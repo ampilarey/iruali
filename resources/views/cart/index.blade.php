@@ -68,8 +68,8 @@
 
                                 <!-- Price -->
                                 <div class="text-right">
-                                    <p class="text-lg font-semibold text-gray-900">ރ{{ number_format($item->subtotal, 2) }}</p>
-                                    <p class="text-sm text-gray-500">ރ{{ number_format($item->price, 2) }} each</p>
+                                    <p class="text-lg font-semibold text-gray-900 force-ltr" dir="ltr">ރ{{ number_format($item->subtotal, 2) }}</p>
+                                    <p class="text-sm text-gray-500 force-ltr" dir="ltr">ރ{{ number_format($item->price, 2) }} each</p>
                                 </div>
 
                                 <!-- Remove Button -->
@@ -136,26 +136,26 @@
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between">
                             <span class="text-gray-600">{{ __('app.subtotal') }}</span>
-                            <span class="font-medium">ރ{{ number_format($cart->total, 2) }}</span>
+                            <span class="font-medium force-ltr" dir="ltr">ރ{{ number_format($cart->total, 2) }}</span>
                         </div>
                         @if($voucher && $discount > 0)
                         <div class="flex justify-between">
                             <span class="text-green-700">Voucher Discount</span>
-                            <span class="font-medium text-green-700">-ރ{{ number_format($discount, 2) }}</span>
+                            <span class="font-medium text-green-700 force-ltr" dir="ltr">-ރ{{ number_format($discount, 2) }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between">
                             <span class="text-gray-600">{{ __('app.shipping') }}</span>
-                            <span class="font-medium">ރ0.00</span>
+                            <span class="font-medium force-ltr" dir="ltr">ރ0.00</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">{{ __('app.tax') }}</span>
-                            <span class="font-medium">ރ0.00</span>
+                            <span class="font-medium force-ltr" dir="ltr">ރ0.00</span>
                         </div>
                         <div class="border-t border-gray-200 pt-3">
                             <div class="flex justify-between">
                                 <span class="text-lg font-semibold">{{ __('app.total') }}</span>
-                                <span class="text-lg font-semibold text-primary-600">ރ{{ number_format($cart->total - $discount, 2) }}</span>
+                                <span class="text-lg font-semibold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($cart->total - $discount, 2) }}</span>
                             </div>
                         </div>
                     </div>

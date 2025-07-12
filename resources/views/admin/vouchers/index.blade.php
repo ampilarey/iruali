@@ -28,8 +28,8 @@
                 <tr>
                     <td>{{ $voucher->code }}</td>
                     <td>{{ ucfirst($voucher->type) }}</td>
-                    <td>{{ $voucher->type === 'percent' ? $voucher->amount . '%' : 'ރ' . number_format($voucher->amount, 2) }}</td>
-                    <td>{{ $voucher->min_order ? 'ރ' . number_format($voucher->min_order, 2) : '-' }}</td>
+                    <td class="force-ltr" dir="ltr">{{ $voucher->type === 'percent' ? $voucher->amount . '%' : 'ރ' . number_format($voucher->amount, 2) }}</td>
+                    <td class="force-ltr" dir="ltr">{{ $voucher->min_order ? 'ރ' . number_format($voucher->min_order, 2) : '-' }}</td>
                     <td>{{ $voucher->max_uses ?? '-' }}</td>
                     <td>{{ $voucher->used_count }}</td>
                     <td>{{ $voucher->valid_from ? $voucher->valid_from->format('Y-m-d') : '-' }} - {{ $voucher->valid_until ? $voucher->valid_until->format('Y-m-d') : '-' }}</td>

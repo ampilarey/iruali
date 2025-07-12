@@ -47,8 +47,8 @@
                             <p class="text-sm text-gray-600">Quantity: {{ $item->quantity }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-lg font-semibold text-gray-900">ރ{{ number_format($item->price * $item->quantity, 2) }}</p>
-                            <p class="text-sm text-gray-600">ރ{{ number_format($item->price, 2) }} each</p>
+                            <p class="text-lg font-semibold text-gray-900 force-ltr" dir="ltr">ރ{{ number_format($item->price * $item->quantity, 2) }}</p>
+                            <p class="text-sm text-gray-600 force-ltr" dir="ltr">ރ{{ number_format($item->price, 2) }} each</p>
                         </div>
                     </div>
                     @endforeach
@@ -61,7 +61,7 @@
                     @if($order->points_redeemed > 0)
                     <div class="flex justify-between">
                         <span class="text-blue-700">Points Redeemed</span>
-                        <span class="text-blue-700">-{{ $order->points_redeemed }} (ރ{{ number_format($order->points_redeemed_discount, 2) }})</span>
+                        <span class="text-blue-700 force-ltr" dir="ltr">-{{ $order->points_redeemed }} (ރ{{ number_format($order->points_redeemed_discount, 2) }})</span>
                     </div>
                     @endif
                 </div>
@@ -107,12 +107,12 @@
                 <div class="space-y-3">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Subtotal</span>
-                        <span class="text-gray-900">ރ{{ number_format($order->total_amount + $order->voucher_discount, 2) }}</span>
+                        <span class="text-gray-900 force-ltr" dir="ltr">ރ{{ number_format($order->total_amount + $order->voucher_discount, 2) }}</span>
                     </div>
                     @if($order->voucher_code && $order->voucher_discount > 0)
                     <div class="flex justify-between">
                         <span class="text-green-700">Voucher ({{ $order->voucher_code }})</span>
-                        <span class="text-green-700">-ރ{{ number_format($order->voucher_discount, 2) }}</span>
+                        <span class="text-green-700 force-ltr" dir="ltr">-ރ{{ number_format($order->voucher_discount, 2) }}</span>
                     </div>
                     @endif
                     <div class="flex justify-between">
@@ -121,12 +121,12 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Tax</span>
-                        <span class="text-gray-900">ރ0.00</span>
+                        <span class="text-gray-900 force-ltr" dir="ltr">ރ0.00</span>
                     </div>
                     <hr class="my-3">
                     <div class="flex justify-between">
                         <span class="text-lg font-semibold text-gray-900">Total</span>
-                        <span class="text-lg font-semibold text-primary-600">ރ{{ number_format($order->total_amount, 2) }}</span>
+                        <span class="text-lg font-semibold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($order->total_amount, 2) }}</span>
                     </div>
                 </div>
 

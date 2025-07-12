@@ -37,6 +37,11 @@ a:hover, .link:hover {
     color: #256029;
 }
 
+.force-ltr {
+    direction: ltr;
+    unicode-bidi: embed;
+}
+
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
     /* Better touch targets */

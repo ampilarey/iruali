@@ -27,7 +27,7 @@
                             @else bg-gray-100 text-gray-800 @endif">
                             {{ ucfirst($order->status) }}
                         </span>
-                        <p class="text-lg font-bold text-primary-600 mt-1">ރ{{ number_format($order->total_amount, 2) }}</p>
+                        <p class="text-lg font-bold text-primary-600 mt-1 force-ltr" dir="ltr">ރ{{ number_format($order->total_amount, 2) }}</p>
                     </div>
                 </div>
 
@@ -47,7 +47,7 @@
                                 @foreach($order->items->take(3) as $item)
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">{{ $item->product->name }} x{{ $item->quantity }}</span>
-                                    <span class="text-gray-900">ރ{{ number_format($item->price * $item->quantity, 2) }}</span>
+                                    <span class="text-gray-900 force-ltr" dir="ltr">ރ{{ number_format($item->price * $item->quantity, 2) }}</span>
                                 </div>
                                 @endforeach
                                 @if($order->items->count() > 3)

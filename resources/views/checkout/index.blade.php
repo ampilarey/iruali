@@ -119,7 +119,7 @@
                                     <p class="text-xs text-gray-500">Qty: {{ $item->quantity }}</p>
                                 </div>
                             </div>
-                            <span class="text-sm font-medium text-gray-900">ރ{{ number_format($item->subtotal, 2) }}</span>
+                            <span class="text-sm font-medium text-gray-900 force-ltr" dir="ltr">ރ{{ number_format($item->subtotal, 2) }}</span>
                         </div>
                         @endforeach
                     </div>
@@ -133,7 +133,7 @@
                         </div>
                         @if($points_redeemed > 0)
                             <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-green-700">Redeemed: {{ $points_redeemed }} (ރ{{ number_format($points_redeemed_discount, 2) }})</span>
+                                <span class="text-green-700 force-ltr" dir="ltr">Redeemed: {{ $points_redeemed }} (ރ{{ number_format($points_redeemed_discount, 2) }})</span>
                                 <form action="{{ route('checkout.removePoints') }}" method="POST">
                                     @csrf
                                     <button type="submit" class="text-red-600 hover:underline ml-2">Remove</button>
@@ -156,12 +156,12 @@
                     <div class="border-t border-gray-200 pt-4 space-y-3">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Subtotal</span>
-                            <span class="font-medium">ރ{{ number_format($cart->total, 2) }}</span>
+                            <span class="font-medium force-ltr" dir="ltr">ރ{{ number_format($cart->total, 2) }}</span>
                         </div>
                         @if($points_redeemed_discount > 0)
                         <div class="flex justify-between">
                             <span class="text-blue-700">Loyalty Points Discount</span>
-                            <span class="font-medium text-blue-700">-ރ{{ number_format($points_redeemed_discount, 2) }}</span>
+                            <span class="font-medium text-blue-700 force-ltr" dir="ltr">-ރ{{ number_format($points_redeemed_discount, 2) }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between">
@@ -175,7 +175,7 @@
                         <div class="border-t border-gray-200 pt-3">
                             <div class="flex justify-between">
                                 <span class="text-lg font-semibold">Total</span>
-                                <span class="text-lg font-semibold text-primary-600">ރ{{ number_format($cart->total, 2) }}</span>
+                                <span class="text-lg font-semibold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($cart->total, 2) }}</span>
                             </div>
                         </div>
                     </div>

@@ -111,10 +111,10 @@
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                             <div class="flex items-center space-x-2">
                                 @if($product->is_on_sale)
-                                    <span class="text-base sm:text-lg font-bold text-primary-600">${{ number_format($product->final_price, 2) }}</span>
-                                    <span class="text-xs sm:text-sm text-gray-500 line-through">${{ number_format($product->price, 2) }}</span>
+                                    <span class="text-base sm:text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($product->final_price, 2) }}</span>
+                                    <span class="text-xs sm:text-sm text-gray-500 line-through force-ltr" dir="ltr">ރ{{ number_format($product->price, 2) }}</span>
                                 @else
-                                    <span class="text-base sm:text-lg font-bold text-primary-600">${{ number_format($product->price, 2) }}</span>
+                                    <span class="text-base sm:text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($product->price, 2) }}</span>
                                 @endif
                             </div>
                             <button class="bg-primary-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-primary-700 transition duration-300 text-sm">
@@ -211,8 +211,8 @@
                         <p class="text-xs sm:text-sm text-gray-600 mb-3">{{ $product->category->name }}</p>
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                             <div class="flex items-center space-x-2">
-                                <span class="text-base sm:text-lg font-bold text-red-600">${{ number_format($product->final_price, 2) }}</span>
-                                <span class="text-xs sm:text-sm text-gray-500 line-through">${{ number_format($product->price, 2) }}</span>
+                                <span class="text-base sm:text-lg font-bold text-red-600 force-ltr" dir="ltr">ރ{{ number_format($product->final_price, 2) }}</span>
+                                <span class="text-xs sm:text-sm text-gray-500 line-through force-ltr" dir="ltr">ރ{{ number_format($product->price, 2) }}</span>
                             </div>
                             <button class="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 text-sm">
                                 {{ __('app.add_to_cart') }}

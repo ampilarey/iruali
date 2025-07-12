@@ -194,44 +194,63 @@ textarea:focus {
     outline-offset: 2px;
 }
 
-/* Header spacing fixes */
+/* Header spacing fixes - Force separation */
 .header-right-section {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
+    display: flex !important;
+    align-items: center !important;
+    gap: 2rem !important;
 }
 
+/* Cart styling */
 .cart-icon {
-    position: relative;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
+    position: relative !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.2s ease !important;
+    margin-right: 1rem !important;
 }
 
 .cart-icon:hover {
-    background-color: #f3f4f6;
-    color: #4CAF50;
+    background-color: #f3f4f6 !important;
+    color: #4CAF50 !important;
 }
 
+/* User menu styling */
 .user-menu-button {
-    position: relative;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
+    position: relative !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.2s ease !important;
+    margin-left: 1rem !important;
 }
 
 .user-menu-button:hover {
-    background-color: #f3f4f6;
-    color: #4CAF50;
+    background-color: #f3f4f6 !important;
+    color: #4CAF50 !important;
 }
 
-/* Ensure proper spacing between cart and user menu */
+/* Force separation between cart and user menu */
 .cart-container {
-    margin-right: 1rem;
+    margin-right: 2rem !important;
+    min-width: 48px !important;
 }
 
 .user-menu-container {
-    margin-left: 1rem;
+    margin-left: 2rem !important;
+    min-width: 120px !important;
+}
+
+/* Additional spacing for header elements */
+.header-cart {
+    margin-right: 2rem !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+}
+
+.header-user {
+    margin-left: 2rem !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
 }
 
 /* Loading states */

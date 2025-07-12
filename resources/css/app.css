@@ -296,3 +296,84 @@ textarea:focus {
 ::-webkit-scrollbar-thumb:hover {
     background: #388e3c;
 }
+
+/* CRITICAL HEADER FIXES - Force layout separation */
+header .flex.items-center.justify-between {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+/* Force three-column layout */
+header .flex.items-center.justify-between > div:first-child {
+    flex: 0 0 auto !important;
+    min-width: 200px !important;
+}
+
+header .flex.items-center.justify-between > nav {
+    flex: 1 !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+header .flex.items-center.justify-between > div:last-child {
+    flex: 0 0 auto !important;
+    min-width: 300px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* Mobile header fixes */
+@media (max-width: 768px) {
+    header .flex.items-center.justify-between > div:last-child {
+        min-width: auto !important;
+        gap: 1rem !important;
+    }
+    
+    /* Ensure cart and login are properly spaced on mobile */
+    header .flex.items-center.justify-between > div:last-child > div {
+        margin: 0 0.5rem !important;
+    }
+}
+
+/* Force inline styles to override any conflicting CSS */
+[style*="display: flex"] {
+    display: flex !important;
+}
+
+[style*="margin-right: 3rem"] {
+    margin-right: 3rem !important;
+}
+
+[style*="margin-left: 3rem"] {
+    margin-left: 3rem !important;
+}
+
+/* Ensure proper z-index for dropdowns */
+.dropdown-menu, .user-dropdown {
+    z-index: 1000 !important;
+}
+
+/* Prevent any text wrapping in header */
+header * {
+    white-space: nowrap !important;
+}
+
+/* Force proper spacing in header containers */
+header div[style*="gap: 3rem"] {
+    gap: 3rem !important;
+}
+
+/* Ensure search bar doesn't interfere */
+header input[type="text"] {
+    max-width: 300px !important;
+}
+
+/* Mobile search bar positioning */
+@media (max-width: 768px) {
+    header input[type="text"] {
+        max-width: 100% !important;
+    }
+}

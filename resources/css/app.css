@@ -12,23 +12,23 @@
 
 body {
     color: #222;
-    background-color: #f0f9f0; /* Light green background */
+    background-color: #2d5016; /* Dark green snake color */
 }
 
-/* Main content area with green background */
+/* Main content area with green snake background */
 main, .main-content {
-    background-color: #f0f9f0;
+    background-color: #2d5016;
     min-height: 100vh;
 }
 
-/* Container with green background */
+/* Container with green snake background */
 .container {
-    background-color: #f0f9f0;
+    background-color: #2d5016;
 }
 
-/* Page sections with green background */
+/* Page sections with green snake background */
 .page-section {
-    background-color: #f0f9f0;
+    background-color: #2d5016;
 }
 
 .navbar, .header, footer {

@@ -211,7 +211,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-green-800 text-white py-8 mt-16">
+    <footer class="bg-green-900 text-white py-8 mt-16">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
@@ -251,7 +251,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-8 pt-8 border-t border-green-700 text-center text-gray-300 text-sm">
+            <div class="mt-8 pt-8 border-t border-green-800 text-center text-gray-300 text-sm">
                 <p>&copy; {{ date('Y') }} iruali. All rights reserved.</p>
             </div>
         </div>

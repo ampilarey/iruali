@@ -36,9 +36,14 @@ class UserSeeder extends Seeder
         }
         
         // Attach admin role if roles are seeded and user doesn't have it
-        if (method_exists($admin, 'roles') && !$admin->roles()->where('id', 1)->exists()) {
-            $admin->roles()->attach(1); // Assuming admin role is ID 1
-            $this->command->info('✅ Admin role attached to user');
+        if (method_exists($admin, 'roles')) {
+            $hasAdminRole = $admin->roles()->where('roles.id', 1)->exists();
+            if (!$hasAdminRole) {
+                $admin->roles()->attach(1); // Assuming admin role is ID 1
+                $this->command->info('✅ Admin role attached to user');
+            } else {
+                $this->command->info('✅ Admin role already attached to user');
+            }
         }
     }
 }

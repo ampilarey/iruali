@@ -31,7 +31,7 @@
     <!-- Header -->
     <header class="bg-white shadow sticky top-0 z-30">
         <!-- Desktop Header -->
-        <div class="hidden md:flex max-w-7xl mx-auto px-4 py-3 items-center justify-between">
+        <div class="hidden lg:flex max-w-7xl mx-auto px-4 py-3 items-center justify-between">
             <!-- Left: Logo -->
             <div class="flex items-center min-w-[120px]">
                 <a href="/" class="text-2xl font-bold text-primary-600">iruali</a>
@@ -96,7 +96,7 @@
             </div>
         </div>
         <!-- Mobile Header -->
-        <div class="md:hidden px-4 py-3 flex items-center justify-between max-w-7xl mx-auto">
+        <div class="lg:hidden px-4 py-3 flex items-center justify-between max-w-7xl mx-auto">
             <!-- Hamburger -->
             <button id="mobile-menu-button" class="text-gray-700 hover:text-primary-600 focus:outline-none">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -112,7 +112,7 @@
             </a>
         </div>
         <!-- Mobile Search Bar -->
-        <div class="md:hidden px-4 pb-2">
+        <div class="lg:hidden px-4 pb-2">
             <form action="{{ route('search') }}" method="GET" class="relative flex">
                 <input type="text" name="q" placeholder="Search products..." class="flex-1 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
                 <button type="submit" class="absolute left-3 top-2.5 text-gray-400">

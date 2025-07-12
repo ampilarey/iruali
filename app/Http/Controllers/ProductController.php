@@ -31,7 +31,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = Category::where('is_active', true)->get();
+        $categories = Category::active()->get();
         $islands = \App\Models\Island::where('is_active', true)->get();
         return view('products.create', compact('categories', 'islands'));
     }
@@ -151,7 +151,7 @@ class ProductController extends Controller
             abort(403);
         }
 
-        $categories = Category::where('is_active', true)->get();
+        $categories = Category::active()->get();
         $islands = \App\Models\Island::where('is_active', true)->get();
         $product->load('islands');
         return view('products.edit', compact('product', 'categories', 'islands'));

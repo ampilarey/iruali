@@ -1,0 +1,33 @@
+# Laravel
+/vendor
+/node_modules
+.env
+/public/storage
+/storage/*.key
+.idea
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+.DS_Store
+/public/hot
+/public/mix-manifest.json
+.env.backup
+.env.*.backup
+.env.local
+.env.development
+.env.production
+.env.testing
+/.vscode
+/.history
+
+# Additional ignores
+*.log
+.phpactor.json
+/.fleet
+/.nova
+/.phpunit.cache
+/.zed
+/auth.json
+/storage/pail
+Thumbs.db

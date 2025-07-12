@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreOrderRequest;
 
 class OrderController extends Controller
 {
@@ -30,17 +31,9 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
-    public function store(Request $request)
+    public function store(StoreOrderRequest $request)
     {
         $this->authorize('create', Order::class);
-
-        $request->validate([
-            'shipping_address' => 'required|string',
-            'shipping_city' => 'required|string',
-            'shipping_state' => 'required|string',
-            'shipping_zip' => 'required|string',
-            'shipping_country' => 'required|string',
-        ]);
 
         $user = Auth::user();
         $cart = $user->carts()->where('status', 'active')->latest()->first();

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\SecureFileUpload;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
@@ -42,27 +44,8 @@ class ProductController extends Controller
     /**
      * Store a newly created product
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $request->validate([
-            'name.en' => 'required|string|max:255',
-            'name.dv' => 'required|string|max:255',
-            'description.en' => 'nullable|string',
-            'description.dv' => 'nullable|string',
-            'sku' => 'required|string|unique:products,sku',
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'compare_price' => 'nullable|numeric|min:0',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'reorder_point' => 'nullable|integer|min:0',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_featured' => 'boolean',
-            'requires_shipping' => 'boolean',
-            'is_digital' => 'boolean',
-        ]);
-
         $data = $request->all();
         
         // Generate slug from English name
@@ -173,28 +156,9 @@ class ProductController extends Controller
     /**
      * Update the specified product
      */
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
         $this->authorize('update', $product);
-
-        $request->validate([
-            'name.en' => 'required|string|max:255',
-            'name.dv' => 'required|string|max:255',
-            'description.en' => 'nullable|string',
-            'description.dv' => 'nullable|string',
-            'sku' => 'required|string|unique:products,sku,' . $product->id,
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'compare_price' => 'nullable|numeric|min:0',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'reorder_point' => 'nullable|integer|min:0',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_featured' => 'boolean',
-            'requires_shipping' => 'boolean',
-            'is_digital' => 'boolean',
-        ]);
 
         $data = $request->all();
         

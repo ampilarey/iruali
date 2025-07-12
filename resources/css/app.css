@@ -196,57 +196,7 @@ textarea:focus {
 
 
 
-/* Cart styling */
-.cart-icon {
-    position: relative !important;
-    padding: 0.75rem !important;
-    border-radius: 0.5rem !important;
-    transition: all 0.2s ease !important;
-    margin-right: 1rem !important;
-}
 
-.cart-icon:hover {
-    background-color: #f3f4f6 !important;
-    color: #4CAF50 !important;
-}
-
-/* User menu styling */
-.user-menu-button {
-    position: relative !important;
-    padding: 0.75rem !important;
-    border-radius: 0.5rem !important;
-    transition: all 0.2s ease !important;
-    margin-left: 1rem !important;
-}
-
-.user-menu-button:hover {
-    background-color: #f3f4f6 !important;
-    color: #4CAF50 !important;
-}
-
-/* Force separation between cart and user menu */
-.cart-container {
-    margin-right: 2rem !important;
-    min-width: 48px !important;
-}
-
-.user-menu-container {
-    margin-left: 2rem !important;
-    min-width: 120px !important;
-}
-
-/* Additional spacing for header elements */
-.header-cart {
-    margin-right: 2rem !important;
-    padding: 0.75rem !important;
-    border-radius: 0.5rem !important;
-}
-
-.header-user {
-    margin-left: 2rem !important;
-    padding: 0.75rem !important;
-    border-radius: 0.5rem !important;
-}
 
 /* Loading states */
 .loading {
@@ -301,53 +251,27 @@ textarea:focus {
 
 /* Remove problematic force rules that override responsive classes */
 
-/* Ensure proper z-index for dropdowns */
-.dropdown-menu, .user-dropdown {
-    z-index: 1000 !important;
-}
-
-/* Prevent any text wrapping in header */
-header * {
-    white-space: nowrap !important;
-}
 
 
 
-/* Ensure search bar doesn't interfere */
-header input[type="text"] {
-    max-width: 300px !important;
-}
 
-/* Mobile search bar positioning */
-@media (max-width: 768px) {
-    header input[type="text"] {
-        max-width: 100% !important;
-    }
-}
 
-/* Desktop header spacing fixes */
+
+
+
+/* Desktop header spacing fixes - more specific */
 @media (min-width: 1024px) {
-    /* Ensure proper spacing between header elements */
-    header .flex.items-center.justify-between > div:last-child > * {
-        margin-left: 1rem !important;
+    /* Only target the specific header elements that need spacing */
+    header .flex.items-center.justify-between > div:last-child > form[action*="search"] {
+        max-width: 12rem;
+        min-width: 10rem;
     }
     
-    header .flex.items-center.justify-between > div:last-child > *:first-child {
-        margin-left: 0 !important;
+    header .flex.items-center.justify-between > div:last-child > a[href*="cart"] {
+        margin-left: 1rem;
     }
     
-    /* Prevent cart and user menu overlap */
-    header a[href*="cart"] {
-        margin-right: 1rem !important;
-    }
-    
-    header .relative.group {
-        margin-left: 1rem !important;
-    }
-    
-    /* Ensure search bar doesn't take too much space */
-    header form[action*="search"] {
-        max-width: 12rem !important;
-        min-width: 10rem !important;
+    header .flex.items-center.justify-between > div:last-child > .relative.group {
+        margin-left: 1rem;
     }
 }

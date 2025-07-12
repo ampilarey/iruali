@@ -21,14 +21,17 @@ php artisan route:clear
 php artisan view:clear
 php artisan view:cache
 
-# Copy build assets from public/build to public_html/build
+# Delete existing build folder from public_html and copy new build assets
+echo "[iruali] Removing old build assets from public_html..."
+rm -rf ../public_html/build
+
 echo "[iruali] Copying build assets to public_html..."
 mkdir -p ../public_html/build
 cp -r public/build/* ../public_html/build/
 
-# Set permissions (adjust as needed for your environment)
+# Set permissions (adjust paths as needed)
 echo "[iruali] Setting permissions..."
-chmod -R 775 storage bootstrap/cache
+chmod -R 755 storage bootstrap/cache
+chmod -R 644 storage/logs/*.log 2>/dev/null || true
 
-# Done
-echo "[iruali] Deployment complete!" 
+echo "[iruali] Deployment completed successfully!" 

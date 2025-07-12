@@ -194,6 +194,46 @@ textarea:focus {
     outline-offset: 2px;
 }
 
+/* Header spacing fixes */
+.header-right-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.cart-icon {
+    position: relative;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.cart-icon:hover {
+    background-color: #f3f4f6;
+    color: #4CAF50;
+}
+
+.user-menu-button {
+    position: relative;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.user-menu-button:hover {
+    background-color: #f3f4f6;
+    color: #4CAF50;
+}
+
+/* Ensure proper spacing between cart and user menu */
+.cart-container {
+    margin-right: 1rem;
+}
+
+.user-menu-container {
+    margin-left: 1rem;
+}
+
 /* Loading states */
 .loading {
     opacity: 0.6;

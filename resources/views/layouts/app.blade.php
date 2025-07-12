@@ -144,19 +144,20 @@
         <!-- Main Header -->
         <div class="max-w-7xl mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-button" class="md:hidden text-gray-700 hover:text-primary-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                <!-- Left side: Mobile Menu + Logo -->
+                <div class="flex items-center space-x-4">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-button" class="md:hidden text-gray-700 hover:text-primary-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
 
-                <!-- Logo -->
-                <div class="flex items-center">
+                    <!-- Logo -->
                     <a href="/" class="text-2xl font-bold text-primary-600">iruali</a>
                 </div>
 
-                <!-- Desktop Navigation -->
+                <!-- Center: Desktop Navigation -->
                 <nav class="hidden md:flex space-x-8">
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
                         {{ __('app.home') }}
@@ -172,8 +173,8 @@
                     </a>
                 </nav>
 
-                <!-- Right side -->
-                <div class="flex items-center space-x-8">
+                <!-- Right side: Search + Cart + User -->
+                <div class="flex items-center space-x-6">
                     <!-- Search (Hidden on mobile) -->
                     <div class="hidden sm:block relative">
                         <form action="{{ route('search') }}" method="GET" class="flex">
@@ -187,9 +188,9 @@
                         </form>
                     </div>
 
-                    <!-- Cart (Completely separated) -->
-                    <div class="header-cart">
-                        <a href="{{ route('cart') }}" class="relative text-gray-700 hover:text-primary-600 inline-flex items-center">
+                    <!-- Cart Icon (Separate container) -->
+                    <div class="flex items-center" style="margin-right: 2rem; padding: 0.5rem; border-radius: 0.5rem;">
+                        <a href="{{ route('cart') }}" class="relative text-gray-700 hover:text-primary-600 p-2 rounded-lg hover:bg-gray-100 transition-colors" style="display: inline-flex; align-items: center;">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
                             </svg>
@@ -201,10 +202,10 @@
                         </a>
                     </div>
 
-                    <!-- Desktop User menu (Completely separated) -->
+                    <!-- User Menu (Separate container) -->
                     @auth
-                        <div class="header-user hidden md:block relative group">
-                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary-600">
+                        <div class="hidden md:block relative group" style="margin-left: 2rem; padding: 0.5rem; border-radius: 0.5rem;">
+                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary-600 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                                 <img class="w-8 h-8 rounded-full" src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}" alt="{{ auth()->user()->name }}">
                                 <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

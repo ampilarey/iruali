@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # iruali cPanel Deployment Script
-# This script updates the website from Git and rebuilds assets
+# This script updates the website from Git and copies built assets
 
 echo "🚀 Starting iruali deployment..."
 
@@ -63,30 +63,23 @@ fi
 
 echo "✅ Database migrations completed"
 
-# Check if Node.js is available
-if command -v node &> /dev/null && command -v npm &> /dev/null; then
-    echo "📦 Installing Node.js dependencies..."
-    npm install
-    
-    if [ $? -ne 0 ]; then
-        echo "❌ npm install failed"
-        exit 1
+# Copy built assets from public/build to public_html/build
+echo "📁 Copying built assets to public_html..."
+if [ -d "$LARAVEL_DIR/public/build" ]; then
+    # Remove old build folder if it exists
+    if [ -d "$PUBLIC_DIR/build" ]; then
+        rm -rf "$PUBLIC_DIR/build"
+        echo "🗑️ Removed old build folder"
     fi
     
-    echo "✅ Node.js dependencies installed"
-    
-    echo "🔨 Building assets..."
-    npm run build
-    
-    if [ $? -ne 0 ]; then
-        echo "❌ Asset build failed"
-        exit 1
-    fi
-    
-    echo "✅ Assets built successfully"
+    # Copy new build folder
+    cp -r "$LARAVEL_DIR/public/build" "$PUBLIC_DIR/"
+    echo "✅ Built assets copied to public_html/build"
 else
-    echo "⚠️ Node.js not available on server"
-    echo "📤 Please upload the public/build/ folder manually"
+    echo "⚠️ Build folder not found at $LARAVEL_DIR/public/build"
+    echo "📤 Please build assets locally and upload the public/build/ folder"
+    echo "   Run locally: npm run build"
+    echo "   Then upload: public/build/ → public_html/build/"
 fi
 
 # Set proper permissions
@@ -108,4 +101,9 @@ fi
 
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Your website should now be updated with the latest changes"
-echo "📱 Don't forget to test the new header layout on both desktop and mobile!" 
+echo "📱 Don't forget to test the new header layout on both desktop and mobile!"
+echo ""
+echo "📋 Next steps:"
+echo "1. Build assets locally: npm run build"
+echo "2. Upload public/build/ folder to public_html/build/"
+echo "3. Test your website" 

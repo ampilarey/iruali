@@ -6,7 +6,7 @@
 echo "🚀 Starting iruali deployment..."
 
 # Set the Laravel application directory
-LARAVEL_DIR="/home/$(whoami)/repositories/iruali"
+LARAVEL_DIR="/home/$(whoami)/iruali"
 PUBLIC_DIR="/home/$(whoami)/public_html"
 
 # Check if Laravel directory exists

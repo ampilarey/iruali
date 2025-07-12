@@ -23,8 +23,8 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
 
     <!-- Styles -->
-    @if(app()->environment('production') && file_exists(public_path('build/assets/app-C5TN8hdn.css')))
-        <link rel="stylesheet" href="{{ asset('build/assets/app-C5TN8hdn.css') }}">
+    @if(app()->environment('production') && file_exists(public_path('build/assets/app-DRV1gWo1.css')))
+        <link rel="stylesheet" href="{{ asset('build/assets/app-DRV1gWo1.css') }}">
         <script type="module" src="{{ asset('build/assets/app-DNxiirP_.js') }}"></script>
     @else
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -103,24 +103,24 @@
         <!-- Mobile Header -->
         <div class="lg:hidden px-4 py-3 flex items-center justify-between max-w-7xl mx-auto">
             <!-- Hamburger -->
-            <button id="mobile-menu-button" class="text-gray-700 hover:text-primary-600 focus:outline-none">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <button id="mobile-menu-button" class="text-gray-700 hover:text-primary-600 focus:outline-none p-2 -ml-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <!-- Logo -->
-            <a href="/" class="text-xl font-bold text-primary-600">iruali</a>
+            <a href="/" class="text-lg sm:text-xl font-bold text-primary-600">iruali</a>
             <!-- Cart -->
-            <a href="{{ route('cart') }}" class="relative flex items-center px-2 py-2 rounded-lg bg-gray-100 hover:bg-gray-200">
-                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg>
+            <a href="{{ route('cart') }}" class="relative flex items-center p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg>
                 @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
                     <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ auth()->user()->cart->item_count }}</span>
                 @endif
             </a>
         </div>
         <!-- Mobile Search Bar -->
-        <div class="lg:hidden px-4 pb-2">
+        <div class="lg:hidden px-4 pb-3">
             <form action="{{ route('search') }}" method="GET" class="relative flex">
-                <input type="text" name="q" placeholder="Search products..." class="flex-1 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
-                <button type="submit" class="absolute left-3 top-2.5 text-gray-400">
+                <input type="text" name="q" placeholder="Search products..." class="flex-1 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base">
+                <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
             </form>
@@ -134,31 +134,31 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <nav class="p-4 space-y-2">
-                    <a href="{{ route('home') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.home') }}</a>
-                    <a href="{{ route('shop') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.shop') }}</a>
-                    <a href="{{ route('products.index') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.products') }}</a>
-                    <a href="{{ route('categories.index') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.categories') }}</a>
-                    <a href="{{ route('cart') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.cart') }}</a>
+                <nav class="p-4 space-y-1">
+                    <a href="{{ route('home') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.home') }}</a>
+                    <a href="{{ route('shop') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.shop') }}</a>
+                    <a href="{{ route('products.index') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.products') }}</a>
+                    <a href="{{ route('categories.index') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.categories') }}</a>
+                    <a href="{{ route('cart') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.cart') }}</a>
                 </nav>
                 <div class="p-4 border-t mt-4">
                     @auth
-                        <div class="flex items-center space-x-3 mb-4">
+                        <div class="flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg">
                             <img class="w-10 h-10 rounded-full" src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}" alt="{{ auth()->user()->name }}">
                             <div>
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</p>
                                 <p class="text-xs text-blue-600">Points: {{ auth()->user()->loyalty_points ?? 0 }}</p>
                             </div>
                         </div>
-                        <a href="{{ route('wishlist.index') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.wishlist') }}</a>
-                        <a href="{{ route('orders.index') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.orders') }}</a>
-                        <a href="{{ route('account') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">{{ __('app.account') }}</a>
+                        <a href="{{ route('wishlist.index') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.wishlist') }}</a>
+                        <a href="{{ route('orders.index') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.orders') }}</a>
+                        <a href="{{ route('account') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg text-base">{{ __('app.account') }}</a>
                         <form action="{{ route('logout') }}" method="POST" class="mt-4">@csrf
-                            <button type="submit" class="w-full text-left px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md flex items-center">{{ __('app.logout') }}</button>
+                            <button type="submit" class="w-full text-left px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg flex items-center text-base">{{ __('app.logout') }}</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md mb-2">{{ __('app.login') }}</a>
-                        <a href="{{ route('register') }}" class="block px-3 py-2 bg-primary-600 text-white rounded-md text-center hover:bg-primary-700">{{ __('app.register') }}</a>
+                        <a href="{{ route('login') }}" class="block px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg mb-3 text-base">{{ __('app.login') }}</a>
+                        <a href="{{ route('register') }}" class="block px-4 py-3 bg-primary-600 text-white rounded-lg text-center hover:bg-primary-700 text-base">{{ __('app.register') }}</a>
                     @endauth
                 </div>
                 <!-- Language Switcher -->

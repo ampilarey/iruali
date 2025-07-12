@@ -38,8 +38,62 @@ a:hover, .link:hover {
 }
 
 .force-ltr {
-    direction: ltr;
-    unicode-bidi: embed;
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+}
+
+/* Force LTR for price displays with rufiya sign */
+.force-ltr {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+    font-feature-settings: "kern" 1;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Force LTR for price displays specifically */
+.force-ltr[dir="ltr"] {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Additional specificity for price elements */
+span.force-ltr,
+p.force-ltr,
+div.force-ltr {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Aggressive LTR forcing for price displays */
+[dir="ltr"].force-ltr,
+.force-ltr[dir="ltr"] {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Force LTR for any element containing rufiya sign */
+.force-ltr {
+    unicode-bidi: embed !important;
+    direction: ltr !important;
+}
+
+/* Additional specificity for price displays */
+.text-primary-600.force-ltr,
+.text-red-600.force-ltr,
+.text-gray-900.force-ltr,
+.text-gray-500.force-ltr {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
 }
 
 /* Mobile-specific improvements */
@@ -278,5 +332,40 @@ textarea:focus {
     
     header .flex.items-center.justify-between > div:last-child > .relative.group {
         margin-left: 1rem;
+    }
+}
+
+/* Text line clamping utilities */
+.line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+/* Mobile-specific price display */
+@media (max-width: 640px) {
+    .price-mobile {
+        font-size: 14px;
+        line-height: 1.2;
+    }
+    
+    .price-mobile-large {
+        font-size: 16px;
+        line-height: 1.3;
     }
 }

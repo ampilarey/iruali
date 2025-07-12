@@ -40,14 +40,14 @@
                 <div class="mb-6">
                     @if($product->is_on_sale)
                         <div class="flex items-center space-x-4">
-                            <span class="text-3xl font-bold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($product->final_price, 2) }}</span>
-                            <span class="text-xl text-gray-500 line-through force-ltr" dir="ltr">ރ{{ number_format($product->price, 2) }}</span>
+                            <span class="text-3xl font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->final_price, 2) }}</span>
+                            <span class="text-xl text-gray-500 line-through force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
                             <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                                 -{{ $product->discount_percentage }}% OFF
                             </span>
                         </div>
                     @else
-                        <span class="text-3xl font-bold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($product->price, 2) }}</span>
+                        <span class="text-3xl font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
                     @endif
                 </div>
 
@@ -143,10 +143,10 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             @if($relatedProduct->is_on_sale)
-                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($relatedProduct->final_price, 2) }}</span>
-                                <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">ރ{{ number_format($relatedProduct->price, 2) }}</span>
+                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($relatedProduct->final_price, 2) }}</span>
+                                <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">ރ&#x200E;{{ number_format($relatedProduct->price, 2) }}</span>
                             @else
-                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ{{ number_format($relatedProduct->price, 2) }}</span>
+                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($relatedProduct->price, 2) }}</span>
                             @endif
                         </div>
                         <form action="{{ route('cart.add') }}" method="POST" class="inline">

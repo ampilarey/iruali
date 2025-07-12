@@ -97,10 +97,13 @@ chmod -R 644 storage/logs/*.log 2>/dev/null || true
 echo "✅ Permissions set"
 
 # Create storage link if it doesn't exist
+echo "🔗 Checking storage link..."
 if [ ! -L "$PUBLIC_DIR/storage" ]; then
-    echo "🔗 Creating storage link..."
+    echo "Creating storage link..."
     php artisan storage:link
     echo "✅ Storage link created"
+else
+    echo "✅ Storage link already exists"
 fi
 
 echo "🎉 Deployment completed successfully!"

@@ -1,19 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\SellerController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\AuthController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\WishlistController;
+use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\Customer\SearchController;
+use App\Http\Controllers\Customer\ShopController;
+use App\Http\Controllers\Seller\SellerController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Customer\LocaleController;
+use App\Http\Controllers\Customer\OrderTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,8 +67,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::put('/cart/update/{item}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])->name('cart.remove');
         Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-        Route::post('cart/apply-voucher', [\App\Http\Controllers\CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
-        Route::post('cart/remove-voucher', [\App\Http\Controllers\CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
+        Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
+        Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
         // Wishlist routes
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
         Route::post('/wishlist/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
@@ -75,8 +76,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         // Checkout routes
         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
-        Route::post('checkout/redeem-points', [\App\Http\Controllers\CheckoutController::class, 'redeemPoints'])->name('checkout.redeemPoints');
-        Route::post('checkout/remove-points', [\App\Http\Controllers\CheckoutController::class, 'removePoints'])->name('checkout.removePoints');
+        Route::post('checkout/redeem-points', [CheckoutController::class, 'redeemPoints'])->name('checkout.redeemPoints');
+        Route::post('checkout/remove-points', [CheckoutController::class, 'removePoints'])->name('checkout.removePoints');
         // Order routes
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -89,9 +90,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     });
 
     // Public order tracking
-    Route::get('track', [\App\Http\Controllers\OrderTrackingController::class, 'form'])->name('order.track.form');
-    Route::post('track', [\App\Http\Controllers\OrderTrackingController::class, 'submit'])->name('order.track.submit');
-    Route::get('track/order/{order}', [\App\Http\Controllers\OrderTrackingController::class, 'show'])->name('order.track.show');
+    Route::get('track', [OrderTrackingController::class, 'form'])->name('order.track.form');
+    Route::post('track', [OrderTrackingController::class, 'submit'])->name('order.track.submit');
+    Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show');
 
     // Seller routes
     Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {

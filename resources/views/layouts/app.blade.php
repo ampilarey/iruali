@@ -261,11 +261,12 @@
                             </div>
                         </div>
                     @else
-                        <div class="hidden md:flex items-center space-x-4">
-                            <a href="{{ route('login') }}" class="text-gray-700 hover:text-primary-600 text-sm font-medium">
+                        <!-- Login/Register (Completely isolated) -->
+                        <div style="display: flex; align-items: center; margin-left: 3rem; padding: 0.75rem; border-radius: 0.5rem; background-color: #f8f9fa; border: 1px solid #e9ecef; gap: 1rem;">
+                            <a href="{{ route('login') }}" style="color: #374151; text-decoration: none; font-size: 0.875rem; font-weight: 500;">
                                 {{ __('app.login') }}
                             </a>
-                            <a href="{{ route('register') }}" class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700">
+                            <a href="{{ route('register') }}" style="background-color: #4CAF50; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; font-weight: 500;">
                                 {{ __('app.register') }}
                             </a>
                         </div>

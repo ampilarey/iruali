@@ -37,7 +37,13 @@ class AuthController extends BaseController
             return $this->sendForbidden('Account is deactivated');
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $token = $user->createToken('mobile', [
+            'order:read',
+            'cart:write',
+            'wishlist:write',
+            'profile:read',
+            'profile:write',
+        ])->plainTextToken;
 
         return $this->sendResponse([
             'user' => [
@@ -51,6 +57,13 @@ class AuthController extends BaseController
             ],
             'token' => $token,
             'token_type' => 'Bearer',
+            'abilities' => [
+                'order:read',
+                'cart:write',
+                'wishlist:write',
+                'profile:read',
+                'profile:write',
+            ],
         ], 'Login successful');
     }
 

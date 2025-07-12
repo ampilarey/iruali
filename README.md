@@ -218,3 +218,60 @@ For issues and questions, please check the Laravel documentation or create an is
 ## License
 
 This project is proprietary software.
+
+# API Authentication & Usage
+
+## Authentication (Sanctum)
+
+- Login via `/api/v1/login` to receive a Bearer token.
+- Use the token in the `Authorization` header for all protected endpoints.
+- Logout via `/api/v1/logout` (requires token).
+- Tokens are issued with abilities (scopes) for fine-grained access control.
+- Tokens older than 30 days are automatically deleted for security.
+
+### Example: Login
+
+```
+curl -X POST https://yourdomain.com/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "password"}'
+```
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": { "id": 1, "name": "User", ... },
+    "token": "1|longsanctumtokenstring",
+    "token_type": "Bearer",
+    "abilities": ["order:read", "cart:write", "wishlist:write", "profile:read", "profile:write"]
+  },
+  "message": "Login successful"
+}
+```
+
+### Example: Authenticated Request
+
+```
+curl -X GET https://yourdomain.com/api/v1/user \
+  -H "Authorization: Bearer 1|longsanctumtokenstring"
+```
+
+### Example: Logout
+
+```
+curl -X POST https://yourdomain.com/api/v1/logout \
+  -H "Authorization: Bearer 1|longsanctumtokenstring"
+```
+
+## Token Abilities (Scopes)
+- Each token is issued with specific abilities.
+- Example: `order:read`, `cart:write`, `wishlist:write`, `profile:read`, `profile:write`
+- You can check abilities in your controllers using `$request->user()->tokenCan('order:read')`.
+
+## Token Expiration
+- Tokens older than 30 days are deleted automatically by a scheduled job.
+
+---
+
+For more endpoints and usage, see the API documentation or contact the backend team.

@@ -174,7 +174,7 @@
                 </nav>
 
                 <!-- Right side: Search + Cart + User -->
-                <div class="flex items-center space-x-6">
+                <div class="flex items-center" style="gap: 3rem;">
                     <!-- Search (Hidden on mobile) -->
                     <div class="hidden sm:block relative">
                         <form action="{{ route('search') }}" method="GET" class="flex">
@@ -188,24 +188,24 @@
                         </form>
                     </div>
 
-                    <!-- Cart Icon (Separate container) -->
-                    <div class="flex items-center" style="margin-right: 2rem; padding: 0.5rem; border-radius: 0.5rem;">
-                        <a href="{{ route('cart') }}" class="relative text-gray-700 hover:text-primary-600 p-2 rounded-lg hover:bg-gray-100 transition-colors" style="display: inline-flex; align-items: center;">
+                    <!-- Cart Icon (Completely isolated) -->
+                    <div style="display: flex; align-items: center; margin-right: 3rem; padding: 0.75rem; border-radius: 0.5rem; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+                        <a href="{{ route('cart') }}" style="display: inline-flex; align-items: center; text-decoration: none; color: #374151;">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
                             </svg>
                             @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                <span style="position: absolute; top: -0.25rem; right: -0.25rem; background-color: #ef4444; color: white; font-size: 0.75rem; border-radius: 50%; height: 1.25rem; width: 1.25rem; display: flex; align-items: center; justify-content: center;">
                                     {{ auth()->user()->cart->item_count }}
                                 </span>
                             @endif
                         </a>
                     </div>
 
-                    <!-- User Menu (Separate container) -->
+                    <!-- User Menu (Completely isolated) -->
                     @auth
-                        <div class="hidden md:block relative group" style="margin-left: 2rem; padding: 0.5rem; border-radius: 0.5rem;">
-                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary-600 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div style="display: block; position: relative; margin-left: 3rem; padding: 0.75rem; border-radius: 0.5rem; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+                            <button style="display: flex; align-items: center; gap: 0.5rem; color: #374151; text-decoration: none; background: none; border: none; cursor: pointer;">
                                 <img class="w-8 h-8 rounded-full" src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}" alt="{{ auth()->user()->name }}">
                                 <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

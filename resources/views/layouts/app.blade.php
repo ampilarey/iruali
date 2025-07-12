@@ -57,6 +57,14 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </button>
                 </form>
+                <!-- Language Switcher -->
+                <form action="{{ route('locale.switch') }}" method="GET" class="flex items-center">
+                    <input type="hidden" name="redirect" value="{{ url()->current() }}">
+                    <select name="locale" onchange="this.form.submit()" class="bg-white text-gray-700 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>EN</option>
+                        <option value="dv" {{ app()->getLocale() == 'dv' ? 'selected' : '' }}>ދިވެހިބަސް</option>
+                    </select>
+                </form>
                 <!-- Cart -->
                 <a href="{{ route('cart') }}" class="relative flex items-center px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 ml-4">
                     <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg>
@@ -108,13 +116,24 @@
             </button>
             <!-- Logo -->
             <a href="/" class="text-lg sm:text-xl font-bold text-primary-600">iruali</a>
-            <!-- Cart -->
-            <a href="{{ route('cart') }}" class="relative flex items-center p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg>
-                @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ auth()->user()->cart->item_count }}</span>
-                @endif
-            </a>
+            <!-- Right side: Language + Cart -->
+            <div class="flex items-center space-x-2">
+                <!-- Language Switcher -->
+                <form action="{{ route('locale.switch') }}" method="GET" class="flex items-center">
+                    <input type="hidden" name="redirect" value="{{ url()->current() }}">
+                    <select name="locale" onchange="this.form.submit()" class="bg-white text-gray-700 text-xs border border-gray-300 rounded px-1 py-1 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>EN</option>
+                        <option value="dv" {{ app()->getLocale() == 'dv' ? 'selected' : '' }}>ދިވެހިބަސް</option>
+                    </select>
+                </form>
+                <!-- Cart -->
+                <a href="{{ route('cart') }}" class="relative flex items-center p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg>
+                    @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ auth()->user()->cart->item_count }}</span>
+                    @endif
+                </a>
+            </div>
         </div>
         <!-- Mobile Search Bar -->
         <div class="lg:hidden px-4 pb-3">

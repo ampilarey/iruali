@@ -29,6 +29,20 @@ class OrderService
             return ['success' => false, 'message' => 'Your cart is empty.'];
         }
 
+        // Stock check before order creation
+        foreach ($cart->items as $cartItem) {
+            $product = $cartItem->product;
+            if (!$product) {
+                return ['success' => false, 'message' => 'A product in your cart no longer exists.'];
+            }
+            if ($product->stock_quantity < $cartItem->quantity) {
+                return [
+                    'success' => false,
+                    'message' => 'Sorry, not enough stock for "' . ($product->name['en'] ?? $product->name) . '". Available: ' . $product->stock_quantity . ', Requested: ' . $cartItem->quantity
+                ];
+            }
+        }
+
         try {
             DB::beginTransaction();
 
@@ -44,6 +58,14 @@ class OrderService
 
             // Create order items
             $this->createOrderItems($order, $cart);
+
+            // Decrement stock for each product
+            foreach ($cart->items as $cartItem) {
+                $product = $cartItem->product;
+                if ($product) {
+                    $product->decrement('stock_quantity', $cartItem->quantity);
+                }
+            }
 
             // Process loyalty points and referral rewards
             $this->processLoyaltyPoints($user, $loyaltyPointsEarned, $discounts['points']['points_redeemed']);

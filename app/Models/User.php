@@ -9,10 +9,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -313,5 +314,45 @@ class User extends Authenticatable
     public function referrals()
     {
         return $this->hasMany(User::class, 'referred_by');
+    }
+
+    /**
+     * Scope to include only soft deleted users
+     */
+    public function scopeOnlyTrashed($query)
+    {
+        return $query->onlyTrashed();
+    }
+
+    /**
+     * Scope to include both active and soft deleted users
+     */
+    public function scopeWithTrashed($query)
+    {
+        return $query->withTrashed();
+    }
+
+    /**
+     * Check if user is soft deleted
+     */
+    public function isTrashed(): bool
+    {
+        return $this->trashed();
+    }
+
+    /**
+     * Restore a soft deleted user
+     */
+    public function restoreUser(): bool
+    {
+        return $this->restore();
+    }
+
+    /**
+     * Force delete a user (permanently remove)
+     */
+    public function forceDeleteUser(): bool
+    {
+        return $this->forceDelete();
     }
 }

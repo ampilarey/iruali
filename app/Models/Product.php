@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
 class Product extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, SoftDeletes;
 
     public $translatable = ['name', 'description'];
 
@@ -197,5 +198,45 @@ class Product extends Model
                 $product->slug = $product->generateSlug();
             }
         });
+    }
+
+    /**
+     * Scope to include only soft deleted products
+     */
+    public function scopeOnlyTrashed($query)
+    {
+        return $query->onlyTrashed();
+    }
+
+    /**
+     * Scope to include both active and soft deleted products
+     */
+    public function scopeWithTrashed($query)
+    {
+        return $query->withTrashed();
+    }
+
+    /**
+     * Check if product is soft deleted
+     */
+    public function isTrashed(): bool
+    {
+        return $this->trashed();
+    }
+
+    /**
+     * Restore a soft deleted product
+     */
+    public function restoreProduct(): bool
+    {
+        return $this->restore();
+    }
+
+    /**
+     * Force delete a product (permanently remove)
+     */
+    public function forceDeleteProduct(): bool
+    {
+        return $this->forceDelete();
     }
 }

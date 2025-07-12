@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'user_id',
         'order_number',
@@ -80,5 +84,45 @@ class Order extends Model
     public function scopeByStatus($query, $status)
     {
         return $query->where('status', $status);
+    }
+
+    /**
+     * Scope to include only soft deleted orders
+     */
+    public function scopeOnlyTrashed($query)
+    {
+        return $query->onlyTrashed();
+    }
+
+    /**
+     * Scope to include both active and soft deleted orders
+     */
+    public function scopeWithTrashed($query)
+    {
+        return $query->withTrashed();
+    }
+
+    /**
+     * Check if order is soft deleted
+     */
+    public function isTrashed(): bool
+    {
+        return $this->trashed();
+    }
+
+    /**
+     * Restore a soft deleted order
+     */
+    public function restoreOrder(): bool
+    {
+        return $this->restore();
+    }
+
+    /**
+     * Force delete an order (permanently remove)
+     */
+    public function forceDeleteOrder(): bool
+    {
+        return $this->forceDelete();
     }
 }

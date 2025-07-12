@@ -30,7 +30,7 @@ class SearchController extends Controller
             ->latest()
             ->paginate(12);
 
-        $categories = Category::where('is_active', true)->whereNull('parent_id')->get();
+        $categories = Category::active()->root()->get();
 
         return view('search.results', compact('products', 'categories', 'query'));
     }

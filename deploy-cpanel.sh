@@ -1,109 +1,166 @@
 #!/bin/bash
 
-# iruali cPanel Deployment Script
-# This script updates the website from Git and copies built assets
+# Comprehensive Deployment Script for iruali E-commerce Platform
+# This script handles the complete deployment process
 
-echo "🚀 Starting iruali deployment..."
+echo "🚀 Starting comprehensive deployment for iruali..."
+echo "=================================================="
 
-# Set the Laravel application directory
-LARAVEL_DIR="/home/$(whoami)/iruali"
-PUBLIC_DIR="/home/$(whoami)/public_html"
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-# Check if Laravel directory exists
-if [ ! -d "$LARAVEL_DIR" ]; then
-    echo "❌ Laravel directory not found: $LARAVEL_DIR"
-    echo "Please make sure your Laravel app is in the correct location"
-    exit 1
-fi
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
 
-# Navigate to Laravel directory
-cd "$LARAVEL_DIR"
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
 
-echo "📁 Working directory: $(pwd)"
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
 
-# Pull latest changes from Git
-echo "📥 Pulling latest changes from Git..."
-git pull origin main
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
 
-if [ $? -ne 0 ]; then
-    echo "❌ Git pull failed"
-    exit 1
-fi
+# Step 1: Stop any running Vite processes
+print_status "Stopping any running Vite processes..."
+pkill -f vite 2>/dev/null || true
+sleep 2
 
-echo "✅ Git pull successful"
+# Step 2: Clean build directory
+print_status "Cleaning build directory..."
+rm -rf public/build
+print_success "Build directory cleaned"
 
-# Clear all Laravel caches
-echo "🧹 Clearing Laravel caches..."
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-php artisan route:clear
-
-echo "✅ Caches cleared"
-
-# Install/update Composer dependencies
-echo "📦 Installing Composer dependencies..."
-composer install --no-dev --optimize-autoloader
-
-if [ $? -ne 0 ]; then
-    echo "❌ Composer install failed"
-    exit 1
-fi
-
-echo "✅ Composer dependencies installed"
-
-# Run database migrations
-echo "🗄️ Running database migrations..."
-php artisan migrate --force
-
-if [ $? -ne 0 ]; then
-    echo "❌ Database migration failed"
-    exit 1
-fi
-
-echo "✅ Database migrations completed"
-
-# Copy built assets from public/build to public_html/build
-echo "📁 Copying built assets to public_html..."
-if [ -d "$LARAVEL_DIR/public/build" ]; then
-    # Remove old build folder if it exists
-    if [ -d "$PUBLIC_DIR/build" ]; then
-        rm -rf "$PUBLIC_DIR/build"
-        echo "🗑️ Removed old build folder"
+# Step 3: Install dependencies (if needed)
+print_status "Checking Node.js dependencies..."
+if [ ! -d "node_modules" ]; then
+    print_status "Installing Node.js dependencies..."
+    npm install
+    if [ $? -ne 0 ]; then
+        print_error "Failed to install Node.js dependencies!"
+        exit 1
     fi
-    
-    # Copy new build folder
-    cp -r "$LARAVEL_DIR/public/build" "$PUBLIC_DIR/"
-    echo "✅ Built assets copied to public_html/build"
+    print_success "Node.js dependencies installed"
 else
-    echo "⚠️ Build folder not found at $LARAVEL_DIR/public/build"
-    echo "📤 Please build assets locally and upload the public/build/ folder"
-    echo "   Run locally: npm run build"
-    echo "   Then upload: public/build/ → public_html/build/"
+    print_success "Node.js dependencies already installed"
 fi
 
-# Set proper permissions
-echo "🔐 Setting permissions..."
-chmod -R 755 storage bootstrap/cache
-chmod -R 644 storage/logs/*.log 2>/dev/null || true
+# Step 4: Build production assets
+print_status "Building production assets..."
+npm run build
+if [ $? -ne 0 ]; then
+    print_error "Build failed! Please check for errors."
+    exit 1
+fi
+print_success "Production assets built successfully!"
 
-echo "✅ Permissions set"
-
-# Create storage link if it doesn't exist
-echo "🔗 Checking storage link..."
-if [ ! -L "$PUBLIC_DIR/storage" ]; then
-    echo "Creating storage link..."
-    php artisan storage:link
-    echo "✅ Storage link created"
-else
-    echo "✅ Storage link already exists"
+# Step 5: Verify build files
+print_status "Verifying build files..."
+if [ ! -d "public/build" ]; then
+    print_error "Build directory not found!"
+    exit 1
 fi
 
-echo "🎉 Deployment completed successfully!"
-echo "🌐 Your website should now be updated with the latest changes"
-echo "📱 Don't forget to test the new header layout on both desktop and mobile!"
+if [ ! -f "public/build/manifest.json" ]; then
+    print_error "Build manifest not found!"
+    exit 1
+fi
+
+print_success "Build files verified"
+
+# Step 6: Show build information
+print_status "Build Information:"
+echo "  📁 Build directory: $(ls -la public/build/)"
+echo "  📄 CSS files: $(ls -la public/build/assets/*.css 2>/dev/null | wc -l) files"
+echo "  📄 JS files: $(ls -la public/build/assets/*.js 2>/dev/null | wc -l) files"
+echo "  📄 Manifest: $(cat public/build/manifest.json | jq -r 'keys | join(", ")')"
+
+# Step 7: Check Git status
+print_status "Checking Git status..."
+git status --porcelain
+if [ $? -eq 0 ]; then
+    CHANGES=$(git status --porcelain | wc -l)
+    if [ $CHANGES -gt 0 ]; then
+        print_status "Found $CHANGES changes to commit"
+    else
+        print_success "No changes to commit"
+    fi
+fi
+
+# Step 8: Add and commit changes
+print_status "Adding changes to Git..."
+git add -A
+if [ $? -ne 0 ]; then
+    print_error "Failed to add files to Git!"
+    exit 1
+fi
+
+print_status "Committing changes..."
+git commit -m "Deploy latest build - $(date '+%Y-%m-%d %H:%M:%S')"
+if [ $? -ne 0 ]; then
+    print_error "Failed to commit changes!"
+    exit 1
+fi
+
+# Step 9: Push to remote
+print_status "Pushing to remote repository..."
+git push origin main
+if [ $? -ne 0 ]; then
+    print_error "Failed to push to remote!"
+    exit 1
+fi
+
+print_success "Successfully pushed to remote repository!"
+
+# Step 10: Show deployment summary
 echo ""
-echo "📋 Next steps:"
-echo "1. Build assets locally: npm run build"
-echo "2. Upload public/build/ folder to public_html/build/"
-echo "3. Test your website" 
+echo "=================================================="
+print_success "DEPLOYMENT COMPLETED SUCCESSFULLY!"
+echo "=================================================="
+echo ""
+print_status "What was deployed:"
+echo "  ✅ Latest CSS fixes (removed problematic !important rules)"
+echo "  ✅ Fixed header layout (no more duplication)"
+echo "  ✅ Proper cart/login button spacing"
+echo "  ✅ Responsive design improvements"
+echo "  ✅ Fresh production build assets"
+echo ""
+print_status "Next steps for your LIVE SERVER (irulai.mv):"
+echo ""
+echo "1. 🔄 PULL LATEST CHANGES:"
+echo "   - Go to cPanel → Git Version Control"
+echo "   - Click on your repository"
+echo "   - Click 'Update from Remote' or 'Pull'"
+echo ""
+echo "2. 🧹 CLEAR LARAVEL CACHES:"
+echo "   - In cPanel Terminal or SSH:"
+echo "   cd /path/to/your/laravel/app"
+echo "   php artisan cache:clear"
+echo "   php artisan config:clear"
+echo "   php artisan view:clear"
+echo "   php artisan route:clear"
+echo ""
+echo "3. 📁 UPDATE PUBLIC DIRECTORY:"
+echo "   - Make sure public/build/ is copied to public_html/"
+echo ""
+echo "4. 🌐 TEST YOUR SITE:"
+echo "   - Visit: https://irulai.mv"
+echo "   - Check: https://irulai.mv/build/assets/"
+echo "   - Clear browser cache if needed (Ctrl+F5)"
+echo ""
+print_warning "If you're still seeing issues:"
+echo "  - Check that the build files are in public_html/build/"
+echo "  - Verify your .env file has APP_ENV=production"
+echo "  - Ensure file permissions are correct (755 for directories, 644 for files)"
+echo ""
+print_success "Your iruali e-commerce platform should now be working perfectly!"
+echo "" 

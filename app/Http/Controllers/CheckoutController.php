@@ -2,39 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CartService;
+use App\Services\DiscountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
+    protected $cartService;
+    protected $discountService;
+
+    public function __construct(CartService $cartService, DiscountService $discountService)
+    {
+        $this->cartService = $cartService;
+        $this->discountService = $discountService;
+    }
+
     public function index()
     {
         $user = Auth::user();
-        $cart = $user->cart;
+        $cart = $this->cartService->getOrCreateCart();
+        
+        if ($this->cartService->isCartEmpty($cart)) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+        
         $points_balance = $user->loyalty_points;
         $points_redeemed = session('points_redeemed', 0);
         $points_redeemed_discount = $points_redeemed;
-        if (!$cart || $cart->items->count() === 0) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
-        }
+        
         return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount'));
     }
 
     public function redeemPoints(Request $request)
     {
         $user = Auth::user();
-        $cart = $user->cart;
-        $max_points = min($user->loyalty_points, $cart->total);
+        $cart = $this->cartService->getOrCreateCart();
+        
         $request->validate([
-            'points' => 'required|integer|min:1|max:' . $max_points,
+            'points' => 'required|integer|min:1',
         ]);
-        session(['points_redeemed' => $request->points]);
+        
+        $result = $this->discountService->applyLoyaltyPoints($request->points, $user, $cart);
+        
+        if (!$result['valid']) {
+            return back()->withErrors(['points' => $result['message']]);
+        }
+        
         return back()->with('success', __('Loyalty points applied!'));
     }
 
     public function removePoints()
     {
-        session()->forget('points_redeemed');
+        $this->discountService->removeLoyaltyPoints();
         return back()->with('success', __('Loyalty points removed.'));
     }
 

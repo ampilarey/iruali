@@ -29,6 +29,5 @@ npm-debug.log
 /.phpunit.cache
 /.zed
 /auth.json
-/public/build
 /storage/pail
 Thumbs.db

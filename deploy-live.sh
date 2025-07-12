@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# Change to the Laravel app directory
-cd iruali
-
 echo "[iruali] Pulling latest code from git..."
 git pull origin main
 
@@ -24,7 +21,7 @@ php artisan route:clear
 php artisan view:clear
 php artisan view:cache
 
-# Copy build assets from iruali/public/build to public_html/build
+# Copy build assets from public/build to public_html/build
 echo "[iruali] Copying build assets to public_html..."
 mkdir -p ../public_html/build
 cp -r public/build/* ../public_html/build/

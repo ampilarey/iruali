@@ -123,12 +123,12 @@ class Product extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('is_active', true);
     }
 
     public function scopeFeatured($query)
     {
-        return $query->where('featured', true);
+        return $query->where('is_featured', true);
     }
 
     public function scopeInStock($query)
@@ -138,16 +138,16 @@ class Product extends Model
 
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('is_active', false);
     }
 
     public function scopeApproved($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('is_active', true);
     }
 
     public function scopeRejected($query)
     {
-        return $query->where('status', 'rejected');
+        return $query->where('is_active', false);
     }
 }

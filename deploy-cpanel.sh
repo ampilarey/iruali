@@ -40,28 +40,49 @@ print_status "Cleaning build directory..."
 rm -rf public/build
 print_success "Build directory cleaned"
 
-# Step 3: Install dependencies (if needed)
-print_status "Checking Node.js dependencies..."
-if [ ! -d "node_modules" ]; then
-    print_status "Installing Node.js dependencies..."
-    npm install
-    if [ $? -ne 0 ]; then
-        print_error "Failed to install Node.js dependencies!"
-        exit 1
+# Step 3: Check if Node.js is available
+print_status "Checking Node.js availability..."
+if command -v npm &> /dev/null; then
+    print_success "Node.js is available"
+    
+    # Install dependencies (if needed)
+    if [ ! -d "node_modules" ]; then
+        print_status "Installing Node.js dependencies..."
+        npm install
+        if [ $? -ne 0 ]; then
+            print_error "Failed to install Node.js dependencies!"
+            exit 1
+        fi
+        print_success "Node.js dependencies installed"
+    else
+        print_success "Node.js dependencies already installed"
     fi
-    print_success "Node.js dependencies installed"
 else
-    print_success "Node.js dependencies already installed"
+    print_warning "Node.js is not available on this server"
+    print_status "Skipping Node.js dependency installation"
+    print_status "Make sure to build assets locally before deployment"
 fi
 
 # Step 4: Build production assets
 print_status "Building production assets..."
-npm run build
-if [ $? -ne 0 ]; then
-    print_error "Build failed! Please check for errors."
-    exit 1
+if command -v npm &> /dev/null; then
+    npm run build
+    if [ $? -ne 0 ]; then
+        print_error "Build failed! Please check for errors."
+        exit 1
+    fi
+    print_success "Production assets built successfully!"
+else
+    print_warning "Node.js not available - checking if build files exist..."
+    if [ -d "public/build" ] && [ -f "public/build/manifest.json" ]; then
+        print_success "Build files found - using existing build"
+    else
+        print_error "No build files found! Please build assets locally first:"
+        print_error "1. Run: npm run build"
+        print_error "2. Then run this deployment script again"
+        exit 1
+    fi
 fi
-print_success "Production assets built successfully!"
 
 # Step 5: Verify build files
 print_status "Verifying build files..."

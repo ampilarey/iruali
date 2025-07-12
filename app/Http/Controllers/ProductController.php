@@ -7,9 +7,12 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\SecureFileUpload;
 
 class ProductController extends Controller
 {
+    use SecureFileUpload;
+
     /**
      * Display a listing of products
      */
@@ -74,7 +77,14 @@ class ProductController extends Controller
 
         // Handle image upload
         if ($request->hasFile('main_image')) {
-            $data['main_image'] = $request->file('main_image')->store('products', 'public');
+            $file = $request->file('main_image');
+            $filePath = $this->storeFileSecurely($file, 'products');
+            
+            if (!$filePath) {
+                return back()->withErrors(['main_image' => 'Invalid file type or size. Only JPEG, PNG, JPG, and GIF up to 2MB are allowed.']);
+            }
+            
+            $data['main_image'] = $filePath;
         }
 
         // Set default values
@@ -114,7 +124,13 @@ class ProductController extends Controller
                 ];
                 // Handle image upload for variant
                 if (isset($variant['image']) && is_file($variant['image'])) {
-                    $variantData['image'] = $variant['image']->store('variants', 'public');
+                    $file = $variant['image'];
+                    $filePath = $this->storeFileSecurely($file, 'variants');
+                    
+                    if ($filePath) {
+                        $variantData['image'] = $filePath;
+                    }
+                    // Skip this variant if invalid file type/size
                 }
                 $product->variants()->create($variantData);
             }
@@ -194,10 +210,16 @@ class ProductController extends Controller
         // Handle image upload
         if ($request->hasFile('main_image')) {
             // Delete old image
-            if ($product->main_image) {
-                Storage::disk('public')->delete($product->main_image);
+            $this->deleteFile($product->main_image);
+            
+            $file = $request->file('main_image');
+            $filePath = $this->storeFileSecurely($file, 'products');
+            
+            if (!$filePath) {
+                return back()->withErrors(['main_image' => 'Invalid file type or size. Only JPEG, PNG, JPG, and GIF up to 2MB are allowed.']);
             }
-            $data['main_image'] = $request->file('main_image')->store('products', 'public');
+            
+            $data['main_image'] = $filePath;
         }
 
         $product->update($data);
@@ -233,7 +255,13 @@ class ProductController extends Controller
                 ];
                 // Handle image upload for variant
                 if (isset($variant['image']) && is_file($variant['image'])) {
-                    $variantData['image'] = $variant['image']->store('variants', 'public');
+                    $file = $variant['image'];
+                    $filePath = $this->storeFileSecurely($file, 'variants');
+                    
+                    if ($filePath) {
+                        $variantData['image'] = $filePath;
+                    }
+                    // Skip this variant if invalid file type/size
                 }
                 if (isset($variant['id']) && in_array($variant['id'], $existingIds)) {
                     // Update existing variant
@@ -267,9 +295,7 @@ class ProductController extends Controller
         }
 
         // Delete image
-        if ($product->main_image) {
-            Storage::disk('public')->delete($product->main_image);
-        }
+        $this->deleteFile($product->main_image);
 
         $product->delete();
 

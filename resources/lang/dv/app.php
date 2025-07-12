@@ -59,4 +59,5 @@ return [
     'fast_delivery' => 'ފާސްޓް ޑިލިވަރީ',
     'quality_guarantee' => 'ކުރަންވާ ގަރަންޓީ',
     'customer_support' => '24/7 ކަސްޓަމަރު ސަޕޯޓް',
+    'loyalty_points' => 'ލޯޔަލްޓީ ޕޮއިންޓްސް',
 ]; 

@@ -297,4 +297,5 @@ return [
     'fast_delivery' => 'Fast Delivery',
     'quality_guarantee' => 'Quality Guarantee',
     'customer_support' => '24/7 Customer Support',
+    'loyalty_points' => 'Loyalty Points',
 ]; 

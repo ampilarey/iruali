@@ -14,6 +14,16 @@ class ProductSeeder extends Seeder
         $categories = Category::all();
         $admin = User::where('email', 'admin@example.com')->first();
 
+        if (!$admin) {
+            $this->command->error('❌ Admin user not found. Please run UserSeeder first.');
+            return;
+        }
+
+        if ($categories->isEmpty()) {
+            $this->command->error('❌ No categories found. Please run CategorySeeder first.');
+            return;
+        }
+
         $products = [
             [
                 'name' => [
@@ -150,14 +160,26 @@ class ProductSeeder extends Seeder
             ]
         ];
 
+        $createdCount = 0;
         foreach ($products as $productData) {
-            // Assign random category
-            $category = $categories->random();
-            
-            Product::create(array_merge($productData, [
-                'category_id' => $category->id,
-                'seller_id' => $admin->id,
-            ]));
+            // Check if product already exists
+            $existingProduct = Product::where('sku', $productData['sku'])->first();
+            if (!$existingProduct) {
+                // Assign random category
+                $category = $categories->random();
+                
+                Product::create(array_merge($productData, [
+                    'category_id' => $category->id,
+                    'seller_id' => $admin->id,
+                ]));
+                
+                $createdCount++;
+                $this->command->info("✅ Created product: {$productData['name']['en']}");
+            } else {
+                $this->command->info("✅ Product already exists: {$productData['name']['en']}");
+            }
         }
+
+        $this->command->info("🎉 Product seeding completed! Created {$createdCount} new products.");
     }
 } 

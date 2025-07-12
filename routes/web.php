@@ -37,24 +37,24 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     // Authentication routes
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
     });
 
     // 2FA routes
     Route::middleware('guest')->group(function () {
         Route::get('/2fa', [AuthController::class, 'show2FA'])->name('2fa.show');
-        Route::post('/2fa/verify', [AuthController::class, 'verify2FA'])->name('2fa.verify');
+        Route::post('/2fa/verify', [AuthController::class, 'verify2FA'])->name('2fa.verify')->middleware('throttle:5,1');
     });
 
     // Verification routes
     Route::middleware('auth')->group(function () {
         Route::get('/verification/notice', [AuthController::class, 'showVerificationNotice'])->name('verification.notice');
-        Route::post('/auth/send/email/otp', [AuthController::class, 'sendEmailOTP'])->name('auth.send.email.otp');
-        Route::post('/auth/send/sms/otp', [AuthController::class, 'sendSMSOTP'])->name('auth.send.sms.otp');
-        Route::post('/auth/verify/email/otp', [AuthController::class, 'verifyEmailOTP'])->name('auth.verify.email.otp');
-        Route::post('/auth/verify/phone/otp', [AuthController::class, 'verifyPhoneOTP'])->name('auth.verify.phone.otp');
+        Route::post('/auth/send/email/otp', [AuthController::class, 'sendEmailOTP'])->name('auth.send.email.otp')->middleware('throttle:3,1');
+        Route::post('/auth/send/sms/otp', [AuthController::class, 'sendSMSOTP'])->name('auth.send.sms.otp')->middleware('throttle:3,1');
+        Route::post('/auth/verify/email/otp', [AuthController::class, 'verifyEmailOTP'])->name('auth.verify.email.otp')->middleware('throttle:5,1');
+        Route::post('/auth/verify/phone/otp', [AuthController::class, 'verifyPhoneOTP'])->name('auth.verify.phone.otp')->middleware('throttle:5,1');
     });
 
     // Authenticated user routes

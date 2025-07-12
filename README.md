@@ -1,54 +1,33 @@
-# Iru E-commerce Application
+# iruali - Multi-Vendor E-commerce Platform
 
-A modern, full-featured e-commerce application built with Laravel and Tailwind CSS.
+A modern, multi-vendor e-commerce platform built with Laravel for the Maldives market.
 
 ## Features
 
-### 🛍️ Product Management
-- Product catalog with categories
-- Product images and variants
-- Sale pricing and discounts
-- Stock management
-- Product reviews and ratings
+- Multi-vendor marketplace
+- Multilingual support (English & Dhivehi)
+- Flash sales with countdown timers
+- User authentication and authorization
+- Shopping cart and wishlist
+- Order management and tracking
+- Loyalty points system
+- Referral system
+- SEO optimized
 
-### 🛒 Shopping Experience
-- Shopping cart functionality
-- Wishlist management
-- Product search and filtering
-- Category browsing
-- Responsive product listings
+## Local Development Setup
 
-### 👤 User Management
-- User registration and authentication
-- User profiles and order history
-- Secure login/logout system
+### Prerequisites
+- PHP 8.1 or higher
+- Composer
+- Node.js & npm
+- MySQL/MariaDB
 
-### 💳 Order Processing
-- Checkout process
-- Order management
-- Order tracking and status
-- Shipping information
-
-### 🎨 Modern UI/UX
-- Responsive design with Tailwind CSS
-- Modern, clean interface
-- Mobile-friendly navigation
-- Beautiful product displays
-
-## Technology Stack
-
-- **Backend**: Laravel 11 (PHP)
-- **Frontend**: Blade templates with Tailwind CSS
-- **Database**: MySQL/PostgreSQL
-- **Authentication**: Laravel's built-in auth system
-- **Styling**: Tailwind CSS with custom design system
-
-## Installation
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd iru-ecommerce
+   git clone https://github.com/yourusername/iruali.git
+   cd iruali
    ```
 
 2. **Install PHP dependencies**
@@ -67,154 +46,175 @@ A modern, full-featured e-commerce application built with Laravel and Tailwind C
    php artisan key:generate
    ```
 
-5. **Database setup**
-   ```bash
-   php artisan migrate
-   php artisan db:seed
+5. **Configure database in `.env`**
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=iruali
+   DB_USERNAME=root
+   DB_PASSWORD=
    ```
 
-6. **Build frontend assets**
+6. **Run migrations and seeders**
    ```bash
-   npm run build
+   php artisan migrate --seed
    ```
 
-7. **Start the development server**
+7. **Create storage link**
+   ```bash
+   php artisan storage:link
+   ```
+
+8. **Build assets**
+   ```bash
+   npm run dev
+   ```
+
+9. **Start the development server**
    ```bash
    php artisan serve
    ```
 
-## Database Structure
+10. **Visit** `http://127.0.0.1:8000`
 
-### Core Models
-- **User**: Customer accounts and authentication
-- **Product**: Product catalog with variants
-- **Category**: Product categorization
-- **Cart/CartItem**: Shopping cart functionality
-- **Order/OrderItem**: Order management
-- **Wishlist**: User wishlists
-- **Banner**: Promotional content
-- **ProductImage**: Product media
-- **ProductReview**: Customer reviews
+## cPanel Deployment
 
-### Key Relationships
-- Users have carts, orders, and wishlists
-- Products belong to categories and have images
-- Orders contain multiple order items
-- Carts contain multiple cart items
+### Method 1: Git Version Control (Recommended)
 
-## Routes
+1. **Push your code to GitHub**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
 
-### Public Routes
-- `/` - Home page
-- `/shop` - Product catalog
-- `/products` - All products
-- `/products/{product}` - Product details
-- `/categories` - All categories
-- `/categories/{category}` - Category products
-- `/search` - Product search
-- `/login` - User login
-- `/register` - User registration
+2. **In cPanel:**
+   - Go to **Git Version Control**
+   - Click **Create**
+   - Enter your GitHub repository URL
+   - Set clone directory: `/home/yourcpaneluser/repositories/iruali`
+   - Click **Create**
 
-### Authenticated Routes
-- `/cart` - Shopping cart
-- `/wishlist` - User wishlist
-- `/checkout` - Checkout process
-- `/orders` - Order history
-- `/orders/{order}` - Order details
+3. **Set up document root:**
+   - Copy contents of `public/` folder to `public_html/`
+   - Edit `public_html/index.php` to point to your Laravel app
 
-## Features in Detail
+4. **Install dependencies:**
+   ```bash
+   cd /home/yourcpaneluser/repositories/iruali
+   composer install --no-dev --optimize-autoloader
+   ```
 
-### Product Catalog
-- Browse products by category
-- Search functionality with filters
-- Product images and descriptions
-- Sale pricing display
-- Stock availability
+5. **Configure environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with production settings
+   php artisan key:generate
+   ```
 
-### Shopping Cart
-- Add/remove items
-- Update quantities
-- Calculate totals
-- Persistent cart data
+6. **Set permissions:**
+   ```bash
+   chmod -R 775 storage bootstrap/cache
+   ```
 
-### User Authentication
-- Secure registration and login
-- Password protection
-- Session management
-- User profile management
+7. **Run migrations:**
+   ```bash
+   php artisan migrate --force
+   php artisan storage:link
+   ```
 
-### Order Management
-- Complete checkout process
-- Order confirmation
-- Order history tracking
-- Shipping information
+8. **Build assets (if server supports Node.js):**
+   ```bash
+   npm install
+   npm run build
+   ```
+   Or build locally and upload `public/build/` to `public_html/`
 
-### Wishlist
-- Save favorite products
-- Add to cart from wishlist
-- Manage wishlist items
+### Method 2: Manual Upload
 
-## Customization
+1. **Prepare files locally:**
+   - Run `composer install --no-dev --optimize-autoloader`
+   - Run `npm run build`
+   - Create a zip file excluding `vendor/`, `node_modules/`, `.env`
 
-### Styling
-The application uses Tailwind CSS with a custom design system. Colors and styling can be modified in:
-- `tailwind.config.js` - Design system configuration
-- `resources/css/app.css` - Custom styles
-- Blade templates in `resources/views/`
+2. **Upload to cPanel:**
+   - Extract in `/home/yourcpaneluser/repositories/iruali`
+   - Copy `public/` contents to `public_html/`
+   - Follow steps 4-8 from Method 1
 
-### Database
-Database structure can be modified through Laravel migrations in `database/migrations/`.
+## File Structure for cPanel
 
-### Features
-New features can be added by:
-1. Creating new models and migrations
-2. Adding controllers and routes
-3. Creating Blade views
-4. Updating the navigation
-
-## Development
-
-### Running Tests
-```bash
-php artisan test
+```
+/home/yourcpaneluser/
+├── public_html/           # Document root (public files only)
+│   ├── index.php         # Updated to point to Laravel app
+│   ├── .htaccess
+│   ├── favicon.ico
+│   └── build/            # Compiled assets
+└── repositories/
+    └── iruali/           # Main Laravel application
+        ├── app/
+        ├── bootstrap/
+        ├── config/
+        ├── database/
+        ├── resources/
+        ├── routes/
+        ├── storage/
+        ├── vendor/
+        └── .env
 ```
 
-### Database Seeding
-```bash
-php artisan db:seed
+## Environment Variables
+
+### Required for Production
+```env
+APP_NAME=iruali
+APP_ENV=production
+APP_KEY=base64:...
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=your_db_name
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
+
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
 ```
 
-### Asset Compilation
-```bash
-npm run dev    # Development
-npm run build  # Production
-```
+## Troubleshooting
 
-## Deployment
+### Common Issues
 
-1. Set up your production environment
-2. Configure your web server (Apache/Nginx)
-3. Set up your database
-4. Run migrations and seeders
-5. Configure environment variables
-6. Build assets for production
+1. **500 Error:**
+   - Check `storage/logs/laravel.log`
+   - Verify file permissions
+   - Ensure `.env` exists and is configured
 
-## Contributing
+2. **Database Connection Error:**
+   - Verify database credentials in `.env`
+   - Check if database exists
+   - Ensure user has proper permissions
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+3. **Missing Assets:**
+   - Run `npm run build`
+   - Upload `public/build/` to `public_html/`
 
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Permission Errors:**
+   ```bash
+   chmod -R 755 storage bootstrap/cache
+   chmod -R 644 storage/logs/*.log
+   ```
 
 ## Support
 
-For support and questions, please open an issue in the repository or contact the development team.
+For issues and questions, please check the Laravel documentation or create an issue in the repository.
 
----
+## License
 
-**Iru E-commerce** - Your trusted online shopping destination for quality products.
+This project is proprietary software.

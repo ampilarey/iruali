@@ -23,7 +23,12 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
 
     <!-- Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(app()->environment('production') && file_exists(public_path('build/assets/app-C5TN8hdn.css')))
+        <link rel="stylesheet" href="{{ asset('build/assets/app-C5TN8hdn.css') }}">
+        <script type="module" src="{{ asset('build/assets/app-DNxiirP_.js') }}"></script>
+    @else
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
     
     @stack('styles')
 </head>

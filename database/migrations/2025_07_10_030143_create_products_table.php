@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->json('name'); // Multilingual
+            $table->json('name')->nullable(); // Multilingual
             $table->string('name_dv')->nullable();
             $table->json('description')->nullable(); // Multilingual
             $table->string('description_dv')->nullable();

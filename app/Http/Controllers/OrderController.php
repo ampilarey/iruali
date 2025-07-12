@@ -11,6 +11,8 @@ class OrderController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Order::class);
+
         $orders = Order::where('user_id', Auth::id())
             ->with('items.product')
             ->orderBy('created_at', 'desc')
@@ -21,10 +23,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        // Ensure user can only view their own orders
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('view', $order);
 
         $order->load('items.product');
 
@@ -33,6 +32,8 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Order::class);
+
         $request->validate([
             'shipping_address' => 'required|string',
             'shipping_city' => 'required|string',

@@ -162,10 +162,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        // Check if user can edit this product
-        if (auth()->user() && !auth()->user()->isAdmin() && $product->seller_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('update', $product);
 
         $categories = Category::active()->get();
         $islands = \App\Models\Island::where('is_active', true)->get();
@@ -178,10 +175,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        // Check if user can update this product
-        if (auth()->user() && !auth()->user()->isAdmin() && $product->seller_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('update', $product);
 
         $request->validate([
             'name.en' => 'required|string|max:255',
@@ -289,10 +283,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        // Check if user can delete this product
-        if (auth()->user() && !auth()->user()->isAdmin() && $product->seller_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('delete', $product);
 
         // Delete image
         $this->deleteFile($product->main_image);
@@ -308,13 +299,12 @@ class ProductController extends Controller
      */
     public function approve(Product $product)
     {
-        if (!auth()->user() || !auth()->user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorize('approve', $product);
 
         $product->update(['is_active' => true]);
 
-        return back()->with('success', __('products.approved_successfully'));
+        return redirect()->route('products.index')
+            ->with('success', __('products.approved_successfully'));
     }
 
     /**
@@ -322,12 +312,11 @@ class ProductController extends Controller
      */
     public function reject(Product $product)
     {
-        if (!auth()->user() || !auth()->user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorize('reject', $product);
 
         $product->update(['is_active' => false]);
 
-        return back()->with('success', __('products.rejected_successfully'));
+        return redirect()->route('products.index')
+            ->with('success', __('products.rejected_successfully'));
     }
 }

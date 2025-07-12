@@ -10,17 +10,22 @@ class VoucherController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Voucher::class);
+
         $vouchers = Voucher::latest()->paginate(20);
         return view('admin.vouchers.index', compact('vouchers'));
     }
 
     public function create()
     {
+        $this->authorize('create', Voucher::class);
+
         return view('admin.vouchers.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Voucher::class);
         $request->validate([
             'code' => 'required|string|unique:vouchers,code',
             'type' => 'required|in:fixed,percent',
@@ -37,11 +42,14 @@ class VoucherController extends Controller
 
     public function edit(Voucher $voucher)
     {
+        $this->authorize('update', $voucher);
+
         return view('admin.vouchers.edit', compact('voucher'));
     }
 
     public function update(Request $request, Voucher $voucher)
     {
+        $this->authorize('update', $voucher);
         $request->validate([
             'code' => 'required|string|unique:vouchers,code,' . $voucher->id,
             'type' => 'required|in:fixed,percent',
@@ -58,6 +66,7 @@ class VoucherController extends Controller
 
     public function destroy(Voucher $voucher)
     {
+        $this->authorize('delete', $voucher);
         $voucher->delete();
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher deleted successfully.');
     }

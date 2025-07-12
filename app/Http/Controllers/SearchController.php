@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
-    public function index(Request $request)
+    public function search(Request $request)
     {
         $query = $request->get('q');
         
@@ -17,8 +17,8 @@ class SearchController extends Controller
         }
 
         $products = Product::with(['category', 'mainImage'])
-            ->active()
-            ->inStock()
+            ->where('is_active', true)
+            ->where('stock_quantity', '>', 0)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
@@ -30,8 +30,13 @@ class SearchController extends Controller
             ->latest()
             ->paginate(12);
 
-        $categories = Category::active()->root()->get();
+        $categories = Category::where('is_active', true)->whereNull('parent_id')->get();
 
-        return view('search.index', compact('products', 'categories', 'query'));
+        return view('search.results', compact('products', 'categories', 'query'));
+    }
+
+    public function index(Request $request)
+    {
+        return $this->search($request);
     }
 }

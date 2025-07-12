@@ -14,7 +14,7 @@
 
     <!-- Search Form -->
     <div class="mb-8">
-        <form action="{{ route('search.results') }}" method="GET" class="max-w-2xl">
+        <form action="{{ route('search') }}" method="GET" class="max-w-2xl">
             <div class="flex">
                 <input type="text" 
                        name="q" 
@@ -73,7 +73,7 @@
             </div>
 
             <!-- Clear Filters -->
-            <a href="{{ route('search.results', ['q' => request('q')]) }}" 
+            <a href="{{ route('search', ['q' => request('q')]) }}" 
                class="text-sm text-primary-600 hover:text-primary-700">
                 Clear Filters
             </a>
@@ -150,7 +150,7 @@
             <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
             <p class="mt-1 text-sm text-gray-500">Try adjusting your search terms or filters.</p>
             <div class="mt-6">
-                <a href="{{ route('shop.index') }}" class="text-primary-600 hover:text-primary-700 font-medium">
+                <a href="{{ route('shop') }}" class="text-primary-600 hover:text-primary-700 font-medium">
                     Browse all products →
                 </a>
             </div>
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         select.addEventListener('change', function() {
             const form = document.createElement('form');
             form.method = 'GET';
-            form.action = '{{ route("search.results") }}';
+            form.action = '{{ route("search") }}';
             
             // Add search query
             const queryInput = document.createElement('input');

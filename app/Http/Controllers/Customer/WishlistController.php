@@ -28,21 +28,13 @@ class WishlistController extends Controller
         $userId = Auth::id();
         $productId = $request->product_id;
 
-        // Check if already in wishlist
-        $existing = Wishlist::where('user_id', $userId)
-            ->where('product_id', $productId)
-            ->first();
+        $result = Wishlist::addToWishlist($userId, $productId);
 
-        if ($existing) {
-            return back()->with('info', 'Product is already in your wishlist.');
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
+        } else {
+            return back()->with('info', $result['message']);
         }
-
-        Wishlist::create([
-            'user_id' => $userId,
-            'product_id' => $productId
-        ]);
-
-        return back()->with('success', 'Product added to wishlist successfully.');
     }
 
     public function remove($id)

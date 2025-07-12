@@ -83,7 +83,7 @@ VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
 
 ✅ **Debug Mode Disabled** - `APP_DEBUG=false`  
 ✅ **Production Environment** - `APP_ENV=production`  
-✅ **Error Logging Only** - `LOG_LEVEL=error`  
+✅ **Error Logging Only** - `LOG_LEVEL=error` (Reduces log noise in production)  
 ✅ **Session Encryption** - `SESSION_ENCRYPT=true`  
 ✅ **Secure URL** - `APP_URL=https://iruali.mv`  
 
@@ -132,6 +132,24 @@ After deployment, test these security features:
 - Regularly update your dependencies
 - Monitor your error logs for any issues
 - Backup your database before major updates
+
+## 📝 Production Logging Optimization
+
+### Why `LOG_LEVEL=error` is Important:
+- **Reduces log file size** - Only critical errors are logged
+- **Improves performance** - Less I/O operations for logging
+- **Easier monitoring** - Focus on actual issues, not debug noise
+- **Better security** - Sensitive information isn't logged unnecessarily
+
+### Log Levels Available:
+- `debug` - All messages (development only)
+- `info` - Informational messages
+- `notice` - Normal but significant events
+- `warning` - Warning conditions
+- `error` - Error conditions (recommended for production)
+- `critical` - Critical conditions
+- `alert` - Action must be taken immediately
+- `emergency` - System is unusable
 
 ## 📞 Support
 

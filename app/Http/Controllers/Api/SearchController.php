@@ -110,15 +110,15 @@ class SearchController extends BaseController
                 'images' => $product->images,
                 'brand' => $product->brand,
                 'model' => $product->model,
-                'category' => [
+                'category' => $product->category ? [
                     'id' => $product->category->id,
                     'name' => $product->category->name,
                     'slug' => $product->category->slug,
-                ],
-                'seller' => [
+                ] : null,
+                'seller' => $product->seller ? [
                     'id' => $product->seller->id,
                     'name' => $product->seller->name,
-                ],
+                ] : null,
                 'is_featured' => $product->is_featured,
                 'is_sponsored' => $product->is_sponsored,
                 'created_at' => $product->created_at,

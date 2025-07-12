@@ -100,15 +100,15 @@ class ProductController extends BaseController
                 'slug' => $product->slug,
                 'main_image' => $product->main_image,
                 'images' => $product->images,
-                'category' => [
+                'category' => $product->category ? [
                     'id' => $product->category->id,
                     'name' => $product->category->name,
                     'slug' => $product->category->slug,
-                ],
-                'seller' => [
+                ] : null,
+                'seller' => $product->seller ? [
                     'id' => $product->seller->id,
                     'name' => $product->seller->name,
-                ],
+                ] : null,
                 'is_featured' => $product->is_featured,
                 'is_sponsored' => $product->is_sponsored,
                 'created_at' => $product->created_at,
@@ -163,24 +163,24 @@ class ProductController extends BaseController
             'dimensions' => $product->dimensions,
             'requires_shipping' => $product->requires_shipping,
             'is_digital' => $product->is_digital,
-            'category' => [
+            'category' => $product->category ? [
                 'id' => $product->category->id,
                 'name' => $product->category->name,
                 'slug' => $product->category->slug,
-            ],
-            'seller' => [
+            ] : null,
+            'seller' => $product->seller ? [
                 'id' => $product->seller->id,
                 'name' => $product->seller->name,
-            ],
+            ] : null,
             'reviews' => $product->reviews->map(function ($review) {
                 return [
                     'id' => $review->id,
                     'rating' => $review->rating,
                     'comment' => $review->comment,
-                    'user' => [
+                    'user' => $review->user ? [
                         'id' => $review->user->id,
                         'name' => $review->user->name,
-                    ],
+                    ] : null,
                     'created_at' => $review->created_at,
                 ];
             }),
@@ -236,14 +236,14 @@ class ProductController extends BaseController
                 'sku' => $product->sku,
                 'slug' => $product->slug,
                 'main_image' => $product->main_image,
-                'category' => [
+                'category' => $product->category ? [
                     'id' => $product->category->id,
                     'name' => $product->category->name,
-                ],
-                'seller' => [
+                ] : null,
+                'seller' => $product->seller ? [
                     'id' => $product->seller->id,
                     'name' => $product->seller->name,
-                ],
+                ] : null,
             ];
         });
 
@@ -287,14 +287,14 @@ class ProductController extends BaseController
                 'sku' => $product->sku,
                 'slug' => $product->slug,
                 'main_image' => $product->main_image,
-                'category' => [
+                'category' => $product->category ? [
                     'id' => $product->category->id,
                     'name' => $product->category->name,
-                ],
-                'seller' => [
+                ] : null,
+                'seller' => $product->seller ? [
                     'id' => $product->seller->id,
                     'name' => $product->seller->name,
-                ],
+                ] : null,
             ];
         });
 

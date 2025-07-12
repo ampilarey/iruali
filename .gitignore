@@ -20,3 +20,15 @@ npm-debug.log
 .env.testing
 /.vscode
 /.history
+
+# Additional ignores
+*.log
+.phpactor.json
+/.fleet
+/.nova
+/.phpunit.cache
+/.zed
+/auth.json
+/public/build
+/storage/pail
+Thumbs.db

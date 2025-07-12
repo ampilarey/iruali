@@ -44,16 +44,16 @@
                 <a href="{{ route('categories.index') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">{{ __('app.categories') }}</a>
             </nav>
             <!-- Right: Search, Cart, User -->
-            <div class="flex items-center space-x-4 min-w-[320px] justify-end">
+            <div class="flex items-center space-x-6 min-w-[400px] justify-end">
                 <!-- Search -->
-                <form action="{{ route('search') }}" method="GET" class="relative w-56">
+                <form action="{{ route('search') }}" method="GET" class="relative w-48">
                     <input type="text" name="q" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
                     <button type="submit" class="absolute left-3 top-2.5 text-gray-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </button>
                 </form>
                 <!-- Cart -->
-                <a href="{{ route('cart') }}" class="relative flex items-center px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                <a href="{{ route('cart') }}" class="relative flex items-center px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 ml-4">
                     <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg>
                     @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
                         <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ auth()->user()->cart->item_count }}</span>
@@ -61,7 +61,7 @@
                 </a>
                 <!-- User -->
                 @auth
-                    <div class="relative group">
+                    <div class="relative group ml-4">
                         <button class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200">
                             <img class="w-8 h-8 rounded-full" src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}" alt="{{ auth()->user()->name }}">
                             <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
@@ -88,7 +88,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-3 ml-4">
                         <a href="{{ route('login') }}" class="text-gray-700 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-medium">{{ __('app.login') }}</a>
                         <a href="{{ route('register') }}" class="text-white px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-sm font-medium">{{ __('app.register') }}</a>
                     </div>

@@ -324,3 +324,30 @@ header input[type="text"] {
         max-width: 100% !important;
     }
 }
+
+/* Desktop header spacing fixes */
+@media (min-width: 1024px) {
+    /* Ensure proper spacing between header elements */
+    header .flex.items-center.justify-between > div:last-child > * {
+        margin-left: 1rem !important;
+    }
+    
+    header .flex.items-center.justify-between > div:last-child > *:first-child {
+        margin-left: 0 !important;
+    }
+    
+    /* Prevent cart and user menu overlap */
+    header a[href*="cart"] {
+        margin-right: 1rem !important;
+    }
+    
+    header .relative.group {
+        margin-left: 1rem !important;
+    }
+    
+    /* Ensure search bar doesn't take too much space */
+    header form[action*="search"] {
+        max-width: 12rem !important;
+        min-width: 10rem !important;
+    }
+}

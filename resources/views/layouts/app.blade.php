@@ -40,6 +40,7 @@
                 </button>
             </div>
             <nav class="p-4">
+                <!-- Main Navigation -->
                 <div class="space-y-2">
                     <a href="{{ route('home') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">
                         {{ __('app.home') }}
@@ -55,7 +56,23 @@
                     </a>
                 </div>
                 
+                <!-- Cart Section -->
+                <div class="mt-6 pt-6 border-t">
+                    <a href="{{ route('cart') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                        </svg>
+                        <span>{{ __('app.cart') }}</span>
+                        @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
+                            <span class="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ auth()->user()->cart->item_count }}
+                            </span>
+                        @endif
+                    </a>
+                </div>
+                
                 @auth
+                    <!-- User Account Section -->
                     <div class="mt-6 pt-6 border-t">
                         <div class="flex items-center space-x-3 mb-4">
                             <img class="w-10 h-10 rounded-full" src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}" alt="{{ auth()->user()->name }}">
@@ -66,15 +83,25 @@
                         </div>
                         <div class="space-y-2">
                             <a href="{{ route('wishlist.index') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">
-                                My Wishlist
+                                {{ __('app.wishlist') }}
                             </a>
                             <a href="{{ route('orders.index') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">
-                                My Orders
+                                {{ __('app.orders') }}
                             </a>
+                            <a href="{{ route('account') }}" class="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md">
+                                {{ __('app.account') }}
+                            </a>
+                        </div>
+                        
+                        <!-- Logout Section (Separated) -->
+                        <div class="mt-6 pt-6 border-t border-red-100">
                             <form action="{{ route('logout') }}" method="POST" class="block">
                                 @csrf
-                                <button type="submit" class="w-full text-left px-3 py-2 text-gray-700 hover:text-red-600 hover:bg-gray-100 rounded-md">
-                                    Logout
+                                <button type="submit" class="w-full text-left px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    {{ __('app.logout') }}
                                 </button>
                             </form>
                         </div>

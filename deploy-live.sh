@@ -1,40 +1,37 @@
 #!/bin/bash
+set -e
 
-# iruali Live Deployment Script for cPanel
-# Run this script in your cPanel terminal or SSH
+# Change to the Laravel app directory
+cd iruali
 
-echo "🚀 Starting iruali deployment..."
-
-# Navigate to your repository directory
-cd /home/$(whoami)/repositories/iruali
-
-# Pull latest changes from Git
-echo "📥 Pulling latest changes from Git..."
+echo "[iruali] Pulling latest code from git..."
 git pull origin main
 
-# Install/update PHP dependencies
-echo "📦 Installing PHP dependencies..."
+echo "[iruali] Installing composer dependencies..."
 composer install --no-dev --optimize-autoloader
 
-# Clear Laravel caches
-echo "🧹 Clearing Laravel caches..."
+echo "[iruali] Running migrations..."
+php artisan migrate --force
+
+echo "[iruali] Running storage:link..."
+php artisan storage:link || true
+
+echo "[iruali] Clearing and optimizing caches..."
 php artisan cache:clear
 php artisan config:clear
-php artisan view:clear
+php artisan config:cache
 php artisan route:clear
+php artisan view:clear
+php artisan view:cache
 
-# Optimize for production
-echo "⚡ Optimizing for production..."
-php artisan optimize
+# Copy build assets from iruali/public/build to public_html/build
+echo "[iruali] Copying build assets to public_html..."
+mkdir -p ../public_html/build
+cp -r public/build/* ../public_html/build/
 
-# Copy build assets from iruali/public to public_html
-echo "📁 Copying build assets to public_html..."
-cp -r public/build/* /home/$(whoami)/public_html/build/
-
-# Set proper permissions
-echo "🔐 Setting permissions..."
-chmod -R 755 /home/$(whoami)/public_html/build/
+# Set permissions (adjust as needed for your environment)
+echo "[iruali] Setting permissions..."
 chmod -R 775 storage bootstrap/cache
 
-echo "✅ Deployment completed successfully!"
-echo "🌐 Your live site should now be updated with the latest changes." 
+# Done
+echo "[iruali] Deployment complete!" 

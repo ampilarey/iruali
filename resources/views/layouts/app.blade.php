@@ -32,7 +32,7 @@
     
     @stack('styles')
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="font-sans antialiased">
     <!-- Header -->
     <header class="bg-white shadow sticky top-0 z-30">
         <!-- Desktop Header -->
@@ -194,7 +194,7 @@
     </header>
 
     <!-- Main content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <main class="main-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         @if(session('success'))
             <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                 {{ session('success') }}
@@ -211,7 +211,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-16">
+    <footer class="bg-green-800 text-white py-8 mt-16">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
@@ -251,7 +251,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-300 text-sm">
+            <div class="mt-8 pt-8 border-t border-green-700 text-center text-gray-300 text-sm">
                 <p>&copy; {{ date('Y') }} iruali. All rights reserved.</p>
             </div>
         </div>

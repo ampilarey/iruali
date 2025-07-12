@@ -49,9 +49,6 @@ class ProductController extends Controller
     {
         $data = $request->all();
         
-        // Generate slug from English name
-        $data['slug'] = Str::slug($data['name']['en']);
-        
         // Set seller ID if user is a seller
         if (auth()->user() && auth()->user()->isSeller()) {
             $data['seller_id'] = auth()->id();
@@ -162,9 +159,6 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $data = $request->all();
-        
-        // Generate slug from English name
-        $data['slug'] = Str::slug($data['name']['en']);
 
         // Handle image upload
         if ($request->hasFile('main_image')) {

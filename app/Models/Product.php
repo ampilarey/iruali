@@ -150,4 +150,52 @@ class Product extends Model
     {
         return $query->where('is_active', false);
     }
+
+    /**
+     * Get the route key for the model.
+     * Use slug instead of ID for URLs
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    /**
+     * Generate a unique slug for the product
+     */
+    public function generateSlug()
+    {
+        $baseSlug = \Illuminate\Support\Str::slug($this->name['en'] ?? $this->name);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Check if slug already exists
+        while (static::where('slug', $slug)->where('id', '!=', $this->id)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Boot method to automatically generate slug
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($product) {
+            if (empty($product->slug)) {
+                $product->slug = $product->generateSlug();
+            }
+        });
+
+        static::updating(function ($product) {
+            // Regenerate slug if name has changed
+            if ($product->isDirty('name')) {
+                $product->slug = $product->generateSlug();
+            }
+        });
+    }
 }

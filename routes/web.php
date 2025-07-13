@@ -24,7 +24,7 @@ use App\Http\Controllers\Customer\OrderTrackingController;
 
 Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     // Locale switching
-    Route::get('/locale/switch', [LocaleController::class, 'switch'])->name('locale.switch');
+    Route::post('/locale/switch', [LocaleController::class, 'switch'])->name('locale.switch');
 
     // Public routes
     Route::get('/', [HomeController::class, 'index'])->name('home');

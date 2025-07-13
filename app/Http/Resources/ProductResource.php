@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\LocalizationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,8 +17,8 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
+            'name' => LocalizationService::getLocalizedValue($this->resource, 'name'),
+            'description' => LocalizationService::getLocalizedValue($this->resource, 'description'),
             'price' => $this->price,
             'final_price' => $this->final_price,
             'compare_price' => $this->compare_price,
@@ -30,7 +31,7 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'main_image' => $this->main_image,
             'images' => $this->whenLoaded('images', function () {
-                return $this->images->map(function ($image) {
+                return collect($this->images)->map(function ($image) {
                     return [
                         'id' => $image->id,
                         'url' => $image->url,
@@ -60,7 +61,7 @@ class ProductResource extends JsonResource
                 ];
             }),
             'reviews' => $this->whenLoaded('reviews', function () {
-                return $this->reviews->map(function ($review) {
+                return collect($this->reviews)->map(function ($review) {
                     return [
                         'id' => $review->id,
                         'rating' => $review->rating,
@@ -76,7 +77,7 @@ class ProductResource extends JsonResource
                 });
             }),
             'variants' => $this->whenLoaded('variants', function () {
-                return $this->variants->map(function ($variant) {
+                return collect($this->variants)->map(function ($variant) {
                     return [
                         'id' => $variant->id,
                         'name' => $variant->name,

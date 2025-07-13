@@ -153,6 +153,39 @@ class Product extends Model
     }
 
     /**
+     * Get the localized name with fallback
+     */
+    public function getLocalizedNameAttribute()
+    {
+        return $this->getTranslation('name', app()->getLocale(), false) ?: $this->getTranslation('name', config('app.fallback_locale'), false);
+    }
+
+    /**
+     * Get the localized description with fallback
+     */
+    public function getLocalizedDescriptionAttribute()
+    {
+        return $this->getTranslation('description', app()->getLocale(), false) ?: $this->getTranslation('description', config('app.fallback_locale'), false);
+    }
+
+    /**
+     * Get all available translations for a field
+     */
+    public function getAllTranslations($field)
+    {
+        return $this->getTranslations($field);
+    }
+
+    /**
+     * Check if a translation exists for a field
+     */
+    public function hasTranslation($field, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+        return $this->hasTranslation($field, $locale);
+    }
+
+    /**
      * Get the route key for the model.
      * Use slug instead of ID for URLs
      */

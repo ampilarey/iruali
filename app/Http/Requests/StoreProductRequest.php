@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreProductRequest extends FormRequest
+class StoreProductRequest extends TranslatableRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +21,12 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name.en' => 'required|string|max:255',
-            'name.dv' => 'required|string|max:255',
-            'description.en' => 'nullable|string|max:5000',
-            'description.dv' => 'nullable|string|max:5000',
+        $translatableRules = array_merge(
+            $this->getRequiredTranslatableRules(['name']),
+            $this->getOptionalTranslatableRules(['description'], ['max:5000'])
+        );
+
+        return array_merge($translatableRules, [
             'sku' => [
                 'required',
                 'string',
@@ -59,7 +59,7 @@ class StoreProductRequest extends FormRequest
             'variants.*.stock_quantity' => 'nullable|integer|min:0|max:999999',
             'variants.*.is_active' => 'boolean',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ];
+        ]);
     }
 
     /**
@@ -67,17 +67,18 @@ class StoreProductRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'name.en.required' => 'Product name in English is required.',
-            'name.dv.required' => 'Product name in Dhivehi is required.',
-            'sku.unique' => 'This SKU is already in use. Please choose a different one.',
-            'price.min' => 'Price must be greater than or equal to 0.',
-            'compare_price.gt' => 'Compare price must be greater than the regular price.',
-            'main_image.max' => 'Product image must not exceed 2MB.',
-            'main_image.mimes' => 'Product image must be a JPEG, PNG, JPG, or GIF file.',
-            'variants.*.image.max' => 'Variant image must not exceed 2MB.',
-            'variants.*.image.mimes' => 'Variant image must be a JPEG, PNG, JPG, or GIF file.',
-        ];
+        return array_merge(
+            $this->getTranslatableErrorMessages(['name', 'description']),
+            [
+                'sku.unique' => 'This SKU is already in use. Please choose a different one.',
+                'price.min' => 'Price must be greater than or equal to 0.',
+                'compare_price.gt' => 'Compare price must be greater than the regular price.',
+                'main_image.max' => 'Product image must not exceed 2MB.',
+                'main_image.mimes' => 'Product image must be a JPEG, PNG, JPG, or GIF file.',
+                'variants.*.image.max' => 'Variant image must not exceed 2MB.',
+                'variants.*.image.mimes' => 'Variant image must be a JPEG, PNG, JPG, or GIF file.',
+            ]
+        );
     }
 
     /**
@@ -133,5 +134,15 @@ class StoreProductRequest extends FormRequest
             }
             $this->merge(['variants' => $variants]);
         }
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $this->validateAtLeastOneTranslation(['name']);
+        });
     }
 }

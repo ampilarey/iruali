@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\CategoryResource;
+use App\Http\Requests\StoreProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -209,5 +210,20 @@ class ProductController extends BaseController
         });
 
         return $this->sendResponse($products, 'Products on sale retrieved successfully');
+    }
+
+    /**
+     * Create a new product
+     */
+    public function store(StoreProductRequest $request)
+    {
+        $data = $request->validated();
+        
+        // Set the seller_id to the authenticated user
+        $data['seller_id'] = auth()->id();
+        
+        $product = Product::create($data);
+
+        return $this->sendResponse(new ProductResource($product), 'Product created successfully', 201);
     }
 }

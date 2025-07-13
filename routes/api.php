@@ -77,6 +77,9 @@ Route::prefix('v1')->group(function () {
         // Checkout routes
         Route::post('/checkout/redeem-points', [OrderController::class, 'redeemPoints']);
         Route::post('/checkout/remove-points', [OrderController::class, 'removePoints']);
+
+        // Product creation (for tests and admin)
+        Route::post('/products', [ProductController::class, 'store']);
     });
 });
 

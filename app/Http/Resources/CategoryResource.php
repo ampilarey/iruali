@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\LocalizationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,8 +17,8 @@ class CategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
+            'name' => LocalizationService::getLocalizedValue($this->resource, 'name'),
+            'description' => LocalizationService::getLocalizedValue($this->resource, 'description'),
             'slug' => $this->slug,
             'image' => $this->image,
             'is_active' => $this->is_active,

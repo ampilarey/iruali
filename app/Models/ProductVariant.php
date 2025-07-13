@@ -28,4 +28,20 @@ class ProductVariant extends Model
         'stock_quantity' => 'integer',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Get the localized name with fallback
+     */
+    public function getLocalizedNameAttribute()
+    {
+        return $this->getTranslation('name', app()->getLocale(), false) ?: $this->getTranslation('name', config('app.fallback_locale'), false);
+    }
+
+    /**
+     * Get all available translations for name
+     */
+    public function getAllNameTranslations()
+    {
+        return $this->getTranslations('name');
+    }
 }

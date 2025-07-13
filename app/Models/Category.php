@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
+
+    public $translatable = ['name', 'description', 'meta_title', 'meta_description'];
 
     protected $fillable = [
         'name',
@@ -22,7 +25,11 @@ class Category extends Model
     ];
 
     protected $casts = [
-        'status' => 'string'
+        'status' => 'string',
+        'name' => 'array',
+        'description' => 'array',
+        'meta_title' => 'array',
+        'meta_description' => 'array',
     ];
 
     public function products(): HasMany
@@ -52,14 +59,31 @@ class Category extends Model
 
     public function getFullPathAttribute()
     {
-        $path = [$this->name];
+        $path = [$this->getTranslation('name', app()->getLocale(), false) ?: $this->getTranslation('name', config('app.fallback_locale'), false)];
         $parent = $this->parent;
         
         while ($parent) {
-            array_unshift($path, $parent->name);
+            $parentName = $parent->getTranslation('name', app()->getLocale(), false) ?: $parent->getTranslation('name', config('app.fallback_locale'), false);
+            array_unshift($path, $parentName);
             $parent = $parent->parent;
         }
         
         return implode(' > ', $path);
+    }
+
+    /**
+     * Get the localized name with fallback
+     */
+    public function getLocalizedNameAttribute()
+    {
+        return $this->getTranslation('name', app()->getLocale(), false) ?: $this->getTranslation('name', config('app.fallback_locale'), false);
+    }
+
+    /**
+     * Get the localized description with fallback
+     */
+    public function getLocalizedDescriptionAttribute()
+    {
+        return $this->getTranslation('description', app()->getLocale(), false) ?: $this->getTranslation('description', config('app.fallback_locale'), false);
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use PragmaRX\Google2FA\Google2FA;
 use App\Http\Requests\RegisterUserRequest;
+use App\Services\NotificationService;
 
 class AuthController extends Controller
 {
@@ -78,7 +79,9 @@ class AuthController extends Controller
         // Assign default role
         $defaultRole = $user->is_seller ? 'seller' : 'customer';
         $role = Role::where('name', $defaultRole)->first();
-        $user->roles()->attach($role->id);
+        if ($role) {
+            $user->roles()->attach($role->id);
+        }
 
         // Reward referral (optional: adjust points/logic as needed)
         if ($referredBy) {
@@ -94,8 +97,9 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('verification.notice')
-            ->with('success', __('auth.registration_successful'));
+        NotificationService::registrationSuccess();
+
+        return redirect()->route('verification.notice');
     }
 
     /**
@@ -149,6 +153,7 @@ class AuthController extends Controller
                 return redirect()->route('verification.notice');
             }
 
+            NotificationService::loginSuccess();
             return $this->redirectBasedOnRole($user);
         }
 
@@ -288,7 +293,9 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
         $user->update(['email_verified_at' => now()]);
 
-        return back()->with('success', __('auth.email_verified'));
+        NotificationService::emailVerified();
+
+        return back();
     }
 
     /**
@@ -316,7 +323,9 @@ class AuthController extends Controller
         $user = User::where('phone', $request->phone)->first();
         $user->update(['phone_verified_at' => now()]);
 
-        return back()->with('success', __('auth.phone_verified'));
+        NotificationService::phoneVerified();
+
+        return back();
     }
 
     /**
@@ -364,8 +373,9 @@ class AuthController extends Controller
             'two_factor_recovery_codes' => encrypt(json_encode($user->generateRecoveryCodes()))
         ]);
 
-        return redirect()->route('profile.2fa')
-            ->with('success', __('auth.2fa_enabled'));
+        NotificationService::twoFactorEnabled();
+
+        return redirect()->route('profile.2fa');
     }
 
     /**
@@ -376,7 +386,9 @@ class AuthController extends Controller
         $user = Auth::user();
         $user->disableTwoFactor();
 
-        return back()->with('success', __('auth.2fa_disabled'));
+        NotificationService::twoFactorDisabled();
+
+        return back();
     }
 
     /**
@@ -387,6 +399,8 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        NotificationService::logoutSuccess();
 
         return redirect()->route('home');
     }

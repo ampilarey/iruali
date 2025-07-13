@@ -38,6 +38,12 @@ return [
     'email_otp_sent' => 'Email verification code sent successfully.',
     'sms_otp_sent' => 'SMS verification code sent successfully.',
     'invalid_otp' => 'Invalid verification code. Please try again.',
+    
+    // Success messages
+    'login_successful' => 'Login successful!',
+    'logout_successful' => 'Logout successful!',
+    'email_verified_successfully' => 'Email verified successfully!',
+    'phone_verified_successfully' => 'Phone verified successfully!',
     'email_verified' => 'Email verified successfully.',
     'phone_verified' => 'Phone verified successfully.',
     'continue_to_dashboard' => 'Continue to Dashboard',

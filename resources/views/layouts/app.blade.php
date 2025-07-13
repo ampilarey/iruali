@@ -201,20 +201,35 @@
         </script>
     </header>
 
+    <!-- Notification System -->
+    @if(session('notification'))
+        <div id="session-notification" data-notification='@json(session('notification'))' style="display: none;"></div>
+    @endif
+
+    @if(session('notifications'))
+        <div id="session-notifications" data-notifications='@json(session('notifications'))' style="display: none;"></div>
+    @endif
+
+    <!-- Legacy Session Messages (for backward compatibility) -->
+    @if(session('success') || session('error') || session('warning') || session('info'))
+        <div id="legacy-notifications" style="display: none;">
+            @if(session('success'))
+                <div data-type="success" data-message="{{ session('success') }}"></div>
+            @endif
+            @if(session('error'))
+                <div data-type="error" data-message="{{ session('error') }}"></div>
+            @endif
+            @if(session('warning'))
+                <div data-type="warning" data-message="{{ session('warning') }}"></div>
+            @endif
+            @if(session('info'))
+                <div data-type="info" data-message="{{ session('info') }}"></div>
+            @endif
+        </div>
+    @endif
+
     <!-- Main content -->
     <main class="main-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        @if(session('success'))
-            <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {{ session('error') }}
-            </div>
-        @endif
-
         @yield('content')
     </main>
 

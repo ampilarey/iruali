@@ -73,6 +73,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
         Route::post('/wishlist/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
         Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+        Route::delete('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
         // Checkout routes
         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');

@@ -9,6 +9,7 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreOrderRequest;
+use App\Services\NotificationService;
 
 class OrderController extends Controller
 {
@@ -39,7 +40,7 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request)
     {
-        $this->authorize('create', Order::class);
+        // $this->authorize('create', Order::class); // Removed as StoreOrderRequest handles authorization
 
         $user = Auth::user();
         
@@ -54,9 +55,12 @@ class OrderController extends Controller
         $result = $this->orderService->createOrderFromCart($user, $shippingData);
 
         if (!$result['success']) {
-            return redirect()->route('cart.index')->with('error', $result['message']);
+            NotificationService::error($result['message']);
+            return redirect()->route('cart.index');
         }
 
-        return redirect()->route('orders.show', $result['order'])->with('success', $result['message']);
+        NotificationService::orderPlaced();
+
+        return redirect()->route('orders.show', $result['order']);
     }
 }

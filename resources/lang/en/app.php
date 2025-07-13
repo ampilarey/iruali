@@ -274,6 +274,18 @@ return [
     'message_info' => 'Please note this information.',
     'message_confirm_delete' => 'Are you sure you want to delete this item?',
     'message_confirm_action' => 'Are you sure you want to perform this action?',
+    
+    // Notification messages
+    'created_successfully' => ':model created successfully!',
+    'updated_successfully' => ':model updated successfully!',
+    'deleted_successfully' => ':model deleted successfully!',
+    'added_to_cart_successfully' => ':product added to cart successfully!',
+    'removed_from_cart_successfully' => ':product removed from cart successfully!',
+    'added_to_wishlist_successfully' => ':product added to wishlist successfully!',
+    'removed_from_wishlist_successfully' => ':product removed from wishlist successfully!',
+    'order_placed_successfully' => 'Order placed successfully!',
+    'voucher_applied_successfully' => 'Voucher :code applied successfully!',
+    'voucher_removed_successfully' => 'Voucher removed successfully!',
 
     // Home page
     'discover_amazing_products' => 'Discover Amazing Products',

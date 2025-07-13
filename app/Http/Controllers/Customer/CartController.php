@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Services\CartService;
 use App\Services\DiscountService;
 use App\Http\Resources\CartResource;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,14 +46,16 @@ class CartController extends Controller
             'variant_id' => 'nullable|exists:product_variants,id'
         ]);
 
+        $product = Product::find($request->product_id);
         $this->cartService->addToCart(
             $request->product_id,
             $request->quantity,
             $request->variant_id
         );
 
-        return redirect()->route('cart.index')
-            ->with('success', 'Product added to cart successfully!');
+        NotificationService::addedToCart($product->name);
+
+        return redirect()->route('cart');
     }
 
     public function update(Request $request, CartItem $item)
@@ -72,18 +75,21 @@ class CartController extends Controller
 
     public function remove(CartItem $item)
     {
+        $productName = $item->product->name;
         $this->cartService->removeFromCart($item);
 
-        return redirect()->route('cart.index')
-            ->with('success', 'Item removed from cart successfully!');
+        NotificationService::removedFromCart($productName);
+
+        return redirect()->route('cart');
     }
 
     public function clear()
     {
         $this->cartService->clearCart();
 
-        return redirect()->route('cart.index')
-            ->with('success', 'Cart cleared successfully!');
+        NotificationService::success('Cart cleared successfully!');
+
+        return redirect()->route('cart');
     }
 
     public function applyVoucher(Request $request)
@@ -98,13 +104,15 @@ class CartController extends Controller
         }
         
         $this->discountService->applyVoucher($request->voucher_code);
-        return back()->with('success', __('Voucher applied!'));
+        NotificationService::voucherApplied($request->voucher_code);
+        return back();
     }
 
     public function removeVoucher()
     {
         $this->discountService->removeVoucher();
-        return back()->with('success', __('Voucher removed.'));
+        NotificationService::voucherRemoved();
+        return back();
     }
 
 }

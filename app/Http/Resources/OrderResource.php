@@ -38,7 +38,7 @@ class OrderResource extends JsonResource
             'tracking_number' => $this->tracking_number,
             'notes' => $this->notes,
             'items' => $this->whenLoaded('items', function () {
-                return $this->items->map(function ($item) {
+                return collect($this->items)->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'product_id' => $item->product_id,

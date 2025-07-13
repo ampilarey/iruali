@@ -36,20 +36,18 @@ class UserResource extends JsonResource
             'last_login_at' => $this->last_login_at,
             'referral_code' => $this->referral_code,
             'referred_by' => $this->referred_by,
-            'roles' => $this->whenLoaded('roles', function () {
-                return $this->roles->map(function ($role) {
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                        'display_name' => $role->display_name,
-                    ];
-                });
+            'roles' => collect($this->roles)->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'display_name' => $role->display_name,
+                ];
             }),
             'orders' => $this->whenLoaded('orders', function () {
                 return OrderResource::collection($this->orders);
             }),
             'wishlist' => $this->whenLoaded('wishlist', function () {
-                return $this->wishlist->map(function ($wishlistItem) {
+                return collect($this->wishlist)->map(function ($wishlistItem) {
                     return [
                         'id' => $wishlistItem->id,
                         'product' => new ProductResource($wishlistItem->product),
@@ -60,14 +58,12 @@ class UserResource extends JsonResource
             'cart' => $this->whenLoaded('cart', function () {
                 return [
                     'id' => $this->cart->id,
-                    'items' => $this->cart->whenLoaded('items', function () {
-                        return $this->cart->items->map(function ($item) {
-                            return [
-                                'id' => $item->id,
-                                'quantity' => $item->quantity,
-                                'product' => new ProductResource($item->product),
-                            ];
-                        });
+                    'items' => collect(optional($this->cart)->items ?? [])->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'quantity' => $item->quantity,
+                            'product' => new ProductResource($item->product),
+                        ];
                     }),
                 ];
             }),

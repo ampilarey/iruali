@@ -23,7 +23,7 @@ class CartResource extends JsonResource
             'subtotal' => $this->subtotal,
             'total' => $this->total,
             'items' => $this->whenLoaded('items', function () {
-                return $this->items->map(function ($item) {
+                return collect($this->items)->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'quantity' => $item->quantity,

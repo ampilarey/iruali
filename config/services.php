@@ -35,4 +35,51 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Cloud API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure WhatsApp Business API for sending messages, OTP, and notifications
+    |
+    */
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
+        'webhook_verify_token' => env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | BML Payment Gateway Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure Bank of Maldives payment gateway for online payments
+    |
+    */
+    'bml' => [
+        'base_uri' => env('BML_BASE_URI', 'https://api.bml.com.mv'),
+        'api_key' => env('BML_API_KEY'),
+        'merchant_id' => env('BML_MERCHANT_ID'),
+        'secret_key' => env('BML_SECRET_KEY'),
+        'environment' => env('BML_ENVIRONMENT', 'sandbox'), // sandbox or production
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Gateway Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure SMS gateway for sending OTP and notifications
+    |
+    */
+    'sms' => [
+        'provider' => env('SMS_PROVIDER', 'twilio'), // twilio, nexmo, etc.
+        'api_key' => env('SMS_API_KEY'),
+        'api_secret' => env('SMS_API_SECRET'),
+        'from_number' => env('SMS_FROM_NUMBER'),
+        'endpoint' => env('SMS_ENDPOINT'),
+    ],
+
 ];

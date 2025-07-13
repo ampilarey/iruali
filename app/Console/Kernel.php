@@ -72,5 +72,15 @@ class Kernel extends ConsoleKernel
 
         // Generate sitemap daily
         $schedule->command('sitemap:generate')->daily();
+
+        // === Automated Backups (Spatie Laravel Backup) ===
+        // Daily backup at 2am
+        $schedule->command('backup:run')->daily()->at('02:00');
+        // Daily cleanup at 3am
+        $schedule->command('backup:clean')->daily()->at('03:00');
+        // Daily health check at 4am
+        $schedule->command('backup:monitor')->daily()->at('04:00');
+        // OneDrive backup at 5am (after local backup is complete)
+        $schedule->command('backup:onedrive')->daily()->at('05:00');
     }
 } 

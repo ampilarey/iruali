@@ -82,4 +82,21 @@ return [
         'endpoint' => env('SMS_ENDPOINT'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Microsoft OneDrive Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure Microsoft Graph API for OneDrive backup integration
+    | Get these credentials from Azure Portal: https://portal.azure.com/
+    |
+    */
+    'onedrive' => [
+        'client_id' => env('ONEDRIVE_CLIENT_ID'),
+        'client_secret' => env('ONEDRIVE_CLIENT_SECRET'),
+        'refresh_token' => env('ONEDRIVE_REFRESH_TOKEN'),
+        'tenant_id' => env('ONEDRIVE_TENANT_ID'),
+        'redirect_uri' => env('ONEDRIVE_REDIRECT_URI', 'http://localhost:8000/auth/onedrive/callback'),
+    ],
+
 ];

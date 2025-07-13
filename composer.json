@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "pragmarx/google2fa": "^8.0",
+        "spatie/laravel-backup": "^9.3",
         "spatie/laravel-permission": "^6.20",
         "spatie/laravel-translatable": "^6.11"
     },

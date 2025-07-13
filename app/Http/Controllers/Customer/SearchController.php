@@ -33,7 +33,9 @@ class SearchController extends Controller
 
         $categories = Category::active()->root()->get();
 
-        return view('search.results', compact('products', 'categories', 'query'));
+        $totalResults = $products->total();
+        
+        return view('search.results', compact('products', 'categories', 'query', 'totalResults'));
     }
 
     public function index(Request $request)

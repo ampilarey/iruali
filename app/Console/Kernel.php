@@ -69,5 +69,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             \Laravel\Sanctum\PersonalAccessToken::where('created_at', '<', now()->subDays(30))->delete();
         })->daily();
+
+        // Generate sitemap daily
+        $schedule->command('sitemap:generate')->daily();
     }
 } 

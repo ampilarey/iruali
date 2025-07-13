@@ -1,2 +1,26 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /storage/
+Disallow: /vendor/
+Disallow: /node_modules/
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+Disallow: /email/
+Disallow: /verify-email
+
+# Allow important pages
+Allow: /products/
+Allow: /categories/
+Allow: /shop
+Allow: /search
+
+# Sitemap
+Sitemap: https://iruali.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

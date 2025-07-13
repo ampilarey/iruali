@@ -5,18 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', config('app.name'))</title>
-    <meta name="description" content="@yield('meta_description', 'iruali is a modern, multi-vendor e-commerce platform for the Maldives. Shop the latest products, flash sales, and more!')">
-    <meta name="keywords" content="iruali, e-commerce, Maldives, shop, online, multi-vendor, flash sale, deals, products">
-    <meta property="og:title" content="@yield('title', config('app.name'))">
-    <meta property="og:description" content="@yield('meta_description', 'iruali is a modern, multi-vendor e-commerce platform for the Maldives. Shop the latest products, flash sales, and more!')">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ asset('images/og-image.png') }}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('title', config('app.name'))">
-    <meta name="twitter:description" content="@yield('meta_description', 'iruali is a modern, multi-vendor e-commerce platform for the Maldives. Shop the latest products, flash sales, and more!')">
-    <meta name="twitter:image" content="{{ asset('images/og-image.png') }}">
+    <x-seo-meta :seo="$seo ?? null" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

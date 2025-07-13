@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\DiscountService;
+use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -65,8 +66,7 @@ class CartController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Cart updated successfully',
-            'cart_total' => $item->cart->total,
-            'item_count' => $item->cart->item_count
+            'cart' => new CartResource($item->cart),
         ]);
     }
 

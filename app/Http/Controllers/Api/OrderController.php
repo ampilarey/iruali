@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Order;
 use App\Services\OrderService;
 use App\Services\DiscountService;
+use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -47,49 +48,8 @@ class OrderController extends BaseController
 
         $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
-        $orders->getCollection()->transform(function ($order) {
-            return [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'status' => $order->status,
-                'status_badge' => $order->status_badge,
-                'total_amount' => $order->total_amount,
-                'voucher_code' => $order->voucher_code,
-                'voucher_discount' => $order->voucher_discount,
-                'loyalty_points_earned' => $order->loyalty_points_earned,
-                'points_redeemed' => $order->points_redeemed,
-                'points_redeemed_discount' => $order->points_redeemed_discount,
-                'shipping_address' => [
-                    'address' => $order->shipping_address,
-                    'city' => $order->shipping_city,
-                    'state' => $order->shipping_state,
-                    'zip' => $order->shipping_zip,
-                    'country' => $order->shipping_country,
-                ],
-                'items' => $order->items->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'product_id' => $item->product_id,
-                        'quantity' => $item->quantity,
-                        'price' => $item->price,
-                        'subtotal' => $item->quantity * $item->price,
-                        'product' => [
-                            'id' => $item->product->id,
-                            'name' => $item->product->name,
-                            'sku' => $item->product->sku,
-                            'slug' => $item->product->slug,
-                            'main_image' => $item->product->main_image,
-                        ],
-                    ];
-                }),
-                'item_count' => $order->items->count(),
-                'created_at' => $order->created_at,
-                'updated_at' => $order->updated_at,
-            ];
-        });
-
         return $this->sendResponse([
-            'orders' => $orders->items(),
+            'orders' => OrderResource::collection($orders),
             'pagination' => [
                 'current_page' => $orders->currentPage(),
                 'last_page' => $orders->lastPage(),
@@ -114,55 +74,7 @@ class OrderController extends BaseController
 
         $order->load(['items.product.mainImage', 'items.product.category']);
 
-        $orderData = [
-            'id' => $order->id,
-            'order_number' => $order->order_number,
-            'status' => $order->status,
-            'status_badge' => $order->status_badge,
-            'total_amount' => $order->total_amount,
-            'voucher_code' => $order->voucher_code,
-            'voucher_discount' => $order->voucher_discount,
-            'loyalty_points_earned' => $order->loyalty_points_earned,
-            'points_redeemed' => $order->points_redeemed,
-            'points_redeemed_discount' => $order->points_redeemed_discount,
-            'shipping_address' => [
-                'address' => $order->shipping_address,
-                'city' => $order->shipping_city,
-                'state' => $order->shipping_state,
-                'zip' => $order->shipping_zip,
-                'country' => $order->shipping_country,
-            ],
-            'billing_address' => $order->billing_address,
-            'payment_method' => $order->payment_method,
-            'payment_status' => $order->payment_status,
-            'tracking_number' => $order->tracking_number,
-            'notes' => $order->notes,
-            'items' => $order->items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'subtotal' => $item->quantity * $item->price,
-                    'product' => [
-                        'id' => $item->product->id,
-                        'name' => $item->product->name,
-                        'description' => $item->product->description,
-                        'sku' => $item->product->sku,
-                        'slug' => $item->product->slug,
-                        'main_image' => $item->product->main_image,
-                        'category' => [
-                            'id' => $item->product->category->id,
-                            'name' => $item->product->category->name,
-                        ],
-                    ],
-                ];
-            }),
-            'created_at' => $order->created_at,
-            'updated_at' => $order->updated_at,
-        ];
-
-        return $this->sendResponse($orderData, 'Order retrieved successfully');
+        return $this->sendResponse(new OrderResource($order), 'Order retrieved successfully');
     }
 
     /**
@@ -204,36 +116,7 @@ class OrderController extends BaseController
         $order = $result['order'];
         $order->load(['items.product.mainImage']);
 
-        $orderData = [
-            'id' => $order->id,
-            'order_number' => $order->order_number,
-            'status' => $order->status,
-            'total_amount' => $order->total_amount,
-            'shipping_address' => [
-                'address' => $order->shipping_address,
-                'city' => $order->shipping_city,
-                'state' => $order->shipping_state,
-                'zip' => $order->shipping_zip,
-                'country' => $order->shipping_country,
-            ],
-            'items' => $order->items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'product' => [
-                        'id' => $item->product->id,
-                        'name' => $item->product->name,
-                        'sku' => $item->product->sku,
-                        'main_image' => $item->product->main_image,
-                    ],
-                ];
-            }),
-            'created_at' => $order->created_at,
-        ];
-
-        return $this->sendResponse($orderData, 'Order created successfully', 201);
+        return $this->sendResponse(new OrderResource($order), 'Order created successfully', 201);
     }
 
     /**

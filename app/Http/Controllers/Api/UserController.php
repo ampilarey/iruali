@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,31 +17,7 @@ class UserController extends BaseController
     {
         $user = Auth::user();
 
-        $profileData = [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'address' => $user->address,
-            'city' => $user->city,
-            'state' => $user->state,
-            'country' => $user->country,
-            'postal_code' => $user->postal_code,
-            'date_of_birth' => $user->date_of_birth,
-            'gender' => $user->gender,
-            'profile_picture' => $user->profile_picture,
-            'loyalty_points' => $user->loyalty_points,
-            'is_seller' => $user->is_seller,
-            'seller_approved' => $user->seller_approved,
-            'email_verified_at' => $user->email_verified_at,
-            'phone_verified_at' => $user->phone_verified_at,
-            'is_active' => $user->is_active,
-            'last_login_at' => $user->last_login_at,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ];
-
-        return $this->sendResponse($profileData, 'Profile retrieved successfully');
+        return $this->sendResponse(new UserResource($user), 'Profile retrieved successfully');
     }
 
     /**
@@ -71,29 +48,7 @@ class UserController extends BaseController
             'country', 'postal_code', 'date_of_birth', 'gender'
         ]));
 
-        return $this->sendResponse([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'address' => $user->address,
-            'city' => $user->city,
-            'state' => $user->state,
-            'country' => $user->country,
-            'postal_code' => $user->postal_code,
-            'date_of_birth' => $user->date_of_birth,
-            'gender' => $user->gender,
-            'profile_picture' => $user->profile_picture,
-            'loyalty_points' => $user->loyalty_points,
-            'is_seller' => $user->is_seller,
-            'seller_approved' => $user->seller_approved,
-            'email_verified_at' => $user->email_verified_at,
-            'phone_verified_at' => $user->phone_verified_at,
-            'is_active' => $user->is_active,
-            'last_login_at' => $user->last_login_at,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ], 'Profile updated successfully');
+        return $this->sendResponse(new UserResource($user), 'Profile updated successfully');
     }
 
     /**

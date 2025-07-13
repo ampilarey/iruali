@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\WishlistItemResource;
 
 class WishlistController extends BaseController
 {
@@ -20,44 +21,9 @@ class WishlistController extends BaseController
             ->with(['product.mainImage', 'product.category', 'product.seller'])
             ->get();
 
-        $wishlistData = $wishlistItems->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'product' => [
-                    'id' => $item->product->id,
-                    'name' => $item->product->name,
-                    'description' => $item->product->description,
-                    'price' => $item->product->price,
-                    'final_price' => $item->product->final_price,
-                    'compare_price' => $item->product->compare_price,
-                    'sale_price' => $item->product->sale_price,
-                    'discount_percentage' => $item->product->discount_percentage,
-                    'is_on_sale' => $item->product->is_on_sale,
-                    'stock_quantity' => $item->product->stock_quantity,
-                    'is_in_stock' => $item->product->is_in_stock,
-                    'sku' => $item->product->sku,
-                    'slug' => $item->product->slug,
-                    'main_image' => $item->product->main_image,
-                    'images' => $item->product->images,
-                    'category' => [
-                        'id' => $item->product->category->id,
-                        'name' => $item->product->category->name,
-                        'slug' => $item->product->category->slug,
-                    ],
-                    'seller' => [
-                        'id' => $item->product->seller->id,
-                        'name' => $item->product->seller->name,
-                    ],
-                    'is_featured' => $item->product->is_featured,
-                    'is_sponsored' => $item->product->is_sponsored,
-                ],
-                'added_at' => $item->created_at,
-            ];
-        });
-
         return $this->sendResponse([
-            'items' => $wishlistData,
-            'total_items' => $wishlistData->count(),
+            'items' => WishlistItemResource::collection($wishlistItems),
+            'total_items' => $wishlistItems->count(),
         ], 'Wishlist retrieved successfully');
     }
 

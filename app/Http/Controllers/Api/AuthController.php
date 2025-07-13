@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Http\Resources\AuthUserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -46,15 +47,7 @@ class AuthController extends BaseController
         ])->plainTextToken;
 
         return $this->sendResponse([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'loyalty_points' => $user->loyalty_points,
-                'is_seller' => $user->is_seller,
-                'seller_approved' => $user->seller_approved,
-            ],
+            'user' => new AuthUserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
             'abilities' => [
@@ -100,15 +93,7 @@ class AuthController extends BaseController
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return $this->sendResponse([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'loyalty_points' => $user->loyalty_points,
-                'is_seller' => $user->is_seller,
-                'seller_approved' => $user->seller_approved,
-            ],
+            'user' => new AuthUserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
         ], 'Registration successful', 201);

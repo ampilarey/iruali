@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\DiscountService;
+use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -32,38 +33,7 @@ class CartController extends BaseController
 
         $cart->load(['items.product.mainImage']);
 
-        $cartData = [
-            'id' => $cart->id,
-            'items' => $cart->items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'subtotal' => $item->subtotal,
-                    'product' => [
-                        'id' => $item->product->id,
-                        'name' => $item->product->name,
-                        'sku' => $item->product->sku,
-                        'slug' => $item->product->slug,
-                        'price' => $item->product->price,
-                        'final_price' => $item->product->final_price,
-                        'main_image' => $item->product->main_image,
-                        'stock_quantity' => $item->product->stock_quantity,
-                        'is_in_stock' => $item->product->is_in_stock,
-                    ],
-                ];
-            }),
-            'total_items' => $cart->item_count,
-            'subtotal' => $cart->total,
-            'total' => $cart->total,
-            'voucher_code' => session('voucher_code'),
-            'voucher_discount' => session('voucher_discount', 0),
-            'points_redeemed' => session('points_redeemed', 0),
-            'points_redeemed_discount' => session('points_redeemed_discount', 0),
-        ];
-
-        return $this->sendResponse($cartData, 'Cart retrieved successfully');
+        return $this->sendResponse(new CartResource($cart), 'Cart retrieved successfully');
     }
 
     /**
@@ -94,7 +64,7 @@ class CartController extends BaseController
             return $this->sendError($result['message']);
         }
 
-        return $this->sendResponse($result['cart'], 'Item added to cart successfully');
+        return $this->sendResponse(new CartResource($result['cart']), 'Item added to cart successfully');
     }
 
     /**
@@ -128,7 +98,7 @@ class CartController extends BaseController
             return $this->sendError($result['message']);
         }
 
-        return $this->sendResponse($result['cart'], 'Cart item updated successfully');
+        return $this->sendResponse(new CartResource($result['cart']), 'Cart item updated successfully');
     }
 
     /**
@@ -149,7 +119,7 @@ class CartController extends BaseController
             return $this->sendError($result['message']);
         }
 
-        return $this->sendResponse($result['cart'], 'Item removed from cart successfully');
+        return $this->sendResponse(new CartResource($result['cart']), 'Item removed from cart successfully');
     }
 
     /**

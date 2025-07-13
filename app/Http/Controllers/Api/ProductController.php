@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -82,42 +84,8 @@ class ProductController extends BaseController
         $perPage = $request->per_page ?? 15;
         $products = $query->paginate($perPage);
 
-        // Transform the data
-        $products->getCollection()->transform(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'description' => $product->description,
-                'price' => $product->price,
-                'final_price' => $product->final_price,
-                'compare_price' => $product->compare_price,
-                'sale_price' => $product->sale_price,
-                'discount_percentage' => $product->discount_percentage,
-                'is_on_sale' => $product->is_on_sale,
-                'stock_quantity' => $product->stock_quantity,
-                'is_in_stock' => $product->is_in_stock,
-                'sku' => $product->sku,
-                'slug' => $product->slug,
-                'main_image' => $product->main_image,
-                'images' => $product->images,
-                'category' => $product->category ? [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                    'slug' => $product->category->slug,
-                ] : null,
-                'seller' => $product->seller ? [
-                    'id' => $product->seller->id,
-                    'name' => $product->seller->name,
-                ] : null,
-                'is_featured' => $product->is_featured,
-                'is_sponsored' => $product->is_sponsored,
-                'created_at' => $product->created_at,
-                'updated_at' => $product->updated_at,
-            ];
-        });
-
         return $this->sendResponse([
-            'products' => $products->items(),
+            'products' => ProductResource::collection($products),
             'pagination' => [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
@@ -140,65 +108,7 @@ class ProductController extends BaseController
 
         $product->load(['category', 'images', 'reviews.user', 'seller', 'variants']);
 
-        $data = [
-            'id' => $product->id,
-            'name' => $product->name,
-            'description' => $product->description,
-            'price' => $product->price,
-            'final_price' => $product->final_price,
-            'compare_price' => $product->compare_price,
-            'sale_price' => $product->sale_price,
-            'discount_percentage' => $product->discount_percentage,
-            'is_on_sale' => $product->is_on_sale,
-            'stock_quantity' => $product->stock_quantity,
-            'is_in_stock' => $product->is_in_stock,
-            'sku' => $product->sku,
-            'slug' => $product->slug,
-            'main_image' => $product->main_image,
-            'images' => $product->images,
-            'tags' => $product->tags,
-            'brand' => $product->brand,
-            'model' => $product->model,
-            'weight' => $product->weight,
-            'dimensions' => $product->dimensions,
-            'requires_shipping' => $product->requires_shipping,
-            'is_digital' => $product->is_digital,
-            'category' => $product->category ? [
-                'id' => $product->category->id,
-                'name' => $product->category->name,
-                'slug' => $product->category->slug,
-            ] : null,
-            'seller' => $product->seller ? [
-                'id' => $product->seller->id,
-                'name' => $product->seller->name,
-            ] : null,
-            'reviews' => $product->reviews->map(function ($review) {
-                return [
-                    'id' => $review->id,
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                    'user' => $review->user ? [
-                        'id' => $review->user->id,
-                        'name' => $review->user->name,
-                    ] : null,
-                    'created_at' => $review->created_at,
-                ];
-            }),
-            'variants' => $product->variants->map(function ($variant) {
-                return [
-                    'id' => $variant->id,
-                    'name' => $variant->name,
-                    'price' => $variant->price,
-                    'stock_quantity' => $variant->stock_quantity,
-                ];
-            }),
-            'is_featured' => $product->is_featured,
-            'is_sponsored' => $product->is_sponsored,
-            'created_at' => $product->created_at,
-            'updated_at' => $product->updated_at,
-        ];
-
-        return $this->sendResponse($data, 'Product retrieved successfully');
+        return $this->sendResponse(new ProductResource($product), 'Product retrieved successfully');
     }
 
     /**

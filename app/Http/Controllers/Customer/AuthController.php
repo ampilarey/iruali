@@ -226,6 +226,15 @@ class AuthController extends Controller
     }
 
     /**
+     * Show user account page
+     */
+    public function account()
+    {
+        $user = auth()->user();
+        return view('account.index', compact('user'));
+    }
+
+    /**
      * Show verification notice
      */
     public function showVerificationNotice()

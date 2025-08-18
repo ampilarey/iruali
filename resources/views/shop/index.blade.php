@@ -24,7 +24,7 @@
                         <label class="flex items-center">
                             <input type="checkbox" name="category" value="{{ $category->slug }}" 
                                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-700">{{ $category->name }}</span>
+                            <span class="ml-2 text-sm text-gray-700">{{ $category->localized_name }}</span>
                         </label>
                         @endforeach
                     </div>
@@ -76,7 +76,7 @@
                     <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
                         <div class="relative">
                             @if($product->mainImage)
-                                <img src="{{ $product->mainImage->url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                                <img src="{{ $product->mainImage->url }}" alt="{{ $product->localized_name }}" class="w-full h-48 object-cover">
                             @else
                                 <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,9 +84,9 @@
                                     </svg>
                                 </div>
                             @endif
-                            @if($product->is_on_sale)
+                            @if($product->sale_price)
                                 <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
-                                    -{{ $product->discount_percentage }}%
+                                    SALE
                                 </div>
                             @endif
                             <div class="absolute top-2 right-2">
@@ -100,17 +100,17 @@
                         <div class="p-4">
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">
                                 <a href="{{ route('products.show', $product) }}" class="hover:text-primary-600">
-                                    {{ $product->name }}
+                                    {{ $product->localized_name }}
                                 </a>
                             </h3>
-                            <p class="text-sm text-gray-600 mb-3">{{ $product->category->name }}</p>
+                            <p class="text-sm text-gray-600 mb-3">{{ $product->category->localized_name }}</p>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
-                                    @if($product->is_on_sale)
-                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->final_price, 2) }}</span>
-                                        <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
+                                    @if($product->sale_price)
+                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">${{ number_format($product->sale_price, 2) }}</span>
+                                        <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">${{ number_format($product->price, 2) }}</span>
                                     @else
-                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
+                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">${{ number_format($product->price, 2) }}</span>
                                     @endif
                                 </div>
                                 <form action="{{ route('cart.add') }}" method="POST" class="inline">

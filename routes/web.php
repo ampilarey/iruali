@@ -61,6 +61,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     // Authenticated user routes
     Route::middleware('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        // Account routes
+        Route::get('/account', [AuthController::class, 'account'])->name('account');
         // Cart routes
         Route::get('/cart', [CartController::class, 'index'])->name('cart');
         Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
@@ -76,7 +78,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::delete('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
         // Checkout routes
         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-        Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+        Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.store');
         Route::post('checkout/redeem-points', [CheckoutController::class, 'redeemPoints'])->name('checkout.redeemPoints');
         Route::post('checkout/remove-points', [CheckoutController::class, 'removePoints'])->name('checkout.removePoints');
         // Order routes

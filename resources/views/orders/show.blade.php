@@ -139,7 +139,7 @@
                 @endif
 
                 <div class="mt-4">
-                    <a href="{{ route('orders.index') }}" class="block text-center text-primary-600 hover:text-primary-700 font-medium">
+                    <a href="{{ route('orders') }}" class="block text-center text-primary-600 hover:text-primary-700 font-medium">
                         ← Back to Orders
                     </a>
                 </div>

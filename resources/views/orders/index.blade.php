@@ -85,7 +85,7 @@
             <h3 class="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
             <p class="mt-1 text-sm text-gray-500">Start shopping to see your order history here.</p>
             <div class="mt-6">
-                <a href="{{ route('shop.index') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-300">
+                <a href="{{ route('shop') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-300">
                     Start Shopping
                 </a>
             </div>

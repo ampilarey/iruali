@@ -84,7 +84,7 @@
                         Clear Wishlist
                     </button>
                 </form>
-                <a href="{{ route('shop.index') }}" class="text-primary-600 hover:text-primary-700 font-medium">
+                <a href="{{ route('shop') }}" class="text-primary-600 hover:text-primary-700 font-medium">
                     Continue Shopping
                 </a>
             </div>
@@ -97,7 +97,7 @@
             <h3 class="mt-2 text-sm font-medium text-gray-900">Your wishlist is empty</h3>
             <p class="mt-1 text-sm text-gray-500">Start adding products to your wishlist to save them for later.</p>
             <div class="mt-6">
-                <a href="{{ route('shop.index') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-300">
+                <a href="{{ route('shop') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-300">
                     Start Shopping
                 </a>
             </div>

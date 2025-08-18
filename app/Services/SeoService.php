@@ -38,10 +38,10 @@ class SeoService
             'og_title' => $name,
             'og_description' => $metaDescription,
             'og_type' => 'product',
-            'og_image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.png'),
+            'og_image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.svg'),
             'twitter_title' => $name,
             'twitter_description' => $metaDescription,
-            'twitter_image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.png'),
+            'twitter_image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.svg'),
             'canonical_url' => route('products.show', $product->slug),
             'schema' => self::generateProductSchema($product),
         ];
@@ -64,10 +64,10 @@ class SeoService
             'og_title' => $name,
             'og_description' => $metaDescription,
             'og_type' => 'website',
-            'og_image' => asset('images/og-image.png'),
+            'og_image' => asset('images/og-image.svg'),
             'twitter_title' => $name,
             'twitter_description' => $metaDescription,
-            'twitter_image' => asset('images/og-image.png'),
+            'twitter_image' => asset('images/og-image.svg'),
             'canonical_url' => route('categories.show', $category->slug),
             'schema' => self::generateCategorySchema($category),
         ];
@@ -89,10 +89,10 @@ class SeoService
             'og_title' => $title,
             'og_description' => $description,
             'og_type' => 'website',
-            'og_image' => asset('images/og-image.png'),
+            'og_image' => asset('images/og-image.svg'),
             'twitter_title' => $title,
             'twitter_description' => $description,
-            'twitter_image' => asset('images/og-image.png'),
+            'twitter_image' => asset('images/og-image.svg'),
             'canonical_url' => request()->url(),
             'schema' => null,
         ];
@@ -115,10 +115,10 @@ class SeoService
             'og_title' => $title,
             'og_description' => $description,
             'og_type' => 'profile',
-            'og_image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.png'),
+            'og_image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.svg'),
             'twitter_title' => $title,
             'twitter_description' => $description,
-            'twitter_image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.png'),
+            'twitter_image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.svg'),
             'canonical_url' => request()->url(),
             'schema' => self::generateUserSchema($user),
         ];
@@ -136,10 +136,10 @@ class SeoService
             'og_title' => config('app.name'),
             'og_description' => 'iruali is a modern, multi-vendor e-commerce platform for the Maldives. Shop the latest products, flash sales, and more!',
             'og_type' => 'website',
-            'og_image' => asset('images/og-image.png'),
+            'og_image' => asset('images/og-image.svg'),
             'twitter_title' => config('app.name'),
             'twitter_description' => 'iruali is a modern, multi-vendor e-commerce platform for the Maldives. Shop the latest products, flash sales, and more!',
-            'twitter_image' => asset('images/og-image.png'),
+            'twitter_image' => asset('images/og-image.svg'),
             'canonical_url' => request()->url(),
             'schema' => self::generateWebsiteSchema(),
         ];
@@ -158,7 +158,7 @@ class SeoService
             '@type' => 'Product',
             'name' => $name,
             'description' => $description,
-            'image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.png'),
+            'image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.svg'),
             'brand' => [
                 '@type' => 'Brand',
                 'name' => $product->brand ?? 'iruali'
@@ -203,7 +203,7 @@ class SeoService
                 '@type' => 'Organization',
                 'name' => $user->name,
                 'url' => request()->url(),
-                'image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.png'),
+                'image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.svg'),
             ];
         }
 
@@ -212,7 +212,7 @@ class SeoService
             '@type' => 'Person',
             'name' => $user->name,
             'url' => request()->url(),
-            'image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.png'),
+            'image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.svg'),
         ];
     }
 

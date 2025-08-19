@@ -38,13 +38,13 @@ class AdminController extends Controller
             })->count(),
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
-            'pending_sellers' => User::where('status', 'pending_approval')->count(),
-            'pending_products' => Product::where('status', 'pending')->count(),
+            'pending_sellers' => User::where('status', 'inactive')->count(),
+            'pending_products' => Product::where('is_active', false)->count(),
         ];
 
         $recent_users = User::latest()->take(5)->get();
         $recent_orders = Order::with('user')->latest()->take(5)->get();
-        $pending_sellers = User::where('status', 'pending_approval')->get();
+        $pending_sellers = User::where('status', 'inactive')->get();
 
         return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers'));
     }
@@ -101,7 +101,7 @@ class AdminController extends Controller
         $this->checkAdminRole();
         
         $product = Product::findOrFail($id);
-        $product->update(['status' => 'active']);
+        $product->update(['is_active' => true]);
 
         return redirect()->back()->with('success', 'Product approved successfully.');
     }
@@ -111,7 +111,7 @@ class AdminController extends Controller
         $this->checkAdminRole();
         
         $product = Product::findOrFail($id);
-        $product->update(['status' => 'rejected']);
+        $product->update(['is_active' => false]);
 
         return redirect()->back()->with('success', 'Product rejected successfully.');
     }

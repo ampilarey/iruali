@@ -55,12 +55,12 @@
                                     <div class="text-sm text-gray-900">${{ number_format($product->price ?? 0, 2) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($product->status ?? 'inactive') === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ ucfirst($product->status ?? 'inactive') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($product->is_active ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ ($product->is_active ?? false) ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    @if(($product->status ?? 'inactive') !== 'active')
+                                    @if(!($product->is_active ?? false))
                                     <form method="POST" action="{{ route('admin.products.approve', $product->id) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900 mr-2">Approve</button>

@@ -29,10 +29,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     // Public routes
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/shop', [ShopController::class, 'index'])->name('shop');
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-    Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/products', [\App\Http\Controllers\Customer\ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product}', [\App\Http\Controllers\Customer\ProductController::class, 'show'])->name('products.show');
+    Route::get('/categories', [\App\Http\Controllers\Customer\CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     // Authentication routes

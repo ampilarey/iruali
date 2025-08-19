@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CSS Test Page</title>
-    <link rel="stylesheet" href="{{ asset('build/assets/app-6rYAPRRz.css') }}">
+    @vite(['resources/css/app.css'])
 </head>
 <body>
     <div class="bg-primary text-white text-center py-4 px-6">

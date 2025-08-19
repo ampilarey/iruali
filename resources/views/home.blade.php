@@ -166,7 +166,8 @@
                             'reviews_count' => 128,
                             'stock_quantity' => 25,
                             'flash_sale' => true,
-                            'category' => (object)['name' => 'Electronics']
+                            'category' => (object)['name' => 'Electronics'],
+                            'image' => '/images/products/headphones.svg'
                         ],
                         [
                             'name' => 'Premium Cotton T-Shirt',
@@ -178,7 +179,8 @@
                             'stock_quantity' => 50,
                             'flash_sale' => false,
                             'is_new' => true,
-                            'category' => (object)['name' => 'Fashion']
+                            'category' => (object)['name' => 'Fashion'],
+                            'image' => '/images/products/denim-jacket.svg'
                         ],
                         [
                             'name' => 'Smart Fitness Watch',
@@ -189,7 +191,8 @@
                             'reviews_count' => 256,
                             'stock_quantity' => 15,
                             'flash_sale' => true,
-                            'category' => (object)['name' => 'Electronics']
+                            'category' => (object)['name' => 'Electronics'],
+                            'image' => '/images/products/smartphone.svg'
                         ],
                         [
                             'name' => 'Organic Coffee Beans',
@@ -200,7 +203,8 @@
                             'reviews_count' => 342,
                             'stock_quantity' => 100,
                             'flash_sale' => false,
-                            'category' => (object)['name' => 'Food & Beverage']
+                            'category' => (object)['name' => 'Food & Beverage'],
+                            'image' => '/images/products/coffee-table.svg'
                         ],
                         [
                             'name' => 'Professional Camera Lens',
@@ -211,7 +215,8 @@
                             'reviews_count' => 67,
                             'stock_quantity' => 8,
                             'flash_sale' => true,
-                            'category' => (object)['name' => 'Electronics']
+                            'category' => (object)['name' => 'Electronics'],
+                            'image' => '/images/products/camera.svg'
                         ]
                     ];
                 @endphp
@@ -219,7 +224,7 @@
                 @foreach($fallbackProducts as $product)
                     <div class="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
                         <div class="relative aspect-square overflow-hidden bg-gray-50">
-                            <img src="/images/product-placeholder.svg" alt="Product" class="w-full h-48 object-cover rounded-lg">
+                            <img src="{{ $product['image'] ?? '/images/product-placeholder.svg' }}" alt="{{ $product['name'] }}" class="w-full h-48 object-cover rounded-lg">
                             
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
                                 <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex space-x-2">

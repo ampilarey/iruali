@@ -129,4 +129,8 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
     Route::get('/test-images', function () {
         return view('test-images');
     });
+
+
+
+
 });

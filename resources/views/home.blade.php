@@ -1,24 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Debug styles to ensure images are visible -->
-<style>
-    .product-image {
-        width: 100%;
-        height: 256px;
-        object-fit: contain;
-        background-color: #f9fafb;
-        padding: 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.5rem;
-    }
-    .product-image:hover {
-        border-color: #10b981;
-        transform: scale(1.05);
-        transition: all 0.3s ease;
-    }
-</style>
-
 <!-- Hero Section -->
 <section class="bg-gradient-to-r from-primary-50 to-accent-50 py-16">
     <div class="container mx-auto px-4 text-center">
@@ -47,10 +29,10 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             <!-- Product 1: Headphones -->
             <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative">
+                <div class="relative p-4 bg-gray-50">
                     <img src="/images/products/headphones.svg" 
                          alt="Wireless Bluetooth Headphones" 
-                         class="product-image">
+                         class="w-full h-64 object-contain mx-auto block">
                     <div class="absolute top-2 left-2">
                         <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
                     </div>
@@ -74,10 +56,10 @@
 
             <!-- Product 2: T-Shirt -->
             <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative">
+                <div class="relative p-4 bg-gray-50">
                     <img src="/images/products/denim-jacket.svg" 
                          alt="Premium Cotton T-Shirt" 
-                         class="product-image">
+                         class="w-full h-64 object-contain mx-auto block">
                     <div class="absolute top-2 left-2">
                         <span class="bg-primary text-white text-xs px-2 py-1 rounded-full font-medium">New</span>
                     </div>
@@ -99,10 +81,10 @@
 
             <!-- Product 3: Smart Watch -->
             <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative">
+                <div class="relative p-4 bg-gray-50">
                     <img src="/images/products/smartphone.svg" 
                          alt="Smart Fitness Watch" 
-                         class="product-image">
+                         class="w-full h-64 object-contain mx-auto block">
                     <div class="absolute top-2 left-2">
                         <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
                     </div>
@@ -126,10 +108,10 @@
 
             <!-- Product 4: Coffee Beans -->
             <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative">
+                <div class="relative p-4 bg-gray-50">
                     <img src="/images/products/coffee-table.svg" 
                          alt="Organic Coffee Beans" 
-                         class="product-image">
+                         class="w-full h-64 object-contain mx-auto block">
                 </div>
                 <div class="p-6">
                     <p class="text-sm text-gray-500 mb-2">Food & Beverage</p>
@@ -148,10 +130,10 @@
 
             <!-- Product 5: Camera Lens -->
             <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative">
+                <div class="relative p-4 bg-gray-50">
                     <img src="/images/products/laptop.svg" 
                          alt="Professional Camera Lens" 
-                         class="product-image">
+                         class="w-full h-64 object-contain mx-auto block">
                     <div class="absolute top-2 left-2">
                         <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
                     </div>
@@ -222,4 +204,18 @@
         </a>
     </div>
 </section>
+
+<!-- Debug Info -->
+<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mx-4 mb-8">
+    <h3 class="text-yellow-800 font-semibold mb-2">🔍 Debug Information</h3>
+    <p class="text-yellow-700 text-sm mb-2">If you can't see the product images above, try these test pages:</p>
+    <div class="flex flex-wrap gap-2">
+        <a href="/test-standalone.html" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
+            Standalone Test
+        </a>
+        <a href="/test-images" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
+            CSS Test
+        </a>
+    </div>
+</div>
 @endsection 

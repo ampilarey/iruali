@@ -107,7 +107,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     });
 
     // Admin routes
-    Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/sellers', [AdminController::class, 'sellers'])->name('sellers');

@@ -27,10 +27,22 @@ class SearchController extends Controller
                   ->orWhereHas('category', function ($categoryQuery) use ($query) {
                       $categoryQuery->where('name', 'like', "%{$query}%");
                   });
-            })
-            ->latest()
-            ->paginate(12);
+            });
 
+        // Apply category filter
+        if ($request->has('category') && $request->category) {
+            $products->where('category_id', $request->category);
+        }
+
+        // Apply price filters
+        if ($request->has('min_price') && $request->min_price) {
+            $products->where('price', '>=', $request->min_price);
+        }
+        if ($request->has('max_price') && $request->max_price) {
+            $products->where('price', '<=', $request->max_price);
+        }
+
+        $products = $products->latest()->paginate(12);
         $categories = Category::active()->root()->get();
 
         $totalResults = $products->total();
@@ -40,6 +52,12 @@ class SearchController extends Controller
 
     public function index(Request $request)
     {
+        // If no search query, show the search form
+        if (!$request->get('q')) {
+            return view('search.index');
+        }
+        
+        // Otherwise, perform the search
         return $this->search($request);
     }
 }

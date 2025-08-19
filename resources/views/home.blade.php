@@ -27,133 +27,38 @@
         <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Featured Products</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <!-- Product 1: Headphones -->
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative p-4 bg-gray-50">
-                    <img src="/images/products/headphones.svg" 
-                         alt="Wireless Bluetooth Headphones" 
-                         class="w-full h-64 object-contain mx-auto block">
-                    <div class="absolute top-2 left-2">
-                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <p class="text-sm text-gray-500 mb-2">Electronics</p>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Wireless Bluetooth Headphones</h3>
-                    <p class="text-sm text-gray-600 mb-4">TechAudio</p>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl font-bold text-gray-900">$89.99</span>
-                            <span class="text-lg text-gray-500 line-through">$129.99</span>
-                        </div>
-                        <span class="text-sm bg-red-100 text-red-600 px-2 py-1 rounded">31% OFF</span>
-                    </div>
-                    <button class="w-full bg-primary hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 2: T-Shirt -->
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative p-4 bg-gray-50">
-                    <img src="/images/products/denim-jacket.svg" 
-                         alt="Premium Cotton T-Shirt" 
-                         class="w-full h-64 object-contain mx-auto block">
-                    <div class="absolute top-2 left-2">
-                        <span class="bg-primary text-white text-xs px-2 py-1 rounded-full font-medium">New</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <p class="text-sm text-gray-500 mb-2">Fashion</p>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Premium Cotton T-Shirt</h3>
-                    <p class="text-sm text-gray-600 mb-4">FashionCo</p>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl font-bold text-gray-900">$24.99</span>
-                        </div>
-                    </div>
-                    <button class="w-full bg-primary hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 3: Smart Watch -->
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative p-4 bg-gray-50">
-                    <img src="/images/products/smartphone.svg" 
-                         alt="Smart Fitness Watch" 
-                         class="w-full h-64 object-contain mx-auto block">
-                    <div class="absolute top-2 left-2">
-                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <p class="text-sm text-gray-500 mb-2">Electronics</p>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Smart Fitness Watch</h3>
-                    <p class="text-sm text-gray-600 mb-4">FitTech</p>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl font-bold text-gray-900">$199.99</span>
-                            <span class="text-lg text-gray-500 line-through">$299.99</span>
-                        </div>
-                        <span class="text-sm bg-red-100 text-red-600 px-2 py-1 rounded">33% OFF</span>
-                    </div>
-                    <button class="w-full bg-primary hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 4: Coffee Beans -->
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative p-4 bg-gray-50">
-                    <img src="/images/products/coffee-table.svg" 
-                         alt="Organic Coffee Beans" 
-                         class="w-full h-64 object-contain mx-auto block">
-                </div>
-                <div class="p-6">
-                    <p class="text-sm text-gray-500 mb-2">Food & Beverage</p>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Organic Coffee Beans</h3>
-                    <p class="text-sm text-gray-600 mb-4">BrewMaster</p>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl font-bold text-gray-900">$19.99</span>
-                        </div>
-                    </div>
-                    <button class="w-full bg-primary hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-
-            <!-- Product 5: Camera Lens -->
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 overflow-hidden">
-                <div class="relative p-4 bg-gray-50">
-                    <img src="/images/products/laptop.svg" 
-                         alt="Professional Camera Lens" 
-                         class="w-full h-64 object-contain mx-auto block">
-                    <div class="absolute top-2 left-2">
-                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <p class="text-sm text-gray-500 mb-2">Electronics</p>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Professional Camera Lens</h3>
-                    <p class="text-sm text-gray-600 mb-4">PhotoPro</p>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl font-bold text-gray-900">$599.99</span>
-                            <span class="text-lg text-gray-500 line-through">$799.99</span>
-                        </div>
-                        <span class="text-sm bg-red-100 text-red-600 px-2 py-1 rounded">25% OFF</span>
-                    </div>
-                    <button class="w-full bg-primary hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
+            @php
+                // Get actual featured products from database
+                $featuredProducts = \App\Models\Product::with(['category', 'mainImage'])
+                    ->active()
+                    ->inStock()
+                    ->featured()
+                    ->take(4)
+                    ->get();
+                    
+                // If no featured products, get some active products
+                if ($featuredProducts->count() == 0) {
+                    $featuredProducts = \App\Models\Product::with(['category', 'mainImage'])
+                        ->active()
+                        ->inStock()
+                        ->latest()
+                        ->take(4)
+                        ->get();
+                }
+            @endphp
+            
+            @foreach($featuredProducts as $product)
+                <x-product-card :product="$product" />
+            @endforeach
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="{{ route('products.index') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-hover transition duration-200">
+                View All Products
+                <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </a>
         </div>
     </div>
 </section>
@@ -205,17 +110,5 @@
     </div>
 </section>
 
-<!-- Debug Info -->
-<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mx-4 mb-8">
-    <h3 class="text-yellow-800 font-semibold mb-2">🔍 Debug Information</h3>
-    <p class="text-yellow-700 text-sm mb-2">If you can't see the product images above, try these test pages:</p>
-    <div class="flex flex-wrap gap-2">
-        <a href="/test-standalone.html" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
-            Standalone Test
-        </a>
-        <a href="/test-images" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm font-medium">
-            CSS Test
-        </a>
-    </div>
-</div>
+
 @endsection 

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <rect width="600" height="600" fill="#F9FAFB"/>
+  <rect x="75" y="75" width="450" height="450" rx="10" fill="#F3F4F6"/>
+  <text x="300" y="300" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#9CA3AF">Product</text>
+  <text x="300" y="340" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#9CA3AF">600x600</text>
+</svg>

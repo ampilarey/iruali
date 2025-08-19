@@ -268,7 +268,7 @@
                         @foreach($fallbackProducts as $product)
                             <div class="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
                                 <div class="relative aspect-square overflow-hidden bg-gray-50">
-                                    <img src="https://via.placeholder.com/400x400?text=Product" 
+                                    <img src="/images/product-placeholder.svg" 
                                          alt="{{ $product['name'] }}" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     

@@ -6,7 +6,7 @@
         @php
             $imageUrl = $product->featured_image ?? 
                        ($product->images && $product->images->count() > 0 ? $product->images->first()->url : null) ?? 
-                       'https://via.placeholder.com/400x400?text=Product';
+                       '/images/product-placeholder.svg';
         @endphp
         <img src="{{ $imageUrl }}" 
              alt="{{ $product->name }}" 

@@ -56,4 +56,35 @@ const iconCheckInterval = setInterval(() => {
         clearInterval(iconCheckInterval);
     }
 }, 100);
+
+// Immediately hide any PNG touch icons
+document.addEventListener('DOMContentLoaded', function() {
+    const touchIcons = document.querySelectorAll('img[src*="apple-touch-icon"], img[src*="precomposed"]');
+    touchIcons.forEach(icon => {
+        icon.style.display = 'none';
+        icon.style.width = '0';
+        icon.style.height = '0';
+        icon.style.maxWidth = '0';
+        icon.style.maxHeight = '0';
+        icon.style.opacity = '0';
+        icon.style.visibility = 'hidden';
+    });
+});
+
+// Also run immediately in case DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM is still loading
+} else {
+    // DOM is already loaded
+    const touchIcons = document.querySelectorAll('img[src*="apple-touch-icon"], img[src*="precomposed"]');
+    touchIcons.forEach(icon => {
+        icon.style.display = 'none';
+        icon.style.width = '0';
+        icon.style.height = '0';
+        icon.style.maxWidth = '0';
+        icon.style.maxHeight = '0';
+        icon.style.opacity = '0';
+        icon.style.visibility = 'hidden';
+    });
+}
 import './notifications';

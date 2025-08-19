@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
-  <rect width="300" height="300" fill="#f8f9fa"/>
-  <rect x="80" y="100" width="140" height="80" rx="10" fill="#ff6b6b"/>
-  <rect x="90" y="110" width="120" height="60" fill="#ff8e8e"/>
-  <text x="150" y="220" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#495057">Yoga Mat</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect x="20" y="30" width="60" height="40" rx="5" fill="#10B981"/>
+  <rect x="25" y="35" width="50" height="30" rx="3" fill="#34D399"/>
+  <circle cx="35" cy="45" r="2" fill="#059669"/>
+  <circle cx="65" cy="45" r="2" fill="#059669"/>
+  <circle cx="50" cy="55" r="2" fill="#059669"/>
+  <rect x="30" y="60" width="40" height="3" fill="#059669"/>
 </svg>

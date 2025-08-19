@@ -117,4 +117,22 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     });
+
+    // Handle old icon requests to prevent 404s
+    Route::get('/apple-touch-icon.png', function() {
+        return response('', 404);
+    });
+
+    Route::get('/apple-touch-icon-precomposed.png', function() {
+        return response('', 404);
+    });
+
+    // Block any other icon variations
+    Route::get('/apple-touch-icon{size}.png', function() {
+        return response('', 404);
+    })->where('size', '.*');
+
+    Route::get('/apple-touch-icon-precomposed{size}.png', function() {
+        return response('', 404);
+    })->where('size', '.*');
 });

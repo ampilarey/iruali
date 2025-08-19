@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="relative">
-                <img src="https://via.placeholder.com/600x400?text=Hero+Image" alt="Featured Products" class="rounded-lg shadow-lg">
+                <img src="/images/hero-placeholder.svg" alt="Featured Products" class="rounded-lg shadow-lg">
                 <div class="absolute -bottom-4 -left-4 bg-white rounded-lg shadow-lg p-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -219,9 +219,7 @@
                 @foreach($fallbackProducts as $product)
                     <div class="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
                         <div class="relative aspect-square overflow-hidden bg-gray-50">
-                            <img src="https://via.placeholder.com/400x400?text=Product" 
-                                 alt="{{ $product['name'] }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="/images/product-placeholder.svg" alt="Product" class="w-full h-48 object-cover rounded-lg">
                             
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
                                 <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex space-x-2">

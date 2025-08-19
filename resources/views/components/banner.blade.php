@@ -2,7 +2,7 @@
 
 <div class="relative overflow-hidden rounded-lg shadow-lg">
     <!-- Banner Image -->
-    <img src="{{ $banner->image ?? 'https://via.placeholder.com/1200x400?text=Banner' }}" 
+    <img src="{{ $banner->image ?? '/images/banner-placeholder.svg' }}" 
          alt="{{ $banner->title ?? 'Promotional Banner' }}" 
          class="w-full h-full object-cover">
     

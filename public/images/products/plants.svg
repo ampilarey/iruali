@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
-  <rect width="300" height="300" fill="#f8f9fa"/>
-  <circle cx="150" cy="200" r="40" fill="#8b4513"/>
-  <circle cx="150" cy="160" r="30" fill="#228b22"/>
-  <circle cx="150" cy="120" r="20" fill="#32cd32"/>
-  <text x="150" y="260" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#495057">Indoor Plants</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="70" r="15" fill="#8B4513"/>
+  <ellipse cx="50" cy="60" rx="20" ry="25" fill="#228B22"/>
+  <ellipse cx="45" cy="55" rx="8" ry="12" fill="#32CD32"/>
+  <ellipse cx="55" cy="50" rx="10" ry="15" fill="#228B22"/>
+  <ellipse cx="40" cy="45" rx="6" ry="10" fill="#32CD32"/>
+  <ellipse cx="60" cy="40" rx="8" ry="12" fill="#228B22"/>
 </svg>

@@ -26,7 +26,7 @@
                     @php
                         $mainImageUrl = $product->featured_image ?? 
                                        ($product->images && $product->images->count() > 0 ? $product->images->first()->url : null) ?? 
-                                       'https://via.placeholder.com/600x600?text=Product';
+                                       '/images/product-detail-placeholder.svg';
                     @endphp
                     <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 mb-4">
                         <img id="main-image" 
@@ -401,7 +401,7 @@
                 @foreach($relatedProducts as $relatedProduct)
                     <div class="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
                         <div class="relative aspect-square overflow-hidden bg-gray-50">
-                            <img src="https://via.placeholder.com/400x400?text=Related" 
+                            <img src="/images/product-placeholder.svg" 
                                  alt="{{ $relatedProduct['name'] }}" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             

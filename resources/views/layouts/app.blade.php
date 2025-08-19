@@ -4,10 +4,146 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Explicitly prevent apple-touch-icon usage -->
+    <meta name="apple-mobile-web-app-capable" content="no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="">
 
     <!-- Favicon and Touch Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v={{ time() }}">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" type="image/x-icon" href="/favicon.svg?v={{ time() }}">
+    <link rel="shortcut icon" href="/favicon.svg?v={{ time() }}">
+    <link rel="manifest" href="/site.webmanifest?v={{ time() }}">
+
+    <style>
+        /* Immediate icon hiding - runs before main CSS loads */
+        img[src*="apple-touch-icon"],
+        img[src*="precomposed"],
+        img[width="180"],
+        img[height="180"],
+        img[width="152"],
+        img[height="152"],
+        img[width="144"],
+        img[height="144"] {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            max-width: 0 !important;
+            max-height: 0 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+    </style>
+
+    <script>
+        // Register service worker to block icon requests
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/icon-blocker.js')
+                .then(function(registration) {
+                    console.log('Icon Blocker Service Worker registered:', registration);
+                })
+                .catch(function(error) {
+                    console.log('Icon Blocker Service Worker registration failed:', error);
+                });
+        }
+        
+        // Immediate icon hiding - runs before main JS loads
+        (function() {
+            function hideLargeIcons() {
+                const icons = document.querySelectorAll('img[src*="apple-touch-icon"], img[src*="precomposed"], img[width="180"], img[height="180"], img[width="152"], img[height="152"], img[width="144"], img[height="144"]');
+                icons.forEach(icon => {
+                    icon.style.display = 'none';
+                    icon.style.width = '0';
+                    icon.style.height = '0';
+                    icon.style.maxWidth = '0';
+                    icon.style.maxHeight = '0';
+                    icon.style.opacity = '0';
+                    icon.style.visibility = 'hidden';
+                });
+            }
+            
+            // Run immediately
+            hideLargeIcons();
+            
+            // Run again when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', hideLargeIcons);
+            }
+            
+            // Run repeatedly for the first few seconds
+            let count = 0;
+            const interval = setInterval(() => {
+                hideLargeIcons();
+                count++;
+                if (count >= 20) clearInterval(interval);
+            }, 100);
+            
+            // Intercept and prevent requests to old icon files
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+                if (typeof url === 'string' && (url.includes('apple-touch-icon') || url.includes('precomposed'))) {
+                    console.log('Blocked request to:', url);
+                    return Promise.resolve(new Response('', { status: 200 }));
+                }
+                return originalFetch.apply(this, arguments);
+            };
+            
+            // Also intercept XMLHttpRequest
+            const originalXHROpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url, ...args) {
+                if (typeof url === 'string' && (url.includes('apple-touch-icon') || url.includes('precomposed'))) {
+                    console.log('Blocked XHR request to:', url);
+                    this.abort();
+                    return;
+                }
+                return originalXHROpen.apply(this, [method, url, ...args]);
+            };
+            
+            // Debug: Log all link tags to see what's being generated
+            setTimeout(() => {
+                const allLinks = document.querySelectorAll('link');
+                console.log('All link tags found:', allLinks.length);
+                allLinks.forEach((link, index) => {
+                    console.log(`Link ${index}:`, {
+                        rel: link.rel,
+                        href: link.href,
+                        type: link.type,
+                        sizes: link.sizes
+                    });
+                });
+                
+                // Also check for any img tags that might be large icons
+                const allImages = document.querySelectorAll('img');
+                console.log('All img tags found:', allImages.length);
+                allImages.forEach((img, index) => {
+                    if (img.src.includes('apple-touch-icon') || img.src.includes('precomposed')) {
+                        console.log(`Large icon img found:`, {
+                            src: img.src,
+                            width: img.width,
+                            height: img.height,
+                            naturalWidth: img.naturalWidth,
+                            naturalHeight: img.naturalHeight
+                        });
+                    }
+                });
+                
+                // Log all network requests to identify icon sources
+                console.log('=== NETWORK REQUEST DEBUG ===');
+                const observer = new PerformanceObserver((list) => {
+                    list.getEntries().forEach((entry) => {
+                        if (entry.name.includes('favicon') || entry.name.includes('apple-touch-icon') || entry.name.includes('precomposed')) {
+                            console.log('Icon request detected:', entry.name, entry.entryType);
+                        }
+                    });
+                });
+                observer.observe({ entryTypes: ['resource'] });
+            }, 1000);
+        })();
+    </script>
 
     <x-seo-meta :seo="$seo ?? null" />
 
@@ -16,7 +152,7 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
 
     <!-- Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'], 'build')
     
     @stack('styles')
 </head>

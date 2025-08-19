@@ -1,6 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../views/**/*.{php,blade.php}";
+@source "../js/**/*.{js,ts,jsx,tsx}";
 
 /* Custom animations */
 @keyframes bounce-gentle {
@@ -120,22 +121,44 @@ img[src*="precomposed"] {
   display: none !important;
 }
 
-/* Force all icon-related images to be small */
+/* Aggressive hiding of any large images that might be icons */
 img[width="180"],
 img[height="180"],
 img[width="152"],
-img[height="152"] {
+img[height="152"],
+img[width="144"],
+img[height="144"],
+img[width="120"],
+img[height="120"],
+img[width="114"],
+img[height="114"],
+img[width="96"],
+img[height="96"],
+img[width="72"],
+img[height="72"] {
+  display: none !important;
   max-width: 32px !important;
   max-height: 32px !important;
-  width: auto !important;
-  height: auto !important;
+  width: 32px !important;
+  height: 32px !important;
 }
 
-/* Aggressive favicon sizing - prevent any large icons */
+/* Hide any images with large dimensions in their filename */
+img[src*="180x180"],
+img[src*="152x152"],
+img[src*="144x144"],
+img[src*="120x120"],
+img[src*="114x114"],
+img[src*="96x96"],
+img[src*="72x72"] {
+  display: none !important;
+}
+
+/* Force all icon-related images to be small */
+img[src*="icon"],
+img[src*="touch"],
 img[src*="favicon"],
-img[src*="touch-icon"],
-img[src*="og-image"],
-img[src*="apple-touch"] {
+img[src*="apple"] {
   max-width: 32px !important;
   max-height: 32px !important;
   width: 32px !important;
@@ -143,14 +166,63 @@ img[src*="apple-touch"] {
   object-fit: contain !important;
 }
 
-/* Hide any images that might be displayed as large icons */
+/* EXTREMELY AGGRESSIVE ICON HIDING - Hide ANY large images */
 img[width="180"],
 img[height="180"],
 img[width="152"],
 img[height="152"],
 img[width="144"],
-img[height="144"] {
+img[height="144"],
+img[width="120"],
+img[height="120"],
+img[width="114"],
+img[height="114"],
+img[width="96"],
+img[height="96"],
+img[width="72"],
+img[height="72"],
+img[width="60"],
+img[height="60"],
+img[width="48"],
+img[height="48"],
+img[width="32"],
+img[height="32"] {
   display: none !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
+
+/* Hide any images with large dimensions in their filename */
+img[src*="180x180"],
+img[src*="152x152"],
+img[src*="144x144"],
+img[src*="120x120"],
+img[src*="114x114"],
+img[src*="96x96"],
+img[src*="72x72"],
+img[src*="60x60"],
+img[src*="48x48"],
+img[src*="32x32"] {
+  display: none !important;
+}
+
+/* Hide any images that might be icons based on their path */
+img[src*="/apple-touch-icon"],
+img[src*="/favicon"],
+img[src*="/icon"],
+img[src*="/touch"] {
+  display: none !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Button styles */

@@ -2,7 +2,7 @@ import './bootstrap';
 
 // Prevent large icons from being displayed
 document.addEventListener('DOMContentLoaded', function() {
-    // Find and resize any large icons
+    // Find and resize any large icons (but not product images)
     const icons = document.querySelectorAll('img[src*="favicon"], img[src*="touch-icon"], img[src*="og-image"]');
     icons.forEach(icon => {
         icon.style.maxWidth = '32px';
@@ -17,13 +17,16 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.style.display = 'none';
     });
     
-    // Force resize any large images
+    // Force resize any large images (but not product images)
     const largeImages = document.querySelectorAll('img[width="180"], img[height="180"], img[width="152"], img[height="152"]');
     largeImages.forEach(img => {
-        img.style.maxWidth = '32px';
-        img.style.maxHeight = '32px';
-        img.style.width = 'auto';
-        img.style.height = 'auto';
+        // Don't hide product images
+        if (!img.src.includes('images/products/')) {
+            img.style.maxWidth = '32px';
+            img.style.maxHeight = '32px';
+            img.style.width = 'auto';
+            img.style.height = 'auto';
+        }
     });
 });
 
@@ -41,14 +44,17 @@ if (document.readyState === 'loading') {
     });
 }
 
-// Aggressive icon hiding - run every 100ms for the first 5 seconds
+// Aggressive icon hiding - run every 100ms for the first 5 seconds (but not product images)
 let iconCheckCount = 0;
 const iconCheckInterval = setInterval(() => {
     const largeImages = document.querySelectorAll('img[width="180"], img[height="180"], img[width="152"], img[height="152"], img[width="144"], img[height="144"]');
     largeImages.forEach(img => {
-        img.style.display = 'none';
-        img.style.maxWidth = '32px';
-        img.style.maxHeight = '32px';
+        // Don't hide product images
+        if (!img.src.includes('images/products/')) {
+            img.style.display = 'none';
+            img.style.maxWidth = '32px';
+            img.style.maxHeight = '32px';
+        }
     });
     
     iconCheckCount++;
@@ -87,4 +93,5 @@ if (document.readyState === 'loading') {
         icon.style.visibility = 'hidden';
     });
 }
+
 import './notifications';

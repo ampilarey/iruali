@@ -36,8 +36,8 @@ class AppServiceProvider extends ServiceProvider
             $view->with('seo', $seo);
         });
 
-        // Register custom Vite configuration for cPanel deployment
-        $this->app->register(\App\Providers\ViteServiceProvider::class);
+        // Temporarily disabled for debugging
+        // $this->app->register(\App\Providers\ViteServiceProvider::class);
     }
 
     /**

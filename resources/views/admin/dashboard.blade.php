@@ -1,21 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Debug Info -->
-<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
-    <p><strong>Debug Info:</strong></p>
-    <p>Total Users: {{ $stats['total_users'] ?? 'N/A' }}</p>
-    <p>Total Products: {{ $stats['total_products'] ?? 'N/A' }}</p>
-    <p>Total Orders: {{ $stats['total_orders'] ?? 'N/A' }}</p>
-    <p>Total Sellers: {{ $stats['total_sellers'] ?? 'N/A' }}</p>
-    <p>Pending Sellers: {{ $stats['pending_sellers'] ?? 'N/A' }}</p>
-    <p>Pending Products: {{ $stats['pending_products'] ?? 'N/A' }}</p>
-    <p>Recent Users Count: {{ count($recent_users ?? []) }}</p>
-    <p>Recent Orders Count: {{ count($recent_orders ?? []) }}</p>
-    <p>Raw Stats: {{ print_r($stats ?? [], true) }}</p>
-    <p>Raw Recent Users: {{ print_r($recent_users ?? [], true) }}</p>
-    <p>Raw Recent Orders: {{ print_r($recent_orders ?? [], true) }}</p>
-</div>
+
 <div class="min-h-screen bg-gray-100">
     <!-- Header -->
     <div class="bg-white shadow">

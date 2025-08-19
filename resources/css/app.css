@@ -78,20 +78,7 @@
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
-/* Icon sizing fixes */
-link[rel="icon"],
-link[rel="apple-touch-icon"] {
-  max-width: 32px;
-  max-height: 32px;
-}
-
-/* Ensure favicon is properly sized */
-link[rel="icon"][type="image/x-icon"] {
-  max-width: 16px;
-  max-height: 16px;
-}
-
-/* Prevent large favicon display */
+/* Favicon and icon sizing */
 .favicon {
   width: 16px;
   height: 16px;

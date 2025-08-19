@@ -117,4 +117,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     });
+    
+    // CSS Test route
+    Route::get('/test-css', function () {
+        return view('test-css');
+    });
 });

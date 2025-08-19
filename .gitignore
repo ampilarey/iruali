@@ -53,8 +53,8 @@ yarn-error.log*
 *.tgz
 .yarn-integrity
 
-# Build artifacts
-/public/build
+# Build artifacts (included for cPanel deployment)
+# /public/build
 /public/mix-manifest.json
 /public/hot
 /public/css
@@ -186,6 +186,6 @@ tests/coverage/
 *.tmp
 *.temp
 
-# Deployment files (should be in deployment tools, not source control)
-deploy-*.sh
-update-*.sh
+# Deployment files (included for cPanel deployment)
+# deploy-*.sh
+# update-*.sh

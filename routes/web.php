@@ -115,6 +115,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+        Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('admin.sellers.approve');
+        Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('admin.products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     });
     

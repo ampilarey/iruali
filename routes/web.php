@@ -122,4 +122,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/test-css', function () {
         return view('test-css');
     });
+    
+    // Image Test route
+    Route::get('/test-images', function () {
+        return view('test-images');
+    });
 });

@@ -47,7 +47,7 @@ class CartService
     /**
      * Add a product to cart
      */
-    public function addToCart(int $productId, int $quantity, ?int $variantId = null): bool
+    public function addToCart(int $productId, int $quantity): bool
     {
         $cart = $this->getOrCreateCart();
         $product = Product::findOrFail($productId);
@@ -55,7 +55,6 @@ class CartService
         // Check if product is already in cart
         $existingItem = $cart->items()
             ->where('product_id', $productId)
-            ->where('product_variant_id', $variantId)
             ->first();
 
         if ($existingItem) {
@@ -67,7 +66,7 @@ class CartService
                 'product_id' => $productId,
                 'product_variant_id' => $variantId,
                 'quantity' => $quantity,
-                'price' => $product->final_price
+                'price' => $product->price
             ]);
         }
 

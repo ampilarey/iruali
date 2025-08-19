@@ -27,7 +27,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = $this->cartService->getOrCreateCart();
-        $cart->load('items.product.mainImage');
+        $cart->load('items.product');
         
         $cartSummary = $this->cartService->getCartSummary($cart);
         
@@ -42,15 +42,13 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'variant_id' => 'nullable|exists:product_variants,id'
+            'quantity' => 'required|integer|min:1'
         ]);
 
         $product = Product::find($request->product_id);
         $this->cartService->addToCart(
             $request->product_id,
-            $request->quantity,
-            $request->variant_id
+            $request->quantity
         );
 
         NotificationService::addedToCart($product->name);

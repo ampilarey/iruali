@@ -216,7 +216,7 @@
                             'stock_quantity' => 8,
                             'flash_sale' => true,
                             'category' => (object)['name' => 'Electronics'],
-                            'image' => '/images/products/camera.svg'
+                            'image' => '/images/products/laptop.svg'
                         ]
                     ];
                 @endphp

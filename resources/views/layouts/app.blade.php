@@ -29,8 +29,8 @@
         </div>
     </div>
 
-    <!-- Sticky Header -->
-    <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+    <!-- Sticky Header (desktop only — mobile uses the fixed header below) -->
+    <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 hidden lg:block">
         <!-- Main Header -->
         <div class="bg-white">
             <div class="container mx-auto px-4">

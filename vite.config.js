@@ -19,5 +19,6 @@ export default defineConfig({
             },
         },
     },
-    base: process.env.NODE_ENV === 'production' ? '/iruali/public/' : '/',
+    // Domain-root deploy (iruali.mv / test.iruali.mv). Use '/subdir/' only if hosted under a path.
+    base: '/',
 });

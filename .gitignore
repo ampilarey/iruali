@@ -14,7 +14,7 @@ npm-debug.log
 .DS_Store
 /public/hot
 /public/mix-manifest.json
-/public/build
+# public/build is tracked so cPanel Git deploys include Vite assets
 /.vscode
 /.history
 
@@ -138,9 +138,8 @@ jspm_packages/
 .nuxt
 dist
 
-# Gatsby files
+# Gatsby files (do NOT ignore Laravel's public/ directory)
 .cache/
-public
 
 # Storybook build outputs
 .out

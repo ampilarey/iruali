@@ -244,8 +244,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="min-h-screen pt-0 lg:pt-0">
+    <!-- Main Content (top padding clears fixed mobile header: logo row + search) -->
+    <main class="min-h-screen pt-28 lg:pt-0">
         @yield('content')
     </main>
 

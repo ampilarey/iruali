@@ -22,6 +22,13 @@
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-background text-dark">
+    <!-- TEST AUTO-DEPLOY BANNER (remove after verifying test.iruali.mv deploy) -->
+    <div class="bg-red-600 text-white text-center py-3 px-4 text-sm font-bold tracking-wide">
+        <div class="container mx-auto">
+            <span>TEST AUTO-DEPLOY LIVE — test.iruali.mv</span>
+        </div>
+    </div>
+
     <!-- Top Banner -->
     <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
         <div class="container mx-auto">

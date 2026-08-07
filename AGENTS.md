@@ -11,7 +11,7 @@ This is a **Laravel 12 (PHP 8.2+) multi-vendor e-commerce app** ("Iruali") with 
 
 ### Environment gotchas (non-obvious)
 - **`.env.example` contains an unresolved git merge conflict.** Do not `cp .env.example .env` blindly. A working local dev `.env` (SQLite, `APP_ENV=local`, `APP_DEBUG=true`, `APP_URL=http://localhost:8000`) is created during environment setup; it is gitignored and persists in the VM snapshot.
-- **The entire `public/` directory is gitignored** (`.gitignore` line ~143 `public`), so `public/index.php` / `public/.htaccess` are **not** in the repo. They are recreated during environment setup (standard Laravel 12 front controller). If `public/index.php` is missing, `php artisan serve` returns 404 for everything — recreate it.
+- **`public/index.php`, `public/.htaccess`, and `public/build/` are tracked** (needed for cPanel Git deploys). A leftover Gatsby-style `public` ignore used to drop the whole folder from Git, which caused production `ViteManifestNotFoundException` on iruali.mv — that ignore is removed. Still ignored: `public/hot`, `public/storage`. After frontend changes, run `npm run build` (runs `fix-manifest.sh` to copy `.vite/manifest.json` → `build/manifest.json`) and commit `public/build/`.
 - Runtime dirs `storage/framework/{cache,sessions,views}` and `storage/app/public` are not tracked and are created during setup. Run `php artisan storage:link` after they exist.
 - **Dev database is SQLite** at `database/database.sqlite` (gitignored). Recreate with `touch database/database.sqlite` then `php artisan migrate --seed`. Seeders create an admin user `admin@example.com` / `password` plus sample categories/products/islands.
 

@@ -77,4 +77,35 @@ php artisan migrate --force \
   && php artisan view:clear \
   || { echo "$(date '+%F %T') Laravel deploy steps failed"; exit 1; }
 
+# cPanel docroot is a separate folder (not ~/test/public). Sync built assets so
+# CSS/JS updates actually go live. Path matches DomainInfo documentroot.
+DOCROOT="${DEPLOY_TEST_DOCROOT:-/home/iruali/home/iruali/test.iruali.mv}"
+if [[ -d "$DOCROOT" && -d "$ROOT/public/build" ]]; then
+  mkdir -p "$DOCROOT/build" "$DOCROOT/images"
+  cp -a "$ROOT/public/build/." "$DOCROOT/build/"
+  if [[ -d "$ROOT/public/images" ]]; then
+    cp -a "$ROOT/public/images/." "$DOCROOT/images/"
+  fi
+  # Keep front controller pointing at the app in ~/test
+  cat > "$DOCROOT/index.php" <<'PHP'
+<?php
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+define('LARAVEL_START', microtime(true));
+if (file_exists($maintenance = '/home/iruali/test/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+require '/home/iruali/test/vendor/autoload.php';
+/** @var Application $app */
+$app = require_once '/home/iruali/test/bootstrap/app.php';
+$app->handleRequest(Request::capture());
+PHP
+  if [[ -f "$ROOT/public/.htaccess" ]]; then
+    cp -a "$ROOT/public/.htaccess" "$DOCROOT/.htaccess"
+  fi
+  echo "$(date '+%F %T') synced public build -> $DOCROOT"
+else
+  echo "$(date '+%F %T') WARN: skip docroot sync (DOCROOT=$DOCROOT)"
+fi
+
 echo "$(date '+%F %T') deploy complete: ${REMOTE:0:8}"

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\TestDeployWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,4 +91,9 @@ Route::get('/health', function () {
         'timestamp' => now(),
         'version' => '1.0.0'
     ]);
-}); 
+});
+
+// TEST-only immediate deploy trigger (GitHub Actions → cPanel). Disabled when
+// TEST_DEPLOY_WEBHOOK_SECRET is unset; always 404 on non-test hosts.
+Route::post('/deploy/test-pull', TestDeployWebhookController::class)
+    ->middleware('throttle:10,1'); 

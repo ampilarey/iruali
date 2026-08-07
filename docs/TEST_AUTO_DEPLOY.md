@@ -14,7 +14,21 @@ On every push to `main`, workflow **Deploy TEST (immediate)** runs
 
 Typical delay: under a minute after the push.
 
-Cron is only a fallback if the webhook fails (e.g. DNS/SSL hiccup).
+Cron is **only a fallback** if the webhook fails (e.g. DNS/SSL/Imunify360 hiccup).
+The intended order is always: **1) GitHub Action webhook → 2) cron**.
+
+### Imunify360 (required on this host)
+
+GitHub Actions was blocked with:
+
+`Access denied by Imunify360 bot-protection. IPs used for automation should be whitelisted`
+
+Until that is fixed, only cron deploys. Fix one of:
+
+1. **cPanel → Imunify360 → Firewall → White List**  
+   Add GitHub Actions IP ranges from https://api.github.com/meta (`actions` key), **or** ask your host/WHM admin to whitelist them.
+2. **Or** disable / exclude bot-protection (WebShield) for `test.iruali.mv`, especially path `/api/deploy/test-pull`.
+3. Re-run **Actions → Deploy TEST (immediate) → Re-run jobs** and confirm HTTP **202**.
 
 ## One-time setup
 

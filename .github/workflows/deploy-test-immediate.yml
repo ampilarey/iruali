@@ -27,12 +27,15 @@ jobs:
             exit 1
           fi
 
+          # If Imunify360 bot-protection returns 403, whitelist GitHub Actions
+          # (or disable webshield for /api/deploy/*) — see docs/TEST_AUTO_DEPLOY.md
           for attempt in 1 2 3 4 5 6; do
             code=$(curl -sS -o /tmp/deploy-webhook.json -w "%{http_code}" \
               -X POST "https://test.iruali.mv/api/deploy/test-pull" \
               -H "Authorization: Bearer ${DEPLOY_SECRET}" \
               -H "Content-Type: application/json" \
               -H "Accept: application/json" \
+              -H "User-Agent: Iruali-Test-Deploy/1.0 (+GitHubActions)" \
               -d "{\"sha\":\"${GITHUB_SHA}\"}")
             echo "Attempt ${attempt}: HTTP ${code}"
             cat /tmp/deploy-webhook.json || true
@@ -41,10 +44,13 @@ jobs:
               echo "TEST deploy triggered for ${GITHUB_SHA}"
               exit 0
             fi
+            if [ "$code" = "403" ] && grep -qi 'Imunify360' /tmp/deploy-webhook.json 2>/dev/null; then
+              echo "::error::Imunify360 blocked GitHub Actions (403). Whitelist automation IPs or allow /api/deploy/test-pull — cron remains fallback."
+            fi
             sleep 5
           done
 
-          echo "::error::Webhook deploy failed after retries"
+          echo "::error::Webhook deploy failed after retries (hook is primary; cron is fallback only)"
           exit 1
 
       - name: Brief smoke (homepage + health)

@@ -24,7 +24,7 @@
 <body class="font-sans antialiased bg-background text-dark">
     <!-- Top Banner -->
     <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
-        <div class="container mx-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <span>🎉 Free Shipping on Orders Over $49 | Expert Support Available 24/7</span>
         </div>
     </div>
@@ -33,7 +33,7 @@
     <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 hidden lg:block">
         <!-- Main Header -->
         <div class="bg-white">
-            <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <div class="flex items-center">
@@ -135,7 +135,7 @@
 
         <!-- Mega Menu -->
         <nav class="bg-gray-50 border-b border-gray-200">
-            <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center space-x-8 h-12">
                     <a href="{{ route('home') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
                         Home
@@ -251,7 +251,7 @@
 
     <!-- Footer -->
     <footer class="bg-footer text-white">
-        <div class="container mx-auto px-4 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Company Info -->
                 <div>
@@ -322,7 +322,7 @@
 
         <!-- Bottom Footer -->
         <div class="border-t border-gray-700">
-            <div class="container mx-auto px-4 py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <p class="text-gray-300 text-sm">&copy; 2024 iruali. All rights reserved.</p>
                     <div class="flex space-x-6 mt-4 md:mt-0">

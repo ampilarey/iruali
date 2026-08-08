@@ -24,7 +24,7 @@
              }">
             <div class="p-4">
                 <div class="flex items-start">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <!-- Success Icon -->
                         <svg x-show="notification.type === 'success'" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -50,7 +50,7 @@
                         <p x-text="notification.title" class="text-sm font-medium text-gray-900"></p>
                         <p x-text="notification.message" class="mt-1 text-sm text-gray-500"></p>
                     </div>
-                    <div class="ml-4 flex-shrink-0 flex">
+                    <div class="ml-4 shrink-0 flex">
                         <button 
                             @click="hideNotification()"
                             class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

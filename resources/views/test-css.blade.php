@@ -12,7 +12,7 @@
         <p class="text-lg mt-2">If you see this styled, CSS is working!</p>
     </div>
     
-    <div class="container mx-auto mt-8 p-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div class="bg-white shadow-sm border rounded-lg p-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Test Elements</h2>
             

@@ -3,7 +3,7 @@
 @section('content')
 <!-- Hero Section -->
 <section class="bg-gradient-to-r from-primary-50 to-accent-50 py-16">
-    <div class="container mx-auto px-4 text-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Welcome to <span class="text-primary">iruali</span>
         </h1>
@@ -23,7 +23,7 @@
 
 <!-- Featured Products Section -->
 <section class="py-16 bg-white">
-    <div class="container mx-auto px-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Featured Products</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -65,7 +65,7 @@
 
 <!-- Features Section -->
 <section class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Why Choose iruali?</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center">
@@ -101,7 +101,7 @@
 
 <!-- CTA Section -->
 <section class="py-16 bg-primary">
-    <div class="container mx-auto px-4 text-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">Ready to Start Shopping?</h2>
         <p class="text-xl text-primary-100 mb-8">Join thousands of satisfied customers who trust iruali for their shopping needs.</p>
         <a href="{{ route('shop') }}" class="bg-white hover:bg-gray-100 text-primary px-8 py-3 rounded-lg text-lg font-semibold transition-colors inline-block">

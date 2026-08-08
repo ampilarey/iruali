@@ -24,7 +24,7 @@
 <body class="font-sans antialiased bg-background text-dark">
     <!-- Top Banner -->
     <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
-        <div class="container mx-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <span>🎉 Free Shipping on Orders Over $49 | Expert Support Available 24/7</span>
         </div>
     </div>
@@ -33,7 +33,7 @@
     <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 hidden lg:block">
         <!-- Main Header -->
         <div class="bg-white">
-            <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <div class="flex items-center">
@@ -135,7 +135,7 @@
 
         <!-- Mega Menu -->
         <nav class="bg-gray-50 border-b border-gray-200">
-            <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center space-x-8 h-12">
                     <a href="{{ route('home') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
                         Home
@@ -161,7 +161,7 @@
     </header>
 
     <!-- Mobile Header (Hidden on Desktop) -->
-    <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-100">
+    <div class="lg:hidden sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
         <div class="flex items-center justify-between px-4 py-3">
             <button id="mobile-menu-button" class="text-dark hover:text-primary transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,7 +200,7 @@
     </div>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden">
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden">
         <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out -translate-x-full" id="mobile-menu">
             <div class="flex items-center justify-between p-4 border-b border-gray-200">
                 <span class="text-xl font-bold text-primary">iruali</span>
@@ -244,14 +244,14 @@
         </div>
     </div>
 
-    <!-- Main Content (top padding clears fixed mobile header: logo row + search) -->
-    <main class="min-h-screen pt-28 lg:pt-0">
+    <!-- Main Content -->
+    <main class="min-h-screen">
         @yield('content')
     </main>
 
     <!-- Footer -->
     <footer class="bg-footer text-white">
-        <div class="container mx-auto px-4 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Company Info -->
                 <div>
@@ -322,7 +322,7 @@
 
         <!-- Bottom Footer -->
         <div class="border-t border-gray-700">
-            <div class="container mx-auto px-4 py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <p class="text-gray-300 text-sm">&copy; 2024 iruali. All rights reserved.</p>
                     <div class="flex space-x-6 mt-4 md:mt-0">

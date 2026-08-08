@@ -20,7 +20,7 @@
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
         
         <!-- Quick Actions Overlay -->
-        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
             <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex space-x-2">
                 <button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors" 
                         title="Quick View">

@@ -31,7 +31,7 @@
                 <div class="space-y-4">
                     @foreach($order->items as $item)
                     <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             @if($item->product->mainImage)
                                 <img src="{{ $item->product->mainImage->url }}" alt="{{ $item->product->name }}" class="w-16 h-16 object-cover rounded">
                             @else

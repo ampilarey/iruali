@@ -23,7 +23,7 @@
                         <div class="p-6">
                             <div class="flex items-center space-x-4">
                                 <!-- Product Image -->
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     @if($item->product->mainImage)
                                         <img src="{{ $item->product->mainImage->url }}" alt="{{ $item->product->name }}" 
                                              class="w-20 h-20 object-cover rounded-lg">

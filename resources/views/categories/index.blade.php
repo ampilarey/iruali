@@ -23,7 +23,7 @@
                         </svg>
                     </div>
                 @endif
-                <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+                <div class="absolute inset-0 bg-black/40"></div>
                 <div class="absolute bottom-4 left-4 right-4">
                     <h3 class="text-white text-xl font-semibold">{{ $category->name }}</h3>
                     <p class="text-white text-sm opacity-90">{{ $category->products->count() }} products</p>

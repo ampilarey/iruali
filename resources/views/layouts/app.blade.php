@@ -161,7 +161,7 @@
     </header>
 
     <!-- Mobile Header (Hidden on Desktop) -->
-    <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-100">
+    <div class="lg:hidden sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
         <div class="flex items-center justify-between px-4 py-3">
             <button id="mobile-menu-button" class="text-dark hover:text-primary transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,8 +244,8 @@
         </div>
     </div>
 
-    <!-- Main Content (top padding clears fixed mobile header: logo row + search) -->
-    <main class="min-h-screen pt-28 lg:pt-0">
+    <!-- Main Content -->
+    <main class="min-h-screen">
         @yield('content')
     </main>
 

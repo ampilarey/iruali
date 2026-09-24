@@ -14,7 +14,7 @@ class Setting extends Model
      * Editable settings and their defaults.
      */
     public const DEFAULTS = [
-        'announcement_text' => '🎉 Free Shipping on Orders Over $49 | Expert Support Available 24/7',
+        'announcement_text' => 'Shop local sellers from every island, delivered across the Maldives.',
         'contact_email' => '',
         'contact_phone' => '',
         'loyalty_spend_per_point' => 100,

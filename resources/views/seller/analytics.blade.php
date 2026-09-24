@@ -8,10 +8,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach([
-                ['Revenue', "ރ\u{200E}" . number_format($stats['total_revenue'], 2)],
+                ['Revenue', \App\Support\Money::format($stats['total_revenue'])],
                 ['Orders', $stats['total_orders']],
                 ['Units sold', $stats['units_sold']],
-                ['Average per order', "ރ\u{200E}" . number_format($stats['average_order'], 2)],
+                ['Average per order', \App\Support\Money::format($stats['average_order'])],
             ] as [$label, $value])
                 <div class="rounded-lg bg-white p-5 shadow">
                     <p class="text-sm font-medium text-gray-500">{{ $label }}</p>
@@ -24,7 +24,7 @@
             <h2 class="text-lg font-semibold text-gray-900">Revenue, last 12 months</h2>
             <div class="mt-6 flex h-48 items-end gap-2">
                 @foreach($months as $month => $total)
-                    <div class="flex h-full flex-1 flex-col items-center justify-end gap-1" title="{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M Y') }}: ރ&#x200E;{{ number_format($total, 2) }}">
+                    <div class="flex h-full flex-1 flex-col items-center justify-end gap-1" title="{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M Y') }}: {{ \App\Support\Money::format($total) }}">
                         <div class="w-full rounded-t bg-primary-500" style="height: {{ max($total / $max * 100, $total > 0 ? 2 : 0) }}%"></div>
                     </div>
                 @endforeach
@@ -53,7 +53,7 @@
                         <tr>
                             <td class="px-5 py-3 text-sm text-gray-900">{{ $row->product->name ?? 'Deleted product' }}</td>
                             <td class="px-5 py-3 text-right text-sm text-gray-700">{{ $row->units }}</td>
-                            <td class="px-5 py-3 text-right text-sm text-gray-900">ރ&#x200E;{{ number_format($row->revenue, 2) }}</td>
+                            <td class="px-5 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($row->revenue) }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="3" class="px-5 py-8 text-center text-sm text-gray-500">No sales yet.</td></tr>

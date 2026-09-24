@@ -9,12 +9,14 @@
     <!-- Favicon and Web App Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#0B7A70">
 
     <x-seo-meta :seo="$seo ?? null" />
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Thaana:wght@400;600&display=swap" rel="stylesheet">
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -40,8 +42,8 @@
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <div class="flex items-center">
-                        <a href="/" class="text-2xl font-bold text-primary hover:text-primary/80 transition-colors">
-                            iruali
+                        <a href="/" class="block" aria-label="iruali home">
+                            <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="108" height="37" class="h-9 w-auto">
                         </a>
                     </div>
 
@@ -186,7 +188,9 @@
                 </svg>
             </button>
             
-            <a href="/" class="text-xl font-bold text-primary">iruali</a>
+            <a href="/" class="block" aria-label="iruali home">
+                <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="88" height="30" class="h-7 w-auto">
+            </a>
             
             <div class="flex items-center space-x-4">
                 <a href="{{ route('cart') }}" class="relative text-dark hover:text-primary transition-colors">
@@ -220,7 +224,7 @@
     <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden">
         <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out -translate-x-full" id="mobile-menu">
             <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                <span class="text-xl font-bold text-primary">iruali</span>
+                <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="88" height="30" class="h-7 w-auto">
                 <button id="close-mobile-menu" class="text-gray-500 hover:text-dark transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -276,8 +280,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Company Info -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">iruali</h3>
-                    <p class="text-gray-300 mb-4">Your trusted source for premium products and expert support. Shop with confidence knowing you're getting the best deals and service.</p>
+                    <img src="/images/brand/iruali-wordmark-reversed.svg" alt="iruali" width="96" height="33" class="h-8 w-auto mb-4">
+                    <p class="text-gray-300 mb-4">Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-300 hover:text-white transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

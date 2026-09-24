@@ -33,7 +33,7 @@
 
 .focus-ring:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 2px rgba(11, 122, 112, 0.2);
 }
 
 /* Favicon and icon sizing */
@@ -74,46 +74,46 @@ img[src*="precomposed"] {
 }
 
 .btn-primary {
-  background-color: #10B981;
+  background-color: #0B7A70;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: rgba(16, 185, 129, 0.9);
+  background-color: rgba(11, 122, 112, 0.9);
 }
 
 .btn-primary:focus {
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 2px rgba(11, 122, 112, 0.2);
 }
 
 .btn-secondary {
   background-color: white;
-  color: #10B981;
-  border-color: #10B981;
+  color: #0B7A70;
+  border-color: #0B7A70;
 }
 
 .btn-secondary:hover {
-  background-color: #10B981;
+  background-color: #0B7A70;
   color: white;
 }
 
 .btn-secondary:focus {
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 2px rgba(11, 122, 112, 0.2);
 }
 
 .btn-outline {
   background-color: transparent;
-  color: #10B981;
-  border-color: #10B981;
+  color: #0B7A70;
+  border-color: #0B7A70;
 }
 
 .btn-outline:hover {
-  background-color: #10B981;
+  background-color: #0B7A70;
   color: white;
 }
 
 .btn-outline:focus {
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 2px rgba(11, 122, 112, 0.2);
 }
 
 
@@ -123,42 +123,42 @@ img[src*="precomposed"] {
 }
 
 .btn-danger {
-  background-color: #ef4444;
+  background-color: #B42330;
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: rgba(239, 68, 68, 0.9);
+  background-color: rgba(180, 35, 48, 0.9);
 }
 
 .btn-danger:focus {
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 2px rgba(180, 35, 48, 0.2);
 }
 
 .btn-success {
-  background-color: #22c55e;
+  background-color: #1E7B3C;
   color: white;
 }
 
 .btn-success:hover {
-  background-color: rgba(34, 197, 94, 0.9);
+  background-color: rgba(30, 123, 60, 0.9);
 }
 
 .btn-success:focus {
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  box-shadow: 0 0 0 2px rgba(30, 123, 60, 0.2);
 }
 
 .btn-warning {
-  background-color: #f59e0b;
+  background-color: #F5A524;
   color: white;
 }
 
 .btn-warning:hover {
-  background-color: rgba(245, 158, 11, 0.9);
+  background-color: rgba(245, 165, 36, 0.9);
 }
 
 .btn-warning:focus {
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.2);
 }
 
 
@@ -173,18 +173,18 @@ img[src*="precomposed"] {
 }
 
 .badge-primary {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10B981;
+  background-color: rgba(11, 122, 112, 0.1);
+  color: #0B7A70;
 }
 
 .badge-danger {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
+  background-color: rgba(180, 35, 48, 0.1);
+  color: #B42330;
 }
 
 .badge-success {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #EAF6F4;
+  color: #0B7A70;
 }
 
 /* Star rating */
@@ -196,30 +196,30 @@ img[src*="precomposed"] {
 .star {
   width: 1rem;
   height: 1rem;
-  color: #fbbf24;
+  color: #F5A524;
 }
 
 .star-empty {
-  color: #d1d5db;
+  color: #B6C6C6;
 }
 
 /* Product price styles */
 .product-price {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #111827;
+  color: #0F2A3A;
 }
 
 .product-price-original {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #5F7680;
   text-decoration: line-through;
 }
 
 .product-price-sale {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #EF4444;
+  color: #B42330;
 }
 
 /* Container responsive */
@@ -255,7 +255,7 @@ img[src*="precomposed"] {
 /* Hero section */
 .hero-section {
   position: relative;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(11, 122, 112, 0.05) 0%, rgba(245, 165, 36, 0.07) 100%);
   padding: 4rem 0;
 }
 
@@ -276,13 +276,13 @@ img[src*="precomposed"] {
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(15, 42, 58, 0.05);
   transition: all 0.3s;
-  border: 1px solid #f3f4f6;
+  border: 1px solid #EAF0EF;
 }
 
 .category-card:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(15, 42, 58, 0.1);
 }
 
 .category-image {
@@ -299,7 +299,7 @@ img[src*="precomposed"] {
 .category-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(15, 42, 58, 0.6) 0%, transparent 100%);
 }
 
 .category-content {
@@ -340,14 +340,14 @@ img[src*="precomposed"] {
 .product-card {
   background-color: white;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(15, 42, 58, 0.05);
   transition: all 0.3s;
-  border: 1px solid #f3f4f6;
+  border: 1px solid #EAF0EF;
   overflow: hidden;
 }
 
 .product-card:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(15, 42, 58, 0.1);
 }
 
 .product-image {
@@ -366,7 +366,7 @@ img[src*="precomposed"] {
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  background-color: #EF4444;
+  background-color: #B42330;
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
@@ -380,8 +380,8 @@ img[src*="precomposed"] {
 }
 
 .tab-button.active {
-  border-color: #10B981;
-  color: #10B981;
+  border-color: #0B7A70;
+  color: #0B7A70;
 }
 
 /* Mobile menu styles */
@@ -406,19 +406,19 @@ img[src*="precomposed"] {
 /* Loading states */
 .loading {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  background-color: #e5e7eb;
+  background-color: #D5E1DF;
 }
 
 /* Skeleton loading */
 .skeleton {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  background-color: #e5e7eb;
+  background-color: #D5E1DF;
   border-radius: 0.25rem;
 }
 
 .skeleton-text {
   height: 1rem;
-  background-color: #e5e7eb;
+  background-color: #D5E1DF;
   border-radius: 0.25rem;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -426,7 +426,7 @@ img[src*="precomposed"] {
 .skeleton-image {
   width: 100%;
   height: 12rem;
-  background-color: #e5e7eb;
+  background-color: #D5E1DF;
   border-radius: 0.25rem;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -654,3 +654,24 @@ img[src*="precomposed"] {
     font-size: 0.875rem;
   }
 }
+
+
+/* ---- iruali brand base (docs/brand, iruali design system) ---- */
+@layer base {
+  h1, h2, .font-display {
+    font-family: "Bricolage Grotesque", Figtree, ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  :lang(dv), [lang="dv"] {
+    font-family: "Noto Sans Thaana", "MV Faseyha", Faruma, sans-serif;
+    line-height: 1.75;
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #0B7A70;
+    outline-offset: 2px;
+  }
+}
+
+/* Prices line up in columns */
+.price, .tabular-nums { font-variant-numeric: tabular-nums; }

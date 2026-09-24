@@ -18,15 +18,15 @@
                     <li class="flex items-center justify-between px-5 py-3">
                         <div>
                             <p class="text-sm font-medium text-gray-900">{{ $item->product->name ?? 'Deleted product' }}</p>
-                            <p class="text-xs text-gray-500">{{ $item->quantity }} × ރ&#x200E;{{ number_format($item->price, 2) }}</p>
+                            <p class="text-xs text-gray-500">{{ $item->quantity }} × {{ \App\Support\Money::format($item->price) }}</p>
                         </div>
-                        <span class="text-sm font-medium text-gray-900">ރ&#x200E;{{ number_format($item->price * $item->quantity, 2) }}</span>
+                        <span class="text-sm font-medium text-gray-900">{{ \App\Support\Money::format($item->price * $item->quantity) }}</span>
                     </li>
                 @endforeach
             </ul>
             <div class="flex justify-between border-t border-gray-100 px-5 py-4 text-sm font-semibold text-gray-900">
                 <span>Your total</span>
-                <span>ރ&#x200E;{{ number_format($order->items->sum(fn ($i) => $i->price * $i->quantity), 2) }}</span>
+                <span>{{ \App\Support\Money::format($order->items->sum(fn ($i) => $i->price * $i->quantity)) }}</span>
             </div>
         </div>
 

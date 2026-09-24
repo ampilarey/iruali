@@ -17,7 +17,7 @@
 
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach([
-                ['Revenue', "ރ\u{200E}" . number_format($stats['total_revenue'], 2), 'From non-cancelled orders'],
+                ['Revenue', \App\Support\Money::format($stats['total_revenue']), 'From non-cancelled orders'],
                 ['Orders', $stats['total_orders'], $stats['pending_orders'] . ' pending'],
                 ['Products', $stats['total_products'], $stats['active_products'] . ' live · ' . $stats['pending_products'] . ' awaiting approval'],
                 ['Low stock', $stats['low_stock'], 'At or below reorder point'],
@@ -66,7 +66,7 @@
                                     <p class="text-sm font-medium text-gray-900">{{ $product->name }}</p>
                                     <p class="text-xs text-gray-500">{{ $product->category->name ?? '—' }} · Stock {{ $product->stock_quantity }}</p>
                                 </div>
-                                <span class="text-sm font-medium text-gray-900">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ \App\Support\Money::format($product->price) }}</span>
                             </a>
                         </li>
                     @empty

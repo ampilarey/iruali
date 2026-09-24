@@ -107,10 +107,10 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
                                     @if($product->sale_price)
-                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">${{ number_format($product->sale_price, 2) }}</span>
-                                        <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">${{ number_format($product->price, 2) }}</span>
+                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($product->sale_price) }}</span>
+                                        <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">{{ \App\Support\Money::format($product->price) }}</span>
                                     @else
-                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">${{ number_format($product->price, 2) }}</span>
+                                        <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($product->price) }}</span>
                                     @endif
                                 </div>
                                 <form action="{{ route('cart.add') }}" method="POST" class="inline">

@@ -1,8 +1,8 @@
 @props(['product'])
 
-<div class="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
+<div class="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-200 overflow-hidden flex flex-col">
     <!-- Product Image -->
-    <div class="relative aspect-square overflow-hidden bg-gray-50">
+    <div class="relative aspect-square overflow-hidden bg-primary-50">
         @php
             // Handle both real products and fallback products
             if (is_array($product)) {
@@ -41,32 +41,43 @@
         <!-- Badges -->
         <div class="absolute top-2 left-2 flex flex-col space-y-1">
             @if((is_array($product) ? ($product['flash_sale'] ?? false) : $product->flash_sale))
-                <span class="bg-danger text-white text-xs px-2 py-1 rounded-full font-medium">Flash Sale</span>
+                <span class="bg-coral text-white text-xs px-2 py-1 rounded-md font-semibold">Flash sale</span>
             @endif
             @if((is_array($product) ? ($product['is_new'] ?? false) : $product->is_new))
-                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full font-medium">New</span>
+                <span class="bg-sun text-sun-on text-xs px-2 py-1 rounded-md font-semibold">New</span>
             @endif
         </div>
 
         <!-- Stock Status -->
         <div class="absolute top-2 right-2">
             @if((is_array($product) ? $product['stock_quantity'] : $product->stock_quantity) > 0)
-                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">In Stock</span>
+                <span class="bg-white/95 text-success text-xs px-2 py-1 rounded-md font-semibold">In stock</span>
             @else
-                <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full font-medium">Out of Stock</span>
+                <span class="bg-white/95 text-danger text-xs px-2 py-1 rounded-md font-semibold">Out of stock</span>
             @endif
         </div>
     </div>
 
     <!-- Product Info -->
-    <div class="p-4">
-        <!-- Category -->
-        @if(is_array($product) ? isset($product['category']) : $product->category)
-            <p class="text-xs text-gray-500 mb-1">{{ is_array($product) ? $product['category']->name : $product->category->name }}</p>
+    <div class="p-4 flex flex-col flex-1">
+        <!-- Seller: on a marketplace, who sells it comes first -->
+        @php
+            $seller = is_array($product) ? null : $product->seller;
+            $sellerName = $seller ? ($seller->business_name ?: $seller->name) : null;
+            $sellerIsland = $seller?->city;
+        @endphp
+        @if($sellerName)
+            <p class="flex items-center gap-1.5 text-xs text-gray-600 mb-1 min-w-0">
+                <span class="w-2 h-2 rounded-full bg-sun shrink-0" aria-hidden="true"></span>
+                <span class="font-semibold text-dark truncate">{{ $sellerName }}</span>
+                @if($sellerIsland)<span class="truncate">&middot; {{ $sellerIsland }}</span>@endif
+            </p>
+        @elseif(is_array($product) ? isset($product['category']) : $product->category)
+            <p class="text-xs text-gray-600 mb-1">{{ is_array($product) ? $product['category']->name : $product->category->name }}</p>
         @endif
 
         <!-- Product Name -->
-        <h3 class="font-medium text-dark text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 class="font-semibold text-dark text-sm leading-snug mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             @if(is_array($product))
                 <span class="hover:underline">{{ $product['name'] }}</span>
             @else
@@ -85,7 +96,7 @@
         <div class="flex items-center mb-2">
             <div class="flex items-center">
                 @for($i = 1; $i <= 5; $i++)
-                    <svg class="w-3 h-3 {{ $i <= (is_array($product) ? ($product['average_rating'] ?? 0) : ($product->average_rating ?? 0)) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-3 h-3 {{ $i <= (is_array($product) ? ($product['average_rating'] ?? 0) : ($product->average_rating ?? 0)) ? 'text-sun' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
                 @endfor
@@ -94,30 +105,30 @@
         </div>
 
         <!-- Price -->
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center space-x-2">
+        <div class="flex items-center justify-between mt-auto mb-3">
+            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 @php
                     $price = is_array($product) ? $product['price'] : $product->price;
                     $originalPrice = is_array($product) ? ($product['compare_price'] ?? null) : ($product->compare_price ?? null);
                 @endphp
                 @if($originalPrice && $originalPrice > $price)
-                    <span class="text-lg font-bold text-dark">${{ number_format($price, 2) }}</span>
-                    <span class="text-sm text-gray-500 line-through">${{ number_format($originalPrice, 2) }}</span>
-                    <span class="text-xs bg-red-100 text-red-600 px-1 py-0.5 rounded">
-                        {{ round((($originalPrice - $price) / $originalPrice) * 100) }}% OFF
+                    <span class="price text-lg font-bold text-coral">{{ \App\Support\Money::format($price) }}</span>
+                    <span class="price text-sm text-gray-500 line-through">{{ \App\Support\Money::format($originalPrice) }}</span>
+                    <span class="text-xs font-semibold bg-coral-soft text-coral px-1.5 py-0.5 rounded-md">
+                        &minus;{{ round((($originalPrice - $price) / $originalPrice) * 100) }}%
                     </span>
                 @else
-                    <span class="text-lg font-bold text-dark">${{ number_format($price, 2) }}</span>
+                    <span class="price text-lg font-bold text-dark">{{ \App\Support\Money::format($price) }}</span>
                 @endif
             </div>
         </div>
 
         <!-- Add to Cart Button -->
-        <button class="w-full bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 group/btn">
+        <button class="w-full bg-primary hover:bg-primary-hover text-white py-2 px-4 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center space-x-2 group/btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
             </svg>
-            <span>Add to Cart</span>
+            <span>Add to cart</span>
         </button>
     </div>
 </div> 

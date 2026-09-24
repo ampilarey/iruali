@@ -35,7 +35,7 @@
         <div class="flex items-center justify-center space-x-4 text-sm text-gray-500">
             <span>{{ $category->products_count ?? 0 }} Products</span>
             <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
-            <span>Shop Now</span>
+            <span>{{ __('Shop Now') }}</span>
         </div>
     </div>
 </div> 

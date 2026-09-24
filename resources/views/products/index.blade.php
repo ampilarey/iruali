@@ -5,8 +5,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">All Products</h1>
-            <p class="text-gray-600 mt-2">Discover our complete collection</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('All Products') }}</h1>
+            <p class="text-gray-600 mt-2">{{ __('Discover our complete collection') }}</p>
         </div>
 
         <!-- Filters and Products Grid -->
@@ -14,11 +14,11 @@
             <!-- Sidebar Filters -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow p-6 sticky top-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Filters</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Filters') }}</h3>
                     
                     <!-- Categories -->
                     <div class="mb-6">
-                        <h4 class="text-sm font-medium text-gray-900 mb-3">Categories</h4>
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">{{ __('Categories') }}</h4>
                         <div class="space-y-2">
                             @foreach($categories as $category)
                             <label class="flex items-center">
@@ -32,15 +32,15 @@
 
                     <!-- Price Range -->
                     <div class="mb-6">
-                        <h4 class="text-sm font-medium text-gray-900 mb-3">Price Range</h4>
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">{{ __('Price Range') }}</h4>
                         <div class="space-y-3">
                             <div>
-                                <label for="min_price" class="block text-sm text-gray-700 mb-1">Min Price</label>
+                                <label for="min_price" class="block text-sm text-gray-700 mb-1">{{ __('Min Price') }}</label>
                                 <input type="number" id="min_price" name="min_price" placeholder="0" 
                                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
                             </div>
                             <div>
-                                <label for="max_price" class="block text-sm text-gray-700 mb-1">Max Price</label>
+                                <label for="max_price" class="block text-sm text-gray-700 mb-1">{{ __('Max Price') }}</label>
                                 <input type="number" id="max_price" name="max_price" placeholder="1000" 
                                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
                             </div>
@@ -49,20 +49,20 @@
 
                     <!-- Sort -->
                     <div class="mb-6">
-                        <h4 class="text-sm font-medium text-gray-900 mb-3">Sort By</h4>
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">{{ __('Sort By') }}</h4>
                         <select name="sort" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
-                            <option value="latest">Latest</option>
-                            <option value="price_low">Price: Low to High</option>
-                            <option value="price_high">Price: High to Low</option>
-                            <option value="name">Name: A to Z</option>
-                            <option value="popular">Most Popular</option>
+                            <option value="latest">{{ __('Latest') }}</option>
+                            <option value="price_low">{{ __('Price: Low to High') }}</option>
+                            <option value="price_high">{{ __('Price: High to Low') }}</option>
+                            <option value="name">{{ __('Name: A to Z') }}</option>
+                            <option value="popular">{{ __('Most Popular') }}</option>
                         </select>
                     </div>
 
                     <!-- Apply Filters Button -->
                     <button type="button" onclick="applyFilters()" 
                             class="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2 px-4 rounded-md transition duration-200">
-                        Apply Filters
+                        {{ __('Apply Filters') }}
                     </button>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                                 </div>
                                 
                                 @if($product->is_on_sale)
-                                <span class="bg-coral-soft text-coral text-xs font-semibold px-2 py-1 rounded-md">
+                                <span dir="ltr" class="bg-coral-soft text-coral text-xs font-semibold px-2 py-1 rounded-md">
                                     &minus;{{ $product->discount_percentage }}%
                                 </span>
                                 @endif
@@ -128,9 +128,9 @@
                             <!-- Stock Status -->
                             <div class="flex items-center justify-between mb-3">
                                 @if($product->is_in_stock)
-                                <span class="text-sm text-green-600">In Stock</span>
+                                <span class="text-sm text-green-600">{{ __('In Stock') }}</span>
                                 @else
-                                <span class="text-sm text-red-600">Out of Stock</span>
+                                <span class="text-sm text-red-600">{{ __('Out of Stock') }}</span>
                                 @endif
                             </div>
 
@@ -143,12 +143,12 @@
                                     <input type="hidden" name="quantity" value="1">
                                     <button type="submit" 
                                             class="w-full bg-primary hover:bg-primary-hover text-white text-sm font-medium py-2 px-4 rounded-md transition duration-200">
-                                        Add to Cart
+                                        {{ __('Add to Cart') }}
                                     </button>
                                 </form>
                                 @else
                                 <button disabled class="w-full bg-gray-300 text-gray-500 text-sm font-medium py-2 px-4 rounded-md cursor-not-allowed">
-                                    Out of Stock
+                                    {{ __('Out of Stock') }}
                                 </button>
                                 @endif
                                 
@@ -178,8 +178,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                               d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
-                    <p class="mt-1 text-sm text-gray-500">Try adjusting your filters or search terms.</p>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No products found') }}</h3>
+                    <p class="mt-1 text-sm text-gray-500">{{ __('Try adjusting your filters or search terms.') }}</p>
                 </div>
                 @endif
             </div>

@@ -4,14 +4,14 @@
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
-        <nav class="flex mb-8" aria-label="Breadcrumb">
+        <nav class="flex mb-8" aria-label="{{ __('Breadcrumb') }}">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-gray-900">
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                         </svg>
-                        Home
+                        {{ __('Home') }}
                     </a>
                 </li>
                 <li>
@@ -71,7 +71,7 @@
                     @if($product->is_on_sale)
                     <span class="text-3xl font-bold text-coral">{{ \App\Support\Money::format($product->sale_price) }}</span>
                     <span class="text-xl text-gray-500 line-through">{{ \App\Support\Money::format($product->price) }}</span>
-                    <span class="bg-coral-soft text-coral text-sm font-semibold px-2.5 py-0.5 rounded-md">
+                    <span dir="ltr" class="bg-coral-soft text-coral text-sm font-semibold px-2.5 py-0.5 rounded-md">
                         &minus;{{ $product->discount_percentage }}%
                     </span>
                     @else
@@ -87,7 +87,7 @@
                     </span>
                     @else
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        Out of Stock
+                        {{ __('Out of Stock') }}
                     </span>
                     @endif
                 </div>
@@ -95,7 +95,7 @@
                 <!-- Description -->
                 @if($product->description)
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('Description') }}</h3>
                     <div class="text-gray-600 prose max-w-none">
                         {!! $product->description !!}
                     </div>
@@ -109,7 +109,7 @@
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     
                     <div class="flex items-center space-x-4">
-                        <label for="quantity" class="text-sm font-medium text-gray-700">Quantity:</label>
+                        <label for="quantity" class="text-sm font-medium text-gray-700">{{ __('Quantity:') }}</label>
                         <select name="quantity" id="quantity" class="border border-gray-300 rounded-md px-3 py-2">
                             @for($i = 1; $i <= min(10, $product->stock_quantity); $i++)
                             <option value="{{ $i }}">{{ $i }}</option>
@@ -118,7 +118,7 @@
                     </div>
 
                     <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 px-6 rounded-lg transition duration-200">
-                        Add to Cart
+                        {{ __('Add to Cart') }}
                     </button>
                 </form>
                 @endif
@@ -127,21 +127,21 @@
                 <div class="border-t pt-6 space-y-4">
                     @if($product->sku)
                     <div class="flex justify-between">
-                        <span class="text-gray-600">SKU:</span>
+                        <span class="text-gray-600">{{ __('SKU:') }}</span>
                         <span class="text-gray-900">{{ $product->sku }}</span>
                     </div>
                     @endif
 
                     @if($product->brand)
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Brand:</span>
+                        <span class="text-gray-600">{{ __('Brand:') }}</span>
                         <span class="text-gray-900">{{ $product->brand }}</span>
                     </div>
                     @endif
 
                     @if($product->model)
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Model:</span>
+                        <span class="text-gray-600">{{ __('Model:') }}</span>
                         <span class="text-gray-900">{{ $product->model }}</span>
                     </div>
                     @endif
@@ -152,7 +152,7 @@
         <!-- Related Products -->
         @if($relatedProducts && $relatedProducts->count() > 0)
         <div class="mt-16">
-            <h2 class="text-2xl font-bold text-gray-900 mb-8">Related Products</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-8">{{ __('Related Products') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach($relatedProducts as $relatedProduct)
                 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-200">
@@ -170,7 +170,7 @@
                             <span class="font-bold text-gray-900">{{ \App\Support\Money::format($relatedProduct->price) }}</span>
                             <a href="{{ route('products.show', $relatedProduct) }}" 
                                class="text-primary hover:text-primary-hover text-sm font-medium">
-                                View Details
+                                {{ __('View Details') }}
                             </a>
                         </div>
                     </div>

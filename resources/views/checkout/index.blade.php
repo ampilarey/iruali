@@ -6,8 +6,8 @@
 <div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-        <p class="text-gray-600">Complete your order</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Checkout') }}</h1>
+        <p class="text-gray-600">{{ __('Complete your order') }}</p>
     </div>
 
     <form action="{{ route('checkout.store') }}" method="POST">
@@ -17,10 +17,10 @@
             <div class="space-y-6">
                 <!-- Shipping Information -->
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Shipping Information</h2>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Shipping Information') }}</h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Address') }}</label>
                             <input type="text" id="shipping_address" name="shipping_address" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_address') border-red-500 @enderror"
                                    value="{{ old('shipping_address') }}">
@@ -31,7 +31,7 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label for="shipping_city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                <label for="shipping_city" class="block text-sm font-medium text-gray-700 mb-1">{{ __('City') }}</label>
                                 <input type="text" id="shipping_city" name="shipping_city" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_city') border-red-500 @enderror"
                                        value="{{ old('shipping_city') }}">
@@ -40,7 +40,7 @@
                                 @enderror
                             </div>
                             <div>
-                                <label for="shipping_state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                <label for="shipping_state" class="block text-sm font-medium text-gray-700 mb-1">{{ __('State') }}</label>
                                 <input type="text" id="shipping_state" name="shipping_state" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_state') border-red-500 @enderror"
                                        value="{{ old('shipping_state') }}">
@@ -52,7 +52,7 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label for="shipping_zip" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                                <label for="shipping_zip" class="block text-sm font-medium text-gray-700 mb-1">{{ __('ZIP Code') }}</label>
                                 <input type="text" id="shipping_zip" name="shipping_zip" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_zip') border-red-500 @enderror"
                                        value="{{ old('shipping_zip') }}">
@@ -61,7 +61,7 @@
                                 @enderror
                             </div>
                             <div>
-                                <label for="shipping_country" class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                <label for="shipping_country" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Country') }}</label>
                                 <input type="text" id="shipping_country" name="shipping_country" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_country') border-red-500 @enderror"
                                        value="{{ old('shipping_country', 'United States') }}">
@@ -75,20 +75,20 @@
 
                 <!-- Payment Information -->
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Payment Method</h2>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
                     <div class="space-y-4">
                         <div>
                             <label class="flex items-center">
                                 <input type="radio" name="payment_method" value="card" checked
                                        class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300">
-                                <span class="ml-3 text-sm font-medium text-gray-700">Credit Card</span>
+                                <span class="ml-3 text-sm font-medium text-gray-700">{{ __('Credit Card') }}</span>
                             </label>
                         </div>
                         <div>
                             <label class="flex items-center">
                                 <input type="radio" name="payment_method" value="paypal"
                                        class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300">
-                                <span class="ml-3 text-sm font-medium text-gray-700">PayPal</span>
+                                <span class="ml-3 text-sm font-medium text-gray-700">{{ __('PayPal') }}</span>
                             </label>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
             <!-- Order Summary -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
                     
                     <!-- Order Items -->
                     <div class="space-y-3 mb-6">
@@ -127,7 +127,7 @@
                     <!-- Loyalty Points Redemption -->
                     @if(isset($points_balance))
                     <div class="mb-6">
-                        <h3 class="text-md font-semibold mb-2">Loyalty Points</h3>
+                        <h3 class="text-md font-semibold mb-2">{{ __('Loyalty Points') }}</h3>
                         <div class="flex items-center space-x-2 mb-2">
                             <span class="text-blue-700">Balance: {{ $points_balance }}</span>
                         </div>
@@ -136,14 +136,14 @@
                                 <span class="text-green-700 force-ltr" dir="ltr">Redeemed: {{ $points_redeemed }} ({{ \App\Support\Money::format($points_redeemed_discount) }})</span>
                                 <form action="{{ route('checkout.removePoints') }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:underline ml-2">Remove</button>
+                                    <button type="submit" class="text-red-600 hover:underline ml-2">{{ __('Remove') }}</button>
                                 </form>
                             </div>
                         @else
                             <form action="{{ route('checkout.redeemPoints') }}" method="POST" class="flex items-center space-x-2">
                                 @csrf
-                                <input type="number" name="points" min="1" max="{{ $points_balance }}" class="px-3 py-2 border rounded-md w-32" placeholder="Points to redeem">
-                                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">Redeem</button>
+                                <input type="number" name="points" min="1" max="{{ $points_balance }}" class="px-3 py-2 border rounded-md w-32" placeholder="{{ __('Points to redeem') }}">
+                                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">{{ __('Redeem') }}</button>
                             </form>
                             @error('points')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -155,26 +155,26 @@
                     <!-- Totals -->
                     <div class="border-t border-gray-200 pt-4 space-y-3">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-600">{{ __('Subtotal') }}</span>
                             <span class="font-medium force-ltr" dir="ltr">{{ \App\Support\Money::format($cart->total) }}</span>
                         </div>
                         @if($points_redeemed_discount > 0)
                         <div class="flex justify-between">
-                            <span class="text-blue-700">Loyalty Points Discount</span>
+                            <span class="text-blue-700">{{ __('Loyalty Points Discount') }}</span>
                             <span class="font-medium text-blue-700 force-ltr" dir="ltr">-{{ \App\Support\Money::format($points_redeemed_discount) }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Shipping</span>
+                            <span class="text-gray-600">{{ __('Shipping') }}</span>
                             <span class="font-medium">{{ \App\Support\Money::format(0) }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Tax</span>
+                            <span class="text-gray-600">{{ __('Tax') }}</span>
                             <span class="font-medium">{{ \App\Support\Money::format(0) }}</span>
                         </div>
                         <div class="border-t border-gray-200 pt-3">
                             <div class="flex justify-between">
-                                <span class="text-lg font-semibold">Total</span>
+                                <span class="text-lg font-semibold">{{ __('Total') }}</span>
                                 <span class="text-lg font-semibold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($cart->total) }}</span>
                             </div>
                         </div>
@@ -182,11 +182,11 @@
 
                     <!-- Place Order Button -->
                     <button type="submit" class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 transition duration-300 mt-6">
-                        Place Order
+                        {{ __('Place Order') }}
                     </button>
 
                     <div class="mt-4 text-center">
-                        <p class="text-sm text-gray-500">By placing your order, you agree to our Terms of Service</p>
+                        <p class="text-sm text-gray-500">{{ __('By placing your order, you agree to our Terms of Service') }}</p>
                     </div>
                 </div>
             </div>

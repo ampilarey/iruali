@@ -27,7 +27,7 @@
         <!-- Order Details -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Items</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Items') }}</h2>
                 <div class="space-y-4">
                     @foreach($order->items as $item)
                     <div class="flex items-center space-x-4">
@@ -54,13 +54,13 @@
                     @endforeach
                     @if($order->loyalty_points_earned > 0)
                     <div class="flex justify-between">
-                        <span class="text-blue-700">Loyalty Points Earned</span>
+                        <span class="text-blue-700">{{ __('Loyalty Points Earned') }}</span>
                         <span class="text-blue-700">+{{ $order->loyalty_points_earned }}</span>
                     </div>
                     @endif
                     @if($order->points_redeemed > 0)
                     <div class="flex justify-between">
-                        <span class="text-blue-700">Points Redeemed</span>
+                        <span class="text-blue-700">{{ __('Points Redeemed') }}</span>
                         <span class="text-blue-700 force-ltr" dir="ltr">-{{ $order->points_redeemed }} ({{ \App\Support\Money::format($order->points_redeemed_discount) }})</span>
                     </div>
                     @endif
@@ -69,10 +69,10 @@
 
             <!-- Shipping Information -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Shipping Information</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Shipping Information') }}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Shipping Address</h3>
+                        <h3 class="font-semibold text-gray-900 mb-2">{{ __('Shipping Address') }}</h3>
                         <p class="text-gray-600">
                             {{ $order->shipping_address }}<br>
                             {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
@@ -80,17 +80,17 @@
                         </p>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Order Status</h3>
+                        <h3 class="font-semibold text-gray-900 mb-2">{{ __('Order Status') }}</h3>
                         <div class="space-y-2">
                             <div class="flex items-center">
                                 <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                                <span class="text-sm text-gray-600">Order Placed</span>
+                                <span class="text-sm text-gray-600">{{ __('Order Placed') }}</span>
                                 <span class="text-xs text-gray-400 ml-auto">{{ $order->created_at->format('M d, Y') }}</span>
                             </div>
                             @if($order->status === 'completed')
                             <div class="flex items-center">
                                 <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                                <span class="text-sm text-gray-600">Order Completed</span>
+                                <span class="text-sm text-gray-600">{{ __('Order Completed') }}</span>
                                 <span class="text-xs text-gray-400 ml-auto">{{ $order->updated_at->format('M d, Y') }}</span>
                             </div>
                             @endif
@@ -103,10 +103,10 @@
         <!-- Order Summary -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
                 <div class="space-y-3">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Subtotal</span>
+                        <span class="text-gray-600">{{ __('Subtotal') }}</span>
                         <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount + $order->voucher_discount) }}</span>
                     </div>
                     @if($order->voucher_code && $order->voucher_discount > 0)
@@ -116,16 +116,16 @@
                     </div>
                     @endif
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Shipping</span>
-                        <span class="text-gray-900">Free</span>
+                        <span class="text-gray-600">{{ __('Shipping') }}</span>
+                        <span class="text-gray-900">{{ __('Free') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Tax</span>
+                        <span class="text-gray-600">{{ __('Tax') }}</span>
                         <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format(0) }}</span>
                     </div>
                     <hr class="my-3">
                     <div class="flex justify-between">
-                        <span class="text-lg font-semibold text-gray-900">Total</span>
+                        <span class="text-lg font-semibold text-gray-900">{{ __('Total') }}</span>
                         <span class="text-lg font-semibold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</span>
                     </div>
                 </div>
@@ -133,14 +133,14 @@
                 @if($order->status === 'pending')
                 <div class="mt-6">
                     <button class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300">
-                        Cancel Order
+                        {{ __('Cancel Order') }}
                     </button>
                 </div>
                 @endif
 
                 <div class="mt-4">
                     <a href="{{ route('orders') }}" class="block text-center text-primary-600 hover:text-primary-700 font-medium">
-                        ← Back to Orders
+                        {{ __('← Back to Orders') }}
                     </a>
                 </div>
             </div>

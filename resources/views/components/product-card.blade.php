@@ -23,14 +23,14 @@
         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
             <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex space-x-2">
                 <button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors" 
-                        title="Quick View">
+                        title="{{ __('Quick View') }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                 </button>
                 <button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors" 
-                        title="Add to Wishlist">
+                        title="{{ __('Add to Wishlist') }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
@@ -41,19 +41,19 @@
         <!-- Badges -->
         <div class="absolute top-2 left-2 flex flex-col space-y-1">
             @if((is_array($product) ? ($product['flash_sale'] ?? false) : $product->flash_sale))
-                <span class="bg-coral text-white text-xs px-2 py-1 rounded-md font-semibold">Flash sale</span>
+                <span class="bg-coral text-white text-xs px-2 py-1 rounded-md font-semibold">{{ __('Flash sale') }}</span>
             @endif
             @if((is_array($product) ? ($product['is_new'] ?? false) : $product->is_new))
-                <span class="bg-sun text-sun-on text-xs px-2 py-1 rounded-md font-semibold">New</span>
+                <span class="bg-sun text-sun-on text-xs px-2 py-1 rounded-md font-semibold">{{ __('New') }}</span>
             @endif
         </div>
 
         <!-- Stock Status -->
         <div class="absolute top-2 right-2">
             @if((is_array($product) ? $product['stock_quantity'] : $product->stock_quantity) > 0)
-                <span class="bg-white/95 text-success text-xs px-2 py-1 rounded-md font-semibold">In stock</span>
+                <span class="bg-white/95 text-success text-xs px-2 py-1 rounded-md font-semibold">{{ __('In stock') }}</span>
             @else
-                <span class="bg-white/95 text-danger text-xs px-2 py-1 rounded-md font-semibold">Out of stock</span>
+                <span class="bg-white/95 text-danger text-xs px-2 py-1 rounded-md font-semibold">{{ __('Out of stock') }}</span>
             @endif
         </div>
     </div>
@@ -114,7 +114,7 @@
                 @if($originalPrice && $originalPrice > $price)
                     <span class="price text-lg font-bold text-coral">{{ \App\Support\Money::format($price) }}</span>
                     <span class="price text-sm text-gray-500 line-through">{{ \App\Support\Money::format($originalPrice) }}</span>
-                    <span class="text-xs font-semibold bg-coral-soft text-coral px-1.5 py-0.5 rounded-md">
+                    <span dir="ltr" class="text-xs font-semibold bg-coral-soft text-coral px-1.5 py-0.5 rounded-md">
                         &minus;{{ round((($originalPrice - $price) / $originalPrice) * 100) }}%
                     </span>
                 @else
@@ -128,7 +128,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
             </svg>
-            <span>Add to cart</span>
+            <span>{{ __('Add to cart') }}</span>
         </button>
     </div>
 </div> 

@@ -6,8 +6,8 @@
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">My Wishlist</h1>
-        <p class="text-gray-600">Save your favorite products for later</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('My Wishlist') }}</h1>
+        <p class="text-gray-600">{{ __('Save your favorite products for later') }}</p>
     </div>
 
     @if($wishlistItems->count() > 0)
@@ -62,7 +62,7 @@
                             <input type="hidden" name="product_id" value="{{ $item->product->id }}">
                             <input type="hidden" name="quantity" value="1">
                             <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition duration-300">
-                                Add to Cart
+                                {{ __('Add to Cart') }}
                             </button>
                         </form>
                     </div>
@@ -81,11 +81,11 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="text-red-600 hover:text-red-700 font-medium">
-                        Clear Wishlist
+                        {{ __('Clear Wishlist') }}
                     </button>
                 </form>
                 <a href="{{ route('shop') }}" class="text-primary-600 hover:text-primary-700 font-medium">
-                    Continue Shopping
+                    {{ __('Continue Shopping') }}
                 </a>
             </div>
         </div>
@@ -94,11 +94,11 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Your wishlist is empty</h3>
-            <p class="mt-1 text-sm text-gray-500">Start adding products to your wishlist to save them for later.</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('Your wishlist is empty') }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ __('Start adding products to your wishlist to save them for later.') }}</p>
             <div class="mt-6">
                 <a href="{{ route('shop') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-300">
-                    Start Shopping
+                    {{ __('Start Shopping') }}
                 </a>
             </div>
         </div>

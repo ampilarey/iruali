@@ -118,14 +118,14 @@
                                 <span class="text-green-700 font-semibold">Voucher Applied: {{ $voucher->code }}</span>
                                 <form action="{{ route('cart.removeVoucher') }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:underline ml-2">Remove</button>
+                                    <button type="submit" class="text-red-600 hover:underline ml-2">{{ __('Remove') }}</button>
                                 </form>
                             </div>
                         @else
                             <form action="{{ route('cart.applyVoucher') }}" method="POST" class="flex items-center space-x-2">
                                 @csrf
-                                <input type="text" name="voucher_code" placeholder="Voucher code" class="px-3 py-2 border rounded-md" required>
-                                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">Apply</button>
+                                <input type="text" name="voucher_code" placeholder="{{ __('Voucher code') }}" class="px-3 py-2 border rounded-md" required>
+                                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">{{ __('Apply') }}</button>
                             </form>
                             @error('voucher_code')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -140,7 +140,7 @@
                         </div>
                         @if($voucher && $discount > 0)
                         <div class="flex justify-between">
-                            <span class="text-green-700">Voucher Discount</span>
+                            <span class="text-green-700">{{ __('Voucher Discount') }}</span>
                             <span class="font-medium text-green-700 force-ltr" dir="ltr">-{{ \App\Support\Money::format($discount) }}</span>
                         </div>
                         @endif

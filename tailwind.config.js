@@ -126,7 +126,7 @@ export default {
       },
 
       fontFamily: {
-        sans: ['Figtree', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        sans: ['Figtree', '"Noto Sans Thaana"', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         display: ['"Bricolage Grotesque"', 'Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         thaana: ['"Noto Sans Thaana"', '"MV Faseyha"', 'Faruma', 'sans-serif'],
       },

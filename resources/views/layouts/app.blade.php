@@ -142,7 +142,7 @@
                         <!-- Cart -->
                         <a href="{{ route('cart') }}" class="relative flex items-center space-x-2 text-dark hover:text-primary transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
                             <span class="text-sm font-medium">{{ __('Cart') }}</span>
                             @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
@@ -199,7 +199,7 @@
             <div class="flex items-center space-x-4">
                 <a href="{{ route('cart') }}" class="relative text-dark hover:text-primary transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
                         <span class="absolute -top-2 -right-2 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center font-bold">
@@ -372,10 +372,10 @@
     <!-- Floating Cart Icon (Mobile Only) -->
     <a href="{{ route('cart') }}"
        class="fixed bottom-5 right-5 z-50 bg-primary shadow-lg rounded-full w-12 h-12 flex items-center justify-center border-2 border-white lg:hidden animate-bounce-gentle"
-       style="box-shadow: 0 4px 24px rgba(16, 185, 129, 0.3);">
+       style="box-shadow: 0 4px 24px rgba(11, 122, 112, 0.35);">
       <div class="relative w-6 h-6 flex items-center justify-center">
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
         </svg>
         @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
           <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger text-white text-xs rounded-full flex items-center justify-center font-bold">

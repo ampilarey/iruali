@@ -81,6 +81,8 @@ class OrderService
 
             DB::commit();
 
+            app(OrderNotifier::class)->orderPlaced($order);
+
             return [
                 'success' => true,
                 'order' => $order,
@@ -251,6 +253,8 @@ class OrderService
 
             $order->update(['status' => $status]);
         });
+
+        app(OrderNotifier::class)->statusChanged($order->fresh());
 
         return true;
     }

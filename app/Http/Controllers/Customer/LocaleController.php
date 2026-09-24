@@ -15,18 +15,23 @@ class LocaleController extends Controller
     public function switch(Request $request)
     {
         $locale = $request->get('locale');
-        
+
         // Validate locale
-        if (!in_array($locale, LocalizationService::getAvailableLocales())) {
+        if (! in_array($locale, LocalizationService::getAvailableLocales())) {
             return back()->withErrors(['locale' => 'Invalid locale selected.']);
         }
-        
+
         // Set locale in session
         session(['locale' => $locale]);
-        
+
+        // Remember it for signed-in users, so emails come in the same language
+        if ($request->user()) {
+            $request->user()->update(['preferred_language' => $locale]);
+        }
+
         // Set application locale
         App::setLocale($locale);
-        
+
         return back()->with('success', 'Language changed successfully.');
     }
 
@@ -52,4 +57,4 @@ class LocaleController extends Controller
             'current' => LocalizationService::getCurrentLocale(),
         ]);
     }
-} 
+}

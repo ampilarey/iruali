@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
@@ -39,6 +40,7 @@ class User extends Authenticatable
         'business_name',
         'business_description',
         'seller_applied_at',
+        'preferred_language',
         'email_verified_at',
         'phone_verified_at',
         'two_factor_secret',
@@ -361,5 +363,13 @@ class User extends Authenticatable
     public function forceDeleteUser(): bool
     {
         return $this->forceDelete();
+    }
+
+    /**
+     * Emails go out in the user's chosen language (en or dv).
+     */
+    public function preferredLocale(): ?string
+    {
+        return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
     }
 }

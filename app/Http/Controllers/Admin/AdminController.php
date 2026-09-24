@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Setting;
+use App\Services\OrderService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -152,7 +153,11 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $orders = Order::with(['user', 'items.product'])->paginate(10);
+        $orders = Order::with(['user', 'items.product'])
+            ->when(request('status'), fn ($q, $status) => $q->where('status', $status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.orders.index', compact('orders'));
     }
@@ -250,5 +255,28 @@ class AdminController extends Controller
         Setting::set($validated);
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');
+    }
+
+    public function showOrder(Order $order, OrderService $orderService)
+    {
+        $this->checkAdminRole();
+
+        $order->load(['user', 'items.product.seller']);
+        $nextStatuses = $orderService->nextStatuses($order);
+
+        return view('admin.orders.show', compact('order', 'nextStatuses'));
+    }
+
+    public function updateOrderStatus(Request $request, Order $order, OrderService $orderService)
+    {
+        $this->checkAdminRole();
+
+        $request->validate(['status' => 'required|in:'.implode(',', array_keys(OrderService::TRANSITIONS))]);
+
+        if (! $orderService->updateOrderStatus($order, $request->status)) {
+            return back()->with('error', "An order that is {$order->status} can't be moved to {$request->status}.");
+        }
+
+        return back()->with('success', 'Order marked as '.$request->status.'.');
     }
 }

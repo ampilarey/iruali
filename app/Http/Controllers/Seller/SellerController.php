@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\OrderService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,13 +45,41 @@ class SellerController extends Controller
         return view('seller.orders.index', compact('orders'));
     }
 
-    public function showOrder(Order $order)
+    public function showOrder(Order $order, OrderService $orderService)
     {
         abort_unless($this->sellerOrders()->whereKey($order->id)->exists(), 404);
 
+        $ownsWholeOrder = $this->ownsWholeOrder($order);
+        $nextStatuses = $ownsWholeOrder ? $orderService->nextStatuses($order) : [];
+
         $order->load(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product']);
 
-        return view('seller.orders.show', compact('order'));
+        return view('seller.orders.show', compact('order', 'nextStatuses', 'ownsWholeOrder'));
+    }
+
+    public function updateOrderStatus(Request $request, Order $order, OrderService $orderService)
+    {
+        abort_unless($this->sellerOrders()->whereKey($order->id)->exists(), 404);
+
+        // The status is per order, so a seller can only move orders that contain nothing but their own items.
+        abort_unless($this->ownsWholeOrder($order), 403, 'This order has items from other shops. An admin updates its status.');
+
+        $request->validate(['status' => 'required|in:'.implode(',', array_keys(OrderService::TRANSITIONS))]);
+
+        if (! $orderService->updateOrderStatus($order, $request->status)) {
+            return back()->with('error', "An order that is {$order->status} can't be moved to {$request->status}.");
+        }
+
+        return back()->with('success', 'Order marked as '.$request->status.'.');
+    }
+
+    /**
+     * True when every item in the order is one of the current seller's products.
+     */
+    protected function ownsWholeOrder(Order $order): bool
+    {
+        return $order->items()->exists()
+            && ! $order->items()->whereDoesntHave('product', fn ($q) => $q->withTrashed()->where('seller_id', Auth::id()))->exists();
     }
 
     public function analytics()

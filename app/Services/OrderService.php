@@ -203,13 +203,72 @@ class OrderService
     }
 
     /**
-     * Update order status
+     * Allowed next statuses for each order status.
+     */
+    public const TRANSITIONS = [
+        'pending' => ['processing', 'cancelled'],
+        'processing' => ['shipped', 'cancelled'],
+        'shipped' => ['delivered'],
+        'delivered' => [],
+        'cancelled' => [],
+    ];
+
+    /**
+     * Statuses the order can move to next.
+     */
+    public function nextStatuses(Order $order): array
+    {
+        return self::TRANSITIONS[$order->status] ?? [];
+    }
+
+    public function canTransition(Order $order, string $status): bool
+    {
+        return in_array($status, $this->nextStatuses($order), true);
+    }
+
+    /**
+     * Move an order to a new status, enforcing the allowed transitions.
+     * Cancelling also restocks the items and reverses loyalty points and voucher use.
      */
     public function updateOrderStatus(Order $order, string $status): bool
     {
-        $order->update(['status' => $status]);
+        if (! $this->canTransition($order, $status)) {
+            return false;
+        }
+
+        DB::transaction(function () use ($order, $status) {
+            if ($status === 'cancelled') {
+                $this->reverseOrder($order);
+            }
+
+            $order->update(['status' => $status]);
+        });
 
         return true;
+    }
+
+    /**
+     * Undo the side effects of placing an order: stock, loyalty points and voucher use.
+     */
+    protected function reverseOrder(Order $order): void
+    {
+        foreach ($order->items()->with('product')->get() as $item) {
+            $item->product?->increment('stock_quantity', $item->quantity);
+        }
+
+        $user = $order->user;
+        if ($user) {
+            if ($order->points_redeemed > 0) {
+                $user->increment('loyalty_points', $order->points_redeemed);
+            }
+            if ($order->loyalty_points_earned > 0) {
+                $user->update(['loyalty_points' => max(0, $user->fresh()->loyalty_points - $order->loyalty_points_earned)]);
+            }
+        }
+
+        if ($order->voucher_code) {
+            Voucher::where('code', $order->voucher_code)->where('used_count', '>', 0)->decrement('used_count');
+        }
     }
 
     /**

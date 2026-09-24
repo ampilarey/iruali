@@ -62,4 +62,19 @@ class OrderController extends Controller
 
         return redirect()->route('orders.show', $result['order']);
     }
+
+    public function cancel(Order $order)
+    {
+        $this->authorize('cancel', $order);
+
+        if (! $this->orderService->updateOrderStatus($order, 'cancelled')) {
+            NotificationService::error(__('This order can no longer be cancelled.'));
+
+            return redirect()->route('orders.show', $order);
+        }
+
+        NotificationService::success(__('Your order has been cancelled.'));
+
+        return redirect()->route('orders.show', $order);
+    }
 }

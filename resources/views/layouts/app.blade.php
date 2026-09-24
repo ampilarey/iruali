@@ -47,7 +47,7 @@
                     <!-- Logo -->
                     <div class="flex items-center">
                         <a href="/" class="block" aria-label="{{ __('iruali home') }}">
-                            <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="108" height="37" class="h-9 w-auto">
+                            <img src="/images/brand/iruali-logo.svg" alt="iruali" width="160" height="41" class="h-10 w-auto">
                         </a>
                     </div>
 
@@ -193,7 +193,7 @@
             </button>
             
             <a href="/" class="block" aria-label="{{ __('iruali home') }}">
-                <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="88" height="30" class="h-7 w-auto">
+                <img src="/images/brand/iruali-logo.svg" alt="iruali" width="125" height="32" class="h-8 w-auto">
             </a>
             
             <div class="flex items-center space-x-4">
@@ -228,7 +228,7 @@
     <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden">
         <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out -translate-x-full" id="mobile-menu">
             <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="88" height="30" class="h-7 w-auto">
+                <img src="/images/brand/iruali-logo.svg" alt="iruali" width="125" height="32" class="h-8 w-auto">
                 <button id="close-mobile-menu" class="text-gray-500 hover:text-dark transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -284,7 +284,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Company Info -->
                 <div>
-                    <img src="/images/brand/iruali-wordmark-reversed.svg" alt="iruali" width="96" height="33" class="h-8 w-auto mb-4">
+                    <img src="/images/brand/iruali-logo-reversed.svg" alt="iruali" width="141" height="36" class="h-9 w-auto mb-4">
                     <p class="text-gray-300 mb-4">{{ __('Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.') }}</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-300 hover:text-white transition-colors">

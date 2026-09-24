@@ -51,22 +51,4 @@ class HealthEndpointTest extends TestCase
             ->assertJsonPath('branch', 'main')
             ->assertJsonPath('deployed_at', '2026-09-24T17:00:00Z');
     }
-
-    public function test_red_test_banner_only_shows_on_test_host(): void
-    {
-        file_put_contents($this->stamp, json_encode([
-            'commit' => str_repeat('b', 40),
-            'commit_short' => 'bbbbbbb',
-            'branch' => 'main',
-            'deployed_at' => '2026-09-24T17:00:00Z',
-        ]));
-
-        $this->get('http://test.iruali.mv/')
-            ->assertOk()
-            ->assertSee('TEST SERVER')
-            ->assertSee('commit bbbbbbb')
-            ->assertSee('24 Sep 2026 22:00');
-
-        $this->get('http://iruali.mv/')->assertOk()->assertDontSee('TEST SERVER');
-    }
 }

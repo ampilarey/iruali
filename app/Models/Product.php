@@ -77,6 +77,11 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
 
+    public function questions(): HasMany
+    {
+        return $this->hasMany(ProductQuestion::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
@@ -127,6 +132,14 @@ class Product extends Model
     public function getIsOnSaleAttribute()
     {
         return $this->was_price !== null;
+    }
+
+    /**
+     * When a marked-down price ends, if the seller set an end time (drives the deal countdown).
+     */
+    public function getDealEndsAtAttribute(): ?\Illuminate\Support\Carbon
+    {
+        return $this->is_on_sale && $this->flash_sale_ends_at && $this->flash_sale_ends_at->isFuture() ? $this->flash_sale_ends_at : null;
     }
 
     public function scopeOnSale($query)
@@ -240,6 +253,13 @@ class Product extends Model
         static::creating(function ($product) {
             if (empty($product->slug)) {
                 $product->slug = $product->generateSlug();
+            }
+        });
+
+        // Tell shoppers who asked to be notified when a sold-out product is back
+        static::updated(function ($product) {
+            if ($product->wasChanged('stock_quantity') && (int) $product->getOriginal('stock_quantity') <= 0 && (int) $product->stock_quantity > 0 && $product->is_active) {
+                app(\App\Services\StockAlertService::class)->productRestocked($product);
             }
         });
 

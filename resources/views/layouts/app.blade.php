@@ -70,7 +70,7 @@
                 </a>
 
                 <!-- Search (desktop) -->
-                <form action="{{ route('search') }}" method="GET" role="search" class="hidden lg:flex flex-1 h-11 rounded-lg border-2 border-primary overflow-hidden bg-white focus-within:ring-2 focus-within:ring-primary/30">
+                <form action="{{ route('search') }}" method="GET" role="search" data-suggest class="hidden lg:flex flex-1 h-11 rounded-lg border-2 border-primary overflow-hidden bg-white focus-within:ring-2 focus-within:ring-primary/30">
                     <label for="search-department" class="sr-only">{{ __('Department') }}</label>
                     <select id="search-department" name="category" class="h-full border-0 border-e border-gray-200 bg-gray-50 text-sm text-gray-700 ps-3 pe-8 max-w-[11rem] focus:ring-0">
                         <option value="">{{ __('All departments') }}</option>
@@ -153,7 +153,7 @@
             </div>
 
             <!-- Search (mobile) -->
-            <form action="{{ route('search') }}" method="GET" role="search" class="lg:hidden pb-2.5">
+            <form action="{{ route('search') }}" method="GET" role="search" data-suggest class="lg:hidden pb-2.5">
                 <label for="search-q-mobile" class="sr-only">{{ __('Search') }}</label>
                 <div class="flex h-11 rounded-lg border-2 border-primary overflow-hidden bg-white">
                     <input id="search-q-mobile" type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('Search products, brands and shops') }}"
@@ -232,6 +232,7 @@
                     <a href="{{ route('deals') }}" class="flex items-center gap-3 px-4 py-3 font-semibold text-coral hover:bg-gray-50"><x-icon name="tag" class="w-5 h-5" />{{ __('Today\'s deals') }}</a>
                     <a href="{{ route('shop', ['sort' => 'newest']) }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="gift" class="w-5 h-5 text-gray-500" />{{ __('New arrivals') }}</a>
                     <a href="{{ route('shop') }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="squares" class="w-5 h-5 text-gray-500" />{{ __('Shop all products') }}</a>
+                    <a href="{{ route('compare') }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="columns" class="w-5 h-5 text-gray-500" />{{ __('Compare products') }}</a>
                 </div>
                 <div class="border-t border-gray-100 mt-2">
                     <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Your account') }}</p>
@@ -296,6 +297,20 @@
 
     <!-- Footer -->
     <footer class="bg-footer text-white">
+        <div class="border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 flex flex-col lg:flex-row lg:items-center gap-4">
+                <div class="flex-1">
+                    <p class="font-display text-lg font-bold">{{ __('Get deals in your inbox') }}</p>
+                    <p class="text-sm text-white/70">{{ __('New shops, new arrivals and the best deals, about once a week.') }}</p>
+                </div>
+                <form action="{{ route('newsletter.store') }}" method="POST" class="flex gap-2 w-full lg:w-auto">
+                    @csrf
+                    <label for="newsletter-email" class="sr-only">{{ __('Email address') }}</label>
+                    <input id="newsletter-email" type="email" name="email" required placeholder="{{ __('Email address') }}" class="flex-1 lg:w-72 min-w-0 rounded-lg border-0 bg-white/10 px-4 py-2.5 text-white placeholder-white/50 focus:ring-2 focus:ring-sun">
+                    <button type="submit" class="px-5 rounded-lg bg-sun text-sun-on font-semibold hover:bg-accent-400">{{ __('Subscribe') }}</button>
+                </form>
+            </div>
+        </div>
         <div class="max-w-7xl mx-auto px-4 lg:px-6 py-10 grid grid-cols-2 lg:grid-cols-5 gap-8 text-sm">
             <div class="col-span-2 lg:col-span-1">
                 <img src="/images/brand/iruali-logo-reversed.svg" alt="iruali" width="141" height="36" class="h-9 w-auto mb-4">
@@ -303,6 +318,9 @@
                 <ul class="space-y-2 text-white/85">
                     @if($contactPhone)
                         <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="inline-flex items-center gap-2 hover:text-white" dir="ltr"><x-icon name="phone" class="w-4 h-4" />{{ $contactPhone }}</a></li>
+                    @endif
+                    @if($whatsappNumber = preg_replace('/[^0-9]/', '', (string) \App\Models\Setting::get('whatsapp_number')))
+                        <li><a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 hover:text-white"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a></li>
                     @endif
                     @if($contactEmail)
                         <li><a href="mailto:{{ $contactEmail }}" class="inline-flex items-center gap-2 hover:text-white"><x-icon name="mail" class="w-4 h-4" />{{ $contactEmail }}</a></li>
@@ -367,11 +385,27 @@
         </div>
     </nav>
 
+    <!-- Compare tray -->
+    @php $compareIds = session('compare', []); @endphp
+    @if($compareIds && ! request()->routeIs('compare'))
+        @php $compareItems = \App\Models\Product::whereIn('id', $compareIds)->with('mainImage')->get(); @endphp
+        <div class="fixed z-40 end-4 bottom-20 lg:bottom-6 {{ request()->routeIs('products.show') ? 'hidden lg:block' : '' }}">
+            <a href="{{ route('compare') }}" class="flex items-center gap-3 ps-2 pe-4 py-2 rounded-full bg-reef text-white shadow-2xl hover:bg-reef-night">
+                <span class="flex -space-x-2 rtl:space-x-reverse">
+                    @foreach($compareItems->take(4) as $c)
+                        <img src="{{ $c->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="" class="w-8 h-8 rounded-full border-2 border-reef object-cover bg-primary-50">
+                    @endforeach
+                </span>
+                <span class="text-sm font-semibold">{{ __('Compare') }} ({{ $compareItems->count() }})</span>
+            </a>
+        </div>
+    @endif
+
     <!-- Flash messages, shown as toasts by resources/js/notifications.js -->
     @if(session('notification'))
         <div id="session-notification" data-notification="{{ json_encode(session('notification')) }}" hidden></div>
     @endif
-    @if(session('success') || session('error') || session('warning') || session('info'))
+    @if((session('success') || session('error') || session('warning') || session('info')) && ! request()->routeIs('admin.*', 'seller.*'))
         <div id="legacy-notifications" hidden>
             @foreach(['success', 'error', 'warning', 'info'] as $type)
                 @if(session($type) && is_string(session($type)))<div data-type="{{ $type }}" data-message="{{ session($type) }}"></div>@endif
@@ -400,6 +434,87 @@
                 document.addEventListener('click', function (e) { if (!mega.contains(e.target)) setMega(false); });
             }
 
+
+            // Deal countdowns
+            var timers = document.querySelectorAll('[data-countdown]');
+            if (timers.length) {
+                var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+                var tick = function () {
+                    timers.forEach(function (t) {
+                        var ms = new Date(t.dataset.countdown) - new Date();
+                        if (ms <= 0) { t.textContent = ''; t.parentElement.querySelector('span').textContent = t.dataset.ended; return; }
+                        var s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+                        t.textContent = (d ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s % 60);
+                    });
+                };
+                tick(); setInterval(tick, 1000);
+            }
+
+            // Search suggestions as you type
+            var suggestUrl = {{ \Illuminate\Support\Js::from(route('search.suggest')) }};
+            var labels = {{ \Illuminate\Support\Js::from(['products' => __('Products'), 'departments' => __('Departments'), 'brands' => __('Brands'), 'all' => __('See all results for “:q”'), 'none' => __('No suggestions')]) }};
+            document.querySelectorAll('[data-suggest]').forEach(function (form) {
+                var input = form.querySelector('input[name="q"]'), box = document.createElement('div'), timer, last = '';
+                box.className = 'hidden fixed z-[70] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden text-sm';
+                box.setAttribute('role', 'listbox');
+                document.body.appendChild(box);
+                function place() {
+                    var r = (form.querySelector('.rounded-lg') || form).getBoundingClientRect();
+                    box.style.top = (r.bottom + 4) + 'px'; box.style.left = r.left + 'px'; box.style.width = r.width + 'px';
+                }
+                function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+                function render(data, q) {
+                    box.innerHTML = '';
+                    var any = false;
+                    [['departments', 'squares'], ['brands', 'tag']].forEach(function (group) {
+                        if (!data[group[0]].length) return;
+                        any = true;
+                        box.appendChild(el('p', 'px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500', labels[group[0]]));
+                        data[group[0]].forEach(function (item) {
+                            var a = el('a', 'block px-4 py-2 hover:bg-primary-50 focus:bg-primary-50 outline-none', item.name); a.href = item.url; box.appendChild(a);
+                        });
+                    });
+                    if (data.products.length) {
+                        any = true;
+                        box.appendChild(el('p', 'px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500', labels.products));
+                        data.products.forEach(function (p) {
+                            var a = el('a', 'flex items-center gap-3 px-4 py-2 hover:bg-primary-50 focus:bg-primary-50 outline-none'); a.href = p.url;
+                            var img = el('img', 'w-10 h-10 rounded object-cover bg-primary-50 shrink-0'); img.src = p.image; img.alt = '';
+                            var name = el('span', 'flex-1 min-w-0 truncate', p.name);
+                            var price = el('span', 'font-semibold shrink-0' + (p.in_stock ? '' : ' text-gray-400'), p.price);
+                            a.append(img, name, price); box.appendChild(a);
+                        });
+                    }
+                    if (!any) box.appendChild(el('p', 'px-4 py-3 text-gray-500', labels.none));
+                    var all = el('a', 'block px-4 py-3 border-t border-gray-100 font-semibold text-primary hover:bg-primary-50', labels.all.replace(':q', q));
+                    all.href = form.action + '?q=' + encodeURIComponent(q); box.appendChild(all);
+                    place(); box.classList.remove('hidden');
+                }
+                input.addEventListener('input', function () {
+                    clearTimeout(timer);
+                    var q = input.value.trim();
+                    if (q.length < 2) { box.classList.add('hidden'); return; }
+                    timer = setTimeout(function () {
+                        last = q;
+                        fetch(suggestUrl + '?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) { if (q === last && input.value.trim() === q) render(data, q); })
+                            .catch(function () {});
+                    }, 180);
+                });
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'ArrowDown' && !box.classList.contains('hidden')) { e.preventDefault(); var f = box.querySelector('a'); if (f) f.focus(); }
+                });
+                box.addEventListener('keydown', function (e) {
+                    var links = Array.prototype.slice.call(box.querySelectorAll('a')), i = links.indexOf(document.activeElement);
+                    if (e.key === 'ArrowDown') { e.preventDefault(); (links[i + 1] || links[0]).focus(); }
+                    if (e.key === 'ArrowUp') { e.preventDefault(); i <= 0 ? input.focus() : links[i - 1].focus(); }
+                });
+                document.addEventListener('click', function (e) { if (!form.contains(e.target) && !box.contains(e.target)) box.classList.add('hidden'); });
+                window.addEventListener('resize', function () { if (!box.classList.contains('hidden')) place(); });
+                window.addEventListener('scroll', function () { if (!box.classList.contains('hidden')) place(); }, { passive: true });
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') box.classList.add('hidden'); });
+            });
             document.addEventListener('keydown', function (e) {
                 if (e.key !== 'Escape') return;
                 setDrawer(false);

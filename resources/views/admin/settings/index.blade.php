@@ -52,8 +52,13 @@
                             <label for="contact_phone" class="block text-sm font-medium text-gray-700">Contact phone</label>
                             <input id="contact_phone" name="contact_phone" class="{{ $field }}" value="{{ old('contact_phone', $settings['contact_phone']) }}">
                         </div>
+                        <div>
+                            <label for="whatsapp_number" class="block text-sm font-medium text-gray-700">WhatsApp number</label>
+                            <input id="whatsapp_number" name="whatsapp_number" class="{{ $field }}" placeholder="+960 7xx xxxx" value="{{ old('whatsapp_number', $settings['whatsapp_number'] ?? '') }}">
+                            @error('whatsapp_number')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
                     </div>
-                    <p class="text-xs text-gray-500">Used by the “Contact Us” link in the footer.</p>
+                    <p class="text-xs text-gray-500">Used by the “Contact Us” links. The WhatsApp number adds “Chat on WhatsApp” buttons to the help centre and product pages.</p>
                 </div>
             </section>
 

@@ -17,6 +17,7 @@ class Setting extends Model
         'announcement_text' => 'Shop local sellers from every island, delivered across the Maldives.',
         'contact_email' => '',
         'contact_phone' => '',
+        'whatsapp_number' => '',
         'loyalty_spend_per_point' => 100,
         'referral_referrer_points' => 100,
         'referral_referee_points' => 50,

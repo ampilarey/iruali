@@ -26,6 +26,17 @@ class ShopController extends Controller
         ]);
     }
 
+    public function brand(Request $request, string $brand, CatalogService $catalog)
+    {
+        abort_unless(\App\Models\Product::query()->active()->where('brand', $brand)->exists(), 404);
+
+        return view('catalog.index', $catalog->listing($request, ['brand' => $brand]) + [
+            'title' => $brand,
+            'subtitle' => __('Everything from :brand on iruali.', ['brand' => $brand]),
+            'crumbs' => [['label' => __('Brands'), 'url' => null]],
+        ]);
+    }
+
     /**
      * A seller's storefront: their details on top, their products below.
      */

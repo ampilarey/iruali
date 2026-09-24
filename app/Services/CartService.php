@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class CartService
 {
@@ -15,33 +17,79 @@ class CartService
      */
     public function getOrCreateCart(): Cart
     {
+        return $this->currentCart() ?? Cart::create(Auth::check()
+            ? ['user_id' => Auth::id(), 'session_id' => $this->guestToken(), 'status' => 'active']
+            : ['session_id' => $this->guestToken(), 'status' => 'active']);
+    }
+
+    /**
+     * The shopper's active cart, without creating one.
+     */
+    public function currentCart(): ?Cart
+    {
         if (Auth::check()) {
-            $cart = Cart::where('user_id', Auth::id())
-                ->where('status', 'active')
-                ->first();
-
-            if (! $cart) {
-                $cart = Cart::create([
-                    'user_id' => Auth::id(),
-                    'session_id' => Session::getId(), // Always provide session_id
-                    'status' => 'active',
-                ]);
-            }
-        } else {
-            $sessionId = Session::getId();
-            $cart = Cart::where('session_id', $sessionId)
-                ->where('status', 'active')
-                ->first();
-
-            if (! $cart) {
-                $cart = Cart::create([
-                    'session_id' => $sessionId,
-                    'status' => 'active',
-                ]);
-            }
+            return Cart::where('user_id', Auth::id())->where('status', 'active')->latest('id')->first();
         }
 
-        return $cart;
+        $token = Session::get('cart_token');
+
+        return $token ? Cart::whereNull('user_id')->where('session_id', $token)->where('status', 'active')->first() : null;
+    }
+
+    /**
+     * Guests' carts are keyed by a token kept in the session, so the cart survives
+     * the session id changing when they sign in.
+     */
+    public function guestToken(): string
+    {
+        if (! Session::has('cart_token')) {
+            Session::put('cart_token', Str::random(40));
+        }
+
+        return Session::get('cart_token');
+    }
+
+    /**
+     * Move what a guest put in the cart into the account's cart when they sign in.
+     */
+    public function mergeGuestCart(User $user): void
+    {
+        $token = Session::get('cart_token');
+        if (! $token) {
+            return;
+        }
+
+        $guest = Cart::whereNull('user_id')->where('session_id', $token)->where('status', 'active')->with('items')->first();
+        if (! $guest || $guest->items->isEmpty()) {
+            return;
+        }
+
+        $cart = Cart::where('user_id', $user->id)->where('status', 'active')->latest('id')->first();
+        if (! $cart) {
+            $guest->update(['user_id' => $user->id]);
+
+            return;
+        }
+
+        foreach ($guest->items as $item) {
+            $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)->first();
+            $existing
+                ? $existing->update(['quantity' => $existing->quantity + $item->quantity])
+                : $item->update(['cart_id' => $cart->id]);
+        }
+
+        $guest->items()->delete();
+        $guest->update(['status' => 'abandoned']);
+    }
+
+    /**
+     * Number of units in the shopper's cart (for the header badge).
+     */
+    public function count(): int
+    {
+        $cart = $this->currentCart();
+
+        return $cart ? (int) $cart->items()->sum('quantity') : 0;
     }
 
     /**

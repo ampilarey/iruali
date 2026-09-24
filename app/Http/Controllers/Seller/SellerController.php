@@ -120,6 +120,22 @@ class SellerController extends Controller
         return view('seller.analytics', compact('stats', 'months', 'topProducts'));
     }
 
+    public function questions(Request $request)
+    {
+        $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', Auth::id()));
+
+        $questions = \App\Models\ProductQuestion::query()->tap($own)
+            ->when($request->query('show') !== 'all', fn ($q) => $q->whereNull('answer'))
+            ->with(['product', 'user'])
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        $unanswered = \App\Models\ProductQuestion::query()->tap($own)->whereNull('answer')->count();
+
+        return view('seller.questions', compact('questions', 'unanswered'));
+    }
+
     public function profile()
     {
         $user = Auth::user();

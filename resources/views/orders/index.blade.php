@@ -62,11 +62,18 @@
                            class="text-primary-600 hover:text-primary-700 font-medium">
                             {{ __('View Order Details →') }}
                         </a>
-                        @if($order->status === 'pending')
-                        <button class="text-red-600 hover:text-red-700 font-medium">
-                            {{ __('Cancel Order') }}
-                        </button>
-                        @endif
+                        <div class="flex items-center gap-4">
+                            <form method="POST" action="{{ route('orders.buyAgain', $order) }}">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-medium"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>
+                            </form>
+                            @if($order->status === 'pending')
+                                <form method="POST" action="{{ route('orders.cancel', $order) }}" onsubmit="return confirm('{{ __('Cancel this order?') }}')">
+                                    @csrf
+                                    <button type="submit" class="text-red-600 hover:text-red-700 font-medium">{{ __('Cancel Order') }}</button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

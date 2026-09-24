@@ -5,6 +5,7 @@
     use App\Support\Money;
     $email = Setting::get('contact_email');
     $phone = Setting::get('contact_phone');
+    $whatsapp = preg_replace('/[^0-9]/', '', (string) Setting::get('whatsapp_number'));
     $male = (float) Setting::get('delivery_fee_greater_male');
     $islands = (float) Setting::get('delivery_fee_islands');
     $freeOver = (float) Setting::get('free_delivery_over');
@@ -80,12 +81,15 @@
 
             <section id="contact" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Contact Us') }}</h2>
+                @if($whatsapp)
+                    <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-lg bg-[#25D366] text-white text-sm font-semibold"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a>
+                @endif
                 @if($email || $phone)
                     <ul class="space-y-2">
                         @if($phone)<li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="inline-flex items-center gap-2 font-semibold text-primary hover:underline" dir="ltr"><x-icon name="phone" class="w-4 h-4" />{{ $phone }}</a></li>@endif
                         @if($email)<li><a href="mailto:{{ $email }}" class="inline-flex items-center gap-2 font-semibold text-primary hover:underline"><x-icon name="mail" class="w-4 h-4" />{{ $email }}</a></li>@endif
                     </ul>
-                @else
+                @elseif(! $whatsapp)
                     <p class="text-gray-700">{{ __('Our contact details are coming soon.') }}</p>
                 @endif
             </section>

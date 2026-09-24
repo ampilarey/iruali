@@ -29,7 +29,7 @@ class CatalogService
     /**
      * Filters the page itself pins (a department page always filters by its department, and so on).
      *
-     * @var array{category?: Category, seller?: User, deals?: bool}
+     * @var array{category?: Category, seller?: User, brand?: string, deals?: bool}
      */
     protected array $locked = [];
 
@@ -94,7 +94,9 @@ class CatalogService
             $query->whereIn('seller_id', $sellers);
         }
 
-        if ($except !== 'brand' && ($brands = $this->strings('brand'))) {
+        if (isset($this->locked['brand'])) {
+            $query->where('brand', $this->locked['brand']);
+        } elseif ($except !== 'brand' && ($brands = $this->strings('brand'))) {
             $query->whereIn('brand', $brands);
         }
 
@@ -158,7 +160,7 @@ class CatalogService
             ->sortBy(fn ($c) => $c->localized_name)
             ->values();
 
-        $brands = $this->filtered('brand')->toBase()->whereNotNull('brand')->where('brand', '!=', '')
+        $brands = isset($this->locked['brand']) ? collect() : $this->filtered('brand')->toBase()->whereNotNull('brand')->where('brand', '!=', '')
             ->selectRaw('brand, count(*) as aggregate')->groupBy('brand')->orderBy('brand')->pluck('aggregate', 'brand');
 
         $sellers = collect();
@@ -196,7 +198,7 @@ class CatalogService
         if (! isset($this->locked['category']) && ($category = $this->selectedCategory())) {
             $chips->push(['label' => $category->localized_name, 'url' => $this->urlWithout('category')]);
         }
-        foreach ($this->strings('brand') as $brand) {
+        foreach (isset($this->locked['brand']) ? [] : $this->strings('brand') as $brand) {
             $chips->push(['label' => $brand, 'url' => $this->urlWithout('brand', $brand)]);
         }
         if (! isset($this->locked['seller'])) {

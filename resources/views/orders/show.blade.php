@@ -169,8 +169,13 @@
                     </div>
                 @endif
 
+                <form method="POST" action="{{ route('orders.buyAgain', $order) }}" class="mt-6">
+                    @csrf
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>
+                </form>
+
                 @if($order->status === 'pending')
-                <div class="mt-6">
+                <div class="mt-3">
                     <form method="POST" action="{{ route('orders.cancel', $order) }}" onsubmit="return confirm('{{ __('Cancel this order?') }}')">
                         @csrf
                         <button type="submit" class="w-full border border-danger text-danger px-4 py-2 rounded-lg hover:bg-danger-50 transition duration-300">

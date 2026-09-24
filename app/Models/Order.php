@@ -35,11 +35,14 @@ class Order extends Model
         'billing_address',
         'payment_method',
         'payment_status',
+        'payment_slip',
+        'paid_at',
         'notes',
         'tracking_number',
     ];
 
     protected $casts = [
+        'paid_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',

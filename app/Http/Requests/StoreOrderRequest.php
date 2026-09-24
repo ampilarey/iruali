@@ -34,7 +34,7 @@ class StoreOrderRequest extends FormRequest
             'billing_zip' => 'nullable|string|max:20',
             'billing_country' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
-            'payment_method' => 'required|in:cod',
+            'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
             'delivery_zone' => 'nullable|in:greater_male,islands',
             'agree_terms' => 'required|accepted',
         ];

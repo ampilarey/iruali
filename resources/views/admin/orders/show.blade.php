@@ -63,6 +63,33 @@
                     @include('partials.order-status-actions', ['action' => route('admin.orders.status', $order), 'nextStatuses' => $nextStatuses])
                 </div>
                 <div class="rounded-lg bg-white p-5 shadow">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Payment</h2>
+                    <p class="mt-2 text-sm text-gray-900">{{ $order->payment_method === 'bank_transfer' ? 'Bank transfer' : 'Cash on delivery' }}</p>
+                    <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
+                    @if($order->paid_at)
+                        <p class="mt-1 text-xs text-gray-500">Paid {{ $order->paid_at->format('d M Y, H:i') }}</p>
+                    @endif
+                    @if($order->payment_slip)
+                        <p class="mt-3"><a href="{{ route('orders.payment-slip.show', $order) }}" target="_blank" class="text-sm font-medium text-primary hover:text-primary-hover">View transfer slip ↗</a></p>
+                    @endif
+                    @if($order->payment_status !== 'paid')
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <form method="POST" action="{{ route('admin.orders.payment', $order) }}">
+                                @csrf
+                                <input type="hidden" name="action" value="confirm">
+                                <button class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ $order->payment_method === 'cod' ? 'Mark as paid' : 'Confirm payment' }}</button>
+                            </form>
+                            @if($order->payment_status === 'submitted')
+                                <form method="POST" action="{{ route('admin.orders.payment', $order) }}">
+                                    @csrf
+                                    <input type="hidden" name="action" value="reject">
+                                    <button class="rounded-lg border border-danger px-3 py-1.5 text-sm font-semibold text-danger hover:bg-danger-50">Reject slip</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+                <div class="rounded-lg bg-white p-5 shadow">
                     <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Customer</h2>
                     <p class="mt-2 text-sm text-gray-900">{{ $order->user->name ?? 'Deleted user' }}</p>
                     <p class="text-sm text-gray-600">{{ $order->user->email ?? '' }}</p>

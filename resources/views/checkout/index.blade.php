@@ -81,13 +81,24 @@
 
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
-                    <label class="flex items-start gap-3 rounded-xl border border-primary bg-primary-50 px-4 py-3">
-                        <input type="radio" name="payment_method" value="cod" checked class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
-                        <span>
-                            <span class="block text-sm font-medium text-gray-900">{{ __('Cash on delivery') }}</span>
-                            <span class="block text-sm text-gray-600">{{ __('Pay when your order arrives.') }}</span>
-                        </span>
-                    </label>
+                    @php
+                        $paymentMethods = app(\App\Services\PaymentService::class)->methods();
+                        $paymentHelp = [
+                            'cod' => __('Pay when your order arrives.'),
+                            'bank_transfer' => __('Transfer the total to our bank account after ordering, then upload your slip on the order page.'),
+                        ];
+                    @endphp
+                    <div class="space-y-3">
+                        @foreach($paymentMethods as $method => $label)
+                            <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
+                                <input type="radio" name="payment_method" value="{{ $method }}" @checked(old('payment_method', 'cod') === $method) class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                <span>
+                                    <span class="block text-sm font-medium text-gray-900">{{ $label }}</span>
+                                    <span class="block text-sm text-gray-600">{{ $paymentHelp[$method] ?? '' }}</span>
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
                 </section>
             </div>
 

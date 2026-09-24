@@ -22,6 +22,23 @@
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-background text-dark">
+    {{-- TEST server banner: only on test.* hosts, never on iruali.mv. Inline styles so it
+         shows even if the CSS build is stale. Commit comes from scripts/write-deploy-stamp.sh. --}}
+    @if(str_starts_with(strtolower(request()->getHost()), 'test.'))
+        @php
+            $deployStamp = is_file(storage_path('app/deploy-stamp.json'))
+                ? json_decode((string) file_get_contents(storage_path('app/deploy-stamp.json')), true)
+                : null;
+        @endphp
+        <div role="status" style="background:#dc2626;color:#fff;text-align:center;font-weight:600;font-size:14px;padding:8px 16px;">
+            TEST SERVER — not the live site
+            @if($deployStamp)
+                · commit {{ $deployStamp['commit_short'] ?? '?' }}
+                · deployed {{ \Illuminate\Support\Carbon::parse($deployStamp['deployed_at'])->timezone('Indian/Maldives')->format('d M Y H:i') }}
+            @endif
+        </div>
+    @endif
+
     <!-- Top Banner -->
     @php $announcement = \App\Models\Setting::get('announcement_text'); @endphp
     @if($announcement)

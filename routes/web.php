@@ -93,8 +93,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
 
     // Public order tracking
     Route::get('track', [OrderTrackingController::class, 'form'])->name('order.track.form');
-    Route::post('track', [OrderTrackingController::class, 'submit'])->name('order.track.submit');
-    Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show');
+    Route::post('track', [OrderTrackingController::class, 'submit'])->name('order.track.submit')->middleware('throttle:10,1');
+    Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show')->middleware('signed');
 
     // Seller routes
     // Seller application (any logged-in user)

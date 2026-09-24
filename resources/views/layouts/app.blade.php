@@ -318,7 +318,7 @@
                         <li><a href="{{ route('orders') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Order History') }}</a></li>
                         <li><a href="{{ route('wishlist') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Wishlist') }}</a></li>
                         <li><a href="{{ route('seller.apply') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Sell on iruali') }}</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Track Order') }}</a></li>
+                        <li><a href="{{ route('order.track.form') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Track Order') }}</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Returns') }}</a></li>
                     </ul>
                 </div>

@@ -97,7 +97,7 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('Description') }}</h3>
                     <div class="text-gray-600 prose max-w-none">
-                        {!! $product->description !!}
+                        {!! nl2br(e($product->description)) !!}
                     </div>
                 </div>
                 @endif

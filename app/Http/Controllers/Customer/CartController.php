@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\DiscountService;
-use App\Http\Resources\CartResource;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 class CartController extends Controller
 {
     protected $cartService;
+
     protected $discountService;
 
     public function __construct(CartService $cartService, DiscountService $discountService)
@@ -28,13 +29,13 @@ class CartController extends Controller
     {
         $cart = $this->cartService->getOrCreateCart();
         $cart->load('items.product');
-        
+
         $cartSummary = $this->cartService->getCartSummary($cart);
-        
+
         return view('cart.index', [
             'cart' => $cart,
             'voucher' => $cartSummary['voucher'],
-            'discount' => $cartSummary['voucher_discount']
+            'discount' => $cartSummary['voucher_discount'],
         ]);
     }
 
@@ -42,7 +43,7 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
         $product = Product::find($request->product_id);
@@ -58,8 +59,10 @@ class CartController extends Controller
 
     public function update(Request $request, CartItem $item)
     {
+        $this->authorizeItem($item);
+
         $request->validate([
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
         $this->cartService->updateCartItem($item, $request->quantity);
@@ -73,6 +76,8 @@ class CartController extends Controller
 
     public function remove(CartItem $item)
     {
+        $this->authorizeItem($item);
+
         $productName = $item->product->name;
         $this->cartService->removeFromCart($item);
 
@@ -93,16 +98,17 @@ class CartController extends Controller
     public function applyVoucher(Request $request)
     {
         $request->validate(['voucher_code' => 'required|string']);
-        
+
         $cart = $this->cartService->getOrCreateCart();
         $result = $this->discountService->validateVoucher($request->voucher_code, $cart);
-        
-        if (!$result['valid']) {
+
+        if (! $result['valid']) {
             return back()->withErrors(['voucher_code' => $result['message']]);
         }
-        
+
         $this->discountService->applyVoucher($request->voucher_code);
         NotificationService::voucherApplied($request->voucher_code);
+
         return back();
     }
 
@@ -110,7 +116,16 @@ class CartController extends Controller
     {
         $this->discountService->removeVoucher();
         NotificationService::voucherRemoved();
+
         return back();
     }
 
+    /**
+     * A cart item may only be changed by the owner of the (active) cart it is in.
+     */
+    protected function authorizeItem(CartItem $item): void
+    {
+        $cart = $item->cart;
+        abort_unless($cart && $cart->status === 'active' && (int) $cart->user_id === (int) Auth::id(), 403);
+    }
 }

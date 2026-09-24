@@ -28,7 +28,7 @@ class VoucherController extends Controller
     public function store(StoreVoucherRequest $request)
     {
         $this->authorize('create', Voucher::class);
-        Voucher::create($request->all());
+        Voucher::create($request->validated());
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher created successfully.');
     }
 
@@ -42,7 +42,7 @@ class VoucherController extends Controller
     public function update(UpdateVoucherRequest $request, Voucher $voucher)
     {
         $this->authorize('update', $voucher);
-        $voucher->update($request->all());
+        $voucher->update($request->validated());
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher updated successfully.');
     }
 

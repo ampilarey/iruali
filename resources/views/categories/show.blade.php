@@ -7,9 +7,9 @@
     <!-- Breadcrumb -->
     <nav class="mb-8">
         <ol class="flex items-center space-x-2 text-sm text-gray-500">
-            <li><a href="{{ route('home') }}" class="hover:text-primary-600">Home</a></li>
+            <li><a href="{{ route('home') }}" class="hover:text-primary-600">{{ __('Home') }}</a></li>
             <li><span class="mx-2">/</span></li>
-            <li><a href="{{ route('categories.index') }}" class="hover:text-primary-600">Categories</a></li>
+            <li><a href="{{ route('categories.index') }}" class="hover:text-primary-600">{{ __('Categories') }}</a></li>
             @foreach($parentCategories as $parent)
                 <li><span class="mx-2">/</span></li>
                 <li><a href="{{ route('categories.show', $parent) }}" class="hover:text-primary-600">{{ $parent->name }}</a></li>
@@ -30,7 +30,7 @@
     <!-- Subcategories -->
     @if($subcategories->count() > 0)
     <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Subcategories</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Subcategories') }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach($subcategories as $subcategory)
             <a href="{{ route('categories.show', $subcategory) }}" 
@@ -50,12 +50,12 @@
             
             <!-- Sort Options -->
             <div class="flex items-center space-x-4">
-                <label for="sort" class="text-sm font-medium text-gray-700">Sort by:</label>
+                <label for="sort" class="text-sm font-medium text-gray-700">{{ __('Sort by:') }}</label>
                 <select id="sort" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
-                    <option value="latest">Latest</option>
-                    <option value="price_low">Price: Low to High</option>
-                    <option value="price_high">Price: High to Low</option>
-                    <option value="name">Name: A to Z</option>
+                    <option value="latest">{{ __('Latest') }}</option>
+                    <option value="price_low">{{ __('Price: Low to High') }}</option>
+                    <option value="price_high">{{ __('Price: High to Low') }}</option>
+                    <option value="name">{{ __('Name: A to Z') }}</option>
                 </select>
             </div>
         </div>
@@ -107,7 +107,7 @@
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="quantity" value="1">
                                 <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition duration-300">
-                                    Add to Cart
+                                    {{ __('Add to Cart') }}
                                 </button>
                             </form>
                         </div>
@@ -125,8 +125,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No products found in this category</h3>
-                <p class="mt-1 text-sm text-gray-500">Check back later for new products.</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No products found in this category') }}</h3>
+                <p class="mt-1 text-sm text-gray-500">{{ __('Check back later for new products.') }}</p>
             </div>
         @endif
     </div>

@@ -7,12 +7,12 @@
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Create your account
+                {{ __('Create your account') }}
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Or
+                {{ __('Or') }}
                 <a href="{{ route('login') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                    sign in to your existing account
+                    {{ __('sign in to your existing account') }}
                 </a>
             </p>
         </div>
@@ -20,19 +20,19 @@
             @csrf
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
-                    <label for="name" class="sr-only">Full name</label>
+                    <label for="name" class="sr-only">{{ __('Full name') }}</label>
                     <input id="name" name="name" type="text" autocomplete="name" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm @error('name') border-red-500 @enderror"
-                           placeholder="Full name" value="{{ old('name') }}">
+                           placeholder="{{ __('Full name') }}" value="{{ old('name') }}">
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
-                    <label for="email" class="sr-only">Email address</label>
+                    <label for="email" class="sr-only">{{ __('Email address') }}</label>
                     <input id="email" name="email" type="email" autocomplete="email" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm @error('email') border-red-500 @enderror"
-                           placeholder="Email address" value="{{ old('email') }}">
+                           placeholder="{{ __('Email address') }}" value="{{ old('email') }}">
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -45,22 +45,22 @@
                     @error('referral_code')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-xs text-gray-500">If you have a referral code, enter it here. Both you and your referrer will receive loyalty points after your first order!</p>
+                    <p class="mt-1 text-xs text-gray-500">{{ __('If you have a referral code, enter it here. Both you and your referrer will receive loyalty points after your first order!') }}</p>
                 </div>
                 <div>
-                    <label for="password" class="sr-only">Password</label>
+                    <label for="password" class="sr-only">{{ __('Password') }}</label>
                     <input id="password" name="password" type="password" autocomplete="new-password" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm @error('password') border-red-500 @enderror"
-                           placeholder="Password">
+                           placeholder="{{ __('Password') }}">
                     @error('password')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
-                    <label for="password_confirmation" class="sr-only">Confirm password</label>
+                    <label for="password_confirmation" class="sr-only">{{ __('Confirm password') }}</label>
                     <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                           placeholder="Confirm password">
+                           placeholder="{{ __('Confirm password') }}">
                 </div>
             </div>
 
@@ -68,10 +68,10 @@
                 <input id="agree_terms" name="agree_terms" type="checkbox" required
                        class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
                 <label for="agree_terms" class="ml-2 block text-sm text-gray-900">
-                    I agree to the
-                    <a href="#" class="font-medium text-primary-600 hover:text-primary-500">Terms of Service</a>
-                    and
-                    <a href="#" class="font-medium text-primary-600 hover:text-primary-500">Privacy Policy</a>
+                    {{ __('I agree to the') }}
+                    <a href="#" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Terms of Service') }}</a>
+                    {{ __('and') }}
+                    <a href="#" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Privacy Policy') }}</a>
                 </label>
             </div>
 
@@ -83,7 +83,7 @@
                             <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
                         </svg>
                     </span>
-                    Create account
+                    {{ __('Create account') }}
                 </button>
             </div>
         </form>

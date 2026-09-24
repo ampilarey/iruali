@@ -6,8 +6,8 @@
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Product Categories</h1>
-        <p class="text-gray-600">Browse our products by category</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Product Categories') }}</h1>
+        <p class="text-gray-600">{{ __('Browse our products by category') }}</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -32,7 +32,7 @@
             <div class="p-6">
                 <p class="text-gray-600 mb-4">{{ Str::limit($category->description, 100) }}</p>
                 <a href="{{ route('categories.show', $category) }}" class="text-primary-600 hover:text-primary-700 font-semibold">
-                    View Category →
+                    {{ __('View Category →') }}
                 </a>
             </div>
         </div>

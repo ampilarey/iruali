@@ -6,19 +6,19 @@
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Shop</h1>
-        <p class="text-gray-600">Discover our amazing collection of products</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Shop') }}</h1>
+        <p class="text-gray-600">{{ __('Discover our amazing collection of products') }}</p>
     </div>
 
     <div class="flex flex-col lg:flex-row gap-8">
         <!-- Filters Sidebar -->
         <div class="lg:w-1/4">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Filters') }}</h3>
                 
                 <!-- Categories -->
                 <div class="mb-6">
-                    <h4 class="font-medium text-gray-900 mb-3">Categories</h4>
+                    <h4 class="font-medium text-gray-900 mb-3">{{ __('Categories') }}</h4>
                     <div class="space-y-2">
                         @foreach($categories as $category)
                         <label class="flex items-center">
@@ -32,11 +32,11 @@
 
                 <!-- Price Range -->
                 <div class="mb-6">
-                    <h4 class="font-medium text-gray-900 mb-3">Price Range</h4>
+                    <h4 class="font-medium text-gray-900 mb-3">{{ __('Price Range') }}</h4>
                     <div class="space-y-2">
-                        <input type="number" placeholder="Min Price" name="min_price" 
+                        <input type="number" placeholder="{{ __('Min Price') }}" name="min_price" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                        <input type="number" placeholder="Max Price" name="max_price" 
+                        <input type="number" placeholder="{{ __('Max Price') }}" name="max_price" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                     </div>
                 </div>
@@ -45,25 +45,25 @@
                 <div class="mb-6">
                     <label class="flex items-center">
                         <input type="checkbox" name="sale" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                        <span class="ml-2 text-sm text-gray-700">Sale Items Only</span>
+                        <span class="ml-2 text-sm text-gray-700">{{ __('Sale Items Only') }}</span>
                     </label>
                 </div>
 
                 <!-- Sort -->
                 <div class="mb-6">
-                    <h4 class="font-medium text-gray-900 mb-3">Sort By</h4>
+                    <h4 class="font-medium text-gray-900 mb-3">{{ __('Sort By') }}</h4>
                     <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                        <option value="latest">Latest</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                        <option value="name">Name: A to Z</option>
-                        <option value="popular">Most Popular</option>
+                        <option value="latest">{{ __('Latest') }}</option>
+                        <option value="price_low">{{ __('Price: Low to High') }}</option>
+                        <option value="price_high">{{ __('Price: High to Low') }}</option>
+                        <option value="name">{{ __('Name: A to Z') }}</option>
+                        <option value="popular">{{ __('Most Popular') }}</option>
                     </select>
                 </div>
 
                 <!-- Apply Filters -->
                 <button type="submit" class="w-full bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition duration-300">
-                    Apply Filters
+                    {{ __('Apply Filters') }}
                 </button>
             </div>
         </div>
@@ -86,7 +86,7 @@
                             @endif
                             @if($product->sale_price)
                                 <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
-                                    SALE
+                                    {{ __('SALE') }}
                                 </div>
                             @endif
                             <div class="absolute top-2 right-2">
@@ -118,7 +118,7 @@
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                                     <input type="hidden" name="quantity" value="1">
                                     <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition duration-300">
-                                        Add to Cart
+                                        {{ __('Add to Cart') }}
                                     </button>
                                 </form>
                             </div>
@@ -136,8 +136,8 @@
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
-                    <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No products found') }}</h3>
+                    <p class="mt-1 text-sm text-gray-500">{{ __('Try adjusting your search or filter criteria.') }}</p>
                 </div>
             @endif
         </div>

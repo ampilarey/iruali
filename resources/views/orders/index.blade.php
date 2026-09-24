@@ -6,8 +6,8 @@
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-        <p class="text-gray-600">Track your order history and status</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('My Orders') }}</h1>
+        <p class="text-gray-600">{{ __('Track your order history and status') }}</p>
     </div>
 
     @if($orders->count() > 0)
@@ -34,7 +34,7 @@
                 <div class="border-t border-gray-200 pt-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Shipping Address</h4>
+                            <h4 class="font-semibold text-gray-900 mb-2">{{ __('Shipping Address') }}</h4>
                             <p class="text-sm text-gray-600">
                                 {{ $order->shipping_address }}<br>
                                 {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
@@ -42,7 +42,7 @@
                             </p>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Order Items</h4>
+                            <h4 class="font-semibold text-gray-900 mb-2">{{ __('Order Items') }}</h4>
                             <div class="space-y-2">
                                 @foreach($order->items->take(3) as $item)
                                 <div class="flex justify-between text-sm">
@@ -60,11 +60,11 @@
                     <div class="flex justify-between items-center">
                         <a href="{{ route('orders.show', $order) }}" 
                            class="text-primary-600 hover:text-primary-700 font-medium">
-                            View Order Details →
+                            {{ __('View Order Details →') }}
                         </a>
                         @if($order->status === 'pending')
                         <button class="text-red-600 hover:text-red-700 font-medium">
-                            Cancel Order
+                            {{ __('Cancel Order') }}
                         </button>
                         @endif
                     </div>
@@ -82,11 +82,11 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
-            <p class="mt-1 text-sm text-gray-500">Start shopping to see your order history here.</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No orders found') }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ __('Start shopping to see your order history here.') }}</p>
             <div class="mt-6">
                 <a href="{{ route('shop') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-300">
-                    Start Shopping
+                    {{ __('Start Shopping') }}
                 </a>
             </div>
         </div>

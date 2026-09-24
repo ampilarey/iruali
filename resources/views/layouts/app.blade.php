@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    // Dhivehi reads right-to-left. Admin and Seller Centre pages are English-only for now, so they stay LTR.
+    $rtl = app()->getLocale() === 'dv' && ! request()->routeIs('admin.*', 'seller.*');
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,7 +33,7 @@
     @if($announcement)
     <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <span>{{ $announcement }}</span>
+            <span>{{ __($announcement) }}</span>
         </div>
     </div>
     @endif
@@ -42,7 +46,7 @@
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <div class="flex items-center">
-                        <a href="/" class="block" aria-label="iruali home">
+                        <a href="/" class="block" aria-label="{{ __('iruali home') }}">
                             <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="108" height="37" class="h-9 w-auto">
                         </a>
                     </div>
@@ -50,7 +54,7 @@
                     <!-- Search Bar -->
                     <div class="flex-1 max-w-2xl mx-8">
                         <form action="{{ route('search') }}" method="GET" class="relative">
-                            <input type="text" name="q" placeholder="Search for products, brands, and more..." 
+                            <input type="text" name="q" placeholder="{{ __('Search for products, brands, and more...') }}" 
                                    class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50 hover:bg-white transition-colors">
                             <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,14 +88,14 @@
                                             <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                             </svg>
-                                            My Account
+                                            {{ __('My Account') }}
                                         </a>
                                         @if(auth()->user()->hasRole('admin'))
                                             <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
                                                 <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
                                                 </svg>
-                                                Admin Dashboard
+                                                {{ __('Admin Dashboard') }}
                                             </a>
                                         @endif
                                         <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
@@ -104,13 +108,13 @@
                                             <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                             </svg>
-                                            My Orders
+                                            {{ __('My Orders') }}
                                         </a>
                                         <a href="{{ route('wishlist') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
                                             <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                             </svg>
-                                            Wishlist
+                                            {{ __('Wishlist') }}
                                         </a>
                                     </div>
                                     <div class="border-t border-gray-100 pt-2">
@@ -120,7 +124,7 @@
                                                 <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                                                 </svg>
-                                                Sign Out
+                                                {{ __('Sign Out') }}
                                             </button>
                                         </form>
                                     </div>
@@ -131,7 +135,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                                <span class="text-sm font-medium">Sign In</span>
+                                <span class="text-sm font-medium">{{ __('Sign In') }}</span>
                             </a>
                         @endauth
 
@@ -140,7 +144,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
                             </svg>
-                            <span class="text-sm font-medium">Cart</span>
+                            <span class="text-sm font-medium">{{ __('Cart') }}</span>
                             @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
                                 <span class="absolute -top-2 -right-2 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center font-bold">
                                     {{ auth()->user()->cart->item_count }}
@@ -157,22 +161,22 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center space-x-8 h-12">
                     <a href="{{ route('home') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        Home
+                        {{ __('Home') }}
                     </a>
                     <a href="{{ route('shop') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        Shop
+                        {{ __('Shop') }}
                     </a>
                     <a href="{{ route('products.index') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        Products
+                        {{ __('Products') }}
                     </a>
                     <a href="{{ route('categories.index') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        Categories
+                        {{ __('Categories') }}
                     </a>
                     <a href="#" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        Deals
+                        {{ __('Deals') }}
                     </a>
                     <a href="#" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        Support
+                        {{ __('Support') }}
                     </a>
                 </div>
             </div>
@@ -188,7 +192,7 @@
                 </svg>
             </button>
             
-            <a href="/" class="block" aria-label="iruali home">
+            <a href="/" class="block" aria-label="{{ __('iruali home') }}">
                 <img src="/images/brand/iruali-wordmark.svg" alt="iruali" width="88" height="30" class="h-7 w-auto">
             </a>
             
@@ -209,7 +213,7 @@
         <!-- Mobile Search -->
         <div class="px-4 pb-3">
             <form action="{{ route('search') }}" method="GET" class="relative">
-                <input type="text" name="q" placeholder="Search products..." 
+                <input type="text" name="q" placeholder="{{ __('Search products...') }}" 
                        class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-base bg-gray-50">
                 <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,12 +236,12 @@
                 </button>
             </div>
             <nav class="p-4 space-y-1">
-                <a href="{{ route('home') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Home</a>
-                <a href="{{ route('shop') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Shop</a>
-                <a href="{{ route('products.index') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Products</a>
-                <a href="{{ route('categories.index') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Categories</a>
-                <a href="#" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Deals</a>
-                <a href="#" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Support</a>
+                <a href="{{ route('home') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Home') }}</a>
+                <a href="{{ route('shop') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Shop') }}</a>
+                <a href="{{ route('products.index') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Products') }}</a>
+                <a href="{{ route('categories.index') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Categories') }}</a>
+                <a href="#" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Deals') }}</a>
+                <a href="#" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Support') }}</a>
             </nav>
             <div class="p-4 border-t border-gray-200">
                 @auth
@@ -248,22 +252,22 @@
                             <p class="text-xs text-gray-500">{{ auth()->user()->email }}</p>
                         </div>
                     </div>
-                    <a href="{{ route('account') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">My Account</a>
+                    <a href="{{ route('account') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('My Account') }}</a>
                     @if(auth()->user()->hasRole('admin'))
-                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Admin Dashboard</a>
+                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Admin Dashboard') }}</a>
                     @endif
                     <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}</a>
-                    <a href="{{ route('orders') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">My Orders</a>
-                    <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Wishlist</a>
+                    <a href="{{ route('orders') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('My Orders') }}</a>
+                    <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Wishlist') }}</a>
                     <form action="{{ route('logout') }}" method="POST" class="block">
                         @csrf
                         <button type="submit" class="w-full text-left px-4 py-2 text-danger hover:text-danger/80 hover:bg-red-50 rounded-lg text-base transition-colors">
-                            Sign Out
+                            {{ __('Sign Out') }}
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Sign In</a>
-                    <a href="{{ route('register') }}" class="block px-4 py-2 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg text-base transition-colors">Sign Up</a>
+                    <a href="{{ route('login') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Sign In') }}</a>
+                    <a href="{{ route('register') }}" class="block px-4 py-2 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg text-base transition-colors">{{ __('Sign Up') }}</a>
                 @endauth
             </div>
         </div>
@@ -281,7 +285,7 @@
                 <!-- Company Info -->
                 <div>
                     <img src="/images/brand/iruali-wordmark-reversed.svg" alt="iruali" width="96" height="33" class="h-8 w-auto mb-4">
-                    <p class="text-gray-300 mb-4">Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.</p>
+                    <p class="text-gray-300 mb-4">{{ __('Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.') }}</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-300 hover:text-white transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -308,42 +312,42 @@
 
                 <!-- Quick Links -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <h3 class="text-lg font-semibold mb-4">{{ __('Quick Links') }}</h3>
                     <ul class="space-y-2">
-                        <li><a href="{{ route('account') }}" class="text-gray-300 hover:text-white transition-colors">My Account</a></li>
-                        <li><a href="{{ route('orders') }}" class="text-gray-300 hover:text-white transition-colors">Order History</a></li>
-                        <li><a href="{{ route('wishlist') }}" class="text-gray-300 hover:text-white transition-colors">Wishlist</a></li>
-                        <li><a href="{{ route('seller.apply') }}" class="text-gray-300 hover:text-white transition-colors">Sell on iruali</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Track Order</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Returns</a></li>
+                        <li><a href="{{ route('account') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('My Account') }}</a></li>
+                        <li><a href="{{ route('orders') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Order History') }}</a></li>
+                        <li><a href="{{ route('wishlist') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Wishlist') }}</a></li>
+                        <li><a href="{{ route('seller.apply') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Sell on iruali') }}</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Track Order') }}</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Returns') }}</a></li>
                     </ul>
                 </div>
 
                 <!-- Customer Service -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Customer Service</h3>
+                    <h3 class="text-lg font-semibold mb-4">{{ __('Customer Service') }}</h3>
                     <ul class="space-y-2">
                         @php $contactEmail = \App\Models\Setting::get('contact_email'); $contactPhone = \App\Models\Setting::get('contact_phone'); @endphp
-                        <li><a href="{{ $contactEmail ? 'mailto:' . $contactEmail : ($contactPhone ? 'tel:' . preg_replace('/[^0-9+]/', '', $contactPhone) : '#') }}" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="{{ $contactEmail ? 'mailto:' . $contactEmail : ($contactPhone ? 'tel:' . preg_replace('/[^0-9+]/', '', $contactPhone) : '#') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Contact Us') }}</a></li>
                         @if($contactPhone)
                             <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="text-gray-300 hover:text-white transition-colors">{{ $contactPhone }}</a></li>
                         @endif
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Shipping Info</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Returns & Exchanges</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Size Guide</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Shipping Info') }}</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Returns & Exchanges') }}</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Size Guide') }}</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('FAQ') }}</a></li>
                     </ul>
                 </div>
 
                 <!-- Newsletter -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Stay Updated</h3>
-                    <p class="text-gray-300 mb-4">Subscribe to our newsletter for the latest products, deals, and updates.</p>
+                    <h3 class="text-lg font-semibold mb-4">{{ __('Stay Updated') }}</h3>
+                    <p class="text-gray-300 mb-4">{{ __('Subscribe to our newsletter for the latest products, deals, and updates.') }}</p>
                     <form class="space-y-3">
-                        <input type="email" placeholder="Enter your email" 
+                        <input type="email" placeholder="{{ __('Enter your email') }}" 
                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary">
                         <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors">
-                            Subscribe
+                            {{ __('Subscribe') }}
                         </button>
                     </form>
                 </div>
@@ -356,9 +360,9 @@
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <p class="text-gray-300 text-sm">&copy; 2024 iruali. All rights reserved.</p>
                     <div class="flex space-x-6 mt-4 md:mt-0">
-                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">Privacy Policy</a>
-                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">Terms of Service</a>
-                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">Cookie Policy</a>
+                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">{{ __('Privacy Policy') }}</a>
+                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">{{ __('Terms of Service') }}</a>
+                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">{{ __('Cookie Policy') }}</a>
                     </div>
                 </div>
             </div>

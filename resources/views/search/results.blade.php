@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto">
     <!-- Search Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Search Results</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Search Results') }}</h1>
         <p class="text-gray-600">
             Found {{ $products->total() }} results for "<strong>{{ request('q') }}</strong>"
         </p>
@@ -19,7 +19,7 @@
                 <input type="text" 
                        name="q" 
                        value="{{ request('q') }}" 
-                       placeholder="Search products..." 
+                       placeholder="{{ __('Search products...') }}" 
                        class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 <button type="submit" 
                         class="px-6 py-3 bg-primary-600 text-white rounded-r-lg hover:bg-primary-700 transition duration-300">
@@ -34,25 +34,25 @@
     <!-- Filters -->
     <div class="mb-8">
         <div class="flex flex-wrap items-center gap-4">
-            <span class="text-sm font-medium text-gray-700">Filters:</span>
+            <span class="text-sm font-medium text-gray-700">{{ __('Filters:') }}</span>
             
             <!-- Price Range -->
             <div class="flex items-center space-x-2">
-                <label class="text-sm text-gray-600">Price:</label>
+                <label class="text-sm text-gray-600">{{ __('Price:') }}</label>
                 <select name="price_range" class="px-3 py-1 border border-gray-300 rounded text-sm">
-                    <option value="">All Prices</option>
-                    <option value="0-50" {{ request('price_range') == '0-50' ? 'selected' : '' }}>Under MVR 50</option>
-                    <option value="50-100" {{ request('price_range') == '50-100' ? 'selected' : '' }}>MVR 50–100</option>
-                    <option value="100-200" {{ request('price_range') == '100-200' ? 'selected' : '' }}>MVR 100–200</option>
-                    <option value="200+" {{ request('price_range') == '200+' ? 'selected' : '' }}>MVR 200 and up</option>
+                    <option value="">{{ __('All Prices') }}</option>
+                    <option value="0-50" {{ request('price_range') == '0-50' ? 'selected' : '' }}>{{ __('Under MVR 50') }}</option>
+                    <option value="50-100" {{ request('price_range') == '50-100' ? 'selected' : '' }}>{{ __('MVR 50–100') }}</option>
+                    <option value="100-200" {{ request('price_range') == '100-200' ? 'selected' : '' }}>{{ __('MVR 100–200') }}</option>
+                    <option value="200+" {{ request('price_range') == '200+' ? 'selected' : '' }}>{{ __('MVR 200 and up') }}</option>
                 </select>
             </div>
 
             <!-- Category -->
             <div class="flex items-center space-x-2">
-                <label class="text-sm text-gray-600">Category:</label>
+                <label class="text-sm text-gray-600">{{ __('Category:') }}</label>
                 <select name="category" class="px-3 py-1 border border-gray-300 rounded text-sm">
-                    <option value="">All Categories</option>
+                    <option value="">{{ __('All Categories') }}</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                             {{ $category->name }}
@@ -63,19 +63,19 @@
 
             <!-- Sort -->
             <div class="flex items-center space-x-2">
-                <label class="text-sm text-gray-600">Sort:</label>
+                <label class="text-sm text-gray-600">{{ __('Sort:') }}</label>
                 <select name="sort" class="px-3 py-1 border border-gray-300 rounded text-sm">
-                    <option value="relevance" {{ request('sort') == 'relevance' ? 'selected' : '' }}>Relevance</option>
-                    <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price: Low to High</option>
-                    <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price: High to Low</option>
-                    <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
+                    <option value="relevance" {{ request('sort') == 'relevance' ? 'selected' : '' }}>{{ __('Relevance') }}</option>
+                    <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>{{ __('Price: Low to High') }}</option>
+                    <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>{{ __('Price: High to Low') }}</option>
+                    <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{ __('Newest') }}</option>
                 </select>
             </div>
 
             <!-- Clear Filters -->
             <a href="{{ route('search', ['q' => request('q')]) }}" 
                class="text-sm text-primary-600 hover:text-primary-700">
-                Clear Filters
+                {{ __('Clear Filters') }}
             </a>
         </div>
     </div>
@@ -129,7 +129,7 @@
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1">
                             <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition duration-300">
-                                Add to Cart
+                                {{ __('Add to Cart') }}
                             </button>
                         </form>
                     </div>
@@ -147,11 +147,11 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
-            <p class="mt-1 text-sm text-gray-500">Try adjusting your search terms or filters.</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No products found') }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ __('Try adjusting your search terms or filters.') }}</p>
             <div class="mt-6">
                 <a href="{{ route('shop') }}" class="text-primary-600 hover:text-primary-700 font-medium">
-                    Browse all products →
+                    {{ __('Browse all products →') }}
                 </a>
             </div>
         </div>

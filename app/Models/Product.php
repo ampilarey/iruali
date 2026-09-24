@@ -89,7 +89,7 @@ class Product extends Model
 
     public function seller(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     public function islands()
@@ -109,6 +109,7 @@ class Product extends Model
         if ($this->sale_price && $this->price > $this->sale_price) {
             return round((($this->price - $this->sale_price) / $this->price) * 100);
         }
+
         return 0;
     }
 
@@ -182,6 +183,7 @@ class Product extends Model
     public function hasTranslation($field, $locale = null)
     {
         $locale = $locale ?: app()->getLocale();
+
         return $this->hasTranslation($field, $locale);
     }
 
@@ -205,7 +207,7 @@ class Product extends Model
 
         // Check if slug already exists
         while (static::where('slug', $slug)->where('id', '!=', $this->id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = $baseSlug.'-'.$counter;
             $counter++;
         }
 

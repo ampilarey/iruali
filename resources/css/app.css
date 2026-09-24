@@ -663,8 +663,9 @@ img[src*="precomposed"] {
     letter-spacing: -0.01em;
     text-wrap: balance;
   }
-  :lang(dv), [lang="dv"] {
-    font-family: "Noto Sans Thaana", "MV Faseyha", Faruma, sans-serif;
+  /* Thaana text in any element: Figtree has no Thaana glyphs, so the sans stack falls
+     back to Noto Sans Thaana per glyph. Give Dhivehi blocks a little more line height. */
+  [lang="dv"] :where(p, li, td, dd) {
     line-height: 1.75;
   }
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {

@@ -31,11 +31,12 @@ class Order extends Model
         'shipping_state',
         'shipping_zip',
         'shipping_country',
+        'delivery_zone',
         'billing_address',
         'payment_method',
         'payment_status',
         'notes',
-        'tracking_number'
+        'tracking_number',
     ];
 
     protected $casts = [
@@ -45,7 +46,7 @@ class Order extends Model
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'shipping_address' => 'array',
-        'billing_address' => 'array'
+        'billing_address' => 'array',
     ];
 
     public function user(): BelongsTo
@@ -60,7 +61,7 @@ class Order extends Model
 
     public function getFormattedOrderNumberAttribute()
     {
-        return 'ORD-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        return 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 
     public function getStatusBadgeAttribute()
@@ -70,7 +71,7 @@ class Order extends Model
             'processing' => 'bg-blue-100 text-blue-800',
             'shipped' => 'bg-purple-100 text-purple-800',
             'delivered' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800'
+            'cancelled' => 'bg-red-100 text-red-800',
         ];
 
         return $statuses[$this->status] ?? 'bg-gray-100 text-gray-800';

@@ -250,6 +250,9 @@ class AdminController extends Controller
             'loyalty_spend_per_point' => 'required|numeric|min:1|max:100000',
             'referral_referrer_points' => 'required|integer|min:0|max:100000',
             'referral_referee_points' => 'required|integer|min:0|max:100000',
+            'delivery_fee_greater_male' => 'sometimes|required|numeric|min:0|max:100000',
+            'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
+            'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
         ]);
 
         Setting::set($validated);

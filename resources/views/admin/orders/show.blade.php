@@ -50,6 +50,8 @@
                     @if($order->points_redeemed_discount > 0)
                         <div class="flex justify-between text-gray-600"><dt>Points ({{ $order->points_redeemed }})</dt><dd>−{{ \App\Support\Money::format($order->points_redeemed_discount) }}</dd></div>
                     @endif
+                    <div class="flex justify-between text-gray-600"><dt>Delivery ({{ $order->delivery_zone === 'greater_male' ? 'Greater Malé' : 'other islands' }})</dt><dd>{{ \App\Support\Money::format($order->shipping_amount) }}</dd></div>
+                    <div class="flex justify-between text-gray-600"><dt>Payment</dt><dd>{{ $order->payment_method === 'cod' ? 'Cash on delivery' : ucfirst(str_replace('_', ' ', $order->payment_method)) }}</dd></div>
                     <div class="flex justify-between font-semibold text-gray-900"><dt>Total</dt><dd>{{ \App\Support\Money::format($order->total_amount) }}</dd></div>
                 </dl>
             </div>

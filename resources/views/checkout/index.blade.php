@@ -2,195 +2,184 @@
 
 @section('title', 'Checkout - iruali')
 
+@php
+    $field = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500';
+    $user = auth()->user();
+    $selectedZone = old('delivery_zone', app(\App\Services\DeliveryService::class)->zoneFor(null, $user->city));
+@endphp
+
 @section('content')
-<div class="max-w-4xl mx-auto">
-    <!-- Header -->
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Checkout') }}</h1>
         <p class="text-gray-600">{{ __('Complete your order') }}</p>
     </div>
 
-    <form action="{{ route('checkout.store') }}" method="POST">
+    @if($errors->any())
+        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <ul class="list-disc ps-5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Loyalty-point forms live outside the order form (forms can't nest); their controls point at them with form="" --}}
+    <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>
+    <form id="remove-points-form" action="{{ route('checkout.removePoints') }}" method="POST">@csrf</form>
+
+    <form id="checkout-form" action="{{ route('orders.store') }}" method="POST">
         @csrf
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Checkout Form -->
-            <div class="space-y-6">
-                <!-- Shipping Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Shipping Information') }}</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div class="lg:col-span-3 space-y-6">
+                <section class="bg-white rounded-2xl border border-gray-200 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>
                     <div class="space-y-4">
                         <div>
                             <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Address') }}</label>
-                            <input type="text" id="shipping_address" name="shipping_address" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_address') border-red-500 @enderror"
-                                   value="{{ old('shipping_address') }}">
-                            @error('shipping_address')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <input type="text" id="shipping_address" name="shipping_address" required class="{{ $field }}" value="{{ old('shipping_address', $user->address) }}" placeholder="{{ __('House name, street') }}">
                         </div>
-
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="shipping_city" class="block text-sm font-medium text-gray-700 mb-1">{{ __('City') }}</label>
-                                <input type="text" id="shipping_city" name="shipping_city" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_city') border-red-500 @enderror"
-                                       value="{{ old('shipping_city') }}">
-                                @error('shipping_city')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <label for="shipping_city" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Island') }}</label>
+                                <input type="text" id="shipping_city" name="shipping_city" required class="{{ $field }}" value="{{ old('shipping_city', $user->city) }}" placeholder="{{ __('e.g. Malé') }}">
                             </div>
                             <div>
-                                <label for="shipping_state" class="block text-sm font-medium text-gray-700 mb-1">{{ __('State') }}</label>
-                                <input type="text" id="shipping_state" name="shipping_state" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_state') border-red-500 @enderror"
-                                       value="{{ old('shipping_state') }}">
-                                @error('shipping_state')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <label for="shipping_state" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Atoll') }}</label>
+                                <input type="text" id="shipping_state" name="shipping_state" required class="{{ $field }}" value="{{ old('shipping_state', $user->state) }}" placeholder="{{ __('e.g. Kaafu') }}">
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label for="shipping_zip" class="block text-sm font-medium text-gray-700 mb-1">{{ __('ZIP Code') }}</label>
-                                <input type="text" id="shipping_zip" name="shipping_zip" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_zip') border-red-500 @enderror"
-                                       value="{{ old('shipping_zip') }}">
-                                @error('shipping_zip')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <label for="shipping_zip" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Postal code') }}</label>
+                                <input type="text" id="shipping_zip" name="shipping_zip" required class="{{ $field }}" value="{{ old('shipping_zip', $user->postal_code) }}" placeholder="20026">
                             </div>
                             <div>
                                 <label for="shipping_country" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Country') }}</label>
-                                <input type="text" id="shipping_country" name="shipping_country" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('shipping_country') border-red-500 @enderror"
-                                       value="{{ old('shipping_country', 'United States') }}">
-                                @error('shipping_country')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <input type="text" id="shipping_country" name="shipping_country" required class="{{ $field }} bg-gray-50" value="{{ old('shipping_country', 'Maldives') }}" readonly>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Payment Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="flex items-center">
-                                <input type="radio" name="payment_method" value="card" checked
-                                       class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300">
-                                <span class="ml-3 text-sm font-medium text-gray-700">{{ __('Credit Card') }}</span>
+                <section class="bg-white rounded-2xl border border-gray-200 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-1">{{ __('Delivery area') }}</h2>
+                    @if($freeDeliveryOver > 0)
+                        <p class="text-sm text-gray-600 mb-4">{{ __('Free delivery on orders over :amount.', ['amount' => \App\Support\Money::format($freeDeliveryOver)]) }}</p>
+                    @endif
+                    <div class="space-y-3">
+                        @foreach($deliveryZones as $zone => $label)
+                            <label class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
+                                <span class="flex items-center gap-3">
+                                    <input type="radio" name="delivery_zone" value="{{ $zone }}" data-fee="{{ $deliveryQuotes[$zone] }}" @checked($selectedZone === $zone) class="h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                    <span class="text-sm font-medium text-gray-900">{{ $label }}</span>
+                                </span>
+                                <span class="text-sm font-semibold text-gray-900" dir="ltr">{{ $deliveryQuotes[$zone] > 0 ? \App\Support\Money::format($deliveryQuotes[$zone]) : __('Free') }}</span>
                             </label>
-                        </div>
-                        <div>
-                            <label class="flex items-center">
-                                <input type="radio" name="payment_method" value="paypal"
-                                       class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300">
-                                <span class="ml-3 text-sm font-medium text-gray-700">{{ __('PayPal') }}</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Summary -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
-                    
-                    <!-- Order Items -->
-                    <div class="space-y-3 mb-6">
-                        @foreach($cart->items as $item)
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-3">
-                                @if($item->product->mainImage)
-                                    <img src="{{ $item->product->mainImage->url }}" alt="{{ $item->product->name }}" class="w-12 h-12 object-cover rounded">
-                                @else
-                                    <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                @endif
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">{{ $item->product->name }}</p>
-                                    <p class="text-xs text-gray-500">Qty: {{ $item->quantity }}</p>
-                                </div>
-                            </div>
-                            <span class="text-sm font-medium text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->subtotal) }}</span>
-                        </div>
                         @endforeach
                     </div>
+                </section>
 
-                    <!-- Loyalty Points Redemption -->
-                    @if(isset($points_balance))
-                    <div class="mb-6">
-                        <h3 class="text-md font-semibold mb-2">{{ __('Loyalty Points') }}</h3>
-                        <div class="flex items-center space-x-2 mb-2">
-                            <span class="text-blue-700">Balance: {{ $points_balance }}</span>
+                <section class="bg-white rounded-2xl border border-gray-200 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
+                    <label class="flex items-start gap-3 rounded-xl border border-primary bg-primary-50 px-4 py-3">
+                        <input type="radio" name="payment_method" value="cod" checked class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
+                        <span>
+                            <span class="block text-sm font-medium text-gray-900">{{ __('Cash on delivery') }}</span>
+                            <span class="block text-sm text-gray-600">{{ __('Pay when your order arrives.') }}</span>
+                        </span>
+                    </label>
+                </section>
+            </div>
+
+            <aside class="lg:col-span-2">
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 lg:sticky lg:top-24">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
+
+                    <ul class="space-y-3 mb-6">
+                        @foreach($cart->items as $item)
+                            <li class="flex justify-between items-center gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="{{ $item->product->mainImage->url ?? '/images/product-placeholder.svg' }}" alt="" class="w-12 h-12 object-cover rounded-lg bg-primary-50 shrink-0">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">{{ $item->product->name }}</p>
+                                        <p class="text-xs text-gray-500">{{ __('Qty') }}: {{ $item->quantity }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900" dir="ltr">{{ \App\Support\Money::format($item->quantity * $item->product->price) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    @if(isset($points_balance) && ($points_balance > 0 || $points_redeemed > 0))
+                        <div class="mb-6 rounded-xl bg-sun-soft p-4">
+                            <h3 class="text-sm font-semibold text-sun-ink mb-2">{{ __('Loyalty Points') }}: {{ $points_balance }}</h3>
+                            @if($points_redeemed > 0)
+                                <div class="flex items-center justify-between text-sm">
+                                    <span dir="ltr">{{ __('Points Redeemed') }}: {{ $points_redeemed }}</span>
+                                    <button type="submit" form="remove-points-form" class="text-danger hover:underline">{{ __('Remove') }}</button>
+                                </div>
+                            @else
+                                <div class="flex items-center gap-2">
+                                    <input type="number" name="points" form="redeem-points-form" min="1" max="{{ $points_balance }}" class="{{ $field }} w-32 bg-white" placeholder="{{ __('Points to redeem') }}">
+                                    <button type="submit" form="redeem-points-form" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Redeem') }}</button>
+                                </div>
+                            @endif
                         </div>
-                        @if($points_redeemed > 0)
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-green-700 force-ltr" dir="ltr">Redeemed: {{ $points_redeemed }} ({{ \App\Support\Money::format($points_redeemed_discount) }})</span>
-                                <form action="{{ route('checkout.removePoints') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="text-red-600 hover:underline ml-2">{{ __('Remove') }}</button>
-                                </form>
-                            </div>
-                        @else
-                            <form action="{{ route('checkout.redeemPoints') }}" method="POST" class="flex items-center space-x-2">
-                                @csrf
-                                <input type="number" name="points" min="1" max="{{ $points_balance }}" class="px-3 py-2 border rounded-md w-32" placeholder="{{ __('Points to redeem') }}">
-                                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">{{ __('Redeem') }}</button>
-                            </form>
-                            @error('points')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        @endif
-                    </div>
                     @endif
 
-                    <!-- Totals -->
-                    <div class="border-t border-gray-200 pt-4 space-y-3">
+                    <dl class="border-t border-gray-200 pt-4 space-y-3 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">{{ __('Subtotal') }}</span>
-                            <span class="font-medium force-ltr" dir="ltr">{{ \App\Support\Money::format($cart->total) }}</span>
+                            <dt class="text-gray-600">{{ __('Subtotal') }}</dt>
+                            <dd class="font-medium" dir="ltr">{{ \App\Support\Money::format($cart->total) }}</dd>
                         </div>
+                        @if($voucherDiscount > 0)
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">{{ __('Voucher Discount') }} ({{ $voucherCode }})</dt>
+                                <dd class="font-medium text-coral" dir="ltr">−{{ \App\Support\Money::format($voucherDiscount) }}</dd>
+                            </div>
+                        @endif
                         @if($points_redeemed_discount > 0)
-                        <div class="flex justify-between">
-                            <span class="text-blue-700">{{ __('Loyalty Points Discount') }}</span>
-                            <span class="font-medium text-blue-700 force-ltr" dir="ltr">-{{ \App\Support\Money::format($points_redeemed_discount) }}</span>
-                        </div>
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">{{ __('Loyalty Points Discount') }}</dt>
+                                <dd class="font-medium text-coral" dir="ltr">−{{ \App\Support\Money::format($points_redeemed_discount) }}</dd>
+                            </div>
                         @endif
                         <div class="flex justify-between">
-                            <span class="text-gray-600">{{ __('Shipping') }}</span>
-                            <span class="font-medium">{{ \App\Support\Money::format(0) }}</span>
+                            <dt class="text-gray-600">{{ __('Delivery') }}</dt>
+                            <dd class="font-medium" dir="ltr" id="delivery-fee">{{ \App\Support\Money::format($deliveryQuotes[$selectedZone] ?? 0) }}</dd>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{{ __('Tax') }}</span>
-                            <span class="font-medium">{{ \App\Support\Money::format(0) }}</span>
+                        <div class="flex justify-between border-t border-gray-200 pt-3 text-base">
+                            <dt class="font-semibold">{{ __('Total') }}</dt>
+                            <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + ($deliveryQuotes[$selectedZone] ?? 0)) }}</dd>
                         </div>
-                        <div class="border-t border-gray-200 pt-3">
-                            <div class="flex justify-between">
-                                <span class="text-lg font-semibold">{{ __('Total') }}</span>
-                                <span class="text-lg font-semibold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($cart->total) }}</span>
-                            </div>
-                        </div>
-                    </div>
+                    </dl>
 
-                    <!-- Place Order Button -->
-                    <button type="submit" class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 transition duration-300 mt-6">
+                    <label class="mt-6 flex items-start gap-3 text-sm text-gray-700">
+                        <input type="checkbox" name="agree_terms" value="1" required @checked(old('agree_terms')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
+                        <span>{{ __('By placing your order, you agree to our Terms of Service') }}</span>
+                    </label>
+
+                    <button type="submit" class="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4">
                         {{ __('Place Order') }}
                     </button>
-
-                    <div class="mt-4 text-center">
-                        <p class="text-sm text-gray-500">{{ __('By placing your order, you agree to our Terms of Service') }}</p>
-                    </div>
                 </div>
-            </div>
+            </aside>
         </div>
     </form>
 </div>
-@endsection 
+
+<script>
+    (function () {
+        var goods = @json((float) $goodsTotal);
+        var prefix = @json(\App\Support\Money::prefix());
+        var fmt = function (n) { return prefix + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+        document.querySelectorAll('input[name="delivery_zone"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                var fee = parseFloat(radio.dataset.fee) || 0;
+                document.getElementById('delivery-fee').textContent = fmt(fee);
+                document.getElementById('order-total').textContent = fmt(goods + fee);
+            });
+        });
+    })();
+</script>
+@endsection

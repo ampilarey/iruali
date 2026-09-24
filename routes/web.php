@@ -96,6 +96,12 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show');
 
     // Seller routes
+    // Seller application (any logged-in user)
+    Route::middleware('auth')->group(function () {
+        Route::get('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'create'])->name('seller.apply');
+        Route::post('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'store'])->name('seller.apply.store')->middleware('throttle:5,1');
+    });
+
     Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
         Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
         Route::resource('products', \App\Http\Controllers\Seller\ProductController::class)->except(['show']);
@@ -117,6 +123,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
         Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('sellers.approve');
+        Route::post('/sellers/{seller}/reject', [AdminController::class, 'rejectSeller'])->name('sellers.reject');
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     });

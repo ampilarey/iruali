@@ -13,6 +13,9 @@
             <div>
                 <p class="text-xs font-medium uppercase tracking-wider text-primary-600">Seller Centre</p>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $title }}</h1>
+                @if(auth()->user()->business_name)
+                    <p class="text-sm text-gray-500">{{ auth()->user()->business_name }}</p>
+                @endif
             </div>
             @isset($action)
                 <div>{{ $action }}</div>

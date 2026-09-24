@@ -104,6 +104,8 @@ class SellerController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'business_name' => 'required|string|max:255',
+            'business_description' => 'nullable|string|max:2000',
             'phone' => 'nullable|string|max:20|unique:users,phone,'.$user->id,
             'address' => 'nullable|string|max:500',
             'city' => 'nullable|string|max:100',

@@ -35,10 +35,18 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Shop / display name *</label>
-                    <input id="name" name="name" required class="{{ $field }}" value="{{ old('name', $user->name) }}">
+                    <label for="business_name" class="block text-sm font-medium text-gray-700">Shop name *</label>
+                    <input id="business_name" name="business_name" required class="{{ $field }}" value="{{ old('business_name', $user->business_name ?: $user->name) }}">
                 </div>
                 <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Your name *</label>
+                    <input id="name" name="name" required class="{{ $field }}" value="{{ old('name', $user->name) }}">
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="business_description" class="block text-sm font-medium text-gray-700">About your shop</label>
+                    <textarea id="business_description" name="business_description" rows="3" class="{{ $field }}">{{ old('business_description', $user->business_description) }}</textarea>
+                </div>
+                <div class="sm:col-span-2">
                     <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
                     <input id="phone" name="phone" class="{{ $field }}" value="{{ old('phone', $user->phone) }}">
                 </div>

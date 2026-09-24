@@ -131,11 +131,13 @@ class SellerAreaTest extends TestCase
         $seller = $this->userWithRole('seller');
 
         $this->actingAs($seller)->put('/seller/profile', [
-            'name' => 'Island Crafts',
+            'name' => 'Aisha Ibrahim',
+            'business_name' => 'Island Crafts',
             'city' => 'Male',
         ])->assertRedirect(route('seller.profile'));
 
-        $this->assertSame('Island Crafts', $seller->fresh()->name);
+        $this->assertSame('Aisha Ibrahim', $seller->fresh()->name);
+        $this->assertSame('Island Crafts', $seller->fresh()->business_name);
     }
 
     public function test_admin_approving_seller_marks_them_approved(): void

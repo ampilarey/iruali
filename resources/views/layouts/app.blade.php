@@ -92,14 +92,12 @@
                                                 Admin Dashboard
                                             </a>
                                         @endif
-                                        @if(auth()->user()->hasRole('seller'))
-                                            <a href="{{ route('seller.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
-                                                <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l1-5h16l1 5M3 9h18M3 9v11h18V9M9 20v-6h6v6"></path>
-                                                </svg>
-                                                Seller Centre
-                                            </a>
-                                        @endif
+                                        <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
+                                            <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l1-5h16l1 5M3 9h18M3 9v11h18V9M9 20v-6h6v6"></path>
+                                            </svg>
+                                            {{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}
+                                        </a>
                                         <a href="{{ route('orders') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
                                             <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -250,9 +248,7 @@
                     @if(auth()->user()->hasRole('admin'))
                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Admin Dashboard</a>
                     @endif
-                    @if(auth()->user()->hasRole('seller'))
-                        <a href="{{ route('seller.dashboard') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Seller Centre</a>
-                    @endif
+                    <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}</a>
                     <a href="{{ route('orders') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">My Orders</a>
                     <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Wishlist</a>
                     <form action="{{ route('logout') }}" method="POST" class="block">
@@ -313,6 +309,7 @@
                         <li><a href="{{ route('account') }}" class="text-gray-300 hover:text-white transition-colors">My Account</a></li>
                         <li><a href="{{ route('orders') }}" class="text-gray-300 hover:text-white transition-colors">Order History</a></li>
                         <li><a href="{{ route('wishlist') }}" class="text-gray-300 hover:text-white transition-colors">Wishlist</a></li>
+                        <li><a href="{{ route('seller.apply') }}" class="text-gray-300 hover:text-white transition-colors">Sell on iruali</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Track Order</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Returns</a></li>
                     </ul>

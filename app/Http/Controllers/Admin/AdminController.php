@@ -40,13 +40,15 @@ class AdminController extends Controller
             })->count(),
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
-            'pending_sellers' => User::where('status', 'inactive')->count(),
+            'pending_sellers' => User::whereHas('roles', fn ($q) => $q->where('name', 'seller'))->where('seller_approved', false)->count(),
             'pending_products' => Product::where('is_active', false)->count(),
         ];
 
         $recent_users = User::latest()->take(5)->get();
         $recent_orders = Order::with('user')->latest()->take(5)->get();
-        $pending_sellers = User::where('status', 'inactive')->get();
+        $pending_sellers = User::whereHas('roles', fn ($q) => $q->where('name', 'seller'))
+            ->where('seller_approved', false)
+            ->get();
 
         return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers'));
     }
@@ -57,7 +59,10 @@ class AdminController extends Controller
 
         $sellers = User::whereHas('roles', function ($q) {
             $q->where('name', 'seller');
-        })->with('roles')->paginate(10);
+        })->with('roles')
+            ->orderBy('seller_approved') // pending applications first
+            ->latest('seller_applied_at')
+            ->paginate(10);
 
         return view('admin.sellers.index', compact('sellers'));
     }
@@ -75,6 +80,24 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Seller approved successfully.');
+    }
+
+    public function rejectSeller($id)
+    {
+        $this->checkAdminRole();
+
+        $seller = User::findOrFail($id);
+        $sellerRole = Role::where('name', 'seller')->first();
+        if ($sellerRole) {
+            $seller->roles()->detach($sellerRole->id);
+        }
+        $seller->update([
+            'is_seller' => false,
+            'seller_approved' => false,
+            'seller_approved_at' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Seller application rejected.');
     }
 
     public function suspendSeller($id)

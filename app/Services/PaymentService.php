@@ -66,16 +66,22 @@ class PaymentService
         );
 
         $order->update(['payment_slip' => $path, 'payment_status' => 'submitted']);
+
+        app(OrderNotifier::class)->slipSubmitted($order);
     }
 
     public function confirm(Order $order): void
     {
         $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
+
+        app(OrderNotifier::class)->paymentUpdated($order);
     }
 
     public function reject(Order $order): void
     {
         $order->update(['payment_status' => 'rejected', 'paid_at' => null]);
+
+        app(OrderNotifier::class)->paymentUpdated($order);
     }
 
     public static function statusLabel(?string $status): string

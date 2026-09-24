@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\Cart;
-use App\Services\OrderService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreOrderRequest;
+use App\Models\Order;
 use App\Services\NotificationService;
+use App\Services\OrderService;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -43,7 +41,7 @@ class OrderController extends Controller
         // $this->authorize('create', Order::class); // Removed as StoreOrderRequest handles authorization
 
         $user = Auth::user();
-        
+
         $shippingData = [
             'shipping_address' => $request->shipping_address,
             'shipping_city' => $request->shipping_city,
@@ -54,8 +52,9 @@ class OrderController extends Controller
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             NotificationService::error($result['message']);
+
             return redirect()->route('cart');
         }
 

@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\Role;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -25,7 +24,7 @@ class AdminController extends Controller
      */
     private function checkAdminRole()
     {
-        if (!auth()->check() || !auth()->user()->hasRole('admin')) {
+        if (! auth()->check() || ! auth()->user()->hasRole('admin')) {
             abort(403, 'Access denied. Admin role required.');
         }
     }
@@ -33,10 +32,10 @@ class AdminController extends Controller
     public function dashboard()
     {
         $this->checkAdminRole();
-        
+
         $stats = [
             'total_users' => User::count(),
-            'total_sellers' => User::whereHas('roles', function($q) {
+            'total_sellers' => User::whereHas('roles', function ($q) {
                 $q->where('name', 'seller');
             })->count(),
             'total_products' => Product::count(),
@@ -55,8 +54,8 @@ class AdminController extends Controller
     public function sellers()
     {
         $this->checkAdminRole();
-        
-        $sellers = User::whereHas('roles', function($q) {
+
+        $sellers = User::whereHas('roles', function ($q) {
             $q->where('name', 'seller');
         })->with('roles')->paginate(10);
 
@@ -66,7 +65,7 @@ class AdminController extends Controller
     public function approveSeller($id)
     {
         $this->checkAdminRole();
-        
+
         $seller = User::findOrFail($id);
         $seller->update([
             'status' => 'active',
@@ -81,7 +80,7 @@ class AdminController extends Controller
     public function suspendSeller($id)
     {
         $this->checkAdminRole();
-        
+
         $seller = User::findOrFail($id);
         $seller->update(['status' => 'suspended']);
 
@@ -91,23 +90,25 @@ class AdminController extends Controller
     public function users()
     {
         $this->checkAdminRole();
-        
+
         $users = User::with('roles')->paginate(10);
+
         return view('admin.users.index', compact('users'));
     }
 
     public function products()
     {
         $this->checkAdminRole();
-        
+
         $products = Product::with(['category', 'seller'])->paginate(10);
+
         return view('admin.products.index', compact('products'));
     }
 
     public function approveProduct($id)
     {
         $this->checkAdminRole();
-        
+
         $product = Product::findOrFail($id);
         $product->update(['is_active' => true]);
 
@@ -117,7 +118,7 @@ class AdminController extends Controller
     public function rejectProduct($id)
     {
         $this->checkAdminRole();
-        
+
         $product = Product::findOrFail($id);
         $product->update(['is_active' => false]);
 
@@ -127,15 +128,16 @@ class AdminController extends Controller
     public function orders()
     {
         $this->checkAdminRole();
-        
+
         $orders = Order::with(['user', 'items.product'])->paginate(10);
+
         return view('admin.orders.index', compact('orders'));
     }
 
     public function reports()
     {
         $this->checkAdminRole();
-        
+
         // Sales analytics, best-sellers, etc.
         return view('admin.reports.index');
     }
@@ -226,4 +228,4 @@ class AdminController extends Controller
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');
     }
-} 
+}

@@ -17,4 +17,4 @@ class CartFactory extends Factory
             'status' => 'active',
         ];
     }
-} 
+}

@@ -19,4 +19,4 @@ class CartItemFactory extends Factory
             'price' => $this->faker->randomFloat(2, 10, 1000),
         ];
     }
-} 
+}

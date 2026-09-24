@@ -1,20 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Customer\AuthController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Customer\CartController;
-use App\Http\Controllers\Customer\WishlistController;
-use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\LocaleController;
+use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\OrderTrackingController;
 use App\Http\Controllers\Customer\SearchController;
 use App\Http\Controllers\Customer\ShopController;
+use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Seller\SellerController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Customer\LocaleController;
-use App\Http\Controllers\Customer\OrderTrackingController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,9 +28,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/shop', [ShopController::class, 'index'])->name('shop');
     Route::get('/products', [\App\Http\Controllers\Customer\ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{product}', [\App\Http\Controllers\Customer\ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{product}', [\App\Http\Controllers\Customer\ProductController::class, 'show'])->name('products.show');
     Route::get('/categories', [\App\Http\Controllers\Customer\CategoryController::class, 'index'])->name('categories.index');
-Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     // Authentication routes

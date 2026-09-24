@@ -10,7 +10,7 @@ class Voucher extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code', 'type', 'amount', 'min_order', 'max_uses', 'used_count', 'valid_from', 'valid_until', 'is_active'
+        'code', 'type', 'amount', 'min_order', 'max_uses', 'used_count', 'valid_from', 'valid_until', 'is_active',
     ];
 
     protected $casts = [
@@ -20,4 +20,4 @@ class Voucher extends Model
         'valid_until' => 'datetime',
         'is_active' => 'boolean',
     ];
-} 
+}

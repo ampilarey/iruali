@@ -20,11 +20,11 @@ class CartService
                 ->where('status', 'active')
                 ->first();
 
-            if (!$cart) {
+            if (! $cart) {
                 $cart = Cart::create([
                     'user_id' => Auth::id(),
                     'session_id' => Session::getId(), // Always provide session_id
-                    'status' => 'active'
+                    'status' => 'active',
                 ]);
             }
         } else {
@@ -33,10 +33,10 @@ class CartService
                 ->where('status', 'active')
                 ->first();
 
-            if (!$cart) {
+            if (! $cart) {
                 $cart = Cart::create([
                     'session_id' => $sessionId,
-                    'status' => 'active'
+                    'status' => 'active',
                 ]);
             }
         }
@@ -60,14 +60,14 @@ class CartService
 
         if ($existingItem) {
             $existingItem->update([
-                'quantity' => $existingItem->quantity + $quantity
+                'quantity' => $existingItem->quantity + $quantity,
             ]);
         } else {
             $cart->items()->create([
                 'product_id' => $productId,
                 'product_variant_id' => $variantId,
                 'quantity' => $quantity,
-                'price' => $product->price
+                'price' => $product->price,
             ]);
         }
 
@@ -80,6 +80,7 @@ class CartService
     public function updateCartItem(CartItem $item, int $quantity): bool
     {
         $item->update(['quantity' => $quantity]);
+
         return true;
     }
 
@@ -89,6 +90,7 @@ class CartService
     public function removeFromCart(CartItem $item): bool
     {
         $item->delete();
+
         return true;
     }
 
@@ -99,6 +101,7 @@ class CartService
     {
         $cart = $this->getOrCreateCart();
         $cart->items()->delete();
+
         return true;
     }
 
@@ -127,7 +130,7 @@ class CartService
             'points_discount' => $pointsDiscount,
             'total' => $total,
             'voucher' => $voucher,
-            'points_redeemed' => $pointsRedeemed
+            'points_redeemed' => $pointsRedeemed,
         ];
     }
 
@@ -137,7 +140,7 @@ class CartService
     public function getAppliedVoucher()
     {
         $voucherCode = Session::get('voucher_code');
-        if (!$voucherCode) {
+        if (! $voucherCode) {
             return null;
         }
 
@@ -154,6 +157,7 @@ class CartService
         if ($voucher->type === 'percent') {
             return round($cart->total * ($voucher->amount / 100), 2);
         }
+
         return min($voucher->amount, $cart->total);
     }
 
@@ -166,7 +170,7 @@ class CartService
             ->where('is_active', true)
             ->first();
 
-        if (!$voucher) {
+        if (! $voucher) {
             return ['success' => false, 'message' => __('Invalid or inactive voucher.')];
         }
 
@@ -187,6 +191,7 @@ class CartService
         }
 
         Session::put('voucher_code', $voucher->code);
+
         return ['success' => true, 'message' => __('Voucher applied!')];
     }
 
@@ -196,6 +201,7 @@ class CartService
     public function removeVoucher(): bool
     {
         Session::forget('voucher_code');
+
         return true;
     }
 
@@ -213,14 +219,14 @@ class CartService
     public function getCartSummary(Cart $cart): array
     {
         $totals = $this->getCartTotals($cart);
-        
+
         return [
             'item_count' => $cart->item_count,
             'subtotal' => $totals['subtotal'],
             'voucher_discount' => $totals['voucher_discount'],
             'points_discount' => $totals['points_discount'],
             'total' => $totals['total'],
-            'voucher' => $totals['voucher']
+            'voucher' => $totals['voucher'],
         ];
     }
-} 
+}

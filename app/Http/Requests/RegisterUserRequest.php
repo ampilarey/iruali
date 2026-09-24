@@ -35,7 +35,7 @@ class RegisterUserRequest extends FormRequest
                     ->mixedCase()
                     ->numbers()
                     ->symbols()
-                    ->uncompromised()
+                    ->uncompromised(),
             ],
             'password_confirmation' => 'required|string',
             'agree_terms' => 'required|accepted',

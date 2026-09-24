@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class SampleProductsSeeder extends Seeder
@@ -14,29 +14,29 @@ class SampleProductsSeeder extends Seeder
     public function run(): void
     {
         $sellerId = User::where('email', 'admin@example.com')->value('id') ?? User::value('id');
-        if (!$sellerId) {
+        if (! $sellerId) {
             return;
         }
 
         $categories = Category::all();
-        
+
         foreach ($categories as $category) {
             $this->addProductsToCategory($category, $sellerId);
         }
     }
-    
+
     private function addProductsToCategory(Category $category, int $sellerId)
     {
         $products = $this->getProductsForCategory($category->name);
-        
+
         foreach ($products as $productData) {
             $product = Product::create([
                 'name' => ['en' => $productData['name']],
-                'slug' => Str::slug($productData['name']) . '-' . Str::random(4),
+                'slug' => Str::slug($productData['name']).'-'.Str::random(4),
                 'description' => ['en' => $productData['description']],
                 'price' => $productData['price'],
                 'sale_price' => $productData['sale_price'] ?? null,
-                'sku' => 'SKU-' . Str::random(8),
+                'sku' => 'SKU-'.Str::random(8),
                 'stock_quantity' => rand(10, 100),
                 'category_id' => $category->id,
                 'seller_id' => $sellerId,
@@ -46,12 +46,12 @@ class SampleProductsSeeder extends Seeder
                 'dimensions' => json_encode([
                     'length' => rand(10, 50),
                     'width' => rand(10, 50),
-                    'height' => rand(10, 50)
+                    'height' => rand(10, 50),
                 ]),
-                'meta_title' => $productData['name'] . ' - iruali',
+                'meta_title' => $productData['name'].' - iruali',
                 'meta_description' => $productData['description'],
             ]);
-            
+
             // Add product image
             if (isset($productData['image'])) {
                 ProductImage::create([
@@ -64,7 +64,7 @@ class SampleProductsSeeder extends Seeder
             }
         }
     }
-    
+
     private function getProductsForCategory(string $categoryName): array
     {
         switch (strtolower($categoryName)) {
@@ -76,7 +76,7 @@ class SampleProductsSeeder extends Seeder
                         'price' => 89.99,
                         'sale_price' => 69.99,
                         'image' => 'images/products/headphones.svg',
-                        'keywords' => 'headphones, wireless, bluetooth, noise cancellation'
+                        'keywords' => 'headphones, wireless, bluetooth, noise cancellation',
                     ],
                     [
                         'name' => 'Smart LED TV 55"',
@@ -84,17 +84,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 599.99,
                         'sale_price' => 499.99,
                         'image' => 'images/products/tv.svg',
-                        'keywords' => 'tv, 4k, smart tv, led, hdr'
+                        'keywords' => 'tv, 4k, smart tv, led, hdr',
                     ],
                     [
                         'name' => 'Portable Bluetooth Speaker',
                         'description' => 'Waterproof portable speaker with 360° sound and 20-hour battery.',
                         'price' => 49.99,
                         'image' => 'images/products/speaker.svg',
-                        'keywords' => 'speaker, bluetooth, portable, waterproof'
-                    ]
+                        'keywords' => 'speaker, bluetooth, portable, waterproof',
+                    ],
                 ];
-                
+
             case 'clothing':
                 return [
                     [
@@ -103,17 +103,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 79.99,
                         'sale_price' => 59.99,
                         'image' => 'images/products/denim-jacket.svg',
-                        'keywords' => 'jacket, denim, casual, classic'
+                        'keywords' => 'jacket, denim, casual, classic',
                     ],
                     [
                         'name' => 'Premium Cotton T-Shirt',
                         'description' => 'Soft, breathable cotton t-shirt available in multiple colors.',
                         'price' => 24.99,
                         'image' => 'images/products/tshirt.jpg',
-                        'keywords' => 'tshirt, cotton, casual, comfortable'
-                    ]
+                        'keywords' => 'tshirt, cotton, casual, comfortable',
+                    ],
                 ];
-                
+
             case 'home & garden':
                 return [
                     [
@@ -122,17 +122,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 199.99,
                         'sale_price' => 159.99,
                         'image' => 'images/products/coffee-table.svg',
-                        'keywords' => 'furniture, coffee table, wooden, modern'
+                        'keywords' => 'furniture, coffee table, wooden, modern',
                     ],
                     [
                         'name' => 'Indoor Plant Set',
                         'description' => 'Set of 3 low-maintenance indoor plants with decorative pots.',
                         'price' => 39.99,
                         'image' => 'images/products/plants.jpg',
-                        'keywords' => 'plants, indoor, decorative, low maintenance'
-                    ]
+                        'keywords' => 'plants, indoor, decorative, low maintenance',
+                    ],
                 ];
-                
+
             case 'sports & outdoors':
                 return [
                     [
@@ -140,7 +140,7 @@ class SampleProductsSeeder extends Seeder
                         'description' => 'Non-slip yoga mat with alignment lines and carrying strap.',
                         'price' => 34.99,
                         'image' => 'images/products/yoga-mat.jpg',
-                        'keywords' => 'yoga, mat, fitness, exercise'
+                        'keywords' => 'yoga, mat, fitness, exercise',
                     ],
                     [
                         'name' => 'Hiking Backpack 30L',
@@ -148,10 +148,10 @@ class SampleProductsSeeder extends Seeder
                         'price' => 89.99,
                         'sale_price' => 69.99,
                         'image' => 'images/products/backpack.jpg',
-                        'keywords' => 'backpack, hiking, outdoor, lightweight'
-                    ]
+                        'keywords' => 'backpack, hiking, outdoor, lightweight',
+                    ],
                 ];
-                
+
             case 'books & media':
                 return [
                     [
@@ -159,17 +159,17 @@ class SampleProductsSeeder extends Seeder
                         'description' => 'Set of 3 bestselling novels in hardcover.',
                         'price' => 49.99,
                         'image' => 'images/products/books.jpg',
-                        'keywords' => 'books, novels, hardcover, collection'
+                        'keywords' => 'books, novels, hardcover, collection',
                     ],
                     [
                         'name' => 'Wireless Gaming Mouse',
                         'description' => 'High-precision gaming mouse with customizable RGB lighting.',
                         'price' => 79.99,
                         'image' => 'images/products/gaming-mouse.jpg',
-                        'keywords' => 'gaming, mouse, wireless, rgb'
-                    ]
+                        'keywords' => 'gaming, mouse, wireless, rgb',
+                    ],
                 ];
-                
+
             case 'health & beauty':
                 return [
                     [
@@ -177,7 +177,7 @@ class SampleProductsSeeder extends Seeder
                         'description' => 'Natural face cream with anti-aging properties.',
                         'price' => 29.99,
                         'image' => 'images/products/face-cream.jpg',
-                        'keywords' => 'beauty, face cream, organic, anti-aging'
+                        'keywords' => 'beauty, face cream, organic, anti-aging',
                     ],
                     [
                         'name' => 'Electric Toothbrush Set',
@@ -185,10 +185,10 @@ class SampleProductsSeeder extends Seeder
                         'price' => 59.99,
                         'sale_price' => 44.99,
                         'image' => 'images/products/toothbrush.jpg',
-                        'keywords' => 'dental, electric toothbrush, sonic, travel'
-                    ]
+                        'keywords' => 'dental, electric toothbrush, sonic, travel',
+                    ],
                 ];
-                
+
             case 'smartphones':
                 return [
                     [
@@ -197,17 +197,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 999.99,
                         'sale_price' => 899.99,
                         'image' => 'images/products/smartphone.jpg',
-                        'keywords' => 'smartphone, 5g, camera, flagship'
+                        'keywords' => 'smartphone, 5g, camera, flagship',
                     ],
                     [
                         'name' => 'Wireless Charging Pad',
                         'description' => 'Fast wireless charging pad compatible with all Qi devices.',
                         'price' => 39.99,
                         'image' => 'images/products/charging-pad.jpg',
-                        'keywords' => 'charging, wireless, qi, fast charge'
-                    ]
+                        'keywords' => 'charging, wireless, qi, fast charge',
+                    ],
                 ];
-                
+
             case 'laptops':
                 return [
                     [
@@ -216,17 +216,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 1299.99,
                         'sale_price' => 1099.99,
                         'image' => 'images/products/laptop.jpg',
-                        'keywords' => 'laptop, ultrabook, intel, lightweight'
+                        'keywords' => 'laptop, ultrabook, intel, lightweight',
                     ],
                     [
                         'name' => 'Laptop Stand & Cooling Pad',
                         'description' => 'Adjustable laptop stand with built-in cooling fans.',
                         'price' => 49.99,
                         'image' => 'images/products/laptop-stand.jpg',
-                        'keywords' => 'laptop stand, cooling, adjustable, ergonomic'
-                    ]
+                        'keywords' => 'laptop stand, cooling, adjustable, ergonomic',
+                    ],
                 ];
-                
+
             case 'men\'s clothing':
                 return [
                     [
@@ -235,17 +235,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 299.99,
                         'sale_price' => 249.99,
                         'image' => 'images/products/business-suit.jpg',
-                        'keywords' => 'suit, formal, business, professional'
+                        'keywords' => 'suit, formal, business, professional',
                     ],
                     [
                         'name' => 'Casual Polo Shirt',
                         'description' => 'Comfortable polo shirt made from breathable fabric.',
                         'price' => 34.99,
                         'image' => 'images/products/polo-shirt.jpg',
-                        'keywords' => 'polo, shirt, casual, breathable'
-                    ]
+                        'keywords' => 'polo, shirt, casual, breathable',
+                    ],
                 ];
-                
+
             case 'women\'s clothing':
                 return [
                     [
@@ -254,17 +254,17 @@ class SampleProductsSeeder extends Seeder
                         'price' => 199.99,
                         'sale_price' => 159.99,
                         'image' => 'images/products/evening-dress.jpg',
-                        'keywords' => 'dress, evening, elegant, formal'
+                        'keywords' => 'dress, evening, elegant, formal',
                     ],
                     [
                         'name' => 'Comfortable Leggings',
                         'description' => 'High-quality leggings perfect for workout or casual wear.',
                         'price' => 29.99,
                         'image' => 'images/products/leggings.jpg',
-                        'keywords' => 'leggings, workout, comfortable, casual'
-                    ]
+                        'keywords' => 'leggings, workout, comfortable, casual',
+                    ],
                 ];
-                
+
             default:
                 return [
                     [
@@ -272,8 +272,8 @@ class SampleProductsSeeder extends Seeder
                         'description' => 'This is a sample product for demonstration purposes.',
                         'price' => 29.99,
                         'image' => 'images/products/sample.jpg',
-                        'keywords' => 'sample, product, demo'
-                    ]
+                        'keywords' => 'sample, product, demo',
+                    ],
                 ];
         }
     }

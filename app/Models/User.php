@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -199,7 +199,7 @@ class User extends Authenticatable
      */
     public function isActive(): bool
     {
-        return $this->is_active && !$this->isBanned();
+        return $this->is_active && ! $this->isBanned();
     }
 
     /**
@@ -207,7 +207,7 @@ class User extends Authenticatable
      */
     public function isEmailVerified(): bool
     {
-        return !is_null($this->email_verified_at);
+        return ! is_null($this->email_verified_at);
     }
 
     /**
@@ -215,7 +215,7 @@ class User extends Authenticatable
      */
     public function isPhoneVerified(): bool
     {
-        return !is_null($this->phone_verified_at);
+        return ! is_null($this->phone_verified_at);
     }
 
     /**
@@ -223,7 +223,7 @@ class User extends Authenticatable
      */
     public function isTwoFactorEnabled(): bool
     {
-        return $this->two_factor_enabled && !empty($this->two_factor_secret);
+        return $this->two_factor_enabled && ! empty($this->two_factor_secret);
     }
 
     /**
@@ -234,7 +234,7 @@ class User extends Authenticatable
         $this->update([
             'two_factor_enabled' => true,
             'two_factor_secret' => encrypt(random_bytes(32)),
-            'two_factor_recovery_codes' => encrypt(json_encode($this->generateRecoveryCodes()))
+            'two_factor_recovery_codes' => encrypt(json_encode($this->generateRecoveryCodes())),
         ]);
     }
 
@@ -246,7 +246,7 @@ class User extends Authenticatable
         $this->update([
             'two_factor_enabled' => false,
             'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null
+            'two_factor_recovery_codes' => null,
         ]);
     }
 
@@ -259,6 +259,7 @@ class User extends Authenticatable
         for ($i = 0; $i < 8; $i++) {
             $codes[] = strtoupper(substr(md5(uniqid()), 0, 8));
         }
+
         return $codes;
     }
 
@@ -267,9 +268,10 @@ class User extends Authenticatable
      */
     public function getRecoveryCodes(): array
     {
-        if (!$this->two_factor_recovery_codes) {
+        if (! $this->two_factor_recovery_codes) {
             return [];
         }
+
         return json_decode(decrypt($this->two_factor_recovery_codes), true);
     }
 
@@ -281,7 +283,7 @@ class User extends Authenticatable
         $this->update([
             'last_login_at' => now(),
             'last_login_ip' => $ip,
-            'login_count' => $this->login_count + 1
+            'login_count' => $this->login_count + 1,
         ]);
     }
 
@@ -292,7 +294,7 @@ class User extends Authenticatable
     {
         $this->update([
             'banned_until' => $until ?? now()->addYear(),
-            'banned_reason' => $reason
+            'banned_reason' => $reason,
         ]);
     }
 
@@ -303,7 +305,7 @@ class User extends Authenticatable
     {
         $this->update([
             'banned_until' => null,
-            'banned_reason' => null
+            'banned_reason' => null,
         ]);
     }
 
@@ -311,6 +313,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'referred_by');
     }
+
     public function referrals()
     {
         return $this->hasMany(User::class, 'referred_by');

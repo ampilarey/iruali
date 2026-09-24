@@ -2,20 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Product;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ReferralTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         // Seed roles, permissions, users, products, etc.
@@ -152,4 +151,4 @@ class ReferralTest extends TestCase
         $user->refresh();
         $this->assertEquals(10, $user->loyalty_points); // Only order points
     }
-} 
+}

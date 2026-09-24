@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\Setting;
-use App\Models\Voucher;
 use App\Models\User;
+use App\Models\Voucher;
 use Illuminate\Support\Facades\Session;
 
 class DiscountService
@@ -17,14 +17,14 @@ class DiscountService
     {
         $voucherDiscount = $this->calculateVoucherDiscount($cart);
         $pointsDiscount = $this->calculatePointsDiscount($cart);
-        
+
         $totalDiscount = $voucherDiscount['amount'] + $pointsDiscount['amount'];
-        
+
         return [
             'voucher' => $voucherDiscount,
             'points' => $pointsDiscount,
             'total_discount' => $totalDiscount,
-            'final_total' => max(0, $cart->total - $totalDiscount)
+            'final_total' => max(0, $cart->total - $totalDiscount),
         ];
     }
 
@@ -35,7 +35,7 @@ class DiscountService
     {
         // Web checkout keeps the voucher in the session; API clients store it on the cart.
         $voucherCode = Session::get('voucher_code') ?: $cart->voucher_code;
-        if (!$voucherCode) {
+        if (! $voucherCode) {
             return ['amount' => 0, 'voucher' => null];
         }
 
@@ -43,7 +43,7 @@ class DiscountService
             ->where('is_active', true)
             ->first();
 
-        if (!$voucher) {
+        if (! $voucher) {
             return ['amount' => 0, 'voucher' => null];
         }
 
@@ -53,7 +53,7 @@ class DiscountService
             'amount' => $amount,
             'voucher' => $voucher,
             'type' => $voucher->type,
-            'description' => $this->getVoucherDescription($voucher, $amount)
+            'description' => $this->getVoucherDescription($voucher, $amount),
         ];
     }
 
@@ -65,7 +65,7 @@ class DiscountService
         if ($voucher->type === 'percent') {
             return round($cart->total * ($voucher->amount / 100), 2);
         }
-        
+
         return min($voucher->amount, $cart->total);
     }
 
@@ -75,11 +75,11 @@ class DiscountService
     public function calculatePointsDiscount(Cart $cart): array
     {
         $pointsRedeemed = Session::get('points_redeemed', 0);
-        
+
         return [
             'amount' => $pointsRedeemed,
             'points_redeemed' => $pointsRedeemed,
-            'description' => "Loyalty Points Discount ({$pointsRedeemed} points)"
+            'description' => "Loyalty Points Discount ({$pointsRedeemed} points)",
         ];
     }
 
@@ -92,7 +92,7 @@ class DiscountService
             ->where('is_active', true)
             ->first();
 
-        if (!$voucher) {
+        if (! $voucher) {
             return ['valid' => false, 'message' => __('Invalid or inactive voucher.')];
         }
 
@@ -121,6 +121,7 @@ class DiscountService
     public function applyVoucher(string $voucherCode): bool
     {
         Session::put('voucher_code', $voucherCode);
+
         return true;
     }
 
@@ -130,6 +131,7 @@ class DiscountService
     public function removeVoucher(): bool
     {
         Session::forget('voucher_code');
+
         return true;
     }
 
@@ -139,7 +141,7 @@ class DiscountService
     public function applyLoyaltyPoints(int $points, User $user, Cart $cart): array
     {
         $maxPoints = min($user->loyalty_points, $cart->total);
-        
+
         if ($points > $maxPoints) {
             return ['valid' => false, 'message' => __('Insufficient points or amount exceeds cart total.')];
         }
@@ -149,6 +151,7 @@ class DiscountService
         }
 
         Session::put('points_redeemed', $points);
+
         return ['valid' => true, 'points' => $points];
     }
 
@@ -158,6 +161,7 @@ class DiscountService
     public function removeLoyaltyPoints(): bool
     {
         Session::forget('points_redeemed');
+
         return true;
     }
 
@@ -205,7 +209,7 @@ class DiscountService
         if ($voucher->type === 'percent') {
             return "Voucher Discount ({$voucher->amount}%)";
         }
-        
+
         return "Voucher Discount (ރ{$voucher->amount})";
     }
 
@@ -223,7 +227,7 @@ class DiscountService
     public function getDiscountBreakdown(Cart $cart): array
     {
         $discounts = $this->calculateTotalDiscount($cart);
-        
+
         return [
             'subtotal' => $cart->total,
             'voucher_discount' => $discounts['voucher']['amount'],
@@ -231,7 +235,7 @@ class DiscountService
             'total_discount' => $discounts['total_discount'],
             'final_total' => $discounts['final_total'],
             'voucher' => $discounts['voucher']['voucher'],
-            'points_redeemed' => $discounts['points']['points_redeemed']
+            'points_redeemed' => $discounts['points']['points_redeemed'],
         ];
     }
-} 
+}

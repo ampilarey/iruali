@@ -43,4 +43,4 @@ class ProductFactory extends Factory
             'meta_description' => $this->faker->sentence(),
         ];
     }
-} 
+}

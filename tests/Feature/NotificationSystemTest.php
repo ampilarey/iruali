@@ -2,42 +2,43 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Cart;
-use App\Models\CartItem;
-use App\Models\Wishlist;
+use App\Models\Category;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Wishlist;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
 
 class NotificationSystemTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
     protected $user;
+
     protected $product;
+
     protected $category;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test data
         $this->user = User::factory()->create([
             'email_verified_at' => now(),
-            'phone_verified_at' => now()
+            'phone_verified_at' => now(),
         ]);
         $this->category = Category::factory()->create();
         $this->product = Product::factory()->create([
             'category_id' => $this->category->id,
             'seller_id' => $this->user->id,
-            'name' => 'Test Product'
+            'name' => 'Test Product',
         ]);
-        
+
         // Create test voucher
         \App\Models\Voucher::create([
             'code' => 'TEST123',
@@ -48,7 +49,7 @@ class NotificationSystemTest extends TestCase
             'used_count' => 0,
             'valid_from' => now()->subDay(),
             'valid_until' => now()->addDay(),
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -68,12 +69,12 @@ class NotificationSystemTest extends TestCase
             'postal_code' => '12345',
             'date_of_birth' => '1990-01-01',
             'gender' => 'male',
-            'agree_terms' => 'on'
+            'agree_terms' => 'on',
         ]);
 
         $response->assertRedirect('/verification/notice');
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -85,12 +86,12 @@ class NotificationSystemTest extends TestCase
     {
         $response = $this->post('/login', [
             'email' => $this->user->email,
-            'password' => 'password'
+            'password' => 'password',
         ]);
 
         $response->assertRedirect('/');
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -106,7 +107,7 @@ class NotificationSystemTest extends TestCase
 
         $response->assertRedirect('/');
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -121,7 +122,7 @@ class NotificationSystemTest extends TestCase
         $code = $otp->code;
         $response = $this->post('/auth/verify/email/otp', [
             'email' => $this->user->email,
-            'code' => $code
+            'code' => $code,
         ]);
         $response->assertRedirect();
         $response->assertSessionHas('notification');
@@ -139,7 +140,7 @@ class NotificationSystemTest extends TestCase
         $code = $otp->code;
         $response = $this->post('/auth/verify/phone/otp', [
             'phone' => $this->user->phone,
-            'code' => $code
+            'code' => $code,
         ]);
         $response->assertRedirect();
         $response->assertSessionHas('notification');
@@ -156,12 +157,12 @@ class NotificationSystemTest extends TestCase
 
         $response = $this->post(route('cart.add'), [
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         $response->assertRedirect(route('cart'));
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -172,20 +173,20 @@ class NotificationSystemTest extends TestCase
     public function it_shows_success_notification_for_removing_from_cart()
     {
         $this->actingAs($this->user);
-        
+
         // Create cart and cart item
         $cart = \App\Models\Cart::factory()->create(['user_id' => $this->user->id]);
         $cartItem = \App\Models\CartItem::factory()->create([
             'cart_id' => $cart->id,
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         $response = $this->delete(route('cart.remove', ['item' => $cartItem->id]));
 
         $response->assertRedirect(route('cart'));
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -196,7 +197,7 @@ class NotificationSystemTest extends TestCase
     public function it_shows_success_notification_for_clearing_cart()
     {
         $this->actingAs($this->user);
-        
+
         // Create cart
         \App\Models\Cart::factory()->create(['user_id' => $this->user->id]);
 
@@ -204,7 +205,7 @@ class NotificationSystemTest extends TestCase
 
         $response->assertRedirect(route('cart'));
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -217,12 +218,12 @@ class NotificationSystemTest extends TestCase
         $this->actingAs($this->user);
 
         $response = $this->post(route('wishlist.add', ['product' => $this->product->id]), [
-            'product_id' => $this->product->id
+            'product_id' => $this->product->id,
         ]);
 
         $response->assertRedirect(route('wishlist'));
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -233,18 +234,18 @@ class NotificationSystemTest extends TestCase
     public function it_shows_success_notification_for_removing_from_wishlist()
     {
         $this->actingAs($this->user);
-        
+
         // Create wishlist item
         $wishlistItem = \App\Models\Wishlist::factory()->create([
             'user_id' => $this->user->id,
-            'product_id' => $this->product->id
+            'product_id' => $this->product->id,
         ]);
 
         $response = $this->delete(route('wishlist.remove', ['product' => $wishlistItem->id]));
 
         $response->assertRedirect(route('wishlist'));
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -255,18 +256,18 @@ class NotificationSystemTest extends TestCase
     public function it_shows_success_notification_for_clearing_wishlist()
     {
         $this->actingAs($this->user);
-        
+
         // Create wishlist item
         \App\Models\Wishlist::factory()->create([
             'user_id' => $this->user->id,
-            'product_id' => $this->product->id
+            'product_id' => $this->product->id,
         ]);
 
         $response = $this->delete(route('wishlist.clear'));
 
         $response->assertRedirect(route('wishlist'));
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -283,10 +284,10 @@ class NotificationSystemTest extends TestCase
             'cart_id' => $cart->id,
             'product_id' => $this->product->id,
             'quantity' => 1,
-            'price' => 100.00
+            'price' => 100.00,
         ]);
         $response = $this->post('/cart/apply-voucher', [
-            'voucher_code' => 'TEST123'
+            'voucher_code' => 'TEST123',
         ]);
         $response->assertRedirect();
         $response->assertSessionHas('notification');
@@ -305,7 +306,7 @@ class NotificationSystemTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Success', $notification['title']);
@@ -317,7 +318,7 @@ class NotificationSystemTest extends TestCase
     {
         $response = $this->post('/login', [
             'email' => 'invalid@example.com',
-            'password' => 'wrongpassword'
+            'password' => 'wrongpassword',
         ]);
 
         $response->assertRedirect();
@@ -334,7 +335,7 @@ class NotificationSystemTest extends TestCase
             'cart_id' => $cart->id,
             'product_id' => $this->product->id,
             'quantity' => 1,
-            'price' => 100.00
+            'price' => 100.00,
         ]);
         $response = $this->post('/orders', [
             'shipping_address' => 'Test Address',
@@ -342,7 +343,7 @@ class NotificationSystemTest extends TestCase
             'shipping_state' => 'Test State',
             'shipping_zip' => '12345',
             'shipping_country' => 'Test Country',
-            'payment_method' => 'invalid' // invalid value
+            'payment_method' => 'invalid', // invalid value
             // 'agree_terms' omitted intentionally
         ]);
         $response->assertRedirect();
@@ -353,21 +354,21 @@ class NotificationSystemTest extends TestCase
     public function it_shows_info_notification_for_duplicate_wishlist_item()
     {
         $this->actingAs($this->user);
-        
+
         // Create wishlist item first
         Wishlist::factory()->create([
             'user_id' => $this->user->id,
-            'product_id' => $this->product->id
+            'product_id' => $this->product->id,
         ]);
 
         // Try to add the same product again
         $response = $this->post(route('wishlist.add', ['product' => $this->product->id]), [
-            'product_id' => $this->product->id
+            'product_id' => $this->product->id,
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('notification');
-        
+
         $notification = session('notification');
         $this->assertEquals('info', $notification['type']);
         $this->assertEquals('Information', $notification['title']);
@@ -379,7 +380,7 @@ class NotificationSystemTest extends TestCase
         // Test success notification
         NotificationService::success('Test success message', 'Custom Title');
         $this->assertTrue(session()->has('notification'));
-        
+
         $notification = session('notification');
         $this->assertEquals('success', $notification['type']);
         $this->assertEquals('Custom Title', $notification['title']);
@@ -475,21 +476,21 @@ class NotificationSystemTest extends TestCase
             [
                 'type' => 'success',
                 'title' => 'Success',
-                'message' => 'First notification'
+                'message' => 'First notification',
             ],
             [
                 'type' => 'error',
                 'title' => 'Error',
-                'message' => 'Second notification'
-            ]
+                'message' => 'Second notification',
+            ],
         ];
 
         NotificationService::multiple($notifications);
         $this->assertTrue(session()->has('notifications'));
-        
+
         $sessionNotifications = session('notifications');
         $this->assertCount(2, $sessionNotifications);
         $this->assertEquals('success', $sessionNotifications[0]['type']);
         $this->assertEquals('error', $sessionNotifications[1]['type']);
     }
-} 
+}

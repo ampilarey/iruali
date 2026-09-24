@@ -100,9 +100,11 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
     // Seller routes
     Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
         Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
-        Route::get('/products', [SellerController::class, 'products'])->name('products');
+        Route::resource('products', \App\Http\Controllers\Seller\ProductController::class)->except(['show']);
         Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [SellerController::class, 'showOrder'])->name('orders.show');
         Route::get('/profile', [SellerController::class, 'profile'])->name('profile');
+        Route::put('/profile', [SellerController::class, 'updateProfile'])->name('profile.update');
         Route::get('/analytics', [SellerController::class, 'analytics'])->name('analytics');
     });
 

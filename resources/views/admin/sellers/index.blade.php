@@ -56,7 +56,7 @@
                                     {{ $seller->created_at->format('M d, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    @if($seller->status !== 'active')
+                                    @if(! $seller->seller_approved)
                                     <form method="POST" action="{{ route('admin.sellers.approve', $seller->id) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900 mr-2">Approve</button>

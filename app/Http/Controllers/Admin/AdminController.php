@@ -65,7 +65,12 @@ class AdminController extends Controller
         $this->checkAdminRole();
         
         $seller = User::findOrFail($id);
-        $seller->update(['status' => 'active']);
+        $seller->update([
+            'status' => 'active',
+            'is_seller' => true,
+            'seller_approved' => true,
+            'seller_approved_at' => now(),
+        ]);
 
         return redirect()->back()->with('success', 'Seller approved successfully.');
     }

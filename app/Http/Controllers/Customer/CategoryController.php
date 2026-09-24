@@ -4,39 +4,38 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\Product;
+use App\Services\CatalogService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with(['products' => function($query) {
-            $query->active()->inStock();
-        }])
-        ->active()
-        ->root()
-        ->get();
+        $categories = Category::active()->root()
+            ->withCount(['products' => fn ($q) => $q->active()])
+            ->with(['children' => fn ($q) => $q->active()])
+            ->get()
+            ->sortBy(fn ($c) => $c->localized_name)
+            ->values();
 
         return view('categories.index', compact('categories'));
     }
 
-    public function show(Category $category)
+    public function show(Request $request, Category $category, CatalogService $catalog)
     {
-        // Check if category is active
-        if (!$category->is_active) {
-            abort(404);
+        abort_unless($category->status === 'active', 404);
+
+        $crumbs = [];
+        if ($category->parent) {
+            $crumbs[] = ['label' => $category->parent->localized_name, 'url' => route('categories.show', $category->parent)];
         }
 
-        $products = Product::with(['category', 'mainImage'])
-            ->active()
-            ->inStock()
-            ->where('category_id', $category->id)
-            ->latest()
-            ->paginate(12);
-
-        $subcategories = $category->children()->active()->get();
-
-        return view('categories.show', compact('category', 'products', 'subcategories'));
+        return view('catalog.index', $catalog->listing($request, ['category' => $category]) + [
+            'title' => $category->localized_name,
+            'subtitle' => $category->localized_description,
+            'category' => $category,
+            'subcategories' => $category->children()->active()->get(),
+            'crumbs' => $crumbs,
+        ]);
     }
 }

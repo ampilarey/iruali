@@ -30,8 +30,11 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/products', [\App\Http\Controllers\Customer\ProductController::class, 'index'])->name('products.index');
     Route::get('/products/{product}', [\App\Http\Controllers\Customer\ProductController::class, 'show'])->name('products.show');
     Route::get('/categories', [\App\Http\Controllers\Customer\CategoryController::class, 'index'])->name('categories.index');
-    Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/{category:slug}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
+    Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
+    Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
+    Route::view('/help', 'pages.help')->name('help');
 
     // Authentication routes
     Route::middleware('guest')->group(function () {

@@ -170,6 +170,7 @@ class OrderService
     {
         $cart->items()->delete();
         $cart->status = 'ordered';
+        $cart->voucher_code = null;
         $cart->save();
     }
 

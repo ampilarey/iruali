@@ -33,7 +33,8 @@ class DiscountService
      */
     public function calculateVoucherDiscount(Cart $cart): array
     {
-        $voucherCode = Session::get('voucher_code');
+        // Web checkout keeps the voucher in the session; API clients store it on the cart.
+        $voucherCode = Session::get('voucher_code') ?: $cart->voucher_code;
         if (!$voucherCode) {
             return ['amount' => 0, 'voucher' => null];
         }

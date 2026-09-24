@@ -2,16 +2,16 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Route;
-use App\Services\SeoService;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
 use App\Services\CartService;
 use App\Services\DiscountService;
 use App\Services\OrderService;
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\User;
+use App\Services\SeoService;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +36,17 @@ class AppServiceProvider extends ServiceProvider
             $view->with('seo', $seo);
         });
 
+        // Departments for the header menu, and the shopper's cart and wishlist counts
+        View::composer('layouts.app', function ($view) {
+            $user = auth()->user();
+
+            $view->with([
+                'navDepartments' => Category::active()->root()->get()->sortBy(fn ($c) => $c->localized_name)->values(),
+                'cartCount' => $user ? (int) \App\Models\CartItem::whereHas('cart', fn ($c) => $c->where('user_id', $user->id)->where('status', 'active'))->sum('quantity') : 0,
+                'wishlistCount' => $user ? \App\Models\Wishlist::where('user_id', $user->id)->count() : 0,
+            ]);
+        });
+
         // Temporarily disabled for debugging
         // $this->app->register(\App\Providers\ViteServiceProvider::class);
     }
@@ -46,8 +57,8 @@ class AppServiceProvider extends ServiceProvider
     private function getSeoData(): array
     {
         $route = Route::current();
-        
-        if (!$route) {
+
+        if (! $route) {
             return SeoService::getDefault();
         }
 
@@ -82,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
         if ($routeName === 'search') {
             $query = request()->get('q', '');
             $totalResults = request()->get('total', 0);
+
             return SeoService::forSearch($query, $totalResults);
         }
 

@@ -10,15 +10,18 @@ class ProductReview extends Model
     protected $fillable = [
         'product_id',
         'user_id',
+        'reviewer_name',
+        'reviewer_email',
         'rating',
         'title',
         'comment',
-        'status'
+        'status',
+        'is_approved',
     ];
 
     protected $casts = [
         'rating' => 'integer',
-        'status' => 'string'
+        'status' => 'string',
     ];
 
     public function product(): BelongsTo
@@ -43,6 +46,6 @@ class ProductReview extends Model
 
     public function getStarsAttribute()
     {
-        return str_repeat('★', $this->rating) . str_repeat('☆', 5 - $this->rating);
+        return str_repeat('★', $this->rating).str_repeat('☆', 5 - $this->rating);
     }
 }

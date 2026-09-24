@@ -1,112 +1,103 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Hero Section -->
-<section class="bg-gradient-to-r from-primary-50 to-accent-50 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            {{ __('Welcome to') }} <span class="text-primary">iruali</span>
-        </h1>
-        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            {{ __('Shops from every island, in one place. Buy from local sellers across the Maldives and get it delivered to your island.') }}
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('shop') }}" class="bg-primary hover:bg-primary-600 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
-                {{ __('Shop Now') }}
-            </a>
-            <a href="{{ route('categories.index') }}" class="bg-white hover:bg-gray-50 text-primary border-2 border-primary px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
-                {{ __('Browse Categories') }}
-            </a>
-        </div>
-    </div>
-</section>
+<div class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 pt-4 lg:pt-6 pb-10 space-y-8 lg:space-y-12">
 
-<!-- Featured Products Section -->
-<section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">{{ __('Featured Products') }}</h2>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            @php
-                // Get actual featured products from database
-                $featuredProducts = \App\Models\Product::with(['category', 'mainImage'])
-                    ->active()
-                    ->inStock()
-                    ->featured()
-                    ->take(4)
-                    ->get();
-                    
-                // If no featured products, get some active products
-                if ($featuredProducts->count() == 0) {
-                    $featuredProducts = \App\Models\Product::with(['category', 'mainImage'])
-                        ->active()
-                        ->inStock()
-                        ->latest()
-                        ->take(4)
-                        ->get();
-                }
-            @endphp
-            
-            @foreach($featuredProducts as $product)
-                <x-product-card :product="$product" />
-            @endforeach
-        </div>
-        
-        <div class="text-center mt-8">
-            <a href="{{ route('products.index') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-hover transition duration-200">
-                {{ __('View All Products') }}
-                <svg class="ms-2 -me-1 w-5 h-5 rtl:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                </svg>
-            </a>
-        </div>
-    </div>
-</section>
+        <!-- Hero + side promos -->
+        <section class="grid lg:grid-cols-3 gap-3 lg:gap-4">
+            <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-primary text-white p-6 sm:p-10 min-h-[15rem] lg:min-h-[20rem] flex flex-col justify-end">
+                <svg class="absolute -top-6 -end-10 w-44 h-44 opacity-30 sm:opacity-90 sm:top-auto sm:-bottom-6 sm:end-0 sm:w-64 sm:h-64 lg:w-80 lg:h-80 text-sun" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M20 110a80 80 0 01160 0z"/><rect x="10" y="122" width="180" height="12" rx="6" fill="#63C0B2"/><rect x="45" y="146" width="110" height="10" rx="5" fill="#9DD8CE"/></svg>
+                <div class="relative max-w-md">
+                    <p class="inline-block px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-3">{{ __('Shops from every island, in one place.') }}</p>
+                    <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">{{ __('Local shops. Island delivery.') }}</h1>
+                    <p class="mt-3 text-white/85 sm:text-lg">{{ __('Buy from local sellers across the Maldives and get it delivered to your island.') }}</p>
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <a href="{{ route('shop') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-sun text-sun-on font-semibold hover:bg-accent-400">{{ __('Shop Now') }}<x-icon name="arrow-right" class="w-4 h-4 rtl:rotate-180" /></a>
+                        <a href="{{ route('categories.index') }}" class="inline-flex items-center px-6 py-3 rounded-lg bg-white/10 border border-white/30 font-semibold hover:bg-white/20">{{ __('Browse Categories') }}</a>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
+                <a href="{{ route('deals') }}" class="group rounded-2xl bg-coral text-white p-5 flex flex-col justify-between min-h-[8rem] hover:bg-coral-hover">
+                    <x-icon name="tag" class="w-7 h-7" />
+                    <span>
+                        <span class="block font-display text-xl lg:text-2xl font-bold">{{ __('Today\'s deals') }}</span>
+                        <span class="text-sm text-white/85 inline-flex items-center gap-1">{{ __('Marked-down prices') }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180 group-hover:translate-x-0.5 transition" /></span>
+                    </span>
+                </a>
+                <a href="{{ route('seller.apply') }}" class="group rounded-2xl bg-reef text-white p-5 flex flex-col justify-between min-h-[8rem] hover:bg-reef-night">
+                    <x-icon name="store" class="w-7 h-7 text-sun" />
+                    <span>
+                        <span class="block font-display text-xl lg:text-2xl font-bold">{{ __('Sell on iruali') }}</span>
+                        <span class="text-sm text-white/85 inline-flex items-center gap-1">{{ __('Open your shop') }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" /></span>
+                    </span>
+                </a>
+            </div>
+        </section>
 
-<!-- Features Section -->
-<section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">{{ __('Why shop on iruali') }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+        <!-- Departments -->
+        @if($departments->isNotEmpty())
+            <section>
+                <div class="flex items-end justify-between gap-4 mb-3">
+                    <h2 class="font-display text-xl lg:text-2xl font-bold text-dark">{{ __('Shop by department') }}</h2>
+                    <a href="{{ route('categories.index') }}" class="shrink-0 whitespace-nowrap text-sm font-semibold text-primary hover:underline">{{ __('See all') }}</a>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ __('Local sellers') }}</h3>
-                <p class="text-gray-600">{{ __('Every shop is reviewed by our team before its products go live.') }}</p>
-            </div>
-            <div class="text-center">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                    </svg>
+                <div class="grid grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-3">
+                    @foreach($departments as $dept)
+                        <a href="{{ route('categories.show', $dept) }}" class="group bg-white border border-gray-200 rounded-xl p-2.5 lg:p-4 flex flex-col items-center text-center gap-2 hover:border-primary hover:shadow-sm">
+                            <span class="w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-primary-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition"><x-icon :name="$dept->slug" class="w-5 h-5 lg:w-7 lg:h-7" /></span>
+                            <span class="text-[11px] sm:text-xs lg:text-sm font-semibold leading-tight text-dark">{{ $dept->localized_name }}</span>
+                        </a>
+                    @endforeach
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ __('Delivered to your island') }}</h3>
-                <p class="text-gray-600">{{ __('Sellers ship by boat and air to islands across every atoll. Track your order from the moment it\'s packed.') }}</p>
-            </div>
-            <div class="text-center">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ __('Points on every order') }}</h3>
-                <p class="text-gray-600">{{ __('Earn loyalty points when you shop, and more when a friend you refer places their first order.') }}</p>
-            </div>
-        </div>
-    </div>
-</section>
+            </section>
+        @endif
 
-<!-- CTA Section -->
-<section class="py-16 bg-primary">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold text-white mb-4">{{ __('Sell on iruali') }}</h2>
-        <p class="text-xl text-primary-100 mb-8">{{ __('Have a shop? Reach customers on every inhabited island. Applying takes five minutes.') }}</p>
-        <a href="{{ route('seller.apply') }}" class="bg-white hover:bg-gray-100 text-primary px-8 py-3 rounded-lg text-lg font-semibold transition-colors inline-block">
-            {{ __('Open your shop') }}
-        </a>
+        @if($deals->isNotEmpty())
+            <x-product-row :title="__('Today\'s deals')" :products="$deals" :link="route('deals')" />
+        @endif
+
+        @if($featured->isNotEmpty())
+            <x-product-row :title="__('Featured Products')" :products="$featured" :link="route('products.index')" />
+        @endif
+
+        <!-- Shops -->
+        @if($shops->isNotEmpty())
+            <section>
+                <h2 class="font-display text-xl lg:text-2xl font-bold text-dark mb-3">{{ __('Shops on iruali') }}</h2>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-4">
+                    @foreach($shops as $shop)
+                        @php $shopName = $shop->business_name ?: $shop->name; @endphp
+                        <a href="{{ route('sellers.show', $shop) }}" class="group bg-white border border-gray-200 rounded-xl p-3 lg:p-4 flex items-center gap-3 hover:border-primary hover:shadow-sm">
+                            <span class="w-11 h-11 shrink-0 rounded-lg bg-primary text-white font-display font-bold text-lg flex items-center justify-center">{{ mb_strtoupper(mb_substr($shopName, 0, 1)) }}</span>
+                            <span class="min-w-0">
+                                <span class="block font-semibold text-sm text-dark truncate group-hover:text-primary">{{ $shopName }}</span>
+                                <span class="block text-xs text-gray-500 truncate">{{ $shop->city ? $shop->city.' · ' : '' }}{{ trans_choice(':count product|:count products', $shop->products_count, ['count' => $shop->products_count]) }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if($newArrivals->isNotEmpty())
+            <x-product-row :title="__('New arrivals')" :products="$newArrivals" :link="route('shop', ['sort' => 'newest'])" />
+        @endif
+
+        <div class="text-center">
+            <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white">{{ __('View All Products') }}<x-icon name="arrow-right" class="w-4 h-4 rtl:rotate-180" /></a>
+        </div>
+
+        <!-- Sell CTA -->
+        <section class="rounded-2xl bg-white border border-gray-200 p-6 lg:p-10 flex flex-col lg:flex-row lg:items-center gap-6">
+            <span class="w-14 h-14 shrink-0 rounded-2xl bg-sun-soft text-sun-ink flex items-center justify-center"><x-icon name="store" class="w-7 h-7" /></span>
+            <div class="flex-1">
+                <h2 class="font-display text-2xl font-bold text-dark">{{ __('Sell on iruali') }}</h2>
+                <p class="text-gray-600 mt-1">{{ __('Have a shop? Reach customers on every inhabited island. Applying takes five minutes.') }}</p>
+            </div>
+            <a href="{{ route('seller.apply') }}" class="self-start lg:self-auto inline-flex items-center px-6 py-3 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Open your shop') }}</a>
+        </section>
     </div>
-</section>
-@endsection 
+</div>
+@endsection

@@ -104,18 +104,34 @@ class Product extends Model
         return $this->sale_price ?? $this->price;
     }
 
+    /**
+     * The "was" price shown struck through: sellers set it as compare_price.
+     */
+    public function getWasPriceAttribute(): ?float
+    {
+        $was = (float) ($this->compare_price ?? 0);
+
+        return $was > (float) $this->final_price ? $was : null;
+    }
+
+    public function getSavingsAttribute(): float
+    {
+        return $this->was_price ? round($this->was_price - (float) $this->final_price, 2) : 0.0;
+    }
+
     public function getDiscountPercentageAttribute()
     {
-        if ($this->sale_price && $this->price > $this->sale_price) {
-            return round((($this->price - $this->sale_price) / $this->price) * 100);
-        }
-
-        return 0;
+        return $this->was_price ? (int) round($this->savings / $this->was_price * 100) : 0;
     }
 
     public function getIsOnSaleAttribute()
     {
-        return $this->sale_price && $this->sale_price < $this->price;
+        return $this->was_price !== null;
+    }
+
+    public function scopeOnSale($query)
+    {
+        return $query->whereNotNull('compare_price')->whereColumn('compare_price', '>', 'price');
     }
 
     public function getIsInStockAttribute()

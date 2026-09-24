@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Product;
-use App\Models\Category;
-use App\Http\Resources\ProductResource;
-use App\Http\Resources\CategoryResource;
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -43,9 +41,9 @@ class ProductController extends BaseController
 
         if ($request->search) {
             $query->where(function ($q) use ($request) {
-                $q->whereRaw("JSON_EXTRACT(name, '$.en') LIKE ?", ['%' . $request->search . '%'])
-                  ->orWhereRaw("JSON_EXTRACT(description, '$.en') LIKE ?", ['%' . $request->search . '%'])
-                  ->orWhere('sku', 'LIKE', '%' . $request->search . '%');
+                $q->whereRaw("JSON_EXTRACT(name, '$.en') LIKE ?", ['%'.$request->search.'%'])
+                    ->orWhereRaw("JSON_EXTRACT(description, '$.en') LIKE ?", ['%'.$request->search.'%'])
+                    ->orWhere('sku', 'LIKE', '%'.$request->search.'%');
             });
         }
 
@@ -103,7 +101,7 @@ class ProductController extends BaseController
      */
     public function show(Product $product)
     {
-        if (!$product->is_active) {
+        if (! $product->is_active) {
             return $this->sendNotFound('Product not found');
         }
 
@@ -126,7 +124,7 @@ class ProductController extends BaseController
         }
 
         $limit = $request->limit ?? 10;
-        
+
         $products = Product::with(['category', 'mainImage', 'seller'])
             ->active()
             ->featured()
@@ -175,13 +173,12 @@ class ProductController extends BaseController
         }
 
         $limit = $request->limit ?? 10;
-        
+
         $products = Product::with(['category', 'mainImage', 'seller'])
             ->active()
-            ->whereNotNull('sale_price')
-            ->where('sale_price', '<', \DB::raw('price'))
+            ->onSale()
             ->inStock()
-            ->orderBy('discount_percentage', 'desc')
+            ->orderByRaw('(compare_price - price) / compare_price DESC')
             ->limit($limit)
             ->get();
 
@@ -192,6 +189,7 @@ class ProductController extends BaseController
                 'price' => $product->price,
                 'final_price' => $product->final_price,
                 'sale_price' => $product->sale_price,
+                'was_price' => $product->was_price,
                 'discount_percentage' => $product->discount_percentage,
                 'stock_quantity' => $product->stock_quantity,
                 'is_in_stock' => $product->is_in_stock,
@@ -218,10 +216,10 @@ class ProductController extends BaseController
     public function store(StoreProductRequest $request)
     {
         $data = $request->validated();
-        
+
         // Set the seller_id to the authenticated user
         $data['seller_id'] = auth()->id();
-        
+
         $product = Product::create($data);
 
         return $this->sendResponse(new ProductResource($product), 'Product created successfully', 201);

@@ -47,6 +47,20 @@ class CartController extends Controller
         ]);
 
         $product = Product::find($request->product_id);
+
+        if (! $product->is_active) {
+            NotificationService::error(__('This product is not available.'));
+
+            return back();
+        }
+
+        $inCart = (int) ($this->cartService->getOrCreateCart()->items()->where('product_id', $product->id)->sum('quantity'));
+        if ($product->stock_quantity < $inCart + (int) $request->quantity) {
+            NotificationService::error(__('Only :count left in stock.', ['count' => max(0, $product->stock_quantity - $inCart)]));
+
+            return back();
+        }
+
         $this->cartService->addToCart(
             $request->product_id,
             $request->quantity

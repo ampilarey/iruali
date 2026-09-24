@@ -2,14 +2,20 @@
 @php
     // Dhivehi reads right-to-left. Admin and Seller Centre pages are English-only for now, so they stay LTR.
     $rtl = app()->getLocale() === 'dv' && ! request()->routeIs('admin.*', 'seller.*');
+    $announcement = \App\Models\Setting::get('announcement_text');
+    $contactEmail = \App\Models\Setting::get('contact_email');
+    $contactPhone = \App\Models\Setting::get('contact_phone');
+    $navDepartments = $navDepartments ?? collect();
+    $cartCount = $cartCount ?? 0;
+    $wishlistCount = $wishlistCount ?? 0;
+    $otherLocale = app()->getLocale() === 'dv' ? 'en' : 'dv';
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Iruali E-commerce') }}</title>
-    
+
     <!-- Favicon and Web App Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/site.webmanifest">
@@ -22,399 +28,386 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Thaana:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-background text-dark">
-    <!-- Top Banner -->
-    @php $announcement = \App\Models\Setting::get('announcement_text'); @endphp
-    @if($announcement)
-    <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <span>{{ __($announcement) }}</span>
-        </div>
-    </div>
-    @endif
+<body class="font-sans antialiased bg-background text-dark pb-16 lg:pb-0">
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:start-2 focus:z-[100] focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">{{ __('Skip to content') }}</a>
 
-    <!-- Sticky Header (desktop only — mobile uses the fixed header below) -->
-    <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 hidden lg:block">
-        <!-- Main Header -->
-        <div class="bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <!-- Logo -->
-                    <div class="flex items-center">
-                        <a href="/" class="block" aria-label="{{ __('iruali home') }}">
-                            <img src="/images/brand/iruali-logo.svg" alt="iruali" width="160" height="41" class="h-10 w-auto">
-                        </a>
-                    </div>
-
-                    <!-- Search Bar -->
-                    <div class="flex-1 max-w-2xl mx-8">
-                        <form action="{{ route('search') }}" method="GET" class="relative">
-                            <input type="text" name="q" placeholder="{{ __('Search for products, brands, and more...') }}" 
-                                   class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50 hover:bg-white transition-colors">
-                            <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Right Side Actions -->
-                    <div class="flex items-center space-x-6">
-                        <!-- Account -->
-                        @auth
-                            <div class="relative group">
-                                <button class="flex items-center space-x-2 text-dark hover:text-primary transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
-                                <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50 opacity-0 group-hover:opacity-100 group-hover:visible invisible transition-all duration-200 border border-gray-200">
-                                    <div class="px-4 py-3 border-b border-gray-100">
-                                        <p class="text-sm font-medium text-dark">{{ auth()->user()->name }}</p>
-                                        <p class="text-xs text-gray-500">{{ auth()->user()->email }}</p>
-                                    </div>
-                                    <div class="py-2">
-                                        <a href="{{ route('account') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
-                                            <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                            </svg>
-                                            {{ __('My Account') }}
-                                        </a>
-                                        @if(auth()->user()->hasRole('admin'))
-                                            <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
-                                                <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
-                                                </svg>
-                                                {{ __('Admin Dashboard') }}
-                                            </a>
-                                        @endif
-                                        <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
-                                            <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l1-5h16l1 5M3 9h18M3 9v11h18V9M9 20v-6h6v6"></path>
-                                            </svg>
-                                            {{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}
-                                        </a>
-                                        <a href="{{ route('orders') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
-                                            <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                            {{ __('My Orders') }}
-                                        </a>
-                                        <a href="{{ route('wishlist') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
-                                            <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                            </svg>
-                                            {{ __('Wishlist') }}
-                                        </a>
-                                    </div>
-                                    <div class="border-t border-gray-100 pt-2">
-                                        <form action="{{ route('logout') }}" method="POST" class="block">
-                                            @csrf
-                                            <button type="submit" class="w-full text-left flex items-center px-4 py-2 text-sm text-danger hover:text-danger/80 hover:bg-red-50 transition-colors">
-                                                <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                                </svg>
-                                                {{ __('Sign Out') }}
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <a href="{{ route('login') }}" class="flex items-center space-x-2 text-dark hover:text-primary transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                                <span class="text-sm font-medium">{{ __('Sign In') }}</span>
-                            </a>
-                        @endauth
-
-                        <!-- Cart -->
-                        <a href="{{ route('cart') }}" class="relative flex items-center space-x-2 text-dark hover:text-primary transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            <span class="text-sm font-medium">{{ __('Cart') }}</span>
-                            @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
-                                <span class="absolute -top-2 -right-2 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center font-bold">
-                                    {{ auth()->user()->cart->item_count }}
-                                </span>
-                            @endif
-                        </a>
-                    </div>
-                </div>
+    <!-- Utility bar (desktop) -->
+    <div class="hidden lg:block bg-reef text-white/85 text-xs">
+        <div class="max-w-7xl mx-auto px-6 h-8 flex items-center justify-between gap-6">
+            <p class="truncate">@if($announcement){{ __($announcement) }}@endif</p>
+            <div class="flex items-center gap-5 shrink-0">
+                <a href="{{ route('order.track.form') }}" class="hover:text-white">{{ __('Track Order') }}</a>
+                <a href="{{ route('seller.apply') }}" class="hover:text-white">{{ __('Sell on iruali') }}</a>
+                <a href="{{ route('help') }}" class="hover:text-white">{{ __('Help centre') }}</a>
+                @if($contactPhone)
+                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="hover:text-white" dir="ltr">{{ $contactPhone }}</a>
+                @endif
+                <form action="{{ route('locale.switch') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="locale" value="{{ $otherLocale }}">
+                    <button type="submit" class="inline-flex items-center gap-1 hover:text-white" lang="{{ $otherLocale }}">
+                        <x-icon name="globe" class="w-3.5 h-3.5" />{{ $otherLocale === 'dv' ? 'ދިވެހި' : 'English' }}
+                    </button>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- Mega Menu -->
-        <nav class="bg-gray-50 border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center space-x-8 h-12">
-                    <a href="{{ route('home') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Home') }}
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6">
+            <div class="flex items-center gap-2 lg:gap-6 h-14 lg:h-[72px]">
+                <button type="button" data-drawer-open class="lg:hidden -ms-1 p-2 text-dark" aria-label="{{ __('Open menu') }}">
+                    <x-icon name="menu" class="w-6 h-6" />
+                </button>
+
+                <a href="{{ route('home') }}" class="shrink-0" aria-label="{{ __('iruali home') }}">
+                    <img src="/images/brand/iruali-logo.svg" alt="iruali" width="156" height="40" class="h-8 lg:h-10 w-auto">
+                </a>
+
+                <!-- Search (desktop) -->
+                <form action="{{ route('search') }}" method="GET" role="search" class="hidden lg:flex flex-1 h-11 rounded-lg border-2 border-primary overflow-hidden bg-white focus-within:ring-2 focus-within:ring-primary/30">
+                    <label for="search-department" class="sr-only">{{ __('Department') }}</label>
+                    <select id="search-department" name="category" class="h-full border-0 border-e border-gray-200 bg-gray-50 text-sm text-gray-700 ps-3 pe-8 max-w-[11rem] focus:ring-0">
+                        <option value="">{{ __('All departments') }}</option>
+                        @foreach($navDepartments as $dept)
+                            <option value="{{ $dept->slug }}" @selected(request('category') === $dept->slug || (request()->route('category')?->slug ?? null) === $dept->slug)>{{ $dept->localized_name }}</option>
+                        @endforeach
+                    </select>
+                    <label for="search-q" class="sr-only">{{ __('Search') }}</label>
+                    <input id="search-q" type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('Search products, brands and shops') }}"
+                           class="flex-1 min-w-0 border-0 px-4 text-sm focus:ring-0" autocomplete="off">
+                    <button type="submit" class="px-5 bg-primary hover:bg-primary-hover text-white flex items-center gap-2 text-sm font-semibold">
+                        <x-icon name="search" class="w-5 h-5" /><span class="sr-only">{{ __('Search') }}</span>
+                    </button>
+                </form>
+
+                <div class="flex items-center gap-1 lg:gap-5 ms-auto lg:ms-0">
+                    <!-- Account -->
+                    @auth
+                        <div class="relative group hidden lg:block">
+                            <a href="{{ route('account') }}" class="flex items-center gap-2 text-dark hover:text-primary">
+                                <x-icon name="user" class="w-6 h-6" />
+                                <span class="leading-tight text-start">
+                                    <span class="block text-xs text-gray-500">{{ __('Hello, :name', ['name' => \Illuminate\Support\Str::of(auth()->user()->name)->before(' ')]) }}</span>
+                                    <span class="flex items-center gap-1 text-sm font-semibold">{{ __('Account & Orders') }}<x-icon name="chevron-down" class="w-3 h-3" /></span>
+                                </span>
+                            </a>
+                            <div class="absolute end-0 top-full pt-2 w-64 invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition z-50">
+                                <div class="bg-white rounded-xl shadow-xl border border-gray-200 py-2 text-sm">
+                                    <div class="px-4 py-2 border-b border-gray-100">
+                                        <p class="font-semibold text-dark truncate">{{ auth()->user()->name }}</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</p>
+                                    </div>
+                                    <a href="{{ route('account') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Account') }}</a>
+                                    <a href="{{ route('orders') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Orders') }}</a>
+                                    <a href="{{ route('wishlist') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wishlist') }}</a>
+                                    <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ auth()->user()->hasRole('seller') ? __('Seller Centre') : __('Sell on iruali') }}</a>
+                                    @if(auth()->user()->hasRole('admin'))
+                                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
+                                    @endif
+                                    <form action="{{ route('logout') }}" method="POST" class="border-t border-gray-100 mt-1 pt-1">
+                                        @csrf
+                                        <button type="submit" class="w-full text-start px-4 py-2 text-danger hover:bg-danger-50">{{ __('Sign Out') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="hidden lg:flex items-center gap-2 text-dark hover:text-primary">
+                            <x-icon name="user" class="w-6 h-6" />
+                            <span class="leading-tight text-start">
+                                <span class="block text-xs text-gray-500">{{ __('Hello, sign in') }}</span>
+                                <span class="block text-sm font-semibold">{{ __('Account & Orders') }}</span>
+                            </span>
+                        </a>
+                    @endauth
+
+                    <a href="{{ auth()->check() ? route('account') : route('login') }}" class="lg:hidden p-2 text-dark" aria-label="{{ __('My Account') }}">
+                        <x-icon name="user" class="w-6 h-6" />
                     </a>
-                    <a href="{{ route('shop') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Shop') }}
+
+                    <!-- Wishlist -->
+                    <a href="{{ route('wishlist') }}" class="relative hidden lg:flex items-center p-1 text-dark hover:text-primary" aria-label="{{ __('Wishlist') }}">
+                        <x-icon name="heart" class="w-6 h-6" />
+                        @if($wishlistCount > 0)
+                            <span class="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{{ $wishlistCount }}</span>
+                        @endif
                     </a>
-                    <a href="{{ route('products.index') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Products') }}
+
+                    <!-- Cart -->
+                    <a href="{{ route('cart') }}" class="relative flex items-center gap-2 p-2 lg:p-0 text-dark hover:text-primary" aria-label="{{ __('Cart') }}">
+                        <span class="relative">
+                            <x-icon name="cart" class="w-6 h-6" />
+                            @if($cartCount > 0)
+                                <span class="absolute -top-2 -end-2 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-[11px] font-bold flex items-center justify-center">{{ $cartCount }}</span>
+                            @endif
+                        </span>
+                        <span class="hidden lg:block text-sm font-semibold">{{ __('Cart') }}</span>
                     </a>
-                    <a href="{{ route('categories.index') }}" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Categories') }}
-                    </a>
-                    <a href="#" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Deals') }}
-                    </a>
-                    <a href="#" class="text-dark hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Support') }}
-                    </a>
+                </div>
+            </div>
+
+            <!-- Search (mobile) -->
+            <form action="{{ route('search') }}" method="GET" role="search" class="lg:hidden pb-2.5">
+                <label for="search-q-mobile" class="sr-only">{{ __('Search') }}</label>
+                <div class="flex h-11 rounded-lg border-2 border-primary overflow-hidden bg-white">
+                    <input id="search-q-mobile" type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('Search products, brands and shops') }}"
+                           class="flex-1 min-w-0 border-0 px-3 text-base focus:ring-0" autocomplete="off">
+                    <button type="submit" class="px-4 bg-primary text-white" aria-label="{{ __('Search') }}"><x-icon name="search" class="w-5 h-5" /></button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Department bar (desktop) -->
+        <nav class="hidden lg:block bg-primary text-white" aria-label="{{ __('Departments') }}">
+            <div class="max-w-7xl mx-auto px-6 flex items-center h-11 text-sm font-medium">
+                <div class="relative" data-mega>
+                    <button type="button" data-mega-toggle aria-expanded="false" class="h-11 flex items-center gap-2 pe-5 me-2 border-e border-white/20 font-semibold hover:text-sun">
+                        <x-icon name="menu" class="w-5 h-5" />{{ __('All Departments') }}<x-icon name="chevron-down" class="w-3.5 h-3.5" />
+                    </button>
+                    <div data-mega-panel class="hidden absolute start-0 top-full w-[760px] bg-white text-dark rounded-b-xl shadow-2xl border border-gray-200 p-5 z-50">
+                        <div class="grid grid-cols-2 gap-1">
+                            @foreach($navDepartments as $dept)
+                                <a href="{{ route('categories.show', $dept) }}" class="flex items-start gap-3 p-3 rounded-lg hover:bg-primary-50 group/dept">
+                                    <span class="w-10 h-10 shrink-0 rounded-lg bg-primary-50 group-hover/dept:bg-white text-primary flex items-center justify-center"><x-icon :name="$dept->slug" class="w-5 h-5" /></span>
+                                    <span class="min-w-0">
+                                        <span class="block font-semibold group-hover/dept:text-primary">{{ $dept->localized_name }}</span>
+                                        <span class="block text-xs text-gray-500 line-clamp-2">{{ $dept->localized_description }}</span>
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm">
+                            <a href="{{ route('categories.index') }}" class="font-semibold text-primary hover:underline">{{ __('See all departments') }}</a>
+                            <a href="{{ route('deals') }}" class="inline-flex items-center gap-1.5 font-semibold text-coral hover:underline"><x-icon name="tag" class="w-4 h-4" />{{ __('Today\'s deals') }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 min-w-0 overflow-hidden">
+                    @foreach($navDepartments->take(6) as $dept)
+                        <a href="{{ route('categories.show', $dept) }}" class="px-3 h-11 flex items-center whitespace-nowrap hover:bg-white/10 {{ request()->route('category')?->id === $dept->id ? 'bg-white/15' : '' }}">{{ $dept->localized_name }}</a>
+                    @endforeach
+                </div>
+                <div class="ms-auto flex items-center gap-1 shrink-0">
+                    <a href="{{ route('shop', ['sort' => 'newest']) }}" class="px-3 h-11 flex items-center hover:bg-white/10">{{ __('New arrivals') }}</a>
+                    <a href="{{ route('deals') }}" class="ms-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sun text-sun-on font-semibold hover:bg-accent-400"><x-icon name="tag" class="w-4 h-4" />{{ __('Deals') }}</a>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Mobile Header (Hidden on Desktop) -->
-    <div class="lg:hidden sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
-        <div class="flex items-center justify-between px-4 py-3">
-            <button id="mobile-menu-button" class="text-dark hover:text-primary transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            
-            <a href="/" class="block" aria-label="{{ __('iruali home') }}">
-                <img src="/images/brand/iruali-logo.svg" alt="iruali" width="125" height="32" class="h-8 w-auto">
-            </a>
-            
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('cart') }}" class="relative text-dark hover:text-primary transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                    @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
-                        <span class="absolute -top-2 -right-2 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center font-bold">
-                            {{ auth()->user()->cart->item_count }}
-                        </span>
-                    @endif
-                </a>
+    <!-- Mobile drawer -->
+    <div data-drawer class="fixed inset-0 z-[60] hidden lg:hidden" role="dialog" aria-modal="true" aria-label="{{ __('Menu') }}">
+        <div data-drawer-close class="absolute inset-0 bg-reef/60"></div>
+        <aside class="absolute inset-y-0 start-0 w-[86%] max-w-sm bg-white shadow-2xl flex flex-col">
+            <div class="bg-primary text-white px-4 py-4 flex items-center gap-3">
+                <x-icon name="user" class="w-7 h-7" />
+                <div class="flex-1 min-w-0">
+                    @auth
+                        <p class="font-semibold truncate">{{ __('Hello, :name', ['name' => \Illuminate\Support\Str::of(auth()->user()->name)->before(' ')]) }}</p>
+                        <a href="{{ route('account') }}" class="text-sm text-white/85 underline">{{ __('My Account') }}</a>
+                    @else
+                        <a href="{{ route('login') }}" class="font-semibold">{{ __('Hello, sign in') }}</a>
+                        <a href="{{ route('register') }}" class="block text-sm text-white/85 underline">{{ __('Create an account') }}</a>
+                    @endauth
+                </div>
+                <button type="button" data-drawer-close class="p-1" aria-label="{{ __('Close menu') }}"><x-icon name="x" class="w-6 h-6" /></button>
             </div>
-        </div>
-        
-        <!-- Mobile Search -->
-        <div class="px-4 pb-3">
-            <form action="{{ route('search') }}" method="GET" class="relative">
-                <input type="text" name="q" placeholder="{{ __('Search products...') }}" 
-                       class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-base bg-gray-50">
-                <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden">
-        <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out -translate-x-full" id="mobile-menu">
-            <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                <img src="/images/brand/iruali-logo.svg" alt="iruali" width="125" height="32" class="h-8 w-auto">
-                <button id="close-mobile-menu" class="text-gray-500 hover:text-dark transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <nav class="p-4 space-y-1">
-                <a href="{{ route('home') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Home') }}</a>
-                <a href="{{ route('shop') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Shop') }}</a>
-                <a href="{{ route('products.index') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Products') }}</a>
-                <a href="{{ route('categories.index') }}" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Categories') }}</a>
-                <a href="#" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Deals') }}</a>
-                <a href="#" class="block px-4 py-3 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Support') }}</a>
+            <nav class="flex-1 overflow-y-auto overscroll-contain">
+                <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Departments') }}</p>
+                @foreach($navDepartments as $dept)
+                    <a href="{{ route('categories.show', $dept) }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50">
+                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary flex items-center justify-center"><x-icon :name="$dept->slug" class="w-4 h-4" /></span>
+                        <span class="flex-1">{{ $dept->localized_name }}</span>
+                        <x-icon name="chevron-right" class="w-4 h-4 text-gray-400 rtl:rotate-180" />
+                    </a>
+                @endforeach
+                <div class="border-t border-gray-100 mt-2">
+                    <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Shop') }}</p>
+                    <a href="{{ route('deals') }}" class="flex items-center gap-3 px-4 py-3 font-semibold text-coral hover:bg-gray-50"><x-icon name="tag" class="w-5 h-5" />{{ __('Today\'s deals') }}</a>
+                    <a href="{{ route('shop', ['sort' => 'newest']) }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="gift" class="w-5 h-5 text-gray-500" />{{ __('New arrivals') }}</a>
+                    <a href="{{ route('shop') }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="squares" class="w-5 h-5 text-gray-500" />{{ __('Shop all products') }}</a>
+                </div>
+                <div class="border-t border-gray-100 mt-2">
+                    <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Your account') }}</p>
+                    <a href="{{ route('orders') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My Orders') }}</a>
+                    <a href="{{ route('wishlist') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Wishlist') }}</a>
+                    <a href="{{ route('order.track.form') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Track Order') }}</a>
+                    @auth
+                        <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ auth()->user()->hasRole('seller') ? __('Seller Centre') : __('Sell on iruali') }}</a>
+                        @if(auth()->user()->hasRole('admin'))
+                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
+                        @endif
+                    @else
+                        <a href="{{ route('seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Sell on iruali') }}</a>
+                    @endauth
+                    <a href="{{ route('help') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Help centre') }}</a>
+                </div>
             </nav>
-            <div class="p-4 border-t border-gray-200">
+            <div class="border-t border-gray-200 p-4 flex items-center justify-between gap-3">
+                <form action="{{ route('locale.switch') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="locale" value="{{ $otherLocale }}">
+                    <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium" lang="{{ $otherLocale }}">
+                        <x-icon name="globe" class="w-4 h-4" />{{ $otherLocale === 'dv' ? 'ދިވެހި' : 'English' }}
+                    </button>
+                </form>
                 @auth
-                    <div class="flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                        <img class="w-10 h-10 rounded-full" src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}" alt="{{ auth()->user()->name }}">
-                        <div>
-                            <p class="text-sm font-medium text-dark">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-gray-500">{{ auth()->user()->email }}</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('account') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('My Account') }}</a>
-                    @if(auth()->user()->hasRole('admin'))
-                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Admin Dashboard') }}</a>
-                    @endif
-                    <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}</a>
-                    <a href="{{ route('orders') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('My Orders') }}</a>
-                    <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Wishlist') }}</a>
-                    <form action="{{ route('logout') }}" method="POST" class="block">
+                    <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full text-left px-4 py-2 text-danger hover:text-danger/80 hover:bg-red-50 rounded-lg text-base transition-colors">
-                            {{ __('Sign Out') }}
-                        </button>
+                        <button type="submit" class="text-sm font-medium text-danger">{{ __('Sign Out') }}</button>
                     </form>
-                @else
-                    <a href="{{ route('login') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ __('Sign In') }}</a>
-                    <a href="{{ route('register') }}" class="block px-4 py-2 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg text-base transition-colors">{{ __('Sign Up') }}</a>
                 @endauth
             </div>
-        </div>
+        </aside>
     </div>
 
     <!-- Main Content -->
-    <main class="min-h-screen">
+    <main id="main" class="min-h-[60vh]">
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-footer text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Company Info -->
-                <div>
-                    <img src="/images/brand/iruali-logo-reversed.svg" alt="iruali" width="141" height="36" class="h-9 w-auto mb-4">
-                    <p class="text-gray-300 mb-4">{{ __('Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.') }}</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M22 12c0-5.522-4.478-10-10-10S2 6.478 2 12c0 5 3.657 9.127 8.438 9.877v-6.987h-2.54v-2.89h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.632.771-1.632 1.562v1.875h2.773l-.443 2.89h-2.33v6.987C18.343 21.127 22 17 22 12z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">{{ __('Quick Links') }}</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ route('account') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('My Account') }}</a></li>
-                        <li><a href="{{ route('orders') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Order History') }}</a></li>
-                        <li><a href="{{ route('wishlist') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Wishlist') }}</a></li>
-                        <li><a href="{{ route('seller.apply') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Sell on iruali') }}</a></li>
-                        <li><a href="{{ route('order.track.form') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Track Order') }}</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Returns') }}</a></li>
-                    </ul>
-                </div>
-
-                <!-- Customer Service -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">{{ __('Customer Service') }}</h3>
-                    <ul class="space-y-2">
-                        @php $contactEmail = \App\Models\Setting::get('contact_email'); $contactPhone = \App\Models\Setting::get('contact_phone'); @endphp
-                        <li><a href="{{ $contactEmail ? 'mailto:' . $contactEmail : ($contactPhone ? 'tel:' . preg_replace('/[^0-9+]/', '', $contactPhone) : '#') }}" class="text-gray-300 hover:text-white transition-colors">{{ __('Contact Us') }}</a></li>
-                        @if($contactPhone)
-                            <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="text-gray-300 hover:text-white transition-colors">{{ $contactPhone }}</a></li>
-                        @endif
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Shipping Info') }}</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Returns & Exchanges') }}</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('Size Guide') }}</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">{{ __('FAQ') }}</a></li>
-                    </ul>
-                </div>
-
-                <!-- Newsletter -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">{{ __('Stay Updated') }}</h3>
-                    <p class="text-gray-300 mb-4">{{ __('Subscribe to our newsletter for the latest products, deals, and updates.') }}</p>
-                    <form class="space-y-3">
-                        <input type="email" placeholder="{{ __('Enter your email') }}" 
-                               class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary">
-                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors">
-                            {{ __('Subscribe') }}
-                        </button>
-                    </form>
-                </div>
+    <!-- Why iruali -->
+    <section class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 text-sm">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="truck" /></span>
+                <span><span class="block font-semibold">{{ __('Delivered to your island') }}</span><span class="text-gray-500 text-xs">{{ __('Every atoll, by boat and air') }}</span></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="shield" /></span>
+                <span><span class="block font-semibold">{{ __('Reviewed local sellers') }}</span><span class="text-gray-500 text-xs">{{ __('Every shop is checked before it goes live') }}</span></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="bank" /></span>
+                <span><span class="block font-semibold">{{ __('Pay your way') }}</span><span class="text-gray-500 text-xs">{{ __('Cash on delivery or bank transfer') }}</span></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="gift" /></span>
+                <span><span class="block font-semibold">{{ __('Points on every order') }}</span><span class="text-gray-500 text-xs">{{ __('Spend them on your next order') }}</span></span>
             </div>
         </div>
+    </section>
 
-        <!-- Bottom Footer -->
-        <div class="border-t border-gray-700">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <p class="text-gray-300 text-sm">&copy; 2024 iruali. All rights reserved.</p>
-                    <div class="flex space-x-6 mt-4 md:mt-0">
-                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">{{ __('Privacy Policy') }}</a>
-                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">{{ __('Terms of Service') }}</a>
-                        <a href="#" class="text-gray-300 hover:text-white text-sm transition-colors">{{ __('Cookie Policy') }}</a>
-                    </div>
-                </div>
+    <!-- Footer -->
+    <footer class="bg-footer text-white">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-10 grid grid-cols-2 lg:grid-cols-5 gap-8 text-sm">
+            <div class="col-span-2 lg:col-span-1">
+                <img src="/images/brand/iruali-logo-reversed.svg" alt="iruali" width="141" height="36" class="h-9 w-auto mb-4">
+                <p class="text-white/70 mb-4">{{ __('Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.') }}</p>
+                <ul class="space-y-2 text-white/85">
+                    @if($contactPhone)
+                        <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="inline-flex items-center gap-2 hover:text-white" dir="ltr"><x-icon name="phone" class="w-4 h-4" />{{ $contactPhone }}</a></li>
+                    @endif
+                    @if($contactEmail)
+                        <li><a href="mailto:{{ $contactEmail }}" class="inline-flex items-center gap-2 hover:text-white"><x-icon name="mail" class="w-4 h-4" />{{ $contactEmail }}</a></li>
+                    @endif
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-3">{{ __('Shop') }}</h3>
+                <ul class="space-y-2 text-white/70">
+                    <li><a href="{{ route('shop') }}" class="hover:text-white">{{ __('Shop all products') }}</a></li>
+                    <li><a href="{{ route('categories.index') }}" class="hover:text-white">{{ __('Departments') }}</a></li>
+                    <li><a href="{{ route('deals') }}" class="hover:text-white">{{ __('Deals') }}</a></li>
+                    <li><a href="{{ route('shop', ['sort' => 'newest']) }}" class="hover:text-white">{{ __('New arrivals') }}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-3">{{ __('Customer Service') }}</h3>
+                <ul class="space-y-2 text-white/70">
+                    <li><a href="{{ route('help') }}" class="hover:text-white">{{ __('Help centre') }}</a></li>
+                    <li><a href="{{ route('order.track.form') }}" class="hover:text-white">{{ __('Track Order') }}</a></li>
+                    <li><a href="{{ route('help') }}#delivery" class="hover:text-white">{{ __('Delivery & fees') }}</a></li>
+                    <li><a href="{{ route('help') }}#returns" class="hover:text-white">{{ __('Returns & Exchanges') }}</a></li>
+                    <li><a href="{{ route('help') }}#contact" class="hover:text-white">{{ __('Contact Us') }}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-3">{{ __('Your account') }}</h3>
+                <ul class="space-y-2 text-white/70">
+                    <li><a href="{{ route('account') }}" class="hover:text-white">{{ __('My Account') }}</a></li>
+                    <li><a href="{{ route('orders') }}" class="hover:text-white">{{ __('Order History') }}</a></li>
+                    <li><a href="{{ route('wishlist') }}" class="hover:text-white">{{ __('Wishlist') }}</a></li>
+                    <li><a href="{{ route('cart') }}" class="hover:text-white">{{ __('Cart') }}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-3">{{ __('Sell on iruali') }}</h3>
+                <p class="text-white/70 mb-3">{{ __('Reach customers on every inhabited island.') }}</p>
+                <a href="{{ route('seller.apply') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sun text-sun-on font-semibold hover:bg-accent-400">{{ __('Open your shop') }}</a>
+            </div>
+        </div>
+        <div class="border-t border-white/10">
+            <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
+                <p>&copy; {{ date('Y') }} iruali. {{ __('All rights reserved.') }}</p>
+                <p class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4" />{{ __('Cash on delivery') }} &middot; {{ __('Bank transfer') }}</p>
             </div>
         </div>
     </footer>
 
-    <!-- Floating Cart Icon (Mobile Only) -->
-    <a href="{{ route('cart') }}"
-       class="fixed bottom-5 right-5 z-50 bg-primary shadow-lg rounded-full w-12 h-12 flex items-center justify-center border-2 border-white lg:hidden animate-bounce-gentle"
-       style="box-shadow: 0 4px 24px rgba(11, 122, 112, 0.35);">
-      <div class="relative w-6 h-6 flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-        </svg>
-        @if(auth()->check() && auth()->user()->cart && auth()->user()->cart->item_count > 0)
-          <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger text-white text-xs rounded-full flex items-center justify-center font-bold">
-            {{ auth()->user()->cart->item_count }}
-          </span>
-        @endif
-      </div>
-    </a>
+    <!-- Bottom tab bar (mobile) -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(15,42,58,0.08)]" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="{{ __('Main') }}">
+        <div class="grid grid-cols-5 h-16 text-[11px] font-medium">
+            @php $tab = 'flex flex-col items-center justify-center gap-1'; @endphp
+            <a href="{{ route('home') }}" class="{{ $tab }} {{ request()->routeIs('home') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="home" class="w-6 h-6" />{{ __('Home') }}</a>
+            <button type="button" data-drawer-open class="{{ $tab }} {{ request()->routeIs('categories.*') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="squares" class="w-6 h-6" />{{ __('Departments') }}</button>
+            <a href="{{ route('deals') }}" class="{{ $tab }} {{ request()->routeIs('deals') ? 'text-coral' : 'text-gray-600' }}"><x-icon name="tag" class="w-6 h-6" />{{ __('Deals') }}</a>
+            <a href="{{ auth()->check() ? route('account') : route('login') }}" class="{{ $tab }} {{ request()->routeIs('account', 'orders*', 'login') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="user" class="w-6 h-6" />{{ __('Account') }}</a>
+            <a href="{{ route('cart') }}" class="{{ $tab }} {{ request()->routeIs('cart', 'checkout') ? 'text-primary' : 'text-gray-600' }}">
+                <span class="relative"><x-icon name="cart" class="w-6 h-6" />
+                    @if($cartCount > 0)<span class="absolute -top-1.5 -end-2.5 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-[11px] font-bold flex items-center justify-center">{{ $cartCount }}</span>@endif
+                </span>{{ __('Cart') }}
+            </a>
+        </div>
+    </nav>
 
-    <!-- JavaScript -->
+    <!-- Flash messages, shown as toasts by resources/js/notifications.js -->
+    @if(session('notification'))
+        <div id="session-notification" data-notification="{{ json_encode(session('notification')) }}" hidden></div>
+    @endif
+    @if(session('success') || session('error') || session('warning') || session('info'))
+        <div id="legacy-notifications" hidden>
+            @foreach(['success', 'error', 'warning', 'info'] as $type)
+                @if(session($type) && is_string(session($type)))<div data-type="{{ $type }}" data-message="{{ session($type) }}"></div>@endif
+            @endforeach
+        </div>
+    @endif
+
     <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            document.getElementById('mobile-menu-overlay').classList.remove('hidden');
-            document.getElementById('mobile-menu').classList.remove('-translate-x-full');
-        });
-
-        document.getElementById('close-mobile-menu').addEventListener('click', function() {
-            document.getElementById('mobile-menu-overlay').classList.add('hidden');
-            document.getElementById('mobile-menu').classList.add('-translate-x-full');
-        });
-
-        // Close mobile menu when clicking overlay
-        document.getElementById('mobile-menu-overlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.add('hidden');
-                document.getElementById('mobile-menu').classList.add('-translate-x-full');
+        (function () {
+            var drawer = document.querySelector('[data-drawer]');
+            function setDrawer(open) {
+                if (!drawer) return;
+                drawer.classList.toggle('hidden', !open);
+                document.documentElement.classList.toggle('overflow-hidden', open);
             }
-        });
+            document.querySelectorAll('[data-drawer-open]').forEach(function (b) { b.addEventListener('click', function () { setDrawer(true); }); });
+            document.querySelectorAll('[data-drawer-close]').forEach(function (b) { b.addEventListener('click', function () { setDrawer(false); }); });
 
-        // Close mobile menu on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.getElementById('mobile-menu-overlay').classList.add('hidden');
-                document.getElementById('mobile-menu').classList.add('-translate-x-full');
+            var mega = document.querySelector('[data-mega]');
+            if (mega) {
+                var toggle = mega.querySelector('[data-mega-toggle]'), panel = mega.querySelector('[data-mega-panel]'), timer;
+                function setMega(open) { panel.classList.toggle('hidden', !open); toggle.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+                toggle.addEventListener('click', function () { setMega(panel.classList.contains('hidden')); });
+                mega.addEventListener('mouseenter', function () { clearTimeout(timer); setMega(true); });
+                mega.addEventListener('mouseleave', function () { timer = setTimeout(function () { setMega(false); }, 150); });
+                document.addEventListener('click', function (e) { if (!mega.contains(e.target)) setMega(false); });
             }
-        });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                setDrawer(false);
+                if (mega) mega.querySelector('[data-mega-panel]').classList.add('hidden');
+            });
+        })();
     </script>
 
     @stack('scripts')
 </body>
-</html> 
+</html>

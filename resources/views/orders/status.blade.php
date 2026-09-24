@@ -16,7 +16,7 @@
         </div>
         <div class="mb-4">
             <span class="font-semibold">{{ __('Total:') }}</span>
-            <span class="force-ltr" dir="ltr">ރ{{ number_format($order->total_amount, 2) }}</span>
+            <span class="force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</span>
         </div>
         <div class="mb-6">
             <span class="font-semibold">{{ __('Items:') }}</span>

@@ -44,9 +44,7 @@
                          class="w-full h-full object-cover rounded-lg shadow-lg">
                 </div>
                 @else
-                <div class="aspect-w-1 aspect-h-1 w-full bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span class="text-gray-400">No image available</span>
-                </div>
+                <img src="/images/product-placeholder.svg" alt="No image available" class="w-full aspect-square object-cover rounded-2xl bg-primary-50">
                 @endif
 
                 @if($product->images && $product->images->count() > 1)
@@ -71,13 +69,13 @@
                 <!-- Price -->
                 <div class="flex items-center space-x-4">
                     @if($product->is_on_sale)
-                    <span class="text-3xl font-bold text-red-600">${{ number_format($product->sale_price, 2) }}</span>
-                    <span class="text-xl text-gray-500 line-through">${{ number_format($product->price, 2) }}</span>
-                    <span class="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
-                        {{ $product->discount_percentage }}% OFF
+                    <span class="text-3xl font-bold text-coral">{{ \App\Support\Money::format($product->sale_price) }}</span>
+                    <span class="text-xl text-gray-500 line-through">{{ \App\Support\Money::format($product->price) }}</span>
+                    <span class="bg-coral-soft text-coral text-sm font-semibold px-2.5 py-0.5 rounded-md">
+                        &minus;{{ $product->discount_percentage }}%
                     </span>
                     @else
-                    <span class="text-3xl font-bold text-gray-900">${{ number_format($product->price, 2) }}</span>
+                    <span class="text-3xl font-bold text-gray-900">{{ \App\Support\Money::format($product->price) }}</span>
                     @endif
                 </div>
 
@@ -162,16 +160,14 @@
                     <img src="{{ $relatedProduct->mainImage->url }}" alt="{{ $relatedProduct->name }}" 
                          class="w-full h-48 object-cover">
                     @else
-                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                        <span class="text-gray-400">No image</span>
-                    </div>
+                    <img src="/images/product-placeholder.svg" alt="" class="w-full h-48 object-cover bg-primary-50">
                     @endif
                     
                     <div class="p-4">
                         <h3 class="font-medium text-gray-900 mb-2">{{ $relatedProduct->name }}</h3>
                         <p class="text-gray-600 text-sm mb-2">{{ $relatedProduct->category->name }}</p>
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-gray-900">${{ number_format($relatedProduct->price, 2) }}</span>
+                            <span class="font-bold text-gray-900">{{ \App\Support\Money::format($relatedProduct->price) }}</span>
                             <a href="{{ route('products.show', $relatedProduct) }}" 
                                class="text-primary hover:text-primary-hover text-sm font-medium">
                                 View Details

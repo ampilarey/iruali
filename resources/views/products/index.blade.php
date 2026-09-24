@@ -77,9 +77,7 @@
                         <img src="{{ $product->mainImage->url }}" alt="{{ $product->name }}" 
                              class="w-full h-48 object-cover">
                         @else
-                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                            <span class="text-gray-400">No image</span>
-                        </div>
+                        <img src="/images/product-placeholder.svg" alt="" class="w-full h-48 object-cover bg-primary-50">
                         @endif
                         
                         <div class="p-4">
@@ -113,16 +111,16 @@
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center space-x-2">
                                     @if($product->is_on_sale)
-                                    <span class="text-lg font-bold text-red-600">${{ number_format($product->sale_price, 2) }}</span>
-                                    <span class="text-sm text-gray-500 line-through">${{ number_format($product->price, 2) }}</span>
+                                    <span class="text-lg font-bold text-coral">{{ \App\Support\Money::format($product->sale_price) }}</span>
+                                    <span class="text-sm text-gray-500 line-through">{{ \App\Support\Money::format($product->price) }}</span>
                                     @else
-                                    <span class="text-lg font-bold text-gray-900">${{ number_format($product->price, 2) }}</span>
+                                    <span class="text-lg font-bold text-gray-900">{{ \App\Support\Money::format($product->price) }}</span>
                                     @endif
                                 </div>
                                 
                                 @if($product->is_on_sale)
-                                <span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded">
-                                    {{ $product->discount_percentage }}% OFF
+                                <span class="bg-coral-soft text-coral text-xs font-semibold px-2 py-1 rounded-md">
+                                    &minus;{{ $product->discount_percentage }}%
                                 </span>
                                 @endif
                             </div>

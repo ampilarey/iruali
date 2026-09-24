@@ -94,6 +94,12 @@ if [[ -d "$DOCROOT" && -d "$ROOT/public/build" ]]; then
   if [[ -d "$ROOT/public/images" ]]; then
     cp -a "$ROOT/public/images/." "$DOCROOT/images/"
   fi
+  # Root-level public files (favicon, web manifest) live next to index.php in the docroot
+  for f in favicon.svg site.webmanifest; do
+    if [[ -f "$ROOT/public/$f" ]]; then
+      cp -a "$ROOT/public/$f" "$DOCROOT/$f"
+    fi
+  done
   # Keep front controller pointing at the app in ~/test
   cat > "$DOCROOT/index.php" <<'PHP'
 <?php

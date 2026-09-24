@@ -41,7 +41,7 @@
                                     <p class="text-xs text-gray-500">SKU {{ $product->sku }}</p>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $product->category->name ?? '—' }}</td>
-                                <td class="px-4 py-3 text-right text-sm text-gray-900">ރ&#x200E;{{ number_format($product->price, 2) }}</td>
+                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($product->price) }}</td>
                                 <td class="px-4 py-3 text-right text-sm {{ $product->stock_quantity <= $product->reorder_point ? 'font-semibold text-red-600' : 'text-gray-900' }}">{{ $product->stock_quantity }}</td>
                                 <td class="px-4 py-3">
                                     @if($product->is_active)

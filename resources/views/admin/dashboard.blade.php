@@ -224,7 +224,7 @@
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm font-medium text-gray-900">{{ $order->user->name ?? 'Guest' }}</p>
-                                    <p class="text-sm text-gray-500">${{ number_format($order->total_amount ?? 0, 2) }}</p>
+                                    <p class="text-sm text-gray-500">{{ \App\Support\Money::format($order->total_amount ?? 0) }}</p>
                                 </div>
                             </div>
                             <span class="text-xs text-gray-500">{{ $order->created_at->diffForHumans() }}</span>

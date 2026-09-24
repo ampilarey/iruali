@@ -41,10 +41,10 @@
                 <label class="text-sm text-gray-600">Price:</label>
                 <select name="price_range" class="px-3 py-1 border border-gray-300 rounded text-sm">
                     <option value="">All Prices</option>
-                    <option value="0-50" {{ request('price_range') == '0-50' ? 'selected' : '' }}>$0 - $50</option>
-                    <option value="50-100" {{ request('price_range') == '50-100' ? 'selected' : '' }}>$50 - $100</option>
-                    <option value="100-200" {{ request('price_range') == '100-200' ? 'selected' : '' }}>$100 - $200</option>
-                    <option value="200+" {{ request('price_range') == '200+' ? 'selected' : '' }}>$200+</option>
+                    <option value="0-50" {{ request('price_range') == '0-50' ? 'selected' : '' }}>Under MVR 50</option>
+                    <option value="50-100" {{ request('price_range') == '50-100' ? 'selected' : '' }}>MVR 50–100</option>
+                    <option value="100-200" {{ request('price_range') == '100-200' ? 'selected' : '' }}>MVR 100–200</option>
+                    <option value="200+" {{ request('price_range') == '200+' ? 'selected' : '' }}>MVR 200 and up</option>
                 </select>
             </div>
 
@@ -118,10 +118,10 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             @if($product->is_on_sale)
-                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->final_price, 2) }}</span>
-                                <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
+                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($product->final_price) }}</span>
+                                <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">{{ \App\Support\Money::format($product->price) }}</span>
                             @else
-                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">ރ&#x200E;{{ number_format($product->price, 2) }}</span>
+                                <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($product->price) }}</span>
                             @endif
                         </div>
                         <form action="{{ route('cart.add') }}" method="POST" class="inline">

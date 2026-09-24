@@ -43,7 +43,7 @@
                                     <div class="text-sm text-gray-500">{{ $order->user->email ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">${{ number_format($order->total_amount ?? 0, 2) }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ \App\Support\Money::format($order->total_amount ?? 0) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($order->status ?? 'pending') === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">

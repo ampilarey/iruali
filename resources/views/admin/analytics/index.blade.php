@@ -26,8 +26,8 @@
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach([
-                ['Revenue (all time)', "ރ\u{200E}" . number_format($stats['revenue'], 2), 'Excludes cancelled orders'],
-                ['Revenue (30 days)', "ރ\u{200E}" . number_format($stats['revenue_30d'], 2), 'Average order ރ' . "\u{200E}" . number_format($stats['average_order'], 2)],
+                ['Revenue (all time)', \App\Support\Money::format($stats['revenue']), 'Excludes cancelled orders'],
+                ['Revenue (30 days)', \App\Support\Money::format($stats['revenue_30d']), 'Average order ' . \App\Support\Money::format($stats['average_order'])],
                 ['Orders', number_format($stats['total_orders']), number_format($stats['total_products']) . ' products listed'],
                 ['Users', number_format($stats['total_users']), $stats['total_sellers'] . ' sellers · ' . $stats['new_users_30d'] . ' new in 30 days'],
             ] as [$label, $value, $hint])
@@ -44,7 +44,7 @@
                 <h2 class="text-lg font-semibold text-gray-900">Revenue, last 12 months</h2>
                 <div class="mt-6 flex h-48 items-end gap-2">
                     @foreach($months as $month => $row)
-                        <div class="flex h-full flex-1 flex-col justify-end" title="{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M Y') }}: ރ&#x200E;{{ number_format($row['revenue'], 2) }} · {{ $row['users'] }} new users">
+                        <div class="flex h-full flex-1 flex-col justify-end" title="{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M Y') }}: {{ \App\Support\Money::format($row['revenue']) }} · {{ $row['users'] }} new users">
                             <div class="w-full rounded-t bg-primary-500" style="height: {{ max($row['revenue'] / $maxRevenue * 100, $row['revenue'] > 0 ? 2 : 0) }}%"></div>
                         </div>
                     @endforeach
@@ -95,7 +95,7 @@
                                 <tr>
                                     <td class="px-5 py-3 text-sm text-gray-900">{{ $col === 'Product' ? ($row->product->name ?? 'Deleted product') : $row->name }}</td>
                                     <td class="px-5 py-3 text-right text-sm text-gray-700">{{ $col === 'Product' ? $row->units : $row->orders }}</td>
-                                    <td class="px-5 py-3 text-right text-sm text-gray-900">ރ&#x200E;{{ number_format($row->revenue, 2) }}</td>
+                                    <td class="px-5 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($row->revenue) }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="3" class="px-5 py-8 text-center text-sm text-gray-500">No sales yet.</td></tr>

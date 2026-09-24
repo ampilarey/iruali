@@ -171,6 +171,15 @@
                     <a href="{{ route('admin.orders') }}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Orders
                     </a>
+                    <a href="{{ route('admin.vouchers.index') }}" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Manage Vouchers
+                    </a>
+                    <a href="{{ route('admin.analytics') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Analytics
+                    </a>
+                    <a href="{{ route('admin.settings') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Settings
+                    </a>
                 </div>
             </div>
         </div>

@@ -117,6 +117,7 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+        Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
         Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('sellers.approve');
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);

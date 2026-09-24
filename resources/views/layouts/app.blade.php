@@ -23,11 +23,14 @@
 </head>
 <body class="font-sans antialiased bg-background text-dark">
     <!-- Top Banner -->
+    @php $announcement = \App\Models\Setting::get('announcement_text'); @endphp
+    @if($announcement)
     <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <span>🎉 Free Shipping on Orders Over $49 | Expert Support Available 24/7</span>
+            <span>{{ $announcement }}</span>
         </div>
     </div>
+    @endif
 
     <!-- Sticky Header (desktop only — mobile uses the fixed header below) -->
     <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 hidden lg:block">
@@ -319,7 +322,11 @@
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Customer Service</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        @php $contactEmail = \App\Models\Setting::get('contact_email'); $contactPhone = \App\Models\Setting::get('contact_phone'); @endphp
+                        <li><a href="{{ $contactEmail ? 'mailto:' . $contactEmail : ($contactPhone ? 'tel:' . preg_replace('/[^0-9+]/', '', $contactPhone) : '#') }}" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        @if($contactPhone)
+                            <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="text-gray-300 hover:text-white transition-colors">{{ $contactPhone }}</a></li>
+                        @endif
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Shipping Info</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Returns & Exchanges</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Size Guide</a></li>

@@ -7,8 +7,11 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -140,24 +143,87 @@ class AdminController extends Controller
     public function analytics()
     {
         $this->checkAdminRole();
-        
-        // Analytics data
+
+        $completed = Order::where('status', '!=', 'cancelled');
+
         $stats = [
             'total_users' => User::count(),
-            'total_sellers' => User::whereHas('roles', function($q) {
-                $q->where('name', 'seller');
-            })->count(),
+            'total_sellers' => User::whereHas('roles', fn ($q) => $q->where('name', 'seller'))->count(),
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
+            'revenue' => (float) (clone $completed)->sum('total_amount'),
+            'revenue_30d' => (float) (clone $completed)->where('created_at', '>=', now()->subDays(30))->sum('total_amount'),
+            'new_users_30d' => User::where('created_at', '>=', now()->subDays(30))->count(),
         ];
-        
-        return view('admin.analytics.index', compact('stats'));
+        $stats['average_order'] = ($count = (clone $completed)->count()) > 0 ? $stats['revenue'] / $count : 0;
+
+        // Monthly revenue and signups for the last 12 months (grouped in PHP to stay DB-agnostic)
+        $since = now()->subMonths(11)->startOfMonth();
+        $revenueByMonth = (clone $completed)->where('created_at', '>=', $since)->get(['total_amount', 'created_at'])
+            ->groupBy(fn ($o) => $o->created_at->format('Y-m'))
+            ->map(fn ($rows) => $rows->sum('total_amount'));
+        $usersByMonth = User::where('created_at', '>=', $since)->get(['created_at'])
+            ->groupBy(fn ($u) => $u->created_at->format('Y-m'))
+            ->map->count();
+        $months = collect(range(11, 0))->mapWithKeys(function ($i) use ($revenueByMonth, $usersByMonth) {
+            $key = now()->subMonths($i)->format('Y-m');
+
+            return [$key => ['revenue' => (float) ($revenueByMonth[$key] ?? 0), 'users' => (int) ($usersByMonth[$key] ?? 0)]];
+        });
+
+        $ordersByStatus = Order::selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+
+        $salesLines = OrderItem::query()
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('products', 'products.id', '=', 'order_items.product_id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNull('orders.deleted_at');
+
+        $topProducts = (clone $salesLines)
+            ->select('order_items.product_id', DB::raw('SUM(order_items.quantity) as units'), DB::raw('SUM(order_items.quantity * order_items.price) as revenue'))
+            ->groupBy('order_items.product_id')
+            ->orderByDesc('revenue')
+            ->take(5)
+            ->get();
+        $productNames = Product::withTrashed()->whereIn('id', $topProducts->pluck('product_id'))->get()->keyBy('id');
+        $topProducts->each(fn ($row) => $row->product = $productNames[$row->product_id] ?? null);
+
+        $topSellers = (clone $salesLines)
+            ->select('products.seller_id', DB::raw('SUM(order_items.quantity * order_items.price) as revenue'), DB::raw('COUNT(DISTINCT orders.id) as orders'))
+            ->groupBy('products.seller_id')
+            ->orderByDesc('revenue')
+            ->take(5)
+            ->get();
+        $sellerNames = User::whereIn('id', $topSellers->pluck('seller_id'))->pluck('name', 'id');
+        $topSellers->each(fn ($row) => $row->name = $sellerNames[$row->seller_id] ?? 'Unknown seller');
+
+        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers'));
     }
 
     public function settings()
     {
         $this->checkAdminRole();
-        
-        return view('admin.settings.index');
+
+        $settings = collect(Setting::DEFAULTS)->mapWithKeys(fn ($default, $key) => [$key => Setting::get($key)]);
+
+        return view('admin.settings.index', compact('settings'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $this->checkAdminRole();
+
+        $validated = $request->validate([
+            'announcement_text' => 'nullable|string|max:255',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:30',
+            'loyalty_spend_per_point' => 'required|numeric|min:1|max:100000',
+            'referral_referrer_points' => 'required|integer|min:0|max:100000',
+            'referral_referee_points' => 'required|integer|min:0|max:100000',
+        ]);
+
+        Setting::set($validated);
+
+        return redirect()->route('admin.settings')->with('success', 'Settings saved.');
     }
 } 

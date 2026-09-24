@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Cart;
+use App\Models\Setting;
 use App\Models\Voucher;
 use App\Models\User;
 use Illuminate\Support\Facades\Session;
@@ -164,8 +165,10 @@ class DiscountService
      */
     public function calculateLoyaltyPointsEarned(float $orderTotal): int
     {
-        // 1 point per 100 MVR spent after all discounts
-        return floor($orderTotal / 100);
+        // 1 point per N MVR spent after all discounts (N is configurable, default 100)
+        $spendPerPoint = max(1, (float) Setting::get('loyalty_spend_per_point'));
+
+        return (int) floor($orderTotal / $spendPerPoint);
     }
 
     /**
@@ -179,11 +182,14 @@ class DiscountService
         if ($user->referred_by && $user->orders()->count() === 1) {
             $referrer = $user->referredBy;
             if ($referrer) {
-                $referrer->increment('loyalty_points', 100); // 100 points for referrer
-                $user->increment('loyalty_points', 50); // 50 points for referred user
-                
-                $rewards['referrer_points'] = 100;
-                $rewards['user_points'] = 50;
+                $referrerPoints = (int) Setting::get('referral_referrer_points');
+                $userPoints = (int) Setting::get('referral_referee_points');
+
+                $referrer->increment('loyalty_points', $referrerPoints);
+                $user->increment('loyalty_points', $userPoints);
+
+                $rewards['referrer_points'] = $referrerPoints;
+                $rewards['user_points'] = $userPoints;
             }
         }
 

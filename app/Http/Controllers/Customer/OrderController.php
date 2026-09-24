@@ -48,6 +48,8 @@ class OrderController extends Controller
             'shipping_state' => $request->shipping_state,
             'shipping_zip' => $request->shipping_zip,
             'shipping_country' => $request->shipping_country,
+            'delivery_zone' => $request->delivery_zone,
+            'payment_method' => $request->payment_method,
         ];
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);

@@ -76,6 +76,25 @@
                 <p class="mt-2 text-xs text-gray-500">Referral rewards are paid once, when a referred customer places their first order.</p>
             </section>
 
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Delivery fees (MVR)</h2>
+                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="delivery_fee_greater_male" class="block text-sm font-medium text-gray-700">Greater Malé</label>
+                        <input id="delivery_fee_greater_male" name="delivery_fee_greater_male" type="number" min="0" step="0.01" required class="{{ $field }}" value="{{ old('delivery_fee_greater_male', $settings['delivery_fee_greater_male']) }}">
+                    </div>
+                    <div>
+                        <label for="delivery_fee_islands" class="block text-sm font-medium text-gray-700">Other islands</label>
+                        <input id="delivery_fee_islands" name="delivery_fee_islands" type="number" min="0" step="0.01" required class="{{ $field }}" value="{{ old('delivery_fee_islands', $settings['delivery_fee_islands']) }}">
+                    </div>
+                    <div>
+                        <label for="free_delivery_over" class="block text-sm font-medium text-gray-700">Free delivery over</label>
+                        <input id="free_delivery_over" name="free_delivery_over" type="number" min="0" step="0.01" required class="{{ $field }}" value="{{ old('free_delivery_over', $settings['free_delivery_over']) }}">
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-gray-500">Greater Malé is Malé, Hulhumalé and Villimalé. Set "Free delivery over" to 0 to always charge delivery. Checked against the order total after discounts.</p>
+            </section>
+
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
             </div>

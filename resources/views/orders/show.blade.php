@@ -107,7 +107,7 @@
                 <div class="space-y-3">
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Subtotal') }}</span>
-                        <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount + $order->voucher_discount) }}</span>
+                        <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount - $order->shipping_amount + $order->voucher_discount + $order->points_redeemed_discount) }}</span>
                     </div>
                     @if($order->voucher_code && $order->voucher_discount > 0)
                     <div class="flex justify-between">
@@ -115,13 +115,19 @@
                         <span class="text-green-700 force-ltr" dir="ltr">-{{ \App\Support\Money::format($order->voucher_discount) }}</span>
                     </div>
                     @endif
+                    @if($order->points_redeemed_discount > 0)
                     <div class="flex justify-between">
-                        <span class="text-gray-600">{{ __('Shipping') }}</span>
-                        <span class="text-gray-900">{{ __('Free') }}</span>
+                        <span class="text-gray-600">{{ __('Loyalty Points Discount') }}</span>
+                        <span class="text-gray-900" dir="ltr">-{{ \App\Support\Money::format($order->points_redeemed_discount) }}</span>
+                    </div>
+                    @endif
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">{{ __('Delivery') }}</span>
+                        <span class="text-gray-900" dir="ltr">{{ $order->shipping_amount > 0 ? \App\Support\Money::format($order->shipping_amount) : __('Free') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">{{ __('Tax') }}</span>
-                        <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format(0) }}</span>
+                        <span class="text-gray-600">{{ __('Payment Method') }}</span>
+                        <span class="text-gray-900">{{ $order->payment_method === 'bank_transfer' ? __('Bank transfer') : __('Cash on delivery') }}</span>
                     </div>
                     <hr class="my-3">
                     <div class="flex justify-between">

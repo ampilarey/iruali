@@ -119,7 +119,9 @@ class ApiCartTest extends TestCase
         ]);
 
         $this->assertTrue($result['success']);
-        $this->assertEquals(180, $result['order']->total_amount);
+        // Goods after the 10% voucher, plus the Greater Malé delivery fee
+        $this->assertEquals(25, $result['order']->shipping_amount);
+        $this->assertEquals(180 + 25, $result['order']->total_amount);
         $this->assertSame('SAVE10', $result['order']->voucher_code);
 
         $this->postJson('/api/v1/cart/remove-voucher')->assertOk()->assertJsonPath('data.voucher_code', null);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Services\CartService;
+use App\Services\DeliveryService;
 use App\Services\DiscountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,16 @@ class CheckoutController extends Controller
         $points_redeemed = session('points_redeemed', 0);
         $points_redeemed_discount = $points_redeemed;
 
-        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount'));
+        // Same calculation the order uses: subtotal minus voucher and points
+        $discounts = $this->discountService->calculateTotalDiscount($cart);
+        $voucherDiscount = (float) $discounts['voucher']['amount'];
+        $voucherCode = $discounts['voucher']['voucher']?->code;
+        $goodsTotal = (float) $discounts['final_total'];
+        $deliveryZones = DeliveryService::zones();
+        $deliveryQuotes = app(DeliveryService::class)->quotes($goodsTotal);
+        $freeDeliveryOver = (float) \App\Models\Setting::get('free_delivery_over');
+
+        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver'));
     }
 
     public function redeemPoints(Request $request)
@@ -59,26 +69,5 @@ class CheckoutController extends Controller
         $this->discountService->removeLoyaltyPoints();
 
         return back()->with('success', __('Loyalty points removed.'));
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'shipping_address' => 'required|string',
-            'shipping_city' => 'required|string',
-            'shipping_state' => 'required|string',
-            'shipping_zip' => 'required|string',
-            'shipping_country' => 'required|string',
-            'payment_method' => 'required|in:card,paypal',
-        ]);
-
-        // Redirect to order creation
-        return redirect()->route('orders.store')->with([
-            'shipping_address' => $request->shipping_address,
-            'shipping_city' => $request->shipping_city,
-            'shipping_state' => $request->shipping_state,
-            'shipping_zip' => $request->shipping_zip,
-            'shipping_country' => $request->shipping_country,
-        ]);
     }
 }

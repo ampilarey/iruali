@@ -50,6 +50,11 @@ class OrderService
             $discounts = $this->discountService->calculateTotalDiscount($cart);
             $loyaltyPointsEarned = $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']);
 
+            // Delivery fee by area (points are earned on goods only, not delivery)
+            $delivery = app(DeliveryService::class);
+            $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null);
+            $shippingData['shipping_amount'] = $delivery->fee($shippingData['delivery_zone'], $discounts['final_total']);
+
             // Create order
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned);
 
@@ -101,7 +106,10 @@ class OrderService
             'user_id' => $user->id,
             'order_number' => $this->generateOrderNumber(),
             'status' => 'pending',
-            'total_amount' => $discounts['final_total'],
+            'total_amount' => $discounts['final_total'] + $shippingData['shipping_amount'],
+            'shipping_amount' => $shippingData['shipping_amount'],
+            'delivery_zone' => $shippingData['delivery_zone'],
+            'payment_method' => $shippingData['payment_method'] ?? 'cod',
             'voucher_code' => $voucher ? $voucher->code : null,
             'voucher_discount' => $discounts['voucher']['amount'],
             'loyalty_points_earned' => $loyaltyPointsEarned,

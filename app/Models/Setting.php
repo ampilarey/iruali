@@ -20,6 +20,9 @@ class Setting extends Model
         'loyalty_spend_per_point' => 100,
         'referral_referrer_points' => 100,
         'referral_referee_points' => 50,
+        'delivery_fee_greater_male' => 25,
+        'delivery_fee_islands' => 75,
+        'free_delivery_over' => 1000,
     ];
 
     protected $fillable = ['key', 'value'];

@@ -34,7 +34,8 @@ class StoreOrderRequest extends FormRequest
             'billing_zip' => 'nullable|string|max:20',
             'billing_country' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
-            'payment_method' => 'required|in:cod,card,bank_transfer',
+            'payment_method' => 'required|in:cod',
+            'delivery_zone' => 'nullable|in:greater_male,islands',
             'agree_terms' => 'required|accepted',
         ];
     }

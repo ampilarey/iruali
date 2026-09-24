@@ -55,8 +55,16 @@ fi
 
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse FETCH_HEAD)
+
+write_stamp() {
+  bash "$ROOT/scripts/write-deploy-stamp.sh" "$ROOT" \
+    || echo "$(date '+%F %T') WARN: deploy stamp write failed"
+}
+
 if [[ "$LOCAL" == "$REMOTE" ]]; then
   echo "$(date '+%F %T') already on ${LOCAL:0:8} — nothing to deploy"
+  # Still refresh the stamp so /api/health shows what is running.
+  write_stamp
   exit 0
 fi
 
@@ -108,4 +116,5 @@ else
   echo "$(date '+%F %T') WARN: skip docroot sync (DOCROOT=$DOCROOT)"
 fi
 
+write_stamp
 echo "$(date '+%F %T') deploy complete: ${REMOTE:0:8}"

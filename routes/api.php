@@ -1,16 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
-use App\Http\Controllers\Api\WishlistController;
-use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\TestDeployWebhookController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\WishlistController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,35 +24,35 @@ use App\Http\Controllers\Api\TestDeployWebhookController;
 
 // Public routes
 Route::prefix('v1')->group(function () {
-    
+
     // Authentication routes
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-    
+
     // Public product routes
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('/products/featured', [ProductController::class, 'featured']);
     Route::get('/products/on-sale', [ProductController::class, 'onSale']);
-    
+
     // Public category routes
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{category}', [CategoryController::class, 'show']);
-    
+
     // Search
     Route::get('/search', [SearchController::class, 'search']);
-    
+
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {
-        
+
         // User profile
         Route::get('/user', [UserController::class, 'profile']);
         Route::put('/user', [UserController::class, 'updateProfile']);
         Route::post('/user/change-password', [UserController::class, 'changePassword']);
         Route::post('/logout', [AuthController::class, 'logout']);
-        
+
         // Cart routes
         Route::get('/cart', [CartController::class, 'index']);
         Route::post('/cart/add', [CartController::class, 'add']);
@@ -62,19 +61,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/cart/clear', [CartController::class, 'clear']);
         Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher']);
         Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher']);
-        
+
         // Wishlist routes
         Route::get('/wishlist', [WishlistController::class, 'index']);
         Route::post('/wishlist/add', [WishlistController::class, 'add']);
         Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove']);
         Route::post('/wishlist/clear', [WishlistController::class, 'clear']);
-        
+
         // Order routes
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/orders/{order}/track', [OrderController::class, 'track']);
-        
+
         // Checkout routes
         Route::post('/checkout/redeem-points', [OrderController::class, 'redeemPoints']);
         Route::post('/checkout/remove-points', [OrderController::class, 'removePoints']);
@@ -86,14 +85,24 @@ Route::prefix('v1')->group(function () {
 
 // Health check endpoint
 Route::get('/health', function () {
+    // Written by scripts/write-deploy-stamp.sh on every TEST deploy.
+    $stamp = null;
+    $stampPath = storage_path('app/deploy-stamp.json');
+    if (is_file($stampPath)) {
+        $stamp = json_decode((string) file_get_contents($stampPath), true);
+    }
+
     return response()->json([
         'status' => 'healthy',
         'timestamp' => now(),
-        'version' => '1.0.0'
+        'version' => '1.0.0',
+        'commit' => $stamp['commit_short'] ?? 'unknown',
+        'branch' => $stamp['branch'] ?? null,
+        'deployed_at' => $stamp['deployed_at'] ?? null,
     ]);
 });
 
 // TEST-only immediate deploy trigger (GitHub Actions → cPanel). Disabled when
 // TEST_DEPLOY_WEBHOOK_SECRET is unset; always 404 on non-test hosts.
 Route::post('/deploy/test-pull', TestDeployWebhookController::class)
-    ->middleware('throttle:10,1'); 
+    ->middleware('throttle:10,1');

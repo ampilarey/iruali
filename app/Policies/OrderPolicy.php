@@ -34,8 +34,8 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        // Admins can view any order
-        if ($user->isAdmin()) {
+        // Admins can view any order; everyone can view orders they placed themselves
+        if ($user->isAdmin() || $user->id === $order->user_id) {
             return true;
         }
 
@@ -122,9 +122,9 @@ class OrderPolicy
             return true;
         }
 
-        // Customers can only cancel their own orders in certain states
+        // Customers can cancel their own orders until the shop starts processing them
         if ($user->id === $order->user_id) {
-            return in_array($order->status, ['pending', 'processing']);
+            return $order->status === 'pending';
         }
 
         return false;

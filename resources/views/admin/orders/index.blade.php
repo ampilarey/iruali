@@ -54,7 +54,7 @@
                                     {{ $order->created_at->format('M d, Y') ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button class="text-indigo-600 hover:text-indigo-900">View</button>
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="font-medium text-primary hover:text-primary-hover">View</a>
                                 </td>
                             </tr>
                             @empty

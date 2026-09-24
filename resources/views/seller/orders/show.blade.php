@@ -35,6 +35,13 @@
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Status</h2>
                 <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ ucfirst($order->status) }}</span>
                 <p class="mt-2 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}</p>
+                <div class="mt-4">
+                    @if($ownsWholeOrder)
+                        @include('partials.order-status-actions', ['action' => route('seller.orders.status', $order), 'nextStatuses' => $nextStatuses])
+                    @else
+                        <p class="text-sm text-gray-600">This order also has items from other shops, so an admin updates its status. Pack and hand over your items as usual.</p>
+                    @endif
+                </div>
             </div>
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Ship to</h2>

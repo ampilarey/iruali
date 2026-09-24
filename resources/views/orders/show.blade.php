@@ -132,9 +132,12 @@
 
                 @if($order->status === 'pending')
                 <div class="mt-6">
-                    <button class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300">
-                        {{ __('Cancel Order') }}
-                    </button>
+                    <form method="POST" action="{{ route('orders.cancel', $order) }}" onsubmit="return confirm('{{ __('Cancel this order?') }}')">
+                        @csrf
+                        <button type="submit" class="w-full border border-danger text-danger px-4 py-2 rounded-lg hover:bg-danger-50 transition duration-300">
+                            {{ __('Cancel Order') }}
+                        </button>
+                    </form>
                 </div>
                 @endif
 

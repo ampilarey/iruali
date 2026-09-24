@@ -107,6 +107,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::resource('products', \App\Http\Controllers\Seller\ProductController::class)->except(['show']);
         Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
         Route::get('/orders/{order}', [SellerController::class, 'showOrder'])->name('orders.show');
+        Route::post('/orders/{order}/status', [SellerController::class, 'updateOrderStatus'])->name('orders.status');
         Route::get('/profile', [SellerController::class, 'profile'])->name('profile');
         Route::put('/profile', [SellerController::class, 'updateProfile'])->name('profile.update');
         Route::get('/analytics', [SellerController::class, 'analytics'])->name('analytics');
@@ -119,6 +120,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/sellers', [AdminController::class, 'sellers'])->name('sellers');
         Route::get('/products', [AdminController::class, 'products'])->name('products');
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [AdminController::class, 'showOrder'])->name('orders.show');
+        Route::post('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');

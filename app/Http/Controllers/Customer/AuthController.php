@@ -144,7 +144,10 @@ class AuthController extends Controller
 
             // Check if 2FA is required
             if ($user->isTwoFactorEnabled()) {
-                session(['2fa_user_id' => $user->id]);
+                // The password was right but the user is not signed in until the 2FA code is checked
+                Auth::logout();
+                session(['2fa_user_id' => $user->id, '2fa_remember' => $remember]);
+
                 return redirect()->route('2fa.show');
             }
 
@@ -205,8 +208,9 @@ class AuthController extends Controller
                 'two_factor_recovery_codes' => encrypt(json_encode(array_values($recoveryCodes)))
             ]);
             
-            session()->forget('2fa_user_id');
-            Auth::login($user);
+            $remember = (bool) session('2fa_remember', false);
+            session()->forget(['2fa_user_id', '2fa_remember']);
+            Auth::login($user, $remember);
             return $this->redirectBasedOnRole($user);
         }
 
@@ -215,8 +219,9 @@ class AuthController extends Controller
         $valid = $this->google2fa->verifyKey($secret, $code);
 
         if ($valid) {
-            session()->forget('2fa_user_id');
-            Auth::login($user);
+            $remember = (bool) session('2fa_remember', false);
+            session()->forget(['2fa_user_id', '2fa_remember']);
+            Auth::login($user, $remember);
             return $this->redirectBasedOnRole($user);
         }
 

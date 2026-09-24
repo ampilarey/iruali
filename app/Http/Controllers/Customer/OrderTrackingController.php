@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Models\OTP;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class OrderTrackingController extends Controller
 {
@@ -18,31 +18,16 @@ class OrderTrackingController extends Controller
     // Handle tracking form submission
     public function submit(Request $request)
     {
-        $request->validate([
-            'order_code' => 'nullable|string',
-            'mobile' => 'nullable|string',
-            'otp' => 'nullable|string',
-        ]);
+        $request->validate(['order_code' => 'required|string|max:40']);
 
-        if ($request->filled('order_code')) {
-            $order = Order::where('order_number', $request->order_code)->first();
-            if ($order) {
-                return redirect()->route('order.track.show', $order);
-            } else {
-                return back()->withErrors(['order_code' => __('Order not found.')]);
-            }
+        $order = Order::where('order_number', trim($request->order_code))->first();
+        if (! $order) {
+            return back()->withInput()->withErrors(['order_code' => __('Order not found.')]);
         }
 
-        if ($request->filled('mobile') && $request->filled('otp')) {
-            $order = Order::where('mobile', $request->mobile)->latest()->first();
-            if ($order && OTP::verify($request->mobile, $request->otp, 'order_tracking')) {
-                return redirect()->route('order.track.show', $order);
-            } else {
-                return back()->withErrors(['otp' => __('Invalid OTP or mobile.')]);
-            }
-        }
-
-        return back()->withErrors(['order_code' => __('Please enter order code or mobile/OTP.')]);
+        // The status page is only reachable through a short-lived signed link,
+        // so order ids in the URL can't be guessed or enumerated.
+        return redirect()->to(URL::temporarySignedRoute('order.track.show', now()->addMinutes(30), $order));
     }
 
     // Show order status
@@ -50,4 +35,4 @@ class OrderTrackingController extends Controller
     {
         return view('orders.status', compact('order'));
     }
-} 
+}

@@ -190,7 +190,12 @@ class OrderService
      */
     protected function generateOrderNumber(): string
     {
-        return 'ORD-'.strtoupper(uniqid());
+        // Random rather than time-based (uniqid), so order numbers can't be guessed from each other
+        do {
+            $number = 'ORD-'.strtoupper(\Illuminate\Support\Str::random(10));
+        } while (Order::where('order_number', $number)->exists());
+
+        return $number;
     }
 
     /**

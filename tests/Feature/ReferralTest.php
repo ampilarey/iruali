@@ -32,8 +32,8 @@ class ReferralTest extends TestCase
             'name' => 'Referee User',
             'email' => 'referee@example.com',
             'phone' => '7770001',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Str0ng!Pass#2024',
+            'password_confirmation' => 'Str0ng!Pass#2024',
             'address' => 'Somewhere',
             'city' => 'Male',
             'state' => 'Male',
@@ -65,6 +65,8 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
+            'payment_method' => 'cod',
+            'agree_terms' => 'on',
         ]);
         $response->assertRedirect();
         $referrer->refresh();
@@ -88,6 +90,8 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
+            'payment_method' => 'cod',
+            'agree_terms' => 'on',
         ]);
         $referrer->refresh();
         $referee->refresh();
@@ -100,6 +104,8 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
+            'payment_method' => 'cod',
+            'agree_terms' => 'on',
         ]);
         $referrer->refresh();
         $referee->refresh();
@@ -113,8 +119,8 @@ class ReferralTest extends TestCase
             'name' => 'No Referral',
             'email' => 'noref@example.com',
             'phone' => '7770002',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Str0ng!Pass#2024',
+            'password_confirmation' => 'Str0ng!Pass#2024',
             'address' => 'Somewhere',
             'city' => 'Male',
             'state' => 'Male',
@@ -140,6 +146,8 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
+            'payment_method' => 'cod',
+            'agree_terms' => 'on',
         ]);
         $user->refresh();
         $this->assertEquals(10, $user->loyalty_points); // Only order points

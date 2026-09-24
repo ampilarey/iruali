@@ -188,3 +188,6 @@ tests/coverage/
 # Deployment files (included for cPanel deployment)
 # deploy-*.sh
 # update-*.sh
+
+# Deploy packages built by deploy-cpanel-full.sh
+/iruali-deploy-*.tar.gz

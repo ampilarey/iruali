@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Cart;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Services\DiscountService;
@@ -33,7 +34,7 @@ class DiscountServiceTest extends TestCase
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
             'price' => 100
         ]);
@@ -54,7 +55,7 @@ class DiscountServiceTest extends TestCase
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
             'price' => 100
         ]);
@@ -75,7 +76,7 @@ class DiscountServiceTest extends TestCase
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
             'price' => 100
         ]);
@@ -112,7 +113,7 @@ class DiscountServiceTest extends TestCase
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
             'price' => 100
         ]);
@@ -189,7 +190,7 @@ class DiscountServiceTest extends TestCase
 
         // Mock cart total to 50
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 50])->id,
             'quantity' => 1,
             'price' => 50
         ]);
@@ -217,7 +218,7 @@ class DiscountServiceTest extends TestCase
         $user = User::factory()->create(['loyalty_points' => 100]);
         $cart = Cart::factory()->create();
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
             'price' => 100
         ]);
@@ -236,7 +237,7 @@ class DiscountServiceTest extends TestCase
         $user = User::factory()->create(['loyalty_points' => 50]);
         $cart = Cart::factory()->create();
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
             'price' => 100
         ]);
@@ -252,7 +253,7 @@ class DiscountServiceTest extends TestCase
         $user = User::factory()->create(['loyalty_points' => 100]);
         $cart = Cart::factory()->create();
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 50])->id,
             'quantity' => 1,
             'price' => 50
         ]);

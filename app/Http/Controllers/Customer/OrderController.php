@@ -56,7 +56,7 @@ class OrderController extends Controller
 
         if (!$result['success']) {
             NotificationService::error($result['message']);
-            return redirect()->route('cart.index');
+            return redirect()->route('cart');
         }
 
         NotificationService::orderPlaced();

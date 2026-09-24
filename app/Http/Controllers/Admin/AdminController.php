@@ -92,7 +92,7 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
         
-        $products = Product::with(['category', 'user'])->paginate(10);
+        $products = Product::with(['category', 'seller'])->paginate(10);
         return view('admin.products.index', compact('products'));
     }
 

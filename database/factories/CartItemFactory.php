@@ -12,8 +12,8 @@ class CartItemFactory extends Factory
     public function definition()
     {
         return [
-            'cart_id' => 1,
-            'product_id' => 1,
+            'cart_id' => \App\Models\Cart::factory(),
+            'product_id' => \App\Models\Product::factory(),
             'product_variant_id' => null,
             'quantity' => $this->faker->numberBetween(1, 5),
             'price' => $this->faker->randomFloat(2, 10, 1000),

@@ -68,7 +68,7 @@ class NotificationSystemTest extends TestCase
             'postal_code' => '12345',
             'date_of_birth' => '1990-01-01',
             'gender' => 'male',
-            'terms' => 'on'
+            'agree_terms' => 'on'
         ]);
 
         $response->assertRedirect('/verification/notice');

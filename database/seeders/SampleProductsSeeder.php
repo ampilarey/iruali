@@ -6,20 +6,26 @@ use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 class SampleProductsSeeder extends Seeder
 {
     public function run(): void
     {
+        $sellerId = User::where('email', 'admin@example.com')->value('id') ?? User::value('id');
+        if (!$sellerId) {
+            return;
+        }
+
         $categories = Category::all();
         
         foreach ($categories as $category) {
-            $this->addProductsToCategory($category);
+            $this->addProductsToCategory($category, $sellerId);
         }
     }
     
-    private function addProductsToCategory(Category $category)
+    private function addProductsToCategory(Category $category, int $sellerId)
     {
         $products = $this->getProductsForCategory($category->name);
         
@@ -33,7 +39,7 @@ class SampleProductsSeeder extends Seeder
                 'sku' => 'SKU-' . Str::random(8),
                 'stock_quantity' => rand(10, 100),
                 'category_id' => $category->id,
-                'seller_id' => 1, // Assuming user ID 1 exists
+                'seller_id' => $sellerId,
                 'is_active' => true,
                 'is_featured' => rand(0, 1),
                 'weight' => rand(0.1, 5.0),

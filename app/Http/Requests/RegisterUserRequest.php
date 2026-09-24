@@ -38,7 +38,7 @@ class RegisterUserRequest extends FormRequest
                     ->uncompromised()
             ],
             'password_confirmation' => 'required|string',
-            'terms' => 'required|accepted',
+            'agree_terms' => 'required|accepted',
             'referral_code' => 'nullable|string|exists:users,referral_code',
         ];
     }
@@ -57,8 +57,8 @@ class RegisterUserRequest extends FormRequest
             'password.required' => 'Please enter a password.',
             'password.confirmed' => 'Password confirmation does not match.',
             'password_confirmation.required' => 'Please confirm your password.',
-            'terms.required' => 'You must accept the terms and conditions.',
-            'terms.accepted' => 'You must accept the terms and conditions.',
+            'agree_terms.required' => 'You must accept the terms and conditions.',
+            'agree_terms.accepted' => 'You must accept the terms and conditions.',
             'referral_code.exists' => 'Invalid referral code.',
         ];
     }
@@ -74,7 +74,7 @@ class RegisterUserRequest extends FormRequest
             'phone' => 'phone number',
             'password' => 'password',
             'password_confirmation' => 'password confirmation',
-            'terms' => 'terms and conditions',
+            'agree_terms' => 'terms and conditions',
             'referral_code' => 'referral code',
         ];
     }

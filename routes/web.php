@@ -107,7 +107,7 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
     });
 
     // Admin routes
-    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/sellers', [AdminController::class, 'sellers'])->name('sellers');
@@ -115,22 +115,8 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-        Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('admin.sellers.approve');
-        Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('admin.products.approve');
+        Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('sellers.approve');
+        Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     });
-    
-    // CSS Test route
-    Route::get('/test-css', function () {
-        return view('test-css');
-    });
-    
-    // Image Test route
-    Route::get('/test-images', function () {
-        return view('test-images');
-    });
-
-
-
-
 });

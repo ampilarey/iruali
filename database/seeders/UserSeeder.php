@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -35,11 +36,11 @@ class UserSeeder extends Seeder
             $this->command->info('✅ Admin user already exists, skipping creation');
         }
         
-        // Attach admin role if roles are seeded and user doesn't have it
-        if (method_exists($admin, 'roles')) {
-            $hasAdminRole = $admin->roles()->where('roles.id', 1)->exists();
-            if (!$hasAdminRole) {
-                $admin->roles()->attach(1); // Assuming admin role is ID 1
+        // Attach admin role (looked up by name; IDs are not guaranteed)
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            if (!$admin->roles()->where('roles.id', $adminRole->id)->exists()) {
+                $admin->roles()->attach($adminRole->id);
                 $this->command->info('✅ Admin role attached to user');
             } else {
                 $this->command->info('✅ Admin role already attached to user');

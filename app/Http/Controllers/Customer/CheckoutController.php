@@ -25,7 +25,7 @@ class CheckoutController extends Controller
         $cart = $this->cartService->getOrCreateCart();
         
         if ($this->cartService->isCartEmpty($cart)) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
         
         $points_balance = $user->loyalty_points;

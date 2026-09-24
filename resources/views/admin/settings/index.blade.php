@@ -95,6 +95,25 @@
                 <p class="mt-2 text-xs text-gray-500">Greater Malé is Malé, Hulhumalé and Villimalé. Set "Free delivery over" to 0 to always charge delivery. Checked against the order total after discounts.</p>
             </section>
 
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Bank transfer</h2>
+                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="bank_name" class="block text-sm font-medium text-gray-700">Bank</label>
+                        <input id="bank_name" name="bank_name" class="{{ $field }}" value="{{ old('bank_name', $settings['bank_name']) }}">
+                    </div>
+                    <div>
+                        <label for="bank_account_name" class="block text-sm font-medium text-gray-700">Account name</label>
+                        <input id="bank_account_name" name="bank_account_name" class="{{ $field }}" value="{{ old('bank_account_name', $settings['bank_account_name']) }}">
+                    </div>
+                    <div>
+                        <label for="bank_account_number" class="block text-sm font-medium text-gray-700">Account number</label>
+                        <input id="bank_account_number" name="bank_account_number" class="{{ $field }}" value="{{ old('bank_account_number', $settings['bank_account_number']) }}">
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-gray-500">Bank transfer is offered at checkout once an account number is set. Customers upload their slip on the order page; you confirm it on the order.</p>
+            </section>
+
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
             </div>

@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -253,6 +254,9 @@ class AdminController extends Controller
             'delivery_fee_greater_male' => 'sometimes|required|numeric|min:0|max:100000',
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
+            'bank_name' => 'sometimes|nullable|string|max:100',
+            'bank_account_name' => 'sometimes|nullable|string|max:150',
+            'bank_account_number' => 'sometimes|nullable|string|max:40',
         ]);
 
         Setting::set($validated);
@@ -281,5 +285,22 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Order marked as '.$request->status.'.');
+    }
+
+    public function updatePayment(Request $request, Order $order, PaymentService $payments)
+    {
+        $this->checkAdminRole();
+
+        $request->validate(['action' => 'required|in:confirm,reject']);
+
+        if ($request->action === 'confirm') {
+            $payments->confirm($order);
+
+            return back()->with('success', 'Payment confirmed.');
+        }
+
+        $payments->reject($order);
+
+        return back()->with('success', 'Slip rejected. The customer can upload a new one.');
     }
 }

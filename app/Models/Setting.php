@@ -23,6 +23,9 @@ class Setting extends Model
         'delivery_fee_greater_male' => 25,
         'delivery_fee_islands' => 75,
         'free_delivery_over' => 1000,
+        'bank_name' => 'Bank of Maldives',
+        'bank_account_name' => '',
+        'bank_account_number' => '',
     ];
 
     protected $fillable = ['key', 'value'];

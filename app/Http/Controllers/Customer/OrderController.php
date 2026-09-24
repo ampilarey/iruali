@@ -7,7 +7,10 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Services\NotificationService;
 use App\Services\OrderService;
+use App\Services\PaymentService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -78,5 +81,38 @@ class OrderController extends Controller
         NotificationService::success(__('Your order has been cancelled.'));
 
         return redirect()->route('orders.show', $order);
+    }
+
+    public function uploadPaymentSlip(Request $request, Order $order, PaymentService $payments)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        if (! $payments->canUploadSlip($order)) {
+            NotificationService::error(__('A payment slip can\'t be uploaded for this order.'));
+
+            return redirect()->route('orders.show', $order);
+        }
+
+        $request->validate([
+            'payment_slip' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+        ], [
+            'payment_slip.mimes' => __('Upload a photo (JPG, PNG) or PDF of your transfer slip.'),
+            'payment_slip.max' => __('The slip must be 5 MB or smaller.'),
+        ]);
+
+        $payments->submitSlip($order, $request->file('payment_slip'));
+
+        NotificationService::success(__('Thanks. We\'ll confirm your payment shortly.'));
+
+        return redirect()->route('orders.show', $order);
+    }
+
+    public function showPaymentSlip(Order $order)
+    {
+        $user = Auth::user();
+        abort_unless($order->user_id === $user->id || $user->isAdmin(), 403);
+        abort_unless($order->payment_slip && Storage::disk(PaymentService::DISK)->exists($order->payment_slip), 404);
+
+        return Storage::disk(PaymentService::DISK)->response($order->payment_slip);
     }
 }

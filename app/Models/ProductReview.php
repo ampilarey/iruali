@@ -17,10 +17,14 @@ class ProductReview extends Model
         'comment',
         'status',
         'is_approved',
+        'verified_purchase',
+        'helpful_count',
     ];
 
     protected $casts = [
         'rating' => 'integer',
+        'is_approved' => 'boolean',
+        'verified_purchase' => 'boolean',
         'status' => 'string',
     ];
 

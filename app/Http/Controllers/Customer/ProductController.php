@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Services\CatalogService;
@@ -24,7 +25,7 @@ class ProductController extends Controller
 
         $product->load([
             'category.parent', 'images', 'variants', 'seller',
-            'reviews' => fn ($q) => $q->where('is_approved', true)->latest(),
+            'reviews' => fn ($q) => $q->where('is_approved', true)->with('user')->orderByDesc('helpful_count')->latest(),
         ]);
 
         $cards = fn ($q) => $q->active()->with(['category', 'mainImage', 'seller'])
@@ -45,6 +46,28 @@ class ProductController extends Controller
             ->take(8)
             ->get();
 
+        // Frequently bought together: what else was in the orders that had this product
+        $orderIds = OrderItem::where('product_id', $product->id)->pluck('order_id');
+        $boughtTogetherIds = $orderIds->isEmpty() ? collect() : OrderItem::whereIn('order_id', $orderIds)
+            ->where('product_id', '!=', $product->id)
+            ->selectRaw('product_id, count(*) as together')
+            ->groupBy('product_id')
+            ->orderByDesc('together')
+            ->take(10)
+            ->pluck('product_id');
+        $boughtTogether = $boughtTogetherIds->isEmpty() ? collect() : $cards(Product::query())->whereIn('id', $boughtTogetherIds)->inStock()->get()
+            ->sortBy(fn ($p) => $boughtTogetherIds->search($p->id))->take(3)->values();
+
+        $reviews = $product->reviews;
+        $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(fn ($stars) => [$stars => $reviews->where('rating', $stars)->count()]);
+        $myReview = $request->user() ? $reviews->firstWhere('user_id', $request->user()->id) : null;
+        $votedReviewIds = $request->user()
+            ? \Illuminate\Support\Facades\DB::table('review_votes')->where('user_id', $request->user()->id)->whereIn('product_review_id', $reviews->pluck('id'))->pluck('product_review_id')->all()
+            : [];
+
+        $questions = $product->questions()->with('user')->latest()->get();
+        $isOwner = $request->user() && ($request->user()->id === $product->seller_id || $request->user()->hasRole('admin'));
+
         // Recently viewed, newest first; this product goes to the front for the next page.
         $viewed = collect($request->session()->get('recently_viewed', []))->reject(fn ($id) => $id === $product->id);
         $recentlyViewed = $viewed->isEmpty() ? collect() : $cards(Product::query())->whereIn('id', $viewed)->get()
@@ -57,6 +80,11 @@ class ProductController extends Controller
             'free_over' => (float) Setting::get('free_delivery_over'),
         ];
 
-        return view('products.show', compact('product', 'relatedProducts', 'moreFromSeller', 'recentlyViewed', 'delivery'));
+        $whatsapp = preg_replace('/[^0-9]/', '', (string) Setting::get('whatsapp_number'));
+
+        return view('products.show', compact(
+            'product', 'relatedProducts', 'moreFromSeller', 'recentlyViewed', 'delivery', 'boughtTogether',
+            'ratingBreakdown', 'myReview', 'votedReviewIds', 'questions', 'isOwner', 'whatsapp'
+        ));
     }
 }

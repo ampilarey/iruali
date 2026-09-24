@@ -40,6 +40,7 @@
                 <x-add-to-cart :product="$product" class="flex-1" />
                 <x-wishlist-button :product="$product" />
             </div>
+            <x-compare-toggle :product="$product" class="mt-2" />
         </div>
     </div>
 </article>
@@ -69,10 +70,12 @@
             <p class="mt-1 text-xs text-gray-500 truncate">{{ __('Sold by') }} <a href="{{ route('sellers.show', $seller) }}" class="font-medium text-gray-700 hover:text-primary hover:underline">{{ $sellerName }}</a>@if($seller->city) &middot; {{ $seller->city }}@endif</p>
         @endif
         <div class="mt-auto pt-2">
+            @if($product->deal_ends_at && ! $compact)<x-deal-countdown :ends="$product->deal_ends_at" compact class="mb-1" />@endif
             <x-price :product="$product" />
             <x-stock :quantity="$stock" class="mt-0.5" />
             @unless($compact)
                 <x-add-to-cart :product="$product" class="w-full mt-2.5" small />
+                <x-compare-toggle :product="$product" class="mt-2" />
             @endunless
         </div>
     </div>

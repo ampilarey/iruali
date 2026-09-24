@@ -32,9 +32,35 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/categories', [\App\Http\Controllers\Customer\CategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/{category:slug}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
+    Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest')->middleware('throttle:60,1');
+    Route::get('/brands/{brand}', [ShopController::class, 'brand'])->name('brands.show')->where('brand', '.+');
     Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
     Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
     Route::view('/help', 'pages.help')->name('help');
+    Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
+    Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
+    Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');
+    Route::post('/compare/{product}', [\App\Http\Controllers\Customer\CompareController::class, 'toggle'])->name('compare.toggle');
+    Route::delete('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'clear'])->name('compare.clear');
+
+    // Cart: open to guests; checkout asks them to sign in and their cart comes along.
+    Route::get('/cart', [CartController::class, 'index'])->name('cart');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/add-many', [CartController::class, 'addMany'])->name('cart.addMany');
+    Route::put('/cart/update/{item}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
+    Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
+    Route::middleware('auth')->group(function () {
+        Route::post('/products/{product}/reviews', [\App\Http\Controllers\Customer\ReviewController::class, 'store'])->name('reviews.store')->middleware('throttle:10,1');
+        Route::post('/reviews/{review}/helpful', [\App\Http\Controllers\Customer\ReviewController::class, 'helpful'])->name('reviews.helpful')->middleware('throttle:30,1');
+        Route::post('/products/{product}/questions', [\App\Http\Controllers\Customer\QuestionController::class, 'store'])->name('questions.store')->middleware('throttle:10,1');
+        Route::post('/questions/{question}/answer', [\App\Http\Controllers\Customer\QuestionController::class, 'answer'])->name('questions.answer');
+        Route::post('/cart/{item}/save-for-later', [CartController::class, 'saveForLater'])->name('cart.saveForLater');
+        Route::post('/saved/{saved}/move-to-cart', [CartController::class, 'moveToCart'])->name('saved.moveToCart');
+        Route::delete('/saved/{saved}', [CartController::class, 'removeSaved'])->name('saved.remove');
+    });
 
     // Authentication routes
     Route::middleware('guest')->group(function () {
@@ -65,13 +91,6 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         // Account routes
         Route::get('/account', [AuthController::class, 'account'])->name('account');
         // Cart routes
-        Route::get('/cart', [CartController::class, 'index'])->name('cart');
-        Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
-        Route::put('/cart/update/{item}', [CartController::class, 'update'])->name('cart.update');
-        Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])->name('cart.remove');
-        Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-        Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
-        Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
         // Wishlist routes
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
         Route::post('/wishlist/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
@@ -86,6 +105,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
         Route::post('/orders/{order}/payment-slip', [OrderController::class, 'uploadPaymentSlip'])->name('orders.payment-slip.store')->middleware('throttle:10,1');
         Route::get('/orders/{order}/payment-slip', [OrderController::class, 'showPaymentSlip'])->name('orders.payment-slip.show');
         // 2FA setup routes
@@ -115,6 +135,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/profile', [SellerController::class, 'profile'])->name('profile');
         Route::put('/profile', [SellerController::class, 'updateProfile'])->name('profile.update');
         Route::get('/analytics', [SellerController::class, 'analytics'])->name('analytics');
+        Route::get('/questions', [SellerController::class, 'questions'])->name('questions');
     });
 
     // Admin routes

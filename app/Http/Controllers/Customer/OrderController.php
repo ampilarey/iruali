@@ -83,6 +83,29 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order);
     }
 
+    /**
+     * Put the products from a past order back in the cart (whatever is still available).
+     */
+    public function buyAgain(Order $order, \App\Services\CartService $cart)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        $added = 0;
+        foreach ($order->items()->with('product')->get() as $item) {
+            $product = $item->product;
+            if ($product && $product->is_active && $product->stock_quantity > 0) {
+                $cart->addToCart($product->id, min($item->quantity, $product->stock_quantity));
+                $added++;
+            }
+        }
+
+        $added
+            ? \App\Services\NotificationService::success(trans_choice(':count item added to your cart.|:count items added to your cart.', $added, ['count' => $added]))
+            : \App\Services\NotificationService::error(__('None of these products are available right now.'));
+
+        return redirect()->route('cart');
+    }
+
     public function uploadPaymentSlip(Request $request, Order $order, PaymentService $payments)
     {
         abort_unless($order->user_id === Auth::id(), 403);

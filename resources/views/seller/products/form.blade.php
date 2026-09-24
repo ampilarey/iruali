@@ -72,6 +72,11 @@
                     <input id="compare_price" name="compare_price" type="number" step="0.01" min="0" class="{{ $field }}" value="{{ old('compare_price', $product->compare_price) }}">
                 </div>
                 <div>
+                    <label for="flash_sale_ends_at" class="block text-sm font-medium text-gray-700">Sale ends <span class="font-normal text-gray-500">(optional, shows a countdown)</span></label>
+                    <input id="flash_sale_ends_at" name="flash_sale_ends_at" type="datetime-local" class="{{ $field }}" value="{{ old('flash_sale_ends_at', $product->flash_sale_ends_at?->format('Y-m-d\TH:i')) }}">
+                    <p class="mt-1 text-xs text-gray-500">Only used when a compare-at price is set.</p>
+                </div>
+                <div>
                     <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
                     <input id="brand" name="brand" class="{{ $field }}" value="{{ old('brand', $product->brand) }}">
                 </div>

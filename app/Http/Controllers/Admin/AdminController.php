@@ -8,9 +8,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\OrderService;
 use App\Services\PaymentService;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -248,6 +248,7 @@ class AdminController extends Controller
             'announcement_text' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:30',
+            'whatsapp_number' => ['sometimes', 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,20}$/'],
             'loyalty_spend_per_point' => 'required|numeric|min:1|max:100000',
             'referral_referrer_points' => 'required|integer|min:0|max:100000',
             'referral_referee_points' => 'required|integer|min:0|max:100000',

@@ -420,14 +420,15 @@ class AuthController extends Controller
     private function redirectBasedOnRole(User $user)
     {
         if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard');
+            $default = route('admin.dashboard');
+        } elseif ($user->isSeller()) {
+            $default = route('seller.dashboard');
+        } else {
+            $default = route('home');
         }
 
-        if ($user->isSeller()) {
-            return redirect()->route('seller.dashboard');
-        }
-
-        return redirect()->route('home');
+        // Send users back to the page that required login (e.g. /seller/apply)
+        return redirect()->intended($default);
     }
 
 } 

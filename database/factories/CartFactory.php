@@ -12,9 +12,9 @@ class CartFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => 1,
+            'user_id' => \App\Models\User::factory(),
             'session_id' => $this->faker->uuid(),
             'status' => 'active',
         ];
     }
-} 
+}

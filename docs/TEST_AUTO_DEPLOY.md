@@ -66,9 +66,15 @@ cd /home/iruali/test && git fetch origin && git checkout main && git pull origin
 
 ## After a push to `main`
 
+Only `main` deploys. Work on feature branches (including agent branches such as
+`claude/*`) never reaches TEST until its pull request is merged into `main`.
+
 1. Open Actions → **Deploy TEST (immediate)** — should go green within ~1 minute
-2. Refresh https://test.iruali.mv/
-3. Optional: `tail -f ~/self-update-test.log` on the server
+2. Check https://test.iruali.mv/api/health — `commit` should match the new `main` SHA
+   (written by `scripts/write-deploy-stamp.sh` on every deploy; `unknown` means no
+   deploy has run since this was added)
+3. Refresh https://test.iruali.mv/
+4. Optional: `tail -f ~/self-update-test.log` on the server
 
 ## Disable webhook
 

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Order;
 use App\Models\Cart;
+use App\Models\Order;
 use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
@@ -25,20 +25,20 @@ class OrderService
     {
         $cart = $user->carts()->where('status', 'active')->latest()->first();
 
-        if (!$cart || $cart->items->count() === 0) {
+        if (! $cart || $cart->items->count() === 0) {
             return ['success' => false, 'message' => 'Your cart is empty.'];
         }
 
         // Stock check before order creation
         foreach ($cart->items as $cartItem) {
             $product = $cartItem->product;
-            if (!$product) {
+            if (! $product) {
                 return ['success' => false, 'message' => 'A product in your cart no longer exists.'];
             }
             if ($product->stock_quantity < $cartItem->quantity) {
                 return [
                     'success' => false,
-                    'message' => 'Sorry, not enough stock for "' . ($product->name['en'] ?? $product->name) . '". Available: ' . $product->stock_quantity . ', Requested: ' . $cartItem->quantity
+                    'message' => 'Sorry, not enough stock for "'.($product->name['en'] ?? $product->name).'". Available: '.$product->stock_quantity.', Requested: '.$cartItem->quantity,
                 ];
             }
         }
@@ -79,12 +79,13 @@ class OrderService
             return [
                 'success' => true,
                 'order' => $order,
-                'message' => 'Order placed successfully!'
+                'message' => 'Order placed successfully!',
             ];
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return ['success' => false, 'message' => 'Failed to create order: ' . $e->getMessage()];
+
+            return ['success' => false, 'message' => 'Failed to create order: '.$e->getMessage()];
         }
     }
 
@@ -120,7 +121,7 @@ class OrderService
     protected function processDiscounts(Order $order, array $discounts): void
     {
         $voucher = $discounts['voucher']['voucher'];
-        
+
         // Increment voucher usage
         if ($voucher) {
             $voucher->increment('used_count');
@@ -170,6 +171,7 @@ class OrderService
     {
         $cart->items()->delete();
         $cart->status = 'ordered';
+        $cart->voucher_code = null;
         $cart->save();
     }
 
@@ -178,7 +180,7 @@ class OrderService
      */
     protected function generateOrderNumber(): string
     {
-        return 'ORD-' . strtoupper(uniqid());
+        return 'ORD-'.strtoupper(uniqid());
     }
 
     /**
@@ -206,6 +208,7 @@ class OrderService
     public function updateOrderStatus(Order $order, string $status): bool
     {
         $order->update(['status' => $status]);
+
         return true;
     }
 
@@ -230,7 +233,7 @@ class OrderService
                 'state' => $order->shipping_state,
                 'zip' => $order->shipping_zip,
                 'country' => $order->shipping_country,
-            ]
+            ],
         ];
     }
 
@@ -257,7 +260,7 @@ class OrderService
     {
         $cart = $user->carts()->where('status', 'active')->latest()->first();
 
-        if (!$cart) {
+        if (! $cart) {
             return ['valid' => false, 'message' => 'No active cart found.'];
         }
 
@@ -278,7 +281,7 @@ class OrderService
             'processing' => ['status' => 'Processing', 'description' => 'Your order is being prepared for shipment'],
             'shipped' => ['status' => 'Shipped', 'description' => 'Your order has been shipped'],
             'delivered' => ['status' => 'Delivered', 'description' => 'Your order has been delivered'],
-            'cancelled' => ['status' => 'Cancelled', 'description' => 'Your order has been cancelled']
+            'cancelled' => ['status' => 'Cancelled', 'description' => 'Your order has been cancelled'],
         ];
 
         return [
@@ -286,7 +289,7 @@ class OrderService
             'current_status' => $order->status,
             'status_info' => $statusTimeline[$order->status] ?? ['status' => 'Unknown', 'description' => 'Status not available'],
             'created_at' => $order->created_at,
-            'updated_at' => $order->updated_at
+            'updated_at' => $order->updated_at,
         ];
     }
-} 
+}

@@ -28,7 +28,8 @@ done
 
 chmod +x "$SCRIPT" \
   "$ROOT/scripts/install-self-update-cron-test.sh" \
-  "$ROOT/scripts/pull-deploy-test.sh"
+  "$ROOT/scripts/pull-deploy-test.sh" \
+  "$ROOT/scripts/write-deploy-stamp.sh"
 
 cd "$ROOT"
 git fetch origin main --quiet || {

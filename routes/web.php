@@ -1,20 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Customer\AuthController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Customer\CartController;
-use App\Http\Controllers\Customer\WishlistController;
-use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\LocaleController;
+use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\OrderTrackingController;
 use App\Http\Controllers\Customer\SearchController;
 use App\Http\Controllers\Customer\ShopController;
+use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Seller\SellerController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Customer\LocaleController;
-use App\Http\Controllers\Customer\OrderTrackingController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,9 +28,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/shop', [ShopController::class, 'index'])->name('shop');
     Route::get('/products', [\App\Http\Controllers\Customer\ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{product}', [\App\Http\Controllers\Customer\ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{product}', [\App\Http\Controllers\Customer\ProductController::class, 'show'])->name('products.show');
     Route::get('/categories', [\App\Http\Controllers\Customer\CategoryController::class, 'index'])->name('categories.index');
-Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     // Authentication routes
@@ -98,16 +96,24 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
     Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show');
 
     // Seller routes
+    // Seller application (any logged-in user)
+    Route::middleware('auth')->group(function () {
+        Route::get('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'create'])->name('seller.apply');
+        Route::post('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'store'])->name('seller.apply.store')->middleware('throttle:5,1');
+    });
+
     Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
         Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
-        Route::get('/products', [SellerController::class, 'products'])->name('products');
+        Route::resource('products', \App\Http\Controllers\Seller\ProductController::class)->except(['show']);
         Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [SellerController::class, 'showOrder'])->name('orders.show');
         Route::get('/profile', [SellerController::class, 'profile'])->name('profile');
+        Route::put('/profile', [SellerController::class, 'updateProfile'])->name('profile.update');
         Route::get('/analytics', [SellerController::class, 'analytics'])->name('analytics');
     });
 
     // Admin routes
-    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/sellers', [AdminController::class, 'sellers'])->name('sellers');
@@ -115,22 +121,10 @@ Route::get('/categories/{category}', [\App\Http\Controllers\Customer\CategoryCon
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-        Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('admin.sellers.approve');
-        Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('admin.products.approve');
+        Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('sellers.approve');
+        Route::post('/sellers/{seller}/reject', [AdminController::class, 'rejectSeller'])->name('sellers.reject');
+        Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     });
-    
-    // CSS Test route
-    Route::get('/test-css', function () {
-        return view('test-css');
-    });
-    
-    // Image Test route
-    Route::get('/test-images', function () {
-        return view('test-images');
-    });
-
-
-
-
 });

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\CartService;
 use App\Services\DiscountService;
-use App\Http\Resources\CartResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 class CartController extends BaseController
 {
     protected $cartService;
+
     protected $discountService;
 
     public function __construct(CartService $cartService, DiscountService $discountService)
@@ -28,12 +31,7 @@ class CartController extends BaseController
      */
     public function index()
     {
-        $user = Auth::user();
-        $cart = $this->cartService->getOrCreateCart($user);
-
-        $cart->load(['items.product.mainImage']);
-
-        return $this->sendResponse(new CartResource($cart), 'Cart retrieved successfully');
+        return $this->cartResponse($this->cartService->getOrCreateCart(), 'Cart retrieved successfully');
     }
 
     /**
@@ -43,28 +41,38 @@ class CartController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1|max:999',
+            'product_variant_id' => 'nullable|integer|exists:product_variants,id',
         ]);
 
         if ($validator->fails()) {
             return $this->sendValidationError($validator->errors());
         }
 
-        $user = Auth::user();
         $product = Product::findOrFail($request->product_id);
 
-        // Check stock availability
-        if ($product->stock_quantity < $request->quantity) {
+        if (! $product->is_active) {
+            return $this->sendError('This product is not available');
+        }
+
+        $variantId = $request->product_variant_id;
+        if ($variantId && ! ProductVariant::where('id', $variantId)->where('product_id', $product->id)->exists()) {
+            return $this->sendValidationError(['product_variant_id' => ['The selected variant does not belong to this product.']]);
+        }
+
+        $cart = $this->cartService->getOrCreateCart();
+        $alreadyInCart = (int) $cart->items()
+            ->where('product_id', $product->id)
+            ->where('product_variant_id', $variantId)
+            ->sum('quantity');
+
+        if ($product->stock_quantity < $alreadyInCart + $request->quantity) {
             return $this->sendError('Insufficient stock available');
         }
 
-        $result = $this->cartService->addToCart($user, $product, $request->quantity);
+        $this->cartService->addToCart($product->id, (int) $request->quantity, $variantId ? (int) $variantId : null);
 
-        if (!$result['success']) {
-            return $this->sendError($result['message']);
-        }
-
-        return $this->sendResponse(new CartResource($result['cart']), 'Item added to cart successfully');
+        return $this->cartResponse($cart, 'Item added to cart successfully', 201);
     }
 
     /**
@@ -73,32 +81,24 @@ class CartController extends BaseController
     public function update(Request $request, CartItem $item)
     {
         $validator = Validator::make($request->all(), [
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1|max:999',
         ]);
 
         if ($validator->fails()) {
             return $this->sendValidationError($validator->errors());
         }
 
-        $user = Auth::user();
-
-        // Ensure the cart item belongs to the authenticated user
-        if ($item->cart->user_id !== $user->id) {
+        if (! $this->ownsItem($item)) {
             return $this->sendForbidden('Unauthorized access to cart item');
         }
 
-        // Check stock availability
         if ($item->product->stock_quantity < $request->quantity) {
             return $this->sendError('Insufficient stock available');
         }
 
-        $result = $this->cartService->updateCartItem($item, $request->quantity);
+        $this->cartService->updateCartItem($item, (int) $request->quantity);
 
-        if (!$result['success']) {
-            return $this->sendError($result['message']);
-        }
-
-        return $this->sendResponse(new CartResource($result['cart']), 'Cart item updated successfully');
+        return $this->cartResponse($item->cart, 'Cart item updated successfully');
     }
 
     /**
@@ -106,20 +106,14 @@ class CartController extends BaseController
      */
     public function remove(CartItem $item)
     {
-        $user = Auth::user();
-
-        // Ensure the cart item belongs to the authenticated user
-        if ($item->cart->user_id !== $user->id) {
+        if (! $this->ownsItem($item)) {
             return $this->sendForbidden('Unauthorized access to cart item');
         }
 
-        $result = $this->cartService->removeFromCart($item);
+        $cart = $item->cart;
+        $this->cartService->removeFromCart($item);
 
-        if (!$result['success']) {
-            return $this->sendError($result['message']);
-        }
-
-        return $this->sendResponse(new CartResource($result['cart']), 'Item removed from cart successfully');
+        return $this->cartResponse($cart, 'Item removed from cart successfully');
     }
 
     /**
@@ -127,14 +121,12 @@ class CartController extends BaseController
      */
     public function clear()
     {
-        $user = Auth::user();
-        $result = $this->cartService->clearCart($user);
+        $this->cartService->clearCart();
 
-        if (!$result['success']) {
-            return $this->sendError($result['message']);
-        }
+        $cart = $this->cartService->getOrCreateCart();
+        $cart->update(['voucher_code' => null]);
 
-        return $this->sendResponse([], 'Cart cleared successfully');
+        return $this->cartResponse($cart, 'Cart cleared successfully');
     }
 
     /**
@@ -150,20 +142,21 @@ class CartController extends BaseController
             return $this->sendValidationError($validator->errors());
         }
 
-        $user = Auth::user();
-        $cart = $this->cartService->getOrCreateCart($user);
+        $cart = $this->cartService->getOrCreateCart();
 
-        $result = $this->discountService->applyVoucher($request->voucher_code, $cart);
+        if ($cart->items()->doesntExist()) {
+            return $this->sendError('Your cart is empty');
+        }
 
-        if (!$result['valid']) {
+        $result = $this->discountService->validateVoucher($request->voucher_code, $cart);
+
+        if (! $result['valid']) {
             return $this->sendError($result['message']);
         }
 
-        return $this->sendResponse([
-            'voucher_code' => $request->voucher_code,
-            'discount_amount' => $result['amount'],
-            'cart_total' => $result['new_total'],
-        ], 'Voucher applied successfully');
+        $cart->update(['voucher_code' => $result['voucher']->code]);
+
+        return $this->cartResponse($cart, 'Voucher applied successfully');
     }
 
     /**
@@ -171,13 +164,25 @@ class CartController extends BaseController
      */
     public function removeVoucher()
     {
-        $user = Auth::user();
-        $cart = $this->cartService->getOrCreateCart($user);
+        $cart = $this->cartService->getOrCreateCart();
+        $cart->update(['voucher_code' => null]);
 
-        $result = $this->discountService->removeVoucher($cart);
+        return $this->cartResponse($cart, 'Voucher removed successfully');
+    }
 
-        return $this->sendResponse([
-            'cart_total' => $result['new_total'],
-        ], 'Voucher removed successfully');
+    protected function ownsItem(CartItem $item): bool
+    {
+        $cart = $item->cart;
+
+        return $cart
+            && (int) $cart->user_id === (int) Auth::id()
+            && $cart->status === 'active';
+    }
+
+    protected function cartResponse(Cart $cart, string $message, int $code = 200): JsonResponse
+    {
+        $cart = $cart->fresh(['items.product.mainImage']);
+
+        return $this->sendResponse(new CartResource($cart), $message, $code);
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Cart;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Services\DiscountService;
@@ -19,7 +20,7 @@ class DiscountServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->discountService = new DiscountService();
+        $this->discountService = new DiscountService;
     }
 
     public function test_calculate_voucher_discount_percentage()
@@ -28,18 +29,18 @@ class DiscountServiceTest extends TestCase
         $voucher = Voucher::factory()->create([
             'type' => 'percent',
             'amount' => 10, // 10% discount
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
-            'price' => 100
+            'price' => 100,
         ]);
 
         $discount = $this->discountService->calculateVoucherAmount($cart, $voucher);
-        
+
         $this->assertEquals(10.0, $discount); // 10% of 100 = 10
     }
 
@@ -49,18 +50,18 @@ class DiscountServiceTest extends TestCase
         $voucher = Voucher::factory()->create([
             'type' => 'fixed',
             'amount' => 15, // 15 MVR discount
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
-            'price' => 100
+            'price' => 100,
         ]);
 
         $discount = $this->discountService->calculateVoucherAmount($cart, $voucher);
-        
+
         $this->assertEquals(15.0, $discount); // Fixed 15 MVR
     }
 
@@ -70,18 +71,18 @@ class DiscountServiceTest extends TestCase
         $voucher = Voucher::factory()->create([
             'type' => 'fixed',
             'amount' => 150, // 150 MVR discount
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
-            'price' => 100
+            'price' => 100,
         ]);
 
         $discount = $this->discountService->calculateVoucherAmount($cart, $voucher);
-        
+
         $this->assertEquals(100.0, $discount); // Should not exceed cart total
     }
 
@@ -107,18 +108,18 @@ class DiscountServiceTest extends TestCase
             'valid_until' => now()->addDay(),
             'max_uses' => 100,
             'used_count' => 50,
-            'min_order' => 50
+            'min_order' => 50,
         ]);
 
         // Mock cart total to 100
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
-            'price' => 100
+            'price' => 100,
         ]);
 
         $result = $this->discountService->validateVoucher('TEST10', $cart);
-        
+
         $this->assertTrue($result['valid']);
         $this->assertInstanceOf(Voucher::class, $result['voucher']);
     }
@@ -126,9 +127,9 @@ class DiscountServiceTest extends TestCase
     public function test_validate_voucher_invalid_code()
     {
         $cart = Cart::factory()->create();
-        
+
         $result = $this->discountService->validateVoucher('INVALID', $cart);
-        
+
         $this->assertFalse($result['valid']);
         $this->assertStringContainsString('Invalid', $result['message']);
     }
@@ -138,11 +139,11 @@ class DiscountServiceTest extends TestCase
         $cart = Cart::factory()->create();
         Voucher::factory()->create([
             'code' => 'TEST10',
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         $result = $this->discountService->validateVoucher('TEST10', $cart);
-        
+
         $this->assertFalse($result['valid']);
         $this->assertStringContainsString('Invalid', $result['message']);
     }
@@ -153,11 +154,11 @@ class DiscountServiceTest extends TestCase
         Voucher::factory()->create([
             'code' => 'TEST10',
             'is_active' => true,
-            'valid_until' => now()->subDay()
+            'valid_until' => now()->subDay(),
         ]);
 
         $result = $this->discountService->validateVoucher('TEST10', $cart);
-        
+
         $this->assertFalse($result['valid']);
         $this->assertStringContainsString('expired', $result['message']);
     }
@@ -169,11 +170,11 @@ class DiscountServiceTest extends TestCase
             'code' => 'TEST10',
             'is_active' => true,
             'max_uses' => 10,
-            'used_count' => 10
+            'used_count' => 10,
         ]);
 
         $result = $this->discountService->validateVoucher('TEST10', $cart);
-        
+
         $this->assertFalse($result['valid']);
         $this->assertStringContainsString('usage limit', $result['message']);
     }
@@ -184,18 +185,18 @@ class DiscountServiceTest extends TestCase
         Voucher::factory()->create([
             'code' => 'TEST10',
             'is_active' => true,
-            'min_order' => 100
+            'min_order' => 100,
         ]);
 
         // Mock cart total to 50
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 50])->id,
             'quantity' => 1,
-            'price' => 50
+            'price' => 50,
         ]);
 
         $result = $this->discountService->validateVoucher('TEST10', $cart);
-        
+
         $this->assertFalse($result['valid']);
         $this->assertStringContainsString('minimum amount', $result['message']);
     }
@@ -217,13 +218,13 @@ class DiscountServiceTest extends TestCase
         $user = User::factory()->create(['loyalty_points' => 100]);
         $cart = Cart::factory()->create();
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
-            'price' => 100
+            'price' => 100,
         ]);
 
         $result = $this->discountService->applyLoyaltyPoints(50, $user, $cart);
-        
+
         $this->assertTrue($result['valid']);
         $this->assertEquals(50, Session::get('points_redeemed'));
 
@@ -236,13 +237,13 @@ class DiscountServiceTest extends TestCase
         $user = User::factory()->create(['loyalty_points' => 50]);
         $cart = Cart::factory()->create();
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 100])->id,
             'quantity' => 1,
-            'price' => 100
+            'price' => 100,
         ]);
 
         $result = $this->discountService->applyLoyaltyPoints(100, $user, $cart);
-        
+
         $this->assertFalse($result['valid']);
         $this->assertStringContainsString('Insufficient', $result['message']);
     }
@@ -252,13 +253,13 @@ class DiscountServiceTest extends TestCase
         $user = User::factory()->create(['loyalty_points' => 100]);
         $cart = Cart::factory()->create();
         $cart->items()->create([
-            'product_id' => 1,
+            'product_id' => Product::factory()->create(['price' => 50])->id,
             'quantity' => 1,
-            'price' => 50
+            'price' => 50,
         ]);
 
         $available = $this->discountService->getAvailableLoyaltyPoints($user, $cart);
-        
+
         $this->assertEquals(50, $available); // Should be limited by cart total
     }
-} 
+}

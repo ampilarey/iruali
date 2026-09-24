@@ -22,12 +22,32 @@
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-background text-dark">
+    {{-- TEST server banner: only on test.* hosts, never on iruali.mv. Inline styles so it
+         shows even if the CSS build is stale. Commit comes from scripts/write-deploy-stamp.sh. --}}
+    @if(str_starts_with(strtolower(request()->getHost()), 'test.'))
+        @php
+            $deployStamp = is_file(storage_path('app/deploy-stamp.json'))
+                ? json_decode((string) file_get_contents(storage_path('app/deploy-stamp.json')), true)
+                : null;
+        @endphp
+        <div role="status" style="background:#dc2626;color:#fff;text-align:center;font-weight:600;font-size:14px;padding:8px 16px;">
+            TEST SERVER — not the live site
+            @if($deployStamp)
+                · commit {{ $deployStamp['commit_short'] ?? '?' }}
+                · deployed {{ \Illuminate\Support\Carbon::parse($deployStamp['deployed_at'])->timezone('Indian/Maldives')->format('d M Y H:i') }}
+            @endif
+        </div>
+    @endif
+
     <!-- Top Banner -->
+    @php $announcement = \App\Models\Setting::get('announcement_text'); @endphp
+    @if($announcement)
     <div class="bg-primary text-white text-center py-2 px-4 text-sm font-medium">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <span>🎉 Free Shipping on Orders Over $49 | Expert Support Available 24/7</span>
+            <span>{{ $announcement }}</span>
         </div>
     </div>
+    @endif
 
     <!-- Sticky Header (desktop only — mobile uses the fixed header below) -->
     <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 hidden lg:block">
@@ -80,6 +100,20 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                             </svg>
                                             My Account
+                                        </a>
+                                        @if(auth()->user()->hasRole('admin'))
+                                            <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
+                                                <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                                                </svg>
+                                                Admin Dashboard
+                                            </a>
+                                        @endif
+                                        <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
+                                            <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l1-5h16l1 5M3 9h18M3 9v11h18V9M9 20v-6h6v6"></path>
+                                            </svg>
+                                            {{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}
                                         </a>
                                         <a href="{{ route('orders') }}" class="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
                                             <svg class="w-3 h-3 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,6 +262,10 @@
                         </div>
                     </div>
                     <a href="{{ route('account') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">My Account</a>
+                    @if(auth()->user()->hasRole('admin'))
+                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Admin Dashboard</a>
+                    @endif
+                    <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">{{ auth()->user()->hasRole('seller') ? 'Seller Centre' : 'Sell on iruali' }}</a>
                     <a href="{{ route('orders') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">My Orders</a>
                     <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-dark hover:text-primary hover:bg-gray-50 rounded-lg text-base transition-colors">Wishlist</a>
                     <form action="{{ route('logout') }}" method="POST" class="block">
@@ -288,6 +326,7 @@
                         <li><a href="{{ route('account') }}" class="text-gray-300 hover:text-white transition-colors">My Account</a></li>
                         <li><a href="{{ route('orders') }}" class="text-gray-300 hover:text-white transition-colors">Order History</a></li>
                         <li><a href="{{ route('wishlist') }}" class="text-gray-300 hover:text-white transition-colors">Wishlist</a></li>
+                        <li><a href="{{ route('seller.apply') }}" class="text-gray-300 hover:text-white transition-colors">Sell on iruali</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Track Order</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Returns</a></li>
                     </ul>
@@ -297,7 +336,11 @@
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Customer Service</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        @php $contactEmail = \App\Models\Setting::get('contact_email'); $contactPhone = \App\Models\Setting::get('contact_phone'); @endphp
+                        <li><a href="{{ $contactEmail ? 'mailto:' . $contactEmail : ($contactPhone ? 'tel:' . preg_replace('/[^0-9+]/', '', $contactPhone) : '#') }}" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        @if($contactPhone)
+                            <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="text-gray-300 hover:text-white transition-colors">{{ $contactPhone }}</a></li>
+                        @endif
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Shipping Info</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Returns & Exchanges</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Size Guide</a></li>

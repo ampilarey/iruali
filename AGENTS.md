@@ -10,7 +10,7 @@ This is a **Laravel 12 (PHP 8.2+) multi-vendor e-commerce app** ("Iruali") with 
 - `composer dev` runs server + queue listener + `pail` logs + vite concurrently; usually overkill — running `serve` + `npm run dev` is enough for manual testing.
 
 ### Environment gotchas (non-obvious)
-- **`.env.example` contains an unresolved git merge conflict.** Do not `cp .env.example .env` blindly. A working local dev `.env` (SQLite, `APP_ENV=local`, `APP_DEBUG=true`, `APP_URL=http://localhost:8000`) is created during environment setup; it is gitignored and persists in the VM snapshot.
+- `.env.example` is a local-dev template (SQLite). Copy it to `.env` and run `php artisan key:generate`; the environment setup may already have created a working `.env` (gitignored).
 - **`public/index.php`, `public/.htaccess`, and `public/build/` are tracked** (needed for cPanel Git deploys). A leftover Gatsby-style `public` ignore used to drop the whole folder from Git, which caused production `ViteManifestNotFoundException` on iruali.mv — that ignore is removed. Still ignored: `public/hot`, `public/storage`. After frontend changes, run `npm run build` (runs `fix-manifest.sh` to copy `.vite/manifest.json` → `build/manifest.json`) and commit `public/build/`.
 - Runtime dirs `storage/framework/{cache,sessions,views}` and `storage/app/public` are not tracked and are created during setup. Run `php artisan storage:link` after they exist.
 - **Dev database is SQLite** at `database/database.sqlite` (gitignored). Recreate with `touch database/database.sqlite` then `php artisan migrate --seed`. Seeders create an admin user `admin@example.com` / `password` plus sample categories/products/islands.
@@ -18,7 +18,7 @@ This is a **Laravel 12 (PHP 8.2+) multi-vendor e-commerce app** ("Iruali") with 
 ### Tests
 - Run with `php artisan test` or `./vendor/bin/phpunit`.
 - **`phpunit.xml` hardcodes MySQL** (`DB_CONNECTION=mysql`, `DB_DATABASE=iruali_test`, user `root`, empty password, host defaults to `127.0.0.1`) — it does **not** use the SQLite dev DB. A local MariaDB server with an empty-password root and an `iruali_test` database must be running for the suite to connect. MariaDB has no systemd here; start it with `sudo mysqld_safe &` (data dir `/var/lib/mysql` is already initialized).
-- As of setup, a subset of tests fail on a clean checkout due to **pre-existing test-code bugs** (e.g. `Cart::factory()` FK violations under `RefreshDatabase`, an undefined `$variantId` in `NotificationSystemTest`, and the default `ExampleTest` hitting `/` without seeding). These are not environment problems — MySQL connects and ~72 tests / 321 assertions pass. Do not "fix" the environment to chase them.
+- The full suite is expected to pass (121 tests). A failure is a real regression, not a known pre-existing issue.
 
 ### Lint / format
 - **Laravel Pint**: `./vendor/bin/pint` to fix, `./vendor/bin/pint --test` to check. The existing codebase has many pre-existing style violations; only run Pint on files you touch to avoid a huge unrelated diff.

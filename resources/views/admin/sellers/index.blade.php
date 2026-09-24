@@ -18,51 +18,57 @@
     </div>
 
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        @if(session('success'))
+            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
+        @endif
         <div class="bg-white shadow rounded-lg">
             <div class="px-4 py-5 sm:p-6">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shop</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($sellers ?? [] as $seller)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                                            <span class="text-sm font-medium text-gray-700">{{ substr($seller->name, 0, 1) }}</span>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $seller->name }}</div>
-                                        </div>
-                                    </div>
+                            <tr class="align-top">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ $seller->business_name ?: $seller->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $seller->name }}</div>
+                                    @if($seller->business_description)
+                                        <p class="mt-1 max-w-sm text-xs text-gray-600">{{ \Illuminate\Support\Str::limit($seller->business_description, 140) }}</p>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">
+                                    <div>{{ $seller->email }}</div>
+                                    <div class="text-xs text-gray-500">{{ collect([$seller->phone, $seller->city, $seller->state])->filter()->join(' · ') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $seller->email }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $seller->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ ucfirst($seller->status ?? 'inactive') }}
-                                    </span>
+                                    @if($seller->seller_approved)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $seller->created_at->format('M d, Y') }}
+                                    {{ ($seller->seller_applied_at ?? $seller->created_at)->format('M d, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    @if($seller->status !== 'active')
+                                    @if(! $seller->seller_approved)
                                     <form method="POST" action="{{ route('admin.sellers.approve', $seller->id) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-green-600 hover:text-green-900 mr-2">Approve</button>
+                                        <button type="submit" class="text-green-600 hover:text-green-900 mr-3">Approve</button>
                                     </form>
                                     @endif
-                                    <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                                    <form method="POST" action="{{ route('admin.sellers.reject', $seller->id) }}" class="inline" onsubmit="return confirm('Remove seller access for this user?')">
+                                        @csrf
+                                        <button type="submit" class="text-red-600 hover:text-red-900">{{ $seller->seller_approved ? 'Revoke' : 'Reject' }}</button>
+                                    </form>
                                 </td>
                             </tr>
                             @empty

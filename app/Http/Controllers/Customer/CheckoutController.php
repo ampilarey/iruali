@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class CheckoutController extends Controller
 {
     protected $cartService;
+
     protected $discountService;
 
     public function __construct(CartService $cartService, DiscountService $discountService)
@@ -23,15 +24,15 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         $cart = $this->cartService->getOrCreateCart();
-        
+
         if ($this->cartService->isCartEmpty($cart)) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
-        
+
         $points_balance = $user->loyalty_points;
         $points_redeemed = session('points_redeemed', 0);
         $points_redeemed_discount = $points_redeemed;
-        
+
         return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount'));
     }
 
@@ -39,23 +40,24 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         $cart = $this->cartService->getOrCreateCart();
-        
+
         $request->validate([
             'points' => 'required|integer|min:1',
         ]);
-        
+
         $result = $this->discountService->applyLoyaltyPoints($request->points, $user, $cart);
-        
-        if (!$result['valid']) {
+
+        if (! $result['valid']) {
             return back()->withErrors(['points' => $result['message']]);
         }
-        
+
         return back()->with('success', __('Loyalty points applied!'));
     }
 
     public function removePoints()
     {
         $this->discountService->removeLoyaltyPoints();
+
         return back()->with('success', __('Loyalty points removed.'));
     }
 
@@ -79,4 +81,4 @@ class CheckoutController extends Controller
             'shipping_country' => $request->shipping_country,
         ]);
     }
-} 
+}

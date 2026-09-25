@@ -177,6 +177,13 @@
                     <a href="{{ route('admin.analytics') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Analytics
                     </a>
+                    @php $openQuestions = \App\Models\ProductQuestion::whereNull('answer')->count(); @endphp
+                    <a href="{{ route('admin.reviews') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Reviews &amp; Questions @if($openQuestions)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openQuestions }} open</span>@endif
+                    </a>
+                    <a href="{{ route('admin.newsletter') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Newsletter
+                    </a>
                     <a href="{{ route('admin.settings') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Settings
                     </a>

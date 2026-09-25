@@ -155,5 +155,14 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/sellers/{seller}/reject', [AdminController::class, 'rejectSeller'])->name('sellers.reject');
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
+
+        // Moderation: reviews, questions, newsletter signups
+        Route::get('/reviews', [\App\Http\Controllers\Admin\ModerationController::class, 'reviews'])->name('reviews');
+        Route::post('/reviews/{review}/toggle', [\App\Http\Controllers\Admin\ModerationController::class, 'toggleReview'])->name('reviews.toggle');
+        Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ModerationController::class, 'destroyReview'])->name('reviews.destroy');
+        Route::get('/questions', [\App\Http\Controllers\Admin\ModerationController::class, 'questions'])->name('questions');
+        Route::delete('/questions/{question}', [\App\Http\Controllers\Admin\ModerationController::class, 'destroyQuestion'])->name('questions.destroy');
+        Route::get('/newsletter', [\App\Http\Controllers\Admin\ModerationController::class, 'newsletter'])->name('newsletter');
+        Route::delete('/newsletter/{subscriber}', [\App\Http\Controllers\Admin\ModerationController::class, 'destroySubscriber'])->name('newsletter.destroy');
     });
 });

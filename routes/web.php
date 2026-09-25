@@ -45,6 +45,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::view('/privacy-policy', 'policies.privacy')->name('policies.privacy');
     Route::view('/payment-security', 'policies.security')->name('policies.security');
     Route::view('/about', 'policies.about')->name('policies.about');
+    Route::redirect('/refund', '/refund-policy', 301);
+    Route::redirect('/privacy', '/privacy-policy', 301);
+    Route::redirect('/contact', '/about', 301);
     Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
     Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
     Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');
@@ -113,6 +116,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
         Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1');
         Route::post('/orders/{order}/payment-slip', [OrderController::class, 'uploadPaymentSlip'])->name('orders.payment-slip.store')->middleware('throttle:10,1');
@@ -168,6 +172,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/sellers/{seller}/reject', [AdminController::class, 'rejectSeller'])->name('sellers.reject');
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
+
+        Route::get('/legal', [\App\Http\Controllers\Admin\LegalPagesController::class, 'edit'])->name('legal');
+        Route::put('/legal', [\App\Http\Controllers\Admin\LegalPagesController::class, 'update'])->name('legal.update');
 
         // Moderation: reviews, questions, newsletter signups
         Route::get('/reviews', [\App\Http\Controllers\Admin\ModerationController::class, 'reviews'])->name('reviews');

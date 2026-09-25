@@ -36,6 +36,7 @@ class OrderPlaced extends Notification
         }
 
         return $mail->action(__('View your order'), route('orders.show', $order))
-            ->line(__('Please keep this email as a record of your purchase, together with our Terms & Conditions and Returns, Refunds & Cancellations policy: :url', ['url' => route('policies.terms')]));
+            ->line(__('Please keep this email as a record of your purchase, together with our Terms & Conditions and Returns, Refunds & Cancellations policy: :url', ['url' => route('policies.terms')]))
+            ->line(__('Printable receipt: :url', ['url' => route('orders.receipt', $order)]));
     }
 }

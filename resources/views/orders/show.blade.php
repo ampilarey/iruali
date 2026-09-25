@@ -205,6 +205,7 @@
                 </div>
                 @endif
 
+                <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="mt-3 w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-50">{{ __('View / print receipt') }}</a>
                 <p class="mt-4 text-xs text-gray-500">{{ __('Please keep a copy of your order confirmation, payment receipt and our policies for your records.') }} <a href="{{ route('policies.refunds') }}" class="text-primary hover:underline">{{ __('Returns, Refunds & Cancellations') }}</a></p>
 
                 <div class="mt-4">

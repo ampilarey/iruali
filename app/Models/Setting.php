@@ -25,6 +25,13 @@ class Setting extends Model
         'company_postal_address' => '',
         'customer_service_hours' => 'Sunday to Thursday, 9:00 to 17:00 (Maldives time)',
         'return_window_days' => 7,
+        // Legal pages: optional owner-written text that replaces the built-in policy, and the "Last updated" date
+        'legal_last_updated_date' => '',
+        'legal_terms_body' => '',
+        'legal_refunds_body' => '',
+        'legal_delivery_body' => '',
+        'legal_privacy_body' => '',
+        'legal_security_body' => '',
         'whatsapp_number' => '',
         'loyalty_spend_per_point' => 100,
         'referral_referrer_points' => 100,

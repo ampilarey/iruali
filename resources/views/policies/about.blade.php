@@ -3,6 +3,7 @@
 @php use App\Support\Company; $name = Company::tradingName(); @endphp
 
 @section('policy_title', __('About & Contact'))
+@section('policy_subtitle', __('Who we are and how to reach us.'))
 
 @section('policy')
 <p><strong>{{ $name }}</strong> is an online marketplace for shops across the Maldives. Local sellers, from fishermen and farmers to craftspeople and stores, list their products here, and we deliver to inhabited islands in every atoll. Every shop is reviewed by our team before its products go live.</p>

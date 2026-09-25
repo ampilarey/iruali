@@ -9,6 +9,7 @@
     $freeOver = (float) Setting::get('free_delivery_over');
 @endphp
 
+@section('policy_key', 'delivery')
 @section('policy_title', __('Delivery Policy'))
 
 @section('policy')

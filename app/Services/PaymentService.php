@@ -64,7 +64,7 @@ class PaymentService
     public function startBmlPayment(Order $order): string
     {
         $attempt = $order->paymentTransactions()->count() + 1;
-        $localId = $order->order_number.'-'.$attempt;
+        $localId = BmlConnect::localId($order->order_number.'P'.$attempt);
 
         $transaction = $order->paymentTransactions()->create([
             'gateway' => 'bml',
@@ -80,6 +80,7 @@ class PaymentService
             'customerReference' => 'iruali '.$order->order_number,
             'redirectUrl' => route('payments.bml.return', $order),
             'webhook' => route('payments.bml.webhook'),
+            'paymentPortalExperience' => $this->bml()->portalExperience(),
         ]);
 
         $transaction->update([

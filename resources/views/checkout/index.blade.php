@@ -84,7 +84,7 @@
                     @php
                         $paymentMethods = app(\App\Services\PaymentService::class)->methods();
                         $paymentHelp = [
-                            'bml' => __('Pay now with Visa, Mastercard or American Express on Bank of Maldives\' secure payment page.'),
+                            'bml' => __('Pay now with Visa, Mastercard, American Express or Maestro on Bank of Maldives\' secure payment page.'),
                             'cod' => __('Pay when your order arrives.'),
                             'bank_transfer' => __('Transfer the total to our bank account after ordering, then upload your slip on the order page.'),
                         ];
@@ -95,13 +95,14 @@
                                 <input type="radio" name="payment_method" value="{{ $method }}" @checked(old('payment_method', array_key_first($paymentMethods)) === $method) class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
                                 <span>
                                     <span class="flex items-center gap-2 text-sm font-medium text-gray-900">{{ $label }}
-                                        @if($method === 'bml')<span class="inline-flex items-center gap-1 text-[10px] font-bold tracking-wide"><span class="px-1.5 py-0.5 rounded bg-[#1A1F71] text-white">VISA</span><span class="px-1.5 py-0.5 rounded bg-[#EB001B] text-white">MC</span><span class="px-1.5 py-0.5 rounded bg-[#2E77BC] text-white">AMEX</span></span>@endif
+                                        @if($method === 'bml')<img src="/images/card-brands.png" alt="{{ __('We accept American Express, Visa, Mastercard and Maestro') }}" width="147" height="30" class="h-8 w-auto">@endif
                                     </span>
                                     <span class="block text-sm text-gray-600">{{ $paymentHelp[$method] ?? '' }}</span>
                                 </span>
                             </label>
                         @endforeach
                     </div>
+                    <x-payment-trust class="mt-4" />
                 </section>
             </div>
 
@@ -168,10 +169,21 @@
                         </div>
                     </dl>
 
-                    <label class="mt-6 flex items-start gap-3 text-sm text-gray-700">
+                    <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 p-3 text-xs text-gray-600 space-y-1">
+                        <p class="font-semibold text-dark">{{ __('Before you order') }}</p>
+                        <p>{{ __('Pending orders can be cancelled from My Orders. Damaged, faulty or wrong items can be returned within :days days of delivery. Food, opened personal care items, underwear, swimwear and custom items cannot be returned unless they arrive damaged or wrong. Card refunds go back to the same card.', ['days' => \App\Support\Company::returnWindowDays()]) }}</p>
+                        <p>{{ __('We deliver within the Maldives only; delivery times depend on boat and flight schedules to your island.') }}</p>
+                    </div>
+                    <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
                         <input type="checkbox" name="agree_terms" value="1" required @checked(old('agree_terms')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
-                        <span>{{ __('By placing your order, you agree to our Terms of Service') }}</span>
+                        <span>{!! __('I have read and accept the :terms, :refunds, :delivery and :privacy.', [
+                            'terms' => '<a href="'.route('policies.terms').'" target="_blank" class="text-primary font-medium underline">'.e(__('Terms & Conditions')).'</a>',
+                            'refunds' => '<a href="'.route('policies.refunds').'" target="_blank" class="text-primary font-medium underline">'.e(__('Returns, Refunds & Cancellations')).'</a>',
+                            'delivery' => '<a href="'.route('policies.delivery').'" target="_blank" class="text-primary font-medium underline">'.e(__('Delivery Policy')).'</a>',
+                            'privacy' => '<a href="'.route('policies.privacy').'" target="_blank" class="text-primary font-medium underline">'.e(__('Privacy Policy')).'</a>',
+                        ]) !!}</span>
                     </label>
+                    @error('agree_terms')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
 
                     <button type="submit" class="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4">
                         {{ __('Place Order') }}

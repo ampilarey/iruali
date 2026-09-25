@@ -59,11 +59,14 @@ return [
     |
     */
     'bml' => [
-        'base_uri' => env('BML_BASE_URI', 'https://api.bml.com.mv'),
+        // BML Connect (Bank of Maldives payment gateway). Create an app in the BML merchant portal
+        // to get the API key. Use the UAT (sandbox) environment until BML approves the go-live.
         'api_key' => env('BML_API_KEY'),
-        'merchant_id' => env('BML_MERCHANT_ID'),
-        'secret_key' => env('BML_SECRET_KEY'),
         'environment' => env('BML_ENVIRONMENT', 'sandbox'), // sandbox or production
+        'base_uri' => env('BML_BASE_URI') ?: (env('BML_ENVIRONMENT', 'sandbox') === 'production'
+            ? 'https://api.merchants.bankofmaldives.com.mv/public'
+            : 'https://api.uat.merchants.bankofmaldives.com.mv/public'),
+        'merchant_id' => env('BML_MERCHANT_ID'),
     ],
 
     /*

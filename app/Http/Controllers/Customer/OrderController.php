@@ -63,9 +63,24 @@ class OrderController extends Controller
             return redirect()->route('cart');
         }
 
+        $order = $result['order'];
+
+        // Card payment: straight to BML's payment page. If BML can't be reached the order
+        // stays unpaid and the order page offers "Pay now" to try again.
+        if ($order->payment_method === 'bml') {
+            try {
+                return redirect()->away(app(\App\Services\PaymentService::class)->startBmlPayment($order));
+            } catch (\Throwable $e) {
+                report($e);
+                NotificationService::error(__('Your order is saved, but we could not reach the payment page. Please use "Pay now" to try again.'));
+
+                return redirect()->route('orders.show', $order);
+            }
+        }
+
         NotificationService::orderPlaced();
 
-        return redirect()->route('orders.show', $result['order']);
+        return redirect()->route('orders.show', $order);
     }
 
     public function cancel(Order $order)

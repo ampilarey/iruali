@@ -364,7 +364,7 @@
         <div class="border-t border-white/10">
             <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
                 <p>&copy; {{ date('Y') }} iruali. {{ __('All rights reserved.') }}</p>
-                <p class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4" />{{ __('Cash on delivery') }} &middot; {{ __('Bank transfer') }}</p>
+                <p class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4" />{{ __('Card (BML)') }} &middot; {{ __('Cash on delivery') }} &middot; {{ __('Bank transfer') }}</p>
             </div>
         </div>
     </footer>

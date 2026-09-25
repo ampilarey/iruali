@@ -84,6 +84,7 @@
                     @php
                         $paymentMethods = app(\App\Services\PaymentService::class)->methods();
                         $paymentHelp = [
+                            'bml' => __('Pay now with Visa, Mastercard or American Express on Bank of Maldives\' secure payment page.'),
                             'cod' => __('Pay when your order arrives.'),
                             'bank_transfer' => __('Transfer the total to our bank account after ordering, then upload your slip on the order page.'),
                         ];
@@ -91,9 +92,11 @@
                     <div class="space-y-3">
                         @foreach($paymentMethods as $method => $label)
                             <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
-                                <input type="radio" name="payment_method" value="{{ $method }}" @checked(old('payment_method', 'cod') === $method) class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                <input type="radio" name="payment_method" value="{{ $method }}" @checked(old('payment_method', array_key_first($paymentMethods)) === $method) class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
                                 <span>
-                                    <span class="block text-sm font-medium text-gray-900">{{ $label }}</span>
+                                    <span class="flex items-center gap-2 text-sm font-medium text-gray-900">{{ $label }}
+                                        @if($method === 'bml')<span class="inline-flex items-center gap-1 text-[10px] font-bold tracking-wide"><span class="px-1.5 py-0.5 rounded bg-[#1A1F71] text-white">VISA</span><span class="px-1.5 py-0.5 rounded bg-[#EB001B] text-white">MC</span><span class="px-1.5 py-0.5 rounded bg-[#2E77BC] text-white">AMEX</span></span>@endif
+                                    </span>
                                     <span class="block text-sm text-gray-600">{{ $paymentHelp[$method] ?? '' }}</span>
                                 </span>
                             </label>

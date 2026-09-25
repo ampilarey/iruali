@@ -106,6 +106,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
+        Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1');
         Route::post('/orders/{order}/payment-slip', [OrderController::class, 'uploadPaymentSlip'])->name('orders.payment-slip.store')->middleware('throttle:10,1');
         Route::get('/orders/{order}/payment-slip', [OrderController::class, 'showPaymentSlip'])->name('orders.payment-slip.show');
         // 2FA setup routes
@@ -113,6 +114,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/profile/2fa/enable', [AuthController::class, 'enable2FA'])->name('profile.2fa.enable');
         Route::post('/profile/2fa/disable', [AuthController::class, 'disable2FA'])->name('profile.2fa.disable');
     });
+
+    // BML sends the customer back here after the payment page (their session may have expired, so no auth)
+    Route::get('/payments/bml/return/{order}', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'return'])->name('payments.bml.return')->middleware('throttle:30,1');
 
     // Public order tracking
     Route::get('track', [OrderTrackingController::class, 'form'])->name('order.track.form');
@@ -148,6 +152,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders/{order}', [AdminController::class, 'showOrder'])->name('orders.show');
         Route::post('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
         Route::post('/orders/{order}/payment', [AdminController::class, 'updatePayment'])->name('orders.payment');
+        Route::post('/orders/{order}/bml-sync', [AdminController::class, 'syncBmlPayment'])->name('orders.bml-sync');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');

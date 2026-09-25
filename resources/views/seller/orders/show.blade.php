@@ -35,7 +35,7 @@
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Status</h2>
                 <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ ucfirst($order->status) }}</span>
                 <p class="mt-2 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}</p>
-                <p class="mt-2 text-xs text-gray-600">Payment: {{ $order->payment_method === 'bank_transfer' ? 'bank transfer' : 'cash on delivery' }} ·
+                <p class="mt-2 text-xs text-gray-600">Payment: {{ strtolower(\App\Services\PaymentService::methodLabel($order->payment_method)) }} ·
                     <span class="rounded-full px-2 py-0.5 font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
                 </p>
                 <div class="mt-4">

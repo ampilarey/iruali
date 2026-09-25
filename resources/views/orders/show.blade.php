@@ -127,7 +127,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Payment Method') }}</span>
-                        <span class="text-gray-900">{{ $order->payment_method === 'bank_transfer' ? __('Bank transfer') : __('Cash on delivery') }}</span>
+                        <span class="text-gray-900">{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Payment') }}</span>
@@ -141,6 +141,26 @@
                 </div>
 
                 @php $payments = app(\App\Services\PaymentService::class); @endphp
+                @if($payments->canPayOnline($order))
+                    @php $lastAttempt = $order->paymentTransactions()->latest('id')->first(); @endphp
+                    <div class="mt-6 rounded-xl border border-primary-200 bg-primary-50 p-4 space-y-3">
+                        <h3 class="text-sm font-semibold text-gray-900">{{ __('Pay by card') }}</h3>
+                        @if($lastAttempt?->hasFailed())
+                            <p class="text-sm text-danger">{{ __('Your last payment attempt did not go through. You can try again.') }}</p>
+                        @elseif($lastAttempt && ! $lastAttempt->isConfirmed())
+                            <p class="text-sm text-gray-600">{{ __('If you already paid, it can take a minute for the bank to confirm. Otherwise, pay below.') }}</p>
+                        @else
+                            <p class="text-sm text-gray-600">{{ __('Your order is waiting for payment.') }}</p>
+                        @endif
+                        <form method="POST" action="{{ route('payments.bml.pay', $order) }}">
+                            @csrf
+                            <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Pay :amount now', ['amount' => \App\Support\Money::format($order->total_amount)]) }}</button>
+                        </form>
+                        <p class="text-xs text-gray-500 flex items-center gap-1.5"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('You pay on Bank of Maldives\' secure page. iruali never sees your card details.') }}</p>
+                    </div>
+                @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
+                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
+                @endif
                 @if($order->payment_method === 'bank_transfer' && $order->payment_status !== 'paid' && $order->status !== 'cancelled')
                     <div class="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
                         <h3 class="text-sm font-semibold text-gray-900">{{ __('Pay by bank transfer') }}</h3>

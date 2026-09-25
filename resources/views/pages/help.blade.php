@@ -64,7 +64,8 @@
 
             <section id="payment" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Payment') }}</h2>
-                <p class="text-gray-700">{{ __('Pay cash when your order arrives, or pay by bank transfer and upload your transfer slip on the order page. We confirm the payment before the shop sends your order.') }}</p>
+                <p class="text-gray-700">{{ __('Pay by card (Visa, Mastercard or American Express) on Bank of Maldives\' secure payment page when you place your order. iruali never sees your card details.') }}</p>
+                <p class="text-gray-700 mt-2">{{ __('Pay cash when your order arrives, or pay by bank transfer and upload your transfer slip on the order page. We confirm the payment before the shop sends your order.') }}</p>
             </section>
 
             <section id="returns" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">

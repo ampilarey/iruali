@@ -501,5 +501,21 @@
     ":product is back in stock": ":product ސްޓޮކަށް އައިއްސި",
     "Good news: :product is back in stock at :price.": "އުފާވެރި ޚަބަރެއް: :product އަލުން ސްޓޮކުގައި، :price އަށް.",
     "Stock can go quickly, so order soon if you still want it.": "ސްޓޮކް އަވަހަށް ނިމިދާނެ، އެހެންވީމާ ބޭނުންފުޅުނަމަ އަވަހަށް އޯޑަރ ކުރައްވާ.",
-    "View product": "ތަކެތި ބައްލަވާ"
+    "View product": "ތަކެތި ބައްލަވާ",
+    "Pay now with Visa, Mastercard or American Express on Bank of Maldives' secure payment page.": "ބޭންކް އޮފް މޯލްޑިވްސްގެ ރައްކާތެރި ޕޭމެންޓް ޞަފްޙާގައި ވިސާ، މާސްޓަރކާޑް ނުވަތަ އެމެރިކަން އެކްސްޕްރެސް ކާޑުން މިހާރު ފައިސާ ދައްކަވާ.",
+    "Card (BML)": "ކާޑު (BML)",
+    "Pay by card": "ކާޑުން ފައިސާ ދެއްކުން",
+    "Your last payment attempt did not go through. You can try again.": "ފަހުން ފައިސާ ދެއްކުމަށް މަސައްކަތްކުރި އިރު ނުކުރެވުނު. އަލުން މަސައްކަތް ކުރެއްވޭނެ.",
+    "If you already paid, it can take a minute for the bank to confirm. Otherwise, pay below.": "ފައިސާ ދައްކާފައިވާނަމަ، ބޭންކުން ކަށަވަރުކުރުމަށް މިނެޓެއްހާ ނަގާނެ. ނޫންނަމަ، ތިރީގައި ފައިސާ ދައްކަވާ.",
+    "Your order is waiting for payment.": "ތިބާގެ އޯޑަރު ފައިސާ ދެއްކުމަށް އިންތިޒާރުކުރަނީ.",
+    "Pay :amount now": ":amount މިހާރު ދައްކަވާ",
+    "You pay on Bank of Maldives' secure page. iruali never sees your card details.": "ފައިސާ ދައްކަވަނީ ބޭންކް އޮފް މޯލްޑިވްސްގެ ރައްކާތެރި ޞަފްޙާގައި. ކާޑުގެ މަޢުލޫމާތު އިރުއަލީއަށް ނުފެނޭނެ.",
+    "Paid by card on :date.": ":date ގައި ކާޑުން ފައިސާ ދައްކާފައި.",
+    "Pay by card (Visa, Mastercard or American Express) on Bank of Maldives' secure payment page when you place your order. iruali never sees your card details.": "އޯޑަރު ކުރައްވާއިރު ބޭންކް އޮފް މޯލްޑިވްސްގެ ރައްކާތެރި ޞަފްޙާގައި ކާޑުން (ވިސާ، މާސްޓަރކާޑް ނުވަތަ އެމެރިކަން އެކްސްޕްރެސް) ފައިސާ ދެއްކެވޭނެ. ކާޑުގެ މަޢުލޫމާތު އިރުއަލީއަށް ނުފެނޭނެ.",
+    "We could not reach the payment page. Please try again in a moment.": "ޕޭމެންޓް ޞަފްޙާއަށް ގުޅޭކަށް ނެތް. ކުޑަ ވަގުތުކޮޅަކުން އަލުން މަސައްކަތް ކުރައްވާ.",
+    "Payment received. Thank you!": "ފައިސާ ލިބިއްޖެ. ޝުކުރިއްޔާ!",
+    "The payment was not completed. You can try again from this page.": "ފައިސާ ދެއްކުން ނުނިމުނު. މި ޞަފްޙާއިން އަލުން މަސައްކަތް ކުރެއްވޭނެ.",
+    "We are waiting for the bank to confirm your payment. This page will show it once it does.": "ބޭންކުން ފައިސާ ކަށަވަރުކުރުމަށް އިންތިޒާރުކުރަނީ. ކަށަވަރުކުރުމުން މި ޞަފްޙާގައި ފެންނާނެ.",
+    "Your order is saved, but we could not reach the payment page. Please use \"Pay now\" to try again.": "އޯޑަރު ރައްކާކުރެވިއްޖެ، ނަމަވެސް ޕޭމެންޓް ޞަފްޙާއަށް ގުޅޭކަށް ނެތް. \"މިހާރު ދައްކަވާ\" އިން އަލުން މަސައްކަތް ކުރައްވާ.",
+    "Card payment (BML)": "ކާޑުން ފައިސާ ދެއްކުން (BML)"
 }

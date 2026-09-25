@@ -67,6 +67,23 @@ return [
             ? 'https://api.merchants.bankofmaldives.com.mv/public'
             : 'https://api.uat.merchants.bankofmaldives.com.mv/public'),
         'merchant_id' => env('BML_MERCHANT_ID'),
+        'app_id' => env('BML_APP_ID'),
+
+        // Authorization header, as used by the Bake & Grill and Akuru live setups:
+        //   raw          → {API_KEY}                  (BML UAT)
+        //   bearer_jwt   → Bearer {API_KEY}
+        //   bearer_basic → Bearer base64(API_KEY:APP_ID)
+        //   auto         → Bearer for a JWT key (eyJ…), raw otherwise
+        'auth_mode' => env('BML_AUTH_MODE', 'auto'),
+
+        // Webhook signature. BML signs either with HMAC-SHA256 of the body using the portal's
+        // webhook secret (X-BML-Signature), or with X-Signature = sha256(nonce + timestamp + API key).
+        // Both are accepted; the payment itself is always re-checked with BML's API.
+        'webhook_secret' => env('BML_WEBHOOK_SECRET'),
+        'webhook_signature_header' => env('BML_WEBHOOK_SIGNATURE_HEADER', 'X-BML-Signature'),
+
+        // Sent as paymentPortalExperience.externalWebsiteTermsUrl (BML v2 asks for it).
+        'terms_url' => env('BML_EXTERNAL_TERMS_URL'),
     ],
 
     /*

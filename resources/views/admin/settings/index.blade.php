@@ -100,6 +100,49 @@
                 <p class="mt-2 text-xs text-gray-500">Greater Malé is Malé, Hulhumalé and Villimalé. Set "Free delivery over" to 0 to always charge delivery. Checked against the order total after discounts.</p>
             </section>
 
+            @php $missing = \App\Support\Company::missing(); @endphp
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Business details</h2>
+                <p class="mt-1 text-sm text-gray-500">Shown on the About &amp; Contact page, the policies, the footer and at checkout. Bank of Maldives checks these before approving card payments.</p>
+                @if($missing)
+                    <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        <p class="font-semibold">Still needed for BML:</p>
+                        <ul class="mt-1 list-disc ps-5">@foreach($missing as $label)<li>{{ $label }}</li>@endforeach</ul>
+                    </div>
+                @endif
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="company_legal_name" class="block text-sm font-medium text-gray-700">Registered business name</label>
+                        <input id="company_legal_name" name="company_legal_name" class="{{ $field }}" value="{{ old('company_legal_name', $settings['company_legal_name']) }}">
+                    </div>
+                    <div>
+                        <label for="company_trading_name" class="block text-sm font-medium text-gray-700">Trading name</label>
+                        <input id="company_trading_name" name="company_trading_name" class="{{ $field }}" value="{{ old('company_trading_name', $settings['company_trading_name']) }}">
+                    </div>
+                    <div>
+                        <label for="company_registration_no" class="block text-sm font-medium text-gray-700">Registration number</label>
+                        <input id="company_registration_no" name="company_registration_no" class="{{ $field }}" value="{{ old('company_registration_no', $settings['company_registration_no']) }}">
+                    </div>
+                    <div>
+                        <label for="customer_service_hours" class="block text-sm font-medium text-gray-700">Customer service hours</label>
+                        <input id="customer_service_hours" name="customer_service_hours" class="{{ $field }}" value="{{ old('customer_service_hours', $settings['customer_service_hours']) }}">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="company_address" class="block text-sm font-medium text-gray-700">Business address (permanent establishment)</label>
+                        <input id="company_address" name="company_address" class="{{ $field }}" placeholder="House / building, street, island, postcode" value="{{ old('company_address', $settings['company_address']) }}">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="company_postal_address" class="block text-sm font-medium text-gray-700">Postal address <span class="text-gray-400 font-normal">(if different)</span></label>
+                        <input id="company_postal_address" name="company_postal_address" class="{{ $field }}" value="{{ old('company_postal_address', $settings['company_postal_address']) }}">
+                    </div>
+                    <div>
+                        <label for="return_window_days" class="block text-sm font-medium text-gray-700">Days to report a problem / return</label>
+                        <input id="return_window_days" name="return_window_days" type="number" min="0" max="90" class="{{ $field }}" value="{{ old('return_window_days', $settings['return_window_days']) }}">
+                    </div>
+                </div>
+                <p class="mt-3 text-xs text-gray-500">Customer service email and phone are set under Contact above. Write the phone with the country code, e.g. +960 777 1234.</p>
+            </section>
+
             @php $bml = app(\App\Services\BmlConnect::class); @endphp
             <section class="rounded-lg bg-white p-6 shadow">
                 <h2 class="text-lg font-semibold text-gray-900">Payments</h2>

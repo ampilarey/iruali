@@ -205,6 +205,8 @@
                 </div>
                 @endif
 
+                <p class="mt-4 text-xs text-gray-500">{{ __('Please keep a copy of your order confirmation, payment receipt and our policies for your records.') }} <a href="{{ route('policies.refunds') }}" class="text-primary hover:underline">{{ __('Returns, Refunds & Cancellations') }}</a></p>
+
                 <div class="mt-4">
                     <a href="{{ route('orders') }}" class="block text-center text-primary-600 hover:text-primary-700 font-medium">
                         {{ __('← Back to Orders') }}

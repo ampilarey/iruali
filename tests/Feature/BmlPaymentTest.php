@@ -115,7 +115,9 @@ class BmlPaymentTest extends TestCase
                 && $request->header('Authorization')[0] === 'test-key'
                 && $request['amount'] === 27500 // MVR 200 + MVR 75 island delivery
                 && $request['currency'] === 'MVR'
-                && $request['localId'] === $order->order_number.'-1'
+                && $request['localId'] === preg_replace('/[^A-Za-z0-9]/', '', $order->order_number).'P1'
+                && ctype_alnum($request['localId'])
+                && $request['paymentPortalExperience'] === ['externalWebsiteTermsAccepted' => true, 'externalWebsiteTermsUrl' => route('policies.terms')]
                 && $request['redirectUrl'] === route('payments.bml.return', $order)
                 && $request['webhook'] === route('payments.bml.webhook');
         });
@@ -178,7 +180,7 @@ class BmlPaymentTest extends TestCase
 
         $this->fakeBml('CONFIRMED', id: 'txn_2');
         $this->actingAs($this->customer)->post(route('payments.bml.pay', $order))->assertRedirect('https://pay.bml.test/txn_2');
-        $this->assertSame($order->order_number.'-2', PaymentTransaction::where('transaction_id', 'txn_2')->value('local_id'));
+        $this->assertSame(preg_replace('/[^A-Za-z0-9]/', '', $order->order_number).'P2', PaymentTransaction::where('transaction_id', 'txn_2')->value('local_id'));
 
         $this->actingAs(User::factory()->create())->post(route('payments.bml.pay', $order))->assertForbidden();
     }
@@ -200,6 +202,31 @@ class BmlPaymentTest extends TestCase
         ])->assertOk();
 
         $this->assertSame('paid', $order->fresh()->payment_status);
+    }
+
+    public function test_webhook_signed_with_the_portal_secret_is_accepted(): void
+    {
+        config(['services.bml.webhook_secret' => 'whsec']);
+        $this->fakeBml('CONFIRMED');
+        $this->checkout();
+        $order = Order::sole();
+        $body = json_encode(['transactionId' => 'txn_123', 'state' => 'CONFIRMED']);
+
+        $this->call('POST', route('payments.bml.webhook'), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_BML_SIGNATURE' => hash_hmac('sha256', $body, 'wrong')], $body)
+            ->assertForbidden();
+        $this->call('POST', route('payments.bml.webhook'), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_BML_SIGNATURE' => hash_hmac('sha256', $body, 'whsec')], $body)
+            ->assertOk();
+
+        $this->assertSame('paid', $order->fresh()->payment_status);
+    }
+
+    public function test_auth_header_modes(): void
+    {
+        $this->fakeBml();
+        config(['services.bml.auth_mode' => 'bearer_basic', 'services.bml.app_id' => 'app1']);
+        $this->checkout();
+
+        Http::assertSent(fn (Request $r) => $r->method() === 'POST' && $r->header('Authorization')[0] === 'Bearer '.base64_encode('test-key:app1'));
     }
 
     public function test_bml_being_down_keeps_the_order_and_offers_pay_now(): void

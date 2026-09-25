@@ -37,6 +37,14 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
     Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
     Route::view('/help', 'pages.help')->name('help');
+
+    // Policies (BML website requirements)
+    Route::view('/terms', 'policies.terms')->name('policies.terms');
+    Route::view('/refund-policy', 'policies.refunds')->name('policies.refunds');
+    Route::view('/delivery-policy', 'policies.delivery')->name('policies.delivery');
+    Route::view('/privacy-policy', 'policies.privacy')->name('policies.privacy');
+    Route::view('/payment-security', 'policies.security')->name('policies.security');
+    Route::view('/about', 'policies.about')->name('policies.about');
     Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
     Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
     Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');

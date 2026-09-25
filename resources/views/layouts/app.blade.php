@@ -286,7 +286,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="bank" /></span>
-                <span><span class="block font-semibold">{{ __('Pay your way') }}</span><span class="text-gray-500 text-xs">{{ __('Cash on delivery or bank transfer') }}</span></span>
+                <span><span class="block font-semibold">{{ __('Pay your way') }}</span><span class="text-gray-500 text-xs">{{ __('Card, cash on delivery or bank transfer') }}</span></span>
             </div>
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="gift" /></span>
@@ -341,9 +341,9 @@
                 <ul class="space-y-2 text-white/70">
                     <li><a href="{{ route('help') }}" class="hover:text-white">{{ __('Help centre') }}</a></li>
                     <li><a href="{{ route('order.track.form') }}" class="hover:text-white">{{ __('Track Order') }}</a></li>
-                    <li><a href="{{ route('help') }}#delivery" class="hover:text-white">{{ __('Delivery & fees') }}</a></li>
-                    <li><a href="{{ route('help') }}#returns" class="hover:text-white">{{ __('Returns & Exchanges') }}</a></li>
-                    <li><a href="{{ route('help') }}#contact" class="hover:text-white">{{ __('Contact Us') }}</a></li>
+                    <li><a href="{{ route('policies.delivery') }}" class="hover:text-white">{{ __('Delivery Policy') }}</a></li>
+                    <li><a href="{{ route('policies.refunds') }}" class="hover:text-white">{{ __('Returns, Refunds & Cancellations') }}</a></li>
+                    <li><a href="{{ route('policies.about') }}" class="hover:text-white">{{ __('About & Contact') }}</a></li>
                 </ul>
             </div>
             <div>
@@ -363,8 +363,19 @@
         </div>
         <div class="border-t border-white/10">
             <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
-                <p>&copy; {{ date('Y') }} iruali. {{ __('All rights reserved.') }}</p>
-                <p class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4" />{{ __('Card (BML)') }} &middot; {{ __('Cash on delivery') }} &middot; {{ __('Bank transfer') }}</p>
+                <div class="text-center md:text-start space-y-1">
+                    <p>&copy; {{ date('Y') }} {{ \App\Support\Company::legalName() ?? \App\Support\Company::tradingName() }}. {{ __('All rights reserved.') }}@if(\App\Support\Company::registrationNo()) &middot; {{ __('Registration no.') }} {{ \App\Support\Company::registrationNo() }}@endif</p>
+                    @if(\App\Support\Company::address())<p>{{ \App\Support\Company::address() }}</p>@endif
+                    <p class="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
+                        <a href="{{ route('policies.terms') }}" class="hover:text-white">{{ __('Terms & Conditions') }}</a>
+                        <a href="{{ route('policies.privacy') }}" class="hover:text-white">{{ __('Privacy Policy') }}</a>
+                        <a href="{{ route('policies.security') }}" class="hover:text-white">{{ __('Payment Security') }}</a>
+                    </p>
+                </div>
+                <div class="flex flex-col items-center md:items-end gap-1.5">
+                    <span class="rounded-md bg-white px-2 py-1"><img src="/images/card-brands.png" alt="{{ __('We accept American Express, Visa, Mastercard and Maestro') }}" width="196" height="40" class="h-9 w-auto"></span>
+                    <p>{{ __('Prices in MVR') }} &middot; {{ __('Merchant outlet country') }}: {{ __('Maldives') }}</p>
+                </div>
             </div>
         </div>
     </footer>

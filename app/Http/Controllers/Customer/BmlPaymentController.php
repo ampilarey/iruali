@@ -66,15 +66,12 @@ class BmlPaymentController extends Controller
 
     public function webhook(Request $request, BmlConnect $bml, PaymentService $payments)
     {
-        if (! $bml->verifyWebhookSignature(
-            $request->header('X-Signature-Nonce'),
-            $request->header('X-Signature-Timestamp'),
-            $request->header('X-Signature')
-        )) {
+        if (! $bml->verifyWebhook($request)) {
+            \Illuminate\Support\Facades\Log::warning('BML webhook rejected: bad or missing signature', ['ip' => $request->ip()]);
             abort(403);
         }
 
-        $id = $request->input('transactionId') ?? $request->input('id');
+        $id = $request->input('transactionId') ?? $request->input('transaction_id') ?? $request->input('id');
         $transaction = $id ? PaymentTransaction::where('transaction_id', $id)->first() : null;
 
         if ($transaction) {

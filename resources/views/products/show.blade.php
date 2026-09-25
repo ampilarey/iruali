@@ -119,7 +119,7 @@
                             @if($delivery['free_over'] > 0)<span class="block text-success font-medium">{{ __('Free delivery on orders over :amount', ['amount' => \App\Support\Money::format($delivery['free_over'])]) }}</span>@endif
                         </span>
                     </p>
-                    <p class="flex gap-2"><x-icon name="bank" class="w-5 h-5 shrink-0 text-primary" /><span>{{ __('Cash on delivery or bank transfer') }}</span></p>
+                    <div class="flex gap-2"><x-icon name="bank" class="w-5 h-5 shrink-0 text-primary" /><div><img src="/images/card-brands.png" alt="{{ __('We accept American Express, Visa, Mastercard and Maestro') }}" width="147" height="30" class="h-8 w-auto -ms-1"><span class="block mt-1 text-xs text-gray-500">{{ __('Prices in MVR') }}</span></div></div>
                 </div>
 
                 @if($stock > 0)

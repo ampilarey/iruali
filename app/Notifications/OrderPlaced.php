@@ -35,6 +35,7 @@ class OrderPlaced extends Notification
             $mail->line(__('Please transfer the total and upload your slip on the order page.'));
         }
 
-        return $mail->action(__('View your order'), route('orders.show', $order));
+        return $mail->action(__('View your order'), route('orders.show', $order))
+            ->line(__('Please keep this email as a record of your purchase, together with our Terms & Conditions and Returns, Refunds & Cancellations policy: :url', ['url' => route('policies.terms')]));
     }
 }

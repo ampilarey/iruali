@@ -51,7 +51,7 @@
                         <div class="flex justify-between text-gray-600"><dt>Points ({{ $order->points_redeemed }})</dt><dd>−{{ \App\Support\Money::format($order->points_redeemed_discount) }}</dd></div>
                     @endif
                     <div class="flex justify-between text-gray-600"><dt>Delivery ({{ $order->delivery_zone === 'greater_male' ? 'Greater Malé' : 'other islands' }})</dt><dd>{{ \App\Support\Money::format($order->shipping_amount) }}</dd></div>
-                    <div class="flex justify-between text-gray-600"><dt>Payment</dt><dd>{{ $order->payment_method === 'cod' ? 'Cash on delivery' : ucfirst(str_replace('_', ' ', $order->payment_method)) }}</dd></div>
+                    <div class="flex justify-between text-gray-600"><dt>Payment</dt><dd>{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</dd></div>
                     <div class="flex justify-between font-semibold text-gray-900"><dt>Total</dt><dd>{{ \App\Support\Money::format($order->total_amount) }}</dd></div>
                 </dl>
             </div>
@@ -64,7 +64,7 @@
                 </div>
                 <div class="rounded-lg bg-white p-5 shadow">
                     <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Payment</h2>
-                    <p class="mt-2 text-sm text-gray-900">{{ $order->payment_method === 'bank_transfer' ? 'Bank transfer' : 'Cash on delivery' }}</p>
+                    <p class="mt-2 text-sm text-gray-900">{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</p>
                     <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
                     @if($order->paid_at)
                         <p class="mt-1 text-xs text-gray-500">Paid {{ $order->paid_at->format('d M Y, H:i') }}</p>
@@ -72,7 +72,30 @@
                     @if($order->payment_slip)
                         <p class="mt-3"><a href="{{ route('orders.payment-slip.show', $order) }}" target="_blank" class="text-sm font-medium text-primary hover:text-primary-hover">View transfer slip ↗</a></p>
                     @endif
-                    @if($order->payment_status !== 'paid')
+                    @if($order->payment_method === 'bml')
+                        @php $attempts = $order->paymentTransactions()->latest('id')->get(); @endphp
+                        <div class="mt-3 space-y-2">
+                            @forelse($attempts as $attempt)
+                                <div class="rounded-md border border-gray-200 px-3 py-2 text-xs">
+                                    <div class="flex justify-between gap-2"><span class="font-mono text-gray-700 truncate">{{ $attempt->transaction_id ?? 'not created' }}</span>
+                                        <span class="font-semibold {{ $attempt->isConfirmed() ? 'text-green-700' : ($attempt->hasFailed() || $attempt->state === 'MISMATCH' ? 'text-red-700' : 'text-gray-700') }}">{{ $attempt->state }}</span></div>
+                                    <div class="text-gray-500">{{ $attempt->local_id }} · {{ \App\Support\Money::format($attempt->amount / 100) }} · {{ $attempt->created_at->format('d M, H:i') }}</div>
+                                </div>
+                            @empty
+                                <p class="text-xs text-gray-500">The customer has not started a card payment yet.</p>
+                            @endforelse
+                            @if($attempts->whereNotNull('transaction_id')->isNotEmpty() && $order->payment_status !== 'paid')
+                                <form method="POST" action="{{ route('admin.orders.bml-sync', $order) }}">
+                                    @csrf
+                                    <button class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">Check with BML</button>
+                                </form>
+                            @endif
+                            @if($order->payment_status === 'paid' && $order->status === 'cancelled')
+                                <p class="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">This card payment needs a refund. Refund it in the BML merchant portal.</p>
+                            @endif
+                        </div>
+                    @endif
+                    @if($order->payment_status !== 'paid' && $order->payment_method !== 'bml')
                         <div class="mt-3 flex flex-wrap gap-2">
                             <form method="POST" action="{{ route('admin.orders.payment', $order) }}">
                                 @csrf

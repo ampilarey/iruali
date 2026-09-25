@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// BML Connect payment webhooks (signed by BML, checked in the controller)
+Route::post('/payments/bml/webhook', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'webhook'])
+    ->name('payments.bml.webhook')
+    ->middleware('throttle:120,1');
+
 // Public routes
 Route::prefix('v1')->group(function () {
 

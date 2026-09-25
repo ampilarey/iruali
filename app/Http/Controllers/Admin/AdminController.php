@@ -255,6 +255,7 @@ class AdminController extends Controller
             'delivery_fee_greater_male' => 'sometimes|required|numeric|min:0|max:100000',
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
+            'payment_cod_enabled' => 'sometimes|in:0,1',
             'bank_name' => 'sometimes|nullable|string|max:100',
             'bank_account_name' => 'sometimes|nullable|string|max:150',
             'bank_account_number' => 'sometimes|nullable|string|max:40',
@@ -263,6 +264,28 @@ class AdminController extends Controller
         Setting::set($validated);
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');
+    }
+
+    /**
+     * Ask BML for the latest state of each card payment attempt on the order.
+     */
+    public function syncBmlPayment(Order $order, \App\Services\PaymentService $payments)
+    {
+        $this->checkAdminRole();
+
+        $checked = 0;
+        foreach ($order->paymentTransactions()->whereNotNull('transaction_id')->get() as $transaction) {
+            try {
+                $payments->syncBml($transaction);
+                $checked++;
+            } catch (\Throwable $e) {
+                report($e);
+
+                return back()->with('error', 'Could not reach BML: '.$e->getMessage());
+            }
+        }
+
+        return back()->with('success', $order->fresh()->payment_status === 'paid' ? 'BML confirms this order is paid.' : "Checked {$checked} payment attempt(s) with BML; none is confirmed.");
     }
 
     public function showOrder(Order $order, OrderService $orderService)

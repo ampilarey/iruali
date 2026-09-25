@@ -100,6 +100,24 @@
                 <p class="mt-2 text-xs text-gray-500">Greater Malé is Malé, Hulhumalé and Villimalé. Set "Free delivery over" to 0 to always charge delivery. Checked against the order total after discounts.</p>
             </section>
 
+            @php $bml = app(\App\Services\BmlConnect::class); @endphp
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Payments</h2>
+                <div class="mt-3 rounded-lg border px-4 py-3 text-sm {{ $bml->enabled() ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-800' }}">
+                    @if($bml->enabled())
+                        <p class="font-semibold">BML card payments are on{{ $bml->isSandbox() ? ' (sandbox: test cards only, no real money)' : '' }}.</p>
+                        <p class="mt-1">Customers pay on Bank of Maldives' secure page. Refunds are made in the BML merchant portal.</p>
+                    @else
+                        <p class="font-semibold">BML card payments are off.</p>
+                        <p class="mt-1">Add <code>BML_API_KEY</code> (and <code>BML_ENVIRONMENT=production</code> when BML approves you) to the server's <code>.env</code>. See docs/PAYMENTS_BML.md.</p>
+                    @endif
+                </div>
+                <label class="mt-4 flex items-start gap-3">
+                    <input type="hidden" name="payment_cod_enabled" value="0">
+                    <input type="checkbox" name="payment_cod_enabled" value="1" class="mt-0.5 h-4 w-4 rounded text-primary-600" @checked(old('payment_cod_enabled', $settings['payment_cod_enabled'] ?? '1') !== '0')>
+                    <span class="text-sm"><span class="font-medium text-gray-900">Offer cash on delivery</span><span class="block text-gray-500">Turn off to take card payments only. Cash on delivery stays on while card payments are off.</span></span>
+                </label>
+            </section>
             <section class="rounded-lg bg-white p-6 shadow">
                 <h2 class="text-lg font-semibold text-gray-900">Bank transfer</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-3">

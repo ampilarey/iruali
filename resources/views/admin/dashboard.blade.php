@@ -181,6 +181,9 @@
                     <a href="{{ route('admin.reviews') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Reviews &amp; Questions @if($openQuestions)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openQuestions }} open</span>@endif
                     </a>
+                    <a href="{{ route('admin.legal') }}" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Legal pages
+                    </a>
                     <a href="{{ route('admin.newsletter') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Newsletter
                     </a>

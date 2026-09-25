@@ -47,8 +47,8 @@ class PolicyPagesTest extends TestCase
 
     public function test_policies_state_the_key_disclosures(): void
     {
-        $this->get(route('policies.refunds'))->assertSee('cannot be returned')->assertSee('same card');
-        $this->get(route('policies.terms'))->assertSee('MVR')->assertSee('customs duties')->assertSee('Merchant outlet', false);
+        $this->get(route('policies.refunds'))->assertSee('cannot be returned')->assertSee('original card')->assertSee('Payment disputes')->assertSee('5–7 business days');
+        $this->get(route('policies.terms'))->assertSee('MVR')->assertSee('customs duties')->assertSee('merchant outlet is located in the')->assertSee('Transaction records');
         $this->get(route('policies.privacy'))->assertSee('never receive or store your card number');
         $this->get(route('policies.security'))->assertSee('Bank of Maldives')->assertSee('3-D Secure');
         $this->get(route('policies.delivery'))->assertSee('within the Maldives');
@@ -87,5 +87,49 @@ class PolicyPagesTest extends TestCase
         $this->put('/admin/settings', [
             'contact_phone' => '7770000', 'loyalty_spend_per_point' => 100, 'referral_referrer_points' => 1, 'referral_referee_points' => 1,
         ])->assertSessionHasErrors('contact_phone');
+    }
+
+    public function test_owner_can_replace_a_policy_and_set_the_last_updated_date(): void
+    {
+        $this->get(route('policies.terms'))->assertDontSee('Last updated');
+
+        $admin = User::factory()->create();
+        $admin->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+
+        $this->actingAs($admin)->get(route('admin.legal'))->assertOk()->assertSee('Using iruali');
+        $this->put(route('admin.legal.update'), [
+            'legal_last_updated_date' => '1 October 2026',
+            'legal_refunds_body' => "Our own refund wording.\n<script>alert(1)</script>",
+        ])->assertRedirect(route('admin.legal'));
+
+        $this->get(route('policies.refunds'))
+            ->assertSee('Our own refund wording.')
+            ->assertDontSee('<script>alert(1)</script>', false)
+            ->assertDontSee('Payment disputes')
+            ->assertSee('Last updated: 1 October 2026');
+        $this->get(route('policies.terms'))->assertSee('Transaction records'); // other pages keep the built-in text
+
+        $this->actingAs(User::factory()->create())->get(route('admin.legal'))->assertForbidden();
+    }
+
+    public function test_short_policy_urls_redirect(): void
+    {
+        $this->get('/refund')->assertRedirect('/refund-policy');
+        $this->get('/privacy')->assertRedirect('/privacy-policy');
+        $this->get('/contact')->assertRedirect('/about');
+    }
+
+    public function test_printable_receipt_for_the_owner_only(): void
+    {
+        $user = User::factory()->create();
+        $order = \App\Models\Order::factory()->create(['user_id' => $user->id, 'payment_status' => 'paid', 'payment_method' => 'bml', 'total_amount' => 275]);
+        $order->items()->create(['product_id' => Product::factory()->create(['name' => ['en' => 'Woven mat']])->id, 'quantity' => 1, 'price' => 200]);
+        $order->paymentTransactions()->create(['transaction_id' => 'txn_9', 'local_id' => 'ABC1P1', 'amount' => 27500, 'state' => 'CONFIRMED']);
+
+        $this->actingAs($user)->get(route('orders.receipt', $order))
+            ->assertOk()->assertSee('Receipt')->assertSee('Woven mat')->assertSee('MVR 275.00')->assertSee('txn_9')
+            ->assertSee('Merchant outlet country')->assertSee('keep this receipt');
+
+        $this->actingAs(User::factory()->create())->get(route('orders.receipt', $order))->assertForbidden();
     }
 }

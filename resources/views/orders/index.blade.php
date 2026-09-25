@@ -63,6 +63,7 @@
                             {{ __('View Order Details →') }}
                         </a>
                         <div class="flex items-center gap-4">
+                            <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="text-gray-600 hover:text-primary-700 font-medium">{{ __('Receipt') }}</a>
                             <form method="POST" action="{{ route('orders.buyAgain', $order) }}">
                                 @csrf
                                 <button type="submit" class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-medium"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>

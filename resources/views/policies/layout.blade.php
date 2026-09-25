@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @php
+    use App\Models\Setting;
     use App\Support\Company;
     $policyLinks = [
         'policies.terms' => __('Terms & Conditions'),
@@ -10,6 +11,13 @@
         'policies.security' => __('Payment Security'),
         'policies.about' => __('About & Contact'),
     ];
+
+    // Same approach as Bake & Grill: the owner can replace a policy's text from Admin → Legal pages
+    // (plain text, shown as written), and "Last updated" appears only once a date has been set.
+    $policyKey = trim($__env->yieldContent('policy_key'));
+    $override = $policyKey !== '' ? trim((string) Setting::get('legal_'.$policyKey.'_body')) : '';
+    $updated = trim((string) Setting::get('legal_last_updated_date'));
+    $whatsapp = preg_replace('/[^0-9]/', '', (string) Setting::get('whatsapp_number'));
 @endphp
 
 @section('content')
@@ -25,21 +33,34 @@
         </nav>
         <article class="bg-white border border-gray-200 rounded-xl p-5 sm:p-8 lg:p-10 min-w-0">
             <h1 class="font-display text-2xl lg:text-3xl font-bold text-dark">@yield('policy_title')</h1>
-            <p class="text-sm text-gray-500 mt-1">{{ __('Last updated') }}: @yield('policy_updated', '25 September 2026')</p>
-            <div class="policy mt-6 text-gray-700 leading-relaxed space-y-4 [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-dark [&_h2]:pt-4 [&_ul]:list-disc [&_ul]:ps-6 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:font-medium [&_a:hover]:underline [&_strong]:text-dark">
-                @yield('policy')
-            </div>
-            <div class="mt-10 rounded-lg bg-gray-50 border border-gray-200 p-4 text-sm text-gray-600">
+            <p class="text-gray-600 mt-1">@yield('policy_subtitle', __('Please read this policy before completing your purchase.'))</p>
+
+            {{-- BML requirement 3: corporate information, shown before the policy text --}}
+            <div class="mt-5 rounded-lg border border-primary-100 bg-primary-50 p-4 text-sm text-gray-700 space-y-0.5">
                 <p class="font-semibold text-dark">{{ Company::legalName() ?? Company::tradingName() }}@if(Company::legalName() && Company::legalName() !== Company::tradingName()) ({{ __('trading as') }} {{ Company::tradingName() }})@endif</p>
                 @if(Company::registrationNo())<p>{{ __('Registration no.') }} {{ Company::registrationNo() }}</p>@endif
                 @if(Company::address())<p>{{ Company::address() }}</p>@endif
-                <p class="mt-1">
-                    @if(Company::email())<a href="mailto:{{ Company::email() }}" class="text-primary">{{ Company::email() }}</a>@endif
-                    @if(Company::email() && Company::phone()) &middot; @endif
-                    @if(Company::phone())<a href="tel:{{ preg_replace('/[^0-9+]/', '', Company::phone()) }}" class="text-primary" dir="ltr">{{ Company::phone() }}</a>@endif
+                @if(Company::postalAddress() && Company::postalAddress() !== Company::address())<p>{{ __('Postal address') }}: {{ Company::postalAddress() }}</p>@endif
+                <p>
+                    @if(Company::phone()){{ __('Phone') }}: <a href="tel:{{ preg_replace('/[^0-9+]/', '', Company::phone()) }}" class="text-primary font-medium" dir="ltr">{{ Company::phone() }}</a>@endif
+                    @if(Company::phone() && Company::email()) &nbsp;|&nbsp; @endif
+                    @if(Company::email()){{ __('Email') }}: <a href="mailto:{{ Company::email() }}" class="text-primary font-medium">{{ Company::email() }}</a>@endif
                 </p>
-                <p class="mt-2">{{ __('We recommend you keep a copy of your order confirmation, payment receipt and these policies for your records.') }}</p>
+                <p>{{ __('Customer service') }}: @if($whatsapp){{ __('WhatsApp') }} <a href="https://wa.me/{{ $whatsapp }}" class="text-primary font-medium" dir="ltr">+{{ $whatsapp }}</a>, @endif{{ __('phone or email above') }}@if(Company::hours()) ({{ Company::hours() }})@endif.</p>
             </div>
+
+            <div class="policy mt-6 text-gray-700 leading-relaxed space-y-4 [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-dark [&_h2]:pt-4 [&_ul]:list-disc [&_ul]:ps-6 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:font-medium [&_a:hover]:underline [&_strong]:text-dark">
+                @if($override !== '')
+                    <div class="whitespace-pre-line">{{ $override }}</div>
+                @else
+                    @yield('policy')
+                @endif
+            </div>
+
+            <p class="mt-10 rounded-lg bg-gray-50 border border-gray-200 p-4 text-sm text-gray-600">{{ __('We recommend you keep a copy of your order confirmation, payment receipt and these policies for your records.') }}</p>
+            @if($updated !== '')
+                <p class="mt-4 text-xs text-gray-500">{{ __('Last updated') }}: {{ $updated }}</p>
+            @endif
         </article>
     </div>
 </div>

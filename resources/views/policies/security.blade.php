@@ -2,7 +2,9 @@
 
 @php use App\Support\Company; $name = Company::tradingName(); @endphp
 
+@section('policy_key', 'security')
 @section('policy_title', __('Payment Security'))
+@section('policy_subtitle', __('How your card details are protected when you pay.'))
 
 @section('policy')
 <p class="flex items-center gap-4 flex-wrap"><img src="/images/card-brands.png" alt="American Express, Visa, Mastercard and Maestro" width="368" height="75" class="h-9 w-auto"></p>

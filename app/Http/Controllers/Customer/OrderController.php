@@ -99,6 +99,19 @@ class OrderController extends Controller
     }
 
     /**
+     * Printable receipt / order summary (keep for your records).
+     */
+    public function receipt(Order $order)
+    {
+        $user = Auth::user();
+        abort_unless($order->user_id === $user->id || $user->isAdmin(), 403);
+
+        $order->load(['user', 'items.product.seller', 'paymentTransactions']);
+
+        return view('orders.receipt', compact('order'));
+    }
+
+    /**
      * Put the products from a past order back in the cart (whatever is still available).
      */
     public function buyAgain(Order $order, \App\Services\CartService $cart)

@@ -31,15 +31,17 @@ class ReviewController extends Controller
             ->whereHas('items', fn ($q) => $q->where('product_id', $product->id))
             ->exists();
 
-        ProductReview::updateOrCreate(
-            ['product_id' => $product->id, 'user_id' => $user->id],
-            $data + [
-                'reviewer_name' => $user->name,
-                'reviewer_email' => $user->email,
-                'is_approved' => true,
-                'verified_purchase' => $verified,
-            ]
-        );
+        $review = ProductReview::firstOrNew(['product_id' => $product->id, 'user_id' => $user->id]);
+        $review->fill($data + [
+            'reviewer_name' => $user->name,
+            'reviewer_email' => $user->email,
+            'verified_purchase' => $verified,
+        ]);
+        // New reviews go live; one an admin hid stays hidden when its author edits it.
+        if (! $review->exists) {
+            $review->is_approved = true;
+        }
+        $review->save();
 
         NotificationService::success(__('Thanks! Your review is live.'));
 

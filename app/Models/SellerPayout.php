@@ -28,6 +28,11 @@ class SellerPayout extends Model
         return $this->hasMany(SellerOrder::class, 'payout_id');
     }
 
+    public function adjustments(): HasMany
+    {
+        return $this->hasMany(SellerAdjustment::class, 'payout_id');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

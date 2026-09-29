@@ -11,7 +11,7 @@
             <div class="rounded-lg bg-white p-5 shadow">
                 <p class="text-sm text-gray-500">Ready for payout</p>
                 <p class="mt-1 text-2xl font-bold text-green-700">{{ Money::format($balances['available']) }}</p>
-                <p class="mt-1 text-xs text-gray-500">Delivered and paid by the customer.</p>
+                <p class="mt-1 text-xs text-gray-500">Delivered and paid by the customer{{ $balances['adjustments'] != 0 ? ', after return deductions of '.Money::format(abs($balances['adjustments'])) : '' }}.</p>
             </div>
             <div class="rounded-lg bg-white p-5 shadow">
                 <p class="text-sm text-gray-500">Pending</p>
@@ -83,6 +83,17 @@
                         <li class="px-5 py-6 text-center text-gray-500">No payouts yet.</li>
                     @endforelse
                 </ul>
+                @if($adjustments->isNotEmpty())
+                    <div class="border-t border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">Returns &amp; adjustments</h2><p class="text-xs text-gray-500">Your share of approved returns, taken from your next payout.</p></div>
+                    <ul class="divide-y divide-gray-100 text-sm">
+                        @foreach($adjustments as $adjustment)
+                            <li class="px-5 py-3 flex justify-between gap-3">
+                                <span>{{ $adjustment->reason }}<span class="block text-xs text-gray-500">{{ $adjustment->created_at->format('d M Y') }} · {{ $adjustment->payout ? 'Settled '.$adjustment->payout->paid_at->format('d M') : 'Next payout' }}</span></span>
+                                <span class="font-semibold {{ $adjustment->amount < 0 ? 'text-red-700' : 'text-green-700' }}">{{ $adjustment->amount < 0 ? '−' : '+' }}{{ Money::format(abs($adjustment->amount)) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         </div>
     </div>

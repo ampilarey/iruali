@@ -141,8 +141,19 @@ class SellerController extends Controller
         $parts = SellerOrder::where('seller_id', $user->id)->with(['order', 'payout'])->latest()->paginate(20);
         $payoutHistory = $user->payouts()->latest('paid_at')->take(20)->get();
         $rate = $user->effectiveCommissionRate();
+        $adjustments = \App\Models\SellerAdjustment::where('seller_id', $user->id)->with('payout')->latest()->take(20)->get();
 
-        return view('seller.earnings', compact('balances', 'parts', 'payoutHistory', 'rate', 'user'));
+        return view('seller.earnings', compact('balances', 'parts', 'payoutHistory', 'rate', 'user', 'adjustments'));
+    }
+
+    public function returns()
+    {
+        $returns = \App\Models\ReturnRequest::whereHas('sellerOrder', fn ($q) => $q->where('seller_id', Auth::id()))
+            ->with(['order', 'items.orderItem.product'])
+            ->latest()
+            ->paginate(20);
+
+        return view('seller.returns', compact('returns'));
     }
 
     public function profile()

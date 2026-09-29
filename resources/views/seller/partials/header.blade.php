@@ -3,6 +3,7 @@
         'seller.dashboard' => ['Dashboard', 'seller.dashboard'],
         'seller.products.index' => ['Products', 'seller.products.*'],
         'seller.orders' => ['Orders', 'seller.orders*'],
+        'seller.returns' => ['Returns', 'seller.returns'],
         'seller.questions' => ['Questions', 'seller.questions'],
         'seller.earnings' => ['Earnings', 'seller.earnings'],
         'seller.analytics' => ['Analytics', 'seller.analytics'],

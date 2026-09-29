@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * One shop's part of a customer order: its fulfilment status and tracking, and what the shop earns.
@@ -42,6 +43,11 @@ class SellerOrder extends Model
     public function payout(): BelongsTo
     {
         return $this->belongsTo(SellerPayout::class, 'payout_id');
+    }
+
+    public function returnRequests(): HasMany
+    {
+        return $this->hasMany(ReturnRequest::class);
     }
 
     /**

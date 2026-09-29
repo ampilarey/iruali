@@ -40,4 +40,23 @@ Cancelled parts earn nothing.
 4. Each payout has a statement page and a CSV download. Shops see their balances, per-order earnings and
    payouts under Seller Centre → **Earnings**.
 
-Returns or refunds after a payout are settled with the shop outside the system (adjust the next transfer).
+## Returns and refunds
+
+1. **Customer:** on a delivered order (My Orders → the order), each shop's part has **Request a return**
+   within the return window (Settings → return window days). They pick the items and quantities, a reason,
+   notes and a photo (required for damaged or wrong items). One open request per shop part at a time.
+2. The shop and the admin contact email are emailed. Shops see requests under Seller Centre → **Returns**.
+3. **Admin → Returns** → open a request:
+   - **Approve** with the refund amount. The suggestion is the items' value, plus the delivery fee when the
+     shop was at fault and it was the only shop in the order. The refund can't exceed what is left on the
+     order. Tick **Put the items back in stock** if they can be resold.
+   - Or **Reject** with a reason (sent to the customer).
+4. Approving takes the shop's share of the returned items (price less the part's commission) from its
+   earnings as an **adjustment**. It is settled in the shop's next payout, whether or not that order was
+   already paid out. If deductions are more than what is ready, no payout can be recorded until new sales
+   cover them.
+5. Send the money: card orders are refunded in the **BML merchant portal**; other payments by bank
+   transfer. Then **Mark as refunded** with the reference. The customer is emailed at each step and sees
+   the status and reference on their order.
+
+Adjustments show on the payout page, statement CSV and Seller Centre → Earnings.

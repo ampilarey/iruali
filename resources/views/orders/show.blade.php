@@ -62,6 +62,9 @@
                                 </div>
                             </div>
                             @endforeach
+                            @if($part)
+                                @include('orders._returns', ['part' => $part])
+                            @endif
                         </div>
                     @endforeach
                     @if($order->loyalty_points_earned > 0)

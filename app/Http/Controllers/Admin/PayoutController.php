@@ -41,11 +41,12 @@ class PayoutController extends Controller
         return view('admin.payouts.index', compact('sellers', 'totals', 'recent', 'defaultRate'));
     }
 
-    public function create(User $seller)
+    public function create(User $seller, PayoutService $payouts)
     {
-        $parts = SellerOrder::where('seller_id', $seller->id)->payable()->with('order')->oldest()->get();
+        $parts = SellerOrder::where('seller_id', $seller->id)->payable()->with(['order', 'returnRequests'])->oldest()->get();
+        $adjustments = $payouts->openAdjustments($seller);
 
-        return view('admin.payouts.create', compact('seller', 'parts'));
+        return view('admin.payouts.create', compact('seller', 'parts', 'adjustments'));
     }
 
     public function store(Request $request, User $seller, PayoutService $payouts)
@@ -60,7 +61,7 @@ class PayoutController extends Controller
         $payout = $payouts->createPayout($seller, array_map('intval', $data['parts']), $data['reference'], $data['note'] ?? null, $request->user());
 
         if (! $payout) {
-            return back()->with('error', 'Nothing to pay: the selected orders are no longer payable.');
+            return back()->with('error', 'Nothing to pay: the selected orders are no longer payable, or return deductions are more than they add up to.');
         }
 
         return redirect()->route('admin.payouts.show', $payout)->with('success', 'Payout recorded.');
@@ -68,7 +69,7 @@ class PayoutController extends Controller
 
     public function show(Request $request, SellerPayout $payout)
     {
-        $payout->load(['seller', 'creator', 'sellerOrders.order']);
+        $payout->load(['seller', 'creator', 'sellerOrders.order', 'adjustments']);
 
         if ($request->query('export') === 'csv') {
             return $this->csv($payout);
@@ -92,11 +93,18 @@ class PayoutController extends Controller
         return response()->streamDownload(function () use ($payout) {
             $out = fopen('php://output', 'w');
             fputcsv($out, ['payout_id', 'shop', 'paid_at', 'reference', 'order', 'order_date', 'items', 'commission_rate', 'commission', 'shop_earnings']);
+            $shop = $payout->seller?->business_name ?: $payout->seller?->name;
             foreach ($payout->sellerOrders as $part) {
                 fputcsv($out, [
-                    $payout->id, $payout->seller?->business_name ?: $payout->seller?->name, $payout->paid_at->toDateString(), $payout->reference,
+                    $payout->id, $shop, $payout->paid_at->toDateString(), $payout->reference,
                     $part->order?->order_number, $part->order?->created_at?->toDateString(),
                     $part->subtotal, $part->commission_rate, $part->commission_amount, $part->seller_earnings,
+                ]);
+            }
+            foreach ($payout->adjustments as $adjustment) {
+                fputcsv($out, [
+                    $payout->id, $shop, $payout->paid_at->toDateString(), $payout->reference,
+                    $adjustment->reason, $adjustment->created_at?->toDateString(), '', '', '', $adjustment->amount,
                 ]);
             }
             fclose($out);

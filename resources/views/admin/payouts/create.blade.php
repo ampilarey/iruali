@@ -30,7 +30,7 @@
                     @forelse($parts as $part)
                         <tr>
                             <td class="px-4 py-2"><input type="checkbox" name="parts[]" value="{{ $part->id }}" data-amount="{{ $part->seller_earnings }}" checked class="rounded" aria-label="Include order {{ $part->order?->order_number }}"></td>
-                            <td class="px-4 py-2"><a href="{{ route('admin.orders.show', $part->order) }}" class="font-medium text-primary-700 hover:underline">#{{ $part->order?->order_number }}</a></td>
+                            <td class="px-4 py-2"><a href="{{ route('admin.orders.show', $part->order) }}" class="font-medium text-primary-700 hover:underline">#{{ $part->order?->order_number }}</a>@if($part->returnRequests->where('status', 'requested')->isNotEmpty())<span class="ms-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Return requested</span>@endif</td>
                             <td class="px-4 py-2 text-gray-600">{{ $part->delivered_at?->format('d M Y') }}</td>
                             <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}</td>
                             <td class="px-4 py-2 text-right text-gray-600">&minus;{{ Money::format($part->commission_amount) }} ({{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}%)</td>
@@ -41,7 +41,17 @@
                     @endforelse
                 </tbody>
             </table>
-            <div class="flex justify-end border-t border-gray-100 px-5 py-3 text-base font-semibold">Total: <span class="ms-2" data-payout-total>{{ Money::format($parts->sum('seller_earnings')) }}</span></div>
+            @if($adjustments->isNotEmpty())
+                <div class="border-t border-gray-100 px-5 py-3">
+                    <h3 class="text-sm font-semibold text-gray-900">Adjustments settled in this payout</h3>
+                    <ul class="mt-2 space-y-1 text-sm">
+                        @foreach($adjustments as $adjustment)
+                            <li class="flex justify-between gap-3"><span class="text-gray-700">{{ $adjustment->reason }} <span class="text-xs text-gray-500">({{ $adjustment->created_at->format('d M Y') }})</span></span><span class="font-semibold {{ $adjustment->amount < 0 ? 'text-red-700' : 'text-green-700' }}">{{ $adjustment->amount < 0 ? '−' : '+' }}{{ Money::format(abs($adjustment->amount)) }}</span></li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <div class="flex justify-end border-t border-gray-100 px-5 py-3 text-base font-semibold" data-adjustments="{{ $adjustments->sum('amount') }}">Total: <span class="ms-2" data-payout-total>{{ Money::format($parts->sum('seller_earnings') + $adjustments->sum('amount')) }}</span></div>
         </div>
 
         @if($parts->isNotEmpty())
@@ -71,7 +81,7 @@
         if (!total) return;
         form.querySelectorAll('input[name="parts[]"]').forEach(function (c) {
             c.addEventListener('change', function () {
-                var t = 0;
+                var t = parseFloat(form.querySelector('[data-adjustments]').dataset.adjustments) || 0;
                 form.querySelectorAll('input[name="parts[]"]:checked').forEach(function (x) { t += parseFloat(x.dataset.amount); });
                 total.textContent = 'MVR ' + t.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             });

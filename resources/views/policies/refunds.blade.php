@@ -59,9 +59,9 @@
     @if(Company::phone())<li>Phone: <a href="tel:{{ preg_replace('/[^0-9+]/', '', Company::phone()) }}" dir="ltr">{{ Company::phone() }}</a></li>@endif
     @if(Company::email())<li>Email: <a href="mailto:{{ Company::email() }}">{{ Company::email() }}</a></li>@endif
     @if(Company::address())<li>In person: {{ Company::address() }}</li>@endif
-    <li>Online: <a href="{{ route('orders') }}">My Orders</a> (cancel a pending order)</li>
+    <li>Online: <a href="{{ route('orders') }}">My Orders</a>. Cancel a pending order, or open a delivered order and choose <strong>Request a return</strong> to pick the items, give the reason and add a photo.</li>
 </ul>
-<p>We reply within 2 business days.</p>
+<p>We reply within 2 business days. You can follow your return in My Orders, and we email you when it is approved and when the refund is sent.</p>
 
 <h2>7. Payment disputes</h2>
 <p>If you believe a charge on your card is incorrect, please contact us within <strong>7 days of the transaction date</strong>. We will investigate and respond within 3 business days. If the issue is not resolved, you may raise a dispute with your card issuer.</p>

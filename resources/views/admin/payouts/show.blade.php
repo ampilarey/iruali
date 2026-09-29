@@ -29,6 +29,12 @@
                             <td class="px-4 py-2 text-right font-semibold">{{ Money::format($part->seller_earnings) }}</td>
                         </tr>
                     @endforeach
+                    @foreach($payout->adjustments as $adjustment)
+                        <tr>
+                            <td class="px-4 py-2" colspan="3">{{ $adjustment->reason }}</td>
+                            <td class="px-4 py-2 text-right font-semibold {{ $adjustment->amount < 0 ? 'text-red-700' : 'text-green-700' }}">{{ $adjustment->amount < 0 ? '−' : '+' }}{{ Money::format(abs($adjustment->amount)) }}</td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>

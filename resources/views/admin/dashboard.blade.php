@@ -181,6 +181,10 @@
                     <a href="{{ route('admin.reviews') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Reviews &amp; Questions @if($openQuestions)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openQuestions }} open</span>@endif
                     </a>
+                    @php $openReturns = \App\Models\ReturnRequest::whereIn('status', ['requested', 'approved'])->count(); @endphp
+                    <a href="{{ route('admin.returns') }}" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Returns @if($openReturns)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openReturns }} open</span>@endif
+                    </a>
                     <a href="{{ route('admin.payouts') }}" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Shop payouts
                     </a>

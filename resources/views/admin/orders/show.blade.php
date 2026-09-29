@@ -43,6 +43,34 @@
                         </li>
                     @endforeach
                 </ul>
+                @php $fulfilment = app(\App\Services\FulfilmentService::class); @endphp
+                <div class="border-t border-gray-100 px-5 py-4">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Shops in this order</h3>
+                    <div class="mt-3 space-y-3">
+                        @foreach($order->sellerOrders()->with('seller')->get() as $part)
+                            <div class="rounded-lg border border-gray-200 p-3 text-sm">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <p class="font-semibold text-gray-900">{{ $part->shopName() }}</p>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ ucfirst($part->status) }}</span>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Items {{ \App\Support\Money::format($part->subtotal) }} · commission {{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}% ({{ \App\Support\Money::format($part->commission_amount) }}) · shop earns {{ \App\Support\Money::format($part->seller_earnings) }} · {{ str_replace('_', ' ', $part->earningsState()) }}</p>
+                                @if($part->tracking_note)<p class="mt-1 text-xs text-gray-700">Tracking: {{ $part->tracking_note }}</p>@endif
+                                @if($next = $fulfilment->nextStatuses($part))
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        @foreach($next as $status)
+                                            <form method="POST" action="{{ route('admin.orders.parts.status', [$order, $part]) }}" class="flex gap-2">
+                                                @csrf
+                                                <input type="hidden" name="status" value="{{ $status }}">
+                                                @if($status === 'shipped')<input name="tracking_note" placeholder="Tracking (optional)" class="rounded-lg border border-gray-300 px-2 py-1 text-xs">@endif
+                                                <button class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50">Mark {{ $status }}</button>
+                                            </form>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
                 <dl class="space-y-1 border-t border-gray-100 px-5 py-4 text-sm">
                     @if($order->voucher_discount > 0)
                         <div class="flex justify-between text-gray-600"><dt>Voucher {{ $order->voucher_code }}</dt><dd>−{{ \App\Support\Money::format($order->voucher_discount) }}</dd></div>

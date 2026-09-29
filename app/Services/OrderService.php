@@ -64,6 +64,9 @@ class OrderService
             // Create order items
             $this->createOrderItems($order, $cart);
 
+            // One part per shop, with its own fulfilment status and the shop's earnings
+            app(FulfilmentService::class)->createParts($order);
+
             // Decrement stock for each product
             foreach ($cart->items as $cartItem) {
                 $product = $cartItem->product;
@@ -233,11 +236,22 @@ class OrderService
      */
     public function nextStatuses(Order $order): array
     {
-        return self::TRANSITIONS[$order->status] ?? [];
+        $next = self::TRANSITIONS[$order->status] ?? [];
+
+        if (in_array('cancelled', $next, true) && app(FulfilmentService::class)->anyPartSent($order)) {
+            $next = array_values(array_diff($next, ['cancelled']));
+        }
+
+        return $next;
     }
 
     public function canTransition(Order $order, string $status): bool
     {
+        // Once a shop has sent its part, the order can't be cancelled as a whole (use a return instead).
+        if ($status === 'cancelled' && app(FulfilmentService::class)->anyPartSent($order)) {
+            return false;
+        }
+
         return in_array($status, $this->nextStatuses($order), true);
     }
 
@@ -257,8 +271,31 @@ class OrderService
             }
 
             $order->update(['status' => $status]);
+
+            // Bring every shop's part along with the order
+            app(FulfilmentService::class)->cascadeFromOrder($order, $status);
         });
 
+        app(OrderNotifier::class)->statusChanged($order->fresh());
+
+        return true;
+    }
+
+    /**
+     * Move the order forward to $target through the normal steps (used when shops update their parts),
+     * emailing the customer once about where it ended up. Never moves backwards or cancels.
+     */
+    public function advanceTo(Order $order, string $target): bool
+    {
+        $path = ['pending', 'processing', 'shipped', 'delivered'];
+        $from = array_search($order->status, $path, true);
+        $to = array_search($target, $path, true);
+
+        if ($from === false || $to === false || $to <= $from) {
+            return false;
+        }
+
+        $order->update(['status' => $target]);
         app(OrderNotifier::class)->statusChanged($order->fresh());
 
         return true;

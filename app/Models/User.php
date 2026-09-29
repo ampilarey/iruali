@@ -40,6 +40,9 @@ class User extends Authenticatable implements HasLocalePreference
         'business_name',
         'business_description',
         'seller_applied_at',
+        'payout_bank_name',
+        'payout_account_name',
+        'payout_account_number',
         'preferred_language',
         'email_verified_at',
         'phone_verified_at',
@@ -77,6 +80,7 @@ class User extends Authenticatable implements HasLocalePreference
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'seller_approved_at' => 'datetime',
+        'commission_rate' => 'decimal:2',
         'seller_applied_at' => 'datetime',
         'last_login_at' => 'datetime',
         'banned_until' => 'datetime',
@@ -123,6 +127,24 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * Get the user's products (if seller).
      */
+    public function sellerOrders(): HasMany
+    {
+        return $this->hasMany(SellerOrder::class, 'seller_id');
+    }
+
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(SellerPayout::class, 'seller_id');
+    }
+
+    /**
+     * Commission iruali keeps from this shop's item sales, in percent.
+     */
+    public function effectiveCommissionRate(): float
+    {
+        return (float) ($this->commission_rate ?? Setting::get('default_commission_rate'));
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'seller_id');

@@ -19,6 +19,18 @@ class OrderItem extends Model
         'quantity' => 'integer',
     ];
 
+    /**
+     * Keep each shop's part of the order (status and earnings) in step with the items.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (OrderItem $item) {
+            if ($item->order) {
+                app(\App\Services\FulfilmentService::class)->refreshPart($item->order, $item->product?->seller_id ?: null);
+            }
+        });
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

@@ -57,6 +57,14 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * One part per shop: its own fulfilment status and the shop's earnings.
+     */
+    public function sellerOrders(): HasMany
+    {
+        return $this->hasMany(SellerOrder::class);
+    }
+
     public function paymentTransactions(): HasMany
     {
         return $this->hasMany(PaymentTransaction::class);

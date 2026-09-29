@@ -263,6 +263,7 @@ class AdminController extends Controller
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
             'payment_cod_enabled' => 'sometimes|in:0,1',
+            'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
             'bank_name' => 'sometimes|nullable|string|max:100',
             'bank_account_name' => 'sometimes|nullable|string|max:150',
             'bank_account_number' => 'sometimes|nullable|string|max:40',
@@ -316,6 +317,26 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Order marked as '.$request->status.'.');
+    }
+
+    /**
+     * Move one shop's part of an order (e.g. when the shop asked iruali to update it).
+     */
+    public function updatePartStatus(Request $request, Order $order, \App\Models\SellerOrder $part, \App\Services\FulfilmentService $fulfilment)
+    {
+        $this->checkAdminRole();
+        abort_unless($part->order_id === $order->id, 404);
+
+        $request->validate([
+            'status' => 'required|in:processing,shipped,delivered',
+            'tracking_note' => 'nullable|string|max:255',
+        ]);
+
+        if (! $fulfilment->advance($part, $request->status, $request->tracking_note)) {
+            return back()->with('error', "That part is {$part->status}; it can't be moved to {$request->status}.");
+        }
+
+        return back()->with('success', $part->shopName().' part marked as '.$request->status.'.');
     }
 
     public function updatePayment(Request $request, Order $order, PaymentService $payments)

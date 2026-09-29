@@ -40,6 +40,8 @@ class Setting extends Model
         'delivery_fee_islands' => 75,
         'free_delivery_over' => 1000,
         'payment_cod_enabled' => '1',
+        // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
+        'default_commission_rate' => 10,
         'bank_name' => 'Bank of Maldives',
         'bank_account_name' => '',
         'bank_account_number' => '',

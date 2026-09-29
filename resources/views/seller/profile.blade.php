@@ -72,6 +72,25 @@
                 </div>
             </div>
 
+            <div class="border-t border-gray-100 pt-4">
+                <h2 class="text-base font-semibold text-gray-900">Payout bank account</h2>
+                <p class="text-sm text-gray-500">iruali pays your earnings to this account by bank transfer.</p>
+                <div class="mt-3 grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="payout_bank_name" class="block text-sm font-medium text-gray-700">Bank</label>
+                        <input id="payout_bank_name" name="payout_bank_name" class="{{ $field }}" placeholder="Bank of Maldives" value="{{ old('payout_bank_name', $user->payout_bank_name) }}">
+                    </div>
+                    <div>
+                        <label for="payout_account_name" class="block text-sm font-medium text-gray-700">Account name</label>
+                        <input id="payout_account_name" name="payout_account_name" class="{{ $field }}" value="{{ old('payout_account_name', $user->payout_account_name) }}">
+                    </div>
+                    <div>
+                        <label for="payout_account_number" class="block text-sm font-medium text-gray-700">Account number</label>
+                        <input id="payout_account_number" name="payout_account_number" class="{{ $field }}" value="{{ old('payout_account_number', $user->payout_account_number) }}">
+                    </div>
+                </div>
+            </div>
+
             <div class="flex justify-end border-t border-gray-100 pt-4">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save profile</button>
             </div>

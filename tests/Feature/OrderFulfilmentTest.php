@@ -97,7 +97,7 @@ class OrderFulfilmentTest extends TestCase
             ->post(route('admin.orders.status', $order), ['status' => 'shipped'])->assertForbidden();
     }
 
-    public function test_seller_can_advance_orders_that_are_entirely_theirs(): void
+    public function test_each_shop_advances_its_own_part_even_in_a_shared_order(): void
     {
         $seller = $this->withRole('seller');
         $mine = Product::factory()->create(['seller_id' => $seller->id]);
@@ -107,13 +107,22 @@ class OrderFulfilmentTest extends TestCase
         $mixedOrder = $this->orderWith(User::factory()->create(), [[$mine, 1], [$theirs, 1]]);
 
         $this->actingAs($seller);
-        $this->get(route('seller.orders.show', $ownOrder))->assertOk()->assertSee('Mark as processing');
+        $this->get(route('seller.orders.show', $ownOrder))->assertOk()->assertSee('Start preparing');
         $this->post(route('seller.orders.status', $ownOrder), ['status' => 'processing'])->assertRedirect();
         $this->assertSame('processing', $ownOrder->fresh()->status);
 
-        $this->get(route('seller.orders.show', $mixedOrder))->assertOk()->assertSee('an admin updates its status');
-        $this->post(route('seller.orders.status', $mixedOrder), ['status' => 'processing'])->assertForbidden();
-        $this->assertSame('pending', $mixedOrder->fresh()->status);
+        // In a shared order the shop moves only its own part; the order waits for the other shop.
+        $this->get(route('seller.orders.show', $mixedOrder))->assertOk()->assertSee('also has items from 1 other shop');
+        $this->post(route('seller.orders.status', $mixedOrder), ['status' => 'processing']);
+        $this->post(route('seller.orders.status', $mixedOrder), ['status' => 'shipped', 'tracking_note' => 'Addu ferry']);
+        $this->assertSame('processing', $mixedOrder->fresh()->status);
+        $this->assertSame('shipped', $mixedOrder->sellerOrders()->where('seller_id', $seller->id)->value('status'));
+
+        // A shop can't cancel; cancelling is done on the whole order by an admin or the customer.
+        $this->post(route('seller.orders.status', $mixedOrder), ['status' => 'cancelled'])->assertSessionHasErrors('status');
+
+        $stranger = $this->withRole('seller');
+        $this->actingAs($stranger)->post(route('seller.orders.status', $mixedOrder), ['status' => 'delivered'])->assertNotFound();
     }
 
     public function test_seller_can_view_an_order_they_placed_as_a_customer(): void

@@ -155,6 +155,11 @@
                         <p class="mt-1">Add <code>BML_API_KEY</code> (and <code>BML_ENVIRONMENT=production</code> when BML approves you) to the server's <code>.env</code>. See docs/PAYMENTS_BML.md.</p>
                     @endif
                 </div>
+                <div class="mt-4 max-w-xs">
+                    <label for="default_commission_rate" class="block text-sm font-medium text-gray-700">Default shop commission (%)</label>
+                    <input id="default_commission_rate" name="default_commission_rate" type="number" step="0.01" min="0" max="100" class="{{ $field }}" value="{{ old('default_commission_rate', $settings['default_commission_rate']) }}">
+                    <p class="mt-1 text-xs text-gray-500">What iruali keeps from each shop's item sales. Set a different rate per shop under Shop payouts. Changes apply to new orders.</p>
+                </div>
                 <label class="mt-4 flex items-start gap-3">
                     <input type="hidden" name="payment_cod_enabled" value="0">
                     <input type="checkbox" name="payment_cod_enabled" value="1" class="mt-0.5 h-4 w-4 rounded text-primary-600" @checked(old('payment_cod_enabled', $settings['payment_cod_enabled'] ?? '1') !== '0')>

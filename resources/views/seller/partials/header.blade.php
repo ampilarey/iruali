@@ -4,6 +4,7 @@
         'seller.products.index' => ['Products', 'seller.products.*'],
         'seller.orders' => ['Orders', 'seller.orders*'],
         'seller.questions' => ['Questions', 'seller.questions'],
+        'seller.earnings' => ['Earnings', 'seller.earnings'],
         'seller.analytics' => ['Analytics', 'seller.analytics'],
         'seller.profile' => ['Profile', 'seller.profile*'],
     ];

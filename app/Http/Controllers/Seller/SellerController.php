@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Services\OrderService;
+use App\Models\SellerOrder;
+use App\Services\FulfilmentService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class SellerController extends Controller
             'pending_products' => $user->products()->where('is_active', false)->count(),
             'low_stock' => $user->products()->whereColumn('stock_quantity', '<=', 'reorder_point')->count(),
             'total_orders' => $this->sellerOrders()->count(),
-            'pending_orders' => $this->sellerOrders()->where('status', 'pending')->count(),
+            'pending_orders' => SellerOrder::where('seller_id', $user->id)->whereIn('status', ['pending', 'processing'])->count(),
             'total_revenue' => $this->revenue(),
         ];
 
@@ -35,51 +36,47 @@ class SellerController extends Controller
 
     public function orders(Request $request)
     {
-        $orders = $this->sellerOrders()
-            ->with(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product'])
+        $parts = SellerOrder::query()
+            ->where('seller_id', Auth::id())
+            ->with(['order.user', 'order.items' => fn ($q) => $this->onlyOwnItems($q), 'order.items.product'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('seller.orders.index', compact('orders'));
+        return view('seller.orders.index', compact('parts'));
     }
 
-    public function showOrder(Order $order, OrderService $orderService)
+    public function showOrder(Order $order, FulfilmentService $fulfilment)
     {
-        abort_unless($this->sellerOrders()->whereKey($order->id)->exists(), 404);
+        $part = $fulfilment->partFor($order, Auth::user());
+        abort_unless($part, 404);
 
-        $ownsWholeOrder = $this->ownsWholeOrder($order);
-        $nextStatuses = $ownsWholeOrder ? $orderService->nextStatuses($order) : [];
-
+        $nextStatuses = $fulfilment->nextStatuses($part);
         $order->load(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product']);
+        $otherShops = $order->sellerOrders()->where('seller_id', '!=', Auth::id())->count();
 
-        return view('seller.orders.show', compact('order', 'nextStatuses', 'ownsWholeOrder'));
-    }
-
-    public function updateOrderStatus(Request $request, Order $order, OrderService $orderService)
-    {
-        abort_unless($this->sellerOrders()->whereKey($order->id)->exists(), 404);
-
-        // The status is per order, so a seller can only move orders that contain nothing but their own items.
-        abort_unless($this->ownsWholeOrder($order), 403, 'This order has items from other shops. An admin updates its status.');
-
-        $request->validate(['status' => 'required|in:'.implode(',', array_keys(OrderService::TRANSITIONS))]);
-
-        if (! $orderService->updateOrderStatus($order, $request->status)) {
-            return back()->with('error', "An order that is {$order->status} can't be moved to {$request->status}.");
-        }
-
-        return back()->with('success', 'Order marked as '.$request->status.'.');
+        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops'));
     }
 
     /**
-     * True when every item in the order is one of the current seller's products.
+     * A shop moves its own part of the order along (it works for orders shared with other shops too).
      */
-    protected function ownsWholeOrder(Order $order): bool
+    public function updateOrderStatus(Request $request, Order $order, FulfilmentService $fulfilment)
     {
-        return $order->items()->exists()
-            && ! $order->items()->whereDoesntHave('product', fn ($q) => $q->withTrashed()->where('seller_id', Auth::id()))->exists();
+        $part = $fulfilment->partFor($order, Auth::user());
+        abort_unless($part, 404);
+
+        $request->validate([
+            'status' => 'required|in:processing,shipped,delivered',
+            'tracking_note' => 'nullable|string|max:255',
+        ]);
+
+        if (! $fulfilment->advance($part, $request->status, $request->tracking_note)) {
+            return back()->with('error', "Your part of this order is {$part->status}; it can't be moved to {$request->status}.");
+        }
+
+        return back()->with('success', 'Your part of the order is now '.$request->status.'.');
     }
 
     public function analytics()
@@ -136,6 +133,18 @@ class SellerController extends Controller
         return view('seller.questions', compact('questions', 'unanswered'));
     }
 
+    public function earnings(\App\Services\PayoutService $payouts)
+    {
+        $user = Auth::user();
+
+        $balances = $payouts->balances($user);
+        $parts = SellerOrder::where('seller_id', $user->id)->with(['order', 'payout'])->latest()->paginate(20);
+        $payoutHistory = $user->payouts()->latest('paid_at')->take(20)->get();
+        $rate = $user->effectiveCommissionRate();
+
+        return view('seller.earnings', compact('balances', 'parts', 'payoutHistory', 'rate', 'user'));
+    }
+
     public function profile()
     {
         $user = Auth::user();
@@ -157,6 +166,9 @@ class SellerController extends Controller
             'state' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
+            'payout_bank_name' => 'nullable|string|max:100',
+            'payout_account_name' => 'nullable|string|max:150',
+            'payout_account_number' => ['nullable', 'string', 'max:40', 'regex:/^[0-9 -]+$/'],
         ]);
 
         $user->update($validated);

@@ -152,6 +152,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::put('/profile', [SellerController::class, 'updateProfile'])->name('profile.update');
         Route::get('/analytics', [SellerController::class, 'analytics'])->name('analytics');
         Route::get('/questions', [SellerController::class, 'questions'])->name('questions');
+        Route::get('/earnings', [SellerController::class, 'earnings'])->name('earnings');
     });
 
     // Admin routes
@@ -164,6 +165,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders/{order}', [AdminController::class, 'showOrder'])->name('orders.show');
         Route::post('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
         Route::post('/orders/{order}/payment', [AdminController::class, 'updatePayment'])->name('orders.payment');
+        Route::post('/orders/{order}/parts/{part}/status', [AdminController::class, 'updatePartStatus'])->name('orders.parts.status');
         Route::post('/orders/{order}/bml-sync', [AdminController::class, 'syncBmlPayment'])->name('orders.bml-sync');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -173,6 +175,11 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
 
+        Route::get('/payouts', [\App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts');
+        Route::get('/payouts/sellers/{seller}/new', [\App\Http\Controllers\Admin\PayoutController::class, 'create'])->name('payouts.create');
+        Route::post('/payouts/sellers/{seller}', [\App\Http\Controllers\Admin\PayoutController::class, 'store'])->name('payouts.store');
+        Route::get('/payouts/{payout}', [\App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
+        Route::post('/sellers/{seller}/commission', [\App\Http\Controllers\Admin\PayoutController::class, 'updateCommission'])->name('sellers.commission');
         Route::get('/legal', [\App\Http\Controllers\Admin\LegalPagesController::class, 'edit'])->name('legal');
         Route::put('/legal', [\App\Http\Controllers\Admin\LegalPagesController::class, 'update'])->name('legal.update');
 

@@ -3,7 +3,7 @@
 @section('title', 'Order #' . $order->order_number . ' - iruali')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex justify-between items-start">
@@ -12,12 +12,8 @@
                 <p class="text-gray-600">Placed on {{ $order->created_at->format('F d, Y \a\t g:i A') }}</p>
             </div>
             <div class="text-right">
-                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full
-                    @if($order->status === 'completed') bg-green-100 text-green-800
-                    @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
-                    @elseif($order->status === 'cancelled') bg-red-100 text-red-800
-                    @else bg-gray-100 text-gray-800 @endif">
-                    {{ ucfirst($order->status) }}
+                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">
+                    {{ __(ucfirst($order->status)) }}
                 </span>
             </div>
         </div>
@@ -29,28 +25,44 @@
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Items') }}</h2>
                 <div class="space-y-4">
-                    @foreach($order->items as $item)
-                    <div class="flex items-center space-x-4">
-                        <div class="shrink-0">
-                            @if($item->product->mainImage)
-                                <img src="{{ $item->product->mainImage->url }}" alt="{{ $item->product->name }}" class="w-16 h-16 object-cover rounded">
-                            @else
-                                <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
+                    @php
+                        $parts = $order->sellerOrders->keyBy(fn ($p) => (string) $p->seller_id);
+                        $steps = ['pending' => __('Order placed'), 'processing' => __('Preparing'), 'shipped' => __('On its way'), 'delivered' => __('Delivered')];
+                    @endphp
+                    @foreach($order->items->groupBy(fn ($i) => (string) $i->product?->seller_id) as $sellerId => $shopItems)
+                        @php $part = $parts[$sellerId] ?? null; $rank = \App\Models\SellerOrder::RANK[$part?->status] ?? -1; @endphp
+                        <div class="rounded-lg border border-gray-200 p-4 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
+                                @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(ucfirst($part->status)) }}</span>@endif
+                            </div>
+                            @if($part && $part->status !== 'cancelled')
+                                <ol class="grid grid-cols-4 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
+                                    @foreach($steps as $key => $label)
+                                        @php $done = $rank >= \App\Models\SellerOrder::RANK[$key]; @endphp
+                                        <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>
+                                    @endforeach
+                                </ol>
                             @endif
+                            @if($part?->tracking_note)
+                                <p class="text-sm text-gray-700"><span class="font-medium">{{ __('Tracking') }}:</span> {{ $part->tracking_note }}@if($part->shipped_at) <span class="text-xs text-gray-500">({{ $part->shipped_at->format('j M') }})</span>@endif</p>
+                            @endif
+                            @foreach($shopItems as $item)
+                            <div class="flex items-center space-x-4">
+                                <div class="shrink-0">
+                                    <img src="{{ $item->product?->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $item->product?->name }}" class="w-16 h-16 object-cover rounded bg-primary-50">
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900">{{ $item->product?->name ?? __('Product') }}</h3>
+                                    <p class="text-sm text-gray-600">{{ __('Quantity') }}: {{ $item->quantity }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price * $item->quantity) }}</p>
+                                    <p class="text-xs text-gray-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price) }} {{ __('each') }}</p>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900">{{ $item->product->name }}</h3>
-                            <p class="text-sm text-gray-600">Quantity: {{ $item->quantity }}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-lg font-semibold text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price * $item->quantity) }}</p>
-                            <p class="text-sm text-gray-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price) }} each</p>
-                        </div>
-                    </div>
                     @endforeach
                     @if($order->loyalty_points_earned > 0)
                     <div class="flex justify-between">
@@ -78,23 +90,6 @@
                             {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
                             {{ $order->shipping_country }}
                         </p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-900 mb-2">{{ __('Order Status') }}</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                                <span class="text-sm text-gray-600">{{ __('Order Placed') }}</span>
-                                <span class="text-xs text-gray-400 ml-auto">{{ $order->created_at->format('M d, Y') }}</span>
-                            </div>
-                            @if($order->status === 'completed')
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                                <span class="text-sm text-gray-600">{{ __('Order Completed') }}</span>
-                                <span class="text-xs text-gray-400 ml-auto">{{ $order->updated_at->format('M d, Y') }}</span>
-                            </div>
-                            @endif
-                        </div>
                     </div>
                 </div>
             </div>

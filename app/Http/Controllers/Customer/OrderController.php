@@ -34,7 +34,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order = $this->orderService->getOrderWithDetails($order);
+        $order->load(['items.product' => fn ($q) => $q->withTrashed()->with(['mainImage', 'seller']), 'sellerOrders.seller']);
 
         return view('orders.show', compact('order'));
     }

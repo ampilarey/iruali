@@ -27,10 +27,18 @@ class OrderStatusChanged extends Notification
             default => [__('Update on order :number', ['number' => $number]), __('Your order status is now :status.', ['status' => $this->order->status])],
         };
 
-        return (new MailMessage)->salutation(__('The iruali team'))
+        $mail = (new MailMessage)->salutation(__('The iruali team'))
             ->subject($subject)
             ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
-            ->line($line)
-            ->action(__('View your order'), route('orders.show', $this->order));
+            ->line($line);
+
+        // Tracking details each shop gave when it sent its part
+        if ($this->order->status === 'shipped') {
+            foreach ($this->order->sellerOrders()->with('seller')->whereNotNull('tracking_note')->get() as $part) {
+                $mail->line(__('Tracking from :shop: :note', ['shop' => $part->shopName(), 'note' => $part->tracking_note]));
+            }
+        }
+
+        return $mail->action(__('View your order'), route('orders.show', $this->order));
     }
 }

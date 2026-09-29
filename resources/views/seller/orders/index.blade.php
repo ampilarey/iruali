@@ -24,26 +24,29 @@
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Customer</th>
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Your items</th>
                             <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Your total</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">You earn</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Your status</th>
                             <th class="px-4 py-3"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
-                        @forelse($orders as $order)
+                        @forelse($parts as $part)
+                            @php $order = $part->order; @endphp
                             <tr>
                                 <td class="px-4 py-3">
                                     <p class="text-sm font-medium text-gray-900">#{{ $order->order_number }}</p>
                                     <p class="text-xs text-gray-500">{{ $order->created_at->format('d M Y, H:i') }}</p>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $order->user->name ?? 'Customer' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ $order->user->name ?? 'Customer' }}<span class="block text-xs text-gray-500">{{ $order->shipping_city }}</span></td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $order->items->sum('quantity') }}</td>
-                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($order->items->sum(fn ($i) => $i->price * $i->quantity)) }}</td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ ucfirst($order->status) }}</span></td>
+                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->subtotal) }}</td>
+                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->seller_earnings) }}</td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ ucfirst($part->status) }}</span></td>
                                 <td class="px-4 py-3 text-right text-sm"><a href="{{ route('seller.orders.show', $order) }}" class="font-medium text-primary-600 hover:text-primary-700">View</a></td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500">No orders yet.</td>
+                                <td colspan="7" class="px-4 py-10 text-center text-sm text-gray-500">No orders yet.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -51,7 +54,7 @@
             </div>
         </div>
 
-        <div class="mt-4">{{ $orders->links() }}</div>
+        <div class="mt-4">{{ $parts->links() }}</div>
     </div>
 </div>
 @endsection

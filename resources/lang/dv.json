@@ -563,5 +563,21 @@
     "How we collect, use and protect your personal information.": "ތިބާގެ ޒާތީ މަޢުލޫމާތު ނަގާ، ބޭނުންކުރާ އަދި ރައްކާތެރިކުރާ ގޮތް.",
     "How your card details are protected when you pay.": "ފައިސާ ދައްކަވާއިރު ކާޑުގެ މަޢުލޫމާތު ރައްކާތެރިކުރެވޭ ގޮތް.",
     "Please read these terms before completing your purchase.": "ގަތުން ނިންމުމުގެ ކުރިން މި ޝަރުތުތައް ކިޔުއްވާ.",
-    "Printable receipt: :url": "ޕްރިންޓްކުރެވޭ ރަސީދު: :url"
+    "Printable receipt: :url": "ޕްރިންޓްކުރެވޭ ރަސީދު: :url",
+    "Order placed": "އޯޑަރ ކުރެވިއްޖެ",
+    "Preparing": "ތައްޔާރުކުރަނީ",
+    "On its way": "ފޮނުވިއްޖެ",
+    "Delivered": "ޑެލިވަރީ ކުރެވިއްޖެ",
+    "From :shop": ":shop އިން",
+    "Progress": "ކުރިއެރުން",
+    "Tracking": "ޓްރެކިންގ",
+    "Tracking from :shop: :note": ":shop ގެ ޓްރެކިންގ: :note",
+    "Items from :shop are on their way (order :number)": ":shop ގެ ތަކެތި ފޮނުވިއްޖެ (އޯޑަރ :number)",
+    ":shop has sent their part of your order:": ":shop އިން ތިބާގެ އޯޑަރުގެ ބައި ފޮނުވައިފި:",
+    "Tracking: :note": "ޓްރެކިންގ: :note",
+    "The rest of your order is still being prepared by the other shops.": "އޯޑަރުގެ ބާކީ ބައި އެހެން ފިހާރަތަކުން ތައްޔާރުކުރަމުންދަނީ.",
+    "Pending": "ޕެންޑިންގ",
+    "Processing": "ތައްޔާރުކުރަނީ",
+    "Shipped": "ފޮނުވިއްޖެ",
+    "Cancelled": "ކެންސަލްކުރެވިއްޖެ"
 }

@@ -20,6 +20,7 @@ class CheckoutDeliveryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->enableBml();
         $this->customer = User::factory()->create();
     }
 
@@ -38,7 +39,7 @@ class CheckoutDeliveryTest extends TestCase
             'shipping_state' => 'Addu',
             'shipping_zip' => '19020',
             'shipping_country' => 'Maldives',
-            'payment_method' => 'cod',
+            'payment_method' => 'bml',
             'agree_terms' => '1',
         ], $overrides));
     }
@@ -52,7 +53,8 @@ class CheckoutDeliveryTest extends TestCase
             ->assertSee(route('orders.store'), false)
             ->assertSee('Greater Malé')
             ->assertSee('Other islands')
-            ->assertSee('Cash on delivery')
+            ->assertSee('Card payment (BML)')
+            ->assertDontSee('Cash on delivery')
             ->assertSee('name="agree_terms"', false);
     }
 
@@ -66,7 +68,7 @@ class CheckoutDeliveryTest extends TestCase
         $this->assertSame('islands', $order->delivery_zone);
         $this->assertEquals(75, $order->shipping_amount);
         $this->assertEquals(275, $order->total_amount);
-        $this->assertSame('cod', $order->payment_method);
+        $this->assertSame('bml', $order->payment_method);
     }
 
     public function test_greater_male_rate_and_zone_guessed_from_island(): void

@@ -114,7 +114,7 @@ class OrderService
             'total_amount' => $discounts['final_total'] + $shippingData['shipping_amount'],
             'shipping_amount' => $shippingData['shipping_amount'],
             'delivery_zone' => $shippingData['delivery_zone'],
-            'payment_method' => $shippingData['payment_method'] ?? 'cod',
+            'payment_method' => $shippingData['payment_method'] ?? 'bml',
             'voucher_code' => $voucher ? $voucher->code : null,
             'voucher_discount' => $discounts['voucher']['amount'],
             'loyalty_points_earned' => $loyaltyPointsEarned,

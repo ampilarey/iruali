@@ -16,7 +16,7 @@
     <li><strong>Password:</strong> stored only in hashed (scrambled) form; we cannot read it.</li>
     <li><strong>Delivery address and island:</strong> to deliver your orders.</li>
     <li><strong>Order history:</strong> to show your orders, give loyalty points and handle returns.</li>
-    <li><strong>Payment information:</strong> the payment method, amount, and the transaction reference and status sent to us by Bank of Maldives. <strong>We never receive or store your card number, expiry date or security code.</strong> Bank transfer slips you upload are stored privately.</li>
+    <li><strong>Payment information:</strong> the payment method, amount, and the transaction reference and status sent to us by Bank of Maldives. <strong>We never receive or store your card number, expiry date or security code.</strong></li>
     <li><strong>Reviews and questions</strong> you post, with your name.</li>
     <li><strong>Sellers:</strong> business name, contact person, island and the details in the seller application.</li>
     <li><strong>Technical information:</strong> IP address, browser type and pages visited, in our server logs.</li>
@@ -52,7 +52,7 @@
     <li>encrypted data transmission (HTTPS / TLS) on every page;</li>
     <li>hashed passwords and optional two-step sign-in;</li>
     <li>role-based access for staff; each seller sees only the orders for their own shop;</li>
-    <li>payment slips stored outside the public website, shown only to you and our administrators;</li>
+    <li>photos you add to a return request stored outside the public website, shown only to you, the shop and our administrators;</li>
     <li>every payment result checked directly with Bank of Maldives, never trusted from the browser;</li>
     <li>regular reviews of access and security.</li>
 </ul>

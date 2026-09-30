@@ -31,10 +31,6 @@ class OrderPlaced extends Notification
         $mail->line(__('Delivery').': '.Money::format($order->shipping_amount))
             ->line('**'.__('Total').': '.Money::format($order->total_amount).'**');
 
-        if ($order->payment_method === 'bank_transfer') {
-            $mail->line(__('Please transfer the total and upload your slip on the order page.'));
-        }
-
         return $mail->action(__('View your order'), route('orders.show', $order))
             ->line(__('Please keep this email as a record of your purchase, together with our Terms & Conditions and Returns, Refunds & Cancellations policy: :url', ['url' => route('policies.terms')]))
             ->line(__('Printable receipt: :url', ['url' => route('orders.receipt', $order)]));

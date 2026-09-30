@@ -8,7 +8,6 @@ use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Product;
 use App\Models\Role;
-use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\PaymentUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -257,14 +256,17 @@ class BmlPaymentTest extends TestCase
         $this->assertSame(10, $this->product->fresh()->stock_quantity);
     }
 
-    public function test_cash_on_delivery_can_be_turned_off_but_not_while_cards_are_off(): void
+    public function test_card_payment_is_the_only_method_and_checkout_closes_without_bml(): void
     {
-        Setting::set(['payment_cod_enabled' => '0']);
-        $this->actingAs($this->customer)->get('/checkout')->assertDontSee('value="cod"', false);
+        $this->actingAs($this->customer)->get('/checkout')->assertSee('value="bml"', false)
+            ->assertDontSee('value="cod"', false)->assertDontSee('value="bank_transfer"', false);
         $this->checkout('cod')->assertSessionHasErrors('payment_method');
+        $this->checkout('bank_transfer')->assertSessionHasErrors('payment_method');
 
         config(['services.bml.api_key' => null]);
-        $this->get('/checkout')->assertSee('value="cod"', false);
+        $this->get('/checkout')->assertSee('Card payment is not available right now')->assertDontSee('name="payment_method"', false);
+        $this->checkout('bml')->assertSessionHasErrors('payment_method');
+        $this->assertSame(0, Order::count());
     }
 
     public function test_admin_sees_attempts_and_can_recheck_with_bml(): void

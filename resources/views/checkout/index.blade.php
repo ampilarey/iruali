@@ -85,10 +85,11 @@
                         $paymentMethods = app(\App\Services\PaymentService::class)->methods();
                         $paymentHelp = [
                             'bml' => __('Pay now with Visa, Mastercard, American Express or Maestro on Bank of Maldives\' secure payment page.'),
-                            'cod' => __('Pay when your order arrives.'),
-                            'bank_transfer' => __('Transfer the total to our bank account after ordering, then upload your slip on the order page.'),
                         ];
                     @endphp
+                    @if($paymentMethods === [])
+                        <p class="rounded-xl border border-sun bg-sun-soft px-4 py-3 text-sm text-sun-ink">{{ __('Card payment is not available right now, so orders can\'t be placed. Please try again later.') }}</p>
+                    @endif
                     <div class="space-y-3">
                         @foreach($paymentMethods as $method => $label)
                             <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
@@ -185,7 +186,7 @@
                     </label>
                     @error('agree_terms')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
 
-                    <button type="submit" class="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4">
+                    <button type="submit" @disabled($paymentMethods === []) class="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4 disabled:cursor-not-allowed disabled:opacity-50">
                         {{ __('Place Order') }}
                     </button>
                 </div>

@@ -18,6 +18,10 @@
 <meta property="og:type" content="{{ $seo['og_type'] }}">
 <meta property="og:url" content="{{ $seo['canonical_url'] }}">
 <meta property="og:image" content="{{ $seo['og_image'] }}">
+@if(str_ends_with($seo['og_image'], 'og-image.png'))
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+@endif
 <meta property="og:site_name" content="{{ config('app.name') }}">
 <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 

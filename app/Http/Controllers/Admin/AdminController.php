@@ -262,11 +262,7 @@ class AdminController extends Controller
             'delivery_fee_greater_male' => 'sometimes|required|numeric|min:0|max:100000',
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
-            'payment_cod_enabled' => 'sometimes|in:0,1',
             'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
-            'bank_name' => 'sometimes|nullable|string|max:100',
-            'bank_account_name' => 'sometimes|nullable|string|max:150',
-            'bank_account_number' => 'sometimes|nullable|string|max:40',
         ]);
 
         Setting::set($validated);
@@ -343,16 +339,11 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $request->validate(['action' => 'required|in:confirm,reject']);
+        $request->validate(['action' => 'required|in:confirm']);
 
-        if ($request->action === 'confirm') {
-            $payments->confirm($order);
+        // Card orders are confirmed by BML; this is for older cash on delivery / bank transfer orders.
+        $payments->confirm($order);
 
-            return back()->with('success', 'Payment confirmed.');
-        }
-
-        $payments->reject($order);
-
-        return back()->with('success', 'Slip rejected. The customer can upload a new one.');
+        return back()->with('success', 'Payment confirmed.');
     }
 }

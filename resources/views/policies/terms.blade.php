@@ -28,7 +28,7 @@
     <li>Card payments are processed securely by <strong>Bank of Maldives (BML)</strong> through BML Connect. We accept <strong>Visa, Mastercard, American Express and Maestro</strong>.</li>
     <li>The merchant outlet is located in the <strong>{{ Company::country() }}</strong>.</li>
     <li>Card details are entered only on BML's secure payment page. {{ $name }} does not store, view or process your card number, expiry date or security code.</li>
-    <li>Cash on delivery and bank transfer are also offered when shown at checkout.</li>
+    <li>Card payment is the only payment method. Orders are paid in full when placed; we do not accept cash on delivery or bank transfer.</li>
 </ul>
 
 {{-- BML requirement 8: delivery policy --}}

@@ -119,8 +119,6 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
         Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1');
-        Route::post('/orders/{order}/payment-slip', [OrderController::class, 'uploadPaymentSlip'])->name('orders.payment-slip.store')->middleware('throttle:10,1');
-        Route::get('/orders/{order}/payment-slip', [OrderController::class, 'showPaymentSlip'])->name('orders.payment-slip.show');
         Route::post('/orders/{order}/parts/{part}/return', [\App\Http\Controllers\Customer\ReturnController::class, 'store'])->name('orders.returns.store')->middleware('throttle:10,1');
         Route::get('/returns/{return}/photo', [\App\Http\Controllers\Customer\ReturnController::class, 'photo'])->name('returns.photo');
         // 2FA setup routes

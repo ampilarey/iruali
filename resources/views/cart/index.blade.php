@@ -134,7 +134,7 @@
                     @endauth
                     <ul class="text-xs text-gray-600 space-y-1.5">
                         <li class="flex items-center gap-2"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('Reviewed local sellers') }}</li>
-                        <li class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4 text-primary" />{{ __('Cash on delivery or bank transfer') }}</li>
+                        <li class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4 text-primary" />{{ __('Secure card payment via Bank of Maldives') }}</li>
                     </ul>
                 </aside>
             </div>

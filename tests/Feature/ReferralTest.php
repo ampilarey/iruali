@@ -17,6 +17,7 @@ class ReferralTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->enableBml();
         // Seed roles, permissions, users, products, etc.
         $this->artisan('db:seed');
     }
@@ -64,7 +65,7 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
-            'payment_method' => 'cod',
+            'payment_method' => 'bml',
             'agree_terms' => 'on',
         ]);
         $response->assertRedirect();
@@ -89,7 +90,7 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
-            'payment_method' => 'cod',
+            'payment_method' => 'bml',
             'agree_terms' => 'on',
         ]);
         $referrer->refresh();
@@ -103,7 +104,7 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
-            'payment_method' => 'cod',
+            'payment_method' => 'bml',
             'agree_terms' => 'on',
         ]);
         $referrer->refresh();
@@ -145,7 +146,7 @@ class ReferralTest extends TestCase
             'shipping_state' => 'Male',
             'shipping_zip' => '20001',
             'shipping_country' => 'Maldives',
-            'payment_method' => 'cod',
+            'payment_method' => 'bml',
             'agree_terms' => 'on',
         ]);
         $user->refresh();

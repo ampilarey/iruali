@@ -149,9 +149,9 @@
                 <div class="mt-3 rounded-lg border px-4 py-3 text-sm {{ $bml->enabled() ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-800' }}">
                     @if($bml->enabled())
                         <p class="font-semibold">BML card payments are on{{ $bml->isSandbox() ? ' (sandbox: test cards only, no real money)' : '' }}.</p>
-                        <p class="mt-1">Customers pay on Bank of Maldives' secure page. Refunds are made in the BML merchant portal.</p>
+                        <p class="mt-1">Card payment is the only payment method. Customers pay on Bank of Maldives' secure page. Refunds are made in the BML merchant portal.</p>
                     @else
-                        <p class="font-semibold">BML card payments are off.</p>
+                        <p class="font-semibold">BML card payments are off, so checkout is closed.</p>
                         <p class="mt-1">Add <code>BML_API_KEY</code> (and <code>BML_ENVIRONMENT=production</code> when BML approves you) to the server's <code>.env</code>. See docs/PAYMENTS_BML.md.</p>
                     @endif
                 </div>
@@ -160,29 +160,6 @@
                     <input id="default_commission_rate" name="default_commission_rate" type="number" step="0.01" min="0" max="100" class="{{ $field }}" value="{{ old('default_commission_rate', $settings['default_commission_rate']) }}">
                     <p class="mt-1 text-xs text-gray-500">What iruali keeps from each shop's item sales. Set a different rate per shop under Shop payouts. Changes apply to new orders.</p>
                 </div>
-                <label class="mt-4 flex items-start gap-3">
-                    <input type="hidden" name="payment_cod_enabled" value="0">
-                    <input type="checkbox" name="payment_cod_enabled" value="1" class="mt-0.5 h-4 w-4 rounded text-primary-600" @checked(old('payment_cod_enabled', $settings['payment_cod_enabled'] ?? '1') !== '0')>
-                    <span class="text-sm"><span class="font-medium text-gray-900">Offer cash on delivery</span><span class="block text-gray-500">Turn off to take card payments only. Cash on delivery stays on while card payments are off.</span></span>
-                </label>
-            </section>
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Bank transfer</h2>
-                <div class="mt-4 grid gap-4 sm:grid-cols-3">
-                    <div>
-                        <label for="bank_name" class="block text-sm font-medium text-gray-700">Bank</label>
-                        <input id="bank_name" name="bank_name" class="{{ $field }}" value="{{ old('bank_name', $settings['bank_name']) }}">
-                    </div>
-                    <div>
-                        <label for="bank_account_name" class="block text-sm font-medium text-gray-700">Account name</label>
-                        <input id="bank_account_name" name="bank_account_name" class="{{ $field }}" value="{{ old('bank_account_name', $settings['bank_account_name']) }}">
-                    </div>
-                    <div>
-                        <label for="bank_account_number" class="block text-sm font-medium text-gray-700">Account number</label>
-                        <input id="bank_account_number" name="bank_account_number" class="{{ $field }}" value="{{ old('bank_account_number', $settings['bank_account_number']) }}">
-                    </div>
-                </div>
-                <p class="mt-2 text-xs text-gray-500">Bank transfer is offered at checkout once an account number is set. Customers upload their slip on the order page; you confirm it on the order.</p>
             </section>
 
             <div class="flex justify-end">

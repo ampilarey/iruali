@@ -6,20 +6,15 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\NewSellerOrder;
 use App\Notifications\OrderPlaced;
 use App\Notifications\OrderStatusChanged;
-use App\Notifications\PaymentSlipSubmitted;
 use App\Notifications\PaymentUpdated;
 use App\Services\OrderService;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OrderEmailsTest extends TestCase
@@ -67,17 +62,11 @@ class OrderEmailsTest extends TestCase
         Notification::assertSentToTimes($customer, OrderStatusChanged::class, 2);
     }
 
-    public function test_payment_emails_go_to_customer_and_store(): void
+    public function test_payment_confirmation_is_emailed_to_the_customer(): void
     {
         Notification::fake();
-        Storage::fake('local');
-        Setting::set(['contact_email' => 'orders@iruali.mv']);
         $customer = User::factory()->create();
-        $order = Order::factory()->create(['user_id' => $customer->id, 'payment_method' => 'bank_transfer', 'payment_status' => 'unpaid', 'status' => 'pending']);
-
-        app(PaymentService::class)->submitSlip($order, UploadedFile::fake()->image('slip.jpg'));
-        Notification::assertSentTo(new AnonymousNotifiable, PaymentSlipSubmitted::class,
-            fn ($n, $channels, $notifiable) => $notifiable->routes['mail'] === 'orders@iruali.mv');
+        $order = Order::factory()->create(['user_id' => $customer->id, 'payment_method' => 'bml', 'payment_status' => 'unpaid', 'status' => 'pending']);
 
         app(PaymentService::class)->confirm($order);
         Notification::assertSentTo($customer, PaymentUpdated::class);

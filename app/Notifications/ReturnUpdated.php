@@ -30,7 +30,7 @@ class ReturnUpdated extends Notification
         match ($request->status) {
             'approved' => $mail->subject(__('Your return on order :number is approved', ['number' => $number]))
                 ->line(__('We have approved your return. We will refund :amount.', ['amount' => Money::format($request->refund_amount)]))
-                ->line(__('Card payments are refunded to the same card; other payments by bank transfer. We will email you again when the refund is sent.')),
+                ->line(__('The refund goes back to the card you paid with. We will email you again when it is sent.')),
             'rejected' => $mail->subject(__('Your return on order :number', ['number' => $number]))
                 ->line(__('Sorry, we could not accept your return request.')),
             'refunded' => $mail->subject(__('Refund sent for order :number', ['number' => $number]))

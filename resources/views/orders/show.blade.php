@@ -159,33 +159,6 @@
                 @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
                     <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
                 @endif
-                @if($order->payment_method === 'bank_transfer' && $order->payment_status !== 'paid' && $order->status !== 'cancelled')
-                    <div class="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ __('Pay by bank transfer') }}</h3>
-                        @php $bank = $payments->bankDetails(); @endphp
-                        <dl class="text-sm space-y-1">
-                            <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Bank') }}</dt><dd class="text-gray-900">{{ $bank['bank'] }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Account name') }}</dt><dd class="text-gray-900">{{ $bank['name'] }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Account number') }}</dt><dd class="font-semibold text-gray-900 select-all" dir="ltr">{{ $bank['number'] }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Amount') }}</dt><dd class="font-semibold text-gray-900" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Reference') }}</dt><dd class="text-gray-900 select-all" dir="ltr">{{ $order->order_number }}</dd></div>
-                        </dl>
-                        @if($order->payment_status === 'rejected')
-                            <p class="text-sm text-danger">{{ __('We couldn\'t match your last slip to a payment. Please check the amount and upload it again.') }}</p>
-                        @elseif($order->payment_status === 'submitted')
-                            <p class="text-sm text-gray-600">{{ __('Slip received. We\'ll confirm your payment shortly.') }}</p>
-                        @endif
-                        @if($payments->canUploadSlip($order))
-                            <form method="POST" action="{{ route('orders.payment-slip.store', $order) }}" enctype="multipart/form-data" class="space-y-2">
-                                @csrf
-                                <label for="payment_slip" class="block text-sm font-medium text-gray-700">{{ $order->payment_status === 'submitted' ? __('Replace slip') : __('Upload transfer slip') }}</label>
-                                <input id="payment_slip" name="payment_slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required class="block w-full text-sm text-gray-700">
-                                @error('payment_slip')<p class="text-sm text-danger">{{ $message }}</p>@enderror
-                                <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Send slip') }}</button>
-                            </form>
-                        @endif
-                    </div>
-                @endif
 
                 <form method="POST" action="{{ route('orders.buyAgain', $order) }}" class="mt-6">
                     @csrf

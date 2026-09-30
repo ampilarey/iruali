@@ -29,7 +29,8 @@ back to their order page. iruali never sees card details.
    In the BML portal, set the **webhook URL** to `https://<your-site>/api/payments/bml/webhook`. The webhook
    host must match the site the Connect app is registered for, or BML rejects new transactions.
 4. Admin → Settings → **Payments** shows whether card payments are on, and whether it is the sandbox.
-   You can turn cash on delivery off there to take card payments only.
+   Card payment through BML is the **only** payment method (no cash on delivery or bank transfer). Until
+   `BML_API_KEY` is set, checkout shows a notice and orders can't be placed.
 5. Make sure the Laravel scheduler runs (cPanel → Cron Jobs):
 
    ```

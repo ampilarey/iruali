@@ -607,5 +607,11 @@
     "Please add a photo of the item.": "ތަކެތީގެ ފޮޓޯއެއް ލައްވާ.",
     "The photo must be 5 MB or smaller.": "ފޮޓޯ 5 MB އަށްވުރެ ބޮޑުނުވާން ޖެހޭ.",
     "Choose at least one item to return.": "ރިޓާން ކުރާނެ މަދުވެގެން އެއް ތަކެއްޗެއް ހޮއްވާ.",
-    "Return requested. We'll reply within 2 business days.": "ރިޓާން ކުރަން އެދިއްޖެ. 2 މަސައްކަތު ދުވަހުގެ ތެރޭގައި ޖަވާބު ދޭނަން."
+    "Return requested. We'll reply within 2 business days.": "ރިޓާން ކުރަން އެދިއްޖެ. 2 މަސައްކަތު ދުވަހުގެ ތެރޭގައި ޖަވާބު ދޭނަން.",
+    "Secure card payment via Bank of Maldives": "ބޭންކް އޮފް މޯލްޑިވްސް މެދުވެރިކޮށް ރައްކާތެރި ކާޑު ޕޭމަންޓް",
+    "Card payment is not available right now, so orders can't be placed. Please try again later.": "މިވަގުތު ކާޑު ޕޭމަންޓް ނުކުރެވޭތީ އޯޑަރު ނުކުރެވޭނެ. ފަހުން އަލުން މަސައްކަތް ކޮށްލައްވާ.",
+    "Secure card payment": "ރައްކާތެރި ކާޑު ޕޭމަންޓް",
+    "Visa, Mastercard, Amex and Maestro via Bank of Maldives": "ބޭންކް އޮފް މޯލްޑިވްސް މެދުވެރިކޮށް ވިސާ، މާސްޓަރކާޑް، އެމެކްސް އަދި މެއިސްޓްރޯ",
+    "Card payment is the only way to pay. We don't take cash on delivery or bank transfers, and delivery staff never ask for payment.": "ފައިސާ ދެއްކޭނީ ހަމައެކަނި ކާޑުންނެވެ. ޑެލިވަރީގައި ނަގުދު ފައިސާ ނުވަތަ ބޭންކް ޓްރާންސްފަރ ބަލައެއް ނުގަނެމު. ޑެލިވަރީ މުވައްޒަފުން ފައިސާ އެއްގޮތަކަށްވެސް ނުހޯދާނެ.",
+    "The refund goes back to the card you paid with. We will email you again when it is sent.": "ފައިސާ އަނބުރާ ދެވޭނީ ޕޭމަންޓް ކުރެއްވި ކާޑަށް. ފައިސާ ފޮނުވުމުން އަލުން އީމެއިލް ކުރާނަން."
 }

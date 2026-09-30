@@ -56,6 +56,7 @@ class PolicyPagesTest extends TestCase
 
     public function test_checkout_shows_card_marks_currency_country_and_requires_accepting_the_policies(): void
     {
+        $this->enableBml();
         $user = User::factory()->create();
         $product = Product::factory()->create(['price' => 100, 'stock_quantity' => 5]);
         $cart = Cart::factory()->create(['user_id' => $user->id, 'status' => 'active']);
@@ -73,7 +74,7 @@ class PolicyPagesTest extends TestCase
 
         $this->post('/orders', [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
-            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'cod',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'bml',
         ])->assertSessionHasErrors('agree_terms');
     }
 

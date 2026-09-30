@@ -49,7 +49,7 @@
 
 <h2>5. Special conditions</h2>
 <ul>
-    <li>Cash on delivery orders must be paid in full to the delivery person.</li>
+    <li>All orders are paid by card when placed. Delivery staff never ask for payment.</li>
     <li>Items that need an age check or permit are only handed over after the check.</li>
     <li>No import or export customs duties apply, because all orders are delivered within the Maldives.</li>
 </ul>

@@ -97,9 +97,6 @@
                     @if($order->paid_at)
                         <p class="mt-1 text-xs text-gray-500">Paid {{ $order->paid_at->format('d M Y, H:i') }}</p>
                     @endif
-                    @if($order->payment_slip)
-                        <p class="mt-3"><a href="{{ route('orders.payment-slip.show', $order) }}" target="_blank" class="text-sm font-medium text-primary hover:text-primary-hover">View transfer slip ↗</a></p>
-                    @endif
                     @if($order->payment_method === 'bml')
                         @php $attempts = $order->paymentTransactions()->latest('id')->get(); @endphp
                         <div class="mt-3 space-y-2">
@@ -130,13 +127,6 @@
                                 <input type="hidden" name="action" value="confirm">
                                 <button class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ $order->payment_method === 'cod' ? 'Mark as paid' : 'Confirm payment' }}</button>
                             </form>
-                            @if($order->payment_status === 'submitted')
-                                <form method="POST" action="{{ route('admin.orders.payment', $order) }}">
-                                    @csrf
-                                    <input type="hidden" name="action" value="reject">
-                                    <button class="rounded-lg border border-danger px-3 py-1.5 text-sm font-semibold text-danger hover:bg-danger-50">Reject slip</button>
-                                </form>
-                            @endif
                         </div>
                     @endif
                 </div>

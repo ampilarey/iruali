@@ -4,41 +4,22 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\PaymentTransaction;
-use App\Models\Setting;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
- * Payment methods: card payment through BML Connect, cash on delivery and bank transfer with slips.
+ * Payments are taken by card through BML Connect only.
  *
- * Statuses: unpaid → submitted (slip uploaded) → paid, or → rejected (customer uploads again).
- * Slips are stored on the private "local" disk and only streamed to the customer and admins.
+ * Statuses: unpaid → paid. Older orders may carry other methods (cash on delivery, bank transfer);
+ * admins can still mark those as paid.
  */
 class PaymentService
 {
-    public const DISK = 'local';
-
     /**
-     * Payment methods offered at checkout, card payment (BML) first once it is configured.
+     * Payment methods offered at checkout: card payment through BML only, once it is configured.
+     * Until then checkout is closed.
      */
     public function methods(): array
     {
-        $methods = [];
-
-        if ($this->bml()->enabled()) {
-            $methods['bml'] = __('Card payment (BML)');
-        }
-
-        if (Setting::get('payment_cod_enabled', '1') !== '0' || $methods === []) {
-            $methods['cod'] = __('Cash on delivery');
-        }
-
-        if ($this->bankTransferEnabled()) {
-            $methods['bank_transfer'] = __('Bank transfer');
-        }
-
-        return $methods;
+        return $this->bml()->enabled() ? ['bml' => __('Card payment (BML)')] : [];
     }
 
     public static function methodLabel(?string $method): string
@@ -135,54 +116,9 @@ class PaymentService
         return app(BmlConnect::class);
     }
 
-    public function bankTransferEnabled(): bool
-    {
-        return trim((string) Setting::get('bank_account_number')) !== '';
-    }
-
-    public function bankDetails(): array
-    {
-        return [
-            'bank' => Setting::get('bank_name'),
-            'name' => Setting::get('bank_account_name'),
-            'number' => Setting::get('bank_account_number'),
-        ];
-    }
-
-    public function canUploadSlip(Order $order): bool
-    {
-        return $order->payment_method === 'bank_transfer'
-            && in_array($order->payment_status, ['unpaid', 'rejected', 'submitted'], true)
-            && $order->status !== 'cancelled';
-    }
-
-    public function submitSlip(Order $order, UploadedFile $file): void
-    {
-        if ($order->payment_slip) {
-            Storage::disk(self::DISK)->delete($order->payment_slip);
-        }
-
-        $path = $file->storeAs(
-            'payment-slips',
-            $order->order_number.'-'.Str::random(8).'.'.$file->extension(),
-            self::DISK
-        );
-
-        $order->update(['payment_slip' => $path, 'payment_status' => 'submitted']);
-
-        app(OrderNotifier::class)->slipSubmitted($order);
-    }
-
     public function confirm(Order $order): void
     {
         $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
-
-        app(OrderNotifier::class)->paymentUpdated($order);
-    }
-
-    public function reject(Order $order): void
-    {
-        $order->update(['payment_status' => 'rejected', 'paid_at' => null]);
 
         app(OrderNotifier::class)->paymentUpdated($order);
     }
@@ -191,8 +127,6 @@ class PaymentService
     {
         return match ($status) {
             'paid' => __('Paid'),
-            'submitted' => __('Slip submitted'),
-            'rejected' => __('Slip rejected'),
             default => __('Unpaid'),
         };
     }
@@ -201,8 +135,6 @@ class PaymentService
     {
         return match ($status) {
             'paid' => 'bg-green-100 text-green-800',
-            'submitted' => 'bg-sun-soft text-sun-ink',
-            'rejected' => 'bg-red-100 text-red-800',
             default => 'bg-gray-100 text-gray-700',
         };
     }

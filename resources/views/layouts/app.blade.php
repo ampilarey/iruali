@@ -286,7 +286,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="bank" /></span>
-                <span><span class="block font-semibold">{{ __('Pay your way') }}</span><span class="text-gray-500 text-xs">{{ __('Card, cash on delivery or bank transfer') }}</span></span>
+                <span><span class="block font-semibold">{{ __('Secure card payment') }}</span><span class="text-gray-500 text-xs">{{ __('Visa, Mastercard, Amex and Maestro via Bank of Maldives') }}</span></span>
             </div>
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 shrink-0 rounded-full bg-primary-50 text-primary flex items-center justify-center"><x-icon name="gift" /></span>

@@ -47,7 +47,6 @@
 <h2>5. Refund process</h2>
 <ul>
     <li><strong>Card payments</strong> are refunded to the original card through Bank of Maldives (BML). Processing time is usually <strong>5–7 business days</strong>, depending on your bank.</li>
-    <li><strong>Bank transfer and cash on delivery</strong> are refunded by bank transfer to an account in your name within 5–7 business days of approval.</li>
     <li>We do not refund card payments in cash or to a different card.</li>
     <li>You receive a confirmation when the refund has been started. Loyalty points and vouchers used on a cancelled order are returned to your account.</li>
 </ul>

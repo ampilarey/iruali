@@ -28,7 +28,7 @@ one checkout; each shop handles its own part.
 - Delivery fees, vouchers and loyalty-point discounts are iruali's and don't change what a shop earns.
 
 Earnings states: **pending** (not delivered or not paid yet) → **ready** (part delivered *and* the order is
-paid: card confirmed by BML, bank transfer confirmed, or cash on delivery marked paid) → **paid out**.
+paid: card payment confirmed by BML; older non-card orders can be marked paid by an admin) → **paid out**.
 Cancelled parts earn nothing.
 
 ## Payouts

@@ -89,7 +89,8 @@ class OrderController extends BaseController
             'shipping_zip' => 'required|string|max:20',
             'shipping_country' => 'required|string|max:100',
             'billing_address' => 'nullable|array',
-            'payment_method' => 'required|in:credit_card,paypal,bank_transfer,cash_on_delivery',
+            // Card payment through BML is the only method; the customer pays from the order page.
+            'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -105,6 +106,7 @@ class OrderController extends BaseController
             'shipping_state' => $request->shipping_state,
             'shipping_zip' => $request->shipping_zip,
             'shipping_country' => $request->shipping_country,
+            'payment_method' => $request->payment_method,
         ];
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);

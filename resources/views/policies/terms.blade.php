@@ -35,7 +35,7 @@
 <h2>3. Delivery policy</h2>
 <ul>
     <li><strong>Delivery area:</strong> inhabited islands in the Maldives. We do not deliver outside the Maldives.</li>
-    <li><strong>Delivery fee:</strong> {{ Money::format((float) Setting::get('delivery_fee_greater_male')) }} in Greater Malé and {{ Money::format((float) Setting::get('delivery_fee_islands')) }} to other islands@if((float) Setting::get('free_delivery_over') > 0), free on orders of {{ Money::format((float) Setting::get('free_delivery_over')) }} or more@endif. The fee is shown at checkout before payment.</li>
+    <li><strong>Delivery fee:</strong> {{ Money::format((float) Setting::get('delivery_fee_greater_male')) }} in Greater Malé and {{ Money::format((float) Setting::get('delivery_fee_islands')) }} to other islands{{ (float) Setting::get('free_delivery_over') > 0 ? ', free on orders of '.Money::format((float) Setting::get('free_delivery_over')).' or more' : '' }}. The fee is shown at checkout before payment.</li>
     <li><strong>Estimated delivery time:</strong> usually 1–3 working days in Greater Malé and 3–10 working days to other islands, depending on boat and flight schedules.</li>
     <li>We may decline or cancel an order if delivery is not possible because of weather, distance or other operational reasons. In that case you receive a full refund.</li>
 </ul>

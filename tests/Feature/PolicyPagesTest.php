@@ -54,6 +54,17 @@ class PolicyPagesTest extends TestCase
         $this->get(route('policies.delivery'))->assertSee('within the Maldives');
     }
 
+    public function test_policy_pages_show_no_raw_template_code(): void
+    {
+        \App\Models\Setting::set(['free_delivery_over' => 1000]);
+        $this->get(route('policies.terms'))->assertSee('free on orders of MVR 1,000.00 or more')->assertSee('Card payment is the only payment method');
+
+        foreach (['terms', 'refunds', 'delivery', 'privacy', 'security', 'about'] as $page) {
+            $html = $this->get(route('policies.'.$page))->assertOk()->getContent();
+            $this->assertDoesNotMatchRegularExpression('/@(if|endif|foreach|endforeach|else)\b/', $html, "Raw Blade code on the {$page} page");
+        }
+    }
+
     public function test_checkout_shows_card_marks_currency_country_and_requires_accepting_the_policies(): void
     {
         $this->enableBml();

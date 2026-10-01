@@ -39,6 +39,11 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops'));
+        // Live campaigns: the first hero one replaces the default hero, strip ones line up under it
+        $campaigns = \App\Models\Campaign::live()->ordered()->get();
+        $heroCampaign = $campaigns->firstWhere('placement', 'home_hero');
+        $stripCampaigns = $campaigns->where('placement', 'home_strip')->values();
+
+        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops', 'heroCampaign', 'stripCampaigns'));
     }
 }

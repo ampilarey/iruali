@@ -58,4 +58,12 @@ class Cart extends Model
     {
         return $query->where('session_id', $sessionId);
     }
+
+    /**
+     * Abandoned-cart reminder emails already sent for this cart.
+     */
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(CartReminder::class);
+    }
 }

@@ -42,6 +42,7 @@ class StoreOrderRequest extends FormRequest
             'island_id' => 'nullable|integer|exists:islands,id',
             'save_address' => 'nullable|boolean',
             'address_label' => 'nullable|string|max:50',
+            'use_wallet' => 'nullable|boolean',
         ];
     }
 

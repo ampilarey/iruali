@@ -51,6 +51,7 @@ return [
             'admin.errors', 'admin.errors.show',
             'admin.audit',
             'admin.disputes', 'admin.disputes.show',
+            'admin.rewards', 'admin.gift-cards', 'admin.gift-cards.*',
         ],
     ],
 

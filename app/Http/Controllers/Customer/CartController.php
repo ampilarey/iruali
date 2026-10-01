@@ -87,6 +87,7 @@ class CartController extends Controller
         );
 
         NotificationService::addedToCart($product->name);
+        \App\Services\FunnelService::record('add_to_cart', $product->id);
 
         return redirect()->route('cart');
     }

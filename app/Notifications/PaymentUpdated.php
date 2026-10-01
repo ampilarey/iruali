@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\Channels\WebPushChannel;
 use App\Support\Money;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,7 +24,12 @@ class PaymentUpdated extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return $notifiable instanceof User ? $notifiable->notificationChannels('order_updates') : ['mail'];
+        $channels = $notifiable instanceof User ? $notifiable->notificationChannels('order_updates') : ['mail'];
+        if (WebPushChannel::configured() && $notifiable instanceof User) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -42,5 +48,19 @@ class PaymentUpdated extends Notification implements ShouldQueue
             'amount' => Money::format($this->order->total_amount),
             'number' => $this->order->order_number,
         ]);
+    }
+
+    /**
+     * Browser notification.
+     */
+    public function toWebPush(object $notifiable): array
+    {
+        return [
+            'title' => __('Payment received for order :number', ['number' => $this->order->order_number]),
+            'body' => __('We have received your payment of :amount. Thank you.', ['amount' => Money::format($this->order->total_amount)]),
+            'url' => route('orders.show', $this->order),
+            'icon' => asset('images/icons/icon-192.png'),
+            'tag' => 'order-'.$this->order->id,
+        ];
     }
 }

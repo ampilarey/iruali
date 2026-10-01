@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\LocalizationService;
+use App\Support\LocaleUrl;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,6 +19,11 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
+        // /dv/... is only for storefront pages (see LocalePrefix and LocaleUrl); anything else under it is not a page
+        if (LocalePrefix::active($request) && ! LocaleUrl::isLocalized($request->route())) {
+            abort(404);
+        }
+
         // Get locale from various sources
         $locale = $this->getLocale($request);
 
@@ -38,7 +44,12 @@ class SetLocale
      */
     private function getLocale(Request $request): string
     {
-        // Priority order: URL parameter > Session (user's choice) > Header > Default
+        // Priority order: /dv prefix > URL parameter > Session (user's choice) > Header > Default
+
+        // 0. The language in the URL (/dv/...) wins over everything
+        if (LocalePrefix::active($request)) {
+            return LocalePrefix::PREFIX;
+        }
 
         // 1. Check URL parameter (e.g., ?locale=en)
         if ($request->has('locale')) {

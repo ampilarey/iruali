@@ -38,7 +38,14 @@
 <meta property="og:image:height" content="630">
 @endif
 <meta property="og:site_name" content="{{ config('app.name') }}">
-<meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+<meta property="og:locale" content="{{ app()->getLocale() === 'dv' ? 'dv_MV' : 'en_US' }}">
+@php $alternates = \App\Support\LocaleUrl::alternates(); @endphp
+@if($alternates)
+<meta property="og:locale:alternate" content="{{ app()->getLocale() === 'dv' ? 'en_US' : 'dv_MV' }}">
+@foreach($alternates as $hreflang => $href)
+<link rel="alternate" hreflang="{{ $hreflang }}" href="{{ $href }}">
+@endforeach
+@endif
 
 {{-- Twitter Card Meta Tags --}}
 <meta name="twitter:card" content="summary_large_image">
@@ -58,6 +65,12 @@
         {!! json_encode($seo['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
     </script>
 @endif
+{{-- Further blocks for the page (breadcrumbs on products, Organization on the home page) --}}
+@foreach($seo['extra_schema'] ?? [] as $extra)
+    <script type="application/ld+json">
+        {!! json_encode($extra, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
+    </script>
+@endforeach
 
 {{-- Additional Meta Tags for Products --}}
 @if(isset($seo['og_type']) && $seo['og_type'] === 'product')

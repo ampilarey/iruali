@@ -92,12 +92,15 @@ class User extends Authenticatable implements HasLocalePreference
         'seller_approved' => 'boolean',
         'two_factor_enabled' => 'boolean',
         'referral_rewarded_at' => 'datetime',
+        'marketing_opt_out_at' => 'datetime',
+        'points_expiry_reminded_at' => 'datetime',
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
         'ships_to_islands' => 'boolean',
         'onboarding_completed_at' => 'datetime',
         'notification_preferences' => 'array',
+        'wallet_balance' => 'decimal:2',
     ];
 
     /**
@@ -525,5 +528,34 @@ class User extends Authenticatable implements HasLocalePreference
     public function defaultAddress(): ?Address
     {
         return $this->addresses()->where('is_default', true)->first() ?? $this->addresses()->orderBy('id')->first();
+    }
+
+    /**
+     * Browsers that asked for push notifications about this user's orders.
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    /**
+     * Every loyalty-point movement; loyalty_points is their running sum.
+     */
+    public function pointsTransactions(): HasMany
+    {
+        return $this->hasMany(PointsTransaction::class);
+    }
+
+    /**
+     * Store credit movements; wallet_balance is their running sum.
+     */
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function giftCardsBought(): HasMany
+    {
+        return $this->hasMany(GiftCard::class, 'purchaser_id');
     }
 }

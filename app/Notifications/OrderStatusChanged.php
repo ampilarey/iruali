@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
@@ -29,7 +30,12 @@ class OrderStatusChanged extends Notification implements ShouldQueue
         // Shipping and delivery news follow the delivery preference; everything else the order one
         $type = in_array($this->order->status, ['shipped', 'out_for_delivery', 'delivered'], true) ? 'delivery_updates' : 'order_updates';
 
-        return $notifiable->notificationChannels($type);
+        $channels = $notifiable->notificationChannels($type);
+        if (WebPushChannel::configured()) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -89,5 +95,27 @@ class OrderStatusChanged extends Notification implements ShouldQueue
     protected function trackedParts(): \Illuminate\Support\Collection
     {
         return $this->order->sellerOrders()->with('seller')->get()->filter(fn ($p) => $p->trackingSummary() !== '')->values();
+    }
+
+    /**
+     * Browser notification (same wording as the email subject).
+     */
+    public function toWebPush(object $notifiable): array
+    {
+        $number = $this->order->order_number;
+
+        return [
+            'title' => match ($this->order->status) {
+                'processing' => __('Order :number is being prepared', ['number' => $number]),
+                'shipped' => __('Order :number is on its way', ['number' => $number]),
+                'delivered' => __('Order :number has been delivered', ['number' => $number]),
+                'cancelled' => __('Order :number has been cancelled', ['number' => $number]),
+                default => __('Update on order :number', ['number' => $number]),
+            },
+            'body' => __('Tap to see your order.'),
+            'url' => route('orders.show', $this->order),
+            'icon' => asset('images/icons/icon-192.png'),
+            'tag' => 'order-'.$this->order->id,
+        ];
     }
 }

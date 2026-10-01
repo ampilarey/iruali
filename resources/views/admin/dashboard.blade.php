@@ -236,6 +236,17 @@
                         Manage Vouchers
                     </a>
                     @endif
+                    @if($can('admin.campaigns.index'))
+                    <a href="{{ route('admin.campaigns.index') }}" class="bg-fuchsia-700 hover:bg-fuchsia-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Campaigns
+                    </a>
+                    <a href="{{ route('admin.rewards') }}" class="bg-lime-700 hover:bg-lime-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Rewards report
+                    </a>
+                    <a href="{{ route('admin.gift-cards') }}" class="bg-cyan-700 hover:bg-cyan-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Gift cards
+                    </a>
+                    @endif
                     @if($can('admin.analytics'))
                     <a href="{{ route('admin.analytics') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Analytics

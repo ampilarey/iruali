@@ -42,7 +42,9 @@ class AuthController extends Controller
      */
     public function register(RegisterUserRequest $request)
     {
-        $referrer = $request->filled('referral_code') ? User::where('referral_code', $request->referral_code)->first() : null;
+        // A typed code wins; otherwise the code remembered from a shared /r/{code} link
+        $referralCode = $request->filled('referral_code') ? $request->referral_code : strtoupper((string) $request->cookie(RewardsController::COOKIE, ''));
+        $referrer = $referralCode !== '' ? User::where('referral_code', $referralCode)->first() : null;
 
         do {
             $code = strtoupper(Str::random(8));

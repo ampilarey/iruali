@@ -34,6 +34,7 @@ class PaymentService
         // retired method name, which is shown as-is rather than mislabelled.
         return match ($method) {
             'bml', null, '' => __('Card payment (BML)'),
+            'wallet' => __('Wallet (store credit)'),
             default => ucfirst(str_replace('_', ' ', $method)),
         };
     }
@@ -57,7 +58,7 @@ class PaymentService
         $transaction = $order->paymentTransactions()->create([
             'gateway' => 'bml',
             'local_id' => $localId,
-            'amount' => BmlConnect::toLaari($order->total_amount),
+            'amount' => BmlConnect::toLaari($order->cardAmount()), // the total less whatever the wallet paid
             'currency' => 'MVR',
         ]);
 
@@ -177,8 +178,10 @@ class PaymentService
     public function confirm(Order $order): void
     {
         $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
+        FunnelService::orderPaid($order);
 
         app(OrderService::class)->awardRewards($order->fresh());
+        app(GiftCardService::class)->issueForOrder($order); // a paid gift-card order sends the card
         app(OrderNotifier::class)->paymentUpdated($order);
     }
 

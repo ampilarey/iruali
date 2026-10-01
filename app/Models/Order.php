@@ -41,6 +41,7 @@ class Order extends Model
         'notes',
         'tracking_number',
         'guest_email', 'guest_name', 'guest_token',
+        'wallet_amount', 'wallet_refunded_at',
     ];
 
     protected $casts = [
@@ -53,6 +54,8 @@ class Order extends Model
         'shipping_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'wallet_amount' => 'decimal:2',
+        'wallet_refunded_at' => 'datetime',
         'shipping_address' => 'array',
         'billing_address' => 'array',
     ];
@@ -202,5 +205,25 @@ class Order extends Model
     public function customerReceiptUrl(): string
     {
         return $this->isGuest() && $this->guest_token ? $this->guestUrl('receipt') : route('orders.receipt', $this);
+    }
+
+    // ---- Wallet and gift cards ------------------------------------------------------------
+
+    /**
+     * What still has to be paid by card after the wallet's share.
+     */
+    public function cardAmount(): float
+    {
+        return round(max(0, (float) $this->total_amount - (float) $this->wallet_amount), 2);
+    }
+
+    public function giftCard(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(GiftCard::class);
+    }
+
+    public function isGiftCardOrder(): bool
+    {
+        return $this->relationLoaded('giftCard') ? $this->giftCard !== null : $this->giftCard()->exists();
     }
 }

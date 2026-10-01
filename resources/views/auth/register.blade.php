@@ -50,7 +50,7 @@
                     <label for="referral_code" class="sr-only">{{ __('Referral code (optional)') }}</label>
                     <input id="referral_code" name="referral_code" type="text"
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm @error('referral_code') border-red-500 @enderror"
-                           placeholder="{{ __('Referral code (optional)') }}" value="{{ old('referral_code') }}">
+                           placeholder="{{ __('Referral code (optional)') }}" value="{{ old('referral_code', request()->cookie(\App\Http\Controllers\Customer\RewardsController::COOKIE)) }}">
                     @error('referral_code')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

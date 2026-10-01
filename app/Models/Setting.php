@@ -49,6 +49,21 @@ class Setting extends Model
         'payout_day' => 'Sunday',
         // Checkout without an account (orders carry the guest's email and a token for signed links)
         'guest_checkout_enabled' => 0,
+        // Site analytics: none, plausible (needs the domain) or ga4 (needs the G-XXXX measurement id)
+        'analytics_provider' => 'none',
+        'analytics_id' => '',
+        'analytics_domain' => '',
+        // Social profiles (footer / Organization structured data) and the product feed secret
+        'social_facebook' => '',
+        'social_instagram' => '',
+        'social_tiktok' => '',
+        'social_x' => '',
+        'feed_token' => '',
+        // Abandoned-cart emails (3 h and 48 h nudges); the second nudge carries a voucher when the percent is > 0
+        'abandoned_cart_emails_enabled' => 1,
+        'abandoned_cart_voucher_percent' => 0,
+        // Loyalty points expire this many months after they were earned (0 = never)
+        'points_expire_months' => 0,
     ];
 
     protected $fillable = ['key', 'value'];

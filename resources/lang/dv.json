@@ -809,5 +809,21 @@
     "One email each morning listing products at or below their low-stock level. Not sent when nothing is low.": "ސްޓޮކް މަދު މިންވަރުގައި ނުވަތަ އެއަށްވުރެ ދަށުގައި ހުރި ތަކެތީގެ ލިސްޓާއެކު ކޮންމެ ހެނދުނަކު އެއް އީމެއިލް. މަދުވެފައި އެއްޗެއް ނެތްނަމަ ނުފޮނުވާނެ.",
     "Emails from iruali": "އިރުއަލިން އަންނަ އީމެއިލް",
     "Sent to :email. Turn off the ones you do not want; order details are always available in the Seller Centre.": ":email އަށް ފޮނުވޭ. ބޭނުން ނޫން އީމެއިލް ނިއްވާލާ؛ އޯޑަރުގެ ތަފްސީލު އަބަދުވެސް ސެލަރ ސެންޓަރުން ފެންނާނެ.",
-    "Save notification settings": "ނޮޓިފިކޭޝަން ސެޓިންގްސް ރައްކާކުރޭ"
+    "Save notification settings": "ނޮޓިފިކޭޝަން ސެޓިންގްސް ރައްކާކުރޭ",
+    "Help": "އެހީ",
+    "Listing a product well": "ޕްރޮޑަކްޓެއް ރަނގަޅަށް ލިސްޓްކުރުން",
+    "Photos, names in both languages, pricing and stock.": "ފޮޓޯ، ދެ ބަހުން ނަން، އަގާއި ސްޓޮކް.",
+    "Packing and shipping an order": "އޯޑަރެއް ޕެކްކޮށް ފޮނުވުން",
+    "Order statuses, deadlines and island deliveries.": "އޯޑަރު ސްޓޭޓަސް، މުއްދަތުތައް އަދި ރަށްރަށަށް ޑެލިވަރީ.",
+    "Handling a return": "ރިޓާނެއް ބެލެހެއްޓުން",
+    "The return flow, timelines and what you are charged.": "ރިޓާން ކުރިއަށްދާ ގޮތް، މުއްދަތުތައް އަދި ތިޔައިން ކެނޑޭ އެއްޗެއް.",
+    "Commission and payouts": "ކޮމިޝަނާއި ޕޭއައުޓް",
+    "How commission is worked out, when you are paid, bank files and adjustments.": "ކޮމިޝަން ހިސާބުކުރާ ގޮތް، ފައިސާ ލިބޭ އިރު، ބޭންކް ފައިލާއި އެޖަސްޓްމަންޓް.",
+    "Getting your shop approved": "ފިހާރަ އެޕްރޫވްކުރުވުން",
+    "The checklist every shop completes before its products go live.": "ޕްރޮޑަކްޓްތައް ލައިވްވުމުގެ ކުރިން ކޮންމެ ފިހާރައަކުން ފުރިހަމަކުރާ ޗެކްލިސްޓް.",
+    "Short guides on running your shop on iruali. Everything here describes how the Seller Centre actually works, in English and Dhivehi.": "އިރުއަލިގައި ފިހާރަ ހިންގުމާ ބެހޭ ކުރު ގައިޑުތައް. މިތަނުގައިވަނީ ސެލަރ ސެންޓަރު ހަގީގަތުގައި މަސައްކަތްކުރާ ގޮތް، އިނގިރޭސި އަދި ދިވެހިން.",
+    "Still stuck? Email or WhatsApp iruali using the contact details in the footer, and we will help.": "އަދިވެސް އޮޅުން އަރާނަމަ، ފުޓަރުގައިވާ ކޮންޓެކްޓް މައުލޫމާތުން އިރުއަލިއަށް އީމެއިލް ނުވަތަ ވަޓްސްއެޕް ކުރައްވާ، އަހަރެމެން އެހީވާނަން.",
+    "every week": "ކޮންމެ ހަފްތާއަކު",
+    "every two weeks": "ކޮންމެ ދެ ހަފްތާއަކުން",
+    "every month": "ކޮންމެ މަހަކު"
 }

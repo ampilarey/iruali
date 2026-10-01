@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\PayoutBatchController;
 use App\Http\Controllers\Admin\PayoutController;
+use App\Http\Controllers\Seller\HelpController;
 use App\Http\Controllers\Seller\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::put('/settings/bank', [SettingsController::class, 'updateBank'])->name('settings.bank.update')->middleware('throttle:10,1');
     Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
     Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
+    Route::get('/help', [HelpController::class, 'index'])->name('help');
+    Route::get('/help/{guide}', [HelpController::class, 'show'])->name('help.show');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('Help centre'))
+
 @php
     use App\Models\Setting;
     use App\Support\Money;

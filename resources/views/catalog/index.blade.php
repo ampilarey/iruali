@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', $title)
+
 @php
     $query = request()->query();
     $url = fn (array $changes) => request()->url().'?'.http_build_query(array_filter(array_merge(\Illuminate\Support\Arr::except($query, 'page'), $changes), fn ($v) => $v !== null && $v !== ''));

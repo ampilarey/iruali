@@ -91,11 +91,11 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        // User profile page
-        if ($routeName === 'users.show' && isset($routeParameters['user'])) {
-            $user = $routeParameters['user'];
-            if ($user instanceof User) {
-                return SeoService::forUser($user);
+        // Seller shop page
+        if ($routeName === 'sellers.show' && isset($routeParameters['seller'])) {
+            $seller = $routeParameters['seller'];
+            if ($seller instanceof User) {
+                return SeoService::forUser($seller);
             }
         }
 

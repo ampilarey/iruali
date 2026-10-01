@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
@@ -40,10 +41,15 @@ class OrderService
             if ($product->seller_id && $product->seller?->is_seller && ! $product->seller->isSeller()) {
                 return ['success' => false, 'message' => __('":name" is no longer available: the shop has closed.', ['name' => $product->name['en'] ?? $product->name])];
             }
-            if ($product->stock_quantity < $cartItem->quantity) {
+            // A product sold in variants must be bought as one of them; stock is then the variant's
+            if ($product->has_variants && (! $cartItem->variant || ! $cartItem->variant->is_active)) {
+                return ['success' => false, 'message' => __('":name" needs an option (size, colour...) chosen. Please add it to your cart again.', ['name' => $product->name['en'] ?? $product->name])];
+            }
+            $available = $cartItem->availableStock();
+            if ($available < $cartItem->quantity) {
                 return [
                     'success' => false,
-                    'message' => 'Sorry, not enough stock for "'.($product->name['en'] ?? $product->name).'". Available: '.$product->stock_quantity.', Requested: '.$cartItem->quantity,
+                    'message' => 'Sorry, not enough stock for "'.($product->name['en'] ?? $product->name).($cartItem->variant ? ' ('.$cartItem->variant->displayName().')' : '').'". Available: '.$available.', Requested: '.$cartItem->quantity,
                 ];
             }
         }
@@ -84,13 +90,12 @@ class OrderService
             // One part per shop, with its own fulfilment status and the shop's earnings
             app(FulfilmentService::class)->createParts($order);
 
-            // Take the stock atomically: two checkouts racing for the last unit can't both win
+            // Take the stock atomically: two checkouts racing for the last unit can't both win.
+            // A line with a variant takes it from the variant row (the product total follows).
             foreach ($cart->items as $cartItem) {
-                $taken = Product::whereKey($cartItem->product_id)
-                    ->where('stock_quantity', '>=', $cartItem->quantity)
-                    ->decrement('stock_quantity', $cartItem->quantity);
+                $taken = $this->takeStock($cartItem->product_id, $cartItem->product_variant_id, $cartItem->quantity);
                 if ($taken === 0) {
-                    throw new \RuntimeException(__('Sorry, ":name" just sold out.', ['name' => $cartItem->product->name['en'] ?? $cartItem->product->name]));
+                    throw new \RuntimeException(__('Sorry, ":name" just sold out.', ['name' => ($cartItem->product->name['en'] ?? $cartItem->product->name).($cartItem->variant ? ' ('.$cartItem->variant->displayName().')' : '')]));
                 }
             }
 
@@ -178,17 +183,58 @@ class OrderService
     }
 
     /**
-     * Create order items from cart items
+     * Create order items from cart items (with the variant's name and SKU as they are now)
      */
     protected function createOrderItems(Order $order, Cart $cart): void
     {
         foreach ($cart->items as $cartItem) {
+            $variant = $cartItem->variant;
             $order->items()->create([
                 'product_id' => $cartItem->product_id,
+                'product_variant_id' => $variant?->id,
+                'variant_name' => $variant?->displayName(),
+                'variant_sku' => $variant?->sku,
                 'quantity' => $cartItem->quantity,
-                'price' => $cartItem->product->final_price,
+                'price' => $cartItem->unit_price,
             ]);
         }
+    }
+
+    /**
+     * Conditionally take units from a variant row, or the product row when the line has no variant.
+     * Returns the number of rows updated (0 when there was not enough stock).
+     */
+    protected function takeStock(int $productId, ?int $variantId, int $quantity): int
+    {
+        if ($variantId) {
+            $taken = ProductVariant::whereKey($variantId)->where('product_id', $productId)
+                ->where('stock_quantity', '>=', $quantity)
+                ->decrement('stock_quantity', $quantity);
+            if ($taken > 0) {
+                Product::find($productId)?->syncStockFromVariants();
+            }
+
+            return $taken;
+        }
+
+        return Product::whereKey($productId)
+            ->where('stock_quantity', '>=', $quantity)
+            ->decrement('stock_quantity', $quantity);
+    }
+
+    /**
+     * Put units back on the row they were taken from (a cancelled order, an approved return).
+     */
+    public function restock(Product $product, ?int $variantId, int $quantity): void
+    {
+        if ($variantId && $product->variants()->whereKey($variantId)->exists()) {
+            ProductVariant::whereKey($variantId)->increment('stock_quantity', $quantity);
+            $product->syncStockFromVariants();
+
+            return;
+        }
+
+        $product->increment('stock_quantity', $quantity);
     }
 
     /**
@@ -362,7 +408,9 @@ class OrderService
     protected function reverseOrder(Order $order): void
     {
         foreach ($order->items()->with('product')->get() as $item) {
-            $item->product?->increment('stock_quantity', $item->quantity);
+            if ($item->product) {
+                $this->restock($item->product, $item->product_variant_id, $item->quantity);
+            }
         }
 
         $user = $order->user;

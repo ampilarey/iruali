@@ -11,7 +11,7 @@
             <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ $returnStatus[$return->status] ?? $return->status }}</span>
         </div>
         <p class="text-gray-600">{{ $return->reasonLabel() }}:
-            {{ $return->items->map(fn ($l) => ($l->orderItem?->product?->name ?? __('Product')).' × '.$l->quantity)->join(', ') }}</p>
+            {{ $return->items->map(fn ($l) => ($l->orderItem?->displayName() ?? __('Product')).' × '.$l->quantity)->join(', ') }}</p>
         @if($return->refund_amount !== null && $return->status !== 'rejected')
             <p class="text-gray-700">{{ __('Refund') }}: <span class="font-semibold" dir="ltr">{{ \App\Support\Money::format($return->refund_amount) }}</span>
                 @if($return->refund_reference) · {{ __('Reference') }}: <span dir="ltr">{{ $return->refund_reference }}</span>@endif</p>
@@ -35,7 +35,7 @@
                 <legend class="text-sm font-medium text-gray-700">{{ __('Which items?') }}</legend>
                 @foreach($returnService->returnableItems($part) as $row)
                     <label class="flex items-center justify-between gap-3 text-sm">
-                        <span class="text-gray-800">{{ $row['item']->product?->name ?? __('Product') }}</span>
+                        <span class="text-gray-800">{{ $row['item']->displayName() }}</span>
                         <select name="quantities[{{ $row['item']->id }}]" class="rounded-lg border-gray-300 text-sm" aria-label="{{ __('Quantity to return') }}">
                             @for($q = 0; $q <= $row['max']; $q++)
                                 <option value="{{ $q }}" @selected((int) old('quantities.'.$row['item']->id, $row['max'] === 1 ? 1 : 0) === $q)>{{ $q }}</option>

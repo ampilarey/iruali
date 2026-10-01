@@ -718,5 +718,6 @@
     "This combination is not available.": "މި ކޮމްބިނޭޝަން ލިބޭކަށް ނެތް.",
     "Any option": "ކޮންމެ އޮޕްޝަނެއް",
     "From": "ފެށިގެން",
-    "Choose options": "އޮޕްޝަން ހިޔާރުކުރޭ"
+    "Choose options": "އޮޕްޝަން ހިޔާރުކުރޭ",
+    "\":name\" needs an option (size, colour...) chosen. Please add it to your cart again.": "\":name\" އަށް އޮޕްޝަނެއް (ސައިޒު، ކުލަ...) ހިޔާރުކުރަން ޖެހޭ. އަލުން ކާޓަށް ލައްވާ."
 }

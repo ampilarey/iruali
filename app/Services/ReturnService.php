@@ -153,7 +153,9 @@ class ReturnService
 
             if ($restock) {
                 foreach ($request->items()->with('orderItem.product')->get() as $line) {
-                    $line->orderItem?->product?->increment('stock_quantity', $line->quantity);
+                    if ($line->orderItem?->product) {
+                        app(OrderService::class)->restock($line->orderItem->product, $line->orderItem->product_variant_id, $line->quantity);
+                    }
                 }
             }
 

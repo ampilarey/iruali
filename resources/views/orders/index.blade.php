@@ -46,7 +46,7 @@
                             <div class="space-y-2">
                                 @foreach($order->items->take(3) as $item)
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">{{ $item->product->name }} x{{ $item->quantity }}</span>
+                                    <span class="text-gray-600">{{ $item->displayName() }} x{{ $item->quantity }}</span>
                                     <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price * $item->quantity) }}</span>
                                 </div>
                                 @endforeach

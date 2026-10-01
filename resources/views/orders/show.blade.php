@@ -54,6 +54,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <h3 class="font-semibold text-gray-900">{{ $item->product?->name ?? __('Product') }}</h3>
+                                    @if($item->variant_name)<p class="text-sm text-gray-600">{{ $item->variant_name }}@if($item->variant_sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant_sku }})</span>@endif</p>@endif
                                     <p class="text-sm text-gray-600">{{ __('Quantity') }}: {{ $item->quantity }}</p>
                                 </div>
                                 <div class="text-end">

@@ -24,7 +24,7 @@
                     <tbody class="divide-y divide-gray-100">
                         @foreach($return->items as $line)
                             <tr>
-                                <td class="px-4 py-2">{{ $line->orderItem?->product?->name ?? 'Product' }} <span class="text-xs text-gray-500">(ordered {{ $line->orderItem?->quantity }})</span></td>
+                                <td class="px-4 py-2">{{ $line->orderItem?->displayName() ?? 'Product' }} <span class="text-xs text-gray-500">(ordered {{ $line->orderItem?->quantity }})</span></td>
                                 <td class="px-4 py-2 text-right">{{ $line->quantity }}</td>
                                 <td class="px-4 py-2 text-right">{{ Money::format($line->orderItem?->price) }}</td>
                                 <td class="px-4 py-2 text-right font-semibold">{{ Money::format($line->orderItem?->price * $line->quantity) }}</td>

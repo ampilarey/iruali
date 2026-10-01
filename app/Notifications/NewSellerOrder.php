@@ -28,7 +28,7 @@ class NewSellerOrder extends Notification
             ->line(__('You have a new order. Please pack these items:'));
 
         foreach ($this->items as $item) {
-            $mail->line('• '.($item->product->name ?? __('Product')).' × '.$item->quantity.' — '.Money::format($item->price * $item->quantity));
+            $mail->line('• '.$item->displayName().' × '.$item->quantity.' — '.Money::format($item->price * $item->quantity));
         }
 
         return $mail->line(__('Deliver to: :place', ['place' => trim($this->order->shipping_city.', '.$this->order->shipping_state, ', ')]))

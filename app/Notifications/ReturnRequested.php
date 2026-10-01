@@ -31,7 +31,7 @@ class ReturnRequested extends Notification
             ->line(__('Reason: :reason', ['reason' => $request->reasonLabel()]));
 
         foreach ($request->items()->with('orderItem.product')->get() as $line) {
-            $mail->line('• '.($line->orderItem?->product?->name ?? __('Product')).' × '.$line->quantity);
+            $mail->line('• '.($line->orderItem?->displayName() ?? __('Product')).' × '.$line->quantity);
         }
 
         $mail->line(__('Value of the items: :amount', ['amount' => Money::format($request->items_value)]));

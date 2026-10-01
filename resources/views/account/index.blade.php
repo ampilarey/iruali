@@ -54,6 +54,24 @@
                     </dl>
                 </section>
 
+                @if(\App\Notifications\Channels\WebPushChannel::configured())
+                    <section id="notifications" class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 scroll-mt-36" data-push data-state="off"
+                             data-key="{{ config('webpush.public_key') }}" data-store="{{ route('account.push.store') }}" data-destroy="{{ route('account.push.destroy') }}"
+                             data-labels="{{ json_encode([
+                                 'on' => __('Get order updates on this device'),
+                                 'off' => __('Turn off updates on this device'),
+                                 'statusOn' => __('On. You will get a notification when an order is paid, sent or delivered.'),
+                                 'statusOff' => __('Off. Turn on to be told when your order is paid, sent or delivered.'),
+                                 'unsupported' => __('Your browser does not support notifications.'),
+                                 'denied' => __('Notifications are blocked for iruali in your browser settings.'),
+                                 'failed' => __('Could not change notifications. Please try again.'),
+                             ]) }}">
+                        <h2 class="text-xl font-semibold text-dark">{{ __('Notifications') }}</h2>
+                        <p class="mt-1 text-sm text-gray-600" data-push-status>{{ __('Off. Turn on to be told when your order is paid, sent or delivered.') }}</p>
+                        <button type="button" data-push-toggle class="mt-4 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Get order updates on this device') }}</button>
+                    </section>
+                @endif
+
                 <section id="security" class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 scroll-mt-36 space-y-6">
                     <h2 class="text-xl font-semibold text-dark">{{ __('Security') }}</h2>
 

@@ -21,9 +21,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
-    // Locale switching
-    Route::post('/locale/switch', [LocaleController::class, 'switch'])->name('locale.switch');
+    // Locale switching: the language links (GET) and the old form (POST) both land here
+    Route::match(['get', 'post'], '/locale/switch', [LocaleController::class, 'switch'])->name('locale.switch');
 
+    Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+    // Uploaded files: cPanel/LiteSpeed won't follow a docroot symlink, so the app serves them
+    Route::get('/storage/{path}', [\App\Http\Controllers\StorageController::class, 'show'])->where('path', '.+')->name('storage.file');
+    Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'sitemap'])->name('sitemap');
+    Route::redirect('/refund', '/refund-policy', 301);
+    Route::redirect('/privacy', '/privacy-policy', 301);
+    Route::redirect('/contact', '/about', 301);
+
+    // Storefront pages exist in both languages: English at these URLs, Dhivehi under /dv/...
+    // ('localized' marks them for LocalePrefix / LocaleUrl; route() adds the prefix in Dhivehi).
+    Route::group(['localized' => true], function () {
     // Public routes
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/shop', [ShopController::class, 'index'])->name('shop');
@@ -36,10 +47,6 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/brands/{brand}', [ShopController::class, 'brand'])->name('brands.show')->where('brand', '.+');
     Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
     Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
-    Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
-    // Uploaded files: cPanel/LiteSpeed won't follow a docroot symlink, so the app serves them
-    Route::get('/storage/{path}', [\App\Http\Controllers\StorageController::class, 'show'])->where('path', '.+')->name('storage.file');
-    Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'sitemap'])->name('sitemap');
     Route::view('/help', 'pages.help')->name('help');
 
     // Policies (BML website requirements)
@@ -49,9 +56,6 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::view('/privacy-policy', 'policies.privacy')->name('policies.privacy');
     Route::view('/payment-security', 'policies.security')->name('policies.security');
     Route::view('/about', 'policies.about')->name('policies.about');
-    Route::redirect('/refund', '/refund-policy', 301);
-    Route::redirect('/privacy', '/privacy-policy', 301);
-    Route::redirect('/contact', '/about', 301);
     Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
     Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
     Route::get('/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('signed')->whereNumber('subscriber');
@@ -77,6 +81,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/saved/{saved}/move-to-cart', [CartController::class, 'moveToCart'])->name('saved.moveToCart');
         Route::delete('/saved/{saved}', [CartController::class, 'removeSaved'])->name('saved.remove');
     });
+    }); // end of the localized storefront group
 
     // Authentication routes
     Route::middleware('guest')->group(function () {

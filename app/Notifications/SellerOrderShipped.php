@@ -6,6 +6,7 @@ use App\Models\SellerOrder;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
@@ -25,7 +26,12 @@ class SellerOrderShipped extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return $notifiable instanceof User ? $notifiable->notificationChannels('delivery_updates') : ['mail'];
+        $channels = $notifiable instanceof User ? $notifiable->notificationChannels('delivery_updates') : ['mail'];
+        if (WebPushChannel::configured() && $notifiable instanceof User) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -71,5 +77,21 @@ class SellerOrderShipped extends Notification implements ShouldQueue
         }
 
         return $text;
+    }
+
+    /**
+     * Browser notification.
+     */
+    public function toWebPush(object $notifiable): array
+    {
+        $order = $this->part->order;
+
+        return [
+            'title' => __('Items from :shop are on their way (order :number)', ['shop' => $this->part->shopName(), 'number' => $order->order_number]),
+            'body' => $this->part->tracking_note ? __('Tracking: :note', ['note' => $this->part->tracking_note]) : __('Tap to see your order.'),
+            'url' => route('orders.show', $order),
+            'icon' => asset('images/icons/icon-192.png'),
+            'tag' => 'order-'.$order->id,
+        ];
     }
 }

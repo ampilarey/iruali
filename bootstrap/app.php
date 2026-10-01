@@ -28,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'staff.2fa' => \App\Http\Middleware\RequireTwoFactor::class, // staff must have two-step sign-in on
         ]);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        // /dv/... storefront URLs: runs before routing (see the middleware)
+        $middleware->append(\App\Http\Middleware\LocalePrefix::class);
         $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider
     })
     ->withExceptions(function (Exceptions $exceptions): void {

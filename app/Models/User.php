@@ -526,4 +526,12 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return $this->addresses()->where('is_default', true)->first() ?? $this->addresses()->orderBy('id')->first();
     }
+
+    /**
+     * Browsers that asked for push notifications about this user's orders.
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
 }

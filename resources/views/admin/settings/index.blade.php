@@ -198,6 +198,61 @@
                 <p class="mt-3 text-xs text-gray-500">{{ __('The return window is under Business details above. The Seller Terms page fills in these values through placeholders; edit its wording under Legal pages.') }}</p>
             </section>
 
+            @php $analyticsProvider = old('analytics_provider', $settings['analytics_provider'] ?? 'none'); @endphp
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Site analytics</h2>
+                <p class="mt-1 text-sm text-gray-500">Visitor statistics. The tag is added to storefront pages only (never admin or Seller Centre), and never for browsers that send Do Not Track. The shopping funnel under Analytics works without any provider.</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="analytics_provider" class="block text-sm font-medium text-gray-700">Provider</label>
+                        <select id="analytics_provider" name="analytics_provider" class="{{ $field }}">
+                            <option value="none" @selected($analyticsProvider === 'none')>None</option>
+                            <option value="plausible" @selected($analyticsProvider === 'plausible')>Plausible (privacy-friendly)</option>
+                            <option value="ga4" @selected($analyticsProvider === 'ga4')>Google Analytics 4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="analytics_domain" class="block text-sm font-medium text-gray-700">Plausible domain</label>
+                        <input id="analytics_domain" name="analytics_domain" class="{{ $field }}" placeholder="iruali.mv" value="{{ old('analytics_domain', $settings['analytics_domain'] ?? '') }}">
+                        @error('analytics_domain')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="analytics_id" class="block text-sm font-medium text-gray-700">GA4 measurement ID</label>
+                        <input id="analytics_id" name="analytics_id" class="{{ $field }}" placeholder="G-XXXXXXXXXX" value="{{ old('analytics_id', $settings['analytics_id'] ?? '') }}">
+                        @error('analytics_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Social profiles</h2>
+                <p class="mt-1 text-sm text-gray-500">Linked from the site's structured data (Organization "sameAs") so search engines connect the profiles to iruali. Full URLs.</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    @foreach(['social_facebook' => 'Facebook', 'social_instagram' => 'Instagram', 'social_tiktok' => 'TikTok', 'social_x' => 'X (Twitter)'] as $key => $label)
+                        <div>
+                            <label for="{{ $key }}" class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+                            <input id="{{ $key }}" name="{{ $key }}" type="url" class="{{ $field }}" placeholder="https://" value="{{ old($key, $settings[$key] ?? '') }}">
+                            @error($key)<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Product feeds</h2>
+                <p class="mt-1 text-sm text-gray-500">Give these URLs to Google Merchant Center and Facebook Commerce Manager (catalogue → data feed, scheduled fetch). They list every active product (one item per variant) and refresh hourly. The token keeps scrapers out; don't share it publicly.</p>
+                <dl class="mt-4 space-y-3 text-sm">
+                    <div>
+                        <dt class="font-medium text-gray-700">Google Merchant (RSS)</dt>
+                        <dd><code class="block break-all rounded bg-gray-50 px-3 py-2 text-xs text-gray-800" dir="ltr">{{ \App\Support\FeedToken::url('feeds.google-merchant') }}</code></dd>
+                    </div>
+                    <div>
+                        <dt class="font-medium text-gray-700">Facebook / Instagram catalogue (CSV)</dt>
+                        <dd><code class="block break-all rounded bg-gray-50 px-3 py-2 text-xs text-gray-800" dir="ltr">{{ \App\Support\FeedToken::url('feeds.facebook-catalog') }}</code></dd>
+                    </div>
+                </dl>
+            </section>
+
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
             </div>

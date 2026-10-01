@@ -43,6 +43,7 @@ class CheckoutController extends Controller
         $deliveryZones = DeliveryService::zones();
         $deliveryQuotes = app(DeliveryService::class)->quotes($goodsTotal);
         $freeDeliveryOver = (float) \App\Models\Setting::get('free_delivery_over');
+        \App\Services\FunnelService::record('begin_checkout');
 
         // Saved addresses as cards (the default one pre-selected), plus the island list for a new address
         $addresses = $user->addresses()->defaultFirst()->with('islandRecord')->get();

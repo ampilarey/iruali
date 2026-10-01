@@ -40,3 +40,6 @@ Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler.he
 
 // Shops get one low-stock email a day, in the morning Maldives time (only when something is low)
 Schedule::command('seller:low-stock-digest')->dailyAt('08:00')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// Shopping funnel rows (Admin → Analytics) are kept for 90 days
+Schedule::call(fn () => \App\Services\FunnelService::prune())->dailyAt('03:30')->name('prune-funnel-events');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use App\Support\LocaleUrl;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -32,33 +33,43 @@ class SitemapController extends Controller
     public function sitemap()
     {
         $xml = Cache::remember('sitemap.xml', now()->addHour(), function () {
-            $urls = [
-                [route('home'), now(), 'daily', '1.0'],
-                [route('shop'), now(), 'daily', '0.9'],
-                [route('products.index'), now(), 'daily', '0.8'],
-                [route('categories.index'), now(), 'weekly', '0.7'],
-                [route('deals'), now(), 'daily', '0.7'],
-                [route('help'), now(), 'monthly', '0.4'],
+            // [route name, parameters, last modified, change frequency, priority]; every page is
+            // listed in English and Dhivehi (/dv/...), each pointing at the other with hreflang.
+            $pages = [
+                ['home', [], now(), 'daily', '1.0'],
+                ['shop', [], now(), 'daily', '0.9'],
+                ['products.index', [], now(), 'daily', '0.8'],
+                ['categories.index', [], now(), 'weekly', '0.7'],
+                ['deals', [], now(), 'daily', '0.7'],
+                ['help', [], now(), 'monthly', '0.4'],
             ];
             foreach (['terms', 'refunds', 'delivery', 'privacy', 'security', 'about'] as $policy) {
-                $urls[] = [route('policies.'.$policy), now(), 'monthly', '0.3'];
+                $pages[] = ['policies.'.$policy, [], now(), 'monthly', '0.3'];
             }
             Product::query()->where('is_active', true)->select(['slug', 'updated_at'])->orderBy('id')->lazy()
-                ->each(function ($p) use (&$urls) {
-                    $urls[] = [route('products.show', $p->slug), $p->updated_at, 'weekly', '0.7'];
+                ->each(function ($p) use (&$pages) {
+                    $pages[] = ['products.show', $p->slug, $p->updated_at, 'weekly', '0.7'];
                 });
             Category::query()->where('status', 'active')->select(['slug', 'updated_at'])->get()
-                ->each(function ($c) use (&$urls) {
-                    $urls[] = [route('categories.show', $c->slug), $c->updated_at, 'weekly', '0.6'];
+                ->each(function ($c) use (&$pages) {
+                    $pages[] = ['categories.show', $c->slug, $c->updated_at, 'weekly', '0.6'];
                 });
             User::query()->where('is_seller', true)->where('seller_approved', true)->select(['id', 'updated_at'])->get()
-                ->each(function ($s) use (&$urls) {
-                    $urls[] = [route('sellers.show', $s), $s->updated_at, 'weekly', '0.5'];
+                ->each(function ($s) use (&$pages) {
+                    $pages[] = ['sellers.show', $s->id, $s->updated_at, 'weekly', '0.5'];
                 });
 
-            $out = '<?xml version="1.0" encoding="UTF-8"?>'."\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
-            foreach ($urls as [$loc, $mod, $freq, $prio]) {
-                $out .= '  <url><loc>'.htmlspecialchars($loc, ENT_XML1).'</loc><lastmod>'.($mod ?? now())->toDateString()."</lastmod><changefreq>{$freq}</changefreq><priority>{$prio}</priority></url>\n";
+            $out = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+                .'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'."\n";
+            foreach ($pages as [$name, $params, $mod, $freq, $prio]) {
+                $locs = ['en' => LocaleUrl::route($name, $params, 'en'), 'dv' => LocaleUrl::route($name, $params, 'dv')];
+                $links = '';
+                foreach ($locs + ['x-default' => $locs['en']] as $hreflang => $href) {
+                    $links .= '<xhtml:link rel="alternate" hreflang="'.$hreflang.'" href="'.htmlspecialchars($href, ENT_XML1).'"/>';
+                }
+                foreach ($locs as $loc) {
+                    $out .= '  <url><loc>'.htmlspecialchars($loc, ENT_XML1).'</loc>'.$links.'<lastmod>'.($mod ?? now())->toDateString()."</lastmod><changefreq>{$freq}</changefreq><priority>{$prio}</priority></url>\n";
+                }
             }
 
             return $out.'</urlset>'."\n";

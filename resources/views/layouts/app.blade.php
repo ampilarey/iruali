@@ -9,6 +9,8 @@
     $cartCount = $cartCount ?? 0;
     $wishlistCount = $wishlistCount ?? 0;
     $otherLocale = app()->getLocale() === 'dv' ? 'en' : 'dv';
+    // The language link: same page in the other language (storefront pages live under /dv in Dhivehi)
+    $switchUrl = route('locale.switch', ['locale' => $otherLocale, 'to' => \App\Support\LocaleUrl::alternatePath($otherLocale)]);
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
 <head>
@@ -32,6 +34,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @include('partials.analytics-snippet')
+
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-background text-dark pb-16 lg:pb-0">
@@ -48,13 +52,9 @@
                 @if($contactPhone)
                     <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="hover:text-white" dir="ltr">{{ $contactPhone }}</a>
                 @endif
-                <form action="{{ route('locale.switch') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="locale" value="{{ $otherLocale }}">
-                    <button type="submit" class="inline-flex items-center gap-1 hover:text-white" lang="{{ $otherLocale }}">
-                        <x-icon name="globe" class="w-3.5 h-3.5" />{{ $otherLocale === 'dv' ? 'ދިވެހި' : 'English' }}
-                    </button>
-                </form>
+                <a href="{{ $switchUrl }}" rel="nofollow" hreflang="{{ $otherLocale }}" lang="{{ $otherLocale }}" class="inline-flex items-center gap-1 hover:text-white">
+                    <x-icon name="globe" class="w-3.5 h-3.5" />{{ $otherLocale === 'dv' ? 'ދިވެހި' : 'English' }}
+                </a>
             </div>
         </div>
     </div>
@@ -253,13 +253,9 @@
                 </div>
             </nav>
             <div class="border-t border-gray-200 p-4 flex items-center justify-between gap-3">
-                <form action="{{ route('locale.switch') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="locale" value="{{ $otherLocale }}">
-                    <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium" lang="{{ $otherLocale }}">
-                        <x-icon name="globe" class="w-4 h-4" />{{ $otherLocale === 'dv' ? 'ދިވެހި' : 'English' }}
-                    </button>
-                </form>
+                <a href="{{ $switchUrl }}" rel="nofollow" hreflang="{{ $otherLocale }}" lang="{{ $otherLocale }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium">
+                    <x-icon name="globe" class="w-4 h-4" />{{ $otherLocale === 'dv' ? 'ދިވެހި' : 'English' }}
+                </a>
                 @auth
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -442,6 +438,13 @@
             'loading' => __('Loading…'),
             'completed' => __('Operation completed successfully'),
             'failed' => __('An error occurred'),
+        ]) }};
+        // "Add to home screen" banner (resources/js/pwa.js)
+        window.pwaLabels = {{ \Illuminate\Support\Js::from([
+            'title' => __('Add iruali to your home screen'),
+            'body' => __('Shop faster, even on a slow connection, with the app on your phone.'),
+            'install' => __('Install'),
+            'later' => __('Not now'),
         ]) }};
     </script>
     @if(session('notification'))

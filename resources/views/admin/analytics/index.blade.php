@@ -76,6 +76,72 @@
             </div>
         </div>
 
+        @php
+            $funnelSteps = ['view_product' => 'Viewed a product', 'add_to_cart' => 'Added to cart', 'begin_checkout' => 'Started checkout', 'order_paid' => 'Paid'];
+            $funnelMax = max($funnel['30']['view_product']['count'] ?? 0, 1);
+        @endphp
+        <div class="grid gap-6 lg:grid-cols-2" id="funnel">
+            <div class="overflow-hidden rounded-lg bg-white shadow">
+                <div class="border-b border-gray-100 px-5 py-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Funnel</h2>
+                    <p class="mt-1 text-xs text-gray-500">Visitors who reached each step (first-party, anonymised; no cookies or third parties). Conversion is from the step before.</p>
+                </div>
+                <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-5 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500">Step</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">7 days</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">30 days</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">Conversion (30d)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach($funnelSteps as $event => $label)
+                            @php $week = $funnel['7'][$event]; $month = $funnel['30'][$event]; @endphp
+                            <tr>
+                                <td class="px-5 py-3 text-sm text-gray-900">
+                                    {{ $label }}
+                                    <div class="mt-1 h-1.5 w-40 rounded-full bg-gray-100"><div class="h-1.5 rounded-full bg-primary-500" style="width: {{ min(100, $month['count'] / $funnelMax * 100) }}%"></div></div>
+                                </td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-700" data-funnel="{{ $event }}-7">{{ number_format($week['count']) }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-900" data-funnel="{{ $event }}-30">{{ number_format($month['count']) }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-700" data-funnel="{{ $event }}-rate">{{ $month['rate'] === null ? '—' : number_format($month['rate'], 1).'%' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table></div>
+            </div>
+
+            <div class="overflow-hidden rounded-lg bg-white shadow">
+                <div class="border-b border-gray-100 px-5 py-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Best converting products</h2>
+                    <p class="mt-1 text-xs text-gray-500">Added to cart → paid, last 30 days.</p>
+                </div>
+                <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-5 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500">Product</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">In cart</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">Paid</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">Conversion</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($funnelProducts as $row)
+                            <tr>
+                                <td class="px-5 py-3 text-sm text-gray-900">{{ $row->product->name ?? 'Deleted product' }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-700">{{ $row->carts }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-700">{{ $row->paid }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-900">{{ number_format($row->rate, 1) }}%</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="px-5 py-8 text-center text-sm text-gray-500">Nothing added to a cart in the last 30 days.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table></div>
+            </div>
+        </div>
+
         <div class="grid gap-6 lg:grid-cols-2">
             @foreach([['Top products', $topProducts, 'Product'], ['Top sellers', $topSellers, 'Seller']] as [$title, $rows, $col])
                 <div class="overflow-hidden rounded-lg bg-white shadow">

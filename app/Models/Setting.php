@@ -49,6 +49,16 @@ class Setting extends Model
         'payout_day' => 'Sunday',
         // Checkout without an account (orders carry the guest's email and a token for signed links)
         'guest_checkout_enabled' => 0,
+        // Site analytics: none, plausible (needs the domain) or ga4 (needs the G-XXXX measurement id)
+        'analytics_provider' => 'none',
+        'analytics_id' => '',
+        'analytics_domain' => '',
+        // Social profiles (footer / Organization structured data) and the product feed secret
+        'social_facebook' => '',
+        'social_instagram' => '',
+        'social_tiktok' => '',
+        'social_x' => '',
+        'feed_token' => '',
     ];
 
     protected $fillable = ['key', 'value'];

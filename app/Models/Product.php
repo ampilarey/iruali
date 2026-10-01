@@ -30,6 +30,7 @@ class Product extends Model
         'has_variants',
         'reorder_point',
         'is_active',
+        'approved_at',
         'is_featured',
         'is_sponsored',
         'sponsored_until',
@@ -60,6 +61,7 @@ class Product extends Model
         'is_featured' => 'boolean',
         'is_sponsored' => 'boolean',
         'sponsored_until' => 'datetime',
+        'approved_at' => 'datetime',
         'requires_shipping' => 'boolean',
         'is_digital' => 'boolean',
         'flash_sale_ends_at' => 'datetime',
@@ -339,6 +341,14 @@ class Product extends Model
     public function forceDeleteProduct(): bool
     {
         return $this->forceDelete();
+    }
+
+    /**
+     * Approved by an admin at some point: the shop may switch it off and on without re-approval.
+     */
+    public function isApproved(): bool
+    {
+        return $this->approved_at !== null || $this->is_active;
     }
 
     // ---- Variants -------------------------------------------------------------------------

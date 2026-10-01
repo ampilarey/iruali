@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-[60vh] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -17,12 +17,10 @@
             
             <div>
                 <label for="code" class="sr-only">{{ __('auth.verification_code') }}</label>
-                <input id="code" name="code" type="text" required 
+                <input id="code" name="code" type="text" required inputmode="numeric" autocomplete="one-time-code"
                        class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                        placeholder="{{ __('auth.verification_code') }}"
-                       maxlength="11"
-                       
-                       autocomplete="off">
+                       maxlength="11">
             </div>
 
             @error('code')

@@ -67,7 +67,7 @@
                                         @switch($key)
                                             @case('price') <x-price :product="$product" /> @break
                                             @case('rating')
-                                                @if($product->rating_count)<x-rating :value="round((float) $product->rating_avg, 1)" :count="$product->rating_count" />@else<span class="text-gray-400">{{ __('No reviews yet') }}</span>@endif
+                                                @if($product->rating_count)<x-rating :value="round((float) $product->rating_avg, 1)" :count="$product->rating_count" />@else<span class="text-gray-500">{{ __('No reviews yet') }}</span>@endif
                                                 @break
                                             @case('stock') <x-stock :quantity="(int) $product->stock_quantity" /> @break
                                             @case('brand') {{ $product->brand ?: '—' }} @break

@@ -19,4 +19,17 @@ class NewsletterController extends Controller
 
         return back();
     }
+
+    /**
+     * Signed one-click opt-out from a newsletter footer. A link that was already used still
+     * shows the confirmation, so clicking it twice is not an error.
+     */
+    public function unsubscribe(Request $request, int $subscriber)
+    {
+        $row = NewsletterSubscriber::find($subscriber);
+        $email = $row?->email ?? $request->query('email', '');
+        $row?->delete();
+
+        return view('newsletter.unsubscribed', ['email' => $email]);
+    }
 }

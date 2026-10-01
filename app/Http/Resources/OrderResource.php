@@ -31,6 +31,7 @@ class OrderResource extends JsonResource
                 'state' => $this->shipping_state,
                 'zip' => $this->shipping_zip,
                 'country' => $this->shipping_country,
+                'phone' => $this->shipping_phone,
             ],
             'billing_address' => $this->billing_address,
             'payment_method' => $this->payment_method,

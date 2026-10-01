@@ -17,10 +17,10 @@
         @if($items->isEmpty())
             <div class="bg-white border border-gray-200 rounded-xl p-10 text-center">
                 <span class="mx-auto w-14 h-14 rounded-full bg-primary-50 text-primary flex items-center justify-center mb-4"><x-icon name="cart" class="w-7 h-7" /></span>
-                <p class="font-semibold text-lg">{{ __('app.cart_empty_title') }}</p>
-                <p class="text-gray-600 text-sm mt-1">{{ __('app.cart_empty_description') }}</p>
+                <p class="font-semibold text-lg">{{ __('Your cart is empty') }}</p>
+                <p class="text-gray-600 text-sm mt-1">{{ __('Looks like you haven\'t added any items to your cart yet.') }}</p>
                 <div class="mt-5 flex flex-wrap justify-center gap-3">
-                    <a href="{{ route('shop') }}" class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold">{{ __('app.start_shopping') }}</a>
+                    <a href="{{ route('shop') }}" class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold">{{ __('Start shopping') }}</a>
                     <a href="{{ route('deals') }}" class="px-5 py-2.5 rounded-lg border border-gray-300 font-semibold">{{ __('Today\'s deals') }}</a>
                 </div>
                 @guest
@@ -76,17 +76,17 @@
                         </div>
                     @endforeach
                     <div class="p-4 flex items-center justify-between text-sm">
-                        <a href="{{ route('shop') }}" class="font-semibold text-primary hover:underline">{{ __('app.continue_shopping') }}</a>
+                        <a href="{{ route('shop') }}" class="font-semibold text-primary hover:underline">{{ __('Continue shopping') }}</a>
                         <form action="{{ route('cart.clear') }}" method="POST">
                             @csrf
-                            <button type="submit" class="text-gray-600 hover:text-danger hover:underline">{{ __('app.clear_cart') }}</button>
+                            <button type="submit" class="text-gray-600 hover:text-danger hover:underline">{{ __('Clear cart') }}</button>
                         </form>
                     </div>
                 </section>
 
                 <!-- Summary -->
                 <aside class="lg:sticky lg:top-[132px] bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-                    <h2 class="font-semibold text-lg">{{ __('app.order_summary') }}</h2>
+                    <h2 class="font-semibold text-lg">{{ __('Order Summary') }}</h2>
 
                     @if($freeOver > 0)
                         @php $left = max(0, $freeOver - $subtotal); @endphp
@@ -103,7 +103,7 @@
                     @endif
 
                     <dl class="space-y-2 text-sm">
-                        <div class="flex justify-between"><dt class="text-gray-600">{{ __('app.subtotal') }}</dt><dd class="font-medium">{{ \App\Support\Money::format($subtotal) }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-600">{{ __('Subtotal') }}</dt><dd class="font-medium">{{ \App\Support\Money::format($subtotal) }}</dd></div>
                         @if($voucher && $discount > 0)
                             <div class="flex justify-between text-success"><dt>{{ __('Voucher') }} ({{ $voucher->code }})</dt><dd class="font-medium">&minus;{{ \App\Support\Money::format($discount) }}</dd></div>
                         @endif
@@ -129,7 +129,7 @@
                     @endif
 
                     @auth
-                        <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('app.proceed_to_checkout') }}</a>
+                        <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
                     @else
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Sign in to check out') }}</a>
                         <p class="text-xs text-gray-500 text-center">{{ __('Your cart stays with you when you sign in.') }}</p>

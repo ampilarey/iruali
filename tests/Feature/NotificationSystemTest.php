@@ -345,7 +345,7 @@ class NotificationSystemTest extends TestCase
             'shipping_address' => 'Test Address',
             'shipping_city' => 'Test City',
             'shipping_state' => 'Test State',
-            'shipping_zip' => '12345',
+            'shipping_zip' => '12345', 'shipping_phone' => '7771234',
             'shipping_country' => 'Test Country',
             'payment_method' => 'invalid', // invalid value
             // 'agree_terms' omitted intentionally

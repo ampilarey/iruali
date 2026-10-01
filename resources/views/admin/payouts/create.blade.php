@@ -22,7 +22,7 @@
                 <h2 class="text-lg font-semibold text-gray-900">Orders ready for payout</h2>
                 <p class="text-sm text-gray-500">Untick any order you want to hold back (for example, a return in progress).</p>
             </div>
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
                     <tr><th class="px-4 py-2"></th><th class="px-4 py-2 text-left">Order</th><th class="px-4 py-2 text-left">Delivered</th><th class="px-4 py-2 text-right">Items</th><th class="px-4 py-2 text-right">Commission</th><th class="px-4 py-2 text-right">Shop earns</th></tr>
                 </thead>
@@ -40,7 +40,7 @@
                         <tr><td colspan="6" class="px-4 py-10 text-center text-gray-500">Nothing is ready to pay.</td></tr>
                     @endforelse
                 </tbody>
-            </table>
+            </table></div>
             @if($adjustments->isNotEmpty())
                 <div class="border-t border-gray-100 px-5 py-3">
                     <h3 class="text-sm font-semibold text-gray-900">Adjustments settled in this payout</h3>

@@ -58,7 +58,7 @@
                                     <td class="px-4 py-2 text-xs">
                                         @if($state === 'paid_out')<span class="text-green-700 font-medium">Paid {{ $part->payout?->paid_at?->format('d M') }}</span>
                                         @elseif($state === 'available')<span class="text-green-700">Ready</span>
-                                        @elseif($state === 'cancelled')<span class="text-gray-400">Cancelled</span>
+                                        @elseif($state === 'cancelled')<span class="text-gray-500">Cancelled</span>
                                         @else<span class="text-gray-500">Pending</span>@endif
                                     </td>
                                 </tr>

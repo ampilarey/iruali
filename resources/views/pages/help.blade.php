@@ -43,7 +43,7 @@
             <section id="orders" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Orders & tracking') }}</h2>
                 <p class="text-gray-700">{{ __('After you order, the shop confirms it, packs it and sends it to your island. You get an email at each step.') }}</p>
-                <p class="text-gray-700 mt-2">{{ __('Signed in? See every order under My Orders. Checked out as a guest? Use Track Order with your order number and email.') }}</p>
+                <p class="text-gray-700 mt-2">{{ __('Every order is placed from your account, so you will find them all under My Orders. Lost the confirmation email? Use Track Order with the order code from it.') }}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
                     <a href="{{ route('orders') }}" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold">{{ __('My Orders') }}</a>
                     <a href="{{ route('order.track.form') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold">{{ __('Track Order') }}</a>
@@ -85,7 +85,7 @@
             <section id="contact" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Contact Us') }}</h2>
                 @if($whatsapp)
-                    <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-lg bg-[#25D366] text-white text-sm font-semibold"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a>
+                    <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-lg bg-[#128C7E] text-white text-sm font-semibold"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a>
                 @endif
                 @if($email || $phone)
                     <ul class="space-y-2">

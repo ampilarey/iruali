@@ -37,7 +37,7 @@ class OrderStockCheckTest extends TestCase
             'shipping_address' => '123 Main St',
             'shipping_city' => 'City',
             'shipping_state' => 'State',
-            'shipping_zip' => '12345',
+            'shipping_zip' => '12345', 'shipping_phone' => '7771234',
             'shipping_country' => 'Country',
         ];
 
@@ -68,7 +68,7 @@ class OrderStockCheckTest extends TestCase
             'shipping_address' => '123 Main St',
             'shipping_city' => 'City',
             'shipping_state' => 'State',
-            'shipping_zip' => '12345',
+            'shipping_zip' => '12345', 'shipping_phone' => '7771234',
             'shipping_country' => 'Country',
         ];
 

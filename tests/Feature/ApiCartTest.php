@@ -115,7 +115,7 @@ class ApiCartTest extends TestCase
 
         $result = app(OrderService::class)->createOrderFromCart($this->user, [
             'shipping_address' => 'Somewhere', 'shipping_city' => 'Male', 'shipping_state' => 'Kaafu',
-            'shipping_zip' => '20001', 'shipping_country' => 'Maldives',
+            'shipping_zip' => '20001', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234',
         ]);
 
         $this->assertTrue($result['success']);

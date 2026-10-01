@@ -47,7 +47,7 @@ class BmlPaymentTest extends TestCase
     {
         return $this->actingAs($this->customer)->post('/orders', [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
-            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'delivery_zone' => 'islands',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'delivery_zone' => 'islands',
             'payment_method' => $method, 'agree_terms' => '1',
         ]);
     }

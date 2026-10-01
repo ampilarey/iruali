@@ -1,11 +1,15 @@
 import Swal from 'sweetalert2';
 
+// Translated labels are passed from the layout (window.notificationLabels, via Js::from);
+// the English defaults only apply when a page does not use the main layout.
+const t = (key, fallback) => (window.notificationLabels && window.notificationLabels[key]) || fallback;
+
 // Notification utility class
 class NotificationManager {
     constructor() {
         this.defaultConfig = {
             toast: true,
-            position: 'top-end',
+            position: document.documentElement.dir === 'rtl' ? 'top-start' : 'top-end',
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
@@ -17,7 +21,7 @@ class NotificationManager {
     }
 
     // Success notification
-    success(message, title = 'Success!') {
+    success(message, title = t('success', 'Success')) {
         return Swal.fire({
             ...this.defaultConfig,
             icon: 'success',
@@ -30,7 +34,7 @@ class NotificationManager {
     }
 
     // Error notification
-    error(message, title = 'Error!') {
+    error(message, title = t('error', 'Error')) {
         return Swal.fire({
             ...this.defaultConfig,
             icon: 'error',
@@ -43,7 +47,7 @@ class NotificationManager {
     }
 
     // Warning notification
-    warning(message, title = 'Warning!') {
+    warning(message, title = t('warning', 'Warning')) {
         return Swal.fire({
             ...this.defaultConfig,
             icon: 'warning',
@@ -56,7 +60,7 @@ class NotificationManager {
     }
 
     // Info notification
-    info(message, title = 'Information') {
+    info(message, title = t('info', 'Information')) {
         return Swal.fire({
             ...this.defaultConfig,
             icon: 'info',
@@ -69,21 +73,12 @@ class NotificationManager {
     }
 
     // Question/Confirmation dialog
-    question(message, title = 'Confirm') {
-        return Swal.fire({
-            title: title,
-            text: message,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'No'
-        });
+    question(message, title = t('confirm', 'Confirm')) {
+        return this.confirm(message, title);
     }
 
     // Confirmation dialog with custom buttons
-    confirm(message, title = 'Confirm', confirmText = 'Yes', cancelText = 'No') {
+    confirm(message, title = t('confirm', 'Confirm'), confirmText = t('yes', 'Yes'), cancelText = t('no', 'No')) {
         return Swal.fire({
             title: title,
             text: message,
@@ -97,17 +92,17 @@ class NotificationManager {
     }
 
     // Delete confirmation
-    deleteConfirm(itemName = 'this item') {
+    deleteConfirm(itemName = t('thisItem', 'this item')) {
         return this.confirm(
-            `Are you sure you want to delete ${itemName}? This action cannot be undone.`,
-            'Delete Confirmation',
-            'Delete',
-            'Cancel'
+            t('deleteQuestion', 'Are you sure you want to delete :item? This action cannot be undone.').replace(':item', itemName),
+            t('deleteConfirmation', 'Delete confirmation'),
+            t('delete', 'Delete'),
+            t('cancel', 'Cancel')
         );
     }
 
     // Loading state
-    loading(message = 'Loading...') {
+    loading(message = t('loading', 'Loading…')) {
         return Swal.fire({
             title: message,
             allowOutsideClick: false,
@@ -125,9 +120,9 @@ class NotificationManager {
     // Show notification from server response
     showFromResponse(response) {
         if (response.success) {
-            this.success(response.message || 'Operation completed successfully');
+            this.success(response.message || t('completed', 'Operation completed successfully'));
         } else {
-            this.error(response.message || 'An error occurred');
+            this.error(response.message || t('failed', 'An error occurred'));
         }
     }
 
@@ -193,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const type = div.dataset.type;
                 const message = div.dataset.message;
-                
+
                 switch (type) {
                     case 'success':
                         window.NotificationManager.success(message);
@@ -214,4 +209,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Export for module usage
-export default window.NotificationManager; 
+export default window.NotificationManager;

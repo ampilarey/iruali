@@ -3,7 +3,7 @@
 @section('title', 'My Orders - iruali')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 lg:px-6">
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('My Orders') }}</h1>
@@ -16,8 +16,8 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Order #{{ $order->order_number }}</h3>
-                        <p class="text-sm text-gray-600">{{ $order->created_at->format('M d, Y') }}</p>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('Order') }} #{{ $order->order_number }}</h3>
+                        <p class="text-sm text-gray-600">{{ $order->created_at->translatedFormat('j M Y') }}</p>
                     </div>
                     <div class="text-right">
                         <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full
@@ -37,7 +37,7 @@
                             <h4 class="font-semibold text-gray-900 mb-2">{{ __('Shipping Address') }}</h4>
                             <p class="text-sm text-gray-600">
                                 {{ $order->shipping_address }}<br>
-                                {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
+                                {{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}<br>
                                 {{ $order->shipping_country }}
                             </p>
                         </div>
@@ -63,7 +63,7 @@
                             {{ __('View Order Details →') }}
                         </a>
                         <div class="flex items-center gap-4">
-                            <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="text-gray-600 hover:text-primary-700 font-medium">{{ __('Receipt') }}</a>
+                            <a href="{{ route('orders.receipt', $order) }}" target="_blank" rel="noopener" class="text-gray-600 hover:text-primary-700 font-medium">{{ __('Receipt') }}</a>
                             <form method="POST" action="{{ route('orders.buyAgain', $order) }}">
                                 @csrf
                                 <button type="submit" class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-medium"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>

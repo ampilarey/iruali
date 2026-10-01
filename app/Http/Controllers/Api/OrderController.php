@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\CartService;
 use App\Services\DiscountService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -16,10 +17,13 @@ class OrderController extends BaseController
 
     protected $discountService;
 
-    public function __construct(OrderService $orderService, DiscountService $discountService)
+    protected $cartService;
+
+    public function __construct(OrderService $orderService, DiscountService $discountService, CartService $cartService)
     {
         $this->orderService = $orderService;
         $this->discountService = $discountService;
+        $this->cartService = $cartService;
     }
 
     /**
@@ -154,18 +158,23 @@ class OrderController extends BaseController
         }
 
         $user = Auth::user();
-        $cart = $this->orderService->getOrCreateCart($user);
+        $cart = $this->cartService->currentCart();
+        if (! $cart || $cart->items()->doesntExist()) {
+            return $this->sendError(__('Your cart is empty.'));
+        }
 
-        $result = $this->discountService->applyLoyaltyPoints($request->points, $user, $cart);
+        $result = $this->discountService->applyLoyaltyPoints((int) $request->points, $user, $cart);
 
         if (! $result['valid']) {
             return $this->sendError($result['message']);
         }
 
+        $discounts = $this->discountService->calculateTotalDiscount($cart);
+
         return $this->sendResponse([
-            'points_redeemed' => $request->points,
-            'discount_amount' => $result['amount'],
-            'cart_total' => $result['new_total'],
+            'points_redeemed' => $discounts['points']['points_redeemed'],
+            'discount_amount' => $discounts['points']['amount'],
+            'cart_total' => $discounts['final_total'],
         ], 'Loyalty points applied successfully');
     }
 
@@ -174,13 +183,11 @@ class OrderController extends BaseController
      */
     public function removePoints()
     {
-        $user = Auth::user();
-        $cart = $this->orderService->getOrCreateCart($user);
-
-        $result = $this->discountService->removeLoyaltyPoints($cart);
+        $this->discountService->removeLoyaltyPoints();
+        $cart = $this->cartService->currentCart();
 
         return $this->sendResponse([
-            'cart_total' => $result['new_total'],
+            'cart_total' => $cart ? $this->discountService->calculateTotalDiscount($cart)['final_total'] : 0,
         ], 'Loyalty points removed successfully');
     }
 }

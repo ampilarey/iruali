@@ -1,14 +1,13 @@
 @php
     $returnService = app(\App\Services\ReturnService::class);
     $canReturn = $returnService->canRequest($part, auth()->user());
-    $returnStatus = ['requested' => __('Return requested'), 'approved' => __('Return approved'), 'refunded' => __('Refunded'), 'rejected' => __('Return not accepted')];
 @endphp
 
 @foreach($part->returnRequests->sortByDesc('id') as $return)
     <div class="rounded-lg bg-gray-50 p-3 text-sm space-y-1" id="return-{{ $return->id }}">
         <div class="flex flex-wrap items-center justify-between gap-2">
             <p class="font-medium text-gray-900">{{ __('Return') }} · {{ $return->created_at->translatedFormat('j M Y') }}</p>
-            <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ $returnStatus[$return->status] ?? $return->status }}</span>
+            <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ $return->statusLabel() }}</span>
         </div>
         <p class="text-gray-600">{{ $return->reasonLabel() }}:
             {{ $return->items->map(fn ($l) => ($l->orderItem?->displayName() ?? __('Product')).' × '.$l->quantity)->join(', ') }}</p>

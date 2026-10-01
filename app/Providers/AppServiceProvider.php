@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(OrderService::class);
         // Web push client with the site's VAPID keys (config/webpush.php)
         $this->app->bind(\Minishlink\WebPush\WebPush::class, fn () => \App\Notifications\Channels\WebPushChannel::client());
+        $this->app->bind(\App\Support\SmokeFetcher::class, \App\Support\HttpSmokeFetcher::class);
     }
 
     /**

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\User;
 use App\Http\Resources\AuthUserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends BaseController
 {
@@ -27,20 +26,22 @@ class AuthController extends BaseController
             return $this->sendValidationError($validator->errors());
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return $this->sendUnauthorized('Invalid credentials');
         }
 
         $user = Auth::user();
-        
-        if (!$user->isActive()) {
+
+        if (! $user->isActive()) {
             Auth::logout();
+
             return $this->sendForbidden('Account is deactivated');
         }
 
         // A password alone must not get past two-step sign-in
         if ($user->isTwoFactorEnabled()) {
             Auth::logout();
+
             return $this->sendForbidden('Two-step sign-in is on for this account. Please sign in on the website.');
         }
 
@@ -158,7 +159,7 @@ class AuthController extends BaseController
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password)
+                    'password' => Hash::make($password),
                 ])->save();
             }
         );

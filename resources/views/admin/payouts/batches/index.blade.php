@@ -22,7 +22,7 @@
                         @forelse($batches as $batch)
                             <tr>
                                 <td class="px-4 py-3"><a href="{{ route('admin.payout-batches.show', $batch) }}" class="font-medium text-primary-700 hover:underline">{{ $batch->reference }}</a></td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $batch->status_badge }}">{{ __(ucfirst($batch->status)) }}</span></td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $batch->status_badge }}">{{ $batch->statusLabel() }}</span></td>
                                 <td class="px-4 py-3 text-end">{{ $batch->count }}</td>
                                 <td class="px-4 py-3 text-end font-semibold">{{ Money::format($batch->total) }}</td>
                                 <td class="px-4 py-3 text-gray-600">{{ $batch->created_at->format('d M Y') }}@if($batch->creator) · {{ $batch->creator->name }}@endif</td>

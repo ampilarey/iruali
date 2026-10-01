@@ -63,7 +63,7 @@ class OrderNotifier
 
     protected function send(?User $user, BaseNotification $notification): void
     {
-        if (! $user || ! $user->email) {
+        if (! $user || ! $user->email || $user->isSmokeTest()) {
             return;
         }
 

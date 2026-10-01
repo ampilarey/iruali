@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Product;
+use App\Http\Resources\CartResource;
+use App\Http\Resources\CategoryResource;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\UserResource;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Order;
-use App\Models\Cart;
-use App\Http\Resources\ProductResource;
-use App\Http\Resources\OrderResource;
-use App\Http\Resources\UserResource;
-use App\Http\Resources\CategoryResource;
-use App\Http\Resources\CartResource;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ApiResourceTest extends TestCase
 {
@@ -170,4 +170,4 @@ class ApiResourceTest extends TestCase
         $this->assertEquals($user->name, $data['name']);
         $this->assertEquals($user->email, $data['email']);
     }
-} 
+}

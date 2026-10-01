@@ -1,0 +1,73 @@
+name: Release
+
+# A pushed v* tag (made by scripts/release.sh) runs the full test suite against that exact commit
+# and then publishes a GitHub Release with auto-generated notes. Nothing is deployed from here:
+# production (iruali.mv) is deployed by hand over SSH with scripts/deploy-production.sh <tag>,
+# so that a person looks at the test site first, picks the moment, and is there if the health
+# check or smoke test rolls it back. See docs/PRODUCTION_DEPLOY.md.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  tests:
+    name: Tests on the tagged commit
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+          MARIADB_DATABASE: iruali_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, gd, zip, pdo_mysql, bcmath
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Code style (Pint)
+        run: ./vendor/bin/pint --test
+      - name: Prepare app
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+          mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public bootstrap/cache
+      - name: Run tests
+        run: php artisan test
+        env:
+          DB_HOST: 127.0.0.1
+      - name: Built assets are committed and current
+        run: |
+          test -f public/build/manifest.json
+          git diff --exit-code --stat -- public/build || (echo "public/build is out of date: run npm run build and commit" && exit 1)
+
+  release:
+    name: GitHub Release
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create the release with generated notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG already exists"
+            exit 0
+          fi
+          gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
+          echo "Deploy with: bash scripts/deploy-production.sh $TAG  (on the server; see docs/PRODUCTION_DEPLOY.md)" >> "$GITHUB_STEP_SUMMARY"

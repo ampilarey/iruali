@@ -63,6 +63,8 @@ return [
         // to get the API key. Use the UAT (sandbox) environment until BML approves the go-live.
         'api_key' => env('BML_API_KEY'),
         'environment' => env('BML_ENVIRONMENT', 'sandbox'), // sandbox or production
+        // BML_FAKE=1 walks checkout without BML (local dev, browser tests); ignored in production
+        'fake' => (bool) env('BML_FAKE', false),
         'base_uri' => env('BML_BASE_URI') ?: (env('BML_ENVIRONMENT', 'sandbox') === 'production'
             ? 'https://api.merchants.bankofmaldives.com.mv/public'
             : 'https://api.uat.merchants.bankofmaldives.com.mv/public'),
@@ -100,6 +102,20 @@ return [
         'api_secret' => env('SMS_API_SECRET'),
         'from_number' => env('SMS_FROM_NUMBER'),
         'endpoint' => env('SMS_ENDPOINT'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Post-deploy smoke test customer (php artisan iruali:smoke --place-order)
+    |--------------------------------------------------------------------------
+    |
+    | Created by `php artisan iruali:smoke --setup`; flagged is_smoke_test so it is
+    | left out of analytics, rewards and emails.
+    |
+    */
+    'smoke' => [
+        'email' => env('SMOKE_USER_EMAIL'),
+        'password' => env('SMOKE_USER_PASSWORD'),
     ],
 
 ];

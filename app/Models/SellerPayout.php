@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PayoutStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -52,6 +53,21 @@ class SellerPayout extends Model
      */
     public function isPaid(): bool
     {
-        return $this->status === 'paid';
+        return $this->status === PayoutStatus::Paid->value;
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        return PayoutStatus::badgeFor($this->status);
+    }
+
+    public function statusLabel(): string
+    {
+        return PayoutStatus::labelFor($this->status);
+    }
+
+    public function statusEnum(): ?PayoutStatus
+    {
+        return PayoutStatus::tryFrom((string) $this->status);
     }
 }

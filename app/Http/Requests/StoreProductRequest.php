@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rule;
-
 class StoreProductRequest extends TranslatableRequest
 {
     /**
@@ -31,7 +29,7 @@ class StoreProductRequest extends TranslatableRequest
                 'required',
                 'string',
                 'max:100',
-                'unique:products,sku'
+                'unique:products,sku',
             ],
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0|max:999999.99',

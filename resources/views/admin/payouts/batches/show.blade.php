@@ -8,7 +8,7 @@
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="rounded-lg bg-white p-5 shadow grid gap-3 sm:grid-cols-4 text-sm">
-            <div><p class="text-gray-500">{{ __('Status') }}</p><p><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $batch->status_badge }}">{{ __(ucfirst($batch->status)) }}</span></p></div>
+            <div><p class="text-gray-500">{{ __('Status') }}</p><p><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $batch->status_badge }}">{{ $batch->statusLabel() }}</span></p></div>
             <div><p class="text-gray-500">{{ __('Total') }}</p><p class="text-2xl font-bold text-gray-900">{{ Money::format($batch->total) }}</p><p class="text-xs text-gray-500">{{ trans_choice(':count shop|:count shops', $batch->count, ['count' => $batch->count]) }}</p></div>
             <div><p class="text-gray-500">{{ __('Created') }}</p><p>{{ $batch->created_at->format('d M Y, H:i') }}@if($batch->creator)<br><span class="text-xs text-gray-500">{{ $batch->creator->name }}</span>@endif</p></div>
             <div>

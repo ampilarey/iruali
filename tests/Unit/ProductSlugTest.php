@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,21 +15,21 @@ class ProductSlugTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create required Category and User for foreign key constraints
         Category::create([
             'id' => 1,
             'name' => 'Test Category',
             'slug' => 'test-category',
-            'status' => 'active'
+            'status' => 'active',
         ]);
-        
+
         User::create([
             'id' => 1,
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -37,7 +37,7 @@ class ProductSlugTest extends TestCase
     {
         $product = Product::factory()->create([
             'name' => ['en' => 'Test Product', 'dv' => 'Test Product DV'],
-            'slug' => 'test-product'
+            'slug' => 'test-product',
         ]);
 
         $this->assertEquals('slug', $product->getRouteKeyName());
@@ -47,7 +47,7 @@ class ProductSlugTest extends TestCase
     {
         $product = Product::factory()->create([
             'name' => ['en' => 'New Test Product', 'dv' => 'New Test Product DV'],
-            'slug' => null
+            'slug' => null,
         ]);
 
         $this->assertNotNull($product->slug);
@@ -59,13 +59,13 @@ class ProductSlugTest extends TestCase
         // Create first product
         Product::factory()->create([
             'name' => ['en' => 'Test Product', 'dv' => 'Test Product DV'],
-            'slug' => 'test-product'
+            'slug' => 'test-product',
         ]);
 
         // Create second product with same name
         $product2 = Product::factory()->create([
             'name' => ['en' => 'Test Product', 'dv' => 'Test Product DV'],
-            'slug' => null
+            'slug' => null,
         ]);
 
         $this->assertEquals('test-product-1', $product2->slug);
@@ -75,11 +75,11 @@ class ProductSlugTest extends TestCase
     {
         $product = Product::factory()->create([
             'name' => ['en' => 'Original Name', 'dv' => 'Original Name DV'],
-            'slug' => 'original-name'
+            'slug' => 'original-name',
         ]);
 
         $product->update([
-            'name' => ['en' => 'Updated Name', 'dv' => 'Updated Name DV']
+            'name' => ['en' => 'Updated Name', 'dv' => 'Updated Name DV'],
         ]);
 
         $this->assertEquals('updated-name', $product->fresh()->slug);
@@ -89,13 +89,13 @@ class ProductSlugTest extends TestCase
     {
         $product = Product::factory()->create([
             'name' => ['en' => 'Test Product', 'dv' => 'Test Product DV'],
-            'slug' => 'test-product'
+            'slug' => 'test-product',
         ]);
 
         $originalSlug = $product->slug;
 
         $product->update([
-            'price' => 99.99 // Change something other than name
+            'price' => 99.99, // Change something other than name
         ]);
 
         $this->assertEquals($originalSlug, $product->fresh()->slug);
@@ -105,7 +105,7 @@ class ProductSlugTest extends TestCase
     {
         $product = Product::factory()->create([
             'name' => ['en' => 'Findable Product', 'dv' => 'Findable Product DV'],
-            'slug' => 'findable-product'
+            'slug' => 'findable-product',
         ]);
 
         $foundProduct = Product::where('slug', 'findable-product')->first();
@@ -113,4 +113,4 @@ class ProductSlugTest extends TestCase
         $this->assertNotNull($foundProduct);
         $this->assertEquals($product->id, $foundProduct->id);
     }
-} 
+}

@@ -1,48 +1,140 @@
 # Production deploy (iruali.mv)
 
 Production is **never** deployed automatically. `test.iruali.mv` deploys itself on every
-merge to `main` (see `TEST_AUTO_DEPLOY.md`); check a change there first, then release it
-to production by hand with one command in cPanel → Terminal:
+merge to `main` (see `TEST_AUTO_DEPLOY.md`); production runs **tagged releases only**, deployed
+by hand with one command on the server, and rolled back with one command.
 
-```bash
-cd <app root> && git fetch origin main && git checkout origin/main -- scripts/deploy-production.sh scripts/write-deploy-stamp.sh
-bash <app root>/scripts/deploy-production.sh <app root> [<docroot>]
+```
+main ──push──▶ GitHub Tests ──▶ test.iruali.mv (automatic)
+  │
+  └─ scripts/release.sh ──▶ tag vYYYY.MM.DD ──▶ GitHub "Release" workflow (tests + release notes)
+                                  │
+                                  └─ on the server: bash scripts/deploy-production.sh vYYYY.MM.DD
+                                                    bash scripts/rollback-production.sh   (if needed)
 ```
 
-- `<app root>`: the Laravel checkout for iruali.mv (the folder with `artisan` and `.env`).
+Why no deploy from GitHub: the production server is cPanel shared hosting reached over SSH /
+cPanel Terminal, and a release should go out when a person has looked at the test site, picked
+a quiet moment, and is there to watch the health check and smoke test (which roll the release
+back on failure). GitHub's job stops at "the tagged commit passes the suite, here are the notes".
+
+## 1. Cut a release (on your machine)
+
+```bash
+git checkout main && git pull
+bash scripts/release.sh            # tags today's date, e.g. v2026.10.01 (then .2, .3 … the same day)
+bash scripts/release.sh v2026.10.05 -m "Island delivery fees"   # or name it yourself
+```
+
+The script refuses unless you are on `main`, the tree is clean and `main == origin/main`.
+With `GITHUB_TOKEN` (or `GH_TOKEN`) in the environment it also asks the GitHub API whether
+every check run for that commit is green and stops if not; without a token it tags anyway
+and says so. It creates an **annotated** tag and pushes it. The push starts
+`.github/workflows/release.yml`, which runs Pint + the full test suite on the tagged commit
+and publishes a GitHub Release with generated notes. If that workflow is red, do not deploy
+the tag.
+
+## 2. Deploy the tag (on the server)
+
+In cPanel → Terminal (or SSH), in the production checkout:
+
+```bash
+cd <app root>
+git fetch --tags origin && git checkout origin/main -- scripts/     # the first time only: get the current scripts
+bash scripts/deploy-production.sh v2026.10.01 [<app root>] [<docroot>]
+bash scripts/deploy-production.sh --latest-tag                         # or: the newest v* tag
+```
+
+- `<app root>`: the Laravel checkout (folder with `artisan` and `.env`). Defaults to the folder
+  the script lives in; `DEPLOY_ROOT` in the environment works too.
 - `<docroot>`: only if the domain's document root is a **separate folder** from
   `<app root>/public` (as on test.iruali.mv). Built CSS/JS, images, favicon, manifest,
   `.htaccess` and a front-controller `index.php` pointing at the app root are synced there.
-  Leave it off when the domain already points at `<app root>/public`.
+  Leave it off when the domain already points at `<app root>/public` (`DEPLOY_DOCROOT` works too).
 
-The first line fetches the deploy scripts themselves, so the first run uses the current
-version even when the server's checkout is old.
+What it does, in order:
 
-## What the script does
+1. Refuses anything that is not a tag (`main`, a branch, a bare commit), and refuses if the
+   server checkout has local changes.
+2. Appends a `status=started` line to `storage/app/deploys.log` (tag, new commit, previous
+   commit and its tag, UTC time, who ran it).
+3. `php artisan down`, `git fetch --tags`, **detached checkout of the tag**.
+4. `composer install --no-dev --optimize-autoloader`, `php artisan migrate --force`.
+5. `config:cache`, `route:cache`, `view:cache`, `event:cache`; `storage:link` if the link is
+   missing; docroot sync when a docroot was given; deploy stamp; `queue:restart`.
+6. `php artisan up`, then `GET APP_URL/api/health` must answer `healthy` with the new commit,
+   then `php artisan iruali:smoke` must pass (home, product, category, search, cart, login,
+   `/up`, health, sitemap, robots — and, when `SMOKE_USER_EMAIL` is set in `.env`, a real order
+   placed, taken to BML's pay page, cancelled and its stock checked back).
+7. Appends `status=ok`.
 
-1. Maintenance mode (`php artisan down`)
-2. `git fetch` + fast-forward `main` only (refuses if the server has local commits)
-3. `composer install --no-dev --optimize-autoloader`
-4. `php artisan migrate --force`, `storage:link`, `config:cache`, clears routes/views/cache
-5. Syncs public files to the docroot (when given)
-6. Writes the deploy stamp, `php artisan up`
-7. Checks `APP_URL/api/health` and that it reports the new commit
+**On any failure** after the checkout it rolls back by itself: checkout of the previous commit,
+`composer install`, caches, docroot sync, `up`, a `status=rolled-back` line, exit code 1.
+Database migrations are **not** reversed (they only add columns and tables in this project;
+check `php artisan migrate:status` if the failed release carried one).
 
-On any failure it brings the site back up and, if the code already moved, prints the
-exact `git reset --hard <previous commit>` command to roll back. Database migrations are
-not rolled back automatically.
+`https://iruali.mv/api/health` then shows `"tag": "v2026.10.01"` and the commit.
+
+## 3. Roll back (on the server)
+
+```bash
+bash scripts/rollback-production.sh                 # back to what ran before the last successful deploy
+bash scripts/rollback-production.sh v2026.09.30     # or to a named tag / commit
+```
+
+It prints a warning that migrations are not reversed and lists the migration commits between
+the two versions, then does the same steps as a deploy without `migrate`, ends with the health
+check and smoke test, and appends a `rollback … status=ok` line to `deploys.log`. If a migration
+must go, reverse it by hand first (`php artisan migrate:rollback --step=1` on the *new* code,
+then roll back the code).
+
+`storage/app/deploys.log` is the history: one line per attempt, `deploy` or `rollback`, with
+`status=started|ok|rolled-back|failed`.
+
+## 4. First deploy, step by step
+
+One-off, in cPanel → Terminal, as the cPanel user:
+
+1. **Clone** next to the test site: `cd ~ && git clone https://github.com/ampilarey/iruali.git iruali`
+   (`<app root>` is `/home/iruali/iruali`). Point the domain's document root at
+   `<app root>/public` in cPanel → Domains; if cPanel insists on its own docroot folder, keep
+   that folder and pass it as `<docroot>` to every deploy.
+2. **Runtime folders**: `mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public storage/app/private bootstrap/cache`.
+3. **`.env`**: `cp .env.example .env`, then set `APP_ENV=production`, `APP_DEBUG=false`,
+   `APP_URL=https://iruali.mv`, the MySQL `DB_*` values (database and user made in cPanel →
+   MySQL Databases), `SESSION_DRIVER=database`, `CACHE_STORE=database`,
+   `QUEUE_CONNECTION=database`, the mail settings, `ALERTS_EMAIL`, and the BML keys from
+   `PAYMENTS_BML.md`. Then `php artisan key:generate`.
+4. **Smoke customer** (recommended): set `SMOKE_USER_EMAIL=smoke@iruali.mv` and a long
+   `SMOKE_USER_PASSWORD`, then after the first deploy run `php artisan iruali:smoke --setup`.
+   The account is flagged `is_smoke_test` and never gets emails, points or counted in analytics.
+5. **Deploy the first tag**: `bash scripts/deploy-production.sh --latest-tag`. The first run
+   migrates the empty database, caches, links storage and runs the checks; the health check
+   needs the domain to already resolve to this checkout.
+6. **Admin account**: never run `db:seed` on production. Set `ADMIN_EMAIL` and
+   `ADMIN_PASSWORD` in `.env`, run `php artisan db:seed --class=UserSeeder`, sign in, turn on
+   two-step sign-in from My Account → Security, remove the two values from `.env`, and
+   `php artisan config:cache`.
+7. **Scheduler cron** (cPanel → Cron Jobs, every minute):
+   `cd /home/iruali/iruali && php artisan schedule:run >> /dev/null 2>&1`
+8. **Check**: `php artisan iruali:ready` must end with `READY`; `php artisan iruali:smoke --place-order`
+   must end with `SMOKE OK`; open `https://iruali.mv/api/health`.
+
+Every later release is step 2 above: `bash scripts/deploy-production.sh <tag>`.
 
 ## After deploying
 
-- `https://iruali.mv/api/health` shows `"commit"` = the latest `main` commit.
+- `https://iruali.mv/api/health` shows `"tag"` and `"commit"` of the running release.
 - Demo data (`MarketplaceDemoSeeder`) is for test only. Don't seed it on production.
+- `php artisan iruali:smoke --place-order` can be run at any time; it leaves one cancelled
+  order per run under the smoke customer.
 
-## First-time setup and what must run on the server
+## What must keep running on the server
 
-- **Scheduler cron** (required; unpaid-order cleanup, nightly database backups, token pruning):
-  `* * * * * cd /home/iruali/<app> && php artisan schedule:run >> /dev/null 2>&1`
-  Check with `php artisan schedule:list`. Backups go to the disk set in `config/backup.php`; run `php artisan backup:run --only-db` once by hand and keep copies off the server.
-- **Admin account:** never run `db:seed` on production. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then `php artisan db:seed --class=UserSeeder`, sign in, turn on two-step sign-in from My Account → Security, and remove the two values from `.env`.
+- **Scheduler cron** (set up in the first-deploy steps; unpaid-order cleanup, nightly database
+  backups, queued mail, token pruning): check with `php artisan schedule:list`. Backups go to
+  the disk set in `config/backup.php`; run `php artisan backup:run --only-db` once by hand and
+  keep copies off the server.
 - **Demo accounts:** on any non-local server the migration `rotate_demo_account_passwords` gives every `*@example.com` shop a random password. `admin@example.com` is left alone so you are not locked out: change its password from My Account, or delete it once a real admin exists.
 - **Uploads:** product photos live in `storage/app/public`. The deploy scripts link `<docroot>/storage` to it; if the docroot is `<app>/public`, `php artisan storage:link` does the same.
 - **Runtime folders** on a fresh clone: `mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public storage/app/private bootstrap/cache`.

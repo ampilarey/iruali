@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,10 +17,10 @@ class ApiTest extends TestCase
         $response = $this->getJson('/api/health');
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'status' => 'healthy',
-                    'version' => '1.0.0'
-                ]);
+            ->assertJson([
+                'status' => 'healthy',
+                'version' => '1.0.0',
+            ]);
     }
 
     public function test_products_endpoint()
@@ -36,21 +36,21 @@ class ApiTest extends TestCase
         $response = $this->getJson('/api/v1/products');
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'data' => [
-                        'products',
-                        'pagination' => [
-                            'current_page',
-                            'last_page',
-                            'per_page',
-                            'total',
-                            'from',
-                            'to',
-                        ]
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'products',
+                    'pagination' => [
+                        'current_page',
+                        'last_page',
+                        'per_page',
+                        'total',
+                        'from',
+                        'to',
                     ],
-                    'message'
-                ]);
+                ],
+                'message',
+            ]);
     }
 
     public function test_categories_endpoint()
@@ -60,11 +60,11 @@ class ApiTest extends TestCase
         $response = $this->getJson('/api/v1/categories');
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'data',
-                    'message'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'data',
+                'message',
+            ]);
     }
 
     public function test_search_endpoint()
@@ -80,15 +80,15 @@ class ApiTest extends TestCase
         $response = $this->getJson('/api/v1/search?q=test');
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'data' => [
-                        'query',
-                        'products',
-                        'pagination'
-                    ],
-                    'message'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'query',
+                    'products',
+                    'pagination',
+                ],
+                'message',
+            ]);
     }
 
     public function test_authentication_required_for_protected_endpoints()
@@ -110,19 +110,19 @@ class ApiTest extends TestCase
         $response = $this->postJson('/api/v1/register', $userData);
 
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'success',
-                    'data' => [
-                        'user' => [
-                            'id',
-                            'name',
-                            'email',
-                        ],
-                        'token',
-                        'token_type'
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'user' => [
+                        'id',
+                        'name',
+                        'email',
                     ],
-                    'message'
-                ]);
+                    'token',
+                    'token_type',
+                ],
+                'message',
+            ]);
     }
 
     public function test_user_login()
@@ -139,14 +139,14 @@ class ApiTest extends TestCase
         $response = $this->postJson('/api/v1/login', $loginData);
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'data' => [
-                        'user',
-                        'token',
-                        'token_type'
-                    ],
-                    'message'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'user',
+                    'token',
+                    'token_type',
+                ],
+                'message',
+            ]);
     }
 }

@@ -4,9 +4,9 @@ namespace App\Notifications;
 
 use App\Models\SellerOrder;
 use App\Models\User;
+use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;

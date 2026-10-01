@@ -11,11 +11,11 @@ class Role extends Model
         'name',
         'display_name',
         'description',
-        'is_default'
+        'is_default',
     ];
 
     protected $casts = [
-        'is_default' => 'boolean'
+        'is_default' => 'boolean',
     ];
 
     public function users(): BelongsToMany
@@ -33,6 +33,7 @@ class Role extends Model
         if (is_string($permission)) {
             return $this->permissions()->where('name', $permission)->exists();
         }
+
         return $this->permissions()->where('id', $permission->id)->exists();
     }
 
@@ -41,6 +42,7 @@ class Role extends Model
         if (is_array($permissions)) {
             return $this->permissions()->whereIn('name', $permissions)->exists();
         }
+
         return $this->hasPermission($permissions);
     }
 
@@ -49,6 +51,7 @@ class Role extends Model
         if (is_array($permissions)) {
             return $this->permissions()->whereIn('name', $permissions)->count() === count($permissions);
         }
+
         return $this->hasPermission($permissions);
     }
 

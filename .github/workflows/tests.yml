@@ -28,6 +28,8 @@ jobs:
           coverage: none
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Code style (Pint)
+        run: ./vendor/bin/pint --test
       - name: Prepare app
         run: |
           cp .env.example .env
@@ -41,3 +43,64 @@ jobs:
         run: |
           test -f public/build/manifest.json
           git diff --exit-code --stat -- public/build || (echo "public/build is out of date: run npm run build and commit" && exit 1)
+
+  browser:
+    name: Browser checkout (Playwright)
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, gd, zip, pdo_sqlite, sqlite3, bcmath
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Install npm dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Prepare app
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+          mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public bootstrap/cache
+      - name: Run the checkout browser test
+        run: npm run test:browser
+        env:
+          CI: "1"
+      - name: Upload traces and report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/browser/results
+            tests/browser/report
+          if-no-files-found: ignore
+
+  static-analysis:
+    name: Larastan level 5 (advisory)
+    runs-on: ubuntu-latest
+    # Larastan is not in composer.lock yet (it could not be fetched where the repo is developed),
+    # so this job installs it on the fly and never blocks a merge. Make it blocking once
+    # `composer require --dev larastan/larastan` is committed and `composer analyse` is clean.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, gd, zip, pdo_mysql, bcmath
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Install Larastan (not in the lock file)
+        run: composer require --dev larastan/larastan --no-interaction --no-progress --with-all-dependencies
+      - name: Analyse app/ at level 5
+        run: composer analyse

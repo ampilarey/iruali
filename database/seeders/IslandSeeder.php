@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Island;
+use Illuminate\Database\Seeder;
 
 class IslandSeeder extends Seeder
 {
@@ -36,4 +36,4 @@ class IslandSeeder extends Seeder
             Island::create($island);
         }
     }
-} 
+}

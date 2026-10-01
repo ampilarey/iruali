@@ -12,7 +12,7 @@ class Island extends Model
     public $translatable = ['name'];
 
     protected $fillable = [
-        'name', 'atoll', 'is_active'
+        'name', 'atoll', 'is_active',
     ];
 
     protected $casts = [
@@ -42,4 +42,4 @@ class Island extends Model
     {
         return $this->getTranslations('name');
     }
-} 
+}

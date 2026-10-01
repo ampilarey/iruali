@@ -29,15 +29,16 @@ class GenerateProductSlugs extends Command
         $this->info('Starting product slug generation...');
 
         $query = Product::query();
-        
-        if (!$this->option('force')) {
+
+        if (! $this->option('force')) {
             $query->whereNull('slug')->orWhere('slug', '');
         }
 
         $products = $query->get();
-        
+
         if ($products->isEmpty()) {
             $this->info('No products found that need slug generation.');
+
             return 0;
         }
 
@@ -54,24 +55,24 @@ class GenerateProductSlugs extends Command
                 $oldSlug = $product->slug;
                 $product->slug = $product->generateSlug();
                 $product->save();
-                
+
                 if ($oldSlug !== $product->slug) {
                     $updated++;
                 }
-                
+
                 $bar->advance();
             } catch (\Exception $e) {
                 $errors++;
-                $this->error("\nError processing product ID {$product->id}: " . $e->getMessage());
+                $this->error("\nError processing product ID {$product->id}: ".$e->getMessage());
             }
         }
 
         $bar->finish();
         $this->newLine(2);
 
-        $this->info("Slug generation completed!");
+        $this->info('Slug generation completed!');
         $this->info("Updated: {$updated} products");
-        
+
         if ($errors > 0) {
             $this->warn("Errors: {$errors} products");
         }

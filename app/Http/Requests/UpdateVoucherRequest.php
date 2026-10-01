@@ -29,7 +29,7 @@ class UpdateVoucherRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('vouchers', 'code')->ignore($voucherId)
+                Rule::unique('vouchers', 'code')->ignore($voucherId),
             ],
             'type' => 'required|in:fixed,percent',
             'amount' => 'required|numeric|min:0',

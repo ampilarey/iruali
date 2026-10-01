@@ -17,7 +17,7 @@ class BannerSeeder extends Seeder
                 'button_text' => 'Shop Now',
                 'button_url' => '/shop',
                 'status' => 'active',
-                'position' => 'homepage'
+                'position' => 'homepage',
             ],
             [
                 'title' => 'New Arrivals',
@@ -26,7 +26,7 @@ class BannerSeeder extends Seeder
                 'button_text' => 'Explore',
                 'button_url' => '/products',
                 'status' => 'active',
-                'position' => 'homepage'
+                'position' => 'homepage',
             ],
             [
                 'title' => 'Free Shipping',
@@ -35,12 +35,12 @@ class BannerSeeder extends Seeder
                 'button_text' => 'Learn More',
                 'button_url' => '/shipping',
                 'status' => 'active',
-                'position' => 'homepage'
-            ]
+                'position' => 'homepage',
+            ],
         ];
 
         foreach ($banners as $bannerData) {
             Banner::create($bannerData);
         }
     }
-} 
+}

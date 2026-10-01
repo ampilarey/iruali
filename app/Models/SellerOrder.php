@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SellerOrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,11 +13,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class SellerOrder extends Model
 {
-    public const STATUSES = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
-
-    /** Order of progress; cancelled is outside it. */
-    public const RANK = ['pending' => 0, 'processing' => 1, 'shipped' => 2, 'out_for_delivery' => 3, 'delivered' => 4];
-
     /** Delivery details a shop (or admin) can record on a part. */
     public const TRACKING_FIELDS = ['courier', 'tracking_number', 'tracking_url', 'vessel_or_flight', 'expected_delivery_date'];
 
@@ -100,14 +96,12 @@ class SellerOrder extends Model
 
     public function getStatusBadgeAttribute(): string
     {
-        return [
-            'pending' => 'bg-yellow-100 text-yellow-800',
-            'processing' => 'bg-blue-100 text-blue-800',
-            'shipped' => 'bg-purple-100 text-purple-800',
-            'out_for_delivery' => 'bg-indigo-100 text-indigo-800',
-            'delivered' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-        ][$this->status] ?? 'bg-gray-100 text-gray-800';
+        return SellerOrderStatus::badgeFor($this->status);
+    }
+
+    public function statusEnum(): ?SellerOrderStatus
+    {
+        return SellerOrderStatus::tryFrom((string) $this->status);
     }
 
     public function hasTrackingDetails(): bool

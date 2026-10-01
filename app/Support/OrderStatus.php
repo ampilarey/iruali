@@ -2,26 +2,20 @@
 
 namespace App\Support;
 
+use App\Enums\OrderStatus as Status;
+
 /**
- * Labels for order and shop-part statuses, in one place so every page agrees.
+ * Labels for order and shop-part statuses. The source is App\Enums\OrderStatus; this class
+ * stays so the many views that call OrderStatus::label() keep working.
  */
 final class OrderStatus
 {
-    public const LABELS = [
-        'pending' => 'Pending',
-        'processing' => 'Processing',
-        'shipped' => 'Shipped',
-        'out_for_delivery' => 'Out for delivery',
-        'delivered' => 'Delivered',
-        'cancelled' => 'Cancelled',
-    ];
-
     /**
-     * The English label (pass it through __() to translate).
+     * The translated label for a stored status value.
      */
     public static function label(?string $status): string
     {
-        return self::LABELS[$status] ?? ucfirst(str_replace('_', ' ', (string) $status));
+        return Status::labelFor($status);
     }
 
     /**
@@ -31,12 +25,6 @@ final class OrderStatus
      */
     public static function steps(): array
     {
-        return [
-            'pending' => __('Order placed'),
-            'processing' => __('Preparing'),
-            'shipped' => __('On its way'),
-            'out_for_delivery' => __('Out for delivery'),
-            'delivered' => __('Delivered'),
-        ];
+        return Status::steps();
     }
 }

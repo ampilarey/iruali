@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Wishlist;
+use App\Http\Resources\WishlistItemResource;
 use App\Models\Product;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\WishlistItemResource;
 
 class WishlistController extends BaseController
 {

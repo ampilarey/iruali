@@ -20,11 +20,7 @@
                         <p class="text-sm text-gray-600">{{ $order->created_at->translatedFormat('j M Y') }}</p>
                     </div>
                     <div class="text-right">
-                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full
-                            @if($order->status === 'completed') bg-green-100 text-green-800
-                            @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
-                            @elseif($order->status === 'cancelled') bg-red-100 text-red-800
-                            @else bg-gray-100 text-gray-800 @endif">
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">
                             {{ __(\App\Support\OrderStatus::label($order->status)) }}
                         </span>
                         <p class="text-lg font-bold text-primary-600 mt-1 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</p>

@@ -80,6 +80,33 @@ nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either
   sign-ins, with who, when, IP and the changes. Code records one with
   `Audit::record('action', $model, [...])`.
 
+## Refreshing the staging site
+
+`test.iruali.mv` should run on a recent copy of the production database **with the
+personal data replaced**. `php artisan iruali:anonymise --force` gives every non-staff user
+a made-up Maldivian name, `user<id>@example.test`, phone `7000000+id`, a random password,
+and clears their tokens, 2FA secrets, addresses and bank account; order delivery
+addresses/phones, return request notes, newsletter emails and OTPs are rewritten or
+emptied. Staff accounts (admin, support, finance) are kept so the team can sign in.
+Without `--force` it only prints the counts; on an `APP_ENV=production` install it refuses
+unless `--i-know-this-is-production` is given.
+
+1. On production: `cd <prod app> && php artisan backup:run --only-db` (or
+   `mysqldump -u <user> -p <prod_db> | gzip > /home/iruali/prod.sql.gz`).
+2. On staging: `gunzip < /home/iruali/prod.sql.gz | mysql -u <user> -p <test_db>`
+3. `cd <test app> && php artisan migrate --force && php artisan iruali:anonymise --force`
+4. `php artisan iruali:ready --offline` to confirm the copy works.
+
+Weekly cron on the server (Sunday 03:30, after the nightly backup), with both apps on the
+same host:
+
+```
+30 3 * * 0 cd /home/iruali/iruali && mysqldump -u iruali -p"$DB_PASS" iruali_prod | mysql -u iruali -p"$DB_PASS" iruali_test && cd /home/iruali/test && php artisan migrate --force && php artisan iruali:anonymise --force >> storage/logs/anonymise.log 2>&1
+```
+
+Never run the anonymiser against the production database, and never copy a production
+database anywhere without running it.
+
 ## Admin inbox
 
 **Admin → Inbox** (`/admin/inbox`, badge in the admin nav) lists what is waiting for a

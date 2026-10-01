@@ -63,6 +63,8 @@ return [
         // to get the API key. Use the UAT (sandbox) environment until BML approves the go-live.
         'api_key' => env('BML_API_KEY'),
         'environment' => env('BML_ENVIRONMENT', 'sandbox'), // sandbox or production
+        // BML_FAKE=1 walks checkout without BML (local dev, browser tests); ignored in production
+        'fake' => (bool) env('BML_FAKE', false),
         'base_uri' => env('BML_BASE_URI') ?: (env('BML_ENVIRONMENT', 'sandbox') === 'production'
             ? 'https://api.merchants.bankofmaldives.com.mv/public'
             : 'https://api.uat.merchants.bankofmaldives.com.mv/public'),

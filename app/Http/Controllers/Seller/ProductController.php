@@ -50,6 +50,7 @@ class ProductController extends Controller
         $product->save();
 
         $this->storeImage($request, $product);
+        app(\App\Services\OnboardingService::class)->refresh(Auth::user()->fresh());
 
         return redirect()->route('seller.products.index')
             ->with('success', 'Product submitted. It will be visible in the shop once an admin approves it.');

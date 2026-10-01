@@ -59,6 +59,7 @@ class User extends Authenticatable implements HasLocalePreference
         'banned_reason',
         'loyalty_points',
         'referral_code', 'referred_by', 'referral_rewarded_at',
+        'shop_logo', 'shop_banner', 'delivery_notes', 'ships_to_islands', 'onboarding_completed_at',
     ];
 
     /**
@@ -93,6 +94,8 @@ class User extends Authenticatable implements HasLocalePreference
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
+        'ships_to_islands' => 'boolean',
+        'onboarding_completed_at' => 'datetime',
     ];
 
     /**
@@ -429,5 +432,13 @@ class User extends Authenticatable implements HasLocalePreference
     public function shopName(): string
     {
         return $this->business_name ?: $this->name;
+    }
+
+    /**
+     * Has the shop finished its onboarding checklist (logo, banner, about, phone, delivery, bank, a product)?
+     */
+    public function isOnboarded(): bool
+    {
+        return $this->onboarding_completed_at !== null;
     }
 }

@@ -29,8 +29,15 @@
 
         <!-- Page heading -->
         @if($seller)
+            @if($seller->shop_banner)
+                <img src="{{ \Illuminate\Support\Facades\Storage::url($seller->shop_banner) }}" alt="" class="w-full h-32 lg:h-48 object-cover rounded-xl mb-3 border border-gray-200">
+            @endif
             <div class="bg-white border border-gray-200 rounded-xl p-4 lg:p-6 mb-5 flex items-center gap-4">
+                @if($seller->shop_logo)
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($seller->shop_logo) }}" alt="{{ $title }}" class="w-14 h-14 lg:w-16 lg:h-16 shrink-0 rounded-xl object-cover border border-gray-200">
+                @else
                 <span class="w-14 h-14 lg:w-16 lg:h-16 shrink-0 rounded-xl bg-primary text-white font-display font-bold text-2xl flex items-center justify-center">{{ mb_strtoupper(mb_substr($title, 0, 1)) }}</span>
+                @endif
                 <div class="min-w-0">
                     <h1 class="font-display text-xl lg:text-3xl font-bold text-dark truncate">{{ $title }}</h1>
                     <p class="text-sm text-gray-600 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">

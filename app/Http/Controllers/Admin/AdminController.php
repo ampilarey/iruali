@@ -140,6 +140,9 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $product = Product::findOrFail($id);
+        if (app(\App\Services\OnboardingService::class)->blocksActivation($product->seller)) {
+            return redirect()->back()->with('error', __('This shop has not completed its checklist yet (logo, banner, about, phone, delivery, bank account, a product), so its products cannot go live.'));
+        }
         $product->update(['is_active' => true]);
 
         return redirect()->back()->with('success', 'Product approved successfully.');

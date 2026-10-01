@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\SellerBankAccount;
+use App\Services\OnboardingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -52,6 +53,8 @@ class SettingsController extends Controller
                 'after' => $this->masked($account->only($fields)),
             ]);
         }
+
+        app(OnboardingService::class)->refresh($user->fresh());
 
         return redirect()->route('seller.settings.bank')->with('success', __('Bank details saved. Payouts go to this account from now on.'));
     }

@@ -72,7 +72,8 @@ class SellerOrder extends Model
 
     /**
      * Where the shop's money for this part stands:
-     * cancelled → none; paid_out → in a payout; available → delivered and the customer has paid; pending → not yet.
+     * cancelled → none; paid_out → in a payout; processing → in a payout batch not yet paid;
+     * available → delivered and the customer has paid; pending → not yet.
      */
     public function earningsState(): string
     {
@@ -80,7 +81,7 @@ class SellerOrder extends Model
             return 'cancelled';
         }
         if ($this->payout_id) {
-            return 'paid_out';
+            return $this->payout && ! $this->payout->isPaid() ? 'processing' : 'paid_out';
         }
 
         return $this->status === 'delivered' && $this->order?->payment_status === 'paid' ? 'available' : 'pending';

@@ -31,6 +31,8 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title="{{ __('Paid orders not shipped within :n days of payment, last :days days.', ['n' => \App\Models\Setting::get('late_shipment_days'), 'days' => \App\Services\SellerPerformanceService::WINDOW_DAYS]) }}">{{ __('Late') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Rating') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -60,7 +62,20 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ ($seller->seller_applied_at ?? $seller->created_at)->format('M d, Y') }}
                                 </td>
+                                @php $perf = $performance[$seller->id] ?? null; @endphp
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    @if($perf && $perf['late_rate'] !== null)
+                                        <a href="{{ route('admin.sellers.performance', $seller) }}" class="font-medium {{ $perf['late_rate'] > 10 ? 'text-red-700' : 'text-gray-900' }} hover:underline">{{ rtrim(rtrim(number_format($perf['late_rate'], 1), '0'), '.') }}%</a>
+                                        <span class="block text-xs text-gray-500">{{ $perf['late_count'] }}/{{ $perf['shipped_total'] }}</span>
+                                    @else
+                                        <a href="{{ route('admin.sellers.performance', $seller) }}" class="text-gray-400 hover:underline">—</a>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    @if($perf && $perf['rating'] !== null){{ number_format($perf['rating'], 1) }} ★ <span class="text-xs text-gray-500">({{ $perf['reviews'] }})</span>@else<span class="text-gray-400">—</span>@endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{{ route('admin.sellers.performance', $seller) }}" class="text-primary-700 hover:text-primary-900 me-3">{{ __('Performance') }}</a>
                                     @if(! $seller->seller_approved)
                                     <form method="POST" action="{{ route('admin.sellers.approve', $seller->id) }}" class="inline">
                                         @csrf
@@ -81,7 +96,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">No sellers found</td>
+                                <td colspan="7" class="px-6 py-4 text-center text-gray-500">No sellers found</td>
                             </tr>
                             @endforelse
                         </tbody>

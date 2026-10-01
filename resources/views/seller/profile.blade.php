@@ -17,7 +17,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('seller.profile.update') }}" class="space-y-4 rounded-lg bg-white p-6 shadow">
+        <form method="POST" action="{{ route('seller.profile.update') }}" enctype="multipart/form-data" class="space-y-4 rounded-lg bg-white p-6 shadow">
             @csrf
             @method('PUT')
 
@@ -72,23 +72,49 @@
                 </div>
             </div>
 
-            <div class="border-t border-gray-100 pt-4">
-                <h2 class="text-base font-semibold text-gray-900">Payout bank account</h2>
-                <p class="text-sm text-gray-500">iruali pays your earnings to this account by bank transfer.</p>
-                <div class="mt-3 grid gap-4 sm:grid-cols-3">
+            <div id="branding" class="border-t border-gray-100 pt-4">
+                <h2 class="text-base font-semibold text-gray-900">{{ __('Shop logo and banner') }}</h2>
+                <p class="text-sm text-gray-500">{{ __('The logo is shown next to your shop name; the banner across the top of your shop page. JPEG, PNG or WebP.') }}</p>
+                <div class="mt-3 grid gap-4 sm:grid-cols-2">
                     <div>
-                        <label for="payout_bank_name" class="block text-sm font-medium text-gray-700">Bank</label>
-                        <input id="payout_bank_name" name="payout_bank_name" class="{{ $field }}" placeholder="Bank of Maldives" value="{{ old('payout_bank_name', $user->payout_bank_name) }}">
+                        <label for="shop_logo" class="block text-sm font-medium text-gray-700">{{ __('Shop logo') }} <span class="font-normal text-gray-500">({{ __('square, up to 2 MB') }})</span></label>
+                        @if($user->shop_logo)<img src="{{ \Illuminate\Support\Facades\Storage::url($user->shop_logo) }}" alt="" class="mt-1 h-16 w-16 rounded-lg object-cover border border-gray-200">@endif
+                        <input id="shop_logo" name="shop_logo" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-gray-700">
                     </div>
                     <div>
-                        <label for="payout_account_name" class="block text-sm font-medium text-gray-700">Account name</label>
-                        <input id="payout_account_name" name="payout_account_name" class="{{ $field }}" value="{{ old('payout_account_name', $user->payout_account_name) }}">
-                    </div>
-                    <div>
-                        <label for="payout_account_number" class="block text-sm font-medium text-gray-700">Account number</label>
-                        <input id="payout_account_number" name="payout_account_number" class="{{ $field }}" value="{{ old('payout_account_number', $user->payout_account_number) }}">
+                        <label for="shop_banner" class="block text-sm font-medium text-gray-700">{{ __('Shop banner') }} <span class="font-normal text-gray-500">({{ __('wide, up to 4 MB') }})</span></label>
+                        @if($user->shop_banner)<img src="{{ \Illuminate\Support\Facades\Storage::url($user->shop_banner) }}" alt="" class="mt-1 h-16 w-full rounded-lg object-cover border border-gray-200">@endif
+                        <input id="shop_banner" name="shop_banner" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-gray-700">
                     </div>
                 </div>
+            </div>
+
+            <div id="delivery" class="border-t border-gray-100 pt-4">
+                <h2 class="text-base font-semibold text-gray-900">{{ __('Delivery options') }}</h2>
+                <p class="text-sm text-gray-500">{{ __('Tell customers how you send orders: boat or flight to other islands, courier in Malé, pick-up, and how long it usually takes.') }}</p>
+                <div class="mt-3 space-y-3">
+                    <div>
+                        <label for="delivery_notes" class="block text-sm font-medium text-gray-700">{{ __('How you deliver') }}</label>
+                        <textarea id="delivery_notes" name="delivery_notes" rows="3" maxlength="1000" class="{{ $field }}">{{ old('delivery_notes', $user->delivery_notes) }}</textarea>
+                    </div>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input type="hidden" name="ships_to_islands" value="0">
+                        <input type="checkbox" name="ships_to_islands" value="1" class="rounded border-gray-300" @checked(old('ships_to_islands', $user->ships_to_islands ?? true))>
+                        {{ __('I ship to other islands (not only my own island)') }}
+                    </label>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-4">
+                <h2 class="text-base font-semibold text-gray-900">{{ __('Payout bank account') }}</h2>
+                <p class="text-sm text-gray-500">
+                    @if($user->bankAccount)
+                        {{ $user->bankAccount->account_name }} · {{ $user->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $user->bankAccount->maskedNumber() }}</span>
+                    @else
+                        {{ __('Add your bank account so iruali can pay you. Without it your earnings stay on hold.') }}
+                    @endif
+                    <a href="{{ route('seller.settings.bank') }}" class="ms-1 font-medium text-primary-600 hover:underline">{{ __('Manage bank account') }}</a>
+                </p>
             </div>
 
             <div class="flex justify-end border-t border-gray-100 pt-4">

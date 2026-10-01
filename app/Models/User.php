@@ -59,6 +59,8 @@ class User extends Authenticatable implements HasLocalePreference
         'banned_reason',
         'loyalty_points',
         'referral_code', 'referred_by', 'referral_rewarded_at',
+        'shop_logo', 'shop_banner', 'delivery_notes', 'ships_to_islands', 'onboarding_completed_at',
+        'notification_preferences',
     ];
 
     /**
@@ -93,6 +95,8 @@ class User extends Authenticatable implements HasLocalePreference
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
+        'ships_to_islands' => 'boolean',
+        'onboarding_completed_at' => 'datetime',
         'notification_preferences' => 'array',
     ];
 
@@ -420,52 +424,43 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * Staff can open the admin area: admin, support or finance (config/staff.php says which pages).
+     * The bank account iruali pays this shop's earnings to (Seller Centre → Settings → Bank).
      */
-    public function isStaff(): bool
+    public function bankAccount(): HasOne
     {
-        return \App\Support\StaffAccess::staffRoles($this) !== [];
+        return $this->hasOne(SellerBankAccount::class);
     }
 
-    public function auditLogs(): HasMany
+    public function shopName(): string
     {
-        return $this->hasMany(AuditLog::class);
-    }
-
-    /**
-     * Kinds of notification a customer can route to email, SMS or both
-     * (stored in notification_preferences.customer.*).
-     */
-    public const NOTIFICATION_TYPES = ['order_updates', 'delivery_updates', 'marketing', 'security'];
-
-    /**
-     * 'email', 'sms' or 'both' for one kind of notification. SMS needs a verified phone,
-     * so an SMS choice falls back to email until the number is verified.
-     */
-    public function notificationPreference(string $type): string
-    {
-        $value = data_get($this->notification_preferences, 'customer.'.$type, 'email');
-        if (! in_array($value, ['email', 'sms', 'both'], true)) {
-            return 'email';
-        }
-
-        return $value !== 'email' && ! $this->isPhoneVerified() ? 'email' : $value;
+        return $this->business_name ?: $this->name;
     }
 
     /**
-     * Notification channels for one kind of notification, from the customer's preference.
+     * Has the shop finished its onboarding checklist (logo, banner, about, phone, delivery, bank, a product)?
      */
-    public function notificationChannels(string $type): array
+    public function isOnboarded(): bool
     {
-        return match ($this->notificationPreference($type)) {
-            'sms' => ['sms'],
-            'both' => ['mail', 'sms'],
-            default => ['mail'],
-        };
+        return $this->onboarding_completed_at !== null;
     }
 
-    public function routeNotificationForSms(): ?string
+    /**
+     * The shop emails this user can turn off, all on unless saved otherwise.
+     */
+    public const NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock'];
+
+    /**
+     * @return array<string, bool>
+     */
+    public function notificationPreferences(): array
     {
-        return $this->phone;
+        $saved = is_array($this->notification_preferences) ? $this->notification_preferences : [];
+
+        return collect(self::NOTIFICATION_TYPES)->mapWithKeys(fn ($type) => [$type => (bool) ($saved[$type] ?? true)])->all();
+    }
+
+    public function wantsNotification(string $type): bool
+    {
+        return $this->notificationPreferences()[$type] ?? true;
     }
 }

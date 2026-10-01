@@ -13,6 +13,11 @@
             <div class="rounded-lg bg-white p-5 shadow"><p class="text-sm text-gray-500">Paid to shops</p><p class="mt-1 text-2xl font-bold text-gray-900">{{ Money::format($totals['paid']) }}</p></div>
             <div class="rounded-lg bg-white p-5 shadow"><p class="text-sm text-gray-500">iruali commission (delivered)</p><p class="mt-1 text-2xl font-bold text-primary-700">{{ Money::format($totals['commission']) }}</p></div>
         </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('admin.payout-batches.create') }}" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('New payout batch') }}</a>
+            <a href="{{ route('admin.payout-batches.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Payout batches') }}</a>
+            <span class="text-xs text-gray-500">{{ __('Pay several shops in one BML bulk transfer file.') }}</span>
+        </div>
         <p class="text-sm text-gray-600">Shops earn their item sales minus commission. Earnings are payable once a shop's part is delivered and the customer's payment is confirmed. Default commission: <strong>{{ rtrim(rtrim(number_format($defaultRate, 2), '0'), '.') }}%</strong> (change it in <a href="{{ route('admin.settings') }}" class="text-primary-700 hover:underline">Settings</a>).</p>
 
         <div class="overflow-hidden rounded-lg bg-white shadow">
@@ -37,10 +42,24 @@
                                 <td class="px-4 py-3 text-right font-semibold text-green-700">{{ Money::format($seller->balances['available']) }}</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($seller->balances['pending']) }}</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($seller->balances['paid']) }}</td>
-                                <td class="px-4 py-3 text-xs text-gray-600">@if($seller->payout_account_number){{ $seller->payout_account_name }}<br>{{ $seller->payout_bank_name }} · {{ $seller->payout_account_number }}@else<span class="text-amber-700">Not added yet</span>@endif</td>
+                                <td class="px-4 py-3 text-xs text-gray-600">
+                                    @if($seller->bankAccount)
+                                        {{ $seller->bankAccount->account_name }}<br>{{ $seller->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $seller->bankAccount->account_number }}</span>
+                                        <form method="POST" action="{{ route('admin.sellers.bank.verify', $seller) }}" class="mt-1">
+                                            @csrf
+                                            <button class="rounded-full px-2 py-0.5 text-xs font-medium {{ $seller->bankAccount->isVerified() ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-amber-100 text-amber-800 hover:bg-amber-200' }}" title="{{ __('Click to change') }}">{{ $seller->bankAccount->isVerified() ? __('Verified') : __('Not verified') }}</button>
+                                        </form>
+                                    @else
+                                        <span class="text-amber-700">{{ __('Not added yet') }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-right">
                                     @if($seller->balances['available'] > 0)
-                                        <a href="{{ route('admin.payouts.create', $seller) }}" class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700">Pay out</a>
+                                        @if($seller->bankAccount)
+                                            <a href="{{ route('admin.payouts.create', $seller) }}" class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700">Pay out</a>
+                                        @else
+                                            <span class="text-xs text-amber-700" title="{{ __('This shop has not added a bank account yet, so it cannot be paid out.') }}">{{ __('No bank account') }}</span>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
@@ -57,7 +76,7 @@
             <ul class="divide-y divide-gray-100 text-sm">
                 @forelse($recent as $payout)
                     <li class="px-5 py-3 flex flex-wrap items-center justify-between gap-3">
-                        <span><a href="{{ route('admin.payouts.show', $payout) }}" class="font-medium text-primary-700 hover:underline">#{{ $payout->id }}</a> · {{ $payout->seller?->business_name ?: $payout->seller?->name }} · {{ $payout->paid_at->format('d M Y') }}@if($payout->reference) · ref {{ $payout->reference }}@endif</span>
+                        <span><a href="{{ route('admin.payouts.show', $payout) }}" class="font-medium text-primary-700 hover:underline">#{{ $payout->id }}</a> · {{ $payout->seller?->business_name ?: $payout->seller?->name }} · @if($payout->isPaid()){{ $payout->paid_at?->format('d M Y') }}@else<span class="text-amber-700">{{ __('In batch') }} {{ $payout->batch?->reference }}</span>@endif @if($payout->reference) · ref {{ $payout->reference }}@endif</span>
                         <span class="font-semibold">{{ Money::format($payout->amount) }}</span>
                     </li>
                 @empty

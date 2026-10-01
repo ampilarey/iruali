@@ -11,6 +11,9 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
+/**
+ * A shop has a new order to pack (queued; shops can turn it off under Settings → Notifications).
+ */
 class NewSellerOrder extends Notification implements ShouldQueue
 {
     use Queueable, SerializesModels;
@@ -26,6 +29,10 @@ class NewSellerOrder extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
+        if (method_exists($notifiable, 'wantsNotification') && ! $notifiable->wantsNotification('new_order')) {
+            return [];
+        }
+
         return ['mail'];
     }
 

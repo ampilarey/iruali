@@ -37,3 +37,6 @@ Schedule::command('errors:digest')->dailyAt('07:00')->timezone('Indian/Maldives'
 
 // The ready check (php artisan iruali:ready, admin dashboard) uses this to prove the cron is running
 Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler.heartbeat', now()->toIso8601String()))->everyMinute()->name('heartbeat');
+
+// Shops get one low-stock email a day, in the morning Maldives time (only when something is low)
+Schedule::command('seller:low-stock-digest')->dailyAt('08:00')->timezone('Indian/Maldives')->withoutOverlapping();

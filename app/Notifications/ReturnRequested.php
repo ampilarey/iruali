@@ -11,7 +11,8 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * A customer asked to return items (sent to the shop and to iruali's contact email).
+ * A customer asked to return items (sent to the shop and to iruali's contact email). Queued; the shop
+ * can turn it off under Settings → Notifications, iruali's address always gets it.
  */
 class ReturnRequested extends Notification implements ShouldQueue
 {
@@ -25,6 +26,10 @@ class ReturnRequested extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
+        if (method_exists($notifiable, 'wantsNotification') && ! $notifiable->wantsNotification('return')) {
+            return [];
+        }
+
         return ['mail'];
     }
 

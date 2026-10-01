@@ -50,6 +50,7 @@ class MarketplaceDemoSeeder extends Seeder
                     'seller_approved' => true,
                     'seller_approved_at' => now(),
                     'seller_applied_at' => now()->subWeeks(3),
+                    'onboarding_completed_at' => now(),
                 ]
             );
             $seller->roles()->syncWithoutDetaching([$sellerRole->id]);

@@ -70,8 +70,9 @@ class AdminController extends Controller
             ->orderBy('seller_approved') // pending applications first
             ->latest('seller_applied_at')
             ->paginate(10);
+        $performance = app(\App\Services\SellerPerformanceService::class)->summaryFor($sellers->pluck('id'));
 
-        return view('admin.sellers.index', compact('sellers'));
+        return view('admin.sellers.index', compact('sellers', 'performance'));
     }
 
     public function approveSeller($id)
@@ -148,6 +149,9 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $product = Product::findOrFail($id);
+        if (app(\App\Services\OnboardingService::class)->blocksActivation($product->seller)) {
+            return redirect()->back()->with('error', __('This shop has not completed its checklist yet (logo, banner, about, phone, delivery, bank account, a product), so its products cannot go live.'));
+        }
         $product->update(['is_active' => true, 'approved_at' => $product->approved_at ?? now()]);
         \App\Support\Audit::record('product.approved', $product, ['name' => $product->name]);
 
@@ -259,6 +263,9 @@ class AdminController extends Controller
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
             'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
+            'payout_schedule' => 'sometimes|required|in:weekly,fortnightly,monthly',
+            'payout_day' => 'sometimes|nullable|string|max:30',
+            'late_shipment_days' => 'sometimes|required|integer|min:0|max:60',
         ]);
 
         Setting::set($validated);

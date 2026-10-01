@@ -872,5 +872,22 @@
     "Manage saved addresses": "ރައްކާކޮށްފައިވާ އެޑްރެސްތައް ބަލަހައްޓާ",
     "Save this address to my account for next time": "އަންނަ ފަހަރަށް މި އެޑްރެސް އަހަރެންގެ އެކައުންޓުގައި ރައްކާކުރޭ",
     "Label, e.g. Home (optional)": "ލޭބަލް، މިސާލު: ގެ (އިޚްތިޔާރީ)",
-    "That saved address could not be found. Please choose another or enter a new one.": "އެ ރައްކާކޮށްފައިވާ އެޑްރެސް ނުފެނުނު. އެހެން އެޑްރެސްއެއް އިޚްތިޔާރުކުރައްވާ ނުވަތަ އައު އެޑްރެސްއެއް ލިޔުއްވާ."
+    "That saved address could not be found. Please choose another or enter a new one.": "އެ ރައްކާކޮށްފައިވާ އެޑްރެސް ނުފެނުނު. އެހެން އެޑްރެސްއެއް އިޚްތިޔާރުކުރައްވާ ނުވަތަ އައު އެޑްރެސްއެއް ލިޔުއްވާ.",
+    "Please enter your email so we can send your order confirmation.": "އޯޑަރު ކަށަވަރުކުރުން ފޮނުވޭނެހެން ތިޔަ އީމެއިލް ލިޔުއްވާ.",
+    "Please enter a valid email address.": "ރަނގަޅު އީމެއިލް އެޑްރެސްއެއް ލިޔުއްވާ.",
+    "Please enter your name.": "ތިޔަ ނަން ލިޔުއްވާ.",
+    "A product in your cart is no longer available.": "ކާޓުގައިވާ ތަކެއްޗެއް މިހާރު ލިބެން ނެތް.",
+    "Not enough stock for :name.": ":name ގެ އެކަށީގެންވާ ސްޓޮކެއް ނެތް.",
+    "Your cart is empty.": "ތިޔަ ކާޓް ހުސް.",
+    "You ordered as a guest: keep this email, its link is the way to see and track your order. You can also create an account with this email to find it under My Orders.": "ތިޔަ އޯޑަރު ކުރެއްވީ މެހެމާނެއްގެ ގޮތުގައި: މި އީމެއިލް ރައްކާކުރައްވާ، އޯޑަރު ބަލައި ޓްރެކްކުރެވޭނީ މި ލިންކުންނެވެ. މި އީމެއިލް އިން އެކައުންޓެއް ހައްދަވައިގެން އަހަރެންގެ އޯޑަރުތަކުގެ ތެރެއިން ވެސް ފެންނާނެ.",
+    "No account needed. Sign in to use your points and saved addresses.": "އެކައުންޓެއް ބޭނުމެއް ނުވޭ. ޕޮއިންޓްތަކާއި ރައްކާކޮށްފައިވާ އެޑްރެސްތައް ބޭނުންކުރަން ލޮގިން ކުރައްވާ.",
+    "Your details": "ތިޔަ މައުލޫމާތު",
+    "Checking out as a guest. We email your order confirmation and tracking link to this address.": "މެހެމާނެއްގެ ގޮތުގައި ޗެކްއައުޓް ކުރައްވަނީ. އޯޑަރު ކަށަވަރުކުރުމާއި ޓްރެކިންގ ލިންކް މި އީމެއިލަށް ފޮނުވޭނެ.",
+    "Have an account? Sign in": "އެކައުންޓެއް އެބައޮތްތަ؟ ލޮގިން ކުރައްވާ",
+    "Thank you! Your order is confirmed and the shop is preparing it. We emailed a copy of this page to :email.": "ޝުކުރިއްޔާ! ތިޔަ އޯޑަރު ކަށަވަރުވެ ފިހާރައިން ތައްޔާރުކުރަނީ. މި ސަފުހާގެ ކޮޕީއެއް :email އަށް އީމެއިލް ކުރެވިއްޖެ.",
+    "Keep this page: it is the link to your order. We also emailed it to :email.": "މި ސަފުހާ ރައްކާކުރައްވާ: މިއީ ތިޔަ އޯޑަރުގެ ލިންކެވެ. :email އަށް ވެސް އީމެއިލް ކުރެވިއްޖެ.",
+    "Create an account to track your orders": "އޯޑަރުތައް ޓްރެކްކުރަން އެކައުންޓެއް ހައްދަވާ",
+    "Sign up with :email and this order appears under My Orders, with returns, loyalty points and saved addresses for next time.": ":email އިން ރަޖިސްޓަރ ކުރައްވައިފިނަމަ މި އޯޑަރު އަހަރެންގެ އޯޑަރުތަކުގެ ތެރޭގައި ފެންނާނެ، އަދި އަންނަ ފަހަރަށް ރިޓަރން، ލޯޔަލްޓީ ޕޮއިންޓް އަދި ރައްކާކޮށްފައިވާ އެޑްރެސްތައް ލިބޭނެ.",
+    "Need help with this order?": "މި އޯޑަރާ ބެހޭގޮތުން އެހީއެއް ބޭނުންތަ؟",
+    "For a return, a refund or a problem with a guest order, contact us with your order number and we will sort it out.": "މެހެމާނު އޯޑަރެއްގެ ރިޓަރން، ރިފަންޑް ނުވަތަ މައްސަލައެއް ނަމަ، އޯޑަރު ނަންބަރާއެކު އަޅުގަނޑުމެންނަށް ގުޅުއްވާ، ހައްލުކޮށްދޭނަން."
 }

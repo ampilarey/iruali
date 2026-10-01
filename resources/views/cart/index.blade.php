@@ -130,6 +130,10 @@
 
                     @auth
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
+                    @elseif(\App\Support\GuestCheckout::enabled())
+                        <a href="{{ route('checkout.guest') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
+                        <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-11 rounded-lg border border-gray-300 text-dark font-semibold hover:bg-gray-50">{{ __('Sign in to check out') }}</a>
+                        <p class="text-xs text-gray-500 text-center">{{ __('No account needed. Sign in to use your points and saved addresses.') }}</p>
                     @else
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Sign in to check out') }}</a>
                         <p class="text-xs text-gray-500 text-center">{{ __('Your cart stays with you when you sign in.') }}</p>

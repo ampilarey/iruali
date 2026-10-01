@@ -71,9 +71,9 @@ class OrderResource extends JsonResource
             }),
             'user' => $this->whenLoaded('user', function () {
                 return [
-                    'id' => $this->user->id,
-                    'name' => $this->user->name,
-                    'email' => $this->user->email,
+                    'id' => $this->user?->id,
+                    'name' => $this->user?->name ?? $this->guest_name,
+                    'email' => $this->user?->email ?? $this->guest_email,
                 ];
             }),
             'created_at' => $this->created_at,

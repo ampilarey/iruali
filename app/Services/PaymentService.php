@@ -167,11 +167,7 @@ class PaymentService
 
         $order->forceFill(['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()])->save();
 
-        try {
-            $order->user?->notify(new RefundRecorded($order));
-        } catch (Throwable $e) {
-            report($e);
-        }
+        app(OrderNotifier::class)->sendToCustomer($order, new RefundRecorded($order));
 
         return true;
     }

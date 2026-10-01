@@ -70,7 +70,7 @@
             </div>
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Ship to</h2>
-                <p class="mt-2 text-sm text-gray-900">{{ $order->user->name ?? 'Customer' }}</p>
+                <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span> <span class="block text-xs text-gray-500">{{ $order->guest_email }}</span>@endif</p>
                 <p class="text-sm text-gray-700">{{ $order->shipping_address }}</p>
                 <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
                 <p class="text-sm text-gray-700">{{ $order->shipping_country }}</p>

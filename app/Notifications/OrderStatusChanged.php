@@ -29,7 +29,7 @@ class OrderStatusChanged extends Notification
 
         $mail = (new MailMessage)->salutation(__('The iruali team'))
             ->subject($subject)
-            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? $this->order->customerName()]))
             ->line($line);
 
         // Tracking details each shop gave when it sent its part
@@ -39,6 +39,6 @@ class OrderStatusChanged extends Notification
             }
         }
 
-        return $mail->action(__('View your order'), route('orders.show', $this->order));
+        return $mail->action(__('View your order'), $this->order->customerUrl());
     }
 }

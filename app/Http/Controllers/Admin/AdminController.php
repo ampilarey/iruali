@@ -250,6 +250,7 @@ class AdminController extends Controller
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
             'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
+            'guest_checkout_enabled' => 'sometimes|boolean',
         ]);
 
         Setting::set($validated);

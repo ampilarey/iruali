@@ -41,6 +41,8 @@ class Setting extends Model
         'free_delivery_over' => 1000,
         // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
         'default_commission_rate' => 10,
+        // Checkout without an account (orders carry the guest's email and a token for signed links)
+        'guest_checkout_enabled' => 0,
     ];
 
     protected $fillable = ['key', 'value'];

@@ -7,7 +7,6 @@ use App\Models\SellerOrder;
 use App\Models\User;
 use App\Notifications\SellerOrderShipped;
 use Illuminate\Support\Facades\DB;
-use Throwable;
 
 /**
  * Per-shop fulfilment. Each order is split into one part per shop (SellerOrder). Shops move their
@@ -169,15 +168,7 @@ class FulfilmentService
 
     protected function notifyPartShipped(SellerOrder $part): void
     {
-        $customer = $part->order->user;
-        if (! $customer?->email) {
-            return;
-        }
-
-        try {
-            $customer->notify(new SellerOrderShipped($part));
-        } catch (Throwable $e) {
-            report($e);
-        }
+        // The account holder, or the guest's email for a guest order
+        app(OrderNotifier::class)->sendToCustomer($part->order, new SellerOrderShipped($part));
     }
 }

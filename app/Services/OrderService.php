@@ -21,11 +21,16 @@ class OrderService
     }
 
     /**
-     * Create a new order from cart
+     * Create a new order from cart.
+     *
+     * A guest order (guest checkout) passes no user: its token-keyed cart comes in $cart and the
+     * guest's email and name in $guest. Guests earn no points and can't redeem any.
+     *
+     * @param  array{email?: string, name?: string}  $guest
      */
-    public function createOrderFromCart(User $user, array $shippingData): array
+    public function createOrderFromCart(?User $user, array $shippingData, ?Cart $cart = null, array $guest = []): array
     {
-        $cart = $user->carts()->where('status', 'active')->latest()->first();
+        $cart ??= $user?->carts()->where('status', 'active')->latest()->first();
 
         if (! $cart || $cart->items->count() === 0) {
             return ['success' => false, 'message' => 'Your cart is empty.'];
@@ -62,7 +67,7 @@ class OrderService
             $discounts = $this->discountService->calculateTotalDiscount($cart);
             $redeem = min(
                 (int) $discounts['points']['points_redeemed'],
-                max(0, (int) $user->fresh()->loyalty_points),
+                max(0, (int) $user?->fresh()->loyalty_points),
                 (int) floor(max(0, $cart->total - $discounts['voucher']['amount']))
             );
             if ($redeem !== (int) $discounts['points']['points_redeemed']) {
@@ -71,7 +76,7 @@ class OrderService
                 $discounts['total_discount'] = $discounts['voucher']['amount'] + $redeem;
                 $discounts['final_total'] = max(0, $cart->total - $discounts['total_discount']);
             }
-            $loyaltyPointsEarned = $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']);
+            $loyaltyPointsEarned = $user ? $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']) : 0;
 
             // Delivery fee by area (points are earned on goods only, not delivery)
             $delivery = app(DeliveryService::class);
@@ -79,7 +84,7 @@ class OrderService
             $shippingData['shipping_amount'] = $delivery->fee($shippingData['delivery_zone'], $discounts['final_total']);
 
             // Create order
-            $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned);
+            $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
 
             // Process discounts and points
             $this->processDiscounts($order, $discounts);
@@ -100,7 +105,7 @@ class OrderService
             }
 
             // Redeemed points are taken now; earned points and referral rewards come when the order is paid.
-            if ($discounts['points']['points_redeemed'] > 0) {
+            if ($user && $discounts['points']['points_redeemed'] > 0) {
                 $user->decrement('loyalty_points', $discounts['points']['points_redeemed']);
             }
 
@@ -132,13 +137,17 @@ class OrderService
     /**
      * Create order record
      */
-    protected function createOrder(User $user, Cart $cart, array $shippingData, array $discounts, int $loyaltyPointsEarned): Order
+    protected function createOrder(?User $user, Cart $cart, array $shippingData, array $discounts, int $loyaltyPointsEarned, array $guest = []): Order
     {
         $voucher = $discounts['voucher']['voucher'];
         $pointsRedeemed = $discounts['points']['points_redeemed'];
 
         return Order::create([
-            'user_id' => $user->id,
+            'user_id' => $user?->id,
+            // Guest checkout: who to email, and a token that signed order links carry
+            'guest_email' => $user ? null : ($guest['email'] ?? null),
+            'guest_name' => $user ? null : ($guest['name'] ?? null),
+            'guest_token' => $user ? null : \Illuminate\Support\Str::random(40),
             'order_number' => $this->generateOrderNumber(),
             'status' => 'pending',
             'total_amount' => $discounts['final_total'] + $shippingData['shipping_amount'],

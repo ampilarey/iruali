@@ -240,7 +240,7 @@
                                     <span class="text-sm font-medium text-gray-700">#{{ $order->id }}</span>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">{{ $order->user->name ?? 'Guest' }}</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ $order->customerName() ?? 'Deleted user' }}@if($order->isGuest()) <span class="text-xs text-amber-700 font-medium">(Guest)</span>@endif</p>
                                     <p class="text-sm text-gray-500">{{ \App\Support\Money::format($order->total_amount ?? 0) }}</p>
                                 </div>
                             </div>

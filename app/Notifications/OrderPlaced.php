@@ -21,7 +21,7 @@ class OrderPlaced extends Notification
         $order = $this->order->loadMissing('items.product');
         $mail = (new MailMessage)->salutation(__('The iruali team'))
             ->subject(__('Order :number received', ['number' => $order->order_number]))
-            ->greeting(__('Thank you, :name.', ['name' => $notifiable->name]))
+            ->greeting(__('Thank you, :name.', ['name' => $notifiable->name ?? $order->customerName()]))
             ->line(__('We have your order :number. The shop will prepare it and we will email you when it ships.', ['number' => $order->order_number]));
 
         foreach ($order->items as $item) {
@@ -31,8 +31,12 @@ class OrderPlaced extends Notification
         $mail->line(__('Delivery').': '.Money::format($order->shipping_amount))
             ->line('**'.__('Total').': '.Money::format($order->total_amount).'**');
 
-        return $mail->action(__('View your order'), route('orders.show', $order))
-            ->line(__('Please keep this email as a record of your purchase, together with our Terms & Conditions and Returns, Refunds & Cancellations policy: :url', ['url' => route('policies.terms')]))
-            ->line(__('Printable receipt: :url', ['url' => route('orders.receipt', $order)]));
+        $mail->action(__('View your order'), $order->customerUrl());
+        if ($order->isGuest()) {
+            $mail->line(__('You ordered as a guest: keep this email, its link is the way to see and track your order. You can also create an account with this email to find it under My Orders.'));
+        }
+
+        return $mail->line(__('Please keep this email as a record of your purchase, together with our Terms & Conditions and Returns, Refunds & Cancellations policy: :url', ['url' => route('policies.terms')]))
+            ->line(__('Printable receipt: :url', ['url' => $order->customerReceiptUrl()]));
     }
 }

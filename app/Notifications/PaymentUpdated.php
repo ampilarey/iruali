@@ -19,10 +19,10 @@ class PaymentUpdated extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $number = $this->order->order_number;
-        $mail = (new MailMessage)->salutation(__('The iruali team'))->greeting(__('Hello :name,', ['name' => $notifiable->name]));
+        $mail = (new MailMessage)->salutation(__('The iruali team'))->greeting(__('Hello :name,', ['name' => $notifiable->name ?? $this->order->customerName()]));
 
         return $mail->subject(__('Payment received for order :number', ['number' => $number]))
             ->line(__('We have received your payment of :amount. Thank you.', ['amount' => Money::format($this->order->total_amount)]))
-            ->action(__('View your order'), route('orders.show', $this->order));
+            ->action(__('View your order'), $this->order->customerUrl());
     }
 }

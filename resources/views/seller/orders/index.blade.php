@@ -37,7 +37,7 @@
                                     <p class="text-sm font-medium text-gray-900">#{{ $order->order_number }}</p>
                                     <p class="text-xs text-gray-500">{{ $order->created_at->format('d M Y, H:i') }}</p>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $order->user->name ?? 'Customer' }}<span class="block text-xs text-gray-500">{{ $order->shipping_city }}</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="text-xs text-amber-700 font-medium">(Guest)</span>@endif<span class="block text-xs text-gray-500">{{ $order->shipping_city }}</span></td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $order->items->sum('quantity') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->subtotal) }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->seller_earnings) }}</td>

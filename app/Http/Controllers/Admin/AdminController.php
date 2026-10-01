@@ -257,6 +257,10 @@ class AdminController extends Controller
             'analytics_provider' => 'sometimes|required|in:none,plausible,ga4',
             'analytics_id' => ['sometimes', 'nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9_-]+$/'],
             'analytics_domain' => ['sometimes', 'nullable', 'string', 'max:120', 'regex:/^[a-z0-9.-]+$/i'],
+            'social_facebook' => 'sometimes|nullable|url|max:255',
+            'social_instagram' => 'sometimes|nullable|url|max:255',
+            'social_tiktok' => 'sometimes|nullable|url|max:255',
+            'social_x' => 'sometimes|nullable|url|max:255',
         ]);
 
         Setting::set($validated);

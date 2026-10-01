@@ -45,6 +45,12 @@ class Setting extends Model
         'analytics_provider' => 'none',
         'analytics_id' => '',
         'analytics_domain' => '',
+        // Social profiles (footer / Organization structured data) and the product feed secret
+        'social_facebook' => '',
+        'social_instagram' => '',
+        'social_tiktok' => '',
+        'social_x' => '',
+        'feed_token' => '',
     ];
 
     protected $fillable = ['key', 'value'];

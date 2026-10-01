@@ -140,7 +140,7 @@ class SellerController extends Controller
         $user->load('bankAccount');
         $balances = $payouts->balances($user);
         $parts = SellerOrder::where('seller_id', $user->id)->with(['order', 'payout'])->latest()->paginate(20);
-        $payoutHistory = $user->payouts()->latest('paid_at')->take(20)->get();
+        $payoutHistory = $user->payouts()->with('batch')->latest('id')->take(20)->get();
         $rate = $user->effectiveCommissionRate();
         $adjustments = \App\Models\SellerAdjustment::where('seller_id', $user->id)->with('payout')->latest()->take(20)->get();
 

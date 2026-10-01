@@ -37,7 +37,7 @@ class PayoutController extends Controller
             'commission' => $sellers->sum(fn ($s) => $s->balances['commission']),
         ];
 
-        $recent = SellerPayout::with('seller')->latest('paid_at')->take(15)->get();
+        $recent = SellerPayout::with(['seller', 'batch'])->latest('id')->take(15)->get();
         $defaultRate = (float) Setting::get('default_commission_rate');
 
         return view('admin.payouts.index', compact('sellers', 'totals', 'recent', 'defaultRate'));
@@ -120,14 +120,14 @@ class PayoutController extends Controller
             $shop = $payout->seller?->business_name ?: $payout->seller?->name;
             foreach ($payout->sellerOrders as $part) {
                 fputcsv($out, [
-                    $payout->id, $shop, $payout->paid_at->toDateString(), $payout->reference,
+                    $payout->id, $shop, $payout->paid_at?->toDateString(), $payout->reference,
                     $part->order?->order_number, $part->order?->created_at?->toDateString(),
                     $part->subtotal, $part->commission_rate, $part->commission_amount, $part->seller_earnings,
                 ]);
             }
             foreach ($payout->adjustments as $adjustment) {
                 fputcsv($out, [
-                    $payout->id, $shop, $payout->paid_at->toDateString(), $payout->reference,
+                    $payout->id, $shop, $payout->paid_at?->toDateString(), $payout->reference,
                     $adjustment->reason, $adjustment->created_at?->toDateString(), '', '', '', $adjustment->amount,
                 ]);
             }

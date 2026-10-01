@@ -2,11 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\PayoutBatch;
 use App\Models\SellerAdjustment;
 use App\Models\SellerOrder;
 use App\Models\SellerPayout;
 use App\Models\User;
+use App\Notifications\PayoutPaid;
+use App\Support\BankFileFormat;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * What iruali owes each shop, and recording the payouts.
@@ -21,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 class PayoutService
 {
     /**
-     * @return array{pending: float, available: float, adjustments: float, paid: float, commission: float}
+     * @return array{pending: float, available: float, adjustments: float, paid: float, processing: float, commission: float}
      */
     public function balances(User $seller): array
     {
@@ -35,7 +40,8 @@ class PayoutService
             'available' => round($payable + $adjustments, 2),
             'pending' => round($unpaid - $payable, 2),
             'adjustments' => $adjustments,
-            'paid' => round((float) SellerPayout::where('seller_id', $seller->id)->sum('amount'), 2),
+            'paid' => round((float) SellerPayout::where('seller_id', $seller->id)->where('status', 'paid')->sum('amount'), 2),
+            'processing' => round((float) SellerPayout::where('seller_id', $seller->id)->where('status', 'pending')->sum('amount'), 2),
             'commission' => round((float) (clone $parts)->where('status', 'delivered')->sum('commission_amount'), 2),
         ];
     }
@@ -43,7 +49,7 @@ class PayoutService
     /**
      * balances() for every shop at once (the admin payouts page): a few grouped queries instead of five per shop.
      *
-     * @return array<int, array{pending: float, available: float, adjustments: float, paid: float, commission: float}>
+     * @return array<int, array{pending: float, available: float, adjustments: float, paid: float, processing: float, commission: float}>
      */
     public function balancesForAll(): array
     {
@@ -56,7 +62,8 @@ class PayoutService
                 SUM(CASE WHEN seller_orders.status = 'delivered' THEN seller_orders.commission_amount ELSE 0 END) AS commission")
             ->get()->keyBy('seller_id');
         $adjustments = SellerAdjustment::whereNull('payout_id')->groupBy('seller_id')->selectRaw('seller_id, SUM(amount) AS total')->pluck('total', 'seller_id');
-        $paid = SellerPayout::groupBy('seller_id')->selectRaw('seller_id, SUM(amount) AS total')->pluck('total', 'seller_id');
+        $paid = SellerPayout::where('status', 'paid')->groupBy('seller_id')->selectRaw('seller_id, SUM(amount) AS total')->pluck('total', 'seller_id');
+        $processing = SellerPayout::where('status', 'pending')->groupBy('seller_id')->selectRaw('seller_id, SUM(amount) AS total')->pluck('total', 'seller_id');
 
         $out = [];
         foreach (array_unique(array_merge($parts->keys()->all(), $adjustments->keys()->all(), $paid->keys()->all())) as $sellerId) {
@@ -67,6 +74,7 @@ class PayoutService
                 'pending' => round((float) ($p->unpaid ?? 0) - (float) ($p->payable ?? 0), 2),
                 'adjustments' => $adj,
                 'paid' => round((float) ($paid[$sellerId] ?? 0), 2),
+                'processing' => round((float) ($processing[$sellerId] ?? 0), 2),
                 'commission' => round((float) ($p->commission ?? 0), 2),
             ];
         }
@@ -112,36 +120,192 @@ class PayoutService
             return null;
         }
 
-        return DB::transaction(function () use ($seller, $partIds, $reference, $note, $admin) {
-            $parts = SellerOrder::where('seller_id', $seller->id)
-                ->payable()
-                ->when($partIds !== null, fn ($q) => $q->whereIn('id', $partIds))
-                ->lockForUpdate()
-                ->get();
+        return DB::transaction(fn () => $this->allocate($seller, $partIds, $reference, $note, $admin, null));
+    }
 
-            if ($parts->isEmpty()) {
-                return null;
-            }
-
-            $adjustments = SellerAdjustment::where('seller_id', $seller->id)->whereNull('payout_id')->lockForUpdate()->get();
-            $amount = round($parts->sum('seller_earnings') + $adjustments->sum('amount'), 2);
-            if ($amount <= 0) {
-                return null;
-            }
-
-            $payout = SellerPayout::create([
-                'seller_id' => $seller->id,
-                'amount' => $amount,
-                'reference' => $reference,
-                'note' => $note,
+    /**
+     * Draft a batch: one pending payout per chosen shop, for everything that shop is owed right now.
+     * Shops with no bank account or nothing to pay are skipped; null when no line could be made.
+     * The parts and adjustments are locked, so the same earnings can never land in two batches.
+     *
+     * @param  int[]  $sellerIds
+     */
+    public function createBatch(array $sellerIds, ?User $admin, ?string $notes = null): ?PayoutBatch
+    {
+        DB::beginTransaction();
+        try {
+            $batch = PayoutBatch::create([
+                'reference' => PayoutBatch::nextReference(),
                 'created_by' => $admin?->id,
-                'paid_at' => now(),
+                'status' => 'draft',
+                'notes' => $notes,
             ]);
 
-            SellerOrder::whereIn('id', $parts->pluck('id'))->update(['payout_id' => $payout->id]);
-            SellerAdjustment::whereIn('id', $adjustments->pluck('id'))->update(['payout_id' => $payout->id]);
+            $total = 0.0;
+            $count = 0;
+            foreach (User::whereIn('id', $sellerIds)->with('bankAccount')->get() as $seller) {
+                if ($this->payoutBlockedReason($seller)) {
+                    continue;
+                }
+                $payout = $this->allocate($seller, null, null, null, $admin, $batch);
+                if ($payout) {
+                    $total += (float) $payout->amount;
+                    $count++;
+                }
+            }
 
-            return $payout;
+            if ($count === 0) {
+                DB::rollBack();
+
+                return null;
+            }
+
+            $batch->update(['total' => round($total, 2), 'count' => $count]);
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return $batch;
+    }
+
+    /**
+     * The bank file for a batch. Downloading it moves a draft to "exported".
+     */
+    public function exportBatch(PayoutBatch $batch): string
+    {
+        if ($batch->isDraft()) {
+            $batch->update(['status' => 'exported', 'exported_at' => now()]);
+        }
+
+        return BankFileFormat::forBatch($batch);
+    }
+
+    /**
+     * The bank has made the transfers: every payout in the batch is paid, with the bank's reference and
+     * date, and each shop is told. Only a draft or exported batch can be marked paid, once.
+     */
+    public function markBatchPaid(PayoutBatch $batch, string $bankReference, Carbon $paidAt, ?User $admin): bool
+    {
+        $payouts = DB::transaction(function () use ($batch, $bankReference, $paidAt) {
+            $locked = PayoutBatch::whereKey($batch->id)->lockForUpdate()->first();
+            if (! $locked || ! $locked->isOpen()) {
+                return null;
+            }
+
+            $payouts = SellerPayout::where('payout_batch_id', $batch->id)->where('status', 'pending')->lockForUpdate()->get();
+            foreach ($payouts as $payout) {
+                $payout->update(['status' => 'paid', 'paid_at' => $paidAt, 'reference' => BankFileFormat::remark($batch, $payout->id)]);
+            }
+
+            $locked->update(['status' => 'paid', 'paid_at' => $paidAt, 'bank_reference' => $bankReference]);
+
+            return $payouts;
         });
+
+        if ($payouts === null) {
+            return false;
+        }
+
+        $batch->refresh();
+        foreach ($payouts as $payout) {
+            $this->notifyPaid($payout->fresh());
+        }
+
+        return true;
+    }
+
+    /**
+     * Drop a draft batch: its pending payouts are deleted and their parts and adjustments released,
+     * so the earnings are available for a later batch. An exported file may already be at the bank,
+     * so only drafts can be cancelled.
+     */
+    public function cancelBatch(PayoutBatch $batch): bool
+    {
+        return DB::transaction(function () use ($batch) {
+            $locked = PayoutBatch::whereKey($batch->id)->lockForUpdate()->first();
+            if (! $locked || ! $locked->isDraft()) {
+                return false;
+            }
+
+            $ids = SellerPayout::where('payout_batch_id', $batch->id)->where('status', 'pending')->lockForUpdate()->pluck('id');
+            SellerOrder::whereIn('payout_id', $ids)->update(['payout_id' => null]);
+            SellerAdjustment::whereIn('payout_id', $ids)->update(['payout_id' => null]);
+            SellerPayout::whereIn('id', $ids)->delete();
+
+            $locked->update(['status' => 'cancelled', 'total' => 0, 'count' => 0]);
+            $batch->refresh();
+
+            return true;
+        });
+    }
+
+    /**
+     * Shops that could go in a new batch: everything owed to each, and why it can't be included if so.
+     *
+     * @return \Illuminate\Support\Collection<int, array{seller: User, available: float, blocked: ?string}>
+     */
+    public function batchCandidates()
+    {
+        $all = $this->balancesForAll();
+        $sellers = User::whereIn('id', array_keys($all))->with('bankAccount')->orderByRaw('COALESCE(business_name, name)')->get();
+
+        return $sellers
+            ->map(fn (User $seller) => ['seller' => $seller, 'available' => $all[$seller->id]['available'], 'blocked' => $this->payoutBlockedReason($seller)])
+            ->filter(fn ($row) => $row['available'] > 0)
+            ->values();
+    }
+
+    /**
+     * Allocate a shop's payable parts and open adjustments to a new payout. Inside a transaction.
+     */
+    protected function allocate(User $seller, ?array $partIds, ?string $reference, ?string $note, ?User $admin, ?PayoutBatch $batch): ?SellerPayout
+    {
+        $parts = SellerOrder::where('seller_id', $seller->id)
+            ->payable()
+            ->when($partIds !== null, fn ($q) => $q->whereIn('id', $partIds))
+            ->lockForUpdate()
+            ->get();
+
+        if ($parts->isEmpty()) {
+            return null;
+        }
+
+        $adjustments = SellerAdjustment::where('seller_id', $seller->id)->whereNull('payout_id')->lockForUpdate()->get();
+        $amount = round($parts->sum('seller_earnings') + $adjustments->sum('amount'), 2);
+        if ($amount <= 0) {
+            return null;
+        }
+
+        $payout = SellerPayout::create([
+            'seller_id' => $seller->id,
+            'amount' => $amount,
+            'status' => $batch ? 'pending' : 'paid',
+            'reference' => $reference,
+            'note' => $note,
+            'created_by' => $admin?->id,
+            'payout_batch_id' => $batch?->id,
+            'paid_at' => $batch ? null : now(),
+        ]);
+
+        SellerOrder::whereIn('id', $parts->pluck('id'))->update(['payout_id' => $payout->id]);
+        SellerAdjustment::whereIn('id', $adjustments->pluck('id'))->update(['payout_id' => $payout->id]);
+
+        return $payout;
+    }
+
+    protected function notifyPaid(SellerPayout $payout): void
+    {
+        $seller = $payout->seller;
+        if (! $seller?->email) {
+            return;
+        }
+
+        try {
+            $seller->notify(new PayoutPaid($payout));
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

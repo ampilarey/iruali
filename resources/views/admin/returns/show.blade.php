@@ -9,7 +9,7 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6">
             <div class="rounded-lg bg-white p-5 shadow grid gap-3 sm:grid-cols-2 text-sm">
-                <div><p class="text-gray-500">Status</p><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ ucfirst($return->status) }}</span></div>
+                <div><p class="text-gray-500">Status</p><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ $return->statusLabel() }}</span></div>
                 <div><p class="text-gray-500">Requested</p><p>{{ $return->created_at->format('d M Y, H:i') }}</p></div>
                 <div><p class="text-gray-500">Customer</p><p class="font-medium">{{ $return->user?->name }}</p><p class="text-xs text-gray-500">{{ $return->user?->email }} @if($return->user?->phone)· {{ $return->user->phone }}@endif</p></div>
                 <div><p class="text-gray-500">Shop</p><p class="font-medium">{{ $part?->shopName() }}</p></div>

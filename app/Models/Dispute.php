@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DisputeStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,17 +17,6 @@ class Dispute extends Model
         'return_rejected' => 'Return was not accepted',
         'item_not_as_described' => 'Item not as described',
         'other' => 'Something else',
-    ];
-
-    public const OPEN_STATUSES = ['open', 'awaiting_customer', 'awaiting_seller'];
-
-    public const STATUSES = [
-        'open' => 'Open',
-        'awaiting_customer' => 'Waiting for the customer',
-        'awaiting_seller' => 'Waiting for the shop',
-        'resolved_refund' => 'Resolved: full refund',
-        'resolved_partial' => 'Resolved: partial refund',
-        'resolved_rejected' => 'Resolved: not upheld',
     ];
 
     /** Days after delivery during which "not as described" can be raised. */
@@ -81,12 +71,12 @@ class Dispute extends Model
 
     public function scopeOpen(Builder $query): Builder
     {
-        return $query->whereIn('status', self::OPEN_STATUSES);
+        return $query->whereIn('status', DisputeStatus::openValues());
     }
 
     public function isOpen(): bool
     {
-        return in_array($this->status, self::OPEN_STATUSES, true);
+        return in_array($this->status, DisputeStatus::openValues(), true);
     }
 
     public function isResolved(): bool
@@ -101,18 +91,16 @@ class Dispute extends Model
 
     public function statusLabel(): string
     {
-        return __(self::STATUSES[$this->status] ?? $this->status);
+        return DisputeStatus::labelFor($this->status);
     }
 
     public function getStatusBadgeAttribute(): string
     {
-        return [
-            'open' => 'bg-yellow-100 text-yellow-800',
-            'awaiting_customer' => 'bg-blue-100 text-blue-800',
-            'awaiting_seller' => 'bg-purple-100 text-purple-800',
-            'resolved_refund' => 'bg-green-100 text-green-800',
-            'resolved_partial' => 'bg-green-100 text-green-800',
-            'resolved_rejected' => 'bg-gray-200 text-gray-800',
-        ][$this->status] ?? 'bg-gray-100 text-gray-800';
+        return DisputeStatus::badgeFor($this->status);
+    }
+
+    public function statusEnum(): ?DisputeStatus
+    {
+        return DisputeStatus::tryFrom((string) $this->status);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ReturnStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,7 +59,7 @@ class ReturnRequest extends Model
 
     public function isOpen(): bool
     {
-        return in_array($this->status, ['requested', 'approved'], true);
+        return in_array($this->status, ReturnStatus::openValues(), true);
     }
 
     public function reasonLabel(): string
@@ -68,11 +69,16 @@ class ReturnRequest extends Model
 
     public function getStatusBadgeAttribute(): string
     {
-        return [
-            'requested' => 'bg-yellow-100 text-yellow-800',
-            'approved' => 'bg-blue-100 text-blue-800',
-            'refunded' => 'bg-green-100 text-green-800',
-            'rejected' => 'bg-red-100 text-red-800',
-        ][$this->status] ?? 'bg-gray-100 text-gray-800';
+        return ReturnStatus::badgeFor($this->status);
+    }
+
+    public function statusLabel(): string
+    {
+        return ReturnStatus::labelFor($this->status);
+    }
+
+    public function statusEnum(): ?ReturnStatus
+    {
+        return ReturnStatus::tryFrom((string) $this->status);
     }
 }

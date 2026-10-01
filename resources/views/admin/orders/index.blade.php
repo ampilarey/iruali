@@ -46,8 +46,8 @@
                                     <div class="text-sm font-medium text-gray-900">{{ \App\Support\Money::format($order->total_amount ?? 0) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($order->status ?? 'pending') === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                        {{ ucfirst($order->status ?? 'pending') }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $order->status_badge }}">
+                                        {{ \App\Support\OrderStatus::label($order->status ?? 'pending') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

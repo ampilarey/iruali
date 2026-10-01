@@ -8,7 +8,7 @@
         <form method="GET" class="mb-4 flex flex-wrap gap-2">
             <select name="status" class="rounded-lg border border-gray-300 px-3 py-2 text-sm">
                 <option value="">All statuses</option>
-                @foreach(['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'] as $status)
+                @foreach(\App\Enums\SellerOrderStatus::values() as $status)
                     <option value="{{ $status }}" @selected(request('status') === $status)>{{ \App\Support\OrderStatus::label($status) }}</option>
                 @endforeach
             </select>

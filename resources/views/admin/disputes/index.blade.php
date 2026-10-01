@@ -9,7 +9,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <nav class="flex flex-wrap gap-2 text-sm">
             @foreach(['open' => 'Open', 'awaiting_customer' => 'Waiting for customer', 'awaiting_seller' => 'Waiting for shop', 'resolved' => 'Resolved', 'all' => 'All'] as $key => $label)
-                @php $n = match ($key) { 'open' => collect(\App\Models\Dispute::OPEN_STATUSES)->sum(fn ($s) => $counts[$s] ?? 0), 'resolved' => $counts->except(\App\Models\Dispute::OPEN_STATUSES)->sum(), 'all' => null, default => $counts[$key] ?? null }; @endphp
+                @php $n = match ($key) { 'open' => collect(\App\Enums\DisputeStatus::openValues())->sum(fn ($s) => $counts[$s] ?? 0), 'resolved' => $counts->except(\App\Enums\DisputeStatus::openValues())->sum(), 'all' => null, default => $counts[$key] ?? null }; @endphp
                 <a href="{{ route('admin.disputes', ['status' => $key]) }}" class="rounded-full px-3 py-1.5 font-medium {{ $status === $key ? 'bg-primary-600 text-white' : 'bg-white text-gray-700 shadow hover:bg-gray-50' }}">{{ $label }}@if($n) ({{ $n }})@endif</a>
             @endforeach
         </nav>
@@ -30,7 +30,7 @@
                                 <td class="px-4 py-3">{{ \App\Models\Dispute::TYPES[$d->type] ?? $d->type }}</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($d->amount_claimed) }}</td>
                                 <td class="px-4 py-3 text-right">{{ $d->amount_resolved !== null ? Money::format($d->amount_resolved) : '—' }}</td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $d->status_badge }}">{{ \App\Models\Dispute::STATUSES[$d->status] ?? $d->status }}</span></td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $d->status_badge }}">{{ $d->statusLabel() }}</span></td>
                             </tr>
                         @empty
                             <tr><td colspan="8" class="px-4 py-10 text-center text-gray-500">No disputes here.</td></tr>

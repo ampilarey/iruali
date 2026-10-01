@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Setting;
@@ -184,17 +185,11 @@ class PaymentService
 
     public static function statusLabel(?string $status): string
     {
-        return match ($status) {
-            'paid' => __('Paid'),
-            default => __('Unpaid'),
-        };
+        return PaymentStatus::labelFor($status);
     }
 
     public static function statusBadge(?string $status): string
     {
-        return match ($status) {
-            'paid' => 'bg-green-100 text-green-800',
-            default => 'bg-gray-100 text-gray-700',
-        };
+        return PaymentStatus::badgeFor($status);
     }
 }

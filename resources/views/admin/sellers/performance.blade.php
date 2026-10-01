@@ -28,7 +28,7 @@
                             <td class="px-4 py-2"><a href="{{ route('admin.orders.show', $part->order_id) }}" class="font-medium text-primary-700 hover:underline">#{{ $part->order?->order_number }}</a></td>
                             <td class="px-4 py-2 text-gray-600">{{ $paid->format('d M Y') }}</td>
                             <td class="px-4 py-2 {{ $part->shipped_at ? 'text-gray-600' : 'text-red-700 font-medium' }}">{{ $part->shipped_at ? $part->shipped_at->format('d M Y') : __('Not shipped yet') }}</td>
-                            <td class="px-4 py-2"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ ucfirst($part->status) }}</span></td>
+                            <td class="px-4 py-2"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span></td>
                             <td class="px-4 py-2 text-end">{{ (int) $deadline->diffInDays($part->shipped_at ?? now()) }}</td>
                         </tr>
                     @empty

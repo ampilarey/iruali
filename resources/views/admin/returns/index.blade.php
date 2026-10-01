@@ -44,7 +44,7 @@
                                 <td class="px-4 py-3">{{ $return->reasonLabel() }}</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($return->items_value) }}</td>
                                 <td class="px-4 py-3 text-right">{{ $return->refund_amount !== null ? Money::format($return->refund_amount) : '—' }}</td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ ucfirst($return->status) }}</span></td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ $return->statusLabel() }}</span></td>
                             </tr>
                         @empty
                             <tr><td colspan="8" class="px-4 py-10 text-center text-gray-500">No returns here.</td></tr>

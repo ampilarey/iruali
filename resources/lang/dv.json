@@ -774,5 +774,9 @@
     "Two-factor authentication has been disabled.": "ދެ މަރުޙަލާގެ ސެކިއުރިޓީ ބަންދުކުރެވިއްޖެ.",
     "\":name\" is no longer available: the shop has closed.": "\":name\" މިހާރު ލިބޭކަށް ނެތް: ފިހާރަ ބަންދުކޮށްފި.",
     "Sorry, \":name\" just sold out.": "މަޢާފްކުރައްވާ، \":name\" ދެންމެ ހުސްވެއްޖެ.",
-    "We could not place your order. Please try again.": "އޯޑަރު ނުކުރެވުނު. އަލުން މަސައްކަތްކުރައްވާ."
+    "We could not place your order. Please try again.": "އޯޑަރު ނުކުރެވުނު. އަލުން މަސައްކަތްކުރައްވާ.",
+    "Remove from wishlist": "ވިޝްލިސްޓުން ނަގާ",
+    "Apply filters": "ފިލްޓަރުތައް ބޭނުންކުރޭ",
+    ":count suggestions, use the down arrow to browse them": ":count ހުށަހެޅުން، ބައްލަވަން ތިރީ ތީރު ބޭނުންކުރައްވާ",
+    "Search suggestions": "ހޯދުމުގެ ހުށަހެޅުންތައް"
 }

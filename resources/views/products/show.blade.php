@@ -167,7 +167,7 @@
                     <x-compare-toggle :product="$product" />
                     <div class="flex items-center gap-1" aria-label="{{ __('Share') }}">
                         <span class="text-gray-500 text-xs me-1">{{ __('Share') }}</span>
-                        <a href="https://wa.me/?text={{ urlencode($shareText.' '.$shareUrl) }}" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center" aria-label="WhatsApp">
+                        <a href="https://wa.me/?text={{ urlencode($shareText.' '.$shareUrl) }}" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-[#128C7E] text-white flex items-center justify-center" aria-label="WhatsApp">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.4c.1.3.6 1 1.3 1.6.9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"/></svg>
                         </a>
                         <a href="viber://forward?text={{ rawurlencode($shareText.' '.$shareUrl) }}" class="w-8 h-8 rounded-full bg-[#7360F2] text-white flex items-center justify-center text-[10px] font-bold" aria-label="Viber">V</a>
@@ -296,7 +296,7 @@
                                         @error('rating')<p class="text-danger text-xs">{{ $message }}</p>@enderror
                                     </fieldset>
                                     <div>
-                                        <label for="review-title" class="text-sm font-medium text-gray-700">{{ __('Headline') }} <span class="text-gray-400 font-normal">({{ __('optional') }})</span></label>
+                                        <label for="review-title" class="text-sm font-medium text-gray-700">{{ __('Headline') }} <span class="text-gray-500 font-normal">({{ __('optional') }})</span></label>
                                         <input id="review-title" name="title" maxlength="120" value="{{ old('title', $myReview?->title) }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
                                     </div>
                                     <div>
@@ -408,7 +408,7 @@
 
 <!-- Zoomed image -->
 <div data-zoom class="hidden fixed inset-0 z-[80] bg-reef/95 flex items-center justify-center p-4 overflow-hidden" role="dialog" aria-modal="true" aria-label="{{ __('Zoom image') }}">
-    <button type="button" class="absolute top-4 end-4 text-white" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-8 h-8" /></button>
+    <button type="button" data-dialog-close class="absolute top-4 end-4 text-white" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-8 h-8" /></button>
     <img src="" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain transition-transform duration-200 cursor-zoom-in">
 </div>
 
@@ -440,24 +440,30 @@
 
         // Zoom: open the current image full screen
         var zoom = document.querySelector('[data-zoom]');
+        function closeZoom() {
+            if (!zoom || zoom.classList.contains('hidden')) return;
+            zoom.classList.add('hidden'); zoom.querySelector('img').classList.remove('scale-[2]'); document.documentElement.classList.remove('overflow-hidden');
+            if (window.iruDialog) window.iruDialog.close(zoom);
+        }
         document.querySelectorAll('[data-zoom-open]').forEach(function (b) {
             b.addEventListener('click', function () {
                 zoom.querySelector('img').src = main.src;
                 zoom.classList.remove('hidden');
                 document.documentElement.classList.add('overflow-hidden');
+                // Focus goes to the close button, Tab stays inside, Escape closes and focus returns here
+                if (window.iruDialog) window.iruDialog.open(zoom, closeZoom);
             });
         });
         if (zoom) {
             var zimg = zoom.querySelector('img');
             zoom.addEventListener('click', function (e) {
                 if (e.target === zimg) { zimg.classList.toggle('scale-[2]'); zimg.classList.toggle('cursor-zoom-out'); return; }
-                zoom.classList.add('hidden'); zimg.classList.remove('scale-[2]'); document.documentElement.classList.remove('overflow-hidden');
+                closeZoom();
             });
             zimg.addEventListener('mousemove', function (e) {
                 var r = zimg.getBoundingClientRect();
                 zimg.style.transformOrigin = ((e.clientX - r.left) / r.width * 100) + '% ' + ((e.clientY - r.top) / r.height * 100) + '%';
             });
-            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') zoom.click(); });
         }
 
         document.querySelectorAll('[data-copy-link]').forEach(function (b) {

@@ -53,7 +53,7 @@
                     <div class="ml-4 shrink-0 flex">
                         <button 
                             @click="hideNotification()"
-                            class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             <span class="sr-only">Close</span>
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

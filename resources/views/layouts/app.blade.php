@@ -218,7 +218,7 @@
                         <a href="{{ route('register') }}" class="block text-sm text-white/85 underline">{{ __('Create an account') }}</a>
                     @endauth
                 </div>
-                <button type="button" data-drawer-close class="p-1" aria-label="{{ __('Close menu') }}"><x-icon name="x" class="w-6 h-6" /></button>
+                <button type="button" data-drawer-close data-dialog-close class="p-1" aria-label="{{ __('Close menu') }}"><x-icon name="x" class="w-6 h-6" /></button>
             </div>
             <nav class="flex-1 overflow-y-auto overscroll-contain">
                 <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Departments') }}</p>
@@ -456,12 +456,47 @@
     @endif
 
     <script>
+        // Shared dialog behaviour for the drawers and the image zoom: focus moves to the close
+        // button ([data-dialog-close]) on open, Tab cycles inside, Escape closes, and focus goes
+        // back to whatever opened it. open(dialog, hide) — hide() is what actually hides it.
+        window.iruDialog = (function () {
+            var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            function focusables(dialog) {
+                return Array.prototype.filter.call(dialog.querySelectorAll(FOCUSABLE), function (el) { return el.offsetWidth || el.offsetHeight || el.getClientRects().length; });
+            }
+            function open(dialog, hide) {
+                if (!dialog || dialog.__closeDialog) return;
+                var opener = document.activeElement;
+                function keydown(e) {
+                    if (e.key === 'Escape') { e.preventDefault(); close(dialog); return; }
+                    if (e.key !== 'Tab') return;
+                    var items = focusables(dialog), i = items.indexOf(document.activeElement);
+                    if (!items.length) { e.preventDefault(); return; }
+                    if (e.shiftKey && i <= 0) { e.preventDefault(); items[items.length - 1].focus(); }
+                    else if (!e.shiftKey && (i === -1 || i === items.length - 1)) { e.preventDefault(); items[0].focus(); }
+                }
+                dialog.__closeDialog = function () {
+                    document.removeEventListener('keydown', keydown, true);
+                    delete dialog.__closeDialog;
+                    if (hide) hide();
+                    if (opener && opener.focus && document.contains(opener)) opener.focus();
+                };
+                document.addEventListener('keydown', keydown, true);
+                var target = dialog.querySelector('[data-dialog-close]') || focusables(dialog)[0] || dialog;
+                if (target === dialog && !dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
+                requestAnimationFrame(function () { target.focus(); });
+            }
+            function close(dialog) { if (dialog && dialog.__closeDialog) dialog.__closeDialog(); }
+            return { open: open, close: close };
+        })();
+
         (function () {
             var drawer = document.querySelector('[data-drawer]');
             function setDrawer(open) {
                 if (!drawer) return;
                 drawer.classList.toggle('hidden', !open);
                 document.documentElement.classList.toggle('overflow-hidden', open);
+                open ? window.iruDialog.open(drawer, function () { setDrawer(false); }) : window.iruDialog.close(drawer);
             }
             document.querySelectorAll('[data-drawer-open]').forEach(function (b) { b.addEventListener('click', function () { setDrawer(true); }); });
             document.querySelectorAll('[data-drawer-close]').forEach(function (b) { b.addEventListener('click', function () { setDrawer(false); }); });
@@ -494,17 +529,26 @@
 
             // Search suggestions as you type
             var suggestUrl = {{ \Illuminate\Support\Js::from(route('search.suggest')) }};
-            var labels = {{ \Illuminate\Support\Js::from(['products' => __('Products'), 'departments' => __('Departments'), 'brands' => __('Brands'), 'all' => __('See all results for “:q”'), 'none' => __('No suggestions')]) }};
-            document.querySelectorAll('[data-suggest]').forEach(function (form) {
-                var input = form.querySelector('input[name="q"]'), box = document.createElement('div'), timer, last = '';
+            var labels = {{ \Illuminate\Support\Js::from(['products' => __('Products'), 'departments' => __('Departments'), 'brands' => __('Brands'), 'all' => __('See all results for “:q”'), 'none' => __('No suggestions'), 'count' => __(':count suggestions, use the down arrow to browse them'), 'suggestions' => __('Search suggestions')]) }};
+            document.querySelectorAll('[data-suggest]').forEach(function (form, n) {
+                var input = form.querySelector('input[name="q"]'), box = document.createElement('div'), live = document.createElement('div'), timer, last = '';
+                // Combobox pattern: the input owns a listbox of options and says when it is open;
+                // a polite live region announces how many suggestions came back.
                 box.className = 'hidden fixed z-[70] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden text-sm';
+                box.id = 'search-suggestions-' + n;
                 box.setAttribute('role', 'listbox');
-                document.body.appendChild(box);
+                box.setAttribute('aria-label', labels.suggestions);
+                live.className = 'sr-only'; live.setAttribute('aria-live', 'polite');
+                input.setAttribute('role', 'combobox'); input.setAttribute('aria-autocomplete', 'list');
+                input.setAttribute('aria-expanded', 'false'); input.setAttribute('aria-controls', box.id);
+                input.setAttribute('autocomplete', 'off');
+                document.body.appendChild(box); form.appendChild(live);
+                function hide() { box.classList.add('hidden'); input.setAttribute('aria-expanded', 'false'); }
                 function place() {
                     var r = (form.querySelector('.rounded-lg') || form).getBoundingClientRect();
                     box.style.top = (r.bottom + 4) + 'px'; box.style.left = r.left + 'px'; box.style.width = r.width + 'px';
                 }
-                function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+                function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (tag === 'a') e.setAttribute('role', 'option'); if (tag === 'p') e.setAttribute('role', 'presentation'); return e; }
                 function render(data, q) {
                     box.innerHTML = '';
                     var any = false;
@@ -513,29 +557,30 @@
                         any = true;
                         box.appendChild(el('p', 'px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500', labels[group[0]]));
                         data[group[0]].forEach(function (item) {
-                            var a = el('a', 'block px-4 py-2 hover:bg-primary-50 focus:bg-primary-50 outline-none', item.name); a.href = item.url; box.appendChild(a);
+                            var a = el('a', 'block px-4 py-2 hover:bg-primary-50 focus:bg-primary-50', item.name); a.href = item.url; box.appendChild(a);
                         });
                     });
                     if (data.products.length) {
                         any = true;
                         box.appendChild(el('p', 'px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500', labels.products));
                         data.products.forEach(function (p) {
-                            var a = el('a', 'flex items-center gap-3 px-4 py-2 hover:bg-primary-50 focus:bg-primary-50 outline-none'); a.href = p.url;
+                            var a = el('a', 'flex items-center gap-3 px-4 py-2 hover:bg-primary-50 focus:bg-primary-50'); a.href = p.url;
                             var img = el('img', 'w-10 h-10 rounded object-cover bg-primary-50 shrink-0'); img.src = p.image; img.alt = '';
                             var name = el('span', 'flex-1 min-w-0 truncate', p.name);
-                            var price = el('span', 'font-semibold shrink-0' + (p.in_stock ? '' : ' text-gray-400'), p.price);
+                            var price = el('span', 'font-semibold shrink-0' + (p.in_stock ? '' : ' text-gray-500'), p.price);
                             a.append(img, name, price); box.appendChild(a);
                         });
                     }
                     if (!any) box.appendChild(el('p', 'px-4 py-3 text-gray-500', labels.none));
                     var all = el('a', 'block px-4 py-3 border-t border-gray-100 font-semibold text-primary hover:bg-primary-50', labels.all.replace(':q', q));
                     all.href = form.action + '?q=' + encodeURIComponent(q); box.appendChild(all);
-                    place(); box.classList.remove('hidden');
+                    place(); box.classList.remove('hidden'); input.setAttribute('aria-expanded', 'true');
+                    live.textContent = labels.count.replace(':count', box.querySelectorAll('[role="option"]').length - 1);
                 }
                 input.addEventListener('input', function () {
                     clearTimeout(timer);
                     var q = input.value.trim();
-                    if (q.length < 2) { box.classList.add('hidden'); return; }
+                    if (q.length < 2) { hide(); return; }
                     timer = setTimeout(function () {
                         last = q;
                         fetch(suggestUrl + '?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
@@ -552,10 +597,10 @@
                     if (e.key === 'ArrowDown') { e.preventDefault(); (links[i + 1] || links[0]).focus(); }
                     if (e.key === 'ArrowUp') { e.preventDefault(); i <= 0 ? input.focus() : links[i - 1].focus(); }
                 });
-                document.addEventListener('click', function (e) { if (!form.contains(e.target) && !box.contains(e.target)) box.classList.add('hidden'); });
+                document.addEventListener('click', function (e) { if (!form.contains(e.target) && !box.contains(e.target)) hide(); });
                 window.addEventListener('resize', function () { if (!box.classList.contains('hidden')) place(); });
                 window.addEventListener('scroll', function () { if (!box.classList.contains('hidden')) place(); }, { passive: true });
-                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') box.classList.add('hidden'); });
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
             });
             document.addEventListener('keydown', function (e) {
                 if (e.key !== 'Escape') return;

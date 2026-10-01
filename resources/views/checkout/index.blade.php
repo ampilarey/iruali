@@ -192,10 +192,10 @@
                     <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
                         <input type="checkbox" name="agree_terms" value="1" required @checked(old('agree_terms')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
                         <span>{!! __('I have read and accept the :terms, :refunds, :delivery and :privacy.', [
-                            'terms' => '<a href="'.route('policies.terms').'" target="_blank" class="text-primary font-medium underline">'.e(__('Terms & Conditions')).'</a>',
-                            'refunds' => '<a href="'.route('policies.refunds').'" target="_blank" class="text-primary font-medium underline">'.e(__('Returns, Refunds & Cancellations')).'</a>',
-                            'delivery' => '<a href="'.route('policies.delivery').'" target="_blank" class="text-primary font-medium underline">'.e(__('Delivery Policy')).'</a>',
-                            'privacy' => '<a href="'.route('policies.privacy').'" target="_blank" class="text-primary font-medium underline">'.e(__('Privacy Policy')).'</a>',
+                            'terms' => '<a href="'.route('policies.terms').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Terms & Conditions')).'</a>',
+                            'refunds' => '<a href="'.route('policies.refunds').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Returns, Refunds & Cancellations')).'</a>',
+                            'delivery' => '<a href="'.route('policies.delivery').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Delivery Policy')).'</a>',
+                            'privacy' => '<a href="'.route('policies.privacy').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Privacy Policy')).'</a>',
                         ]) !!}</span>
                     </label>
                     @error('agree_terms')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror

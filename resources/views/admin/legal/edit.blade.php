@@ -36,7 +36,7 @@
             <section class="rounded-lg bg-white p-6 shadow">
                 <div class="flex items-center justify-between gap-3">
                     <label for="legal_{{ $key }}_body" class="text-lg font-semibold text-gray-900">{{ $label }}</label>
-                    <a href="{{ route($route) }}" target="_blank" class="text-sm font-medium text-primary-700 hover:underline">View page ↗</a>
+                    <a href="{{ route($route) }}" target="_blank" rel="noopener" class="text-sm font-medium text-primary-700 hover:underline">View page ↗</a>
                 </div>
                 <p class="mt-1 text-xs {{ $values["legal_{$key}_body"] !== '' ? 'text-amber-700 font-semibold' : 'text-gray-500' }}">{{ $values["legal_{$key}_body"] !== '' ? 'Using your own text.' : 'Using iruali\'s built-in text.' }}</p>
                 <textarea id="legal_{{ $key }}_body" name="legal_{{ $key }}_body" rows="{{ $values["legal_{$key}_body"] !== '' ? 16 : 4 }}" placeholder="Leave empty to use the built-in {{ strtolower($label) }}." class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono">{{ old("legal_{$key}_body", $values["legal_{$key}_body"]) }}</textarea>

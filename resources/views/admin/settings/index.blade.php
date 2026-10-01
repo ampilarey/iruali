@@ -132,7 +132,7 @@
                         <input id="company_address" name="company_address" class="{{ $field }}" placeholder="House / building, street, island, postcode" value="{{ old('company_address', $settings['company_address']) }}">
                     </div>
                     <div class="sm:col-span-2">
-                        <label for="company_postal_address" class="block text-sm font-medium text-gray-700">Postal address <span class="text-gray-400 font-normal">(if different)</span></label>
+                        <label for="company_postal_address" class="block text-sm font-medium text-gray-700">Postal address <span class="text-gray-500 font-normal">(if different)</span></label>
                         <input id="company_postal_address" name="company_postal_address" class="{{ $field }}" value="{{ old('company_postal_address', $settings['company_postal_address']) }}">
                     </div>
                     <div>

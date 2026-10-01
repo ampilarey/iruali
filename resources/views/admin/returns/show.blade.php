@@ -38,7 +38,7 @@
             @if($return->photo_path)
                 <div class="rounded-lg bg-white p-5 shadow">
                     <h2 class="text-sm font-semibold text-gray-900">Customer's photo</h2>
-                    <a href="{{ route('returns.photo', $return) }}" target="_blank"><img src="{{ route('returns.photo', $return) }}" alt="Photo of the returned item" class="mt-3 max-h-96 rounded-lg border border-gray-200"></a>
+                    <a href="{{ route('returns.photo', $return) }}" target="_blank" rel="noopener"><img src="{{ route('returns.photo', $return) }}" alt="Photo of the returned item" class="mt-3 max-h-96 rounded-lg border border-gray-200"></a>
                 </div>
             @endif
         </div>

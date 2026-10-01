@@ -34,7 +34,7 @@
                             {{ __('products.sku') }} *
                         </label>
                         <input type="text" name="sku" id="sku" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('sku') }}">
                         @error('sku')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -46,7 +46,7 @@
                             {{ __('products.category') }} *
                         </label>
                         <select name="category_id" id="category_id" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500">
                             <option value="">{{ __('products.select_category') }}</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -67,7 +67,7 @@
                             {{ __('products.name') }} (English) *
                         </label>
                         <input type="text" name="name[en]" id="name_en" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('name.en') }}">
                         @error('name.en')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -79,7 +79,7 @@
                             {{ __('products.name') }} (ދިވެހިންނަށް) *
                         </label>
                         <input type="text" name="name[dv]" id="name_dv" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('name.dv') }}">
                         @error('name.dv')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -94,7 +94,7 @@
                             {{ __('products.description') }} (English)
                         </label>
                         <textarea name="description[en]" id="description_en" rows="4"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">{{ old('description.en') }}</textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500">{{ old('description.en') }}</textarea>
                         @error('description.en')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -105,7 +105,7 @@
                             {{ __('products.description') }} (ދިވެހިންނަށް)
                         </label>
                         <textarea name="description[dv]" id="description_dv" rows="4"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">{{ old('description.dv') }}</textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500">{{ old('description.dv') }}</textarea>
                         @error('description.dv')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -119,7 +119,7 @@
                             {{ __('products.price') }} *
                         </label>
                         <input type="number" name="price" id="price" step="0.01" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('price') }}">
                         @error('price')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -131,7 +131,7 @@
                             {{ __('products.compare_price') }}
                         </label>
                         <input type="number" name="compare_price" id="compare_price" step="0.01"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('compare_price') }}">
                         @error('compare_price')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -146,7 +146,7 @@
                             {{ __('products.stock_quantity') }}
                         </label>
                         <input type="number" name="stock_quantity" id="stock_quantity" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('stock_quantity', 0) }}">
                         @error('stock_quantity')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -158,7 +158,7 @@
                             {{ __('products.reorder_point') }}
                         </label>
                         <input type="number" name="reorder_point" id="reorder_point" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('reorder_point', 10) }}">
                         @error('reorder_point')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -172,7 +172,7 @@
                         {{ __('products.main_image') }}
                     </label>
                     <input type="file" name="main_image" id="main_image" accept="image/*"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500">
                     @error('main_image')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -185,7 +185,7 @@
                             {{ __('products.brand') }}
                         </label>
                         <input type="text" name="brand" id="brand"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('brand') }}">
                     </div>
 
@@ -194,7 +194,7 @@
                             {{ __('products.model') }}
                         </label>
                         <input type="text" name="model" id="model"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                value="{{ old('model') }}">
                     </div>
                 </div>
@@ -273,11 +273,11 @@
                 <!-- Submit Button -->
                 <div class="flex justify-end space-x-4">
                     <a href="{{ route('products.index') }}" 
-                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         {{ __('common.cancel') }}
                     </a>
                     <button type="submit" 
-                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         {{ __('products.create_product') }}
                     </button>
                 </div>

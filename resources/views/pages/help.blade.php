@@ -85,7 +85,7 @@
             <section id="contact" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Contact Us') }}</h2>
                 @if($whatsapp)
-                    <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-lg bg-[#25D366] text-white text-sm font-semibold"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a>
+                    <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-lg bg-[#128C7E] text-white text-sm font-semibold"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a>
                 @endif
                 @if($email || $phone)
                     <ul class="space-y-2">

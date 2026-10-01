@@ -63,7 +63,7 @@
                 <aside class="absolute inset-y-0 end-0 w-[88%] max-w-sm bg-white flex flex-col lg:static lg:w-auto lg:max-w-none lg:bg-transparent">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 lg:hidden">
                         <p class="font-semibold text-lg">{{ __('Filters') }}</p>
-                        <button type="button" data-filters-close class="p-1" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-6 h-6" /></button>
+                        <button type="button" data-filters-close data-dialog-close class="p-1" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-6 h-6" /></button>
                     </div>
                     <form method="GET" action="{{ request()->url() }}" data-filter-form class="flex-1 overflow-y-auto lg:overflow-visible p-4 lg:p-0 space-y-4">
                         @foreach(['q', 'sort', 'view', 'per_page'] as $keep)
@@ -83,7 +83,7 @@
                                             <label class="flex items-center gap-2 py-1 cursor-pointer">
                                                 <input type="radio" name="category" value="{{ $dept->slug }}" class="text-primary focus:ring-primary" @checked(request('category') === $dept->slug) data-autosubmit>
                                                 <span class="flex-1">{{ $dept->localized_name }}</span>
-                                                <span class="text-xs text-gray-400">{{ $dept->facet_count }}</span>
+                                                <span class="text-xs text-gray-500">{{ $dept->facet_count }}</span>
                                             </label>
                                         @endforeach
                                     </div>
@@ -96,7 +96,7 @@
                             <div class="flex items-center gap-2 clear-both">
                                 <label class="sr-only" for="min_price">{{ __('Min') }}</label>
                                 <input id="min_price" type="number" inputmode="numeric" min="0" name="min_price" value="{{ request('min_price') }}" placeholder="{{ $facets['price_min'] }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
-                                <span class="text-gray-400">–</span>
+                                <span class="text-gray-500">–</span>
                                 <label class="sr-only" for="max_price">{{ __('Max') }}</label>
                                 <input id="max_price" type="number" inputmode="numeric" min="0" name="max_price" value="{{ request('max_price') }}" placeholder="{{ $facets['price_max'] }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
                                 <button type="submit" class="shrink-0 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-semibold" aria-label="{{ __('Apply price') }}"><x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" /></button>
@@ -107,12 +107,12 @@
                             <legend class="font-semibold text-sm mb-2 lg:float-left lg:w-full">{{ __('Availability & offers') }}</legend>
                             <label class="flex items-center gap-2 py-1 cursor-pointer clear-both">
                                 <input type="checkbox" name="in_stock" value="1" class="rounded text-primary focus:ring-primary" @checked(request()->boolean('in_stock')) data-autosubmit>
-                                <span class="flex-1">{{ __('In stock only') }}</span><span class="text-xs text-gray-400">{{ $facets['in_stock_count'] }}</span>
+                                <span class="flex-1">{{ __('In stock only') }}</span><span class="text-xs text-gray-500">{{ $facets['in_stock_count'] }}</span>
                             </label>
                             @unless($facets['deals_locked'])
                                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                                     <input type="checkbox" name="deals" value="1" class="rounded text-primary focus:ring-primary" @checked(request()->boolean('deals')) data-autosubmit>
-                                    <span class="flex-1">{{ __('On sale') }}</span><span class="text-xs text-gray-400">{{ $facets['deals_count'] }}</span>
+                                    <span class="flex-1">{{ __('On sale') }}</span><span class="text-xs text-gray-500">{{ $facets['deals_count'] }}</span>
                                 </label>
                             @endunless
                         </fieldset>
@@ -135,7 +135,7 @@
                                     @foreach($facets['brands'] as $brand => $count)
                                         <label class="flex items-center gap-2 py-1 cursor-pointer {{ $loop->index >= 6 ? 'hidden' : '' }}" @if($loop->index >= 6) data-more @endif>
                                             <input type="checkbox" name="brand[]" value="{{ $brand }}" class="rounded text-primary focus:ring-primary" @checked(in_array($brand, (array) request('brand', []), true)) data-autosubmit>
-                                            <span class="flex-1 truncate">{{ $brand }}</span><span class="text-xs text-gray-400">{{ $count }}</span>
+                                            <span class="flex-1 truncate">{{ $brand }}</span><span class="text-xs text-gray-500">{{ $count }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -153,7 +153,7 @@
                                         <label class="flex items-center gap-2 py-1 cursor-pointer {{ $loop->index >= 6 ? 'hidden' : '' }}" @if($loop->index >= 6) data-more @endif>
                                             <input type="checkbox" name="seller[]" value="{{ $s->id }}" class="rounded text-primary focus:ring-primary" @checked(in_array((string) $s->id, array_map('strval', (array) request('seller', [])), true)) data-autosubmit>
                                             <span class="flex-1 min-w-0"><span class="block truncate">{{ $s->business_name ?: $s->name }}</span>@if($s->city)<span class="block text-xs text-gray-500 truncate">{{ $s->city }}</span>@endif</span>
-                                            <span class="text-xs text-gray-400">{{ $s->facet_count }}</span>
+                                            <span class="text-xs text-gray-500">{{ $s->facet_count }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -162,6 +162,7 @@
                                 @endif
                             </fieldset>
                         @endif
+                        <noscript><button type="submit" class="w-full py-2.5 rounded-lg bg-primary text-white font-semibold">{{ __('Apply filters') }}</button></noscript>
                     </form>
                     <div class="lg:hidden border-t border-gray-200 p-4 flex gap-3">
                         <a href="{{ request()->url().(request('q') ? '?q='.urlencode(request('q')) : '') }}" class="flex-1 text-center py-3 rounded-lg border border-gray-300 font-semibold">{{ __('Clear all') }}</a>
@@ -254,14 +255,32 @@
         function setFilters(open) {
             panel.classList.toggle('hidden', !open);
             document.documentElement.classList.toggle('overflow-hidden', open);
+            // Mobile drawer: focus the close button, keep Tab inside, Escape closes, focus returns to the opener
+            if (!window.iruDialog) return;
+            open ? window.iruDialog.open(panel, function () { setFilters(false); }) : window.iruDialog.close(panel);
         }
         document.querySelectorAll('[data-filters-open]').forEach(function (b) { b.addEventListener('click', function () { setFilters(true); }); });
         document.querySelectorAll('[data-filters-close]').forEach(function (b) { b.addEventListener('click', function () { setFilters(false); }); });
 
-        // A ticked filter applies straight away (the page reloads with the new results).
-        var form = document.querySelector('[data-filter-form]');
+        // A ticked filter applies after a short pause (the page reloads with the new results), so a
+        // few quick ticks become one reload. Arrow keys move through a radio group without reloading:
+        // that choice applies once the group loses focus. The noscript "Apply" button covers the rest.
+        var form = document.querySelector('[data-filter-form]'), pending, keyboardNav = false;
+        function queueSubmit() { clearTimeout(pending); pending = setTimeout(function () { form.submit(); }, 400); }
         form.querySelectorAll('[data-autosubmit]').forEach(function (input) {
-            input.addEventListener('change', function () { form.submit(); });
+            input.addEventListener('keydown', function (e) {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) !== -1) { keyboardNav = true; clearTimeout(pending); }
+            });
+            input.addEventListener('change', function (e) {
+                if (!e.isTrusted || keyboardNav) return;
+                queueSubmit();
+            });
+            input.addEventListener('blur', function () {
+                if (!keyboardNav) return;
+                keyboardNav = false;
+                if (form.contains(document.activeElement) && document.activeElement.name === input.name) return;
+                queueSubmit();
+            });
         });
 
         document.querySelectorAll('[data-show-more]').forEach(function (b) {

@@ -80,6 +80,15 @@ nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either
   sign-ins, with who, when, IP and the changes. Code records one with
   `Audit::record('action', $model, [...])`.
 
+## Admin inbox
+
+**Admin → Inbox** (`/admin/inbox`, badge in the admin nav) lists what is waiting for a
+person: shops awaiting approval, products pending review, refunds due, open returns, BML
+payments that failed in the last 24 h, best sellers almost out of stock, unresolved errors.
+Each row opens the page that deals with it; support and finance see only the rows they can
+open. New features add a row with `AdminInbox::register('key', fn () => [...])` from a
+service provider (see `app/Support/AdminInbox.php`).
+
 ## Backups: off the server, and tested
 
 - Nightly `backup:run --only-db` (02:00) writes to every disk in `BACKUP_DISKS`

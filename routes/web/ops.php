@@ -20,5 +20,7 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
 
     Route::get('/audit', [AuditLogController::class, 'index'])->name('audit');
 
+    Route::get('/inbox', [\App\Http\Controllers\Admin\InboxController::class, 'index'])->name('inbox');
+
     Route::post('/users/{user}/role', [StaffRoleController::class, 'update'])->name('users.role');
 });

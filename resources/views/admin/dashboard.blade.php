@@ -186,6 +186,25 @@
         </div>
         @endif
 
+        <!-- Needs attention: the admin inbox rows this person may open (App\Support\AdminInbox) -->
+        @php $inboxItems = array_filter(\App\Support\AdminInbox::items(), fn ($i) => $i['count'] > 0); @endphp
+        @if($inboxItems)
+        <div class="bg-white shadow rounded-lg mb-8" id="needs-attention">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Needs attention</h3>
+                    <a href="{{ route('admin.inbox') }}" class="text-sm font-medium text-primary-700 hover:underline">Open inbox</a>
+                </div>
+                <ul class="flex flex-wrap gap-2 text-sm">
+                    @foreach($inboxItems as $item)
+                        @php $tone = ['danger' => 'bg-red-100 text-red-800', 'warn' => 'bg-amber-100 text-amber-800', 'info' => 'bg-blue-100 text-blue-800'][$item['severity']]; @endphp
+                        <li><a href="{{ $item['url'] }}" class="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 hover:bg-gray-100" data-inbox="{{ $item['key'] }}">{{ $item['label'] }} <span class="rounded-full px-2 text-xs font-semibold {{ $tone }}">{{ $item['count'] }}</span></a></li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @endif
+
         <!-- Quick Actions -->
         <div class="bg-white shadow rounded-lg mb-8">
             <div class="px-4 py-5 sm:p-6">

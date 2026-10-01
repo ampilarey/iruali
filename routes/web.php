@@ -37,6 +37,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
     Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
     Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+    // Uploaded files: cPanel/LiteSpeed won't follow a docroot symlink, so the app serves them
+    Route::get('/storage/{path}', [\App\Http\Controllers\StorageController::class, 'show'])->where('path', '.+')->name('storage.file');
     Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'sitemap'])->name('sitemap');
     Route::view('/help', 'pages.help')->name('help');
 

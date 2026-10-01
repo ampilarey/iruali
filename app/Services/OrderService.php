@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,10 @@ class OrderService
             if (! $product) {
                 return ['success' => false, 'message' => 'A product in your cart no longer exists.'];
             }
+            // A shop that was rejected or suspended can't sell (products owned by staff have no seller flag)
+            if ($product->seller_id && $product->seller?->is_seller && ! $product->seller->isSeller()) {
+                return ['success' => false, 'message' => __('":name" is no longer available: the shop has closed.', ['name' => $product->name['en'] ?? $product->name])];
+            }
             if ($product->stock_quantity < $cartItem->quantity) {
                 return [
                     'success' => false,
@@ -46,8 +51,20 @@ class OrderService
         try {
             DB::beginTransaction();
 
-            // Calculate discounts and totals
+            // Calculate discounts and totals. Redeemed points come from the session; re-check them
+            // against the customer's real balance and the cart as it is now.
             $discounts = $this->discountService->calculateTotalDiscount($cart);
+            $redeem = min(
+                (int) $discounts['points']['points_redeemed'],
+                max(0, (int) $user->fresh()->loyalty_points),
+                (int) floor(max(0, $cart->total - $discounts['voucher']['amount']))
+            );
+            if ($redeem !== (int) $discounts['points']['points_redeemed']) {
+                $discounts['points']['points_redeemed'] = $redeem;
+                $discounts['points']['amount'] = $redeem;
+                $discounts['total_discount'] = $discounts['voucher']['amount'] + $redeem;
+                $discounts['final_total'] = max(0, $cart->total - $discounts['total_discount']);
+            }
             $loyaltyPointsEarned = $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']);
 
             // Delivery fee by area (points are earned on goods only, not delivery)
@@ -67,11 +84,13 @@ class OrderService
             // One part per shop, with its own fulfilment status and the shop's earnings
             app(FulfilmentService::class)->createParts($order);
 
-            // Decrement stock for each product
+            // Take the stock atomically: two checkouts racing for the last unit can't both win
             foreach ($cart->items as $cartItem) {
-                $product = $cartItem->product;
-                if ($product) {
-                    $product->decrement('stock_quantity', $cartItem->quantity);
+                $taken = Product::whereKey($cartItem->product_id)
+                    ->where('stock_quantity', '>=', $cartItem->quantity)
+                    ->decrement('stock_quantity', $cartItem->quantity);
+                if ($taken === 0) {
+                    throw new \RuntimeException(__('Sorry, ":name" just sold out.', ['name' => $cartItem->product->name['en'] ?? $cartItem->product->name]));
                 }
             }
 
@@ -93,10 +112,15 @@ class OrderService
                 'message' => 'Order placed successfully!',
             ];
 
-        } catch (\Exception $e) {
+        } catch (\RuntimeException $e) {
             DB::rollBack();
 
-            return ['success' => false, 'message' => 'Failed to create order: '.$e->getMessage()];
+            return ['success' => false, 'message' => $e->getMessage()]; // our own checks, safe to show
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return ['success' => false, 'message' => __('We could not place your order. Please try again.')];
         }
     }
 
@@ -136,9 +160,13 @@ class OrderService
     {
         $voucher = $discounts['voucher']['voucher'];
 
-        // Increment voucher usage
+        // Use up the voucher, with the row locked so the last use can't be taken twice
         if ($voucher) {
-            $voucher->increment('used_count');
+            $locked = Voucher::whereKey($voucher->id)->lockForUpdate()->first();
+            if (! $locked || ! $locked->is_active || ($locked->max_uses && $locked->used_count >= $locked->max_uses)) {
+                throw new \RuntimeException(__('Voucher usage limit reached.'));
+            }
+            $locked->increment('used_count');
             Session::forget('voucher_code');
         }
 

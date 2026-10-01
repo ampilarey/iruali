@@ -160,7 +160,9 @@ class ReturnService
             // Take back what the shop earned on the returned items (their price less commission).
             $part = $request->sellerOrder;
             if ($part?->seller_id) {
-                $shopShare = round((float) $request->items_value * (1 - (float) $part->commission_rate / 100), 2);
+                // The shop gives back its share of what the customer is actually refunded for the items
+                $base = min((float) $refund, (float) $request->items_value);
+                $shopShare = round($base * (1 - (float) $part->commission_rate / 100), 2);
                 if ($shopShare > 0) {
                     SellerAdjustment::create([
                         'seller_id' => $part->seller_id,

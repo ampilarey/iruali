@@ -69,10 +69,10 @@ if [[ -n "$DOCROOT" ]]; then
   mkdir -p "$DOCROOT/build" "$DOCROOT/images"
   cp -a "$ROOT/public/build/." "$DOCROOT/build/"
   cp -a "$ROOT/public/images/." "$DOCROOT/images/"
-  if [[ -d "$DOCROOT/storage" && ! -L "$DOCROOT/storage" ]]; then
-    rmdir "$DOCROOT/storage" 2>/dev/null || echo "WARNING: $DOCROOT/storage is a real, non-empty directory; uploads will not be served until it is replaced by a link to $ROOT/storage/app/public"
-  fi
-  [[ -e "$DOCROOT/storage" && ! -L "$DOCROOT/storage" ]] || ln -sfn "$ROOT/storage/app/public" "$DOCROOT/storage"
+  # Uploaded files are served by the app at /storage/... (LiteSpeed refuses to follow a docroot
+  # symlink into the app folder). Any leftover storage link/dir in the docroot would shadow that route.
+  if [[ -L "$DOCROOT/storage" ]]; then rm -f "$DOCROOT/storage"; fi
+  if [[ -d "$DOCROOT/storage" ]]; then rmdir "$DOCROOT/storage" 2>/dev/null || echo "WARNING: $DOCROOT/storage is a non-empty directory and will shadow /storage/* uploads"; fi
   mkdir -p "$ROOT/storage/app/public" && echo "ok $(date -u +%FT%TZ)" > "$ROOT/storage/app/public/healthcheck.txt"
   for f in favicon.svg site.webmanifest robots.txt .htaccess; do
     [[ -f "$ROOT/public/$f" ]] && cp -a "$ROOT/public/$f" "$DOCROOT/$f"

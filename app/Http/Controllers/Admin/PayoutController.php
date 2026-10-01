@@ -21,12 +21,13 @@ class PayoutController extends Controller
         $sellers = User::query()
             ->where(fn ($q) => $q->where('is_seller', true)->orWhereHas('sellerOrders'))
             ->orderByRaw('COALESCE(business_name, name)')
-            ->get()
-            ->map(function (User $seller) use ($payouts) {
-                $seller->balances = $payouts->balances($seller);
+            ->get();
+        $all = $payouts->balancesForAll();
+        $sellers = $sellers->map(function (User $seller) use ($all) {
+            $seller->balances = $all[$seller->id] ?? ['available' => 0.0, 'pending' => 0.0, 'adjustments' => 0.0, 'paid' => 0.0, 'commission' => 0.0];
 
-                return $seller;
-            });
+            return $seller;
+        });
 
         $totals = [
             'available' => $sellers->sum(fn ($s) => $s->balances['available']),

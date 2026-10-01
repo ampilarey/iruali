@@ -182,7 +182,12 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function hasRole(string $role): bool
     {
-        return $this->roles()->where('name', $role)->exists();
+        // Loaded once per request instead of a query per call (layouts ask several times per page)
+        if (! $this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
+        return $this->roles->contains('name', $role);
     }
 
     /**
@@ -206,7 +211,7 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function isSeller(): bool
     {
-        return $this->is_seller && $this->seller_approved;
+        return $this->is_seller && $this->seller_approved && $this->status !== 'suspended';
     }
 
     /**

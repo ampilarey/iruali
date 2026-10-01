@@ -15,12 +15,18 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
-        if (!auth()->user()->hasRole($role)) {
-            abort(403, 'Access denied. ' . ucfirst($role) . ' role required.');
+        if (! auth()->user()->hasRole($role)) {
+            abort(403, 'Access denied. '.ucfirst($role).' role required.');
+        }
+
+        // A pending shop may look around (it sees "awaiting approval"); a suspended one may not.
+        // (Rejection removes the seller role, so the role check above already covers it.)
+        if ($role === 'seller' && auth()->user()->status === 'suspended') {
+            abort(403, 'Your shop is not active.');
         }
 
         return $next($request);

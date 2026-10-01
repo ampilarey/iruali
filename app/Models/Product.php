@@ -257,6 +257,14 @@ class Product extends Model
         });
 
         // Tell shoppers who asked to be notified when a sold-out product is back
+        // A product a shop deletes must not stay in anyone's cart or saved list
+        static::deleting(function ($product) {
+            \App\Models\CartItem::where('product_id', $product->id)->delete();
+            if (class_exists(\App\Models\SavedItem::class)) {
+                \App\Models\SavedItem::where('product_id', $product->id)->delete();
+            }
+        });
+
         static::updated(function ($product) {
             if ($product->wasChanged('stock_quantity') && (int) $product->getOriginal('stock_quantity') <= 0 && (int) $product->stock_quantity > 0 && $product->is_active) {
                 app(\App\Services\StockAlertService::class)->productRestocked($product);

@@ -2,19 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\SeoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SeoTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    #[Test]
     public function it_generates_default_seo_data()
     {
         $seo = SeoService::getDefault();
@@ -29,20 +30,20 @@ class SeoTest extends TestCase
         $this->assertArrayHasKey('schema', $seo);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_product_seo_data()
     {
         $category = Category::factory()->create();
         $seller = User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
-        
+
         $product = Product::factory()->create([
             'name' => [
                 'en' => 'Test Product',
-                'dv' => 'ޓެސްޓް ޕްރޮޑަކްޓް'
+                'dv' => 'ޓެސްޓް ޕްރޮޑަކްޓް',
             ],
             'description' => [
                 'en' => 'This is a test product description',
-                'dv' => 'މިއަކީ ޓެސްޓް ޕްރޮޑަކްޓް ޑިސްކްރިޕްޝަންއެވެ'
+                'dv' => 'މިއަކީ ޓެސްޓް ޕްރޮޑަކްޓް ޑިސްކްރިޕްޝަންއެވެ',
             ],
             'category_id' => $category->id,
             'seller_id' => $seller->id,
@@ -62,20 +63,20 @@ class SeoTest extends TestCase
         $this->assertEquals('Product', $seo['schema']['@type']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_category_seo_data()
     {
         $category = Category::create([
             'name' => [
                 'en' => 'Electronics',
-                'dv' => 'އިލެކްޓްރޮނިކްސް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް',
             ],
             'description' => [
                 'en' => 'Electronic devices and gadgets',
-                'dv' => 'އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކާއި ގަޑްޖެޓްތައްތަކް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކާއި ގަޑްޖެޓްތައްތަކް',
             ],
             'slug' => 'electronics',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $seo = SeoService::forCategory($category);
@@ -88,7 +89,7 @@ class SeoTest extends TestCase
         $this->assertEquals('CollectionPage', $seo['schema']['@type']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_search_seo_data()
     {
         $query = 'test product';
@@ -104,13 +105,13 @@ class SeoTest extends TestCase
         $this->assertNull($seo['schema']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_user_seo_data_for_seller()
     {
         $user = User::factory()->create([
             'name' => 'John Seller',
             'is_seller' => true,
-            'seller_approved' => true
+            'seller_approved' => true,
         ]);
 
         $seo = SeoService::forUser($user);
@@ -123,12 +124,12 @@ class SeoTest extends TestCase
         $this->assertEquals('Organization', $seo['schema']['@type']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_user_seo_data_for_customer()
     {
         $user = User::factory()->create([
             'name' => 'John Customer',
-            'is_seller' => false
+            'is_seller' => false,
         ]);
 
         $seo = SeoService::forUser($user);
@@ -141,7 +142,7 @@ class SeoTest extends TestCase
         $this->assertEquals('Person', $seo['schema']['@type']);
     }
 
-    /** @test */
+    #[Test]
     public function it_includes_canonical_urls()
     {
         $category = Category::factory()->create();
@@ -159,7 +160,7 @@ class SeoTest extends TestCase
         $this->assertStringContainsString($category->slug, $categorySeo['canonical_url']);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_localized_content_in_seo()
     {
         app()->setLocale('dv');
@@ -167,14 +168,14 @@ class SeoTest extends TestCase
         $category = Category::create([
             'name' => [
                 'en' => 'Electronics',
-                'dv' => 'އިލެކްޓްރޮނިކްސް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް',
             ],
             'description' => [
                 'en' => 'Electronic devices',
-                'dv' => 'އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކް',
             ],
             'slug' => 'electronics',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $seo = SeoService::forCategory($category);
@@ -183,20 +184,20 @@ class SeoTest extends TestCase
         $this->assertStringContainsString('އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކް', $seo['description']);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_json_ld_schema_for_products()
     {
         $category = Category::factory()->create();
         $seller = User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
-        
+
         $product = Product::factory()->create([
             'name' => [
                 'en' => 'Test Product',
-                'dv' => 'ޓެސްޓް ޕްރޮޑަކްޓް'
+                'dv' => 'ޓެސްޓް ޕްރޮޑަކްޓް',
             ],
             'description' => [
                 'en' => 'Test description',
-                'dv' => 'ޓެސްޓް ޑިސްކްރިޕްޝަން'
+                'dv' => 'ޓެސްޓް ޑިސްކްރިޕްޝަން',
             ],
             'category_id' => $category->id,
             'seller_id' => $seller->id,
@@ -216,4 +217,4 @@ class SeoTest extends TestCase
         $this->assertEquals('MVR', $schema['offers']['priceCurrency']);
         $this->assertEquals('https://schema.org/InStock', $schema['offers']['availability']);
     }
-} 
+}

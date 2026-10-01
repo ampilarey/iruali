@@ -162,14 +162,6 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * Get the user's notifications.
-     */
-    public function notifications(): HasMany
-    {
-        return $this->hasMany(Notification::class);
-    }
-
-    /**
      * Get all carts for the user.
      */
     public function carts(): HasMany

@@ -34,27 +34,4 @@ class LocaleController extends Controller
 
         return back()->with('success', 'Language changed successfully.');
     }
-
-    /**
-     * Get current locale
-     */
-    public function getCurrentLocale()
-    {
-        return response()->json([
-            'current_locale' => LocalizationService::getCurrentLocale(),
-            'fallback_locale' => LocalizationService::getFallbackLocale(),
-            'available_locales' => LocalizationService::getAvailableLocales(),
-        ]);
-    }
-
-    /**
-     * Get available locales
-     */
-    public function getAvailableLocales()
-    {
-        return response()->json([
-            'locales' => LocalizationService::getAvailableLocales(),
-            'current' => LocalizationService::getCurrentLocale(),
-        ]);
-    }
 }

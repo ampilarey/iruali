@@ -102,15 +102,19 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Seller application rejected.');
     }
 
+    /**
+     * Suspend a seller: the account is marked suspended and every product in
+     * their shop is deactivated so nothing of theirs stays on sale.
+     */
     public function suspendSeller($id)
     {
         $this->checkAdminRole();
 
         $seller = User::findOrFail($id);
-        $seller->update(['status' => 'suspended']);
-        \App\Models\Product::where('seller_id', $seller->id)->update(['is_active' => false]);
+        $seller->forceFill(['status' => 'suspended'])->save(); // status is deliberately not mass-assignable
+        Product::where('seller_id', $seller->id)->update(['is_active' => false]);
 
-        return redirect()->back()->with('success', 'Seller suspended successfully.');
+        return redirect()->back()->with('success', 'Seller suspended and their products deactivated.');
     }
 
     public function users()
@@ -141,16 +145,6 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Product approved successfully.');
     }
 
-    public function rejectProduct($id)
-    {
-        $this->checkAdminRole();
-
-        $product = Product::findOrFail($id);
-        $product->update(['is_active' => false]);
-
-        return redirect()->back()->with('success', 'Product rejected successfully.');
-    }
-
     public function orders()
     {
         $this->checkAdminRole();
@@ -162,14 +156,6 @@ class AdminController extends Controller
             ->withQueryString();
 
         return view('admin.orders.index', compact('orders'));
-    }
-
-    public function reports()
-    {
-        $this->checkAdminRole();
-
-        // Sales analytics, best-sellers, etc.
-        return view('admin.reports.index');
     }
 
     public function analytics()

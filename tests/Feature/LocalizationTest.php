@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\LocalizationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class LocalizationTest extends TestCase
@@ -17,12 +18,12 @@ class LocalizationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin user
         $this->admin = User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
     }
 
-    /** @test */
+    #[Test]
     public function it_uses_fallback_locale_when_translation_missing()
     {
         $category = Category::factory()->create();
@@ -31,11 +32,11 @@ class LocalizationTest extends TestCase
         $product = Product::factory()->create([
             'name' => [
                 'en' => 'English Product Name',
-                'dv' => null
+                'dv' => null,
             ],
             'description' => [
                 'en' => 'English description',
-                'dv' => null
+                'dv' => null,
             ],
             'category_id' => $category->id,
             'seller_id' => $seller->id,
@@ -49,7 +50,7 @@ class LocalizationTest extends TestCase
         $this->assertEquals('English description', $product->localized_description);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_correct_translation_when_available()
     {
         $category = Category::factory()->create();
@@ -58,11 +59,11 @@ class LocalizationTest extends TestCase
         $product = Product::factory()->create([
             'name' => [
                 'en' => 'English Product Name',
-                'dv' => 'Dhivehi Product Name'
+                'dv' => 'Dhivehi Product Name',
             ],
             'description' => [
                 'en' => 'English description',
-                'dv' => 'Dhivehi description'
+                'dv' => 'Dhivehi description',
             ],
             'category_id' => $category->id,
             'seller_id' => $seller->id,
@@ -79,7 +80,7 @@ class LocalizationTest extends TestCase
         $this->assertEquals('Dhivehi description', $product->localized_description);
     }
 
-    /** @test */
+    #[Test]
     public function localization_service_handles_fallbacks_correctly()
     {
         $category = Category::factory()->create();
@@ -87,7 +88,7 @@ class LocalizationTest extends TestCase
         $product = Product::factory()->create([
             'name' => [
                 'en' => 'English Name',
-                'dv' => null
+                'dv' => null,
             ],
             'category_id' => $category->id,
             'seller_id' => $seller->id,
@@ -99,20 +100,20 @@ class LocalizationTest extends TestCase
         $this->assertEquals('English Name', $localizedName);
     }
 
-    /** @test */
+    #[Test]
     public function category_model_supports_translatable_fields()
     {
         $category = Category::create([
             'name' => [
                 'en' => 'Electronics',
-                'dv' => 'އިލެކްޓްރޮނިކްސް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް',
             ],
             'description' => [
                 'en' => 'Electronic devices and gadgets',
-                'dv' => 'އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކާއި ގަޑްޖެޓްތައްތަކް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކާއި ގަޑްޖެޓްތައްތަކް',
             ],
             'slug' => 'electronics',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         app()->setLocale('en');
@@ -124,7 +125,7 @@ class LocalizationTest extends TestCase
         $this->assertEquals('އިލެކްޓްރޮނިކްސް ޑިވައިސްތަކާއި ގަޑްޖެޓްތައްތަކް', $category->localized_description);
     }
 
-    /** @test */
+    #[Test]
     public function api_resources_use_localized_values()
     {
         $category = Category::factory()->create();
@@ -132,11 +133,11 @@ class LocalizationTest extends TestCase
         $product = Product::factory()->create([
             'name' => [
                 'en' => 'English Product',
-                'dv' => 'Dhivehi Product'
+                'dv' => 'Dhivehi Product',
             ],
             'description' => [
                 'en' => 'English description',
-                'dv' => 'Dhivehi description'
+                'dv' => 'Dhivehi description',
             ],
             'category_id' => $category->id,
             'seller_id' => $seller->id,
@@ -152,12 +153,12 @@ class LocalizationTest extends TestCase
             ->assertJson([
                 'data' => [
                     'name' => 'Dhivehi Product',
-                    'description' => 'Dhivehi description'
-                ]
+                    'description' => 'Dhivehi description',
+                ],
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function locale_switching_works_correctly()
     {
         $response = $this->actingAs($this->admin)
@@ -167,7 +168,7 @@ class LocalizationTest extends TestCase
         $this->assertEquals('dv', session('locale'));
     }
 
-    /** @test */
+    #[Test]
     public function invalid_locale_is_rejected()
     {
         $response = $this->actingAs($this->admin)
@@ -176,81 +177,81 @@ class LocalizationTest extends TestCase
         $response->assertSessionHasErrors(['locale']);
     }
 
-    /** @test */
+    #[Test]
     public function translatable_request_validation_works()
     {
         $response = $this->actingAs($this->admin)
             ->postJson('/api/v1/products', [
                 'name' => [
-                    'en' => 'Test Product'
+                    'en' => 'Test Product',
                     // Missing Dhivehi translation
                 ],
                 'sku' => 'TEST-001',
                 'category_id' => Category::factory()->create()->id,
-                'price' => 100
+                'price' => 100,
             ]);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name.dv']);
     }
 
-    /** @test */
+    #[Test]
     public function at_least_one_translation_is_required()
     {
         $response = $this->actingAs($this->admin)
             ->postJson('/api/v1/products', [
                 'name' => [
                     'en' => '',
-                    'dv' => ''
+                    'dv' => '',
                 ],
                 'sku' => 'TEST-001',
                 'category_id' => Category::factory()->create()->id,
-                'price' => 100
+                'price' => 100,
             ]);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
     }
 
-    /** @test */
+    #[Test]
     public function localization_service_returns_available_locales()
     {
         $locales = LocalizationService::getAvailableLocales();
-        
+
         $this->assertContains('en', $locales);
         $this->assertContains('dv', $locales);
         $this->assertCount(2, $locales);
     }
 
-    /** @test */
+    #[Test]
     public function localization_service_returns_current_and_fallback_locales()
     {
         $this->assertEquals('en', LocalizationService::getFallbackLocale());
-        
+
         app()->setLocale('dv');
         $this->assertEquals('dv', LocalizationService::getCurrentLocale());
     }
 
-    /** @test */
+    #[Test]
     public function category_full_path_uses_localized_names()
     {
         $parent = Category::create([
             'name' => [
                 'en' => 'Electronics',
-                'dv' => 'އިލެކްޓްރޮނިކްސް'
+                'dv' => 'އިލެކްޓްރޮނިކްސް',
             ],
             'slug' => 'electronics',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $child = Category::create([
             'name' => [
                 'en' => 'Phones',
-                'dv' => 'ފޯންތައް'
+                'dv' => 'ފޯންތައް',
             ],
             'slug' => 'phones',
             'parent_id' => $parent->id,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         app()->setLocale('dv');
@@ -259,4 +260,4 @@ class LocalizationTest extends TestCase
         app()->setLocale('en');
         $this->assertEquals('Electronics > Phones', $child->full_path);
     }
-} 
+}

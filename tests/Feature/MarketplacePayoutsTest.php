@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Notifications\OrderStatusChanged;
 use App\Notifications\SellerOrderShipped;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use App\Services\PayoutService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -70,7 +71,7 @@ class MarketplacePayoutsTest extends TestCase
 
         $result = app(OrderService::class)->createOrderFromCart($this->customer, [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
-            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'cod',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'bml',
         ]);
         $this->assertTrue($result['success'], $result['message'] ?? '');
 
@@ -167,8 +168,8 @@ class MarketplacePayoutsTest extends TestCase
         $this->post(route('admin.orders.status', $order), ['status' => 'delivered']);
         $this->assertEquals(['pending' => 170.0, 'available' => 0.0], array_intersect_key($payouts->balances($this->shopA), ['pending' => 1, 'available' => 1]));
 
-        // Cash on delivery collected
-        $this->post(route('admin.orders.payment', $order), ['action' => 'confirm']);
+        // BML confirms the card payment (what the webhook does on success)
+        app(PaymentService::class)->confirm($order->fresh());
         $this->assertEquals(170, $payouts->balances($this->shopA)['available']);
 
         $this->get(route('admin.payouts'))->assertOk()->assertSee('Island Crafts')->assertSee('MVR 170.00');

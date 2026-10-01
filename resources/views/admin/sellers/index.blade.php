@@ -49,7 +49,9 @@
                                     <div class="text-xs text-gray-500">{{ collect([$seller->phone, $seller->city, $seller->state])->filter()->join(' · ') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($seller->seller_approved)
+                                    @if($seller->status === 'suspended')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Suspended</span>
+                                    @elseif($seller->seller_approved)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
@@ -69,6 +71,12 @@
                                         @csrf
                                         <button type="submit" class="text-red-600 hover:text-red-900">{{ $seller->seller_approved ? 'Revoke' : 'Reject' }}</button>
                                     </form>
+                                    @if($seller->seller_approved && $seller->status !== 'suspended')
+                                    <form method="POST" action="{{ route('admin.sellers.suspend', $seller->id) }}" class="inline ml-3" onsubmit="return confirm('Suspend this seller? Every product in their shop will be deactivated.')">
+                                        @csrf
+                                        <button type="submit" class="text-orange-600 hover:text-orange-900" title="Deactivates every product in this shop">Suspend</button>
+                                    </form>
+                                    @endif
                                 </td>
                             </tr>
                             @empty

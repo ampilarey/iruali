@@ -41,6 +41,10 @@ class Setting extends Model
         'free_delivery_over' => 1000,
         // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
         'default_commission_rate' => 10,
+        // Site analytics: none, plausible (needs the domain) or ga4 (needs the G-XXXX measurement id)
+        'analytics_provider' => 'none',
+        'analytics_id' => '',
+        'analytics_domain' => '',
     ];
 
     protected $fillable = ['key', 'value'];

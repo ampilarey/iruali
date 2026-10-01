@@ -43,6 +43,7 @@ class CheckoutController extends Controller
         $deliveryZones = DeliveryService::zones();
         $deliveryQuotes = app(DeliveryService::class)->quotes($goodsTotal);
         $freeDeliveryOver = (float) \App\Models\Setting::get('free_delivery_over');
+        \App\Services\FunnelService::record('begin_checkout');
 
         return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver'));
     }

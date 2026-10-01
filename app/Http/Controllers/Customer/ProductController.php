@@ -82,6 +82,8 @@ class ProductController extends Controller
 
         $whatsapp = preg_replace('/[^0-9]/', '', (string) Setting::get('whatsapp_number'));
 
+        \App\Services\FunnelService::record('view_product', $product->id);
+
         return view('products.show', compact(
             'product', 'relatedProducts', 'moreFromSeller', 'recentlyViewed', 'delivery', 'boughtTogether',
             'ratingBreakdown', 'myReview', 'votedReviewIds', 'questions', 'isOwner', 'whatsapp'

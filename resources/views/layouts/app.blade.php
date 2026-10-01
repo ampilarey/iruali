@@ -32,6 +32,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @include('partials.analytics-snippet')
+
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-background text-dark pb-16 lg:pb-0">

@@ -215,7 +215,11 @@ class AdminController extends Controller
         $sellerNames = User::whereIn('id', $topSellers->pluck('seller_id'))->pluck('name', 'id');
         $topSellers->each(fn ($row) => $row->name = $sellerNames[$row->seller_id] ?? 'Unknown seller');
 
-        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers'));
+        // First-party shopping funnel (see FunnelService): visitors per step and product conversion
+        $funnel = ['7' => \App\Services\FunnelService::funnel(7), '30' => \App\Services\FunnelService::funnel(30)];
+        $funnelProducts = \App\Services\FunnelService::topProducts(30);
+
+        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers', 'funnel', 'funnelProducts'));
     }
 
     public function settings()
@@ -250,6 +254,9 @@ class AdminController extends Controller
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
             'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
+            'analytics_provider' => 'sometimes|required|in:none,plausible,ga4',
+            'analytics_id' => ['sometimes', 'nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9_-]+$/'],
+            'analytics_domain' => ['sometimes', 'nullable', 'string', 'max:120', 'regex:/^[a-z0-9.-]+$/i'],
         ]);
 
         Setting::set($validated);

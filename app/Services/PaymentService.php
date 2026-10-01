@@ -179,6 +179,7 @@ class PaymentService
     public function confirm(Order $order): void
     {
         $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
+        FunnelService::orderPaid($order);
 
         app(OrderService::class)->awardRewards($order->fresh());
         app(OrderNotifier::class)->paymentUpdated($order);

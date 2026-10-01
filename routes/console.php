@@ -20,3 +20,6 @@ Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))
         ->each(fn ($cart) => $cart->delete());
 })->dailyAt('03:00')->name('prune-guest-carts');
+
+// Shopping funnel rows (Admin → Analytics) are kept for 90 days
+Schedule::call(fn () => \App\Services\FunnelService::prune())->dailyAt('03:30')->name('prune-funnel-events');

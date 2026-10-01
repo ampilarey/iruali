@@ -12,7 +12,8 @@ class Wishlist extends Model
 
     protected $fillable = [
         'user_id',
-        'product_id'
+        'product_id',
+        'product_variant_id',
     ];
 
     public function user(): BelongsTo
@@ -23,6 +24,11 @@ class Wishlist extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
     /**
@@ -58,7 +64,7 @@ class Wishlist extends Model
         try {
             static::create([
                 'user_id' => $userId,
-                'product_id' => $productId
+                'product_id' => $productId,
             ]);
 
             return ['success' => true, 'message' => 'Product added to wishlist successfully.'];
@@ -67,7 +73,7 @@ class Wishlist extends Model
             if ($e->getCode() == 23000) {
                 return ['success' => false, 'message' => 'Product is already in your wishlist.'];
             }
-            
+
             return ['success' => false, 'message' => 'Failed to add product to wishlist.'];
         }
     }

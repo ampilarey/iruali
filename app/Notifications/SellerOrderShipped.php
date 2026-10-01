@@ -29,7 +29,7 @@ class SellerOrderShipped extends Notification
             ->line(__(':shop has sent their part of your order:', ['shop' => $shop]));
 
         foreach ($this->part->items()->with('product')->get() as $item) {
-            $mail->line('• '.($item->product->name ?? __('Product')).' × '.$item->quantity);
+            $mail->line('• '.$item->displayName().' × '.$item->quantity);
         }
 
         if ($this->part->tracking_note) {

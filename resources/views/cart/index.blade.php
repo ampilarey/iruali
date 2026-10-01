@@ -39,16 +39,16 @@
                             <div class="flex-1 min-w-0 grid sm:grid-cols-[1fr_auto] gap-x-4 gap-y-2">
                                 <div class="min-w-0">
                                     <a href="{{ route('products.show', $product) }}" class="font-semibold text-dark leading-snug hover:text-primary hover:underline line-clamp-2">{{ $product->name }}</a>
-                                    @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->name }}</p>@endif
+                                    @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->displayNameWithKeys() }}@if($item->variant->sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant->sku }})</span>@endif</p>@endif
                                     @if($seller)<p class="text-xs text-gray-500 mt-0.5">{{ __('Sold by') }} {{ $seller->business_name ?: $seller->name }}</p>@endif
-                                    <x-stock :quantity="(int) $product->stock_quantity" class="mt-1" />
+                                    <x-stock :quantity="$item->availableStock()" class="mt-1" />
                                     <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                                         <form action="{{ route('cart.update', $item) }}" method="POST" class="flex items-center gap-2">
                                             @csrf
                                             @method('PUT')
                                             <label for="qty-{{ $item->id }}" class="text-gray-600">{{ __('Qty') }}</label>
                                             <select id="qty-{{ $item->id }}" name="quantity" onchange="this.form.submit()" class="rounded-lg border border-gray-300 bg-white ps-3 pe-8 py-1.5 text-sm focus:border-primary focus:ring-primary">
-                                                @for($q = 1; $q <= max($item->quantity, min(20, (int) $product->stock_quantity)); $q++)
+                                                @for($q = 1; $q <= max($item->quantity, min(20, $item->availableStock())); $q++)
                                                     <option value="{{ $q }}" @selected($q === (int) $item->quantity)>{{ $q }}</option>
                                                 @endfor
                                             </select>
@@ -69,8 +69,8 @@
                                 </div>
                                 <div class="sm:text-end">
                                     <p class="font-bold text-dark text-lg">{{ \App\Support\Money::format($item->subtotal) }}</p>
-                                    @if($item->quantity > 1)<p class="text-xs text-gray-500">{{ \App\Support\Money::format($product->final_price) }} {{ __('each') }}</p>@endif
-                                    @if($product->was_price)<p class="text-xs font-semibold text-coral">{{ __('Save :amount', ['amount' => \App\Support\Money::format($product->savings * $item->quantity)]) }}</p>@endif
+                                    @if($item->quantity > 1)<p class="text-xs text-gray-500">{{ \App\Support\Money::format($item->unit_price) }} {{ __('each') }}</p>@endif
+                                    @if($product->was_price && ! $item->variant)<p class="text-xs font-semibold text-coral">{{ __('Save :amount', ['amount' => \App\Support\Money::format($product->savings * $item->quantity)]) }}</p>@endif
                                 </div>
                             </div>
                         </div>
@@ -151,10 +151,12 @@
                             <a href="{{ route('products.show', $s->product) }}" class="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-primary-50"><img src="{{ $s->product->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $s->product->name }}" class="w-full h-full object-cover"></a>
                             <div class="min-w-0 flex-1 text-sm">
                                 <a href="{{ route('products.show', $s->product) }}" class="font-semibold line-clamp-2 hover:text-primary hover:underline">{{ $s->product->name }}</a>
-                                <p class="font-bold mt-0.5">{{ \App\Support\Money::format($s->product->final_price) }}</p>
-                                <x-stock :quantity="(int) $s->product->stock_quantity" />
+                                @php $savedVariant = $s->variant?->setRelation('product', $s->product); $savedStock = $savedVariant ? ($savedVariant->is_active ? (int) $savedVariant->stock_quantity : 0) : (int) $s->product->stock_quantity; @endphp
+                                @if($savedVariant)<p class="text-xs text-gray-600">{{ $savedVariant->displayName() }}</p>@endif
+                                <p class="font-bold mt-0.5">{{ \App\Support\Money::format($savedVariant ? $savedVariant->effectivePrice() : $s->product->final_price) }}</p>
+                                <x-stock :quantity="$savedStock" />
                                 <div class="mt-2 flex gap-3">
-                                    @if($s->product->stock_quantity > 0 && $s->product->is_active)
+                                    @if($savedStock > 0 && $s->product->is_active)
                                         <form action="{{ route('saved.moveToCart', $s) }}" method="POST">@csrf<button type="submit" class="font-semibold text-primary hover:underline">{{ __('Move to cart') }}</button></form>
                                     @endif
                                     <form action="{{ route('saved.remove', $s) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="text-gray-600 hover:text-danger hover:underline">{{ __('Remove') }}</button></form>

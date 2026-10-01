@@ -7,7 +7,23 @@
     $sellerName = $seller ? ($seller->business_name ?: $seller->name) : null;
     $reviews = $product->reviews;
     $rating = round((float) $reviews->avg('rating'), 1);
-    $stock = (int) $product->stock_quantity;
+    $stock = $product->effectiveStock();
+    // Variants: the active ones, their option types/values, and what the picker needs per variant
+    $variants = $product->has_variants ? $product->variants->where('is_active', true)->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values() : collect();
+    $variants->each(fn ($v) => $v->setRelation('product', $product));
+    $variantOptions = app(\App\Services\VariantService::class)->optionsOf($variants);
+    $variantData = $variants->map(fn ($v) => [
+        'id' => $v->id,
+        'attributes' => $v->attributes_list,
+        'price' => $v->effectivePrice(),
+        'price_text' => \App\Support\Money::format($v->effectivePrice()),
+        'stock' => (int) $v->stock_quantity,
+        'sku' => $v->sku,
+        'image' => $v->image ? \App\Support\ImageVariants::url($v->image, 1200) : null,
+        'srcset' => $v->image ? implode(', ', array_map(fn ($w) => \App\Support\ImageVariants::url($v->image, $w).' '.$w.'w', \App\Support\ImageVariants::WIDTHS)) : null,
+        'label' => $v->displayName(),
+    ])->values();
+    $anyVariantOut = $variants->contains(fn ($v) => $v->stock_quantity <= 0);
     $specs = array_filter([
         __('Brand') => $product->brand,
         __('Model') => $product->model,
@@ -47,7 +63,7 @@
                     <span>{{ $reviews->count() ? trans_choice(':count review|:count reviews', $reviews->count(), ['count' => $reviews->count()]) : __('No reviews yet') }}</span>
                 </a>
                 <a href="#questions" class="hover:text-primary">{{ trans_choice(':count question|:count questions', $questions->count(), ['count' => $questions->count()]) }}</a>
-                <span>{{ __('SKU') }}: <span class="font-medium text-dark" dir="ltr">{{ $product->sku }}</span></span>
+                <span>{{ __('SKU') }}: <span class="font-medium text-dark" dir="ltr" data-variant-sku>{{ $product->sku }}</span></span>
                 @if($product->model)<span>{{ __('Model') }}: <span class="font-medium text-dark" dir="ltr">{{ $product->model }}</span></span>@endif
             </div>
         </div>
@@ -107,11 +123,11 @@
 
             <!-- Buy box -->
             <aside id="buy-box" class="lg:sticky lg:top-[132px] bg-white border border-gray-200 rounded-xl p-4 lg:p-5 shadow-sm">
-                <x-price :product="$product" size="xl" />
+                <div data-variant-price><x-price :product="$product" size="xl" /></div>
                 @if($product->deal_ends_at)
                     <x-deal-countdown :ends="$product->deal_ends_at" class="mt-2" />
                 @endif
-                <x-stock :quantity="$stock" class="mt-2 !text-sm" />
+                <div data-variant-stock data-text-out="{{ __('Out of stock') }}" data-text-low="{{ __('Only :count left', ['count' => '#']) }}" data-text-in="{{ __('In stock') }}"><x-stock :quantity="$stock" class="mt-2 !text-sm" /></div>
 
                 <div class="mt-4 rounded-lg bg-gray-50 p-3 text-sm space-y-2">
                     <p class="flex gap-2"><x-icon name="truck" class="w-5 h-5 shrink-0 text-primary" />
@@ -123,9 +139,31 @@
                 </div>
 
                 @if($stock > 0)
-                    <form action="{{ route('cart.add') }}" method="POST" class="mt-4" id="buy-form">
+                    <form action="{{ route('cart.add') }}" method="POST" class="mt-4" id="buy-form" @if($variants->isNotEmpty()) data-variant-picker data-variants="{{ $variantData->toJson() }}" @endif>
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        @if($variants->isNotEmpty())
+                            <div class="mb-3 space-y-3">
+                                @foreach($variantOptions as $option => $values)
+                                    <fieldset data-option-group="{{ $option }}">
+                                        <legend class="text-sm font-medium text-gray-700">{{ __($option) }}: <span class="font-semibold text-dark" data-option-chosen></span></legend>
+                                        <div class="mt-1 flex flex-wrap gap-2 hidden" data-option-buttons>
+                                            @foreach($values as $value)
+                                                <button type="button" data-option-value="{{ $value }}" aria-pressed="false" class="min-w-11 h-10 px-3 rounded-lg border border-gray-300 text-sm font-medium text-dark hover:border-primary aria-pressed:border-primary aria-pressed:bg-primary-50 aria-pressed:text-primary disabled:opacity-40 disabled:line-through disabled:cursor-not-allowed">{{ $value }}</button>
+                                            @endforeach
+                                        </div>
+                                    </fieldset>
+                                @endforeach
+                                <label for="variant-select" class="block text-sm font-medium text-gray-700" data-variant-select-label>{{ __('Choose an option') }}</label>
+                                <select id="variant-select" name="product_variant_id" required data-variant-select class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
+                                    <option value="">{{ __('Choose an option') }}</option>
+                                    @foreach($variants as $variant)
+                                        <option value="{{ $variant->id }}" @disabled($variant->stock_quantity <= 0)>{{ $variant->displayNameWithKeys() }} – {{ \App\Support\Money::format($variant->effectivePrice()) }}@if($variant->stock_quantity <= 0) ({{ __('Out of stock') }})@endif</option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-danger hidden" data-variant-unavailable>{{ __('This combination is not available.') }}</p>
+                            </div>
+                        @endif
                         <label for="quantity" class="text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
                         <div class="mt-1 flex gap-2">
                             <div class="flex items-center rounded-lg border border-gray-300" data-qty>
@@ -133,15 +171,25 @@
                                 <input id="quantity" name="quantity" type="number" inputmode="numeric" min="1" max="{{ $stock }}" value="1" class="w-12 h-11 border-0 text-center font-semibold focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
                                 <button type="button" data-qty-step="1" class="w-10 h-11 flex items-center justify-center text-gray-600 hover:text-primary" aria-label="{{ __('Increase quantity') }}"><x-icon name="plus" class="w-4 h-4" /></button>
                             </div>
-                            <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">
+                            <button type="submit" data-add-to-cart class="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                                 <x-icon name="cart" class="w-5 h-5" />{{ __('Add to cart') }}
                             </button>
                         </div>
                     </form>
-                @else
-                    <form action="{{ route('stock-alerts.store', $product) }}" method="POST" class="mt-4 rounded-lg border border-gray-200 p-3">
+                @endif
+                @if($stock <= 0 || $anyVariantOut)
+                    <form action="{{ route('stock-alerts.store', $product) }}" method="POST" class="mt-4 rounded-lg border border-gray-200 p-3" data-stock-alert>
                         @csrf
                         <p class="text-sm font-semibold flex items-center gap-2"><x-icon name="bell" class="w-4 h-4 text-primary" />{{ __('Email me when it\'s back in stock') }}</p>
+                        @if($variants->isNotEmpty())
+                            <label for="alert-variant" class="sr-only">{{ __('Variant') }}</label>
+                            <select id="alert-variant" name="product_variant_id" data-alert-variant class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
+                                <option value="">{{ __('Any option') }}</option>
+                                @foreach($variants as $variant)
+                                    <option value="{{ $variant->id }}">{{ $variant->displayNameWithKeys() }}@if($variant->stock_quantity <= 0) ({{ __('Out of stock') }})@endif</option>
+                                @endforeach
+                            </select>
+                        @endif
                         <label for="alert-email" class="sr-only">{{ __('Email address') }}</label>
                         <div class="mt-2 flex gap-2">
                             <input id="alert-email" type="email" name="email" required value="{{ old('email', auth()->user()?->email) }}" placeholder="{{ __('Email address') }}" class="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">

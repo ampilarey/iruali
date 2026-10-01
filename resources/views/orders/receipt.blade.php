@@ -62,7 +62,7 @@
             <tbody>
                 @foreach($order->items as $item)
                     <tr>
-                        <td>{{ $item->product?->name ?? __('Product') }}</td>
+                        <td>{{ $item->displayName() }}@if($item->variant_sku) <span class="muted">{{ $item->variant_sku }}</span>@endif</td>
                         <td class="muted">{{ $item->product?->seller ? ($item->product->seller->business_name ?: $item->product->seller->name) : '' }}</td>
                         <td class="num">{{ $item->quantity }}</td>
                         <td class="num">{{ Money::format($item->price) }}</td>

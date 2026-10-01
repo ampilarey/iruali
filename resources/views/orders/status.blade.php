@@ -22,7 +22,7 @@
             <span class="font-semibold">{{ __('Items:') }}</span>
             <ul class="list-disc ms-6">
                 @foreach($order->items as $item)
-                    <li>{{ $item->product->name }} x{{ $item->quantity }}</li>
+                    <li>{{ $item->displayName() }} x{{ $item->quantity }}</li>
                 @endforeach
             </ul>
         </div>

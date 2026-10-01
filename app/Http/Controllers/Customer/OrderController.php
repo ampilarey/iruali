@@ -63,6 +63,11 @@ class OrderController extends Controller
 
         $order = $result['order'];
 
+        // "Save this address for next time" (a new address typed at checkout)
+        if ($request->boolean('save_address') && ! $request->filled('address_id')) {
+            $this->saveAddressFromOrder($user, $request, $order);
+        }
+
         // Card payment: straight to BML's payment page. If BML can't be reached the order
         // stays unpaid and the order page offers "Pay now" to try again.
         if ($order->payment_method === 'bml') {
@@ -79,6 +84,30 @@ class OrderController extends Controller
         NotificationService::orderPlaced();
 
         return redirect()->route('orders.show', $order);
+    }
+
+    /**
+     * Keep the address typed at checkout in the customer's address book. Never breaks the order.
+     */
+    protected function saveAddressFromOrder($user, StoreOrderRequest $request, Order $order): void
+    {
+        try {
+            $address = new \App\Models\Address([
+                'label' => $request->input('address_label') ?: null,
+                'recipient_name' => $user->name,
+                'phone' => $order->shipping_phone,
+                'island_id' => $request->filled('island_id') ? (int) $request->input('island_id') : null,
+                'island' => $order->shipping_city,
+                'atoll' => $order->shipping_state,
+                'house_name_or_street' => $order->shipping_address,
+                'postal_code' => $order->shipping_zip,
+                'country' => $order->shipping_country ?: 'Maldives',
+            ]);
+            $address->user_id = $user->id;
+            $address->syncIsland()->save();
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     public function cancel(Order $order)

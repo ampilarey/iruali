@@ -417,4 +417,17 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
     }
+
+    /**
+     * Saved delivery addresses (My Account → Addresses).
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function defaultAddress(): ?Address
+    {
+        return $this->addresses()->where('is_default', true)->first() ?? $this->addresses()->orderBy('id')->first();
+    }
 }

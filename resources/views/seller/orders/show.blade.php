@@ -28,13 +28,42 @@
                 <span>Your total</span>
                 <span>{{ \App\Support\Money::format($order->items->sum(fn ($i) => $i->price * $i->quantity)) }}</span>
             </div>
+            @if($disputes->isNotEmpty())
+                <div class="border-t border-gray-100 px-5 py-4 space-y-2">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Disputes</h3>
+                    @foreach($disputes as $dispute)
+                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <p class="font-medium text-gray-900">{{ \App\Models\Dispute::TYPES[$dispute->type] ?? $dispute->type }} · claiming {{ \App\Support\Money::format($dispute->amount_claimed) }}</p>
+                                <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ \App\Models\Dispute::STATUSES[$dispute->status] ?? $dispute->status }}</span>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-600">Opened {{ $dispute->opened_at->format('d M Y') }}.
+                                @if($dispute->isOpen())Reply to the customer in the conversation below; iruali decides within 5 business days.
+                                @elseif($dispute->amount_resolved > 0)Refund of {{ \App\Support\Money::format($dispute->amount_resolved) }} agreed; your share is taken from your next payout.
+                                @else The claim was not upheld.@endif
+                                @if($dispute->resolution_note)<span class="block">Note from iruali: {{ $dispute->resolution_note }}</span>@endif
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            <div class="border-t border-gray-100 px-5 py-4">
+                @include('messaging._thread', [
+                    'part' => $part,
+                    'conversation' => $conversation,
+                    'role' => 'seller',
+                    'action' => route('seller.orders.messages.store', [$order, $part]),
+                    'canReply' => $messagingOpen && (! $conversation || $conversation->isOpen()),
+                    'closedNote' => 'This conversation is closed.',
+                ])
+            </div>
         </div>
 
         <div class="space-y-6">
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your part of this order</h2>
-                <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ ucfirst($part->status) }}</span>
-                @if($part->tracking_note)<p class="mt-2 text-sm text-gray-700">Tracking: {{ $part->tracking_note }}</p>@endif
+                <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span>
+                <div class="mt-2">@include('orders._tracking', ['part' => $part])</div>
                 <p class="mt-2 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}@if($otherShops) · also has items from {{ $otherShops }} other {{ \Illuminate\Support\Str::plural('shop', $otherShops) }}@endif</p>
                 <p class="mt-2 text-xs text-gray-600">Payment: {{ strtolower(\App\Services\PaymentService::methodLabel($order->payment_method)) }} ·
                     <span class="rounded-full px-2 py-0.5 font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
@@ -43,21 +72,33 @@
                     @if($order->status === 'cancelled')
                         <p class="text-sm text-gray-600">This order was cancelled. Don't send these items.</p>
                     @elseif(empty($nextStatuses))
-                        <p class="text-sm text-gray-600">Your part is {{ $part->status }}. Nothing more to update.</p>
+                        <p class="text-sm text-gray-600">Your part is {{ str_replace('_', ' ', $part->status) }}. Nothing more to update.</p>
                     @else
                         @foreach($nextStatuses as $status)
-                            <form method="POST" action="{{ route('seller.orders.status', $order) }}" class="space-y-2">
+                            <form method="POST" action="{{ route('seller.orders.status', $order) }}" class="space-y-2 @if($status === 'shipped') rounded-lg border border-gray-200 p-3 @endif">
                                 @csrf
                                 <input type="hidden" name="status" value="{{ $status }}">
                                 @if($status === 'shipped')
-                                    <label for="tracking_note" class="block text-xs font-medium text-gray-600">Tracking (boat, flight, courier or reference)</label>
-                                    <input id="tracking_note" name="tracking_note" maxlength="255" placeholder="e.g. Hithadhoo ferry, Tuesday; ref 4411" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                                    <p class="text-xs text-gray-600">Tell the customer how it travels: a courier with a tracking number or link, or the boat / flight and the day it should arrive.</p>
+                                    @include('orders._tracking_form', ['part' => $part])
+                                    <label for="tracking_note" class="block text-xs text-gray-600">Note for the customer (optional)</label>
+                                    <input id="tracking_note" name="tracking_note" maxlength="255" placeholder="e.g. Collect from the jetty office after 4pm" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                                 @endif
-                                <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">{{ ['processing' => 'Start preparing', 'shipped' => 'Mark as sent', 'delivered' => 'Mark as delivered'][$status] ?? ucfirst($status) }}</button>
+                                <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">{{ ['processing' => 'Start preparing', 'shipped' => 'Mark as sent', 'out_for_delivery' => 'Out for delivery', 'delivered' => 'Mark as delivered'][$status] ?? ucfirst($status) }}</button>
                             </form>
                         @endforeach
                     @endif
                 </div>
+                @if(in_array($part->status, ['shipped', 'out_for_delivery'], true))
+                    <details class="mt-3 text-sm">
+                        <summary class="cursor-pointer text-xs font-medium text-primary-700">Edit delivery details</summary>
+                        <form method="POST" action="{{ route('seller.orders.tracking', [$order, $part]) }}" class="mt-2 space-y-2">
+                            @csrf
+                            @include('orders._tracking_form', ['part' => $part])
+                            <button type="submit" class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50">Save details</button>
+                        </form>
+                    </details>
+                @endif
             </div>
             <div class="rounded-lg bg-white p-5 shadow text-sm">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your earnings</h2>

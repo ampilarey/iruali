@@ -44,7 +44,7 @@
                                     <p class="text-sm font-medium text-gray-900">#{{ $order->order_number }}</p>
                                     <p class="text-xs text-gray-500">{{ $order->user->name ?? 'Customer' }} · {{ $order->created_at->format('d M Y') }}</p>
                                 </div>
-                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ ucfirst($order->status) }}</span>
+                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ \App\Support\OrderStatus::label($order->status) }}</span>
                             </a>
                         </li>
                     @empty

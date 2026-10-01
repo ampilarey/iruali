@@ -8,8 +8,8 @@
         <form method="GET" class="mb-4 flex flex-wrap gap-2">
             <select name="status" class="rounded-lg border border-gray-300 px-3 py-2 text-sm">
                 <option value="">All statuses</option>
-                @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $status)
-                    <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>
+                @foreach(['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'] as $status)
+                    <option value="{{ $status }}" @selected(request('status') === $status)>{{ \App\Support\OrderStatus::label($status) }}</option>
                 @endforeach
             </select>
             <button class="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900">Filter</button>
@@ -41,7 +41,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $order->items->sum('quantity') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->subtotal) }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->seller_earnings) }}</td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ ucfirst($part->status) }}</span></td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span></td>
                                 <td class="px-4 py-3 text-right text-sm"><a href="{{ route('seller.orders.show', $order) }}" class="font-medium text-primary-600 hover:text-primary-700">View</a></td>
                             </tr>
                         @empty

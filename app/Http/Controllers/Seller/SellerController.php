@@ -56,7 +56,16 @@ class SellerController extends Controller
         $order->load(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product']);
         $otherShops = $order->sellerOrders()->where('seller_id', '!=', Auth::id())->count();
 
-        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops'));
+        // The thread with the customer; opening the page marks it read
+        $messaging = app(\App\Services\MessagingService::class);
+        $conversation = $messaging->existingConversationFor($part)?->load('messages.sender', 'customer');
+        if ($conversation) {
+            $messaging->markRead($conversation, 'seller');
+        }
+        $messagingOpen = $messaging->isOpenFor($order);
+        $disputes = $part->disputes()->latest('id')->get();
+
+        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops', 'conversation', 'messagingOpen', 'disputes'));
     }
 
     /**
@@ -67,16 +76,16 @@ class SellerController extends Controller
         $part = $fulfilment->partFor($order, Auth::user());
         abort_unless($part, 404);
 
-        $request->validate([
-            'status' => 'required|in:processing,shipped,delivered',
+        $data = $request->validate([
+            'status' => 'required|in:processing,shipped,out_for_delivery,delivered',
             'tracking_note' => 'nullable|string|max:255',
-        ]);
+        ] + \App\Http\Controllers\TrackingController::rules());
 
-        if (! $fulfilment->advance($part, $request->status, $request->tracking_note)) {
+        if (! $fulfilment->advance($part, $data['status'], $data['tracking_note'] ?? null, $data)) {
             return back()->with('error', "Your part of this order is {$part->status}; it can't be moved to {$request->status}.");
         }
 
-        return back()->with('success', 'Your part of the order is now '.$request->status.'.');
+        return back()->with('success', 'Your part of the order is now '.str_replace('_', ' ', $request->status).'.');
     }
 
     public function analytics()

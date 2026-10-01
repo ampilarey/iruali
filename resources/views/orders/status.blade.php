@@ -12,12 +12,38 @@
         </div>
         <div class="mb-4">
             <span class="font-semibold">{{ __('Status:') }}</span>
-            <span>{{ ucfirst($order->status) }}</span>
+            <span class="rounded-full px-2 py-0.5 text-sm font-semibold {{ $order->status_badge }}">{{ __(\App\Support\OrderStatus::label($order->status)) }}</span>
         </div>
         <div class="mb-4">
             <span class="font-semibold">{{ __('Total:') }}</span>
             <span class="force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</span>
         </div>
+
+        @php $steps = \App\Support\OrderStatus::steps(); @endphp
+        <div class="mb-6 space-y-3">
+            <span class="font-semibold">{{ __('Delivery') }}</span>
+            @forelse($order->sellerOrders()->with('seller')->get() as $part)
+                @php $rank = \App\Models\SellerOrder::RANK[$part->status] ?? -1; @endphp
+                <div class="rounded-lg border border-gray-200 p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="font-medium text-gray-900">{{ __('From :shop', ['shop' => $part->shopName()]) }}</p>
+                        <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(\App\Support\OrderStatus::label($part->status)) }}</span>
+                    </div>
+                    @if($part->status !== 'cancelled')
+                        <ol class="grid grid-cols-5 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
+                            @foreach($steps as $key => $label)
+                                @php $done = $rank >= \App\Models\SellerOrder::RANK[$key]; @endphp
+                                <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>
+                            @endforeach
+                        </ol>
+                    @endif
+                    @include('orders._tracking', ['part' => $part])
+                </div>
+            @empty
+                <p class="text-sm text-gray-600">{{ __(\App\Support\OrderStatus::label($order->status)) }}</p>
+            @endforelse
+        </div>
+
         <div class="mb-6">
             <span class="font-semibold">{{ __('Items:') }}</span>
             <ul class="list-disc ms-6">
@@ -31,4 +57,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

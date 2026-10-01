@@ -293,8 +293,12 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $order->load(['user', 'items.product.seller']);
+        $order->load(['user', 'items.product.seller', 'sellerOrders.seller', 'sellerOrders.conversation.messages.sender', 'sellerOrders.conversation.customer']);
         $nextStatuses = $orderService->nextStatuses($order);
+
+        // Opening the order counts as reading its threads
+        $messaging = app(\App\Services\MessagingService::class);
+        $order->sellerOrders->each(fn ($part) => $part->conversation && $messaging->markRead($part->conversation, 'admin'));
 
         return view('admin.orders.show', compact('order', 'nextStatuses'));
     }
@@ -320,16 +324,16 @@ class AdminController extends Controller
         $this->checkAdminRole();
         abort_unless($part->order_id === $order->id, 404);
 
-        $request->validate([
-            'status' => 'required|in:processing,shipped,delivered',
+        $data = $request->validate([
+            'status' => 'required|in:processing,shipped,out_for_delivery,delivered',
             'tracking_note' => 'nullable|string|max:255',
-        ]);
+        ] + \App\Http\Controllers\TrackingController::rules());
 
-        if (! $fulfilment->advance($part, $request->status, $request->tracking_note)) {
+        if (! $fulfilment->advance($part, $data['status'], $data['tracking_note'] ?? null, $data)) {
             return back()->with('error', "That part is {$part->status}; it can't be moved to {$request->status}.");
         }
 
-        return back()->with('success', $part->shopName().' part marked as '.$request->status.'.');
+        return back()->with('success', $part->shopName().' part marked as '.str_replace('_', ' ', $request->status).'.');
     }
 
     public function recordRefund(Request $request, Order $order, PaymentService $payments)

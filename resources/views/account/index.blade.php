@@ -19,8 +19,9 @@
                     </div>
                     <nav class="space-y-1" aria-label="{{ __('Account') }}">
                         <a href="{{ route('account') }}" class="block px-4 py-2 text-primary bg-primary/10 rounded-lg font-medium" aria-current="page">{{ __('Profile') }}</a>
-                        <a href="{{ route('orders') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My Orders') }}</a>
+                        <a href="{{ route('orders') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My Orders') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>
                         <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wishlist') }}</a>
+                        <a href="{{ route('account.notifications') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Notifications') }}</a>
                         <a href="#security" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Security') }}</a>
                     </nav>
                 </div>
@@ -42,7 +43,7 @@
                     <dl class="grid gap-4 sm:grid-cols-2 text-sm">
                         <div><dt class="text-gray-500">{{ __('Name') }}</dt><dd class="text-gray-900">{{ $user->name }}</dd></div>
                         <div><dt class="text-gray-500">{{ __('Email') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->email }}</dd></div>
-                        <div><dt class="text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->phone ?: __('Not added') }}</dd></div>
+                        <div><dt class="text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->phone ?: __('Not added') }}@if($user->phone && $user->isPhoneVerified()) <span class="text-xs text-green-700">({{ __('verified') }})</span>@endif</dd></div>
                         <div><dt class="text-gray-500">{{ __('Language') }}</dt><dd class="text-gray-900">{{ ($user->preferred_language ?? 'en') === 'dv' ? 'ދިވެހި' : 'English' }}</dd></div>
                         <div class="sm:col-span-2"><dt class="text-gray-500">{{ __('Delivery address') }}</dt>
                             <dd class="text-gray-900">@if($user->address){{ $user->address }}@if($user->city), {{ $user->city }}@endif @if($user->state){{ $user->state }}@endif @if($user->postal_code){{ $user->postal_code }}@endif @else{{ __('Not added') }}@endif</dd></div>

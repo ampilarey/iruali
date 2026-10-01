@@ -34,7 +34,7 @@ class OrderController extends BaseController
         $validator = Validator::make($request->all(), [
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
-            'status' => 'nullable|in:pending,processing,shipped,delivered,cancelled',
+            'status' => 'nullable|in:pending,processing,shipped,out_for_delivery,delivered,cancelled',
         ]);
 
         if ($validator->fails()) {

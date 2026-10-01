@@ -34,6 +34,9 @@ return [
             'admin.questions', 'admin.questions.*',
             'admin.newsletter', 'admin.newsletter.*',
             'admin.users',
+            'admin.disputes', 'admin.disputes.*',
+            'admin.messages', 'admin.messages.*',
+            'admin.sms', 'admin.sms.*',
         ],
 
         // Finance: payouts, refunds, analytics, errors (read), audit log
@@ -47,6 +50,7 @@ return [
             'admin.analytics',
             'admin.errors', 'admin.errors.show',
             'admin.audit',
+            'admin.disputes', 'admin.disputes.show',
         ],
     ],
 

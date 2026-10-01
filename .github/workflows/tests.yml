@@ -43,3 +43,24 @@ jobs:
         run: |
           test -f public/build/manifest.json
           git diff --exit-code --stat -- public/build || (echo "public/build is out of date: run npm run build and commit" && exit 1)
+
+  static-analysis:
+    name: Larastan level 5 (advisory)
+    runs-on: ubuntu-latest
+    # Larastan is not in composer.lock yet (it could not be fetched where the repo is developed),
+    # so this job installs it on the fly and never blocks a merge. Make it blocking once
+    # `composer require --dev larastan/larastan` is committed and `composer analyse` is clean.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, gd, zip, pdo_mysql, bcmath
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Install Larastan (not in the lock file)
+        run: composer require --dev larastan/larastan --no-interaction --no-progress --with-all-dependencies
+      - name: Analyse app/ at level 5
+        run: composer analyse

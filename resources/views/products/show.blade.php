@@ -327,7 +327,7 @@
                                     </div>
                                     <p class="mt-1 text-xs text-gray-500 flex flex-wrap items-center gap-x-2">
                                         <span class="font-medium text-gray-700">{{ $review->user?->name ?? $review->reviewer_name }}</span>
-                                        <span>{{ $review->created_at?->format('j M Y') }}</span>
+                                        <span>{{ $review->created_at?->translatedFormat('j M Y') }}</span>
                                         @if($review->verified_purchase)<span class="inline-flex items-center gap-1 font-semibold text-success"><x-icon name="check" class="w-3.5 h-3.5" />{{ __('Verified purchase') }}</span>@endif
                                     </p>
                                     <p class="mt-2 text-sm text-gray-700 whitespace-pre-line">{{ $review->comment }}</p>

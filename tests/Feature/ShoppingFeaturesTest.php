@@ -95,7 +95,7 @@ class ShoppingFeaturesTest extends TestCase
         $this->actingAs($user)->post(route('cart.add'), ['product_id' => $product->id, 'quantity' => 1]);
         $item = Cart::where('user_id', $user->id)->first()->items()->first();
 
-        $this->get(route('cart'))->assertOk()->assertSee('Proceed to Checkout')->assertSee(route('checkout'));
+        $this->get(route('cart'))->assertOk()->assertSee('Proceed to checkout')->assertSee(route('checkout'));
 
         // Quantity is capped at the stock
         $this->put(route('cart.update', $item), ['quantity' => 9])->assertRedirect(route('cart'));

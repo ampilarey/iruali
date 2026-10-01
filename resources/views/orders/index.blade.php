@@ -16,8 +16,8 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Order #{{ $order->order_number }}</h3>
-                        <p class="text-sm text-gray-600">{{ $order->created_at->format('M d, Y') }}</p>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('Order') }} #{{ $order->order_number }}</h3>
+                        <p class="text-sm text-gray-600">{{ $order->created_at->translatedFormat('j M Y') }}</p>
                     </div>
                     <div class="text-right">
                         <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full

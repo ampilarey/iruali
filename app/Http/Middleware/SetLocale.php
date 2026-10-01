@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\LocalizationService;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -25,8 +26,9 @@ class SetLocale
             $locale = LocalizationService::getFallbackLocale();
         }
 
-        // Set the application locale
+        // Set the application locale (Carbon follows it so translatedFormat() gives Dhivehi month/day names)
         App::setLocale($locale);
+        Carbon::setLocale($locale);
 
         return $next($request);
     }

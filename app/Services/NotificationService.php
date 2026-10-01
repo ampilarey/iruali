@@ -13,9 +13,9 @@ class NotificationService
     {
         Session::flash('notification', [
             'type' => 'success',
-            'title' => $title ?? __('app.success'),
+            'title' => $title ?? __('Success'),
             'message' => $message,
-            'icon' => 'success'
+            'icon' => 'success',
         ]);
     }
 
@@ -26,9 +26,9 @@ class NotificationService
     {
         Session::flash('notification', [
             'type' => 'error',
-            'title' => $title ?? __('app.error'),
+            'title' => $title ?? __('Error'),
             'message' => $message,
-            'icon' => 'error'
+            'icon' => 'error',
         ]);
     }
 
@@ -39,9 +39,9 @@ class NotificationService
     {
         Session::flash('notification', [
             'type' => 'warning',
-            'title' => $title ?? __('app.warning'),
+            'title' => $title ?? __('Warning'),
             'message' => $message,
-            'icon' => 'warning'
+            'icon' => 'warning',
         ]);
     }
 
@@ -52,9 +52,9 @@ class NotificationService
     {
         Session::flash('notification', [
             'type' => 'info',
-            'title' => $title ?? __('app.info'),
+            'title' => $title ?? __('Information'),
             'message' => $message,
-            'icon' => 'info'
+            'icon' => 'info',
         ]);
     }
 
@@ -65,9 +65,9 @@ class NotificationService
     {
         Session::flash('notification', [
             'type' => 'question',
-            'title' => $title ?? __('app.confirm'),
+            'title' => $title ?? __('Confirm'),
             'message' => $message,
-            'icon' => 'question'
+            'icon' => 'question',
         ]);
     }
 
@@ -116,86 +116,86 @@ class NotificationService
      */
     public static function created(string $modelName): void
     {
-        self::success(__('app.created_successfully', ['model' => $modelName]));
+        self::success(__(':model created successfully!', ['model' => $modelName]));
     }
 
     public static function updated(string $modelName): void
     {
-        self::success(__('app.updated_successfully', ['model' => $modelName]));
+        self::success(__(':model updated successfully!', ['model' => $modelName]));
     }
 
     public static function deleted(string $modelName): void
     {
-        self::success(__('app.deleted_successfully', ['model' => $modelName]));
+        self::success(__(':model deleted successfully!', ['model' => $modelName]));
     }
 
     public static function addedToCart(string $productName): void
     {
-        self::success(__('app.added_to_cart_successfully', ['product' => $productName]));
+        self::success(__(':product added to cart successfully!', ['product' => $productName]));
     }
 
     public static function removedFromCart(string $productName): void
     {
-        self::success(__('app.removed_from_cart_successfully', ['product' => $productName]));
+        self::success(__(':product removed from cart successfully!', ['product' => $productName]));
     }
 
     public static function addedToWishlist(string $productName): void
     {
-        self::success(__('app.added_to_wishlist_successfully', ['product' => $productName]));
+        self::success(__(':product added to wishlist successfully!', ['product' => $productName]));
     }
 
     public static function removedFromWishlist(string $productName): void
     {
-        self::success(__('app.removed_from_wishlist_successfully', ['product' => $productName]));
+        self::success(__(':product removed from wishlist successfully!', ['product' => $productName]));
     }
 
     public static function orderPlaced(): void
     {
-        self::success(__('app.order_placed_successfully'));
+        self::success(__('Order placed successfully!'));
     }
 
     public static function voucherApplied(string $code): void
     {
-        self::success(__('app.voucher_applied_successfully', ['code' => $code]));
+        self::success(__('Voucher :code applied successfully!', ['code' => $code]));
     }
 
     public static function voucherRemoved(): void
     {
-        self::success(__('app.voucher_removed_successfully'));
+        self::success(__('Voucher removed successfully!'));
     }
 
     public static function loginSuccess(): void
     {
-        self::success(__('auth.login_successful'));
+        self::success(__('Login successful!'));
     }
 
     public static function logoutSuccess(): void
     {
-        self::success(__('auth.logout_successful'));
+        self::success(__('Logout successful!'));
     }
 
     public static function registrationSuccess(): void
     {
-        self::success(__('auth.registration_successful'));
+        self::success(__('Registration successful! Please verify your email and phone.'));
     }
 
     public static function emailVerified(): void
     {
-        self::success(__('auth.email_verified_successfully'));
+        self::success(__('Email verified successfully!'));
     }
 
     public static function phoneVerified(): void
     {
-        self::success(__('auth.phone_verified_successfully'));
+        self::success(__('Phone verified successfully!'));
     }
 
     public static function twoFactorEnabled(): void
     {
-        self::success(__('auth.2fa_enabled'));
+        self::success(__('Two-factor authentication has been enabled.'));
     }
 
     public static function twoFactorDisabled(): void
     {
-        self::success(__('auth.2fa_disabled'));
+        self::success(__('Two-factor authentication has been disabled.'));
     }
-} 
+}

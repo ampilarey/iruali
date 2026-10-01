@@ -425,6 +425,25 @@
     @endif
 
     <!-- Flash messages, shown as toasts by resources/js/notifications.js -->
+    <script>
+        window.notificationLabels = {{ \Illuminate\Support\Js::from([
+            'success' => __('Success'),
+            'error' => __('Error'),
+            'warning' => __('Warning'),
+            'info' => __('Information'),
+            'confirm' => __('Confirm'),
+            'yes' => __('Yes'),
+            'no' => __('No'),
+            'delete' => __('Delete'),
+            'cancel' => __('Cancel'),
+            'deleteConfirmation' => __('Delete confirmation'),
+            'deleteQuestion' => __('Are you sure you want to delete :item? This action cannot be undone.'),
+            'thisItem' => __('this item'),
+            'loading' => __('Loading…'),
+            'completed' => __('Operation completed successfully'),
+            'failed' => __('An error occurred'),
+        ]) }};
+    </script>
     @if(session('notification'))
         <div id="session-notification" data-notification="{{ json_encode(session('notification')) }}" hidden></div>
     @endif

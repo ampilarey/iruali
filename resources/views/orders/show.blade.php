@@ -8,8 +8,8 @@
     <div class="mb-8">
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Order #{{ $order->order_number }}</h1>
-                <p class="text-gray-600">Placed on {{ $order->created_at->format('F d, Y \a\t g:i A') }}</p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Order') }} #{{ $order->order_number }}</h1>
+                <p class="text-gray-600">{{ __('Placed on :date', ['date' => $order->created_at->translatedFormat('j F Y, H:i')]) }}</p>
             </div>
             <div class="text-right">
                 <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">

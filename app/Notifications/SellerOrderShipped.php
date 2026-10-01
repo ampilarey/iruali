@@ -3,15 +3,24 @@
 namespace App\Notifications;
 
 use App\Models\SellerOrder;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * Part of a multi-shop order is on its way (the rest is still being prepared).
  */
-class SellerOrderShipped extends Notification
+class SellerOrderShipped extends Notification implements ShouldQueue
 {
-    public function __construct(public SellerOrder $part) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public SellerOrder $part)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

@@ -20,3 +20,14 @@ Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))
         ->each(fn ($cart) => $cart->delete());
 })->dailyAt('03:00')->name('prune-guest-carts');
+
+// Queued mail (every notification implements ShouldQueue) is sent by a short-lived worker the
+// scheduler starts each minute, so no long-running process is needed on shared hosting.
+// With QUEUE_CONNECTION=sync (local, tests) jobs run inline and the worker is not started.
+if (config('queue.default') !== 'sync') {
+    Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping()->name('queue-worker');
+}
+Schedule::command('queue:prune-failed --hours=168')->daily();
+
+// The ready check (php artisan iruali:ready, admin dashboard) uses this to prove the cron is running
+Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler.heartbeat', now()->toIso8601String()))->everyMinute()->name('heartbeat');

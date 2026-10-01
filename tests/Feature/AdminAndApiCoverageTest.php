@@ -361,4 +361,30 @@ class AdminAndApiCoverageTest extends TestCase
         $this->post(route('checkout.redeemPoints'), ['points' => 101])->assertSessionHasErrors('points');
         $this->post(route('checkout.redeemPoints'), ['points' => 100])->assertSessionHasNoErrors()->assertSessionHas('points_redeemed', 100);
     }
+
+    public function test_api_points_endpoints_apply_and_clear_a_discount_on_the_cart(): void
+    {
+        $this->customer->forceFill(['loyalty_points' => 150])->save();
+        Sanctum::actingAs($this->customer);
+
+        $this->postJson('/api/v1/checkout/redeem-points', ['points' => 50])
+            ->assertStatus(400)->assertJsonPath('message', 'Your cart is empty.');
+
+        $this->fillCart($this->customer, 2); // 200 in the cart
+
+        $this->postJson('/api/v1/checkout/redeem-points', ['points' => 0])->assertStatus(422);
+        $this->postJson('/api/v1/checkout/redeem-points', ['points' => 151])
+            ->assertStatus(400)->assertJsonPath('success', false);
+
+        $this->postJson('/api/v1/checkout/redeem-points', ['points' => 50])
+            ->assertOk()
+            ->assertJsonPath('data.points_redeemed', 50)
+            ->assertJsonPath('data.discount_amount', 50)
+            ->assertJsonPath('data.cart_total', 150);
+
+        $this->postJson('/api/v1/checkout/remove-points')
+            ->assertOk()
+            ->assertJsonPath('data.cart_total', 200);
+        $this->assertSame(150, $this->customer->fresh()->loyalty_points);
+    }
 }

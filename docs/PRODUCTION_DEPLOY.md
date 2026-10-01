@@ -64,6 +64,22 @@ The admin dashboard shows the same checks (offline, refreshed every 5 minutes) i
 works from a heartbeat the cron writes every minute; if it says the scheduler has not run,
 nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either.
 
+## Error alerts (no external service needed)
+
+Every reported exception is counted in the `error_events` table, one row per place in the
+code (class + file + line), and listed at **Admin → Errors** (`/admin/errors`) with a
+"Mark resolved" button; a resolved error reopens by itself if it happens again. 404s,
+419s, validation and sign-in errors are not tracked.
+
+- **Payment errors** (anything thrown from `BmlConnect`, `PaymentService` or the payment
+  controller) email `ALERTS_EMAIL` immediately, at most once an hour per error. With no
+  `ALERTS_EMAIL`, the contact email from Admin → Settings is used.
+- **Daily digest** at 07:00 Maldives time (`php artisan errors:digest`): new errors from the
+  last 24 hours and the ten most frequent, sent only when there is something to report.
+- **Sentry (optional):** `composer require sentry/sentry-laravel` and set
+  `SENTRY_LARAVEL_DSN` in `.env`. Sentry then does the alerting; the local table and admin
+  page keep working, only the immediate payment alert email is left to Sentry.
+
 **Queued mail:** every notification is queued. The scheduler starts a short
 `queue:work --stop-when-empty` every minute, so with `QUEUE_CONNECTION=database` no
 separate worker process is needed. Failed jobs are kept 7 days (`queue:prune-failed`) and

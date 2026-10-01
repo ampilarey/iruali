@@ -29,5 +29,8 @@ if (config('queue.default') !== 'sync') {
 }
 Schedule::command('queue:prune-failed --hours=168')->daily();
 
+// Yesterday's errors (new ones and the most frequent), mailed only when there is something to say
+Schedule::command('errors:digest')->dailyAt('07:00')->timezone('Indian/Maldives');
+
 // The ready check (php artisan iruali:ready, admin dashboard) uses this to prove the cron is running
 Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler.heartbeat', now()->toIso8601String()))->everyMinute()->name('heartbeat');

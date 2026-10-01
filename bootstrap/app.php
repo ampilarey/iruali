@@ -29,5 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Count every reported exception in error_events and alert on payment errors (app/Support/ErrorTracker.php)
+        $exceptions->report(fn (\Throwable $e) => \App\Support\ErrorTracker::record($e));
     })->create();

@@ -210,7 +210,7 @@
                         </div>
                     @endif
 
-                    @php $walletBalance = round((float) $user->wallet_balance, 2); @endphp
+                    @php $walletBalance = round((float) ($user?->wallet_balance ?? 0), 2); @endphp
                     @if($walletBalance > 0)
                         <label class="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
                             <input type="checkbox" name="use_wallet" value="1" id="use-wallet" data-balance="{{ $walletBalance }}" @checked(old('use_wallet')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">

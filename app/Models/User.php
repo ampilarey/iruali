@@ -424,6 +424,56 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
+     * Staff can open the admin area: admin, support or finance (config/staff.php says which pages).
+     */
+    public function isStaff(): bool
+    {
+        return \App\Support\StaffAccess::staffRoles($this) !== [];
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class);
+    }
+
+    /**
+     * Kinds of notification a customer can route to email, SMS or both
+     * (stored in notification_preferences.customer.*).
+     */
+    public const NOTIFICATION_TYPES = ['order_updates', 'delivery_updates', 'marketing', 'security'];
+
+    /**
+     * 'email', 'sms' or 'both' for one kind of notification. SMS needs a verified phone,
+     * so an SMS choice falls back to email until the number is verified.
+     */
+    public function notificationPreference(string $type): string
+    {
+        $value = data_get($this->notification_preferences, 'customer.'.$type, 'email');
+        if (! in_array($value, ['email', 'sms', 'both'], true)) {
+            return 'email';
+        }
+
+        return $value !== 'email' && ! $this->isPhoneVerified() ? 'email' : $value;
+    }
+
+    /**
+     * Notification channels for one kind of notification, from the customer's preference.
+     */
+    public function notificationChannels(string $type): array
+    {
+        return match ($this->notificationPreference($type)) {
+            'sms' => ['sms'],
+            'both' => ['mail', 'sms'],
+            default => ['mail'],
+        };
+    }
+
+    public function routeNotificationForSms(): ?string
+    {
+        return $this->phone;
+    }
+
+    /**
      * The bank account iruali pays this shop's earnings to (Seller Centre → Settings → Bank).
      */
     public function bankAccount(): HasOne
@@ -447,7 +497,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * The shop emails this user can turn off, all on unless saved otherwise.
      */
-    public const NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock'];
+    public const SELLER_NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock'];
 
     /**
      * @return array<string, bool>
@@ -456,7 +506,7 @@ class User extends Authenticatable implements HasLocalePreference
     {
         $saved = is_array($this->notification_preferences) ? $this->notification_preferences : [];
 
-        return collect(self::NOTIFICATION_TYPES)->mapWithKeys(fn ($type) => [$type => (bool) ($saved[$type] ?? true)])->all();
+        return collect(self::SELLER_NOTIFICATION_TYPES)->mapWithKeys(fn ($type) => [$type => (bool) ($saved[$type] ?? true)])->all();
     }
 
     public function wantsNotification(string $type): bool

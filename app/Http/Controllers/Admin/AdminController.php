@@ -52,7 +52,10 @@ class AdminController extends Controller
             ->where('seller_approved', false)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers'));
+        // "System status" panel: the same checks as php artisan iruali:ready (offline, cached 5 minutes), admins only
+        $readyChecks = auth()->user()->hasRole('admin') ? \App\Support\ReadyChecks::cached() : [];
+
+        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers', 'readyChecks'));
     }
 
     public function sellers()

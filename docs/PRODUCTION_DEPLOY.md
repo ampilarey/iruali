@@ -47,3 +47,24 @@ not rolled back automatically.
 - **Uploads:** product photos live in `storage/app/public`. The deploy scripts link `<docroot>/storage` to it; if the docroot is `<app>/public`, `php artisan storage:link` does the same.
 - **Runtime folders** on a fresh clone: `mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public storage/app/private bootstrap/cache`.
 - **Timezone** is `Indian/Maldives` by default (`APP_TIMEZONE`).
+
+## Is it ready to run unattended? `php artisan iruali:ready`
+
+Run it after every deploy and whenever something feels off. It prints one row per check
+(scheduler heartbeat, cache, sessions, queue worker, mail, BML Connect, last backup,
+uploads, APP_* settings, timezone, error alerts) with PASS / WARN / FAIL and a one-line fix,
+ends with `READY` or `NOT READY (n failures)` and exits 1 on failure, so it can go in a
+deploy script.
+
+- `--offline` skips the network call to the BML API.
+- `--send-test-mail=you@iruali.mv` also sends a real email through the configured mailer.
+
+The admin dashboard shows the same checks (offline, refreshed every 5 minutes) in the
+**System status** panel, so a red row is visible without a terminal. The scheduler check
+works from a heartbeat the cron writes every minute; if it says the scheduler has not run,
+nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either.
+
+**Queued mail:** every notification is queued. The scheduler starts a short
+`queue:work --stop-when-empty` every minute, so with `QUEUE_CONNECTION=database` no
+separate worker process is needed. Failed jobs are kept 7 days (`queue:prune-failed`) and
+show up as `php artisan queue:failed`; `php artisan queue:retry all` resends them.

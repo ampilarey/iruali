@@ -93,6 +93,7 @@ class User extends Authenticatable implements HasLocalePreference
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
+        'notification_preferences' => 'array',
     ];
 
     /**
@@ -416,5 +417,42 @@ class User extends Authenticatable implements HasLocalePreference
     public function preferredLocale(): ?string
     {
         return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
+    }
+
+    /**
+     * Kinds of notification a customer can route to email, SMS or both
+     * (stored in notification_preferences.customer.*).
+     */
+    public const NOTIFICATION_TYPES = ['order_updates', 'delivery_updates', 'marketing', 'security'];
+
+    /**
+     * 'email', 'sms' or 'both' for one kind of notification. SMS needs a verified phone,
+     * so an SMS choice falls back to email until the number is verified.
+     */
+    public function notificationPreference(string $type): string
+    {
+        $value = data_get($this->notification_preferences, 'customer.'.$type, 'email');
+        if (! in_array($value, ['email', 'sms', 'both'], true)) {
+            return 'email';
+        }
+
+        return $value !== 'email' && ! $this->isPhoneVerified() ? 'email' : $value;
+    }
+
+    /**
+     * Notification channels for one kind of notification, from the customer's preference.
+     */
+    public function notificationChannels(string $type): array
+    {
+        return match ($this->notificationPreference($type)) {
+            'sms' => ['sms'],
+            'both' => ['mail', 'sms'],
+            default => ['mail'],
+        };
+    }
+
+    public function routeNotificationForSms(): ?string
+    {
+        return $this->phone;
     }
 }

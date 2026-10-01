@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\SellerOrder;
+use App\Models\User;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -15,7 +16,7 @@ class SellerOrderShipped extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable instanceof User ? $notifiable->notificationChannels('delivery_updates') : ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -38,5 +39,16 @@ class SellerOrderShipped extends Notification
 
         return $mail->line(__('The rest of your order is still being prepared by the other shops.'))
             ->action(__('View your order'), route('orders.show', $order));
+    }
+
+    public function toSms(object $notifiable): string
+    {
+        $text = __('iruali: :shop has sent their part of order :number.', ['shop' => $this->part->shopName(), 'number' => $this->part->order->order_number]);
+
+        if ($this->part->tracking_note) {
+            $text .= ' '.__('Tracking: :note', ['note' => $this->part->tracking_note]);
+        }
+
+        return $text;
     }
 }

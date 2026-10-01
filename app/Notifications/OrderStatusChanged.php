@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Notifications\Channels\WebPushChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,7 +13,7 @@ class OrderStatusChanged extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return WebPushChannel::configured() ? ['mail', WebPushChannel::class] : ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -40,5 +41,27 @@ class OrderStatusChanged extends Notification
         }
 
         return $mail->action(__('View your order'), route('orders.show', $this->order));
+    }
+
+    /**
+     * Browser notification (same wording as the email subject).
+     */
+    public function toWebPush(object $notifiable): array
+    {
+        $number = $this->order->order_number;
+
+        return [
+            'title' => match ($this->order->status) {
+                'processing' => __('Order :number is being prepared', ['number' => $number]),
+                'shipped' => __('Order :number is on its way', ['number' => $number]),
+                'delivered' => __('Order :number has been delivered', ['number' => $number]),
+                'cancelled' => __('Order :number has been cancelled', ['number' => $number]),
+                default => __('Update on order :number', ['number' => $number]),
+            },
+            'body' => __('Tap to see your order.'),
+            'url' => route('orders.show', $this->order),
+            'icon' => asset('images/icons/icon-192.png'),
+            'tag' => 'order-'.$this->order->id,
+        ];
     }
 }

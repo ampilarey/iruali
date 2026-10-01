@@ -445,6 +445,13 @@
             'completed' => __('Operation completed successfully'),
             'failed' => __('An error occurred'),
         ]) }};
+        // "Add to home screen" banner (resources/js/pwa.js)
+        window.pwaLabels = {{ \Illuminate\Support\Js::from([
+            'title' => __('Add iruali to your home screen'),
+            'body' => __('Shop faster, even on a slow connection, with the app on your phone.'),
+            'install' => __('Install'),
+            'later' => __('Not now'),
+        ]) }};
     </script>
     @if(session('notification'))
         <div id="session-notification" data-notification="{{ json_encode(session('notification')) }}" hidden></div>

@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(CartService::class);
         $this->app->singleton(DiscountService::class);
         $this->app->singleton(OrderService::class);
+        // Web push client with the site's VAPID keys (config/webpush.php)
+        $this->app->bind(\Minishlink\WebPush\WebPush::class, fn () => \App\Notifications\Channels\WebPushChannel::client());
     }
 
     /**

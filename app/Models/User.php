@@ -417,4 +417,12 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
     }
+
+    /**
+     * Browsers that asked for push notifications about this user's orders.
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
 }

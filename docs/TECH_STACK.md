@@ -2,358 +2,162 @@
 
 ## 📋 Overview
 
-The Iruali multi-vendor e-commerce platform is built using modern web technologies with a focus on scalability, security, and performance. This document provides a comprehensive overview of the technology stack, dependencies, and architectural decisions.
+This page lists what the Iruali marketplace is actually built with. The source of truth is
+`composer.json` / `composer.lock` and `package.json` / `package-lock.json`; keep this page in step with them.
 
 ## 🏗️ Architecture Overview
 
 ### Backend Architecture
-- **Framework**: Laravel 12 (PHP 8.2+)
-- **Pattern**: Model-View-Controller (MVC) with Service Layer
-- **Database**: MySQL 8.0+ with optimized indexing
-- **Authentication**: Laravel Sanctum with 2FA support
-- **File Storage**: Local with symbolic links and cloud storage ready
+- **Framework**: Laravel 12 (PHP 8.4 in production and CI; `composer.json` requires `^8.2`)
+- **Pattern**: Model-View-Controller with a service layer (`app/Services`)
+- **Database**: MySQL / MariaDB in production and for the test suite; SQLite for local development (`.env.example`)
+- **Authentication**: Session auth for the website, Laravel Sanctum tokens for the JSON API, optional TOTP 2FA
+- **File Storage**: Local disk (`storage/app/public`), served through `/storage/{path}` by `StorageController` because the cPanel host does not follow the docroot symlink
 
 ### Frontend Architecture
-- **CSS Framework**: TailwindCSS 4.1+
-- **JavaScript**: Alpine.js 3.4+
-- **Build Tool**: Vite 7.0+
-- **Responsive**: Mobile-first design approach
-- **Progressive**: PWA-ready architecture
+- **Templates**: Blade (server-rendered), with small vanilla-JS enhancements in `resources/js`
+- **CSS Framework**: TailwindCSS 4 via the `@tailwindcss/vite` plugin (no PostCSS config or Tailwind v3 plugins)
+- **Build Tool**: Vite 6 with `laravel-vite-plugin`; `npm run build` also runs `fix-manifest.sh` and the result in `public/build/` is committed
+- **Responsive**: Mobile-first layouts; RTL support for Dhivehi
 
 ## 🔧 Backend Technologies
 
 ### Core Framework
 ```json
 {
-  "laravel/framework": "^12.0",
-  "php": "^8.2"
+  "php": "^8.2",
+  "laravel/framework": "^12.0"
 }
 ```
 
-**Laravel 12 Features Used:**
-- MVC Architecture with Service Layer
-- Eloquent ORM with relationships
-- Route Model Binding and Middleware
-- Queue System for background jobs
-- Event System for notifications
-- Artisan Commands for maintenance
+Laravel features in use: Eloquent with soft deletes, route model binding, form requests and policies,
+the notification system (mail), the scheduler (`routes/console.php`), queued jobs with the `sync`/`database`
+drivers, and Artisan commands for maintenance (`orders:cancel-unpaid-card`, `products:generate-slugs`, `mail:test`).
 
-### Key Dependencies
+### Production Dependencies
 
-#### Authentication & Security
-```json
-{
-  "laravel/sanctum": "^4.1",
-  "pragmarx/google2fa": "^8.0",
-  "google/recaptcha": "^1.3"
-}
-```
-- **Laravel Sanctum**: API authentication and SPA authentication
-- **Google 2FA**: Two-factor authentication for enhanced security
-- **reCAPTCHA**: Bot protection and form security
-- **Rate Limiting**: Built-in throttling for API and authentication endpoints
+| Package | Version constraint | Used for |
+| --- | --- | --- |
+| `laravel/sanctum` | `^4.1` | Bearer tokens for `/api/v1/*`; tokens expire after 30 days and `sanctum:prune-expired` runs daily |
+| `pragmarx/google2fa` | `^8.0` | TOTP two-step sign-in (`/profile/2fa/*`, `/2fa/verify`) |
+| `bacon/bacon-qr-code` | `^3.0` | QR code shown when enabling 2FA |
+| `spatie/laravel-translatable` | `^6.11` | English/Dhivehi product and category fields |
+| `intervention/image` | `^3.11` | Resizing and converting uploaded product images |
+| `spatie/laravel-backup` | `^9.3` | Nightly database backup (`backup:run --only-db`, `backup:clean`) to the `local` disk per `config/backup.php` |
+| `guzzlehttp/guzzle` | `^7.9` | HTTP client used for the BML Connect payment gateway (`App\Services\BmlConnect`) |
+| `laravel/tinker` | `^2.10` | REPL |
 
-#### Multilingual Support
-```json
-{
-  "spatie/laravel-translatable": "^6.11"
-}
-```
-- **Spatie Translatable**: Advanced multilingual content management
-- **Locale Management**: Session-based and database-stored preferences
-- **RTL Support**: Built-in right-to-left language support for Dhivehi
-
-#### Image Processing & Storage
-```json
-{
-  "intervention/image": "^3.11"
-}
-```
-- **Intervention Image**: Advanced image manipulation and optimization
-- **WebP Conversion**: Automatic modern image format conversion
-- **Multiple Sizes**: Automatic thumbnail and responsive image generation
-- **Storage Management**: Organized file structure with cleanup
-
-#### Data Processing
-```json
-{
-  "maatwebsite/excel": "^3.1"
-}
-```
-- **Laravel Excel**: Import/export functionality for bulk operations
-- **Data Migration**: Seamless data transfer and backup capabilities
-- **Report Generation**: Excel-based reporting and analytics
-
-#### Backup & Maintenance
-```json
-{
-  "spatie/laravel-backup": "^9.3"
-}
-```
-- **Automated Backups**: Database and file system backup automation
-- **Cloud Storage**: Integration with cloud backup services
-- **Disaster Recovery**: Comprehensive backup and restore procedures
+Roles and permissions are the app's own `Role` / `Permission` models (`role:` middleware), not a package.
+There is no PDF, spreadsheet, reCAPTCHA or social-login package.
 
 ### Development Dependencies
-```json
-{
-  "laravel/breeze": "^2.3",
-  "spatie/laravel-permission": "^6.20",
-  "guzzlehttp/guzzle": "^7.9",
-  "laravel/socialite": "^5.21"
-}
-```
 
-#### Auth & Permissions
-- **Laravel Breeze**: Authentication scaffolding and views
-- **Spatie Permission**: Role-based access control (RBAC)
-- **Social Login**: OAuth integration for third-party authentication
+| Package | Used for |
+| --- | --- |
+| `phpunit/phpunit` `^11.5` | Test suite (`php artisan test`); tests use PHPUnit attributes, not Pest |
+| `laravel/pint` | Code style (`./vendor/bin/pint`) |
+| `fakerphp/faker`, `mockery/mockery` | Factories and mocks |
+| `laravel/pail` | Log tailing (`composer dev`) |
+| `laravel/sail` | Optional Docker environment (not used by the deploy scripts) |
+| `nunomaduro/collision` | Error output |
 
 ## 🎨 Frontend Technologies
 
-### CSS Framework
 ```json
 {
-  "tailwindcss": "^4.1.11",
-  "@tailwindcss/forms": "^0.5.10",
-  "@tailwindcss/typography": "^0.5.16",
-  "@tailwindcss/aspect-ratio": "^0.4.2"
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "concurrently": "^9.0.1",
+    "laravel-vite-plugin": "^1.2.0",
+    "tailwindcss": "^4.1.11",
+    "vite": "^6.2.4"
+  },
+  "dependencies": {
+    "sweetalert2": "^11.22.2"
+  }
 }
 ```
 
-**TailwindCSS Configuration:**
-- Custom color palette for brand identity
-- Responsive breakpoints optimized for mobile commerce
-- Component utilities for rapid development
-- Form styling enhancements for better UX
+- **TailwindCSS 4**: brand palette, fonts and animations are defined in `tailwind.config.js`; `resources/css/app.css` holds the component classes
+- **SweetAlert2**: the flash/notification dialogs driven by `resources/js/notifications.js`
+- **Vite 6**: `npm run dev` for HMR, `npm run build` for production assets (`vite.config.js` sets `base: '/iruali/public/'` only when `NODE_ENV=production`, matching the cPanel layout)
+- No JavaScript framework (no Alpine, Vue or React) and no axios: the pages are server-rendered Blade with plain `fetch` where needed
 
-### JavaScript Framework
-```json
-{
-  "alpinejs": "^3.4.2"
-}
-```
+## 🗄️ Database
 
-**Alpine.js Features:**
-- Lightweight reactive framework for interactivity
-- Component-based JavaScript without build complexity
-- Directives for DOM manipulation and state management
-- Integration with Laravel and server-rendered content
+- **Production**: MySQL / MariaDB
+- **Tests**: MySQL database `iruali_test` (user `root`, empty password) hard-coded in `phpunit.xml`, with `RefreshDatabase`
+- **Local development**: SQLite (`database/database.sqlite`), as set up by `.env.example`
+- Schema is managed by migrations in `database/migrations`; seeders create reference data (permissions, roles, categories, banners, islands) and, outside production, demo shops and an admin user
 
-### Build Tools
-```json
-{
-  "vite": "^7.0.4",
-  "laravel-vite-plugin": "^2.0.0",
-  "autoprefixer": "^10.4.21",
-  "postcss": "^8.5.6"
-}
-```
+Features relied on: foreign keys, JSON columns for translatable fields and product attributes, soft deletes on
+products, orders and users, and `lockForUpdate` on vouchers and payout rows.
 
-**Vite Configuration:**
-- Fast hot module replacement (HMR) for development
-- Asset optimization and minification for production
-- CSS and JS bundling with tree shaking
-- Development server with HTTPS support
+## 🔐 Security
 
-### UI Components
-```json
-{
-  "sweetalert2": "^11.22.2"
-}
-```
-- **SweetAlert2**: Beautiful alert and confirmation dialogs
-- **User Experience**: Enhanced interaction feedback and confirmations
+- CSRF protection, escaped Blade output and Eloquent parameter binding (Laravel defaults)
+- `role:admin` / `role:seller` middleware on the admin and seller areas, policies for orders, products and vouchers
+- Throttling on login, registration, OTP, password reset, reviews, questions and the BML webhook
+- Signed URLs for public order tracking
+- Session auth for the site; Sanctum bearer tokens with abilities for the API
+- Optional TOTP 2FA with recovery codes; email OTP for verification
 
-## 🗄️ Database Technologies
+## 💳 Payments
 
-### Database System
-- **Primary**: MySQL 8.0+ (Production)
-- **Development**: SQLite (Local development)
-- **Features**: Full-text search, JSON columns, and spatial indexes
-
-### Database Features Used
-- **Migrations**: Version-controlled database schema
-- **Seeders**: Sample data and test data population
-- **Eloquent ORM**: Advanced relationships and query optimization
-- **Query Builder**: Performance-optimized database queries
-- **Pagination**: Built-in Laravel pagination for large datasets
-
-### Key Database Extensions
-- **Foreign Key Constraints**: Data integrity and referential integrity
-- **Indexes**: Strategic indexing for query optimization
-- **JSON Columns**: Flexible data storage for product attributes
-- **Timestamps**: Automatic created_at/updated_at tracking
-- **Soft Deletes**: Data retention with logical deletion
-
-## 🔐 Security Stack
-
-### Laravel Security Features
-- **CSRF Protection**: Built-in CSRF token validation
-- **XSS Protection**: Automatic output escaping and sanitization
-- **SQL Injection Prevention**: Eloquent ORM and query builder protection
-- **Authentication**: Secure session management with Sanctum
-- **Authorization**: Role-based access control with granular permissions
-
-### Authentication System
-```php
-// Multi-layer authentication implementation
-Route::middleware(['auth:sanctum', 'role:seller'])->group(function () {
-    // Protected seller routes
-});
-```
-
-**Features:**
-- **Multi-Provider**: Email/password, OAuth, and API token authentication
-- **2FA Support**: Google Authenticator integration
-- **OTP Verification**: SMS and email OTP support
-- **Session Management**: Secure session handling with Sanctum
-- **Rate Limiting**: Protection against brute force attacks
-
-## 📱 Progressive Web App Features
-
-### Service Worker Implementation
-- **Offline Support**: Basic offline functionality for critical pages
-- **Caching Strategy**: Asset and API response caching
-- **Background Sync**: Offline action queuing and synchronization
-- **Push Notifications**: Customer notification system integration
-
-### Manifest Configuration
-```json
-{
-  "name": "Iruali Marketplace",
-  "short_name": "Iruali",
-  "description": "Multi-vendor e-commerce platform",
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#1e40af",
-  "background_color": "#ffffff"
-}
-```
-
-## 🚀 Performance Optimizations
-
-### Frontend Optimizations
-- **Asset Minification**: CSS and JS compression with Vite
-- **Image Optimization**: Automatic WebP conversion and lazy loading
-- **Code Splitting**: Modular JavaScript loading for faster initial loads
-- **Critical CSS**: Inline critical styles for above-the-fold content
-
-### Backend Optimizations
-- **Query Optimization**: Efficient database queries with proper indexing
-- **Caching**: Redis/Memcached integration ready
-- **Database Indexing**: Strategic indexes for common query patterns
-- **Asset Versioning**: Cache-busting for updated assets
-
-### Server Optimizations
-- **Gzip Compression**: Text asset compression
-- **Browser Caching**: Appropriate cache headers for static content
-- **CDN Ready**: Optimized for content delivery networks
-- **Database Connection Pooling**: Efficient database connections
+Card payments only, through **BML Connect** (Bank of Maldives): redirect to BML's hosted page, return URL and
+signed webhook handled by `App\Http\Controllers\Customer\BmlPaymentController` and `App\Services\PaymentService`.
+See `PAYMENTS_BML.md`. Enabled by setting `BML_API_KEY`.
 
 ## 🔄 Development Workflow
 
-### Build Process
 ```bash
 # Development
-npm run dev          # Start Vite dev server with HMR
-php artisan serve    # Start Laravel development server
+npm run dev          # Vite dev server with HMR
+php artisan serve    # Laravel development server
+composer dev         # server + queue listener + pail + vite together
 
-# Production
-npm run build        # Build optimized assets
-composer install --no-dev --optimize-autoloader
-```
+# Checks
+php artisan test     # needs the iruali_test MySQL database
+./vendor/bin/pint    # code style (run on the files you touch)
 
-### Code Quality Tools
-- **Laravel Pint**: Code style enforcement (PHP CS Fixer)
-- **Laravel Testing**: PHPUnit integration with Pest
-- **ESLint**: JavaScript code quality (configured)
-- **Type Safety**: PHP 8.2+ type declarations and strict types
-
-## 📦 Package Management
-
-### Composer Dependencies
-```bash
-# Production dependencies
-composer install --no-dev --optimize-autoloader
-
-# Development dependencies
-composer install
-```
-
-### NPM Dependencies
-```bash
-# Development
-npm install
-
-# Production build
+# Production assets (commit public/build/ afterwards)
 npm run build
 ```
 
-## 🏗️ Deployment Architecture
+Deployment: `scripts/deploy-production.sh` (see `PRODUCTION_DEPLOY.md`) and the TEST auto-deploy in `TEST_AUTO_DEPLOY.md`.
 
-### Production Environment
-- **Web Server**: Apache/Nginx with PHP-FPM
-- **Database**: MySQL 8.0+ with replication support
-- **File Storage**: Local filesystem with cloud backup
-- **SSL/TLS**: HTTPS enforcement with modern cipher suites
-- **Monitoring**: Error logging and performance monitoring
+## 🔧 Configuration
 
-### Development Environment
-- **Local Development**: Laravel Sail (Docker) support
-- **Database**: SQLite for quick setup and testing
-- **Asset Compilation**: Vite dev server with HMR
-- **Debugging**: Laravel Telescope and debugging tools
+Key environment variables (see `.env.example` for the full list):
 
-## 🔧 Configuration Management
-
-### Environment Variables
 ```env
-# Core Laravel settings
 APP_NAME="Iruali"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://iruali.mv
 
-# Database configuration
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
 DB_DATABASE=iruali_production
 
-# Sanctum configuration
 SANCTUM_STATEFUL_DOMAINS=iruali.mv,www.iruali.mv
+SANCTUM_EXPIRATION=43200
 
-# Image processing
-INTERVENTION_IMAGE_DRIVER=gd
+# BML Connect
+BML_API_KEY=
+BML_ENVIRONMENT=sandbox
+BML_WEBHOOK_SECRET=
 
-# Cache configuration
-CACHE_DRIVER=redis
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
+# Admin seeded by `php artisan db:seed --class=UserSeeder`
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
 ```
 
-### Service Providers
-- **AppServiceProvider**: Global application configuration
-- **AuthServiceProvider**: Authentication and authorization setup
-- **RouteServiceProvider**: Route configuration and caching
-
-## 📊 Monitoring & Analytics
-
-### Error Tracking
-- **Laravel Logging**: Comprehensive error logging with contextual information
-- **Custom Exception Handling**: Specialized exception handling for e-commerce scenarios
-- **Performance Monitoring**: Request timing and database query monitoring
-
-### Performance Monitoring
-- **Query Logging**: Database query optimization and analysis
-- **Asset Monitoring**: Loading time optimization and bundle analysis
-- **Server Monitoring**: Resource usage tracking and alerting
+The scheduler (`* * * * * php artisan schedule:run`) must run on the server for unpaid-order cancellation,
+backups, token pruning and guest-cart cleanup (`routes/console.php`).
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: December 2024  
 **Laravel Version**: 12.x  
-**PHP Version**: 8.2+
+**PHP Version**: 8.4 (8.2+ required)

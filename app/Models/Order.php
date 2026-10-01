@@ -35,7 +35,6 @@ class Order extends Model
         'billing_address',
         'payment_method',
         'payment_status',
-        'payment_slip',
         'paid_at',
         'refund_status', 'refund_amount', 'refund_reason', 'refund_reference', 'refunded_at',
         'notes',

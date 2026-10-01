@@ -12,15 +12,16 @@ A modern, multi-vendor e-commerce platform built with Laravel for the Maldives m
 - Order management and tracking
 - Loyalty points system
 - Referral system
+- Card payments through BML Connect (Bank of Maldives) — the only payment method; see `docs/PAYMENTS_BML.md`
 - SEO optimized
 
 ## Local Development Setup
 
 ### Prerequisites
-- PHP 8.1 or higher
+- PHP 8.4 (the app requires 8.2 or higher; production and the test suite run on 8.4)
 - Composer
 - Node.js & npm
-- MySQL/MariaDB
+- MySQL/MariaDB for the test suite (`phpunit.xml` uses the `iruali_test` MySQL database); local development can use SQLite, which is what `.env.example` is set up for
 
 ### Installation
 
@@ -47,6 +48,8 @@ A modern, multi-vendor e-commerce platform built with Laravel for the Maldives m
    ```
 
 5. **Configure database in `.env`**
+
+   `.env.example` points at SQLite (`database/database.sqlite`; create it with `touch database/database.sqlite`). To use MySQL/MariaDB instead:
    ```env
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
@@ -78,92 +81,20 @@ A modern, multi-vendor e-commerce platform built with Laravel for the Maldives m
 
 10. **Visit** `http://127.0.0.1:8000`
 
-## cPanel Deployment
+### Tests
 
-### Method 1: Git Version Control (Recommended)
-
-1. **Push your code to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
-
-2. **In cPanel:**
-   - Go to **Git Version Control**
-   - Click **Create**
-   - Enter your GitHub repository URL
-   - Set clone directory: `/home/yourcpaneluser/repositories/iruali`
-   - Click **Create**
-
-3. **Set up document root:**
-   - Copy contents of `public/` folder to `public_html/`
-   - Edit `public_html/index.php` to point to your Laravel app
-
-4. **Install dependencies:**
-   ```bash
-   cd /home/yourcpaneluser/repositories/iruali
-   composer install --no-dev --optimize-autoloader
-   ```
-
-5. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with production settings
-   php artisan key:generate
-   ```
-
-6. **Set permissions:**
-   ```bash
-   chmod -R 775 storage bootstrap/cache
-   ```
-
-7. **Run migrations:**
-   ```bash
-   php artisan migrate --force
-   php artisan storage:link
-   ```
-
-8. **Build assets (if server supports Node.js):**
-   ```bash
-   npm install
-   npm run build
-   ```
-   Or build locally and upload `public/build/` to `public_html/`
-
-### Method 2: Manual Upload
-
-1. **Prepare files locally:**
-   - Run `composer install --no-dev --optimize-autoloader`
-   - Run `npm run build`
-   - Create a zip file excluding `vendor/`, `node_modules/`, `.env`
-
-2. **Upload to cPanel:**
-   - Extract in `/home/yourcpaneluser/repositories/iruali`
-   - Copy `public/` contents to `public_html/`
-   - Follow steps 4-8 from Method 1
-
-## File Structure for cPanel
-
+```bash
+php artisan test
 ```
-/home/yourcpaneluser/
-├── public_html/           # Document root (public files only)
-│   ├── index.php         # Updated to point to Laravel app
-│   ├── .htaccess
-│   ├── favicon.ico
-│   └── build/            # Compiled assets
-└── repositories/
-    └── iruali/           # Main Laravel application
-        ├── app/
-        ├── bootstrap/
-        ├── config/
-        ├── database/
-        ├── resources/
-        ├── routes/
-        ├── storage/
-        ├── vendor/
-        └── .env
-```
+
+`phpunit.xml` runs the suite against a MySQL/MariaDB database named `iruali_test` (user `root`, empty password), not the SQLite development database, so that database must exist. Built assets live in `public/build/` and are committed: after frontend changes run `npm run build` and commit the result.
+
+## Deployment
+
+The site runs on cPanel. Deployment is scripted (`scripts/`) and documented in:
+
+- **[docs/PRODUCTION_DEPLOY.md](docs/PRODUCTION_DEPLOY.md)** — releasing `main` to `iruali.mv` by hand with `scripts/deploy-production.sh` (production is never deployed automatically).
+- **[docs/TEST_AUTO_DEPLOY.md](docs/TEST_AUTO_DEPLOY.md)** — how `test.iruali.mv` pulls `main` automatically on every push.
 
 ## Environment Variables
 
@@ -185,6 +116,10 @@ DB_PASSWORD=your_db_password
 SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
+
+# Card payments (see docs/PAYMENTS_BML.md). Leave BML_API_KEY empty to hide card payment.
+BML_API_KEY=
+BML_ENVIRONMENT=sandbox
 ```
 
 ## Troubleshooting
@@ -227,7 +162,7 @@ This project is proprietary software.
 - Use the token in the `Authorization` header for all protected endpoints.
 - Logout via `/api/v1/logout` (requires token).
 - Tokens are issued with abilities (scopes) for fine-grained access control.
-- Tokens older than 30 days are automatically deleted for security.
+- Tokens expire after 30 days (`SANCTUM_EXPIRATION`, in minutes); the scheduled `sanctum:prune-expired` command (`routes/console.php`) deletes expired tokens daily, which needs the Laravel scheduler cron on the server.
 
 ### Example: Login
 
@@ -270,7 +205,7 @@ curl -X POST https://yourdomain.com/api/v1/logout \
 - You can check abilities in your controllers using `$request->user()->tokenCan('order:read')`.
 
 ## Token Expiration
-- Tokens older than 30 days are deleted automatically by a scheduled job.
+- Tokens expire 30 days after they are issued. Expired tokens are removed by the daily `sanctum:prune-expired --hours=24` schedule once the scheduler cron (`* * * * * php artisan schedule:run`) is set up on the server.
 
 ---
 

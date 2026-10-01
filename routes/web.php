@@ -185,6 +185,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
         Route::post('/sellers/{seller}/approve', [AdminController::class, 'approveSeller'])->name('sellers.approve');
         Route::post('/sellers/{seller}/reject', [AdminController::class, 'rejectSeller'])->name('sellers.reject');
+        Route::post('/sellers/{seller}/suspend', [AdminController::class, 'suspendSeller'])->name('sellers.suspend');
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
 

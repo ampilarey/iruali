@@ -30,10 +30,11 @@ class PaymentService
 
     public static function methodLabel(?string $method): string
     {
+        // BML card is the only payment method; older orders may still carry a
+        // retired method name, which is shown as-is rather than mislabelled.
         return match ($method) {
-            'bml' => __('Card payment (BML)'),
-            'bank_transfer' => __('Bank transfer'),
-            default => __('Cash on delivery'),
+            'bml', null, '' => __('Card payment (BML)'),
+            default => ucfirst(str_replace('_', ' ', $method)),
         };
     }
 

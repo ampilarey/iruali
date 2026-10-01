@@ -50,7 +50,7 @@
         </div>
 
         <h2>{{ __('Deliver to') }}</h2>
-        <p style="margin:0;font-size:14px">{{ $order->user?->name }}<br>{{ $order->shipping_address }}<br>{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}, {{ $order->shipping_country }}</p>
+        <p style="margin:0;font-size:14px">{{ $order->user?->name }}<br>{{ $order->shipping_address }}<br>{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}, {{ $order->shipping_country }}@if($order->shipping_phone)<br>{{ __('Phone') }}: <span dir="ltr">{{ $order->shipping_phone }}</span>@endif</p>
 
         <h2>{{ __('Items') }}</h2>
         <table>

@@ -700,5 +700,17 @@
     "Something went wrong": "މައްސަލައެއް ދިމާވެއްޖެ",
     "We have been notified. Please try again in a moment.": "އަހަރެމެންނަށް އަންގައިފިން. އިރުކޮޅަކުން އަލުން މަސައްކަތްކުރައްވާ.",
     "Back soon": "އަވަހަށް އަންނާނަން",
-    "iruali is being updated. Please try again in a few minutes.": "iruali އަޕްޑޭޓް ކުރެވެނީ. މިނިޓުކޮޅަކުން އަލުން މަސައްކަތްކުރައްވާ."
+    "iruali is being updated. Please try again in a few minutes.": "iruali އަޕްޑޭޓް ކުރެވެނީ. މިނިޓުކޮޅަކުން އަލުން މަސައްކަތްކުރައްވާ.",
+    "Phone for delivery": "ޑެލިވަރީއަށް ގުޅާނެ ފޯނު ނަންބަރު",
+    "The courier will call this number when your order arrives.": "އޯޑަރު ލިބުމުން ކޫރިއަރު ގުޅާނީ މި ނަންބަރަށެވެ.",
+    "Please enter a phone number we can reach you on for delivery.": "ޑެލިވަރީއަށް ގުޅޭނެ ފޯނު ނަންބަރެއް ޖައްސަވާ.",
+    "Please enter a valid phone number (digits only, e.g. 7771234).": "ރަނގަޅު ފޯނު ނަންބަރެއް ޖައްސަވާ (ހަމައެކަނި އަދަދު، މިސާލު: 7771234).",
+    "Please enter your shipping address.": "ޑެލިވަރީ އެޑްރެސް ޖައްސަވާ.",
+    "Please enter your shipping city.": "ރަށް ޖައްސަވާ.",
+    "Please enter your shipping state/province.": "އަތޮޅު ޖައްސަވާ.",
+    "Please select your shipping country.": "ޤައުމު އިޚްތިޔާރުކުރައްވާ.",
+    "Please select a payment method.": "ފައިސާ ދައްކާނެ ގޮތެއް އިޚްތިޔާރުކުރައްވާ.",
+    "Please select a valid payment method.": "ރަނގަޅު ފައިސާ ދައްކާނެ ގޮތެއް އިޚްތިޔާރުކުރައްވާ.",
+    "You must agree to the terms and conditions.": "ޝަރުތުތަކަށް އެއްބަސްވާން ޖެހޭނެ.",
+    "Your cart is empty. Please add items before placing an order.": "ކާޓް ހުސްކޮށް. އޯޑަރު ކުރުމުގެ ކުރިން ތަކެތި އިތުރުކުރައްވާ."
 }

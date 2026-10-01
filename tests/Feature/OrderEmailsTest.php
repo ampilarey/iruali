@@ -31,7 +31,7 @@ class OrderEmailsTest extends TestCase
 
         $result = app(OrderService::class)->createOrderFromCart($customer, [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Malé', 'shipping_state' => 'Kaafu',
-            'shipping_zip' => '20026', 'shipping_country' => 'Maldives',
+            'shipping_zip' => '20026', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234',
         ]);
         $this->assertTrue($result['success']);
 

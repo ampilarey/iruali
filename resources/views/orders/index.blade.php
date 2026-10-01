@@ -37,7 +37,7 @@
                             <h4 class="font-semibold text-gray-900 mb-2">{{ __('Shipping Address') }}</h4>
                             <p class="text-sm text-gray-600">
                                 {{ $order->shipping_address }}<br>
-                                {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
+                                {{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}<br>
                                 {{ $order->shipping_country }}
                             </p>
                         </div>

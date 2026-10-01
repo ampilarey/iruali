@@ -39,9 +39,39 @@ class CheckoutDeliveryTest extends TestCase
             'shipping_state' => 'Addu',
             'shipping_zip' => '19020',
             'shipping_country' => 'Maldives',
+            'shipping_phone' => '777 1234',
             'payment_method' => 'bml',
             'agree_terms' => '1',
         ], $overrides));
+    }
+
+    public function test_delivery_phone_is_required_validated_and_stored_without_spaces(): void
+    {
+        $this->cartWorth(200);
+
+        $this->placeOrder(['shipping_phone' => ''])->assertSessionHasErrors('shipping_phone');
+        $this->placeOrder(['shipping_phone' => 'call me'])->assertSessionHasErrors('shipping_phone');
+        $this->placeOrder(['shipping_phone' => '123'])->assertSessionHasErrors('shipping_phone');
+        $this->assertSame(0, Order::count());
+
+        $this->placeOrder()->assertRedirect();
+
+        $this->assertSame('7771234', Order::firstOrFail()->shipping_phone);
+    }
+
+    public function test_postal_code_is_optional_and_phone_prefilled_from_profile(): void
+    {
+        $this->customer->update(['phone' => '9991234']);
+        $this->cartWorth(200);
+
+        $this->actingAs($this->customer)->get('/checkout')
+            ->assertOk()
+            ->assertSee('name="shipping_phone"', false)
+            ->assertSee('value="9991234"', false);
+
+        $this->placeOrder(['shipping_zip' => ''])->assertRedirect();
+
+        $this->assertNull(Order::firstOrFail()->shipping_zip);
     }
 
     public function test_checkout_page_shows_delivery_areas_and_posts_to_orders(): void

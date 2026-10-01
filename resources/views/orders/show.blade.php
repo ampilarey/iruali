@@ -90,10 +90,16 @@
                         <h3 class="font-semibold text-gray-900 mb-2">{{ __('Shipping Address') }}</h3>
                         <p class="text-gray-600">
                             {{ $order->shipping_address }}<br>
-                            {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
+                            {{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}<br>
                             {{ $order->shipping_country }}
                         </p>
                     </div>
+                    @if($order->shipping_phone)
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">{{ __('Phone for delivery') }}</h3>
+                            <p class="text-gray-600" dir="ltr"><a href="tel:{{ $order->shipping_phone }}" class="hover:underline">{{ $order->shipping_phone }}</a></p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

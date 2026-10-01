@@ -151,6 +151,9 @@
                     <p class="mt-3 text-sm text-gray-700">{{ $order->shipping_address }}</p>
                     <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
                     <p class="text-sm text-gray-700">{{ $order->shipping_country }}</p>
+                    @if($order->shipping_phone)
+                        <p class="mt-2 text-sm text-gray-700">Phone: <a href="tel:{{ $order->shipping_phone }}" dir="ltr" class="font-medium hover:underline">{{ $order->shipping_phone }}</a></p>
+                    @endif
                     <p class="mt-3 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}</p>
                 </div>
             </div>

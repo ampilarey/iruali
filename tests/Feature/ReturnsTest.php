@@ -73,7 +73,7 @@ class ReturnsTest extends TestCase
 
         $order = app(OrderService::class)->createOrderFromCart($this->customer, [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
-            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'cod',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'cod',
         ])['order'];
 
         $this->actingAs($this->admin);

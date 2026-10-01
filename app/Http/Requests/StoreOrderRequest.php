@@ -25,9 +25,9 @@ class StoreOrderRequest extends FormRequest
             'shipping_address' => 'required|string|max:500',
             'shipping_city' => 'required|string|max:100',
             'shipping_state' => 'required|string|max:100',
-            'shipping_zip' => 'required|string|max:20',
+            'shipping_zip' => 'nullable|string|max:20',
             'shipping_country' => 'required|string|max:100',
-            'shipping_phone' => 'nullable|string|max:20',
+            'shipping_phone' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/'],
             'billing_address' => 'nullable|string|max:500',
             'billing_city' => 'nullable|string|max:100',
             'billing_state' => 'nullable|string|max:100',
@@ -46,15 +46,16 @@ class StoreOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'shipping_address.required' => 'Please enter your shipping address.',
-            'shipping_city.required' => 'Please enter your shipping city.',
-            'shipping_state.required' => 'Please enter your shipping state/province.',
-            'shipping_zip.required' => 'Please enter your shipping postal code.',
-            'shipping_country.required' => 'Please select your shipping country.',
-            'payment_method.required' => 'Please select a payment method.',
-            'payment_method.in' => 'Please select a valid payment method.',
-            'agree_terms.required' => 'You must agree to the terms and conditions.',
-            'agree_terms.accepted' => 'You must agree to the terms and conditions.',
+            'shipping_address.required' => __('Please enter your shipping address.'),
+            'shipping_city.required' => __('Please enter your shipping city.'),
+            'shipping_state.required' => __('Please enter your shipping state/province.'),
+            'shipping_country.required' => __('Please select your shipping country.'),
+            'shipping_phone.required' => __('Please enter a phone number we can reach you on for delivery.'),
+            'shipping_phone.regex' => __('Please enter a valid phone number (digits only, e.g. 7771234).'),
+            'payment_method.required' => __('Please select a payment method.'),
+            'payment_method.in' => __('Please select a valid payment method.'),
+            'agree_terms.required' => __('You must agree to the terms and conditions.'),
+            'agree_terms.accepted' => __('You must agree to the terms and conditions.'),
         ];
     }
 
@@ -69,7 +70,7 @@ class StoreOrderRequest extends FormRequest
             'shipping_state' => 'shipping state/province',
             'shipping_zip' => 'shipping postal code',
             'shipping_country' => 'shipping country',
-            'shipping_phone' => 'shipping phone',
+            'shipping_phone' => 'delivery phone',
             'billing_address' => 'billing address',
             'billing_city' => 'billing city',
             'billing_state' => 'billing state/province',
@@ -91,9 +92,9 @@ class StoreOrderRequest extends FormRequest
             'shipping_address' => trim($this->input('shipping_address')),
             'shipping_city' => trim($this->input('shipping_city')),
             'shipping_state' => trim($this->input('shipping_state')),
-            'shipping_zip' => trim($this->input('shipping_zip')),
+            'shipping_zip' => $this->input('shipping_zip') ? trim($this->input('shipping_zip')) : null,
             'shipping_country' => trim($this->input('shipping_country')),
-            'shipping_phone' => $this->input('shipping_phone') ? trim($this->input('shipping_phone')) : null,
+            'shipping_phone' => $this->input('shipping_phone') ? preg_replace('/\s+/', '', trim($this->input('shipping_phone'))) : null,
             'billing_address' => $this->input('billing_address') ? trim($this->input('billing_address')) : null,
             'billing_city' => $this->input('billing_city') ? trim($this->input('billing_city')) : null,
             'billing_state' => $this->input('billing_state') ? trim($this->input('billing_state')) : null,
@@ -103,7 +104,7 @@ class StoreOrderRequest extends FormRequest
         ]);
 
         // If billing address is not provided, use shipping address
-        if (!$this->input('billing_address')) {
+        if (! $this->input('billing_address')) {
             $this->merge([
                 'billing_address' => $this->input('shipping_address'),
                 'billing_city' => $this->input('shipping_city'),
@@ -124,14 +125,14 @@ class StoreOrderRequest extends FormRequest
             $user = auth()->user();
             $cart = $user->carts()->where('status', 'active')->latest()->first();
 
-            if (!$cart || $cart->items->count() === 0) {
-                $validator->errors()->add('cart', 'Your cart is empty. Please add items before placing an order.');
+            if (! $cart || $cart->items->count() === 0) {
+                $validator->errors()->add('cart', __('Your cart is empty. Please add items before placing an order.'));
             }
 
             // Check if all cart items are still available
             if ($cart) {
                 foreach ($cart->items as $item) {
-                    if (!$item->product->is_active) {
+                    if (! $item->product->is_active) {
                         $validator->errors()->add('cart', "Product '{$item->product->name['en']}' is no longer available.");
                     }
 

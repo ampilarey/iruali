@@ -168,8 +168,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/returns', [SellerController::class, 'returns'])->name('returns');
     });
 
-    // Admin routes
-    Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin routes: staff only (admin sees all; support/finance get the routes listed in config/staff.php) and 2FA required
+    Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/sellers', [AdminController::class, 'sellers'])->name('sellers');

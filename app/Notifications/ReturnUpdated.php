@@ -4,15 +4,24 @@ namespace App\Notifications;
 
 use App\Models\ReturnRequest;
 use App\Support\Money;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * Tells the customer their return was approved, rejected or refunded.
  */
-class ReturnUpdated extends Notification
+class ReturnUpdated extends Notification implements ShouldQueue
 {
-    public function __construct(public ReturnRequest $request) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public ReturnRequest $request)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

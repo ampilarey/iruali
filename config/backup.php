@@ -159,11 +159,12 @@ return [
             'filename_prefix' => 'iruali-backup-',
 
             /*
-             * The disk names on which the backups will be stored.
+             * The disk names on which the backups will be stored. BACKUP_DISKS is a comma list,
+             * e.g. "local,s3" keeps a copy on the server and one off-site (Backblaze B2 / MinIO /
+             * AWS via the s3 disk in config/filesystems.php). The first disk is used for the
+             * monthly restore drill and the ready check.
              */
-            'disks' => [
-                'local',
-            ],
+            'disks' => array_values(array_filter(array_map('trim', explode(',', (string) env('BACKUP_DISKS', 'local'))))),
         ],
 
         /*
@@ -210,9 +211,10 @@ return [
             \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['mail'],
+            // Only problems are mailed (to ALERTS_EMAIL); a nightly "backup OK" email would just be ignored.
+            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => [],
+            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => [],
+            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => [],
         ],
 
         /*
@@ -222,7 +224,7 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_NOTIFICATION_EMAIL', env('MAIL_FROM_ADDRESS', 'admin@iruali.com')),
+            'to' => env('ALERTS_EMAIL', env('BACKUP_NOTIFICATION_EMAIL', env('MAIL_FROM_ADDRESS', 'admin@iruali.com'))),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'noreply@iruali.com'),
@@ -266,7 +268,7 @@ return [
     'monitor_backups' => [
         [
             'name' => env('APP_NAME', 'iruali-backup'),
-            'disks' => ['local'],
+            'disks' => array_values(array_filter(array_map('trim', explode(',', (string) env('BACKUP_DISKS', 'local'))))),
             'health_checks' => [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 10000,
@@ -336,6 +338,15 @@ return [
          * Set to `0` for none
          */
         'retry_delay' => 60,
+    ],
+
+    /*
+     * Monthly restore drill (php artisan backup:restore-drill): the newest backup on the first
+     * backup disk is restored into this separate database, counted against the live one and
+     * dropped again. It must not be the live database; it is created if missing.
+     */
+    'restore_drill' => [
+        'database' => env('DB_DRILL_DATABASE'),
     ],
 
 ];

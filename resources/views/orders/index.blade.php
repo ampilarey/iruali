@@ -25,7 +25,7 @@
                             @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
                             @elseif($order->status === 'cancelled') bg-red-100 text-red-800
                             @else bg-gray-100 text-gray-800 @endif">
-                            {{ ucfirst($order->status) }}
+                            {{ __(\App\Support\OrderStatus::label($order->status)) }}
                         </span>
                         <p class="text-lg font-bold text-primary-600 mt-1 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</p>
                     </div>

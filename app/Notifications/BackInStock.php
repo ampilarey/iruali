@@ -5,12 +5,21 @@ namespace App\Notifications;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Support\Money;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
-class BackInStock extends Notification
+class BackInStock extends Notification implements ShouldQueue
 {
-    public function __construct(public Product $product, public ?ProductVariant $variant = null) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public Product $product, public ?ProductVariant $variant = null)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

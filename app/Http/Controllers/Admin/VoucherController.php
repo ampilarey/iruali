@@ -28,7 +28,9 @@ class VoucherController extends Controller
     public function store(StoreVoucherRequest $request)
     {
         $this->authorize('create', Voucher::class);
-        Voucher::create($request->validated());
+        $voucher = Voucher::create($request->validated());
+        \App\Support\Audit::record('voucher.created', $voucher, ['code' => $voucher->code]);
+
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher created successfully.');
     }
 
@@ -43,6 +45,8 @@ class VoucherController extends Controller
     {
         $this->authorize('update', $voucher);
         $voucher->update($request->validated());
+        \App\Support\Audit::record('voucher.updated', $voucher, ['code' => $voucher->code, 'changed' => array_keys($voucher->getChanges())]);
+
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher updated successfully.');
     }
 
@@ -50,6 +54,8 @@ class VoucherController extends Controller
     {
         $this->authorize('delete', $voucher);
         $voucher->delete();
+        \App\Support\Audit::record('voucher.deleted', $voucher, ['code' => $voucher->code]);
+
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher deleted successfully.');
     }
 } 

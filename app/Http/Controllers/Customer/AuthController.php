@@ -8,10 +8,13 @@ use App\Models\OTP;
 use App\Models\Role;
 use App\Models\User;
 use App\Notifications\VerifyEmailCode;
+use App\Notifications\VerifyPhoneCode;
 use App\Services\NotificationService;
+use App\Services\Sms\SmsManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use PragmaRX\Google2FA\Google2FA;
 use Throwable;
@@ -21,7 +24,7 @@ use Throwable;
  */
 class AuthController extends Controller
 {
-    public function __construct(protected Google2FA $google2fa) {}
+    public function __construct(protected Google2FA $google2fa, protected SmsManager $sms) {}
 
     public function showLogin()
     {
@@ -59,6 +62,9 @@ class AuthController extends Controller
         $user->roles()->attach(Role::firstOrCreate(['name' => 'customer'], ['display_name' => 'Customer'])->id);
 
         $this->sendEmailCode($user);
+        if ($user->phone && $this->sms->isLive()) {
+            $this->sendPhoneCode($user);
+        }
 
         Auth::login($user);
         $request->session()->regenerate();
@@ -97,6 +103,9 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $user->updateLoginTracking($request->ip());
         NotificationService::loginSuccess();
+        if ($user->isStaff()) {
+            \App\Support\Audit::record('staff.login', $user, ['two_factor' => false]);
+        }
 
         // Unverified emails get a reminder banner on every page; they are not locked out.
         return $this->redirectBasedOnRole($user);
@@ -133,13 +142,22 @@ class AuthController extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
         $user->updateLoginTracking($request->ip());
+        if ($user->isStaff()) {
+            \App\Support\Audit::record('staff.login', $user, ['two_factor' => true]);
+        }
 
         return $this->redirectBasedOnRole($user);
     }
 
     public function showVerificationNotice(Request $request)
     {
-        return view('auth.verification-notice', ['user' => $request->user()]);
+        $user = $request->user();
+
+        return view('auth.verification-notice', [
+            'user' => $user,
+            // The phone box only appears when codes can actually be texted
+            'phonePending' => $user->phone && ! $user->isPhoneVerified() && $this->sms->isLive(),
+        ]);
     }
 
     /**
@@ -173,15 +191,39 @@ class AuthController extends Controller
     }
 
     /**
-     * Phone codes: kept for when an SMS provider is connected. Always for the signed-in user's own number.
+     * Text a fresh code to the signed-in user's own number: at most one a minute and five an hour.
+     */
+    public function sendPhoneOTP(Request $request)
+    {
+        $user = $request->user();
+        if (! $user->phone || $user->isPhoneVerified()) {
+            return redirect()->route('account');
+        }
+        if (! $this->sms->isLive()) {
+            return back()->withErrors(['phone_code' => __('Text messages are not available right now. Please try again later.')]);
+        }
+
+        if (RateLimiter::tooManyAttempts('phone-otp:m:'.$user->id, 1) || RateLimiter::tooManyAttempts('phone-otp:h:'.$user->id, 5)) {
+            return back()->withErrors(['phone_code' => __('Please wait a minute before asking for another code.')]);
+        }
+
+        $this->sendPhoneCode($user);
+
+        return back()->with('status', __('We have texted a new code to :phone.', ['phone' => $user->phone]));
+    }
+
+    /**
+     * Phone codes are always checked against the signed-in user's own number.
      */
     public function verifyPhoneOTP(Request $request)
     {
-        $request->validate(['code' => 'required|digits:6']);
+        // The verification page posts phone_code; older clients post code
+        $request->merge(['phone_code' => $request->input('phone_code', $request->input('code'))]);
+        $request->validate(['phone_code' => 'required|digits:6']);
         $user = $request->user();
 
-        if (! $user->phone || ! OTP::verify($user->phone, $request->code, 'verification')) {
-            return back()->withErrors(['code' => __('auth.invalid_otp')]);
+        if (! $user->phone || ! OTP::verify($user->phone, $request->phone_code, 'verification')) {
+            return back()->withErrors(['phone_code' => __('auth.invalid_otp')]);
         }
 
         $user->forceFill(['phone_verified_at' => now()])->save();
@@ -212,10 +254,24 @@ class AuthController extends Controller
         }
     }
 
+    protected function sendPhoneCode(User $user): void
+    {
+        RateLimiter::hit('phone-otp:m:'.$user->id, 60);
+        RateLimiter::hit('phone-otp:h:'.$user->id, 3600);
+
+        $otp = OTP::createForPhone($user->phone, 'verification');
+
+        try {
+            $user->notify(new VerifyPhoneCode($otp));
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
     protected function redirectBasedOnRole(User $user)
     {
         $default = match (true) {
-            $user->isAdmin() => route('admin.dashboard'),
+            $user->isStaff() => route('admin.dashboard'),
             $user->isSeller() => route('seller.dashboard'),
             default => route('home'),
         };

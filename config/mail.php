@@ -115,4 +115,17 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Operational alerts
+    |--------------------------------------------------------------------------
+    |
+    | Where payment error alerts, the daily error digest, backup failures and
+    | the monthly restore drill report go. Falls back to the contact email in
+    | Admin → Settings when empty.
+    |
+    */
+
+    'alerts_to' => env('ALERTS_EMAIL'),
+
 ];

@@ -71,8 +71,10 @@ class FulfilmentService
 
     /**
      * Move one shop's part forward, then bring the order's overall status up to date.
+     *
+     * @param  array<string, mixed>  $tracking  courier, tracking_number, tracking_url, vessel_or_flight, expected_delivery_date
      */
-    public function advance(SellerOrder $part, string $status, ?string $trackingNote = null): bool
+    public function advance(SellerOrder $part, string $status, ?string $trackingNote = null, array $tracking = []): bool
     {
         if (! in_array($status, $this->nextStatuses($part), true)) {
             return false;
@@ -81,7 +83,7 @@ class FulfilmentService
         $order = $part->order;
         $before = $order->status;
 
-        DB::transaction(function () use ($part, $status, $trackingNote) {
+        DB::transaction(function () use ($part, $status, $trackingNote, $tracking) {
             $part->fill(['status' => $status]);
             if ($status === 'shipped') {
                 $part->shipped_at = now();
@@ -89,10 +91,15 @@ class FulfilmentService
                     $part->tracking_note = $trackingNote;
                 }
             }
+            if ($status === 'out_for_delivery') {
+                $part->out_for_delivery_at = now();
+                $part->shipped_at ??= now();
+            }
             if ($status === 'delivered') {
                 $part->delivered_at = now();
                 $part->shipped_at ??= now();
             }
+            $this->fillTracking($part, $tracking);
             $part->save();
         });
 
@@ -123,13 +130,38 @@ class FulfilmentService
 
         $ranks = $parts->map(fn ($s) => SellerOrder::RANK[$s] ?? 0);
         $target = match (true) {
-            $ranks->min() >= 3 => 'delivered',
-            $ranks->min() >= 2 => 'shipped',
-            $ranks->max() >= 1 => 'processing',
+            $ranks->min() >= SellerOrder::RANK['delivered'] => 'delivered',
+            $ranks->min() >= SellerOrder::RANK['out_for_delivery'] => 'out_for_delivery',
+            $ranks->min() >= SellerOrder::RANK['shipped'] => 'shipped',
+            $ranks->max() >= SellerOrder::RANK['processing'] => 'processing',
             default => 'pending',
         };
 
         $this->orders->advanceTo($order, $target);
+    }
+
+    /**
+     * Record (or correct) a part's delivery details without changing its status.
+     *
+     * @param  array<string, mixed>  $tracking
+     */
+    public function updateTracking(SellerOrder $part, array $tracking): void
+    {
+        $this->fillTracking($part, $tracking);
+        $part->save();
+    }
+
+    /**
+     * Only the known tracking fields, and only those actually given (so a form that leaves a
+     * field out does not blank it).
+     */
+    protected function fillTracking(SellerOrder $part, array $tracking): void
+    {
+        foreach (SellerOrder::TRACKING_FIELDS as $field) {
+            if (array_key_exists($field, $tracking)) {
+                $part->{$field} = filled($tracking[$field]) ? $tracking[$field] : null;
+            }
+        }
     }
 
     /**
@@ -147,7 +179,8 @@ class FulfilmentService
             if ((SellerOrder::RANK[$part->status] ?? 0) < (SellerOrder::RANK[$status] ?? 0)) {
                 $part->update([
                     'status' => $status,
-                    'shipped_at' => in_array($status, ['shipped', 'delivered'], true) ? ($part->shipped_at ?? now()) : $part->shipped_at,
+                    'shipped_at' => in_array($status, ['shipped', 'out_for_delivery', 'delivered'], true) ? ($part->shipped_at ?? now()) : $part->shipped_at,
+                    'out_for_delivery_at' => $status === 'out_for_delivery' ? ($part->out_for_delivery_at ?? now()) : $part->out_for_delivery_at,
                     'delivered_at' => $status === 'delivered' ? now() : $part->delivered_at,
                 ]);
             }
@@ -159,7 +192,7 @@ class FulfilmentService
      */
     public function anyPartSent(Order $order): bool
     {
-        return $order->sellerOrders()->whereIn('status', ['shipped', 'delivered'])->exists();
+        return $order->sellerOrders()->whereIn('status', ['shipped', 'out_for_delivery', 'delivered'])->exists();
     }
 
     public function partFor(Order $order, User $seller): ?SellerOrder

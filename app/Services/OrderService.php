@@ -323,7 +323,8 @@ class OrderService
     public const TRANSITIONS = [
         'pending' => ['processing', 'cancelled'],
         'processing' => ['shipped', 'cancelled'],
-        'shipped' => ['delivered'],
+        'shipped' => ['out_for_delivery', 'delivered'],
+        'out_for_delivery' => ['delivered'],
         'delivered' => [],
         'cancelled' => [],
     ];
@@ -362,6 +363,7 @@ class OrderService
             return false;
         }
 
+        $before = $order->status;
         DB::transaction(function () use ($order, $status) {
             if ($status === 'cancelled') {
                 $this->reverseOrder($order);
@@ -377,6 +379,7 @@ class OrderService
             app(FulfilmentService::class)->cascadeFromOrder($order, $status);
         });
 
+        \App\Support\Audit::record($status === 'cancelled' ? 'order.cancelled' : 'order.status', $order, ['from' => $before, 'to' => $status, 'order_number' => $order->order_number]);
         app(OrderNotifier::class)->statusChanged($order->fresh());
 
         return true;
@@ -388,7 +391,7 @@ class OrderService
      */
     public function advanceTo(Order $order, string $target): bool
     {
-        $path = ['pending', 'processing', 'shipped', 'delivered'];
+        $path = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
         $from = array_search($order->status, $path, true);
         $to = array_search($target, $path, true);
 
@@ -500,6 +503,7 @@ class OrderService
             'pending' => ['status' => 'Order Placed', 'description' => 'Your order has been placed and is being processed'],
             'processing' => ['status' => 'Processing', 'description' => 'Your order is being prepared for shipment'],
             'shipped' => ['status' => 'Shipped', 'description' => 'Your order has been shipped'],
+            'out_for_delivery' => ['status' => 'Out for delivery', 'description' => 'Your order is out for delivery'],
             'delivered' => ['status' => 'Delivered', 'description' => 'Your order has been delivered'],
             'cancelled' => ['status' => 'Cancelled', 'description' => 'Your order has been cancelled'],
         ];

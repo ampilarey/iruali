@@ -51,25 +51,55 @@
                             <div class="rounded-lg border border-gray-200 p-3 text-sm">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <p class="font-semibold text-gray-900">{{ $part->shopName() }}</p>
-                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ ucfirst($part->status) }}</span>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span>
                                 </div>
                                 <p class="mt-1 text-xs text-gray-500">Items {{ \App\Support\Money::format($part->subtotal) }} · commission {{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}% ({{ \App\Support\Money::format($part->commission_amount) }}) · shop earns {{ \App\Support\Money::format($part->seller_earnings) }} · {{ str_replace('_', ' ', $part->earningsState()) }}</p>
-                                @if($part->tracking_note)<p class="mt-1 text-xs text-gray-700">Tracking: {{ $part->tracking_note }}</p>@endif
+                                <div class="mt-2">@include('orders._tracking', ['part' => $part])</div>
                                 @if($next = $fulfilment->nextStatuses($part))
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         @foreach($next as $status)
                                             <form method="POST" action="{{ route('admin.orders.parts.status', [$order, $part]) }}" class="flex gap-2">
                                                 @csrf
                                                 <input type="hidden" name="status" value="{{ $status }}">
-                                                @if($status === 'shipped')<input name="tracking_note" placeholder="Tracking (optional)" class="rounded-lg border border-gray-300 px-2 py-1 text-xs">@endif
-                                                <button class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50">Mark {{ $status }}</button>
+                                                @if($status === 'shipped')<input name="tracking_note" placeholder="Note to customer (optional)" class="rounded-lg border border-gray-300 px-2 py-1 text-xs">@endif
+                                                <button class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50">Mark {{ str_replace('_', ' ', $status) }}</button>
                                             </form>
                                         @endforeach
                                     </div>
                                 @endif
+                                @if($part->status !== 'cancelled')
+                                    <details class="mt-2">
+                                        <summary class="cursor-pointer text-xs font-medium text-primary-700">{{ $part->hasTrackingDetails() ? 'Edit delivery details' : 'Add delivery details' }}</summary>
+                                        <form method="POST" action="{{ route('admin.orders.parts.tracking', [$order, $part]) }}" class="mt-2 space-y-2">
+                                            @csrf
+                                            @include('orders._tracking_form', ['part' => $part])
+                                            <button class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50">Save details</button>
+                                        </form>
+                                    </details>
+                                @endif
                             </div>
                         @endforeach
                     </div>
+                </div>
+                <div class="border-t border-gray-100 px-5 py-4 space-y-3">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Conversations</h3>
+                    @foreach($order->sellerOrders as $part)
+                        @include('messaging._thread', [
+                            'part' => $part,
+                            'conversation' => $part->conversation,
+                            'role' => 'admin',
+                            'action' => route('admin.orders.messages.store', [$order, $part]),
+                            'canReply' => true,
+                            'closedNote' => null,
+                        ])
+                        @if($part->conversation)
+                            <form method="POST" action="{{ route('admin.conversations.status', $part->conversation) }}" class="text-end -mt-1">
+                                @csrf
+                                <input type="hidden" name="status" value="{{ $part->conversation->isOpen() ? 'closed' : 'open' }}">
+                                <button class="text-xs text-gray-500 underline hover:text-gray-800">{{ $part->conversation->isOpen() ? 'Close this conversation' : 'Reopen this conversation' }}</button>
+                            </form>
+                        @endif
+                    @endforeach
                 </div>
                 <dl class="space-y-1 border-t border-gray-100 px-5 py-4 text-sm">
                     @if($order->voucher_discount > 0)
@@ -87,7 +117,7 @@
             <div class="space-y-6">
                 <div class="rounded-lg bg-white p-5 shadow">
                     <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Status</h2>
-                    <span class="mt-2 mb-4 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ ucfirst($order->status) }}</span>
+                    <span class="mt-2 mb-4 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ \App\Support\OrderStatus::label($order->status) }}</span>
                     @include('partials.order-status-actions', ['action' => route('admin.orders.status', $order), 'nextStatuses' => $nextStatuses])
                 </div>
                 <div class="rounded-lg bg-white p-5 shadow">

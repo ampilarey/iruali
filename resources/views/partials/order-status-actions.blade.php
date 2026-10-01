@@ -3,6 +3,7 @@
     $labels = [
         'processing' => 'Mark as processing',
         'shipped' => 'Mark as shipped',
+        'out_for_delivery' => 'Mark as out for delivery',
         'delivered' => 'Mark as delivered',
         'cancelled' => 'Cancel order',
     ];
@@ -22,5 +23,5 @@
         @endforeach
     </div>
 @else
-    <p class="text-sm text-gray-600">This order is {{ $order->status }}. There is nothing more to update.</p>
+    <p class="text-sm text-gray-600">This order is {{ str_replace('_', ' ', $order->status) }}. There is nothing more to update.</p>
 @endif

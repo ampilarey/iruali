@@ -26,7 +26,9 @@ class AdminController extends Controller
      */
     private function checkAdminRole()
     {
-        if (! auth()->check() || ! auth()->user()->hasRole('admin')) {
+        // Staff (admin, support, finance): which of these pages each role may open is enforced
+        // per route by the StaffAccess middleware on the admin group (config/staff.php).
+        if (! auth()->check() || ! auth()->user()->isStaff()) {
             abort(403, 'Access denied. Admin role required.');
         }
     }
@@ -52,7 +54,10 @@ class AdminController extends Controller
             ->where('seller_approved', false)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers'));
+        // "System status" panel: the same checks as php artisan iruali:ready (offline, cached 5 minutes), admins only
+        $readyChecks = auth()->user()->hasRole('admin') ? \App\Support\ReadyChecks::cached() : [];
+
+        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers', 'readyChecks'));
     }
 
     public function sellers()
@@ -80,6 +85,7 @@ class AdminController extends Controller
             'seller_approved' => true,
             'seller_approved_at' => now(),
         ]);
+        \App\Support\Audit::record('seller.approved', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller approved successfully.');
     }
@@ -98,6 +104,7 @@ class AdminController extends Controller
             'seller_approved' => false,
             'seller_approved_at' => null,
         ]);
+        \App\Support\Audit::record('seller.rejected', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller application rejected.');
     }
@@ -113,6 +120,7 @@ class AdminController extends Controller
         $seller = User::findOrFail($id);
         $seller->forceFill(['status' => 'suspended'])->save(); // status is deliberately not mass-assignable
         Product::where('seller_id', $seller->id)->update(['is_active' => false]);
+        \App\Support\Audit::record('seller.suspended', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller suspended and their products deactivated.');
     }
@@ -141,6 +149,7 @@ class AdminController extends Controller
 
         $product = Product::findOrFail($id);
         $product->update(['is_active' => true, 'approved_at' => $product->approved_at ?? now()]);
+        \App\Support\Audit::record('product.approved', $product, ['name' => $product->name]);
 
         return redirect()->back()->with('success', 'Product approved successfully.');
     }
@@ -253,6 +262,7 @@ class AdminController extends Controller
         ]);
 
         Setting::set($validated);
+        \App\Support\Audit::record('settings.saved', null, ['keys' => array_keys($validated)]);
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');
     }
@@ -283,8 +293,12 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $order->load(['user', 'items.product.seller']);
+        $order->load(['user', 'items.product.seller', 'sellerOrders.seller', 'sellerOrders.conversation.messages.sender', 'sellerOrders.conversation.customer']);
         $nextStatuses = $orderService->nextStatuses($order);
+
+        // Opening the order counts as reading its threads
+        $messaging = app(\App\Services\MessagingService::class);
+        $order->sellerOrders->each(fn ($part) => $part->conversation && $messaging->markRead($part->conversation, 'admin'));
 
         return view('admin.orders.show', compact('order', 'nextStatuses'));
     }
@@ -310,16 +324,16 @@ class AdminController extends Controller
         $this->checkAdminRole();
         abort_unless($part->order_id === $order->id, 404);
 
-        $request->validate([
-            'status' => 'required|in:processing,shipped,delivered',
+        $data = $request->validate([
+            'status' => 'required|in:processing,shipped,out_for_delivery,delivered',
             'tracking_note' => 'nullable|string|max:255',
-        ]);
+        ] + \App\Http\Controllers\TrackingController::rules());
 
-        if (! $fulfilment->advance($part, $request->status, $request->tracking_note)) {
+        if (! $fulfilment->advance($part, $data['status'], $data['tracking_note'] ?? null, $data)) {
             return back()->with('error', "That part is {$part->status}; it can't be moved to {$request->status}.");
         }
 
-        return back()->with('success', $part->shopName().' part marked as '.$request->status.'.');
+        return back()->with('success', $part->shopName().' part marked as '.str_replace('_', ' ', $request->status).'.');
     }
 
     public function recordRefund(Request $request, Order $order, PaymentService $payments)

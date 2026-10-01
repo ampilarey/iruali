@@ -21,6 +21,7 @@ class PayoutController extends Controller
         $sellers = User::query()
             ->where(fn ($q) => $q->where('is_seller', true)->orWhereHas('sellerOrders'))
             ->orderByRaw('COALESCE(business_name, name)')
+            ->with('bankAccount')
             ->get();
         $all = $payouts->balancesForAll();
         $sellers = $sellers->map(function (User $seller) use ($all) {
@@ -46,8 +47,9 @@ class PayoutController extends Controller
     {
         $parts = SellerOrder::where('seller_id', $seller->id)->payable()->with(['order', 'returnRequests'])->oldest()->get();
         $adjustments = $payouts->openAdjustments($seller);
+        $blocked = $payouts->payoutBlockedReason($seller);
 
-        return view('admin.payouts.create', compact('seller', 'parts', 'adjustments'));
+        return view('admin.payouts.create', compact('seller', 'parts', 'adjustments', 'blocked'));
     }
 
     public function store(Request $request, User $seller, PayoutService $payouts)
@@ -58,6 +60,10 @@ class PayoutController extends Controller
             'reference' => 'required|string|max:100',
             'note' => 'nullable|string|max:1000',
         ]);
+
+        if ($blocked = $payouts->payoutBlockedReason($seller)) {
+            return back()->with('error', $blocked);
+        }
 
         $payout = $payouts->createPayout($seller, array_map('intval', $data['parts']), $data['reference'], $data['note'] ?? null, $request->user());
 
@@ -87,6 +93,23 @@ class PayoutController extends Controller
         $seller->forceFill(['commission_rate' => $data['commission_rate'] === null || $data['commission_rate'] === '' ? null : $data['commission_rate']])->save();
 
         return back()->with('success', 'Commission for '.($seller->business_name ?: $seller->name).' updated. It applies to new orders.');
+    }
+
+    /**
+     * Tick or untick "verified" on a shop's bank account once it has been checked.
+     */
+    public function toggleBankVerified(User $seller)
+    {
+        $account = $seller->bankAccount;
+        if (! $account) {
+            return back()->with('error', __('This shop has not added a bank account yet, so it cannot be paid out.'));
+        }
+
+        $account->forceFill(['verified_at' => $account->verified_at ? null : now()])->save();
+
+        return back()->with('success', $account->verified_at
+            ? __('Bank account for :shop marked as verified.', ['shop' => $seller->shopName()])
+            : __('Bank account for :shop is no longer marked as verified.', ['shop' => $seller->shopName()]));
     }
 
     protected function csv(SellerPayout $payout): StreamedResponse

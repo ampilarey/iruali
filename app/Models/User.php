@@ -417,4 +417,17 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
     }
+
+    /**
+     * The bank account iruali pays this shop's earnings to (Seller Centre → Settings → Bank).
+     */
+    public function bankAccount(): HasOne
+    {
+        return $this->hasOne(SellerBankAccount::class);
+    }
+
+    public function shopName(): string
+    {
+        return $this->business_name ?: $this->name;
+    }
 }

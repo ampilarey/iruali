@@ -137,6 +137,7 @@ class SellerController extends Controller
     {
         $user = Auth::user();
 
+        $user->load('bankAccount');
         $balances = $payouts->balances($user);
         $parts = SellerOrder::where('seller_id', $user->id)->with(['order', 'payout'])->latest()->paginate(20);
         $payoutHistory = $user->payouts()->latest('paid_at')->take(20)->get();
@@ -159,6 +160,7 @@ class SellerController extends Controller
     public function profile()
     {
         $user = Auth::user();
+        $user->load('bankAccount');
 
         return view('seller.profile', compact('user'));
     }

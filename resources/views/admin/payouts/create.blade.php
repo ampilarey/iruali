@@ -10,10 +10,12 @@
         @csrf
         <div class="rounded-lg bg-white p-5 shadow text-sm">
             <h2 class="font-semibold text-gray-900">Pay to</h2>
-            @if($seller->payout_account_number)
-                <p class="mt-1">{{ $seller->payout_account_name }} · {{ $seller->payout_bank_name }} · <span class="font-mono">{{ $seller->payout_account_number }}</span></p>
+            @if($seller->bankAccount)
+                <p class="mt-1">{{ $seller->bankAccount->account_name }} · {{ $seller->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $seller->bankAccount->account_number }}</span>
+                    <span class="ms-2 rounded-full px-2 py-0.5 text-xs font-medium {{ $seller->bankAccount->isVerified() ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">{{ $seller->bankAccount->isVerified() ? __('Verified') : __('Not verified') }}</span>
+                </p>
             @else
-                <p class="mt-1 text-amber-700">This shop hasn't added a bank account yet (Seller Centre → Profile). Confirm the account with them before paying.</p>
+                <p class="mt-1 text-amber-700">{{ $blocked }} {{ __('Ask the shop to add it under Seller Centre → Settings → Bank account.') }}</p>
             @endif
         </div>
 
@@ -54,7 +56,7 @@
             <div class="flex justify-end border-t border-gray-100 px-5 py-3 text-base font-semibold" data-adjustments="{{ $adjustments->sum('amount') }}">Total: <span class="ms-2" data-payout-total>{{ Money::format($parts->sum('seller_earnings') + $adjustments->sum('amount')) }}</span></div>
         </div>
 
-        @if($parts->isNotEmpty())
+        @if($parts->isNotEmpty() && ! $blocked)
             <div class="rounded-lg bg-white p-5 shadow grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="reference" class="block text-sm font-medium text-gray-700">Bank transfer reference *</label>

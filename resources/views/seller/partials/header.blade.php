@@ -8,6 +8,7 @@
         'seller.earnings' => ['Earnings', 'seller.earnings'],
         'seller.analytics' => ['Analytics', 'seller.analytics'],
         'seller.profile' => ['Profile', 'seller.profile*'],
+        'seller.settings.bank' => [__('Settings'), 'seller.settings.*'],
     ];
 @endphp
 <div class="bg-white shadow">

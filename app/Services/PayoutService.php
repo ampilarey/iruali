@@ -88,6 +88,19 @@ class PayoutService
     }
 
     /**
+     * Why this shop can't be paid right now, or null when it can. A shop has to add its bank account
+     * (Seller Centre → Settings → Bank) before any payout or bank file can include it.
+     */
+    public function payoutBlockedReason(User $seller): ?string
+    {
+        if (! $seller->bankAccount) {
+            return __('This shop has not added a bank account yet, so it cannot be paid out.');
+        }
+
+        return null;
+    }
+
+    /**
      * Record a payout for the chosen payable parts (all of them when none are chosen), with every
      * open adjustment settled in it. Refused when deductions leave nothing to pay; the parts then
      * wait until later sales cover the deductions.
@@ -95,6 +108,10 @@ class PayoutService
      */
     public function createPayout(User $seller, ?array $partIds, ?string $reference, ?string $note, ?User $admin): ?SellerPayout
     {
+        if ($this->payoutBlockedReason($seller)) {
+            return null;
+        }
+
         return DB::transaction(function () use ($seller, $partIds, $reference, $note, $admin) {
             $parts = SellerOrder::where('seller_id', $seller->id)
                 ->payable()

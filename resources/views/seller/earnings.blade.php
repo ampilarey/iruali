@@ -30,12 +30,12 @@
             </div>
         </div>
 
-        @if(! $user->payout_account_number)
+        @if(! $user->bankAccount)
             <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Add your bank account in <a href="{{ route('seller.profile') }}" class="font-semibold underline">Profile</a> so iruali can pay you.
+                {{ __('Add your bank account so iruali can pay you. Without it your earnings stay on hold.') }} <a href="{{ route('seller.settings.bank') }}" class="font-semibold underline">{{ __('Bank account') }}</a>
             </div>
         @else
-            <p class="text-sm text-gray-600">Payouts go to {{ $user->payout_account_name }} · {{ $user->payout_bank_name }} · {{ $user->payout_account_number }}.</p>
+            <p class="text-sm text-gray-600">{{ __('Payouts go to') }} {{ $user->bankAccount->account_name }} · {{ $user->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $user->bankAccount->maskedNumber() }}</span>.</p>
         @endif
 
         <div class="grid gap-6 lg:grid-cols-3">

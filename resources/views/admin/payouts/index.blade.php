@@ -37,10 +37,24 @@
                                 <td class="px-4 py-3 text-right font-semibold text-green-700">{{ Money::format($seller->balances['available']) }}</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($seller->balances['pending']) }}</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($seller->balances['paid']) }}</td>
-                                <td class="px-4 py-3 text-xs text-gray-600">@if($seller->payout_account_number){{ $seller->payout_account_name }}<br>{{ $seller->payout_bank_name }} · {{ $seller->payout_account_number }}@else<span class="text-amber-700">Not added yet</span>@endif</td>
+                                <td class="px-4 py-3 text-xs text-gray-600">
+                                    @if($seller->bankAccount)
+                                        {{ $seller->bankAccount->account_name }}<br>{{ $seller->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $seller->bankAccount->account_number }}</span>
+                                        <form method="POST" action="{{ route('admin.sellers.bank.verify', $seller) }}" class="mt-1">
+                                            @csrf
+                                            <button class="rounded-full px-2 py-0.5 text-xs font-medium {{ $seller->bankAccount->isVerified() ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-amber-100 text-amber-800 hover:bg-amber-200' }}" title="{{ __('Click to change') }}">{{ $seller->bankAccount->isVerified() ? __('Verified') : __('Not verified') }}</button>
+                                        </form>
+                                    @else
+                                        <span class="text-amber-700">{{ __('Not added yet') }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-right">
                                     @if($seller->balances['available'] > 0)
-                                        <a href="{{ route('admin.payouts.create', $seller) }}" class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700">Pay out</a>
+                                        @if($seller->bankAccount)
+                                            <a href="{{ route('admin.payouts.create', $seller) }}" class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700">Pay out</a>
+                                        @else
+                                            <span class="text-xs text-amber-700" title="{{ __('This shop has not added a bank account yet, so it cannot be paid out.') }}">{{ __('No bank account') }}</span>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>

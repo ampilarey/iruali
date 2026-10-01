@@ -49,8 +49,7 @@ class StructuredDataAndFeedsTest extends TestCase
         ProductReview::create(['product_id' => $product->id, 'reviewer_name' => 'Spam', 'reviewer_email' => 's@example.com', 'rating' => 1, 'comment' => 'Nope', 'is_approved' => false]);
 
         $html = $this->get(route('products.show', $product))->assertOk()->getContent();
-        [$schema] = $this->jsonLd($html);
-        [$productLd, $breadcrumbs] = $schema;
+        [$productLd, $breadcrumbs] = $this->jsonLd($html);
 
         $this->assertSame('Product', $productLd['@type']);
         $this->assertSame('Copper kettle', $productLd['name']);
@@ -75,7 +74,8 @@ class StructuredDataAndFeedsTest extends TestCase
     {
         $product = Product::factory()->create(['stock_quantity' => 0, 'brand' => null]);
 
-        [$schema] = $this->jsonLd($this->get(route('products.show', $product))->assertOk()->getContent());
+        $schema = $this->jsonLd($this->get(route('products.show', $product))->assertOk()->getContent());
+        $this->assertCount(2, $schema);
         $this->assertArrayNotHasKey('aggregateRating', $schema[0]);
         $this->assertArrayNotHasKey('brand', $schema[0]);
         $this->assertSame('https://schema.org/OutOfStock', $schema[0]['offers']['availability']);
@@ -89,8 +89,7 @@ class StructuredDataAndFeedsTest extends TestCase
             'social_facebook' => 'https://facebook.com/iruali', 'social_instagram' => 'https://instagram.com/iruali',
         ]);
 
-        [$schema] = $this->jsonLd($this->get('/')->assertOk()->getContent());
-        [$website, $org] = $schema;
+        [$website, $org] = $this->jsonLd($this->get('/')->assertOk()->getContent());
         $this->assertSame('WebSite', $website['@type']);
         $this->assertSame('Organization', $org['@type']);
         $this->assertSame('Iruali Pvt Ltd', $org['legalName']);
@@ -101,8 +100,9 @@ class StructuredDataAndFeedsTest extends TestCase
         $this->assertSame(['https://facebook.com/iruali', 'https://instagram.com/iruali'], $org['sameAs']);
 
         // Other pages keep the plain WebSite schema
-        [$terms] = $this->jsonLd($this->get(route('policies.terms'))->assertOk()->getContent());
-        $this->assertSame('WebSite', $terms['@type']);
+        $terms = $this->jsonLd($this->get(route('policies.terms'))->assertOk()->getContent());
+        $this->assertCount(1, $terms);
+        $this->assertSame('WebSite', $terms[0]['@type']);
     }
 
     public function test_feeds_need_the_token(): void

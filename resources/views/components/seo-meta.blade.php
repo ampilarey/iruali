@@ -58,6 +58,12 @@
         {!! json_encode($seo['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
     </script>
 @endif
+{{-- Further blocks for the page (breadcrumbs on products, Organization on the home page) --}}
+@foreach($seo['extra_schema'] ?? [] as $extra)
+    <script type="application/ld+json">
+        {!! json_encode($extra, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
+    </script>
+@endforeach
 
 {{-- Additional Meta Tags for Products --}}
 @if(isset($seo['og_type']) && $seo['og_type'] === 'product')

@@ -45,6 +45,7 @@ class SeoService
             'twitter_image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.png'),
             'canonical_url' => route('products.show', $product->slug),
             'schema' => self::generateProductSchema($product),
+            'extra_schema' => [self::breadcrumbSchema($product)],
         ];
     }
 
@@ -143,6 +144,8 @@ class SeoService
             'twitter_image' => asset('images/og-image.png'),
             'canonical_url' => request()->url(),
             'schema' => self::generateWebsiteSchema(),
+            // The home page also says who runs the site
+            'extra_schema' => request()->routeIs('home') ? [self::organizationSchema()] : [],
         ];
     }
 
@@ -205,14 +208,16 @@ class SeoService
             ];
         }
 
-        return [$schema, self::breadcrumbSchema($product, $name, $url)];
+        return $schema;
     }
 
     /**
      * Home › department › sub-department › product, as the page's breadcrumb shows it.
      */
-    private static function breadcrumbSchema(Product $product, string $name, string $url): array
+    private static function breadcrumbSchema(Product $product): array
     {
+        $name = LocalizationService::getLocalizedValue($product, 'name');
+        $url = route('products.show', $product->slug);
         $items = [[__('Home'), route('home')]];
         if ($product->category?->parent) {
             $items[] = [LocalizationService::getLocalizedValue($product->category->parent, 'name'), route('categories.show', $product->category->parent->slug)];
@@ -325,7 +330,6 @@ class SeoService
             ],
         ];
 
-        // The home page also says who runs the site
-        return request()->routeIs('home') ? [$website, self::organizationSchema()] : $website;
+        return $website;
     }
 }

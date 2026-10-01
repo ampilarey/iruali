@@ -1,6 +1,6 @@
 @props(['product', 'layout' => 'grid', 'compact' => false])
 @php
-    $image = $product->mainImage?->url ?? '/images/product-placeholder.svg';
+    $image = $product->mainImage?->variant(400) ?? '/images/product-placeholder.svg';
     $url = route('products.show', $product);
     $seller = $product->seller;
     $sellerName = $seller ? ($seller->business_name ?: $seller->name) : null;

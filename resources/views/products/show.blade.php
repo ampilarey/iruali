@@ -2,7 +2,7 @@
 
 @php
     $images = $product->getRelation('images')->sortByDesc('is_main')->values();
-    $mainImage = $images->first()?->url ?? '/images/product-placeholder.svg';
+    $mainImage = $images->first()?->variant(1200) ?? '/images/product-placeholder.svg';
     $seller = $product->seller;
     $sellerName = $seller ? ($seller->business_name ?: $seller->name) : null;
     $reviews = $product->reviews;
@@ -59,7 +59,7 @@
                     <div>
                         <div class="relative aspect-square rounded-xl bg-primary-50 overflow-hidden border border-gray-200">
                             <button type="button" data-zoom-open class="block w-full h-full cursor-zoom-in" aria-label="{{ __('Zoom image') }}">
-                                <img data-gallery-main src="{{ $mainImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                <img data-gallery-main src="{{ $mainImage }}" @if($images->first())srcset="{{ $images->first()->srcset() }}" sizes="(min-width: 1024px) 50vw, 100vw"@endif alt="{{ $product->name }}" fetchpriority="high" class="w-full h-full object-cover">
                             </button>
                             <span class="pointer-events-none absolute bottom-3 end-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm"><x-icon name="zoom" class="w-4 h-4" />{{ __('Click to zoom') }}</span>
                             @if($product->is_on_sale)
@@ -69,8 +69,8 @@
                         @if($images->count() > 1)
                             <div class="mt-3 flex gap-2 overflow-x-auto scrollbar-hide">
                                 @foreach($images as $image)
-                                    <button type="button" data-gallery-thumb="{{ $image->url }}" class="shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 {{ $loop->first ? 'border-primary' : 'border-gray-200' }} hover:border-primary" aria-label="{{ __('Show image :n', ['n' => $loop->iteration]) }}">
-                                        <img src="{{ $image->url }}" alt="" class="w-full h-full object-cover">
+                                    <button type="button" data-gallery-thumb="{{ $image->variant(1200) }}" class="shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 {{ $loop->first ? 'border-primary' : 'border-gray-200' }} hover:border-primary" aria-label="{{ __('Show image :n', ['n' => $loop->iteration]) }}">
+                                        <img src="{{ $image->variant(400) }}" alt="" loading="lazy" class="w-full h-full object-cover">
                                     </button>
                                 @endforeach
                             </div>

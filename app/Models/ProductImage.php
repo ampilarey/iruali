@@ -12,13 +12,26 @@ class ProductImage extends Model
         'url',
         'alt_text',
         'is_main',
-        'sort_order'
+        'sort_order',
     ];
 
     protected $casts = [
         'is_main' => 'boolean',
-        'sort_order' => 'integer'
+        'sort_order' => 'integer',
     ];
+
+    /**
+     * The best URL for this image at a given display width (a WebP copy when one exists).
+     */
+    public function variant(int $width): string
+    {
+        return \App\Support\ImageVariants::url($this->url, $width);
+    }
+
+    public function srcset(): string
+    {
+        return implode(', ', array_map(fn ($w) => $this->variant($w).' '.$w.'w', \App\Support\ImageVariants::WIDTHS));
+    }
 
     public function product(): BelongsTo
     {
@@ -34,4 +47,4 @@ class ProductImage extends Model
     {
         return $query->orderBy('sort_order', 'asc');
     }
-} 
+}

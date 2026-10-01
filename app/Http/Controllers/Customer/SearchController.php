@@ -40,9 +40,7 @@ class SearchController extends Controller
 
         $products = Product::query()->active()
             ->with('mainImage')
-            ->where(fn ($w) => $w->whereRaw('LOWER(CAST(name AS CHAR)) LIKE ?', [$like])
-                ->orWhere('brand', 'like', $like)
-                ->orWhere('sku', 'like', $like))
+            ->where('search_text', 'like', $like)
             ->orderByRaw('CASE WHEN stock_quantity > 0 THEN 0 ELSE 1 END')
             ->orderByRaw('CASE WHEN LOWER(CAST(name AS CHAR)) LIKE ? THEN 0 ELSE 1 END', [$like])
             ->take(6)

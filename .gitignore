@@ -191,3 +191,4 @@ tests/coverage/
 
 # Deploy packages built by deploy-cpanel-full.sh
 /iruali-deploy-*.tar.gz
+.claude/worktrees/

@@ -40,6 +40,7 @@ class Order extends Model
         'refund_status', 'refund_amount', 'refund_reason', 'refund_reference', 'refunded_at',
         'notes',
         'tracking_number',
+        'wallet_amount', 'wallet_refunded_at',
     ];
 
     protected $casts = [
@@ -52,6 +53,8 @@ class Order extends Model
         'shipping_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'wallet_amount' => 'decimal:2',
+        'wallet_refunded_at' => 'datetime',
         'shipping_address' => 'array',
         'billing_address' => 'array',
     ];
@@ -145,5 +148,25 @@ class Order extends Model
     public function forceDeleteOrder(): bool
     {
         return $this->forceDelete();
+    }
+
+    // ---- Wallet and gift cards ------------------------------------------------------------
+
+    /**
+     * What still has to be paid by card after the wallet's share.
+     */
+    public function cardAmount(): float
+    {
+        return round(max(0, (float) $this->total_amount - (float) $this->wallet_amount), 2);
+    }
+
+    public function giftCard(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(GiftCard::class);
+    }
+
+    public function isGiftCardOrder(): bool
+    {
+        return $this->relationLoaded('giftCard') ? $this->giftCard !== null : $this->giftCard()->exists();
     }
 }

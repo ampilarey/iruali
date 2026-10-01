@@ -104,10 +104,18 @@ class OrderService
                 app(PointsService::class)->record($user, -(int) $discounts['points']['points_redeemed'], 'redeemed', $order);
             }
 
+            // Store credit pays as much of the total as it can; the rest (if any) goes to the card
+            $walletPaid = ! empty($shippingData['use_wallet']) ? app(WalletService::class)->payFromWallet($order, $user) : 0.0;
+
             // Clear cart
             $this->clearCart($cart);
 
             DB::commit();
+
+            // The wallet covered everything: the order is paid, no card step
+            if ($walletPaid > 0 && $order->fresh()->payment_method === 'wallet') {
+                app(PaymentService::class)->confirm($order);
+            }
 
             app(OrderNotifier::class)->orderPlaced($order);
 
@@ -369,8 +377,9 @@ class OrderService
 
             $order->update(['status' => $status]);
 
-            if ($status === 'cancelled' && $order->payment_status === 'paid') {
-                app(PaymentService::class)->flagRefund($order, (float) $order->total_amount, 'Order cancelled after payment');
+            // The wallet's share went straight back in reverseOrder(); only the card part needs a manual refund
+            if ($status === 'cancelled' && $order->payment_status === 'paid' && $order->cardAmount() > 0) {
+                app(PaymentService::class)->flagRefund($order, $order->cardAmount(), 'Order cancelled after payment');
             }
 
             // Bring every shop's part along with the order
@@ -429,6 +438,10 @@ class OrderService
         if ($order->voucher_code) {
             Voucher::where('code', $order->voucher_code)->where('used_count', '>', 0)->decrement('used_count');
         }
+
+        // Store credit the order took goes back to the wallet; a gift card that was never paid for is dropped
+        app(WalletService::class)->reverseOrderPayment($order);
+        app(GiftCardService::class)->orderCancelled($order);
     }
 
     /**

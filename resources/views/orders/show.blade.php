@@ -138,6 +138,15 @@
                         <span class="text-gray-600">{{ __('Payment') }}</span>
                         <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
                     </div>
+                    @if((float) $order->wallet_amount > 0)
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{{ __('From your wallet') }}</span>
+                            <span class="text-gray-900" dir="ltr">-{{ \App\Support\Money::format($order->wallet_amount) }}</span>
+                        </div>
+                        @if($order->wallet_refunded_at)
+                            <p class="rounded-lg bg-green-50 px-3 py-2 text-xs text-green-800">{{ __(':amount went back to your wallet on :date.', ['amount' => \App\Support\Money::format($order->wallet_amount), 'date' => $order->wallet_refunded_at->translatedFormat('j M Y')]) }}</p>
+                        @endif
+                    @endif
                     @if($order->refund_status === 'due')
                         <p class="rounded-lg bg-sun-soft px-3 py-2 text-xs text-sun-ink">{{ __('A refund of :amount is on its way to you. We email you when it is sent.', ['amount' => \App\Support\Money::format($order->refund_amount)]) }}</p>
                     @elseif($order->refund_status === 'refunded')
@@ -164,12 +173,14 @@
                         @endif
                         <form method="POST" action="{{ route('payments.bml.pay', $order) }}">
                             @csrf
-                            <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Pay :amount now', ['amount' => \App\Support\Money::format($order->total_amount)]) }}</button>
+                            <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Pay :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]) }}</button>
                         </form>
                         <p class="text-xs text-gray-500 flex items-center gap-1.5"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('You pay on Bank of Maldives\' secure page. iruali never sees your card details.') }}</p>
                     </div>
                 @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
                     <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
+                @elseif($order->payment_method === 'wallet' && $order->payment_status === 'paid')
+                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid from your wallet on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
                 @endif
 
                 <form method="POST" action="{{ route('orders.buyAgain', $order) }}" class="mt-6">

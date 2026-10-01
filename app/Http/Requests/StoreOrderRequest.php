@@ -37,6 +37,7 @@ class StoreOrderRequest extends FormRequest
             'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
             'delivery_zone' => 'nullable|in:greater_male,islands',
             'agree_terms' => 'required|accepted',
+            'use_wallet' => 'nullable|boolean',
         ];
     }
 

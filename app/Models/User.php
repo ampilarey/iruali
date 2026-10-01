@@ -95,6 +95,7 @@ class User extends Authenticatable implements HasLocalePreference
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
+        'wallet_balance' => 'decimal:2',
     ];
 
     /**
@@ -426,5 +427,18 @@ class User extends Authenticatable implements HasLocalePreference
     public function pointsTransactions(): HasMany
     {
         return $this->hasMany(PointsTransaction::class);
+    }
+
+    /**
+     * Store credit movements; wallet_balance is their running sum.
+     */
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function giftCardsBought(): HasMany
+    {
+        return $this->hasMany(GiftCard::class, 'purchaser_id');
     }
 }

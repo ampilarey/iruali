@@ -21,6 +21,9 @@ Schedule::command('marketing:cart-reminders')->hourly()->withoutOverlapping();
 // Loyalty points older than Settings → points_expire_months go on the 1st; a warning goes a month ahead
 Schedule::command('rewards:expire-points')->monthlyOn(1, '04:00')->withoutOverlapping();
 
+// Gift cards past their 12 months are marked expired
+Schedule::call(fn () => app(\App\Services\GiftCardService::class)->expireOld())->dailyAt('03:30')->name('expire-gift-cards');
+
 // Guest carts nobody has touched for a month (and their lines) are dropped
 Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))

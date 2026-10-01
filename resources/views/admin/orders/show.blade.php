@@ -97,6 +97,9 @@
                     @if($order->paid_at)
                         <p class="mt-1 text-xs text-gray-500">Paid {{ $order->paid_at->format('d M Y, H:i') }}</p>
                     @endif
+                    @if((float) $order->wallet_amount > 0)
+                        <p class="mt-1 text-xs text-gray-600">{{ \App\Support\Money::format($order->wallet_amount) }} paid from the customer's wallet{{ $order->cardAmount() > 0 ? ', '.\App\Support\Money::format($order->cardAmount()).' by card' : '' }}{{ $order->wallet_refunded_at ? ' · wallet part returned '.$order->wallet_refunded_at->format('d M Y') : '' }}</p>
+                    @endif
                     @if($order->payment_method === 'bml')
                         @php $attempts = $order->paymentTransactions()->latest('id')->get(); @endphp
                         <div class="mt-3 space-y-2">
@@ -130,6 +133,13 @@
                                 <input id="refund_reference" name="refund_reference" required maxlength="100" placeholder="Refund reference" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
                                 <button class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">Mark as refunded</button>
                             </form>
+                            @if($order->user)
+                                <form method="POST" action="{{ route('admin.orders.refund-wallet', $order) }}" class="border-t border-red-200 pt-2" onsubmit="return confirm('Credit {{ \App\Support\Money::format($order->refund_amount) }} to the customer\'s wallet instead of refunding the card?')">
+                                    @csrf
+                                    <button class="rounded-lg border border-primary-300 bg-white px-3 py-1.5 text-sm font-semibold text-primary-700 hover:bg-primary-50">Refund to wallet</button>
+                                    <span class="ms-2 text-xs text-red-700">Instant store credit instead of a card refund.</span>
+                                </form>
+                            @endif
                         </div>
                     @elseif($order->refund_status === 'refunded')
                         <p class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-800">Refunded {{ \App\Support\Money::format($order->refund_amount) }} on {{ $order->refunded_at?->format('d M Y') }} · ref {{ $order->refund_reference }} ({{ $order->refund_reason }})</p>

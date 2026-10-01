@@ -158,6 +158,17 @@
                         </div>
                     @endif
 
+                    @php $walletBalance = round((float) $user->wallet_balance, 2); @endphp
+                    @if($walletBalance > 0)
+                        <label class="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
+                            <input type="checkbox" name="use_wallet" value="1" id="use-wallet" data-balance="{{ $walletBalance }}" @checked(old('use_wallet')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
+                            <span class="text-sm">
+                                <span class="block font-medium text-gray-900">{{ __('Use wallet balance') }} <span dir="ltr">({{ \App\Support\Money::format($walletBalance) }})</span></span>
+                                <span class="block text-gray-600">{{ __('Your store credit pays first; anything left is paid by card.') }}</span>
+                            </span>
+                        </label>
+                    @endif
+
                     <dl class="border-t border-gray-200 pt-4 space-y-3 text-sm">
                         <div class="flex justify-between">
                             <dt class="text-gray-600">{{ __('Subtotal') }}</dt>
@@ -183,6 +194,16 @@
                             <dt class="font-semibold">{{ __('Total') }}</dt>
                             <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + ($deliveryQuotes[$selectedZone] ?? 0)) }}</dd>
                         </div>
+                        @if($walletBalance > 0)
+                            <div class="flex justify-between hidden" id="wallet-row">
+                                <dt class="text-gray-600">{{ __('From your wallet') }}</dt>
+                                <dd class="font-medium text-coral" dir="ltr" id="wallet-amount"></dd>
+                            </div>
+                            <div class="flex justify-between hidden" id="card-row">
+                                <dt class="text-gray-600">{{ __('To pay by card') }}</dt>
+                                <dd class="font-medium" dir="ltr" id="card-amount"></dd>
+                            </div>
+                        @endif
                     </dl>
 
                     <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 p-3 text-xs text-gray-600 space-y-1">
@@ -215,11 +236,27 @@
         var goods = @json((float) $goodsTotal);
         var prefix = @json(\App\Support\Money::prefix());
         var fmt = function (n) { return prefix + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+        var checkedZone = document.querySelector('input[name="delivery_zone"]:checked');
+        var currentFee = checkedZone ? (parseFloat(checkedZone.dataset.fee) || 0) : 0;
+        var wallet = document.getElementById('use-wallet');
+        var splitWallet = function () {
+            if (! wallet) return;
+            var total = goods + currentFee;
+            var show = wallet.checked;
+            var fromWallet = Math.min(parseFloat(wallet.dataset.balance) || 0, total);
+            document.getElementById('wallet-row').classList.toggle('hidden', ! show);
+            document.getElementById('card-row').classList.toggle('hidden', ! show);
+            document.getElementById('wallet-amount').textContent = '−' + fmt(fromWallet);
+            document.getElementById('card-amount').textContent = fmt(total - fromWallet);
+        };
+        if (wallet) { wallet.addEventListener('change', splitWallet); splitWallet(); }
         document.querySelectorAll('input[name="delivery_zone"]').forEach(function (radio) {
             radio.addEventListener('change', function () {
                 var fee = parseFloat(radio.dataset.fee) || 0;
+                currentFee = fee;
                 document.getElementById('delivery-fee').textContent = fmt(fee);
                 document.getElementById('order-total').textContent = fmt(goods + fee);
+                splitWallet();
             });
         });
     })();

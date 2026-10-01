@@ -51,6 +51,7 @@ class OrderController extends Controller
             'shipping_phone' => $request->shipping_phone,
             'delivery_zone' => $request->delivery_zone,
             'payment_method' => $request->payment_method,
+            'use_wallet' => $request->boolean('use_wallet'),
         ];
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);
@@ -65,6 +66,7 @@ class OrderController extends Controller
 
         // Card payment: straight to BML's payment page. If BML can't be reached the order
         // stays unpaid and the order page offers "Pay now" to try again.
+        // (An order the wallet covered in full is already paid and skips the card step.)
         if ($order->payment_method === 'bml') {
             try {
                 return redirect()->away(app(\App\Services\PaymentService::class)->startBmlPayment($order));

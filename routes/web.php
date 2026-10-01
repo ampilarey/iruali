@@ -79,6 +79,11 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+        // Password reset
+        Route::get('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'request'])->name('password.request');
+        Route::post('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'email'])->name('password.email')->middleware('throttle:3,1');
+        Route::get('/reset-password/{token}', [\App\Http\Controllers\Customer\PasswordResetController::class, 'reset'])->name('password.reset');
+        Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
     });
 
     // 2FA routes
@@ -91,7 +96,6 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/verification/notice', [AuthController::class, 'showVerificationNotice'])->name('verification.notice');
         Route::post('/auth/send/email/otp', [AuthController::class, 'sendEmailOTP'])->name('auth.send.email.otp')->middleware('throttle:3,1');
-        Route::post('/auth/send/sms/otp', [AuthController::class, 'sendSMSOTP'])->name('auth.send.sms.otp')->middleware('throttle:3,1');
         Route::post('/auth/verify/email/otp', [AuthController::class, 'verifyEmailOTP'])->name('auth.verify.email.otp')->middleware('throttle:5,1');
         Route::post('/auth/verify/phone/otp', [AuthController::class, 'verifyPhoneOTP'])->name('auth.verify.phone.otp')->middleware('throttle:5,1');
     });
@@ -100,7 +104,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::middleware('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         // Account routes
-        Route::get('/account', [AuthController::class, 'account'])->name('account');
+        Route::get('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'show'])->name('account');
+        Route::get('/account/edit', [\App\Http\Controllers\Customer\ProfileController::class, 'edit'])->name('account.edit');
+        Route::put('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('account.update');
+        Route::put('/account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('account.password')->middleware('throttle:5,1');
         // Cart routes
         // Wishlist routes
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
@@ -121,10 +128,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1');
         Route::post('/orders/{order}/parts/{part}/return', [\App\Http\Controllers\Customer\ReturnController::class, 'store'])->name('orders.returns.store')->middleware('throttle:10,1');
         Route::get('/returns/{return}/photo', [\App\Http\Controllers\Customer\ReturnController::class, 'photo'])->name('returns.photo');
-        // 2FA setup routes
-        Route::get('/profile/2fa/setup', [AuthController::class, 'show2FASetup'])->name('profile.2fa.setup');
-        Route::post('/profile/2fa/enable', [AuthController::class, 'enable2FA'])->name('profile.2fa.enable');
-        Route::post('/profile/2fa/disable', [AuthController::class, 'disable2FA'])->name('profile.2fa.disable');
+        // Two-step sign-in setup
+        Route::get('/profile/2fa/setup', [\App\Http\Controllers\Customer\ProfileController::class, 'twoFactor'])->name('profile.2fa.setup');
+        Route::post('/profile/2fa/enable', [\App\Http\Controllers\Customer\ProfileController::class, 'enableTwoFactor'])->name('profile.2fa.enable')->middleware('throttle:5,1');
+        Route::post('/profile/2fa/disable', [\App\Http\Controllers\Customer\ProfileController::class, 'disableTwoFactor'])->name('profile.2fa.disable')->middleware('throttle:5,1');
     });
 
     // BML sends the customer back here after the payment page (their session may have expired, so no auth)

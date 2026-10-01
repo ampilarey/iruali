@@ -120,6 +120,7 @@ class PaymentService
     {
         $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
 
+        app(OrderService::class)->awardRewards($order->fresh());
         app(OrderNotifier::class)->paymentUpdated($order);
     }
 

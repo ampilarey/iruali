@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements HasLocalePreference
@@ -56,7 +58,7 @@ class User extends Authenticatable implements HasLocalePreference
         'banned_until',
         'banned_reason',
         'loyalty_points',
-        'referral_code', 'referred_by',
+        'referral_code', 'referred_by', 'referral_rewarded_at',
     ];
 
     /**
@@ -87,6 +89,7 @@ class User extends Authenticatable implements HasLocalePreference
         'is_seller' => 'boolean',
         'seller_approved' => 'boolean',
         'two_factor_enabled' => 'boolean',
+        'referral_rewarded_at' => 'datetime',
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
@@ -281,14 +284,37 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * Generate recovery codes for 2FA.
      */
-    private function generateRecoveryCodes(): array
+    /**
+     * Eight one-time recovery codes. The plain codes are shown to the user once; only hashes are stored.
+     *
+     * @return string[]
+     */
+    public function generateRecoveryCodes(): array
     {
-        $codes = [];
-        for ($i = 0; $i < 8; $i++) {
-            $codes[] = strtoupper(substr(md5(uniqid()), 0, 8));
+        return collect(range(1, 8))->map(fn () => strtoupper(Str::random(5).'-'.Str::random(5)))->all();
+    }
+
+    public function setRecoveryCodes(array $plainCodes): void
+    {
+        $this->forceFill(['two_factor_recovery_codes' => encrypt(json_encode(array_map(fn ($c) => Hash::make($c), $plainCodes)))])->save();
+    }
+
+    /**
+     * Use up a recovery code. Codes saved before hashing was introduced still match as plain text.
+     */
+    public function useRecoveryCode(string $code): bool
+    {
+        $stored = $this->getRecoveryCodes();
+        foreach ($stored as $i => $hash) {
+            if ((str_starts_with($hash, '$2y$') && Hash::check($code, $hash)) || hash_equals($hash, $code)) {
+                unset($stored[$i]);
+                $this->forceFill(['two_factor_recovery_codes' => encrypt(json_encode(array_values($stored)))])->save();
+
+                return true;
+            }
         }
 
-        return $codes;
+        return false;
     }
 
     /**

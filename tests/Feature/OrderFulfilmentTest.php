@@ -52,14 +52,14 @@ class OrderFulfilmentTest extends TestCase
         $product = Product::factory()->create(['stock_quantity' => 3, 'price' => 100]);
         Voucher::factory()->create(['code' => 'SAVE10', 'used_count' => 1]);
         $order = $this->orderWith($customer, [[$product, 2]], 'pending', [
-            'loyalty_points_earned' => 2, 'points_redeemed' => 10, 'voucher_code' => 'SAVE10',
+            'loyalty_points_earned' => 2, 'loyalty_points_awarded_at' => now(), 'points_redeemed' => 10, 'voucher_code' => 'SAVE10',
         ]);
 
         $this->assertTrue(app(OrderService::class)->updateOrderStatus($order, 'cancelled'));
 
         $this->assertSame('cancelled', $order->fresh()->status);
         $this->assertSame(5, $product->fresh()->stock_quantity);
-        $this->assertSame(20, $customer->fresh()->loyalty_points); // +10 refunded, −2 earned
+        $this->assertSame(20, $customer->fresh()->loyalty_points); // +10 refunded, −2 earned (they had been given when the order was paid)
         $this->assertSame(0, Voucher::where('code', 'SAVE10')->value('used_count'));
     }
 

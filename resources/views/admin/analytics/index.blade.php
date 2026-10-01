@@ -4,7 +4,7 @@
 @php
     $maxRevenue = max($months->max('revenue'), 1);
     $statusColors = [
-        'pending' => 'bg-yellow-400', 'processing' => 'bg-blue-500', 'shipped' => 'bg-purple-500',
+        'pending' => 'bg-yellow-400', 'processing' => 'bg-blue-500', 'shipped' => 'bg-purple-500', 'out_for_delivery' => 'bg-indigo-500',
         'delivered' => 'bg-green-500', 'cancelled' => 'bg-red-500',
     ];
     $totalOrders = max($ordersByStatus->sum(), 1);
@@ -62,7 +62,7 @@
                     @forelse($ordersByStatus as $status => $count)
                         <li>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-700">{{ ucfirst($status) }}</span>
+                                <span class="text-gray-700">{{ \App\Support\OrderStatus::label($status) }}</span>
                                 <span class="font-medium text-gray-900">{{ $count }}</span>
                             </div>
                             <div class="mt-1 h-2 rounded-full bg-gray-100">

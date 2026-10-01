@@ -12,19 +12,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class SellerOrder extends Model
 {
-    public const STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    public const STATUSES = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
 
     /** Order of progress; cancelled is outside it. */
-    public const RANK = ['pending' => 0, 'processing' => 1, 'shipped' => 2, 'delivered' => 3];
+    public const RANK = ['pending' => 0, 'processing' => 1, 'shipped' => 2, 'out_for_delivery' => 3, 'delivered' => 4];
+
+    /** Delivery details a shop (or admin) can record on a part. */
+    public const TRACKING_FIELDS = ['courier', 'tracking_number', 'tracking_url', 'vessel_or_flight', 'expected_delivery_date'];
 
     protected $fillable = [
-        'order_id', 'seller_id', 'status', 'tracking_note', 'shipped_at', 'delivered_at',
+        'order_id', 'seller_id', 'status', 'tracking_note', 'shipped_at', 'out_for_delivery_at', 'delivered_at',
+        'courier', 'tracking_number', 'tracking_url', 'vessel_or_flight', 'expected_delivery_date',
         'subtotal', 'commission_rate', 'commission_amount', 'seller_earnings', 'payout_id',
     ];
 
     protected $casts = [
         'shipped_at' => 'datetime',
+        'out_for_delivery_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'expected_delivery_date' => 'date',
         'subtotal' => 'decimal:2',
         'commission_rate' => 'decimal:2',
         'commission_amount' => 'decimal:2',
@@ -97,9 +103,42 @@ class SellerOrder extends Model
             'pending' => 'bg-yellow-100 text-yellow-800',
             'processing' => 'bg-blue-100 text-blue-800',
             'shipped' => 'bg-purple-100 text-purple-800',
+            'out_for_delivery' => 'bg-indigo-100 text-indigo-800',
             'delivered' => 'bg-green-100 text-green-800',
             'cancelled' => 'bg-red-100 text-red-800',
         ][$this->status] ?? 'bg-gray-100 text-gray-800';
+    }
+
+    public function hasTrackingDetails(): bool
+    {
+        return filled($this->courier) || filled($this->tracking_number) || filled($this->tracking_url)
+            || filled($this->vessel_or_flight) || $this->expected_delivery_date !== null;
+    }
+
+    /**
+     * The delivery details in one line, for texts and emails: courier and number, boat or flight,
+     * expected date, link; or the free-text note from before these fields existed.
+     */
+    public function trackingSummary(): string
+    {
+        $bits = [];
+        if ($this->courier || $this->tracking_number) {
+            $bits[] = trim($this->courier.' '.$this->tracking_number);
+        }
+        if ($this->vessel_or_flight) {
+            $bits[] = $this->vessel_or_flight;
+        }
+        if ($this->expected_delivery_date) {
+            $bits[] = __('expected :date', ['date' => $this->expected_delivery_date->translatedFormat('j M')]);
+        }
+        if ($this->tracking_url) {
+            $bits[] = $this->tracking_url;
+        }
+        if (! $bits && $this->tracking_note) {
+            $bits[] = $this->tracking_note;
+        }
+
+        return implode(' · ', $bits);
     }
 
     /**

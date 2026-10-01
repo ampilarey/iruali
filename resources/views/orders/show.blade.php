@@ -13,7 +13,7 @@
             </div>
             <div class="text-end">
                 <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">
-                    {{ __(ucfirst($order->status)) }}
+                    {{ __(\App\Support\OrderStatus::label($order->status)) }}
                 </span>
             </div>
         </div>
@@ -27,25 +27,25 @@
                 <div class="space-y-4">
                     @php
                         $parts = $order->sellerOrders->keyBy(fn ($p) => (string) $p->seller_id);
-                        $steps = ['pending' => __('Order placed'), 'processing' => __('Preparing'), 'shipped' => __('On its way'), 'delivered' => __('Delivered')];
+                        $steps = \App\Support\OrderStatus::steps();
                     @endphp
                     @foreach($order->items->groupBy(fn ($i) => (string) $i->product?->seller_id) as $sellerId => $shopItems)
                         @php $part = $parts[$sellerId] ?? null; $rank = \App\Models\SellerOrder::RANK[$part?->status] ?? -1; @endphp
                         <div class="rounded-lg border border-gray-200 p-4 space-y-3">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
-                                @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(ucfirst($part->status)) }}</span>@endif
+                                @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(\App\Support\OrderStatus::label($part->status)) }}</span>@endif
                             </div>
                             @if($part && $part->status !== 'cancelled')
-                                <ol class="grid grid-cols-4 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
+                                <ol class="grid grid-cols-5 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
                                         @php $done = $rank >= \App\Models\SellerOrder::RANK[$key]; @endphp
                                         <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>
                                     @endforeach
                                 </ol>
                             @endif
-                            @if($part?->tracking_note)
-                                <p class="text-sm text-gray-700"><span class="font-medium">{{ __('Tracking') }}:</span> {{ $part->tracking_note }}@if($part->shipped_at) <span class="text-xs text-gray-500">({{ $part->shipped_at->format('j M') }})</span>@endif</p>
+                            @if($part)
+                                @include('orders._tracking', ['part' => $part])
                             @endif
                             @foreach($shopItems as $item)
                             <div class="flex items-center gap-4">

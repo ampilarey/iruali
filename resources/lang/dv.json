@@ -780,5 +780,22 @@
     "Resolved: full refund": "ނިމުނީ: ފުރިހަމަ ރީފަންޑު",
     "Resolved: partial refund": "ނިމުނީ: ބައިކުޅަބައި ރީފަންޑު",
     "Resolved: not upheld": "ނިމުނީ: ބަލައިނުގަނެވުނު",
-    "Open": "ހުޅުވިފައި"
+    "Open": "ހުޅުވިފައި",
+    "Boat or flight": "ބޯޓު ނުވަތަ ފްލައިޓް",
+    "Boat or flight: :vessel": "ބޯޓު ނުވަތަ ފްލައިޓް: :vessel",
+    "Courier": "ކުރިއަރ",
+    "Courier: :courier": "ކުރިއަރ: :courier",
+    "Delivery from :shop: :details": ":shop އިން ޑެލިވަރީ: :details",
+    "Expected delivery": "ލިބޭނެކަމަށް ލަފާކުރެވޭ ދުވަސް",
+    "Expected delivery: :date": "ލިބޭނެކަމަށް ލަފާކުރެވޭ ދުވަސް: :date",
+    "Note from the shop": "ފިހާރައިގެ ނޯޓު",
+    "Open tracking page": "ޓްރެކިންގ ޞަފްޙާ ހުޅުވާ",
+    "Order :number is out for delivery": "އޯޑަރު :number ޑެލިވަރީއަށް ނުކުމެއްޖެ",
+    "Out for delivery": "ޑެލިވަރީއަށް ނުކުމެފައި",
+    "Out for delivery since": "ޑެލިވަރީއަށް ނުކުތީ",
+    "Track the parcel": "ޕާރުސަލް ޓްރެކްކުރޭ",
+    "Track the parcel: :url": "ޕާރުސަލް ޓްރެކްކުރައްވާ: :url",
+    "Your order is out for delivery today. Please keep your phone close.": "އޯޑަރު މިއަދު ޑެލިވަރީއަށް ނުކުމެއްޖެ. ފޯނު ކައިރީގައި ބަހައްޓަވާ.",
+    "expected :date": ":date އަށް ލަފާކުރެވޭ",
+    "iruali: order :number is out for delivery today.": "iruali: އޯޑަރު :number މިއަދު ޑެލިވަރީއަށް ނުކުމެއްޖެ."
 }

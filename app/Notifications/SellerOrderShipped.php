@@ -33,6 +33,18 @@ class SellerOrderShipped extends Notification
             $mail->line('• '.($item->product->name ?? __('Product')).' × '.$item->quantity);
         }
 
+        if ($this->part->courier || $this->part->tracking_number) {
+            $mail->line(__('Courier: :courier', ['courier' => trim($this->part->courier.' '.$this->part->tracking_number)]));
+        }
+        if ($this->part->tracking_url) {
+            $mail->line(__('Track the parcel: :url', ['url' => $this->part->tracking_url]));
+        }
+        if ($this->part->vessel_or_flight) {
+            $mail->line(__('Boat or flight: :vessel', ['vessel' => $this->part->vessel_or_flight]));
+        }
+        if ($this->part->expected_delivery_date) {
+            $mail->line(__('Expected delivery: :date', ['date' => $this->part->expected_delivery_date->translatedFormat('l j F')]));
+        }
         if ($this->part->tracking_note) {
             $mail->line(__('Tracking: :note', ['note' => $this->part->tracking_note]));
         }
@@ -45,8 +57,8 @@ class SellerOrderShipped extends Notification
     {
         $text = __('iruali: :shop has sent their part of order :number.', ['shop' => $this->part->shopName(), 'number' => $this->part->order->order_number]);
 
-        if ($this->part->tracking_note) {
-            $text .= ' '.__('Tracking: :note', ['note' => $this->part->tracking_note]);
+        if (($details = $this->part->trackingSummary()) !== '') {
+            $text .= ' '.$details;
         }
 
         return $text;

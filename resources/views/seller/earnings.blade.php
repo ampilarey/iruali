@@ -21,7 +21,7 @@
             <div class="rounded-lg bg-white p-5 shadow">
                 <p class="text-sm text-gray-500">Paid to you</p>
                 <p class="mt-1 text-2xl font-bold text-gray-900">{{ Money::format($balances['paid']) }}</p>
-                <p class="mt-1 text-xs text-gray-500">All payouts so far.</p>
+                <p class="mt-1 text-xs text-gray-500">All payouts so far.@if($balances['processing'] > 0) {{ __(':amount is on its way in a payout batch.', ['amount' => Money::format($balances['processing'])]) }}@endif</p>
             </div>
             <div class="rounded-lg bg-white p-5 shadow">
                 <p class="text-sm text-gray-500">Commission</p>
@@ -30,12 +30,12 @@
             </div>
         </div>
 
-        @if(! $user->payout_account_number)
+        @if(! $user->bankAccount)
             <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Add your bank account in <a href="{{ route('seller.profile') }}" class="font-semibold underline">Profile</a> so iruali can pay you.
+                {{ __('Add your bank account so iruali can pay you. Without it your earnings stay on hold.') }} <a href="{{ route('seller.settings.bank') }}" class="font-semibold underline">{{ __('Bank account') }}</a>
             </div>
         @else
-            <p class="text-sm text-gray-600">Payouts go to {{ $user->payout_account_name }} · {{ $user->payout_bank_name }} · {{ $user->payout_account_number }}.</p>
+            <p class="text-sm text-gray-600">{{ __('Payouts go to') }} {{ $user->bankAccount->account_name }} · {{ $user->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $user->bankAccount->maskedNumber() }}</span>.</p>
         @endif
 
         <div class="grid gap-6 lg:grid-cols-3">
@@ -57,6 +57,7 @@
                                     <td class="px-4 py-2 text-right font-semibold">{{ Money::format($part->seller_earnings) }}</td>
                                     <td class="px-4 py-2 text-xs">
                                         @if($state === 'paid_out')<span class="text-green-700 font-medium">Paid {{ $part->payout?->paid_at?->format('d M') }}</span>
+                                        @elseif($state === 'processing')<span class="text-blue-700">{{ __('Payout on its way') }}</span>
                                         @elseif($state === 'available')<span class="text-green-700">Ready</span>
                                         @elseif($state === 'cancelled')<span class="text-gray-500">Cancelled</span>
                                         @else<span class="text-gray-500">Pending</span>@endif
@@ -76,7 +77,11 @@
                 <ul class="divide-y divide-gray-100 text-sm">
                     @forelse($payoutHistory as $payout)
                         <li class="px-5 py-3 flex justify-between gap-3">
-                            <span>{{ $payout->paid_at->format('d M Y') }}@if($payout->reference)<span class="block text-xs text-gray-500">Ref {{ $payout->reference }}</span>@endif</span>
+                            <span>
+                                @if($payout->isPaid()){{ $payout->paid_at?->format('d M Y') }}@else<span class="text-blue-700">{{ __('On its way') }}</span>@endif
+                                @if($payout->batch)<span class="block text-xs text-gray-500">{{ __('Batch') }} {{ $payout->batch->reference }}@if($payout->batch->bank_reference) · {{ $payout->batch->bank_reference }}@endif</span>@endif
+                                @if($payout->reference)<span class="block text-xs text-gray-500">Ref {{ $payout->reference }}</span>@endif
+                            </span>
                             <span class="font-semibold">{{ Money::format($payout->amount) }}</span>
                         </li>
                     @empty

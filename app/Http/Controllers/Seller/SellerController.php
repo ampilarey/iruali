@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class SellerController extends Controller
 {
+    use \App\Traits\SecureFileUpload;
+
     public function dashboard()
     {
         $user = Auth::user();
@@ -30,8 +32,9 @@ class SellerController extends Controller
 
         $recent_orders = $this->sellerOrders()->with('user')->latest()->take(5)->get();
         $recent_products = $user->products()->with('category')->latest()->take(5)->get();
+        $onboarding = $user->isOnboarded() ? [] : app(\App\Services\OnboardingService::class)->items($user);
 
-        return view('seller.dashboard', compact('stats', 'recent_orders', 'recent_products'));
+        return view('seller.dashboard', compact('stats', 'recent_orders', 'recent_products', 'onboarding'));
     }
 
     public function orders(Request $request)
@@ -126,6 +129,11 @@ class SellerController extends Controller
         return view('seller.analytics', compact('stats', 'months', 'topProducts'));
     }
 
+    public function performance(\App\Services\SellerPerformanceService $performance)
+    {
+        return view('seller.performance', ['report' => $performance->report(Auth::user())]);
+    }
+
     public function questions(Request $request)
     {
         $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', Auth::id()));
@@ -146,9 +154,10 @@ class SellerController extends Controller
     {
         $user = Auth::user();
 
+        $user->load('bankAccount');
         $balances = $payouts->balances($user);
         $parts = SellerOrder::where('seller_id', $user->id)->with(['order', 'payout'])->latest()->paginate(20);
-        $payoutHistory = $user->payouts()->latest('paid_at')->take(20)->get();
+        $payoutHistory = $user->payouts()->with('batch')->latest('id')->take(20)->get();
         $rate = $user->effectiveCommissionRate();
         $adjustments = \App\Models\SellerAdjustment::where('seller_id', $user->id)->with('payout')->latest()->take(20)->get();
 
@@ -168,6 +177,7 @@ class SellerController extends Controller
     public function profile()
     {
         $user = Auth::user();
+        $user->load('bankAccount');
 
         return view('seller.profile', compact('user'));
     }
@@ -189,9 +199,25 @@ class SellerController extends Controller
             'payout_bank_name' => 'nullable|string|max:100',
             'payout_account_name' => 'nullable|string|max:150',
             'payout_account_number' => ['nullable', 'string', 'max:40', 'regex:/^[0-9 -]+$/'],
+            'delivery_notes' => 'nullable|string|max:1000',
+            'ships_to_islands' => 'nullable|boolean',
+            'shop_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'shop_banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
+        unset($validated['shop_logo'], $validated['shop_banner']);
+        if ($request->has('ships_to_islands') || $request->has('delivery_notes')) {
+            $validated['ships_to_islands'] = $request->boolean('ships_to_islands');
+        }
+        foreach (['shop_logo', 'shop_banner'] as $image) {
+            if ($request->hasFile($image) && ($path = $this->storeFileSecurely($request->file($image), 'shops', ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'], $image === 'shop_logo' ? 2048 : 4096))) {
+                $this->deleteFile($user->{$image});
+                $validated[$image] = $path;
+            }
+        }
+
         $user->update($validated);
+        app(\App\Services\OnboardingService::class)->refresh($user->fresh());
 
         return redirect()->route('seller.profile')
             ->with('success', 'Profile updated successfully.');

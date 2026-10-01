@@ -8,7 +8,10 @@
         'seller.questions' => ['Questions', 'seller.questions'],
         'seller.earnings' => ['Earnings', 'seller.earnings'],
         'seller.analytics' => ['Analytics', 'seller.analytics'],
+        'seller.performance' => [__('Performance'), 'seller.performance'],
         'seller.profile' => ['Profile', 'seller.profile*'],
+        'seller.settings.bank' => [__('Settings'), 'seller.settings.*'],
+        'seller.help' => [__('Help'), 'seller.help*'],
     ];
 @endphp
 <div class="bg-white shadow">

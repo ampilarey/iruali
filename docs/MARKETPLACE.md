@@ -33,12 +33,58 @@ Cancelled parts earn nothing.
 
 ## Payouts
 
-1. Shops add their bank account in Seller Centre → Profile.
+1. Shops add their bank account in Seller Centre → **Settings → Bank account** (`seller_bank_accounts`: BML,
+   MIB or another bank; BML numbers are 13 digits starting 7730/7770, MIB 16 digits starting 90). The number
+   is shown masked to the shop; admins see it in full on Shop payouts and can tick **Verified** once it has
+   been checked. A changed account loses its verified tick. **A shop with no bank account cannot be paid**:
+   `PayoutService` refuses and the admin pages say why.
 2. Admin → **Shop payouts** shows, per shop: ready, pending, paid, commission rate and bank account.
-3. **Pay out** lists the ready orders. Untick any to hold back (e.g. a return in progress), make the bank
-   transfer, enter its reference and **Record payout**. Those parts are marked paid; they can't be paid twice.
+3. **Pay out** (one shop) lists the ready orders. Untick any to hold back (e.g. a return in progress), make
+   the bank transfer, enter its reference and **Record payout**. Those parts are marked paid; they can't be
+   paid twice.
 4. Each payout has a statement page and a CSV download. Shops see their balances, per-order earnings and
    payouts under Seller Centre → **Earnings**.
+
+### Payout batches (several shops in one bulk transfer)
+
+Admin → Shop payouts → **New payout batch** (`payout_batches`, reference `PB-<year>-<number>`):
+
+1. Tick the shops to pay (or **Select all with bank details**). Each ticked shop gets one *pending* payout
+   for everything it is owed right now, with its open adjustments settled. Shops without a bank account are
+   listed but cannot be ticked. The earnings leave the shops' "ready" balance (they see "Payout on its way").
+   Parts and adjustments are locked while a batch is drafted, so the same earnings can never be in two
+   batches or paid twice.
+2. Status **draft**. A draft can be **cancelled**: its payouts are deleted and the earnings are available
+   again (the batch stays in the list as *cancelled*).
+3. **Download bank file** → status **exported**. Upload the file in BML Internet Banking → Bulk transfer and
+   check the total. An exported batch can no longer be cancelled.
+4. **Mark paid** with the bank's reference and the transfer date → status **paid**: every payout in the
+   batch is marked paid (through `PayoutService`, with the same row locking as single payouts), each shop
+   is emailed (`PayoutPaid`, queued) and sees the batch reference, bank reference and date on Earnings.
+
+### Bank file
+
+The file is produced by `App\Support\BankFileFormat` so the exact layout lives in one place:
+
+- CSV, UTF-8, **no byte-order mark**, **CRLF** line endings (also after the last row), file name
+  `bml-bulk-<batch reference>.csv`.
+- Header row: `Beneficiary Account Number,Beneficiary Name,Amount,Remarks`.
+- One row per shop, sorted by shop name:
+  - **Beneficiary Account Number** — the account number, digits only.
+  - **Beneficiary Name** — the account name exactly as the shop entered it.
+  - **Amount** — MVR with two decimals, dot as decimal mark, no thousands separator (`1250.00`).
+  - **Remarks** — the payout reference `<batch reference>/<payout id>`, e.g. `PB-2026-0001/17`; the shop sees
+    the same reference on its earnings page.
+- Line breaks in a value become spaces. A field is double-quoted only when it contains a comma or a quote;
+  quotes inside it are doubled.
+
+```
+Beneficiary Account Number,Beneficiary Name,Amount,Remarks
+7730000123456,Island Crafts Pvt Ltd,1125.00,PB-2026-0001/17
+7770000654321,Reefline Marine,89.55,PB-2026-0001/18
+```
+
+If BML changes the template, change `BankFileFormat` and the byte-for-byte test in `PayoutBatchesTest`.
 
 ## Returns and refunds
 

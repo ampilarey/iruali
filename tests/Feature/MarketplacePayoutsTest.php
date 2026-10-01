@@ -46,6 +46,7 @@ class MarketplacePayoutsTest extends TestCase
         $user = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => $name]);
         $user->forceFill(['commission_rate' => $rate])->save();
         $user->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+        $user->bankAccount()->create(['bank' => 'bml', 'account_name' => $name, 'account_number' => '7730000'.str_pad((string) $user->id, 6, '0', STR_PAD_LEFT)]);
 
         return $user;
     }

@@ -59,6 +59,8 @@ class User extends Authenticatable implements HasLocalePreference
         'banned_reason',
         'loyalty_points',
         'referral_code', 'referred_by', 'referral_rewarded_at',
+        'shop_logo', 'shop_banner', 'delivery_notes', 'ships_to_islands', 'onboarding_completed_at',
+        'notification_preferences',
     ];
 
     /**
@@ -93,6 +95,8 @@ class User extends Authenticatable implements HasLocalePreference
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
+        'ships_to_islands' => 'boolean',
+        'onboarding_completed_at' => 'datetime',
         'notification_preferences' => 'array',
     ];
 
@@ -467,5 +471,46 @@ class User extends Authenticatable implements HasLocalePreference
     public function routeNotificationForSms(): ?string
     {
         return $this->phone;
+    }
+
+    /**
+     * The bank account iruali pays this shop's earnings to (Seller Centre → Settings → Bank).
+     */
+    public function bankAccount(): HasOne
+    {
+        return $this->hasOne(SellerBankAccount::class);
+    }
+
+    public function shopName(): string
+    {
+        return $this->business_name ?: $this->name;
+    }
+
+    /**
+     * Has the shop finished its onboarding checklist (logo, banner, about, phone, delivery, bank, a product)?
+     */
+    public function isOnboarded(): bool
+    {
+        return $this->onboarding_completed_at !== null;
+    }
+
+    /**
+     * The shop emails this user can turn off, all on unless saved otherwise.
+     */
+    public const SELLER_NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock'];
+
+    /**
+     * @return array<string, bool>
+     */
+    public function notificationPreferences(): array
+    {
+        $saved = is_array($this->notification_preferences) ? $this->notification_preferences : [];
+
+        return collect(self::SELLER_NOTIFICATION_TYPES)->mapWithKeys(fn ($type) => [$type => (bool) ($saved[$type] ?? true)])->all();
+    }
+
+    public function wantsNotification(string $type): bool
+    {
+        return $this->notificationPreferences()[$type] ?? true;
     }
 }

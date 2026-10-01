@@ -32,6 +32,7 @@ class Setting extends Model
         'legal_delivery_body' => '',
         'legal_privacy_body' => '',
         'legal_security_body' => '',
+        'legal_seller_terms_body' => '',
         'whatsapp_number' => '',
         'loyalty_spend_per_point' => 100,
         'referral_referrer_points' => 100,
@@ -41,6 +42,11 @@ class Setting extends Model
         'free_delivery_over' => 1000,
         // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
         'default_commission_rate' => 10,
+        // Marketplace: a shop part not shipped within this many days of payment counts as late
+        'late_shipment_days' => 3,
+        // Marketplace: how often and on which day shops are paid (shown in the seller terms)
+        'payout_schedule' => 'weekly',
+        'payout_day' => 'Sunday',
     ];
 
     protected $fillable = ['key', 'value'];

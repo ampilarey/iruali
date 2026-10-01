@@ -71,6 +71,7 @@ class AuditLogTest extends TestCase
     public function test_payouts_are_audited(): void
     {
         $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Reef Goods']);
+        $shop->bankAccount()->create(['bank' => 'bml', 'account_name' => 'Reef Goods', 'account_number' => '7730000000001']);
         $order = Order::factory()->create(['status' => 'delivered', 'payment_status' => 'paid']);
         SellerOrder::create(['order_id' => $order->id, 'seller_id' => $shop->id, 'status' => 'delivered', 'subtotal' => 100, 'commission_rate' => 10, 'commission_amount' => 10, 'seller_earnings' => 90]);
 

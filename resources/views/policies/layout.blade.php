@@ -12,12 +12,14 @@
         'policies.privacy' => __('Privacy Policy'),
         'policies.security' => __('Payment Security'),
         'policies.about' => __('About & Contact'),
+        'policies.seller_terms' => __('Seller Terms'),
     ];
 
     // Same approach as Bake & Grill: the owner can replace a policy's text from Admin → Legal pages
     // (plain text, shown as written), and "Last updated" appears only once a date has been set.
     $policyKey = trim($__env->yieldContent('policy_key'));
-    $override = $policyKey !== '' ? trim((string) Setting::get('legal_'.$policyKey.'_body')) : '';
+    // {placeholders} such as {commission_rate} are filled from Settings (see App\Support\SellerTerms)
+    $override = $policyKey !== '' ? \App\Support\SellerTerms::replace(trim((string) Setting::get('legal_'.$policyKey.'_body'))) : '';
     $updated = trim((string) Setting::get('legal_last_updated_date'));
     $whatsapp = preg_replace('/[^0-9]/', '', (string) Setting::get('whatsapp_number'));
 @endphp

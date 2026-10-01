@@ -15,6 +15,31 @@
             </div>
         @endif
 
+        @if($onboarding)
+            @php $done = collect($onboarding)->where('done', true)->count(); $all = count($onboarding); @endphp
+            <div class="rounded-lg border border-primary-100 bg-white p-5 shadow" data-onboarding>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">{{ __('Set up your shop') }}</h2>
+                        <p class="text-sm text-gray-500">{{ __('Finish every step so your products can go live. :done of :all done.', ['done' => $done, 'all' => $all]) }}</p>
+                    </div>
+                    @if(\Illuminate\Support\Facades\Route::has('seller.help.show'))<a href="{{ route('seller.help.show', 'getting-approved') }}" class="text-sm font-medium text-primary-600 hover:underline">{{ __('How approval works') }}</a>@endif
+                </div>
+                <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100"><div class="h-2 rounded-full bg-primary-500" style="width: {{ $all ? round($done / $all * 100) : 0 }}%"></div></div>
+                <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+                    @foreach($onboarding as $item)
+                        <li class="flex items-start gap-2 text-sm">
+                            <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $item['done'] ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400' }}">{{ $item['done'] ? '✓' : '·' }}</span>
+                            <span>
+                                @if($item['done'])<span class="text-gray-500 line-through">{{ $item['label'] }}</span>
+                                @else<a href="{{ $item['url'] }}" class="font-medium text-primary-700 hover:underline">{{ $item['label'] }}</a><span class="block text-xs text-gray-500">{{ $item['hint'] }}</span>@endif
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach([
                 ['Revenue', \App\Support\Money::format($stats['total_revenue']), 'From non-cancelled orders'],

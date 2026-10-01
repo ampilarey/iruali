@@ -11,6 +11,7 @@ use App\Models\Wishlist;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class NotificationSystemTest extends TestCase
@@ -33,10 +34,13 @@ class NotificationSystemTest extends TestCase
             'phone_verified_at' => now(),
         ]);
         $this->category = Category::factory()->create();
+        // Fixed price: Cart::total is computed from the product price (not the
+        // cart line), and the voucher below needs a 50.00 minimum order.
         $this->product = Product::factory()->create([
             'category_id' => $this->category->id,
             'seller_id' => $this->user->id,
             'name' => 'Test Product',
+            'price' => 100.00,
         ]);
 
         // Create test voucher
@@ -53,7 +57,7 @@ class NotificationSystemTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_registration()
     {
         $response = $this->post('/register', [
@@ -81,7 +85,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Registration successful', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_login()
     {
         $response = $this->post('/login', [
@@ -98,7 +102,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Login successful', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_logout()
     {
         $this->actingAs($this->user);
@@ -114,7 +118,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Logout successful', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_email_verification()
     {
         $this->actingAs($this->user);
@@ -132,7 +136,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Email verified successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_phone_verification()
     {
         $this->actingAs($this->user);
@@ -150,7 +154,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Phone verified successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_adding_to_cart()
     {
         $this->actingAs($this->user);
@@ -169,7 +173,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Test Product added to cart successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_removing_from_cart()
     {
         $this->actingAs($this->user);
@@ -193,7 +197,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Test Product removed from cart successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_clearing_cart()
     {
         $this->actingAs($this->user);
@@ -212,7 +216,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Cart cleared successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_adding_to_wishlist()
     {
         $this->actingAs($this->user);
@@ -230,7 +234,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Test Product added to wishlist successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_removing_from_wishlist()
     {
         $this->actingAs($this->user);
@@ -252,7 +256,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Test Product removed from wishlist successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_clearing_wishlist()
     {
         $this->actingAs($this->user);
@@ -274,7 +278,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Wishlist cleared successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_voucher_application()
     {
         $this->actingAs($this->user);
@@ -297,7 +301,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Voucher TEST123 applied successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_success_notification_for_voucher_removal()
     {
         $this->actingAs($this->user);
@@ -313,7 +317,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Voucher removed successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_error_notification_for_invalid_credentials()
     {
         $response = $this->post('/login', [
@@ -325,7 +329,7 @@ class NotificationSystemTest extends TestCase
         $response->assertSessionHasErrors('email');
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_error_notification_for_order_creation_failure()
     {
         $this->actingAs($this->user);
@@ -350,7 +354,7 @@ class NotificationSystemTest extends TestCase
         $response->assertSessionHasErrors(['payment_method', 'agree_terms']);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_info_notification_for_duplicate_wishlist_item()
     {
         $this->actingAs($this->user);
@@ -374,7 +378,7 @@ class NotificationSystemTest extends TestCase
         $this->assertEquals('Information', $notification['title']);
     }
 
-    /** @test */
+    #[Test]
     public function notification_service_methods_work_correctly()
     {
         // Test success notification
@@ -415,7 +419,7 @@ class NotificationSystemTest extends TestCase
         $this->assertEquals('Test question message', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function notification_service_convenience_methods_work()
     {
         // Test created notification
@@ -469,7 +473,7 @@ class NotificationSystemTest extends TestCase
         $this->assertStringContainsString('Voucher removed successfully', $notification['message']);
     }
 
-    /** @test */
+    #[Test]
     public function multiple_notifications_work_correctly()
     {
         $notifications = [

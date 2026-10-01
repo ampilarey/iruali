@@ -711,5 +711,12 @@
     "The SKU \":sku\" is already in use.": "އެސްކޭޔޫ \":sku\" މިހާރުވެސް ބޭނުންކުރެވިފައިވޭ.",
     "Variant :n does not belong to this product.": "ވޭރިއަންޓް :n މި ތަކެއްޗަކަށް ނިސްބަތެއް ނުވޭ.",
     "Add at least one variant, or turn variants off.": "މަދުވެގެން އެއް ވޭރިއަންޓް ލައްވާ، ނުވަތަ ވޭރިއަންޓްތައް ނިއްވާލައްވާ.",
-    ":count variant|:count variants": ":count ވޭރިއަންޓް|:count ވޭރިއަންޓް"
+    ":count variant|:count variants": ":count ވޭރިއަންޓް|:count ވޭރިއަންޓް",
+    "Please choose an option (size, colour...) first.": "ފުރަތަމަ އޮޕްޝަނެއް (ސައިޒު، ކުލަ...) ހިޔާރުކުރައްވާ.",
+    "This option is not available.": "މި އޮޕްޝަން ލިބޭކަށް ނެތް.",
+    "Choose an option": "އޮޕްޝަނެއް ހިޔާރުކުރައްވާ",
+    "This combination is not available.": "މި ކޮމްބިނޭޝަން ލިބޭކަށް ނެތް.",
+    "Any option": "ކޮންމެ އޮޕްޝަނެއް",
+    "From": "ފެށިގެން",
+    "Choose options": "އޮޕްޝަން ހިޔާރުކުރޭ"
 }

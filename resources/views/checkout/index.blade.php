@@ -132,10 +132,11 @@
                                     <img src="{{ $item->product->mainImage->url ?? '/images/product-placeholder.svg' }}" alt="" class="w-12 h-12 object-cover rounded-lg bg-primary-50 shrink-0">
                                     <div class="min-w-0">
                                         <p class="text-sm font-medium text-gray-900 truncate">{{ $item->product->name }}</p>
+                                        @if($item->variant)<p class="text-xs text-gray-600">{{ $item->variant->displayName() }}</p>@endif
                                         <p class="text-xs text-gray-500">{{ __('Qty') }}: {{ $item->quantity }}</p>
                                     </div>
                                 </div>
-                                <span class="text-sm font-medium text-gray-900" dir="ltr">{{ \App\Support\Money::format($item->quantity * $item->product->price) }}</span>
+                                <span class="text-sm font-medium text-gray-900" dir="ltr">{{ \App\Support\Money::format($item->quantity * $item->unit_price) }}</span>
                             </li>
                         @endforeach
                     </ul>

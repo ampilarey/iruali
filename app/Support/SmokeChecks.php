@@ -76,7 +76,7 @@ final class SmokeChecks
             $this->result('Category page', self::FAIL, 'sitemap lists no category; is any category active?');
         }
 
-        $this->page('Search', '/search?q=a', fn (Response $r) => $this->html($r));
+        $this->page('Search', '/search?q=test', fn (Response $r) => $this->html($r)); // one letter redirects to /shop
         $this->page('Cart', '/cart', fn (Response $r) => $this->html($r));
         $this->page('Login page', '/login', fn (Response $r) => $this->csrfToken($r) ? null : 'no CSRF token in the form');
         $this->page('Laravel /up', '/up', fn () => null);
@@ -127,6 +127,16 @@ final class SmokeChecks
         }
         $this->result('Sign in as smoke user', self::PASS, $o['email']);
 
+        // Signing in regenerates the session, so the CSRF token from the login page is stale.
+        $fresh = $this->fetch('GET', '/cart');
+        $token = $fresh ? $this->csrfToken($fresh) : null;
+        if (! $token) {
+            $this->result('Add cheapest product to cart', self::FAIL, 'could not load the cart page for a fresh CSRF token');
+            $this->skipRest(['Checkout page', 'Place order', 'BML pay page loads', 'Order under My Orders', 'Cancel order', 'Stock restored']);
+
+            return;
+        }
+
         $add = $this->fetch('POST', '/cart/add', array_filter([
             'product_id' => $o['product_id'],
             'quantity' => 1,
@@ -173,7 +183,11 @@ final class SmokeChecks
         $this->result('Place order', self::PASS, 'redirected to '.$location);
 
         // Card orders go straight to BML's page; an order page means BML could not be reached.
-        if ($this->isExternal($location)) {
+        // With BML_FAKE=1 (never production) the "page" is our own return URL marked fake=1.
+        if (str_contains($location, 'fake=1')) {
+            $back = $this->fetch('GET', $location);
+            $this->result('BML pay page loads', $back && $this->isRedirect($back) ? self::PASS : self::FAIL, 'BML_FAKE=1: payment page skipped'.($back ? '' : ', '.$this->noResponse()));
+        } elseif ($this->isExternal($location)) {
             $pay = $this->fetch('GET', $location);
             $this->result('BML pay page loads', $pay && $pay->status() < 400 ? self::PASS : self::FAIL, $pay ? 'HTTP '.$pay->status().' (not paid)' : $this->noResponse().' from '.$location);
         } else {

@@ -123,6 +123,30 @@ class SmokeChecksTest extends TestCase
         $this->assertNotNull($site->sent('POST', '/orders/42/cancel'));
     }
 
+    public function test_a_fresh_csrf_token_is_taken_after_signing_in(): void
+    {
+        $site = $this->withOrderFlow($this->healthySite())
+            ->on('GET /cart', 200, str_replace('tok123', 'tok-after-login', self::HTML));
+        $results = (new SmokeChecks($site, 'http://smoke.test', ['email' => 'x', 'password' => 'y', 'product_id' => 1, 'variant_id' => null]))->run();
+
+        $this->assertSame(0, SmokeChecks::failures($results), json_encode($results));
+        $this->assertSame('tok123', $site->sent('POST', '/login')['data']['_token']);
+        $this->assertSame('tok-after-login', $site->sent('POST', '/cart/add')['data']['_token']);
+    }
+
+    public function test_a_fake_bml_redirect_counts_as_the_pay_page(): void
+    {
+        $site = $this->withOrderFlow($this->healthySite())
+            ->on('POST /orders', 302, '', ['Location' => 'http://smoke.test/payments/bml/return/42?transactionId=FAKE1&fake=1'])
+            ->on('GET /payments/bml/return/42', 302, '', ['Location' => 'http://smoke.test/orders/42']);
+        $results = (new SmokeChecks($site, 'http://smoke.test', ['email' => 'x', 'password' => 'y', 'product_id' => 1, 'variant_id' => null]))->run();
+        $row = collect($results)->firstWhere('name', 'BML pay page loads');
+
+        $this->assertSame('pass', $row['status']);
+        $this->assertStringContainsString('BML_FAKE', $row['detail']);
+        $this->assertSame(0, SmokeChecks::failures($results), json_encode($results));
+    }
+
     public function test_a_failed_sign_in_fails_and_skips_the_rest(): void
     {
         $site = $this->withOrderFlow($this->healthySite())->on('POST /login', 302, '', ['Location' => 'http://smoke.test/login']);

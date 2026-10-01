@@ -24,9 +24,12 @@ class HttpSmokeFetcher implements SmokeFetcher
     {
         $client = $this->client();
 
-        return strtoupper($method) === 'POST'
-            ? $client->asForm()->post($url, $data)
-            : $client->get($url, $data);
+        if (strtoupper($method) === 'POST') {
+            return $client->asForm()->post($url, $data);
+        }
+
+        // An empty query array would make Guzzle drop the URL's own query string (?q=...).
+        return $data === [] ? $client->get($url) : $client->get($url, $data);
     }
 
     protected function client(): PendingRequest

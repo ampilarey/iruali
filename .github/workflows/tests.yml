@@ -28,6 +28,8 @@ jobs:
           coverage: none
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Code style (Pint)
+        run: ./vendor/bin/pint --test
       - name: Prepare app
         run: |
           cp .env.example .env

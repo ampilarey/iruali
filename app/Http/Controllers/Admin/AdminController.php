@@ -111,7 +111,7 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $seller = User::findOrFail($id);
-        $seller->update(['status' => 'suspended']);
+        $seller->forceFill(['status' => 'suspended'])->save(); // status is deliberately not mass-assignable
         Product::where('seller_id', $seller->id)->update(['is_active' => false]);
 
         return redirect()->back()->with('success', 'Seller suspended and their products deactivated.');

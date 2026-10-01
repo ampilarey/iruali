@@ -36,11 +36,12 @@ Route::prefix('v1')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 
-    // Public product routes
+    // Public product routes (static paths go before /products/{product}, or they are
+    // swallowed by the model binding and 404)
     Route::get('/products', [ProductController::class, 'index']);
-    Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('/products/featured', [ProductController::class, 'featured']);
     Route::get('/products/on-sale', [ProductController::class, 'onSale']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
 
     // Public category routes
     Route::get('/categories', [CategoryController::class, 'index']);

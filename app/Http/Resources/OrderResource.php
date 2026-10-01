@@ -45,7 +45,8 @@ class OrderResource extends JsonResource
                         'quantity' => $item->quantity,
                         'price' => $item->price,
                         'subtotal' => $item->quantity * $item->price,
-                        'product' => $item->whenLoaded('product', function () use ($item) {
+                        // $item is a plain model, so whenLoaded() (a JsonResource helper) is not available here
+                        'product' => $this->when($item->relationLoaded('product') && $item->product, function () use ($item) {
                             return [
                                 'id' => $item->product->id,
                                 'name' => $item->product->name,
@@ -53,7 +54,7 @@ class OrderResource extends JsonResource
                                 'sku' => $item->product->sku,
                                 'slug' => $item->product->slug,
                                 'main_image' => $item->product->main_image,
-                                'category' => $item->product->whenLoaded('category', function () use ($item) {
+                                'category' => $this->when($item->product->relationLoaded('category') && $item->product->category, function () use ($item) {
                                     return [
                                         'id' => $item->product->category->id,
                                         'name' => $item->product->category->name,
@@ -78,4 +79,4 @@ class OrderResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

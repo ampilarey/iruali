@@ -64,6 +64,17 @@ Auto-deploy only fast-forwards `main`. After the auto-deploy code is on `main`:
 cd /home/iruali/test && git fetch origin && git checkout main && git pull origin main
 ```
 
+## Smoke test after every test deploy
+
+`scripts/pull-deploy-test.sh` ends with `php artisan iruali:smoke` (home, a product, a
+category, search, cart, login, `/up`, `/api/health`, sitemap, robots). With
+`SMOKE_USER_EMAIL` / `SMOKE_USER_PASSWORD` in the test site's `.env` and
+`php artisan iruali:smoke --setup` run once, it also places a real order as that customer,
+opens BML's pay page (sandbox, never paid), cancels the order and checks the stock is back.
+The test site is not rolled back on a failure: the rows are in the deploy log
+(`~/self-update-test.log` for cron runs, `storage/logs/laravel.log` for webhook runs) so the problem is seen before the
+same commit is tagged for production.
+
 ## After a push to `main`
 
 Only `main` deploys. Work on feature branches (including agent branches such as

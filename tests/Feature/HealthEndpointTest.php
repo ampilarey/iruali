@@ -49,6 +49,23 @@ class HealthEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonPath('commit', 'aaaaaaa')
             ->assertJsonPath('branch', 'main')
+            ->assertJsonPath('tag', null)
             ->assertJsonPath('deployed_at', '2026-09-24T17:00:00Z');
+    }
+
+    public function test_health_reports_the_release_tag_on_production(): void
+    {
+        file_put_contents($this->stamp, json_encode([
+            'commit' => str_repeat('b', 40),
+            'commit_short' => 'bbbbbbb',
+            'branch' => 'HEAD',
+            'tag' => 'v2026.10.01',
+            'deployed_at' => '2026-10-01T09:00:00Z',
+        ]));
+
+        $this->getJson('/api/health')
+            ->assertOk()
+            ->assertJsonPath('commit', 'bbbbbbb')
+            ->assertJsonPath('tag', 'v2026.10.01');
     }
 }

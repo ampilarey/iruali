@@ -91,7 +91,7 @@ Route::prefix('v1')->group(function () {
 
 // Health check endpoint
 Route::get('/health', function () {
-    // Written by scripts/write-deploy-stamp.sh on every TEST deploy.
+    // Written by scripts/write-deploy-stamp.sh on every deploy (test and production).
     $stamp = null;
     $stampPath = storage_path('app/deploy-stamp.json');
     if (is_file($stampPath)) {
@@ -104,6 +104,7 @@ Route::get('/health', function () {
         'version' => '1.0.0',
         'commit' => $stamp['commit_short'] ?? 'unknown',
         'branch' => $stamp['branch'] ?? null,
+        'tag' => ($stamp['tag'] ?? '') !== '' ? $stamp['tag'] : null,
         'deployed_at' => $stamp['deployed_at'] ?? null,
     ]);
 });

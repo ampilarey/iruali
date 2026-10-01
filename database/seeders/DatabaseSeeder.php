@@ -11,14 +11,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            PermissionSeeder::class,
-            RoleSeeder::class,
-            UserSeeder::class,
-            CategorySeeder::class,
-            BannerSeeder::class,
-            IslandSeeder::class,
-            MarketplaceDemoSeeder::class,
-        ]);
+        // Reference data is safe anywhere
+        $this->call([PermissionSeeder::class, RoleSeeder::class, CategorySeeder::class, BannerSeeder::class, IslandSeeder::class]);
+
+        // Demo shops, products and the default admin never go on a production database
+        // (On production, create the admin with ADMIN_EMAIL and ADMIN_PASSWORD set: php artisan db:seed --class=UserSeeder)
+        if (app()->isProduction()) {
+            return;
+        }
+
+        $this->call([UserSeeder::class, MarketplaceDemoSeeder::class]);
     }
 }

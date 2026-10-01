@@ -14,14 +14,24 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check if admin user already exists
-        $admin = User::where('email', 'admin@example.com')->first();
+        // On production the admin login comes from .env; the demo login exists only for local work.
+        $email = env('ADMIN_EMAIL', 'admin@example.com');
+        $password = env('ADMIN_PASSWORD');
+        if (! $password) {
+            if (app()->isProduction()) {
+                throw new \RuntimeException('Set ADMIN_EMAIL and ADMIN_PASSWORD in .env before seeding the admin on production.');
+            }
+            $password = 'password';
+        }
+
+        $admin = User::where('email', $email)->first();
 
         if (! $admin) {
             $admin = User::create([
                 'name' => 'Admin User',
-                'email' => 'admin@example.com',
-                'password' => Hash::make('password'),
+                'email' => $email,
+                'password' => Hash::make($password),
+                'email_verified_at' => now(),
                 'phone' => '7770000',
                 'status' => 'active',
                 'email_verified' => true,

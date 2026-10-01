@@ -294,6 +294,10 @@ class OrderService
 
             $order->update(['status' => $status]);
 
+            if ($status === 'cancelled' && $order->payment_status === 'paid') {
+                app(PaymentService::class)->flagRefund($order, (float) $order->total_amount, 'Order cancelled after payment');
+            }
+
             // Bring every shop's part along with the order
             app(FulfilmentService::class)->cascadeFromOrder($order, $status);
         });

@@ -95,7 +95,9 @@ if [[ -d "$DOCROOT" && -d "$ROOT/public/build" ]]; then
     cp -a "$ROOT/public/images/." "$DOCROOT/images/"
   fi
   # Root-level public files (favicon, web manifest) live next to index.php in the docroot
-  for f in favicon.svg site.webmanifest; do
+  # Uploaded files (product photos, served at /storage/...) live in the app's storage/app/public
+  ln -sfn "$ROOT/storage/app/public" "$DOCROOT/storage"
+  for f in favicon.svg site.webmanifest robots.txt; do
     if [[ -f "$ROOT/public/$f" ]]; then
       cp -a "$ROOT/public/$f" "$DOCROOT/$f"
     fi

@@ -36,3 +36,14 @@ not rolled back automatically.
 
 - `https://iruali.mv/api/health` shows `"commit"` = the latest `main` commit.
 - Demo data (`MarketplaceDemoSeeder`) is for test only. Don't seed it on production.
+
+## First-time setup and what must run on the server
+
+- **Scheduler cron** (required; unpaid-order cleanup, nightly database backups, token pruning):
+  `* * * * * cd /home/iruali/<app> && php artisan schedule:run >> /dev/null 2>&1`
+  Check with `php artisan schedule:list`. Backups go to the disk set in `config/backup.php`; run `php artisan backup:run --only-db` once by hand and keep copies off the server.
+- **Admin account:** never run `db:seed` on production. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then `php artisan db:seed --class=UserSeeder`, sign in, turn on two-step sign-in from My Account → Security, and remove the two values from `.env`.
+- **Demo accounts:** on any non-local server the migration `rotate_demo_account_passwords` gives every `*@example.com` shop a random password. `admin@example.com` is left alone so you are not locked out: change its password from My Account, or delete it once a real admin exists.
+- **Uploads:** product photos live in `storage/app/public`. The deploy scripts link `<docroot>/storage` to it; if the docroot is `<app>/public`, `php artisan storage:link` does the same.
+- **Runtime folders** on a fresh clone: `mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public storage/app/private bootstrap/cache`.
+- **Timezone** is `Indian/Maldives` by default (`APP_TIMEZONE`).

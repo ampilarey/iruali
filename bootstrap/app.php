@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

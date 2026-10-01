@@ -38,6 +38,12 @@ class AuthController extends BaseController
             return $this->sendForbidden('Account is deactivated');
         }
 
+        // A password alone must not get past two-step sign-in
+        if ($user->isTwoFactorEnabled()) {
+            Auth::logout();
+            return $this->sendForbidden('Two-step sign-in is on for this account. Please sign in on the website.');
+        }
+
         $token = $user->createToken('mobile', [
             'order:read',
             'cart:write',

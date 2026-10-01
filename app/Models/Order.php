@@ -37,12 +37,15 @@ class Order extends Model
         'payment_status',
         'payment_slip',
         'paid_at',
+        'refund_status', 'refund_amount', 'refund_reason', 'refund_reference', 'refunded_at',
         'notes',
         'tracking_number',
     ];
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'refunded_at' => 'datetime',
+        'refund_amount' => 'decimal:2',
         'loyalty_points_awarded_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',

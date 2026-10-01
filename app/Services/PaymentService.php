@@ -4,6 +4,12 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\PaymentTransaction;
+use App\Models\Setting;
+use App\Notifications\RefundDue;
+use App\Notifications\RefundRecorded;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 /**
  * Payments are taken by card through BML Connect only.
@@ -93,16 +99,26 @@ class PaymentService
         }
 
         // The customer's return and BML's webhook can arrive together: lock so the order is confirmed once.
-        \Illuminate\Support\Facades\DB::transaction(function () use ($transaction, $state, $remote) {
+        DB::transaction(function () use ($transaction, $state, $remote) {
             $locked = PaymentTransaction::whereKey($transaction->id)->lockForUpdate()->first();
+            $order = Order::whereKey($locked->order_id)->lockForUpdate()->first();
             $locked->update(['state' => $state, 'response' => $remote]);
 
-            if ($state === 'CONFIRMED' && ! $locked->confirmed_at) {
-                $locked->update(['confirmed_at' => now()]);
-                $order = $locked->order;
-                if ($order->payment_status !== 'paid') {
-                    $this->confirm($order);
-                }
+            if ($state !== 'CONFIRMED' || $locked->confirmed_at) {
+                return;
+            }
+            $locked->update(['confirmed_at' => now()]);
+            $amount = $locked->amount / 100;
+
+            if ($order->status === 'cancelled') {
+                // Paid after the order was cancelled (its stock is already released): the money goes back.
+                $this->flagRefund($order, $amount, 'Paid after the order was cancelled');
+            } elseif ($order->payment_status === 'paid') {
+                // A second successful payment for the same order.
+                $locked->update(['state' => 'DUPLICATE']);
+                $this->flagRefund($order, $amount, 'Paid twice');
+            } else {
+                $this->confirm($order);
             }
         });
 
@@ -114,6 +130,49 @@ class PaymentService
     protected function bml(): BmlConnect
     {
         return app(BmlConnect::class);
+    }
+
+    /**
+     * Record that the customer is owed money and tell the admins. Adds to any refund already due.
+     */
+    public function flagRefund(Order $order, float $amount, string $reason): void
+    {
+        $due = $order->refund_status === 'due' ? (float) $order->refund_amount : 0;
+        $order->forceFill([
+            'refund_status' => 'due',
+            'refund_amount' => round($due + $amount, 2),
+            'refund_reason' => $reason,
+        ])->save();
+
+        DB::afterCommit(function () use ($order) {
+            try {
+                if ($email = trim((string) Setting::get('contact_email'))) {
+                    Notification::route('mail', $email)->notify(new RefundDue($order->fresh()));
+                }
+            } catch (Throwable $e) {
+                report($e);
+            }
+        });
+    }
+
+    /**
+     * The refund has been sent (BML portal or bank transfer): record the reference and tell the customer.
+     */
+    public function markRefunded(Order $order, string $reference): bool
+    {
+        if ($order->refund_status !== 'due') {
+            return false;
+        }
+
+        $order->forceFill(['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()])->save();
+
+        try {
+            $order->user?->notify(new RefundRecorded($order));
+        } catch (Throwable $e) {
+            report($e);
+        }
+
+        return true;
     }
 
     public function confirm(Order $order): void

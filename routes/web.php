@@ -175,6 +175,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/orders/{order}/payment', [AdminController::class, 'updatePayment'])->name('orders.payment');
         Route::post('/orders/{order}/parts/{part}/status', [AdminController::class, 'updatePartStatus'])->name('orders.parts.status');
         Route::post('/orders/{order}/bml-sync', [AdminController::class, 'syncBmlPayment'])->name('orders.bml-sync');
+        Route::post('/orders/{order}/refunded', [AdminController::class, 'recordRefund'])->name('orders.refunded');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');

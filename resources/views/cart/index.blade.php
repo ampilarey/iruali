@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('Cart'))
+
 @php
     $items = $cart->items->filter(fn ($i) => $i->product);
     $subtotal = (float) $cart->total;

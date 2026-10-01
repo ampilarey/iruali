@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('Compare products'))
+
 @php
     $rows = [
         'price' => __('Price'),

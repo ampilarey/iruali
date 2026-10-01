@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', html_entity_decode(trim($__env->yieldContent('policy_title')), ENT_QUOTES | ENT_HTML5))
+
 @php
     use App\Models\Setting;
     use App\Support\Company;

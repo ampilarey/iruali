@@ -192,7 +192,7 @@
                 </div>
                 <div class="flex items-center gap-1 min-w-0 overflow-hidden">
                     @foreach($navDepartments->take(6) as $dept)
-                        <a href="{{ route('categories.show', $dept) }}" class="px-3 h-11 flex items-center whitespace-nowrap hover:bg-white/10 {{ request()->route('category')?->id === $dept->id ? 'bg-white/15' : '' }}">{{ $dept->localized_name }}</a>
+                        <a href="{{ route('categories.show', $dept) }}" class="px-3 h-11 flex items-center whitespace-nowrap hover:bg-white/10 {{ (request()->route('category') instanceof \App\Models\Category ? request()->route('category')->id : null) === $dept->id ? 'bg-white/15' : '' }}">{{ $dept->localized_name }}</a>
                     @endforeach
                 </div>
                 <div class="ms-auto flex items-center gap-1 shrink-0">

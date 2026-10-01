@@ -36,6 +36,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/brands/{brand}', [ShopController::class, 'brand'])->name('brands.show')->where('brand', '.+');
     Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
     Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
+    Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+    Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'sitemap'])->name('sitemap');
     Route::view('/help', 'pages.help')->name('help');
 
     // Policies (BML website requirements)

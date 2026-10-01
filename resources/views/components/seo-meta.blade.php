@@ -2,6 +2,21 @@
 
 @php
     $seo = $seo ?? App\Services\SeoService::getDefault();
+
+    // A page that sets @section('title') wins over the generic site title (products, categories,
+    // search and shops already get theirs from SeoService).
+    // (inline @section values arrive HTML-escaped; decode so the {{ }} below escapes exactly once)
+    $pageTitle = html_entity_decode(trim(strip_tags($__env->yieldContent('title'))), ENT_QUOTES | ENT_HTML5);
+    if ($pageTitle !== '' && $seo['title'] === config('app.name')) {
+        $pageTitle = preg_replace('/\s*[-–|]\s*iruali\s*$/i', '', $pageTitle);
+        $seo['title'] = $pageTitle.' - iruali';
+        $seo['og_title'] = $seo['twitter_title'] = $pageTitle;
+    }
+
+    // Private, transactional and duplicate-content pages are not for search engines
+    $noindex = trim($__env->yieldContent('robots')) === 'noindex, nofollow'
+        || request()->routeIs('login', 'register', 'password.*', 'verification.*', '2fa.*', 'account*', 'profile.*', 'cart*', 'checkout*',
+            'orders*', 'wishlist*', 'compare*', 'saved.*', 'search', 'order.track.*', 'returns.*', 'payments.*', 'admin.*', 'seller.*', 'locale.*');
 @endphp
 
 {{-- Basic Meta Tags --}}
@@ -33,7 +48,7 @@
 <meta name="twitter:site" content="@iruali">
 
 {{-- Additional Meta Tags --}}
-<meta name="robots" content="index, follow">
+<meta name="robots" content="{{ $noindex ? 'noindex, nofollow' : 'index, follow' }}">
 <meta name="author" content="{{ config('app.name') }}">
 <meta name="language" content="{{ app()->getLocale() }}">
 

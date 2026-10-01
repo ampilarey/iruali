@@ -719,5 +719,15 @@
     "Any option": "ކޮންމެ އޮޕްޝަނެއް",
     "From": "ފެށިގެން",
     "Choose options": "އޮޕްޝަން ހިޔާރުކުރޭ",
-    "\":name\" needs an option (size, colour...) chosen. Please add it to your cart again.": "\":name\" އަށް އޮޕްޝަނެއް (ސައިޒު، ކުލަ...) ހިޔާރުކުރަން ޖެހޭ. އަލުން ކާޓަށް ލައްވާ."
+    "\":name\" needs an option (size, colour...) chosen. Please add it to your cart again.": "\":name\" އަށް އޮޕްޝަނެއް (ސައިޒު، ކުލަ...) ހިޔާރުކުރަން ޖެހޭ. އަލުން ކާޓަށް ލައްވާ.",
+    ":count product low on stock|:count products low on stock": ":count ތަކެތި ސްޓޮކް މަދު|:count ތަކެތި ސްޓޮކް މަދު",
+    "Search name or SKU": "ނަން ނުވަތަ އެސްކޭޔޫ ހޯދާ",
+    "Low stock only": "ސްޓޮކް މަދު އެއްޗެހި އެކަނި",
+    "Filter": "ފިލްޓަރ",
+    "Awaiting approval": "އެޕްރޫވަލް އަށް މަޑުކުރަނީ",
+    "Inactive": "އިންއެކްޓިވް",
+    "Nothing is low on stock.": "ސްޓޮކް މަދު އެއްޗެއް ނެތް.",
+    "No products found.": "ތަކެއްޗެއް ނުފެނުނު.",
+    "Save stock levels": "ސްޓޮކް ރައްކާކުރޭ",
+    ":count stock level updated.|:count stock levels updated.": ":count ސްޓޮކް އަދާހަމަކުރެވިއްޖެ.|:count ސްޓޮކް އަދާހަމަކުރެވިއްޖެ."
 }

@@ -266,6 +266,7 @@ class AdminController extends Controller
             'payout_schedule' => 'sometimes|required|in:weekly,fortnightly,monthly',
             'payout_day' => 'sometimes|nullable|string|max:30',
             'late_shipment_days' => 'sometimes|required|integer|min:0|max:60',
+            'guest_checkout_enabled' => 'sometimes|boolean',
         ]);
 
         Setting::set($validated);

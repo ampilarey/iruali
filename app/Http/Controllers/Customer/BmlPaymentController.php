@@ -61,7 +61,8 @@ class BmlPaymentController extends Controller
             NotificationService::info(__('We are waiting for the bank to confirm your payment. This page will show it once it does.'));
         }
 
-        return redirect()->route('orders.show', $order);
+        // A guest's order page is its signed link (there is no account to sign in to)
+        return redirect()->to($order->customerUrl());
     }
 
     public function webhook(Request $request, BmlConnect $bml, PaymentService $payments)

@@ -35,7 +35,7 @@ class SellerOrderShipped extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)->salutation(__('The iruali team'))
             ->subject(__('Items from :shop are on their way (order :number)', ['shop' => $shop, 'number' => $order->order_number]))
-            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? $order->customerName()]))
             ->line(__(':shop has sent their part of your order:', ['shop' => $shop]));
 
         foreach ($this->part->items()->with('product')->get() as $item) {
@@ -59,7 +59,7 @@ class SellerOrderShipped extends Notification implements ShouldQueue
         }
 
         return $mail->line(__('The rest of your order is still being prepared by the other shops.'))
-            ->action(__('View your order'), route('orders.show', $order));
+            ->action(__('View your order'), $order->customerUrl());
     }
 
     public function toSms(object $notifiable): string

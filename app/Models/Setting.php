@@ -47,6 +47,8 @@ class Setting extends Model
         // Marketplace: how often and on which day shops are paid (shown in the seller terms)
         'payout_schedule' => 'weekly',
         'payout_day' => 'Sunday',
+        // Checkout without an account (orders carry the guest's email and a token for signed links)
+        'guest_checkout_enabled' => 0,
     ];
 
     protected $fillable = ['key', 'value'];

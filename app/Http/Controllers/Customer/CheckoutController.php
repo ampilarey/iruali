@@ -44,7 +44,12 @@ class CheckoutController extends Controller
         $deliveryQuotes = app(DeliveryService::class)->quotes($goodsTotal);
         $freeDeliveryOver = (float) \App\Models\Setting::get('free_delivery_over');
 
-        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver'));
+        // Saved addresses as cards (the default one pre-selected), plus the island list for a new address
+        $addresses = $user->addresses()->defaultFirst()->with('islandRecord')->get();
+        $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)?->id ?? $addresses->first()?->id ?? '');
+        $islandsByAtoll = app(DeliveryService::class)->islandsByAtoll();
+
+        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll'));
     }
 
     public function redeemPoints(Request $request)

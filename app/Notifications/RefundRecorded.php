@@ -34,10 +34,10 @@ class RefundRecorded extends Notification implements ShouldQueue
 
         return (new MailMessage)->salutation(__('The iruali team'))
             ->subject(__('Refund sent for order :number', ['number' => $order->order_number]))
-            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? $order->customerName()]))
             ->line(__('We have sent your refund of :amount.', ['amount' => Money::format($order->refund_amount)]))
             ->line(__('Reference: :ref', ['ref' => $order->refund_reference]))
             ->line(__('Refunds usually reach you within 5–7 business days, depending on your bank.'))
-            ->action(__('View your order'), route('orders.show', $order));
+            ->action(__('View your order'), $order->customerUrl());
     }
 }

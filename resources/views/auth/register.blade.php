@@ -32,7 +32,7 @@
                     <label for="email" class="sr-only">{{ __('Email address') }}</label>
                     <input id="email" name="email" type="email" autocomplete="email" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm @error('email') border-red-500 @enderror"
-                           placeholder="{{ __('Email address') }}" value="{{ old('email') }}">
+                           placeholder="{{ __('Email address') }}" value="{{ old('email', request()->query('email')) }}">
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

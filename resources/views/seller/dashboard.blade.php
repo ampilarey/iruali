@@ -67,7 +67,7 @@
                             <a href="{{ route('seller.orders.show', $order) }}" class="flex items-center justify-between px-5 py-3 hover:bg-gray-50">
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">#{{ $order->order_number }}</p>
-                                    <p class="text-xs text-gray-500">{{ $order->user->name ?? 'Customer' }} · {{ $order->created_at->format('d M Y') }}</p>
+                                    <p class="text-xs text-gray-500">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) (Guest)@endif · {{ $order->created_at->format('d M Y') }}</p>
                                 </div>
                                 <span class="rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ \App\Support\OrderStatus::label($order->status) }}</span>
                             </a>

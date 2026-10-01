@@ -331,7 +331,7 @@
                         @auth
                             <details @if($errors->hasAny(['rating', 'comment', 'title'])) open @endif>
                                 <summary class="cursor-pointer font-semibold text-primary">{{ $myReview ? __('Edit your review') : __('Write a review') }}</summary>
-                                <form action="{{ route('reviews.store', $product) }}" method="POST" class="mt-3 space-y-3">
+                                <form action="{{ route('reviews.store', $product) }}" method="POST" enctype="multipart/form-data" class="mt-3 space-y-3">
                                     @csrf
                                     <fieldset>
                                         <legend class="text-sm font-medium text-gray-700 mb-1">{{ __('Your rating') }}</legend>
@@ -352,6 +352,23 @@
                                         <textarea id="review-comment" name="comment" rows="4" required minlength="10" maxlength="2000" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">{{ old('comment', $myReview?->comment) }}</textarea>
                                         @error('comment')<p class="text-danger text-xs">{{ $message }}</p>@enderror
                                     </div>
+                                    <div>
+                                        <label for="review-photos" class="text-sm font-medium text-gray-700">{{ __('Photos') }} <span class="text-gray-500 font-normal">({{ __('optional, up to 3') }})</span></label>
+                                        <input id="review-photos" name="photos[]" type="file" multiple accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-gray-700">
+                                        <p class="mt-1 text-xs text-gray-500">{{ __('JPG, PNG or WebP, 4 MB each.') }}</p>
+                                        @error('photos')<p class="text-danger text-xs">{{ $message }}</p>@enderror
+                                        @error('photos.*')<p class="text-danger text-xs">{{ $message }}</p>@enderror
+                                        @if($myReview && $myReview->photos->isNotEmpty())
+                                            <ul class="mt-2 flex flex-wrap gap-2">
+                                                @foreach($myReview->photos as $photo)
+                                                    <li>
+                                                        <img src="{{ $photo->variant(400) }}" alt="" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                                                        <label class="mt-1 flex items-center gap-1 text-xs text-gray-600"><input type="checkbox" name="remove_photos[]" value="{{ $photo->id }}" class="rounded">{{ __('Remove') }}</label>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
                                     <button type="submit" class="w-full h-10 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-hover">{{ __('Post review') }}</button>
                                 </form>
                             </details>
@@ -366,8 +383,25 @@
                     @if($reviews->isEmpty())
                         <p class="text-gray-500">{{ __('Be the first to review this product.') }}</p>
                     @else
+                        @php
+                            $reviewLink = fn (array $params) => route('products.show', $product).'?'.http_build_query(array_filter(array_merge(['sort' => $reviewSort === 'helpful' ? null : $reviewSort, 'photos' => $reviewPhotosOnly ? 1 : null], $params))).'#reviews';
+                            $pill = 'px-3 py-1 rounded-full border text-xs font-medium';
+                            $withPhotosCount = $reviews->filter(fn ($r) => $r->photos->isNotEmpty())->count();
+                        @endphp
+                        <div class="mb-3 flex flex-wrap items-center gap-2" data-review-filters>
+                            <a href="{{ $reviewLink(['photos' => $reviewPhotosOnly ? null : 1]) }}" class="{{ $pill }} {{ $reviewPhotosOnly ? 'border-primary bg-primary text-white' : 'border-gray-300 text-gray-700 hover:border-primary' }}" @if($reviewPhotosOnly) aria-current="true" @endif>{{ __('With photos') }} ({{ $withPhotosCount }})</a>
+                            <span class="ms-auto flex flex-wrap items-center gap-1 text-xs text-gray-500">
+                                <span>{{ __('Sort by') }}:</span>
+                                @foreach(['helpful' => __('Most helpful'), 'newest' => __('Newest'), 'highest' => __('Highest rating'), 'lowest' => __('Lowest rating')] as $key => $label)
+                                    <a href="{{ $reviewLink(['sort' => $key === 'helpful' ? null : $key]) }}" class="{{ $pill }} {{ $reviewSort === $key ? 'border-primary bg-primary text-white' : 'border-gray-300 text-gray-700 hover:border-primary' }}" @if($reviewSort === $key) aria-current="true" @endif>{{ $label }}</a>
+                                @endforeach
+                            </span>
+                        </div>
+                        @if($reviewList->isEmpty())
+                            <p class="text-gray-500">{{ __('No reviews with photos yet.') }}</p>
+                        @endif
                         <ul class="divide-y divide-gray-200 border-y border-gray-200">
-                            @foreach($reviews->take(20) as $review)
+                            @foreach($reviewList->take(20) as $review)
                                 <li id="review-{{ $review->id }}" class="py-4 scroll-mt-40">
                                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                         <x-rating :value="$review->rating" />
@@ -379,6 +413,19 @@
                                         @if($review->verified_purchase)<span class="inline-flex items-center gap-1 font-semibold text-success"><x-icon name="check" class="w-3.5 h-3.5" />{{ __('Verified purchase') }}</span>@endif
                                     </p>
                                     <p class="mt-2 text-sm text-gray-700 whitespace-pre-line">{{ $review->comment }}</p>
+                                    @if($review->photos->isNotEmpty())
+                                        <ul class="mt-2 flex flex-wrap gap-2" aria-label="{{ __('Review photos') }}">
+                                            @foreach($review->photos as $photo)
+                                                <li><button type="button" data-review-photo="{{ $photo->variant(1200) }}" class="block rounded-lg overflow-hidden border border-gray-200 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary" aria-label="{{ __('Open photo') }}"><img src="{{ $photo->variant(400) }}" alt="" loading="lazy" class="w-20 h-20 object-cover"></button></li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                    @if($review->hasReply())
+                                        <div class="mt-3 ms-4 rounded-lg bg-gray-50 border-s-4 border-primary px-3 py-2 text-sm">
+                                            <p class="text-xs text-gray-500"><span class="font-semibold text-dark">{{ __('Reply from :shop', ['shop' => $review->replyShopName()]) }}</span> &middot; {{ $review->seller_replied_at?->translatedFormat('j M Y') }}</p>
+                                            <p class="mt-1 text-gray-700 whitespace-pre-line">{{ $review->seller_reply }}</p>
+                                        </div>
+                                    @endif
                                     <div class="mt-2 flex items-center gap-3 text-xs text-gray-500">
                                         @if($review->helpful_count)<span>{{ trans_choice(':count person found this helpful|:count people found this helpful', $review->helpful_count, ['count' => $review->helpful_count]) }}</span>@endif
                                         @auth
@@ -499,6 +546,15 @@
                 zoom.classList.remove('hidden');
                 document.documentElement.classList.add('overflow-hidden');
                 // Focus goes to the close button, Tab stays inside, Escape closes and focus returns here
+                if (window.iruDialog) window.iruDialog.open(zoom, closeZoom);
+            });
+        });
+        // Review photos open in the same full-screen dialog
+        document.querySelectorAll('[data-review-photo]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                zoom.querySelector('img').src = b.dataset.reviewPhoto;
+                zoom.classList.remove('hidden');
+                document.documentElement.classList.add('overflow-hidden');
                 if (window.iruDialog) window.iruDialog.open(zoom, closeZoom);
             });
         });

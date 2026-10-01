@@ -33,6 +33,31 @@ class DeliveryService
     }
 
     /**
+     * The zone for an island picked from the islands table (its English name decides), or for a
+     * typed island name when none was picked. The atoll alone never decides: Kaafu has many islands
+     * outside Greater Malé.
+     */
+    public function zoneForIsland(?\App\Models\Island $island, ?string $islandName = null): string
+    {
+        $name = $island
+            ? ($island->getTranslation('name', 'en', false) ?: $island->getTranslation('name', config('app.fallback_locale'), false))
+            : $islandName;
+
+        return $this->zoneFor(null, $name);
+    }
+
+    /**
+     * All active islands grouped by atoll, for address pickers: ['Kaafu' => Collection<Island>, ...].
+     */
+    public function islandsByAtoll(): \Illuminate\Support\Collection
+    {
+        return \App\Models\Island::where('is_active', true)->get()
+            ->sortBy(fn ($i) => $i->localized_name)
+            ->groupBy(fn ($i) => $i->atoll ?: __('Other'))
+            ->sortKeys();
+    }
+
+    /**
      * Delivery fee for a zone, given the order's goods total after discounts.
      */
     public function fee(string $zone, float $goodsTotal): float

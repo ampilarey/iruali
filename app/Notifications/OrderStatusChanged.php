@@ -47,7 +47,7 @@ class OrderStatusChanged extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)->salutation(__('The iruali team'))
             ->subject($subject)
-            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? $this->order->customerName()]))
             ->line($line);
 
         // Delivery details each shop gave when it sent its part
@@ -57,7 +57,7 @@ class OrderStatusChanged extends Notification implements ShouldQueue
             }
         }
 
-        return $mail->action(__('View your order'), route('orders.show', $this->order));
+        return $mail->action(__('View your order'), $this->order->customerUrl());
     }
 
     public function toSms(object $notifiable): string

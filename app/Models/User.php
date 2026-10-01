@@ -513,4 +513,17 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return $this->notificationPreferences()[$type] ?? true;
     }
+
+    /**
+     * Saved delivery addresses (My Account → Addresses).
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function defaultAddress(): ?Address
+    {
+        return $this->addresses()->where('is_default', true)->first() ?? $this->addresses()->orderBy('id')->first();
+    }
 }

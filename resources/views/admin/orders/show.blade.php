@@ -176,8 +176,8 @@
                 </div>
                 <div class="rounded-lg bg-white p-5 shadow">
                     <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Customer</h2>
-                    <p class="mt-2 text-sm text-gray-900">{{ $order->user->name ?? 'Deleted user' }}</p>
-                    <p class="text-sm text-gray-600">{{ $order->user->email ?? '' }}</p>
+                    <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Deleted user' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span>@endif</p>
+                    <p class="text-sm text-gray-600">{{ $order->customerEmail() ?? '' }}</p>
                     <p class="mt-3 text-sm text-gray-700">{{ $order->shipping_address }}</p>
                     <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
                     <p class="text-sm text-gray-700">{{ $order->shipping_country }}</p>

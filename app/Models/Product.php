@@ -19,6 +19,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
+        'search_text',
         'sku',
         'slug',
         'category_id',
@@ -246,6 +247,18 @@ class Product extends Model
     /**
      * Boot method to automatically generate slug
      */
+    /**
+     * Everything a search may match, lower-cased: both names, brand, model, SKU and the start of the description.
+     */
+    public function buildSearchText(): string
+    {
+        $names = $this->getTranslations('name');
+        $descriptions = $this->getTranslations('description');
+        $parts = array_merge(array_values($names), [$this->brand, $this->model, $this->sku], array_map(fn ($d) => mb_substr(strip_tags((string) $d), 0, 300), array_values($descriptions)));
+
+        return mb_strtolower(trim(preg_replace('/\s+/u', ' ', implode(' ', array_filter($parts, fn ($p) => filled($p))))));
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -253,6 +266,13 @@ class Product extends Model
         static::creating(function ($product) {
             if (empty($product->slug)) {
                 $product->slug = $product->generateSlug();
+            }
+        });
+
+        // One plain column to search instead of five JSON casts per row
+        static::saving(function ($product) {
+            if ($product->isDirty(['name', 'description', 'brand', 'model', 'sku']) || $product->search_text === null) {
+                $product->search_text = $product->buildSearchText();
             }
         });
 

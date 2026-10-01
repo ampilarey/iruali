@@ -34,7 +34,7 @@ jobs:
           php artisan key:generate --no-interaction
           mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public bootstrap/cache
       - name: Run tests
-        run: php artisan test --no-interaction
+        run: php artisan test
         env:
           DB_HOST: 127.0.0.1
       - name: Built assets are committed and current

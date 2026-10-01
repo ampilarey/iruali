@@ -45,8 +45,13 @@ trait SecureFileUpload
         // Generate secure filename
         $filename = $this->generateSecureFilename($file);
 
-        // Store file
-        return $file->storeAs($directory, $filename, 'public');
+        // Store file, then the smaller WebP copies the storefront prefers
+        $path = $file->storeAs($directory, $filename, 'public');
+        if ($path) {
+            \App\Support\ImageVariants::make($path);
+        }
+
+        return $path;
     }
 
     /**
@@ -57,6 +62,8 @@ trait SecureFileUpload
         if (! $filePath) {
             return false;
         }
+
+        \App\Support\ImageVariants::delete($filePath);
 
         return Storage::disk('public')->delete($filePath);
     }

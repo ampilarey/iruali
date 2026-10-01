@@ -76,11 +76,8 @@ class CatalogService
         if (($q = trim((string) $r->query('q', ''))) !== '') {
             // Names and descriptions are JSON (one value per language); JSON compares case-sensitively on MySQL.
             $like = '%'.mb_strtolower(str_replace(['%', '_'], ['\%', '\_'], $q)).'%';
-            $query->where(fn ($w) => $w->whereRaw('LOWER(CAST(name AS CHAR)) LIKE ?', [$like])
-                ->orWhereRaw('LOWER(CAST(description AS CHAR)) LIKE ?', [$like])
-                ->orWhere('sku', 'like', $like)
-                ->orWhere('brand', 'like', $like)
-                ->orWhere('model', 'like', $like)
+            // products.search_text holds names, brand, model, SKU and description, lower-cased (Product::buildSearchText)
+            $query->where(fn ($w) => $w->where('search_text', 'like', $like)
                 ->orWhereHas('category', fn ($c) => $c->whereRaw('LOWER(CAST(name AS CHAR)) LIKE ?', [$like])));
         }
 
@@ -225,22 +222,34 @@ class CatalogService
         return $chips;
     }
 
+    /** @var array{0: ?Category}|null memo: facets call this several times per request */
+    protected ?array $categoryMemo = null;
+
+    protected ?array $categoryIdsMemo = null;
+
     public function selectedCategory(): ?Category
     {
         if (isset($this->locked['category'])) {
             return $this->locked['category'];
         }
+        if ($this->categoryMemo !== null) {
+            return $this->categoryMemo[0];
+        }
 
         $slug = $this->request->query('category');
+        $this->categoryMemo = [is_string($slug) && $slug !== '' ? Category::active()->where('slug', $slug)->first() : null];
 
-        return is_string($slug) && $slug !== '' ? Category::active()->where('slug', $slug)->first() : null;
+        return $this->categoryMemo[0];
     }
 
     protected function categoryIds(): array
     {
+        if ($this->categoryIdsMemo !== null) {
+            return $this->categoryIdsMemo;
+        }
         $category = $this->selectedCategory();
 
-        return $category ? $category->children()->active()->pluck('id')->push($category->id)->all() : [];
+        return $this->categoryIdsMemo = $category ? $category->children()->active()->pluck('id')->push($category->id)->all() : [];
     }
 
     protected function dealsOnly(): bool

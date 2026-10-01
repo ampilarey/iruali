@@ -27,6 +27,12 @@
             </ol>
         </nav>
 
+        @if($category)
+            @foreach(\App\Models\Campaign::live()->placement('category')->ordered()->get() as $campaign)
+                <div class="mb-4">@include('campaigns._banner', ['campaign' => $campaign, 'size' => 'strip'])</div>
+            @endforeach
+        @endif
+
         <!-- Page heading -->
         @if($seller)
             @if($seller->shop_banner)

@@ -78,7 +78,8 @@ class ProductVariant extends Model
     public function effectivePrice(): float
     {
         if ($this->price !== null) {
-            return round((float) $this->price, 2);
+            // A variant priced on its own still gets the product's live campaign discount
+            return $this->product ? $this->product->applyCampaignDiscount((float) $this->price) : round((float) $this->price, 2);
         }
 
         return round((float) ($this->product?->final_price ?? 0) + (float) $this->price_adjustment, 2);

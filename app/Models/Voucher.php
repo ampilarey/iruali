@@ -11,6 +11,7 @@ class Voucher extends Model
 
     protected $fillable = [
         'code', 'type', 'amount', 'min_order', 'max_uses', 'used_count', 'valid_from', 'valid_until', 'is_active',
+        'user_id', // set when the voucher was issued to one customer (abandoned-cart nudges)
     ];
 
     protected $casts = [
@@ -20,4 +21,17 @@ class Voucher extends Model
         'valid_until' => 'datetime',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * The one customer this voucher was issued to, or null when anyone may use it.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function usableBy(?int $userId): bool
+    {
+        return $this->user_id === null || $this->user_id === $userId;
+    }
 }

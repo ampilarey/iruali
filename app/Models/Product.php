@@ -111,15 +111,20 @@ class Product extends Model
 
     public function getFinalPriceAttribute()
     {
-        return $this->sale_price ?? $this->price;
+        // A live campaign the shop joined (and an admin approved) beats the list price
+        return $this->campaignPrice() ?? $this->sale_price ?? $this->price;
     }
 
     /**
-     * The "was" price shown struck through: sellers set it as compare_price.
+     * The "was" price shown struck through: sellers set it as compare_price. During a campaign the
+     * list price itself is the "was" price when no higher compare price is set.
      */
     public function getWasPriceAttribute(): ?float
     {
         $was = (float) ($this->compare_price ?? 0);
+        if ($this->campaignPrice() !== null) {
+            $was = max($was, (float) ($this->sale_price ?? $this->price));
+        }
 
         return $was > (float) $this->final_price ? $was : null;
     }
@@ -433,5 +438,50 @@ class Product extends Model
         $range = $this->variantPriceRange();
 
         return $range && $range[0] < $range[1] ? $range[0] : null;
+    }
+
+    // ---- Campaigns ------------------------------------------------------------------------
+
+    public function campaigns()
+    {
+        return $this->belongsToMany(Campaign::class, 'campaign_products')
+            ->withPivot(['seller_id', 'discount_percent', 'approved_at'])
+            ->withTimestamps();
+    }
+
+    public function campaignParticipations(): HasMany
+    {
+        return $this->hasMany(CampaignProduct::class);
+    }
+
+    /**
+     * The biggest discount (percent) from a live campaign this product is approved in, or 0.
+     */
+    public function campaignDiscountPercent(): float
+    {
+        return (float) (Campaign::liveDiscounts()[(int) $this->id] ?? 0);
+    }
+
+    /**
+     * The price after the live campaign discount, or null when no campaign applies.
+     */
+    public function campaignPrice(): ?float
+    {
+        $pct = $this->campaignDiscountPercent();
+        if ($pct <= 0) {
+            return null;
+        }
+
+        return $this->applyCampaignDiscount((float) ($this->sale_price ?? $this->price));
+    }
+
+    /**
+     * Take the live campaign discount off a price (used for variants priced on their own too).
+     */
+    public function applyCampaignDiscount(float $price): float
+    {
+        $pct = $this->campaignDiscountPercent();
+
+        return $pct > 0 ? round($price * (1 - $pct / 100), 2) : round($price, 2);
     }
 }

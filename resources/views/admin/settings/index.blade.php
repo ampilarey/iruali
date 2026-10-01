@@ -88,7 +88,28 @@
                         <input id="referral_referee_points" name="referral_referee_points" type="number" min="0" required class="{{ $field }}" value="{{ old('referral_referee_points', $settings['referral_referee_points']) }}">
                     </div>
                 </div>
+                <div class="mt-4 max-w-xs">
+                    <label for="points_expire_months" class="block text-sm font-medium text-gray-700">Points expire after (months)</label>
+                    <input id="points_expire_months" name="points_expire_months" type="number" min="0" max="120" class="{{ $field }}" value="{{ old('points_expire_months', $settings['points_expire_months'] ?? 0) }}">
+                    <p class="mt-1 text-xs text-gray-500">0 = never. Oldest points go first; customers are emailed a month before. Needs the scheduler cron. Report under <a href="{{ route('admin.rewards') }}" class="underline">Rewards</a>.</p>
+                </div>
                 <p class="mt-2 text-xs text-gray-500">Referral rewards are paid once, when a referred customer places their first order.</p>
+            </section>
+
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">Abandoned cart emails</h2>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <label class="flex items-start gap-3 text-sm text-gray-700">
+                        <input type="hidden" name="abandoned_cart_emails_enabled" value="0">
+                        <input type="checkbox" name="abandoned_cart_emails_enabled" value="1" @checked(old('abandoned_cart_emails_enabled', $settings['abandoned_cart_emails_enabled'] ?? 1)) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span><span class="font-medium text-gray-900">Send reminders</span><br><span class="text-xs text-gray-500">Signed-in customers who leave items in their cart get an email after 3 hours and again after 48 hours. Needs the scheduler cron.</span></span>
+                    </label>
+                    <div>
+                        <label for="abandoned_cart_voucher_percent" class="block text-sm font-medium text-gray-700">Voucher in the second email (%)</label>
+                        <input id="abandoned_cart_voucher_percent" name="abandoned_cart_voucher_percent" type="number" min="0" max="100" step="0.01" class="{{ $field }}" value="{{ old('abandoned_cart_voucher_percent', $settings['abandoned_cart_voucher_percent'] ?? 0) }}">
+                        <p class="mt-1 text-xs text-gray-500">0 sends no voucher. Otherwise the second email carries a single-use code for that customer, valid 7 days.</p>
+                    </div>
+                </div>
             </section>
 
             <section class="rounded-lg bg-white p-6 shadow">

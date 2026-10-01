@@ -278,6 +278,9 @@ class AdminController extends Controller
             'social_instagram' => 'sometimes|nullable|url|max:255',
             'social_tiktok' => 'sometimes|nullable|url|max:255',
             'social_x' => 'sometimes|nullable|url|max:255',
+            'abandoned_cart_emails_enabled' => 'sometimes|boolean',
+            'abandoned_cart_voucher_percent' => 'sometimes|required|numeric|min:0|max:100',
+            'points_expire_months' => 'sometimes|required|integer|min:0|max:120',
         ]);
 
         Setting::set($validated);

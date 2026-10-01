@@ -6,6 +6,9 @@
 
         <!-- Hero + side promos -->
         <section class="grid lg:grid-cols-3 gap-3 lg:gap-4">
+            @if(($heroCampaign ?? null))
+            <div class="lg:col-span-2">@include('campaigns._banner', ['campaign' => $heroCampaign, 'size' => 'hero'])</div>
+            @else
             <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-primary text-white p-6 sm:p-10 min-h-[15rem] lg:min-h-[20rem] flex flex-col justify-end">
                 <svg class="absolute -top-6 -end-10 w-44 h-44 opacity-30 sm:opacity-90 sm:top-auto sm:-bottom-6 sm:end-0 sm:w-64 sm:h-64 lg:w-80 lg:h-80 text-sun" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M20 110a80 80 0 01160 0z"/><rect x="10" y="122" width="180" height="12" rx="6" fill="#63C0B2"/><rect x="45" y="146" width="110" height="10" rx="5" fill="#9DD8CE"/></svg>
                 <div class="relative max-w-md">
@@ -18,6 +21,7 @@
                     </div>
                 </div>
             </div>
+            @endif
             <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
                 <a href="{{ route('deals') }}" class="group rounded-2xl bg-coral text-white p-5 flex flex-col justify-between min-h-[8rem] hover:bg-coral-hover">
                     <x-icon name="tag" class="w-7 h-7" />
@@ -35,6 +39,15 @@
                 </a>
             </div>
         </section>
+
+        <!-- Campaign strips (live sales and events) -->
+        @if(($stripCampaigns ?? collect())->isNotEmpty())
+            <section class="space-y-3">
+                @foreach($stripCampaigns as $campaign)
+                    @include('campaigns._banner', ['campaign' => $campaign, 'size' => 'strip'])
+                @endforeach
+            </section>
+        @endif
 
         <!-- Departments -->
         @if($departments->isNotEmpty())

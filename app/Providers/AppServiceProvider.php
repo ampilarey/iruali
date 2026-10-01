@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(CartService::class);
         $this->app->singleton(DiscountService::class);
         $this->app->singleton(OrderService::class);
+        $this->app->bind(\App\Support\SmokeFetcher::class, \App\Support\HttpSmokeFetcher::class);
     }
 
     /**

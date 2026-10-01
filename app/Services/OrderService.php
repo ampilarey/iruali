@@ -253,7 +253,7 @@ class OrderService
     public function awardRewards(Order $order): void
     {
         $user = $order->user;
-        if (! $user || $order->payment_status !== 'paid' || $order->status === 'cancelled') {
+        if (! $user || $user->isSmokeTest() || $order->payment_status !== 'paid' || $order->status === 'cancelled') {
             return;
         }
 

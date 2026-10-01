@@ -102,4 +102,18 @@ return [
         'endpoint' => env('SMS_ENDPOINT'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Post-deploy smoke test customer (php artisan iruali:smoke --place-order)
+    |--------------------------------------------------------------------------
+    |
+    | Created by `php artisan iruali:smoke --setup`; flagged is_smoke_test so it is
+    | left out of analytics, rewards and emails.
+    |
+    */
+    'smoke' => [
+        'email' => env('SMOKE_USER_EMAIL'),
+        'password' => env('SMOKE_USER_PASSWORD'),
+    ],
+
 ];

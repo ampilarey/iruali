@@ -209,4 +209,12 @@ class Order extends Model
     {
         return $this->isGuest() && $this->guest_token ? $this->guestUrl('receipt') : route('orders.receipt', $this);
     }
+
+    /**
+     * Leave out orders placed by the smoke-test customer (php artisan iruali:smoke --place-order).
+     */
+    public function scopeWithoutSmokeTests($query)
+    {
+        return $query->whereNotIn('orders.user_id', User::query()->where('is_smoke_test', true)->select('id'));
+    }
 }

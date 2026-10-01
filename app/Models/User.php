@@ -61,6 +61,7 @@ class User extends Authenticatable implements HasLocalePreference
         'referral_code', 'referred_by', 'referral_rewarded_at',
         'shop_logo', 'shop_banner', 'delivery_notes', 'ships_to_islands', 'onboarding_completed_at',
         'notification_preferences',
+        'is_smoke_test',
     ];
 
     /**
@@ -98,6 +99,7 @@ class User extends Authenticatable implements HasLocalePreference
         'ships_to_islands' => 'boolean',
         'onboarding_completed_at' => 'datetime',
         'notification_preferences' => 'array',
+        'is_smoke_test' => 'boolean',
     ];
 
     /**
@@ -525,5 +527,18 @@ class User extends Authenticatable implements HasLocalePreference
     public function defaultAddress(): ?Address
     {
         return $this->addresses()->where('is_default', true)->first() ?? $this->addresses()->orderBy('id')->first();
+    }
+
+    /**
+     * The post-deploy smoke test's customer (php artisan iruali:smoke): no emails, rewards or analytics.
+     */
+    public function isSmokeTest(): bool
+    {
+        return (bool) $this->is_smoke_test;
+    }
+
+    public function scopeWithoutSmokeTests($query)
+    {
+        return $query->where('users.is_smoke_test', false);
     }
 }

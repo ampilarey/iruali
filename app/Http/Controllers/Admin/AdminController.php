@@ -38,12 +38,12 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $stats = [
-            'total_users' => User::count(),
+            'total_users' => User::withoutSmokeTests()->count(),
             'total_sellers' => User::whereHas('roles', function ($q) {
                 $q->where('name', 'seller');
             })->count(),
             'total_products' => Product::count(),
-            'total_orders' => Order::count(),
+            'total_orders' => Order::withoutSmokeTests()->count(),
             'pending_sellers' => User::whereHas('roles', fn ($q) => $q->where('name', 'seller'))->where('seller_approved', false)->count(),
             'pending_products' => Product::where('is_active', false)->count(),
         ];
@@ -175,16 +175,16 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $completed = Order::where('status', '!=', 'cancelled');
+        $completed = Order::withoutSmokeTests()->where('status', '!=', 'cancelled');
 
         $stats = [
-            'total_users' => User::count(),
+            'total_users' => User::withoutSmokeTests()->count(),
             'total_sellers' => User::whereHas('roles', fn ($q) => $q->where('name', 'seller'))->count(),
             'total_products' => Product::count(),
-            'total_orders' => Order::count(),
+            'total_orders' => Order::withoutSmokeTests()->count(),
             'revenue' => (float) (clone $completed)->sum('total_amount'),
             'revenue_30d' => (float) (clone $completed)->where('created_at', '>=', now()->subDays(30))->sum('total_amount'),
-            'new_users_30d' => User::where('created_at', '>=', now()->subDays(30))->count(),
+            'new_users_30d' => User::withoutSmokeTests()->where('created_at', '>=', now()->subDays(30))->count(),
         ];
         $stats['average_order'] = ($count = (clone $completed)->count()) > 0 ? $stats['revenue'] / $count : 0;
 
@@ -202,7 +202,7 @@ class AdminController extends Controller
             return [$key => ['revenue' => (float) ($revenueByMonth[$key] ?? 0), 'users' => (int) ($usersByMonth[$key] ?? 0)]];
         });
 
-        $ordersByStatus = Order::selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $ordersByStatus = Order::withoutSmokeTests()->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
 
         $salesLines = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')

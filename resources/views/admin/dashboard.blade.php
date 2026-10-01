@@ -194,6 +194,9 @@
                     <a href="{{ route('admin.newsletter') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Newsletter
                     </a>
+                    <a href="{{ route('admin.sms') }}" class="bg-cyan-700 hover:bg-cyan-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        SMS
+                    </a>
                     <a href="{{ route('admin.settings') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Settings
                     </a>

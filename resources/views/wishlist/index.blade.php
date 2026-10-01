@@ -3,7 +3,7 @@
 @section('title', 'My Wishlist - iruali')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 lg:px-6">
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('My Wishlist') }}</h1>
@@ -25,11 +25,11 @@
                         </div>
                     @endif
                     @if($item->product->is_on_sale)
-                        <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
+                        <div class="absolute top-2 start-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
                             -{{ $item->product->discount_percentage }}%
                         </div>
                     @endif
-                    <div class="absolute top-2 right-2">
+                    <div class="absolute top-2 end-2">
                         <form action="{{ route('wishlist.remove', $item->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
@@ -49,7 +49,7 @@
                     </h3>
                     <p class="text-sm text-gray-600 mb-4">{{ Str::limit($item->product->description, 80) }}</p>
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2">
                             @if($item->product->is_on_sale)
                                 <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->product->final_price) }}</span>
                                 <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">{{ \App\Support\Money::format($item->product->price) }}</span>
@@ -76,7 +76,7 @@
             <div class="text-sm text-gray-600">
                 {{ $wishlistItems->count() }} item(s) in your wishlist
             </div>
-            <div class="flex space-x-4">
+            <div class="flex gap-4">
                 <form action="{{ route('wishlist.clear') }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')

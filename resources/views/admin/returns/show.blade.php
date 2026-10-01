@@ -18,7 +18,7 @@
                 <div class="sm:col-span-2"><p class="text-gray-500">Reason</p><p class="font-medium">{{ $return->reasonLabel() }}</p>@if($return->details)<p class="mt-1 whitespace-pre-line text-gray-700">{{ $return->details }}</p>@endif</div>
             </div>
 
-            <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="overflow-x-auto rounded-lg bg-white shadow">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500"><tr><th class="px-4 py-2 text-left">Item</th><th class="px-4 py-2 text-right">Returning</th><th class="px-4 py-2 text-right">Price</th><th class="px-4 py-2 text-right">Value</th></tr></thead>
                     <tbody class="divide-y divide-gray-100">

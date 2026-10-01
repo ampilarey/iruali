@@ -196,7 +196,7 @@
     </div>
 
     <!-- Section tabs -->
-    <div class="sticky top-[104px] lg:top-[115px] z-30 bg-white border-y border-gray-200 mt-4">
+    <div class="sticky top-[112px] lg:top-[118px] z-30 bg-white border-y border-gray-200 mt-4">
         <nav class="max-w-7xl mx-auto px-4 lg:px-6 flex gap-6 text-sm font-semibold overflow-x-auto scrollbar-hide" aria-label="{{ __('Product sections') }}">
             <a href="#overview" class="py-3 border-b-2 border-transparent hover:border-primary hover:text-primary whitespace-nowrap">{{ __('Overview') }}</a>
             <a href="#specs" class="py-3 border-b-2 border-transparent hover:border-primary hover:text-primary whitespace-nowrap">{{ __('Specs') }}</a>

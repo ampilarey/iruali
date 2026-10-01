@@ -82,7 +82,7 @@
                     <div class="border-b border-gray-100 px-5 py-4">
                         <h2 class="text-lg font-semibold text-gray-900">{{ $title }}</h2>
                     </div>
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{{ $col }}</th>
@@ -101,7 +101,7 @@
                                 <tr><td colspan="3" class="px-5 py-8 text-center text-sm text-gray-500">No sales yet.</td></tr>
                             @endforelse
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             @endforeach
         </div>

@@ -9,7 +9,7 @@
             <p class="text-sm text-gray-600">{{ $subscribers->total() }} {{ \Illuminate\Support\Str::plural('subscriber', $subscribers->total()) }} from the footer signup.</p>
             <a href="{{ route('admin.newsletter', ['export' => 'csv']) }}" class="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700">Download CSV</a>
         </div>
-        <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="bg-white shadow rounded-lg overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-600">
                     <tr><th class="text-start px-4 py-2 font-medium">Email</th><th class="text-start px-4 py-2 font-medium">Language</th><th class="text-start px-4 py-2 font-medium">Signed up</th><th class="px-4 py-2"><span class="sr-only">Actions</span></th></tr>

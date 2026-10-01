@@ -3,7 +3,7 @@
 @section('title', __('Track Your Order'))
 
 @section('content')
-<div class="max-w-md mx-auto py-12">
+<div class="max-w-md mx-auto px-4 lg:px-6 py-12">
     <div class="bg-white rounded-lg shadow-lg p-8">
         <h1 class="text-2xl font-bold mb-6 text-center">{{ __('Track Your Order') }}</h1>
         <form action="{{ route('order.track.submit') }}" method="POST">

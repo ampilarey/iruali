@@ -3,7 +3,7 @@
 @section('title', 'My Orders - iruali')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 lg:px-6">
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('My Orders') }}</h1>

@@ -3,7 +3,7 @@
 @section('title', __('Order Status'))
 
 @section('content')
-<div class="max-w-2xl mx-auto py-12">
+<div class="max-w-2xl mx-auto px-4 lg:px-6 py-12">
     <div class="bg-white rounded-lg shadow-lg p-8">
         <h1 class="text-2xl font-bold mb-6 text-center">{{ __('Order Status') }}</h1>
         <div class="mb-4">
@@ -20,7 +20,7 @@
         </div>
         <div class="mb-6">
             <span class="font-semibold">{{ __('Items:') }}</span>
-            <ul class="list-disc ml-6">
+            <ul class="list-disc ms-6">
                 @foreach($order->items as $item)
                     <li>{{ $item->product->name }} x{{ $item->quantity }}</li>
                 @endforeach

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Order;
-use App\Services\OrderService;
-use App\Services\DiscountService;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
+use App\Services\DiscountService;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 class OrderController extends BaseController
 {
     protected $orderService;
+
     protected $discountService;
 
     public function __construct(OrderService $orderService, DiscountService $discountService)
@@ -86,8 +87,9 @@ class OrderController extends BaseController
             'shipping_address' => 'required|string|max:500',
             'shipping_city' => 'required|string|max:100',
             'shipping_state' => 'required|string|max:100',
-            'shipping_zip' => 'required|string|max:20',
+            'shipping_zip' => 'nullable|string|max:20',
             'shipping_country' => 'required|string|max:100',
+            'shipping_phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/'],
             'billing_address' => 'nullable|array',
             // Card payment through BML is the only method; the customer pays from the order page.
             'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
@@ -99,19 +101,20 @@ class OrderController extends BaseController
         }
 
         $user = Auth::user();
-        
+
         $shippingData = [
             'shipping_address' => $request->shipping_address,
             'shipping_city' => $request->shipping_city,
             'shipping_state' => $request->shipping_state,
             'shipping_zip' => $request->shipping_zip,
             'shipping_country' => $request->shipping_country,
+            'shipping_phone' => $request->shipping_phone ? preg_replace('/\s+/', '', $request->shipping_phone) : null,
             'payment_method' => $request->payment_method,
         ];
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $this->sendError($result['message']);
         }
 
@@ -155,7 +158,7 @@ class OrderController extends BaseController
 
         $result = $this->discountService->applyLoyaltyPoints($request->points, $user, $cart);
 
-        if (!$result['valid']) {
+        if (! $result['valid']) {
             return $this->sendError($result['message']);
         }
 

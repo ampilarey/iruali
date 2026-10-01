@@ -44,11 +44,51 @@ class DhivehiTest extends TestCase
 
     public function test_every_translated_view_string_has_a_dhivehi_entry(): void
     {
+        $this->assertNoMissingDhivehi(glob(resource_path('views/{,*/,*/*/}*.blade.php'), GLOB_BRACE));
+    }
+
+    public function test_every_translated_string_in_customer_code_has_a_dhivehi_entry(): void
+    {
+        $this->assertNoMissingDhivehi(array_merge(
+            glob(app_path('Notifications/*.php')),
+            glob(app_path('Services/*.php')),
+            glob(app_path('Http/Controllers/Customer/*.php')),
+            glob(app_path('Http/Requests/*.php')),
+        ));
+    }
+
+    public function test_dhivehi_dates_and_validation_messages_are_translated(): void
+    {
+        $this->withSession(['locale' => 'dv'])->get('/')->assertOk();
+
+        $this->assertSame('dv', \Carbon\Carbon::getLocale());
+        $this->assertStringContainsString('މާރިޗު', \Carbon\Carbon::parse('2026-03-05')->translatedFormat('j F Y'));
+        $this->assertSame('އީމެއިލް ލާޒިމު.', __('validation.required', ['attribute' => __('validation.attributes.email')]));
+        $this->assertFileExists(lang_path('dv/pagination.php'));
+    }
+
+    public function test_dhivehi_mail_is_right_to_left(): void
+    {
+        app()->setLocale('dv');
+        $html = (string) view('vendor.mail.html.layout', ['slot' => 'ސަލާމް'])->render();
+        app()->setLocale('en');
+
+        $this->assertStringContainsString('dir="rtl"', $html);
+        $this->assertStringContainsString('direction: rtl', $html);
+    }
+
+    /**
+     * Every __('...') string (without parameters) in the given files must have a dv.json entry.
+     * Dotted keys ("products.name") live in the PHP translation files and are skipped.
+     */
+    private function assertNoMissingDhivehi(array $files): void
+    {
         $dv = json_decode(file_get_contents(lang_path('dv.json')), true);
         $missing = [];
 
-        foreach (glob(resource_path('views/{,*/,*/*/}*.blade.php'), GLOB_BRACE) as $file) {
-            preg_match_all("/__\\('((?:[^'\\\\]|\\\\.)*)'\\)/", file_get_contents($file), $m);
+        foreach ($files as $file) {
+            // __('...') and __('...', [...]) alike: the key is the first single-quoted argument.
+            preg_match_all("/__\\('((?:[^'\\\\]|\\\\.)*)'\\s*[,)]/", file_get_contents($file), $m);
             foreach ($m[1] as $key) {
                 $key = stripslashes($key);
                 // Dotted keys ("products.name") live in the PHP translation files.

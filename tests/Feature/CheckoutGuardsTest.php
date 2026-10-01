@@ -49,7 +49,7 @@ class CheckoutGuardsTest extends TestCase
     {
         return app(OrderService::class)->createOrderFromCart($this->customer, [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
-            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'bml',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml',
         ]);
     }
 

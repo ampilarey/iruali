@@ -3,7 +3,7 @@
 @php $field = 'mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500'; @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-[60vh] bg-gray-100 pb-12">
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
             <p class="text-xs font-medium uppercase tracking-wider text-primary-600">{{ __('Sell on iruali') }}</p>
@@ -30,7 +30,7 @@
         <div class="lg:col-span-2">
             @if($errors->any())
                 <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                    <ul class="list-disc pl-5">
+                    <ul class="list-disc ps-5">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach

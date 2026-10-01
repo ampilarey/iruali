@@ -8,10 +8,10 @@
     <div class="mb-8">
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Order #{{ $order->order_number }}</h1>
-                <p class="text-gray-600">Placed on {{ $order->created_at->format('F d, Y \a\t g:i A') }}</p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Order') }} #{{ $order->order_number }}</h1>
+                <p class="text-gray-600">{{ __('Placed on :date', ['date' => $order->created_at->translatedFormat('j F Y, H:i')]) }}</p>
             </div>
-            <div class="text-right">
+            <div class="text-end">
                 <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">
                     {{ __(ucfirst($order->status)) }}
                 </span>
@@ -48,7 +48,7 @@
                                 <p class="text-sm text-gray-700"><span class="font-medium">{{ __('Tracking') }}:</span> {{ $part->tracking_note }}@if($part->shipped_at) <span class="text-xs text-gray-500">({{ $part->shipped_at->format('j M') }})</span>@endif</p>
                             @endif
                             @foreach($shopItems as $item)
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-center gap-4">
                                 <div class="shrink-0">
                                     <img src="{{ $item->product?->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $item->product?->name }}" class="w-16 h-16 object-cover rounded bg-primary-50">
                                 </div>
@@ -56,7 +56,7 @@
                                     <h3 class="font-semibold text-gray-900">{{ $item->product?->name ?? __('Product') }}</h3>
                                     <p class="text-sm text-gray-600">{{ __('Quantity') }}: {{ $item->quantity }}</p>
                                 </div>
-                                <div class="text-right">
+                                <div class="text-end">
                                     <p class="font-semibold text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price * $item->quantity) }}</p>
                                     <p class="text-xs text-gray-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->price) }} {{ __('each') }}</p>
                                 </div>
@@ -90,17 +90,23 @@
                         <h3 class="font-semibold text-gray-900 mb-2">{{ __('Shipping Address') }}</h3>
                         <p class="text-gray-600">
                             {{ $order->shipping_address }}<br>
-                            {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_zip }}<br>
+                            {{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}<br>
                             {{ $order->shipping_country }}
                         </p>
                     </div>
+                    @if($order->shipping_phone)
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">{{ __('Phone for delivery') }}</h3>
+                            <p class="text-gray-600" dir="ltr"><a href="tel:{{ $order->shipping_phone }}" class="hover:underline">{{ $order->shipping_phone }}</a></p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
 
         <!-- Order Summary -->
         <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
+            <div class="bg-white rounded-lg shadow-md p-6 lg:sticky lg:top-32">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
                 <div class="space-y-3">
                     <div class="flex justify-between">
@@ -181,7 +187,7 @@
                 </div>
                 @endif
 
-                <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="mt-3 w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-50">{{ __('View / print receipt') }}</a>
+                <a href="{{ route('orders.receipt', $order) }}" target="_blank" rel="noopener" class="mt-3 w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-50">{{ __('View / print receipt') }}</a>
                 <p class="mt-4 text-xs text-gray-500">{{ __('Please keep a copy of your order confirmation, payment receipt and our policies for your records.') }} <a href="{{ route('policies.refunds') }}" class="text-primary hover:underline">{{ __('Returns, Refunds & Cancellations') }}</a></p>
 
                 <div class="mt-4">

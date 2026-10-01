@@ -150,6 +150,7 @@ class OrderService
             'shipping_state' => $shippingData['shipping_state'],
             'shipping_zip' => $shippingData['shipping_zip'],
             'shipping_country' => $shippingData['shipping_country'],
+            'shipping_phone' => $shippingData['shipping_phone'] ?? null,
         ]);
     }
 
@@ -403,6 +404,7 @@ class OrderService
                 'state' => $order->shipping_state,
                 'zip' => $order->shipping_zip,
                 'country' => $order->shipping_country,
+                'phone' => $order->shipping_phone,
             ],
         ];
     }

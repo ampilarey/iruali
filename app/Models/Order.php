@@ -31,6 +31,7 @@ class Order extends Model
         'shipping_state',
         'shipping_zip',
         'shipping_country',
+        'shipping_phone',
         'delivery_zone',
         'billing_address',
         'payment_method',

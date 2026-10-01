@@ -15,7 +15,7 @@
             @if($payout->note)<div class="sm:col-span-2"><p class="text-gray-500">Note</p><p>{{ $payout->note }}</p></div>@endif
             <div class="sm:col-span-2"><a href="{{ route('admin.payouts.show', [$payout, 'export' => 'csv']) }}" class="inline-block rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Download statement (CSV)</a></div>
         </div>
-        <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="overflow-x-auto rounded-lg bg-white shadow">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
                     <tr><th class="px-4 py-2 text-left">Order</th><th class="px-4 py-2 text-right">Items</th><th class="px-4 py-2 text-right">Commission</th><th class="px-4 py-2 text-right">Shop earns</th></tr>

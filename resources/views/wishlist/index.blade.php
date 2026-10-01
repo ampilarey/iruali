@@ -3,7 +3,7 @@
 @section('title', 'My Wishlist - iruali')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 lg:px-6">
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('My Wishlist') }}</h1>
@@ -25,15 +25,15 @@
                         </div>
                     @endif
                     @if($item->product->is_on_sale)
-                        <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
+                        <div class="absolute top-2 start-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-semibold">
                             -{{ $item->product->discount_percentage }}%
                         </div>
                     @endif
-                    <div class="absolute top-2 right-2">
+                    <div class="absolute top-2 end-2">
                         <form action="{{ route('wishlist.remove', $item->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700 transition duration-300">
+                            <button type="submit" class="text-red-500 hover:text-red-700 transition duration-300" aria-label="{{ __('Remove from wishlist') }}" title="{{ __('Remove from wishlist') }}">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
@@ -49,7 +49,7 @@
                     </h3>
                     <p class="text-sm text-gray-600 mb-4">{{ Str::limit($item->product->description, 80) }}</p>
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2">
                             @if($item->product->is_on_sale)
                                 <span class="text-lg font-bold text-primary-600 force-ltr" dir="ltr">{{ \App\Support\Money::format($item->product->final_price) }}</span>
                                 <span class="text-sm text-gray-500 line-through force-ltr" dir="ltr">{{ \App\Support\Money::format($item->product->price) }}</span>
@@ -76,7 +76,7 @@
             <div class="text-sm text-gray-600">
                 {{ $wishlistItems->count() }} item(s) in your wishlist
             </div>
-            <div class="flex space-x-4">
+            <div class="flex gap-4">
                 <form action="{{ route('wishlist.clear') }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')

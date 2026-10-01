@@ -8,7 +8,7 @@
         <h1 class="text-2xl font-bold">Vouchers</h1>
         <a href="{{ route('admin.vouchers.create') }}" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">+ New Voucher</a>
     </div>
-    <div class="bg-white rounded shadow p-6">
+    <div class="bg-white rounded shadow p-6 overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
                 <tr class="bg-gray-100">

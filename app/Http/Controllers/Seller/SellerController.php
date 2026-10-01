@@ -56,7 +56,15 @@ class SellerController extends Controller
         $order->load(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product']);
         $otherShops = $order->sellerOrders()->where('seller_id', '!=', Auth::id())->count();
 
-        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops'));
+        // The thread with the customer; opening the page marks it read
+        $messaging = app(\App\Services\MessagingService::class);
+        $conversation = $messaging->existingConversationFor($part)?->load('messages.sender', 'customer');
+        if ($conversation) {
+            $messaging->markRead($conversation, 'seller');
+        }
+        $messagingOpen = $messaging->isOpenFor($order);
+
+        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops', 'conversation', 'messagingOpen'));
     }
 
     /**

@@ -146,4 +146,12 @@ class Order extends Model
     {
         return $this->forceDelete();
     }
+
+    /**
+     * Message threads about this order (one per shop).
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
+    }
 }

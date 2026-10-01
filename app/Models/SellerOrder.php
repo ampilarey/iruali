@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * One shop's part of a customer order: its fulfilment status and tracking, and what the shop earns.
@@ -99,5 +100,13 @@ class SellerOrder extends Model
             'delivered' => 'bg-green-100 text-green-800',
             'cancelled' => 'bg-red-100 text-red-800',
         ][$this->status] ?? 'bg-gray-100 text-gray-800';
+    }
+
+    /**
+     * The message thread between the customer, this shop and iruali support about this part.
+     */
+    public function conversation(): HasOne
+    {
+        return $this->hasOne(Conversation::class, 'seller_order_id');
     }
 }

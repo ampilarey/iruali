@@ -283,8 +283,12 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $order->load(['user', 'items.product.seller']);
+        $order->load(['user', 'items.product.seller', 'sellerOrders.seller', 'sellerOrders.conversation.messages.sender', 'sellerOrders.conversation.customer']);
         $nextStatuses = $orderService->nextStatuses($order);
+
+        // Opening the order counts as reading its threads
+        $messaging = app(\App\Services\MessagingService::class);
+        $order->sellerOrders->each(fn ($part) => $part->conversation && $messaging->markRead($part->conversation, 'admin'));
 
         return view('admin.orders.show', compact('order', 'nextStatuses'));
     }

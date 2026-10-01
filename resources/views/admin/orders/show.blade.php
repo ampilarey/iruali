@@ -71,6 +71,26 @@
                         @endforeach
                     </div>
                 </div>
+                <div class="border-t border-gray-100 px-5 py-4 space-y-3">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Conversations</h3>
+                    @foreach($order->sellerOrders as $part)
+                        @include('messaging._thread', [
+                            'part' => $part,
+                            'conversation' => $part->conversation,
+                            'role' => 'admin',
+                            'action' => route('admin.orders.messages.store', [$order, $part]),
+                            'canReply' => true,
+                            'closedNote' => null,
+                        ])
+                        @if($part->conversation)
+                            <form method="POST" action="{{ route('admin.conversations.status', $part->conversation) }}" class="text-end -mt-1">
+                                @csrf
+                                <input type="hidden" name="status" value="{{ $part->conversation->isOpen() ? 'closed' : 'open' }}">
+                                <button class="text-xs text-gray-500 underline hover:text-gray-800">{{ $part->conversation->isOpen() ? 'Close this conversation' : 'Reopen this conversation' }}</button>
+                            </form>
+                        @endif
+                    @endforeach
+                </div>
                 <dl class="space-y-1 border-t border-gray-100 px-5 py-4 text-sm">
                     @if($order->voucher_discount > 0)
                         <div class="flex justify-between text-gray-600"><dt>Voucher {{ $order->voucher_code }}</dt><dd>−{{ \App\Support\Money::format($order->voucher_discount) }}</dd></div>

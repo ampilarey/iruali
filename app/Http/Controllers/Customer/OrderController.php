@@ -31,9 +31,14 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['items.product' => fn ($q) => $q->withTrashed()->with(['mainImage', 'seller']), 'sellerOrders.seller', 'sellerOrders.returnRequests.items.orderItem.product']);
+        $order->load(['items.product' => fn ($q) => $q->withTrashed()->with(['mainImage', 'seller']), 'sellerOrders.seller', 'sellerOrders.returnRequests.items.orderItem.product', 'sellerOrders.conversation.messages.sender']);
 
-        return view('orders.show', compact('order'));
+        // Seeing the page counts as reading the shops' messages
+        $messaging = app(\App\Services\MessagingService::class);
+        $order->sellerOrders->each(fn ($part) => $part->conversation && $messaging->markRead($part->conversation, 'customer'));
+        $messagingOpen = $messaging->isOpenFor($order);
+
+        return view('orders.show', compact('order', 'messagingOpen'));
     }
 
     public function store(StoreOrderRequest $request)

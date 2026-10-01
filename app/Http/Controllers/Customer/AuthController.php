@@ -211,6 +211,8 @@ class AuthController extends Controller
      */
     public function verifyPhoneOTP(Request $request)
     {
+        // The verification page posts phone_code; older clients post code
+        $request->merge(['phone_code' => $request->input('phone_code', $request->input('code'))]);
         $request->validate(['phone_code' => 'required|digits:6']);
         $user = $request->user();
 

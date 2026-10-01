@@ -64,6 +64,14 @@
                             @endforeach
                             @if($part)
                                 @include('orders._returns', ['part' => $part])
+                                @include('messaging._thread', [
+                                    'part' => $part,
+                                    'conversation' => $part->conversation,
+                                    'role' => 'customer',
+                                    'action' => route('orders.messages.store', [$order, $part]),
+                                    'canReply' => $messagingOpen && (! $part->conversation || $part->conversation->isOpen()),
+                                    'closedNote' => __('Messages about this order are closed: it is more than 90 days old and nothing is open on it.'),
+                                ])
                             @endif
                         </div>
                     @endforeach

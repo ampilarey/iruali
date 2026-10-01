@@ -194,6 +194,9 @@
                     <a href="{{ route('admin.newsletter') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Newsletter
                     </a>
+                    <a href="{{ route('admin.messages') }}" class="bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Messages @if(($messageBadges['admin'] ?? 0) > 0)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $messageBadges['admin'] }} unread</span>@endif
+                    </a>
                     <a href="{{ route('admin.sms') }}" class="bg-cyan-700 hover:bg-cyan-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         SMS
                     </a>

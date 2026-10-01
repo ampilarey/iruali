@@ -28,6 +28,16 @@
                 <span>Your total</span>
                 <span>{{ \App\Support\Money::format($order->items->sum(fn ($i) => $i->price * $i->quantity)) }}</span>
             </div>
+            <div class="border-t border-gray-100 px-5 py-4">
+                @include('messaging._thread', [
+                    'part' => $part,
+                    'conversation' => $conversation,
+                    'role' => 'seller',
+                    'action' => route('seller.orders.messages.store', [$order, $part]),
+                    'canReply' => $messagingOpen && (! $conversation || $conversation->isOpen()),
+                    'closedNote' => 'This conversation is closed.',
+                ])
+            </div>
         </div>
 
         <div class="space-y-6">

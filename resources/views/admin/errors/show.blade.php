@@ -13,7 +13,7 @@
                 </div>
                 @if($event->isResolved())
                     <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">Resolved {{ $event->resolved_at->format('d M Y H:i') }}</span>
-                @elseif(auth()->user()->hasRole('admin'))
+                @elseif(\App\Support\StaffAccess::can('admin.errors.resolve'))
                     <form method="POST" action="{{ route('admin.errors.resolve', $event) }}">
                         @csrf
                         <button type="submit" class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Mark resolved</button>

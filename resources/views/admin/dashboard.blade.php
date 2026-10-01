@@ -21,6 +21,7 @@
                 </div>
             </div>
         </div>
+        @include('admin.partials.nav')
     </div>
 
     <!-- Main Content -->
@@ -189,45 +190,80 @@
         <div class="bg-white shadow rounded-lg mb-8">
             <div class="px-4 py-5 sm:p-6">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Actions</h3>
+                @php $can = fn ($route) => \App\Support\StaffAccess::can($route); @endphp
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @if($can('admin.users'))
                     <a href="{{ route('admin.users') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Users
                     </a>
+                    @endif
+                    @if($can('admin.sellers'))
                     <a href="{{ route('admin.sellers') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Sellers
                     </a>
+                    @endif
+                    @if($can('admin.products'))
                     <a href="{{ route('admin.products') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Products
                     </a>
+                    @endif
+                    @if($can('admin.orders'))
                     <a href="{{ route('admin.orders') }}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Orders
                     </a>
+                    @endif
+                    @if($can('admin.vouchers.index'))
                     <a href="{{ route('admin.vouchers.index') }}" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Vouchers
                     </a>
+                    @endif
+                    @if($can('admin.analytics'))
                     <a href="{{ route('admin.analytics') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Analytics
                     </a>
+                    @endif
+                    @if($can('admin.reviews'))
                     @php $openQuestions = \App\Models\ProductQuestion::whereNull('answer')->count(); @endphp
                     <a href="{{ route('admin.reviews') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Reviews &amp; Questions @if($openQuestions)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openQuestions }} open</span>@endif
                     </a>
+                    @endif
+                    @if($can('admin.returns'))
                     @php $openReturns = \App\Models\ReturnRequest::whereIn('status', ['requested', 'approved'])->count() + \App\Models\Order::where('refund_status', 'due')->count(); @endphp
                     <a href="{{ route('admin.returns') }}" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Returns @if($openReturns)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openReturns }} open</span>@endif
                     </a>
+                    @endif
+                    @if($can('admin.payouts'))
                     <a href="{{ route('admin.payouts') }}" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Shop payouts
                     </a>
+                    @endif
+                    @if($can('admin.legal'))
                     <a href="{{ route('admin.legal') }}" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Legal pages
                     </a>
+                    @endif
+                    @if($can('admin.newsletter'))
                     <a href="{{ route('admin.newsletter') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Newsletter
                     </a>
+                    @endif
+                    @if($can('admin.settings'))
                     <a href="{{ route('admin.settings') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Settings
                     </a>
+                    @endif
+                    @if($can('admin.errors'))
+                    <a href="{{ route('admin.errors') }}" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Errors @if($n = \App\Models\ErrorEvent::unresolved()->count())<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $n }} open</span>@endif
+                    </a>
+                    @endif
+                    @if($can('admin.audit'))
+                    <a href="{{ route('admin.audit') }}" class="bg-cyan-700 hover:bg-cyan-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Audit log
+                    </a>
+                    @endif
                 </div>
             </div>
         </div>

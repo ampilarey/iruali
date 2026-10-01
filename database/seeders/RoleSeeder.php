@@ -37,7 +37,20 @@ class RoleSeeder extends Seeder
                 'display_name' => 'Customer',
                 'description' => 'Regular customer with basic shopping permissions',
                 'is_default' => true
-            ]
+            ],
+            // Staff roles: what each may open in /admin is in config/staff.php
+            [
+                'name' => 'support',
+                'display_name' => 'Support',
+                'description' => 'Customer support: orders, returns, moderation, users (read-only)',
+                'is_default' => false,
+            ],
+            [
+                'name' => 'finance',
+                'display_name' => 'Finance',
+                'description' => 'Finance: shop payouts, refunds, analytics, errors and the audit log',
+                'is_default' => false,
+            ],
         ];
 
         foreach ($roles as $role) {

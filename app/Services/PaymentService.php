@@ -144,6 +144,7 @@ class PaymentService
             'refund_amount' => round($due + $amount, 2),
             'refund_reason' => $reason,
         ])->save();
+        \App\Support\Audit::record('refund.flagged', $order, ['amount' => $amount, 'total_due' => $order->refund_amount, 'reason' => $reason, 'order_number' => $order->order_number]);
 
         DB::afterCommit(function () use ($order) {
             try {
@@ -166,6 +167,7 @@ class PaymentService
         }
 
         $order->forceFill(['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()])->save();
+        \App\Support\Audit::record('refund.recorded', $order, ['amount' => $order->refund_amount, 'reference' => $reference, 'order_number' => $order->order_number]);
 
         try {
             $order->user?->notify(new RefundRecorded($order));

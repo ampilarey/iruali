@@ -97,6 +97,9 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $user->updateLoginTracking($request->ip());
         NotificationService::loginSuccess();
+        if ($user->isStaff()) {
+            \App\Support\Audit::record('staff.login', $user, ['two_factor' => false]);
+        }
 
         // Unverified emails get a reminder banner on every page; they are not locked out.
         return $this->redirectBasedOnRole($user);
@@ -133,6 +136,9 @@ class AuthController extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
         $user->updateLoginTracking($request->ip());
+        if ($user->isStaff()) {
+            \App\Support\Audit::record('staff.login', $user, ['two_factor' => true]);
+        }
 
         return $this->redirectBasedOnRole($user);
     }
@@ -215,7 +221,7 @@ class AuthController extends Controller
     protected function redirectBasedOnRole(User $user)
     {
         $default = match (true) {
-            $user->isAdmin() => route('admin.dashboard'),
+            $user->isStaff() => route('admin.dashboard'),
             $user->isSeller() => route('seller.dashboard'),
             default => route('home'),
         };

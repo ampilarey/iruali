@@ -38,6 +38,7 @@ class LegalPagesController extends Controller
 
         $data = $request->validate($rules);
         Setting::set(array_map(fn ($v) => $v === null ? '' : trim($v), $data));
+        \App\Support\Audit::record('legal.saved', null, ['pages' => array_keys($data)]);
 
         return redirect()->route('admin.legal')->with('success', 'Legal pages saved.');
     }

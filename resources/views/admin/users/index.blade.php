@@ -68,7 +68,21 @@
                                     {{ $user->created_at->format('M d, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                                    @if(\App\Support\StaffAccess::can('admin.users.role') && ! $user->hasRole('admin') && $user->id !== auth()->id())
+                                        {{-- Staff role: support / finance (config/staff.php says what each may open) --}}
+                                        <form method="POST" action="{{ route('admin.users.role', $user) }}" class="flex items-center gap-2">
+                                            @csrf
+                                            @php $staffRole = \App\Support\StaffAccess::staffRoles($user)[0] ?? 'none'; @endphp
+                                            <select name="role" class="rounded-lg border-gray-300 text-sm" aria-label="Staff role for {{ $user->name }}">
+                                                <option value="none" @selected($staffRole === 'none')>Not staff</option>
+                                                <option value="support" @selected($staffRole === 'support')>Support</option>
+                                                <option value="finance" @selected($staffRole === 'finance')>Finance</option>
+                                            </select>
+                                            <button type="submit" class="text-indigo-600 hover:text-indigo-900">Save</button>
+                                        </form>
+                                    @elseif($user->hasRole('admin'))
+                                        <span class="text-gray-400">Admin</span>
+                                    @endif
                                 </td>
                             </tr>
                             @empty

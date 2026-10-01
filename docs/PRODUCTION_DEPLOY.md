@@ -64,6 +64,22 @@ The admin dashboard shows the same checks (offline, refreshed every 5 minutes) i
 works from a heartbeat the cron writes every minute; if it says the scheduler has not run,
 nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either.
 
+## Staff roles, 2FA and the audit log
+
+- Roles: **admin** (everything), **support** (dashboard, inbox, orders, returns, moderation,
+  users read-only) and **finance** (dashboard, inbox, payouts, refunds, analytics, errors
+  read-only, audit log). What each may open is the route list in `config/staff.php`; the
+  `StaffAccess` middleware on the admin group enforces it and the admin nav hides the rest.
+  Admins give someone support/finance from **Admin → Users**.
+- Every staff member must have **two-step sign-in** on (`STAFF_REQUIRE_2FA`, default true);
+  without it, `/admin` redirects to My Account → Security. Set `STAFF_REQUIRE_2FA=false`
+  only on a development machine.
+- **Audit log** at **Admin → Audit log** (`/admin/audit`, admin + finance): order status
+  changes and cancellations, refunds flagged/recorded, payouts, seller approve/reject/suspend,
+  product approvals, settings and legal pages saved, vouchers, role changes and staff
+  sign-ins, with who, when, IP and the changes. Code records one with
+  `Audit::record('action', $model, [...])`.
+
 ## Backups: off the server, and tested
 
 - Nightly `backup:run --only-db` (02:00) writes to every disk in `BACKUP_DISKS`

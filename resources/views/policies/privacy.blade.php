@@ -40,7 +40,7 @@
     <li>order confirmations, status updates and receipts;</li>
     <li>our newsletter and offers, only if you subscribed.</li>
 </ul>
-<p><strong>Opt out:</strong> to stop the newsletter or offers, contact us using the details above. Order and security messages are part of the service and continue while you have an account.</p>
+<p><strong>Opt out:</strong> to stop the newsletter or offers, use the unsubscribe link in any newsletter or contact us using the details above. Order and security messages are part of the service and continue while you have an account.</p>
 
 <h2>5. Card payment security</h2>
 <p>All card payments are processed exclusively on Bank of Maldives' (BML) secure payment page. {{ $name }} does not store, view, process or retain any card details (card number, CVV, expiry) on its servers. Card data is handled entirely by BML using SSL/TLS encryption. See <a href="{{ route('policies.security') }}">Payment Security</a>.</p>

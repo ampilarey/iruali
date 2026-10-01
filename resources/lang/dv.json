@@ -778,5 +778,10 @@
     "Remove from wishlist": "ވިޝްލިސްޓުން ނަގާ",
     "Apply filters": "ފިލްޓަރުތައް ބޭނުންކުރޭ",
     ":count suggestions, use the down arrow to browse them": ":count ހުށަހެޅުން، ބައްލަވަން ތިރީ ތީރު ބޭނުންކުރައްވާ",
-    "Search suggestions": "ހޯދުމުގެ ހުށަހެޅުންތައް"
+    "Search suggestions": "ހޯދުމުގެ ހުށަހެޅުންތައް",
+    "Unsubscribed": "ސަބްސްކްރިޕްޝަން ކެންސަލްކުރެވިއްޖެ",
+    "You are unsubscribed": "ސަބްސްކްރިޕްޝަން ކެންސަލްކުރެވިއްޖެ",
+    ":email will not get our newsletter or offers any more. Order and account emails continue as part of the service.": ":email އަށް ދެން ނިއުސްލެޓަރާއި އޮފަރުތައް ނުފޮނުވާނެ. އޯޑަރާއި އެކައުންޓުގެ އީމެއިލްތައް ޚިދުމަތުގެ ބައެއްގެ ގޮތުން ކުރިއަށްދާނެ.",
+    "Back to shopping": "ވިޔަފާރިއަށް އަނބުރާ",
+    "Subscribe again": "އަލުން ސަބްސްކްރައިބްކުރޭ"
 }

@@ -54,6 +54,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::redirect('/contact', '/about', 301);
     Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
     Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
+    Route::get('/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('signed')->whereNumber('subscriber');
     Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');
     Route::post('/compare/{product}', [\App\Http\Controllers\Customer\CompareController::class, 'toggle'])->name('compare.toggle');
     Route::delete('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'clear'])->name('compare.clear');

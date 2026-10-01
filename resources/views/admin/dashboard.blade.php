@@ -174,6 +174,9 @@
                     <a href="{{ route('admin.vouchers.index') }}" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Vouchers
                     </a>
+                    <a href="{{ route('admin.campaigns.index') }}" class="bg-fuchsia-700 hover:bg-fuchsia-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Campaigns
+                    </a>
                     <a href="{{ route('admin.analytics') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Analytics
                     </a>

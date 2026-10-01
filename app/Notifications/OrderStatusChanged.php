@@ -3,12 +3,21 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
-class OrderStatusChanged extends Notification
+class OrderStatusChanged extends Notification implements ShouldQueue
 {
-    public function __construct(public Order $order) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public Order $order)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

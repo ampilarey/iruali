@@ -26,7 +26,9 @@ class AdminController extends Controller
      */
     private function checkAdminRole()
     {
-        if (! auth()->check() || ! auth()->user()->hasRole('admin')) {
+        // Staff (admin, support, finance): which of these pages each role may open is enforced
+        // per route by the StaffAccess middleware on the admin group (config/staff.php).
+        if (! auth()->check() || ! auth()->user()->isStaff()) {
             abort(403, 'Access denied. Admin role required.');
         }
     }
@@ -52,7 +54,10 @@ class AdminController extends Controller
             ->where('seller_approved', false)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers'));
+        // "System status" panel: the same checks as php artisan iruali:ready (offline, cached 5 minutes), admins only
+        $readyChecks = auth()->user()->hasRole('admin') ? \App\Support\ReadyChecks::cached() : [];
+
+        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers', 'readyChecks'));
     }
 
     public function sellers()
@@ -80,6 +85,7 @@ class AdminController extends Controller
             'seller_approved' => true,
             'seller_approved_at' => now(),
         ]);
+        \App\Support\Audit::record('seller.approved', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller approved successfully.');
     }
@@ -98,6 +104,7 @@ class AdminController extends Controller
             'seller_approved' => false,
             'seller_approved_at' => null,
         ]);
+        \App\Support\Audit::record('seller.rejected', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller application rejected.');
     }
@@ -113,6 +120,7 @@ class AdminController extends Controller
         $seller = User::findOrFail($id);
         $seller->forceFill(['status' => 'suspended'])->save(); // status is deliberately not mass-assignable
         Product::where('seller_id', $seller->id)->update(['is_active' => false]);
+        \App\Support\Audit::record('seller.suspended', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller suspended and their products deactivated.');
     }
@@ -141,6 +149,7 @@ class AdminController extends Controller
 
         $product = Product::findOrFail($id);
         $product->update(['is_active' => true, 'approved_at' => $product->approved_at ?? now()]);
+        \App\Support\Audit::record('product.approved', $product, ['name' => $product->name]);
 
         return redirect()->back()->with('success', 'Product approved successfully.');
     }
@@ -253,6 +262,7 @@ class AdminController extends Controller
         ]);
 
         Setting::set($validated);
+        \App\Support\Audit::record('settings.saved', null, ['keys' => array_keys($validated)]);
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');
     }

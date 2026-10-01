@@ -21,6 +21,7 @@
                 </div>
             </div>
         </div>
+        @include('admin.partials.nav')
     </div>
 
     <!-- Main Content -->
@@ -154,49 +155,134 @@
             </div>
         </div>
 
+        @if(! empty($readyChecks))
+        <!-- System status: the same checks as `php artisan iruali:ready` (offline, cached for 5 minutes) -->
+        @php $readyFailures = \App\Support\ReadyChecks::failures($readyChecks); @endphp
+        <div class="bg-white shadow rounded-lg mb-8" id="system-status">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">System status</h3>
+                    <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $readyFailures ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                        {{ $readyFailures ? 'Not ready: '.$readyFailures.' problem(s)' : 'Ready' }}
+                    </span>
+                </div>
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach($readyChecks as $check)
+                        @php $tone = ['pass' => 'bg-green-500', 'warn' => 'bg-amber-500', 'fail' => 'bg-red-500', 'skip' => 'bg-gray-300'][$check['status']] ?? 'bg-gray-300'; @endphp
+                        <li class="flex items-start gap-3 py-2" data-status="{{ $check['status'] }}">
+                            <span class="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full {{ $tone }}" title="{{ $check['status'] }}"></span>
+                            <div class="min-w-0 flex-1">
+                                <span class="font-medium text-gray-900">{{ $check['name'] }}</span>
+                                <span class="text-gray-600">— {{ $check['detail'] }}</span>
+                                @if($check['status'] !== 'pass' && $check['fix'])
+                                    <p class="text-xs text-gray-500">{{ $check['fix'] }}</p>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+                <p class="mt-3 text-xs text-gray-400">Refreshes every 5 minutes. Network checks run from the server with <code>php artisan iruali:ready</code>.</p>
+            </div>
+        </div>
+        @endif
+
+        <!-- Needs attention: the admin inbox rows this person may open (App\Support\AdminInbox) -->
+        @php $inboxItems = array_filter(\App\Support\AdminInbox::items(), fn ($i) => $i['count'] > 0); @endphp
+        @if($inboxItems)
+        <div class="bg-white shadow rounded-lg mb-8" id="needs-attention">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Needs attention</h3>
+                    <a href="{{ route('admin.inbox') }}" class="text-sm font-medium text-primary-700 hover:underline">Open inbox</a>
+                </div>
+                <ul class="flex flex-wrap gap-2 text-sm">
+                    @foreach($inboxItems as $item)
+                        @php $tone = ['danger' => 'bg-red-100 text-red-800', 'warn' => 'bg-amber-100 text-amber-800', 'info' => 'bg-blue-100 text-blue-800'][$item['severity']]; @endphp
+                        <li><a href="{{ $item['url'] }}" class="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 hover:bg-gray-100" data-inbox="{{ $item['key'] }}">{{ $item['label'] }} <span class="rounded-full px-2 text-xs font-semibold {{ $tone }}">{{ $item['count'] }}</span></a></li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @endif
+
         <!-- Quick Actions -->
         <div class="bg-white shadow rounded-lg mb-8">
             <div class="px-4 py-5 sm:p-6">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Actions</h3>
+                @php $can = fn ($route) => \App\Support\StaffAccess::can($route); @endphp
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @if($can('admin.users'))
                     <a href="{{ route('admin.users') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Users
                     </a>
+                    @endif
+                    @if($can('admin.sellers'))
                     <a href="{{ route('admin.sellers') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Sellers
                     </a>
+                    @endif
+                    @if($can('admin.products'))
                     <a href="{{ route('admin.products') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Products
                     </a>
+                    @endif
+                    @if($can('admin.orders'))
                     <a href="{{ route('admin.orders') }}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Orders
                     </a>
+                    @endif
+                    @if($can('admin.vouchers.index'))
                     <a href="{{ route('admin.vouchers.index') }}" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Vouchers
                     </a>
+                    @endif
+                    @if($can('admin.analytics'))
                     <a href="{{ route('admin.analytics') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Analytics
                     </a>
+                    @endif
+                    @if($can('admin.reviews'))
                     @php $openQuestions = \App\Models\ProductQuestion::whereNull('answer')->count(); @endphp
                     <a href="{{ route('admin.reviews') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Reviews &amp; Questions @if($openQuestions)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openQuestions }} open</span>@endif
                     </a>
+                    @endif
+                    @if($can('admin.returns'))
                     @php $openReturns = \App\Models\ReturnRequest::whereIn('status', ['requested', 'approved'])->count() + \App\Models\Order::where('refund_status', 'due')->count(); @endphp
                     <a href="{{ route('admin.returns') }}" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Returns @if($openReturns)<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $openReturns }} open</span>@endif
                     </a>
+                    @endif
+                    @if($can('admin.payouts'))
                     <a href="{{ route('admin.payouts') }}" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Shop payouts
                     </a>
+                    @endif
+                    @if($can('admin.legal'))
                     <a href="{{ route('admin.legal') }}" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Legal pages
                     </a>
+                    @endif
+                    @if($can('admin.newsletter'))
                     <a href="{{ route('admin.newsletter') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Newsletter
                     </a>
+                    @endif
+                    @if($can('admin.settings'))
                     <a href="{{ route('admin.settings') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Settings
                     </a>
+                    @endif
+                    @if($can('admin.errors'))
+                    <a href="{{ route('admin.errors') }}" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Errors @if($n = \App\Models\ErrorEvent::unresolved()->count())<span class="ms-1 rounded-full bg-white/25 px-2 text-xs">{{ $n }} open</span>@endif
+                    </a>
+                    @endif
+                    @if($can('admin.audit'))
+                    <a href="{{ route('admin.audit') }}" class="bg-cyan-700 hover:bg-cyan-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Audit log
+                    </a>
+                    @endif
                 </div>
             </div>
         </div>

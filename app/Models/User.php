@@ -417,4 +417,17 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
     }
+
+    /**
+     * Staff can open the admin area: admin, support or finance (config/staff.php says which pages).
+     */
+    public function isStaff(): bool
+    {
+        return \App\Support\StaffAccess::staffRoles($this) !== [];
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class);
+    }
 }

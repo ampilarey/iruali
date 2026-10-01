@@ -362,6 +362,7 @@ class OrderService
             return false;
         }
 
+        $before = $order->status;
         DB::transaction(function () use ($order, $status) {
             if ($status === 'cancelled') {
                 $this->reverseOrder($order);
@@ -377,6 +378,7 @@ class OrderService
             app(FulfilmentService::class)->cascadeFromOrder($order, $status);
         });
 
+        \App\Support\Audit::record($status === 'cancelled' ? 'order.cancelled' : 'order.status', $order, ['from' => $before, 'to' => $status, 'order_number' => $order->order_number]);
         app(OrderNotifier::class)->statusChanged($order->fresh());
 
         return true;

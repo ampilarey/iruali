@@ -24,10 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'staff' => \App\Http\Middleware\StaffAccess::class,      // admin area: role → allowed routes (config/staff.php)
+            'staff.2fa' => \App\Http\Middleware\RequireTwoFactor::class, // staff must have two-step sign-in on
         ]);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Count every reported exception in error_events and alert on payment errors (app/Support/ErrorTracker.php)
+        $exceptions->report(fn (\Throwable $e) => \App\Support\ErrorTracker::record($e));
     })->create();

@@ -4,15 +4,24 @@ namespace App\Notifications;
 
 use App\Models\ReturnRequest;
 use App\Support\Money;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * A customer asked to return items (sent to the shop and to iruali's contact email).
  */
-class ReturnRequested extends Notification
+class ReturnRequested extends Notification implements ShouldQueue
 {
-    public function __construct(public ReturnRequest $request) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public ReturnRequest $request)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

@@ -123,6 +123,7 @@ class PayoutService
 
             SellerOrder::whereIn('id', $parts->pluck('id'))->update(['payout_id' => $payout->id]);
             SellerAdjustment::whereIn('id', $adjustments->pluck('id'))->update(['payout_id' => $payout->id]);
+            \App\Support\Audit::record('payout.created', $payout, ['seller_id' => $seller->id, 'shop' => $seller->business_name ?: $seller->name, 'amount' => $amount, 'reference' => $reference, 'parts' => $parts->count()]);
 
             return $payout;
         });

@@ -806,5 +806,6 @@
     ":count product updated.|:count products updated.": ":count ތަކެތި އަދާހަމަކުރެވިއްޖެ.|:count ތަކެތި އަދާހަމަކުރެވިއްޖެ.",
     "Product duplicated. Check the copy and submit it for approval.": "ތަކެތި ކޮޕީކުރެވިއްޖެ. ކޮޕީ ޗެކްކޮށް އެޕްރޫވަލްއަށް ހުށަހަޅުއްވާ.",
     "percentage": "ޕަސެންޓޭޖް",
-    "stock": "ސްޓޮކް"
+    "stock": "ސްޓޮކް",
+    "Staff accounts must use two-step sign-in. Set it up here before opening the admin area.": "ސްޓާފް އެކައުންޓުތަކުން ދެ މަރުހަލާގެ ސައިން އިން ބޭނުންކުރަން ޖެހޭނެ. އެޑްމިން ބައި ހުޅުވުމުގެ ކުރިން މިތަނުން އެ ސެޓްކުރައްވާ."
 }

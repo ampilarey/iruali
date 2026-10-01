@@ -4,16 +4,25 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use App\Support\Money;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
-class NewSellerOrder extends Notification
+class NewSellerOrder extends Notification implements ShouldQueue
 {
+    use Queueable, SerializesModels;
+
     /**
      * @param  Collection  $items  the order items that belong to this seller
      */
-    public function __construct(public Order $order, public Collection $items) {}
+    public function __construct(public Order $order, public Collection $items)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

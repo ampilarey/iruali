@@ -3,15 +3,24 @@
 namespace App\Notifications;
 
 use App\Models\OTP;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * The 6-digit code a customer types on the "verify your email" page.
  */
-class VerifyEmailCode extends Notification
+class VerifyEmailCode extends Notification implements ShouldQueue
 {
-    public function __construct(public OTP $otp) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public OTP $otp)
+    {
+        // Sent only once the surrounding database transaction has committed
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

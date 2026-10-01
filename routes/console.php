@@ -12,6 +12,9 @@ Schedule::command('orders:cancel-unpaid-card')->hourly()->withoutOverlapping();
 Schedule::command('backup:clean')->dailyAt('01:30');
 Schedule::command('backup:run --only-db')->dailyAt('02:00')->withoutOverlapping();
 
+// Once a month, prove the backups restore: newest backup into DB_DRILL_DATABASE, counts compared, report mailed
+Schedule::command('backup:restore-drill')->monthlyOn(1, '04:00')->withoutOverlapping();
+
 // Expired API tokens
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 

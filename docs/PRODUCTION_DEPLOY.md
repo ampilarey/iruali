@@ -64,6 +64,22 @@ The admin dashboard shows the same checks (offline, refreshed every 5 minutes) i
 works from a heartbeat the cron writes every minute; if it says the scheduler has not run,
 nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either.
 
+## Backups: off the server, and tested
+
+- Nightly `backup:run --only-db` (02:00) writes to every disk in `BACKUP_DISKS`
+  (comma list; default `local` = `storage/app/private`). Set `BACKUP_DISKS=local,s3` and the
+  `AWS_*` keys in `.env` to also keep a copy off-site. The `s3` disk works with AWS S3,
+  **Backblaze B2** (`AWS_ENDPOINT=https://s3.<region>.backblazeb2.com`) and **MinIO**
+  (`AWS_USE_PATH_STYLE_ENDPOINT=true`). Backup failures are mailed to `ALERTS_EMAIL`.
+- `php artisan iruali:ready` fails when the newest backup on the first disk is older than 48 h.
+- **Restore drill**, 1st of every month at 04:00 (`php artisan backup:restore-drill`): the
+  newest backup is downloaded, unzipped, its SQL dump restored into `DB_DRILL_DATABASE`
+  (never the live database; created if missing), the orders/users/products row counts are
+  compared with the live database, the drill tables are dropped and a pass/fail report is
+  mailed to `ALERTS_EMAIL`. Set `DB_DRILL_DATABASE=iruali_drill` in `.env` and give the DB
+  user `CREATE` on it (in cPanel: create the database and assign the same user).
+  Run it by hand after changing anything about backups.
+
 ## Error alerts (no external service needed)
 
 Every reported exception is counted in the `error_events` table, one row per place in the

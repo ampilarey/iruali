@@ -29,7 +29,7 @@ class ReadyCheckTest extends TestCase
         $this->assertSame('fail', $checks['Sessions']['status']);       // SESSION_DRIVER=array in tests
         $this->assertSame('warn', $checks['Queue']['status']);          // sync outside production
         $this->assertSame('fail', $checks['BML Connect']['status']);
-        $this->assertSame('skip', $checks['SMS']['status']);
+        $this->assertSame('warn', $checks['SMS']['status']); // SMS_DRIVER=log
         $this->assertSame('pass', $checks['Uploads']['status']);
         $this->assertSame('pass', $checks['App key']['status']);
         $this->assertSame('pass', $checks['Timezone']['status']);

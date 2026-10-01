@@ -3,14 +3,22 @@
 namespace App\Notifications;
 
 use App\Models\OTP;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * The 6-digit code texted to a customer to verify their mobile number.
  */
-class VerifyPhoneCode extends Notification
+class VerifyPhoneCode extends Notification implements ShouldQueue
 {
-    public function __construct(public OTP $otp) {}
+    use Queueable, SerializesModels;
+
+    public function __construct(public OTP $otp)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

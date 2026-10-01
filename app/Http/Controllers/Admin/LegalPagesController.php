@@ -18,6 +18,7 @@ class LegalPagesController extends Controller
         'delivery' => ['Delivery Policy', 'policies.delivery'],
         'privacy' => ['Privacy Policy', 'policies.privacy'],
         'security' => ['Payment Security', 'policies.security'],
+        'seller_terms' => ['Seller Terms', 'policies.seller_terms'],
     ];
 
     public function edit()

@@ -33,3 +33,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/payout-batches/{batch}/paid', [PayoutBatchController::class, 'markPaid'])->name('payout-batches.paid');
     Route::post('/payout-batches/{batch}/cancel', [PayoutBatchController::class, 'cancel'])->name('payout-batches.cancel');
 });
+
+// Seller terms: the legal page every shop agrees to (public, editable under Admin → Legal pages)
+Route::view('/seller-terms', 'policies.seller-terms')->name('policies.seller_terms');

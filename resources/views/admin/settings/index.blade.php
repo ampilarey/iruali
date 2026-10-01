@@ -162,6 +162,32 @@
                 </div>
             </section>
 
+            <section class="rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('Marketplace / seller terms') }}</h2>
+                <p class="mt-1 text-sm text-gray-500">{{ __('Shown to shops on the Seller Terms page and in the Seller Centre, and used to flag late shipments. The commission rate is under Payments above.') }}</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="payout_schedule" class="block text-sm font-medium text-gray-700">{{ __('Payout schedule') }}</label>
+                        <select id="payout_schedule" name="payout_schedule" class="{{ $field }}">
+                            @foreach(\App\Support\SellerTerms::SCHEDULES as $schedule)
+                                <option value="{{ $schedule }}" @selected(old('payout_schedule', $settings['payout_schedule'] ?? 'weekly') === $schedule)>{{ ucfirst($schedule) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="payout_day" class="block text-sm font-medium text-gray-700">{{ __('Payout day') }}</label>
+                        <input id="payout_day" name="payout_day" maxlength="30" class="{{ $field }}" placeholder="Sunday" value="{{ old('payout_day', $settings['payout_day'] ?? '') }}">
+                        <p class="mt-1 text-xs text-gray-500">{{ __('A weekday for weekly or fortnightly payouts, or a date for monthly ones (e.g. "the 5th").') }}</p>
+                    </div>
+                    <div>
+                        <label for="late_shipment_days" class="block text-sm font-medium text-gray-700">{{ __('Days to ship after payment') }}</label>
+                        <input id="late_shipment_days" name="late_shipment_days" type="number" min="0" max="60" class="{{ $field }}" value="{{ old('late_shipment_days', $settings['late_shipment_days'] ?? 3) }}">
+                        <p class="mt-1 text-xs text-gray-500">{{ __('Parts shipped later than this count as late on performance pages.') }}</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-xs text-gray-500">{{ __('The return window is under Business details above. The Seller Terms page fills in these values through placeholders; edit its wording under Legal pages.') }}</p>
+            </section>
+
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
             </div>

@@ -78,7 +78,7 @@
                 <div class="border-t border-gray-100 pt-6">
                     <label class="flex items-start gap-3 text-sm text-gray-700">
                         <input type="checkbox" name="agree_seller_terms" value="1" required class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600" @checked(old('agree_seller_terms'))>
-                        <span>{{ __('I confirm the details above are accurate and agree to iruali\'s seller terms, including that listings are reviewed before going live.') }}</span>
+                        <span>{{ __('I confirm the details above are accurate and agree to iruali\'s seller terms, including that listings are reviewed before going live.') }} <a href="{{ route('policies.seller_terms') }}" target="_blank" rel="noopener" class="font-medium text-primary-600 hover:underline">{{ __('Seller Terms') }}</a></span>
                     </label>
                 </div>
 

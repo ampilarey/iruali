@@ -20,3 +20,6 @@ Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))
         ->each(fn ($cart) => $cart->delete());
 })->dailyAt('03:00')->name('prune-guest-carts');
+
+// Shops get one low-stock email a day, in the morning Maldives time (only when something is low)
+Schedule::command('seller:low-stock-digest')->dailyAt('08:00')->timezone('Indian/Maldives')->withoutOverlapping();

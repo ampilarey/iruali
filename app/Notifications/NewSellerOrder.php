@@ -4,12 +4,20 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use App\Support\Money;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
-class NewSellerOrder extends Notification
+/**
+ * A shop has a new order to pack (queued; shops can turn it off under Settings → Notifications).
+ */
+class NewSellerOrder extends Notification implements ShouldQueue
 {
+    use Queueable, SerializesModels;
+
     /**
      * @param  Collection  $items  the order items that belong to this seller
      */
@@ -17,6 +25,10 @@ class NewSellerOrder extends Notification
 
     public function via(object $notifiable): array
     {
+        if (method_exists($notifiable, 'wantsNotification') && ! $notifiable->wantsNotification('new_order')) {
+            return [];
+        }
+
         return ['mail'];
     }
 

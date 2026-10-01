@@ -793,5 +793,21 @@
     "I ship to other islands (not only my own island)": "އެހެން ރަށްރަށަށްވެސް ފޮނުވަން (ހަމައެކަނި އަމިއްލަ ރަށަކަށް ނޫން)",
     "Set up your shop": "ފިހާރަ ތައްޔާރުކުރޭ",
     "Finish every step so your products can go live. :done of :all done.": "ޕްރޮޑަކްޓްތައް ލައިވްކުރެވޭނީ ހުރިހާ ފިޔަވަޅެއް ނިންމުމުން. :all ގެ ތެރެއިން :done ނިމިއްޖެ.",
-    "How approval works": "އެޕްރޫވަލް ލިބޭ ގޮތް"
+    "How approval works": "އެޕްރޫވަލް ލިބޭ ގޮތް",
+    ":count item is running low|:count items are running low": ":count އެއްޗެއް މަދުވަނީ|:count އެއްޗެއް މަދުވަނީ",
+    "These items are at or below their low-stock level. Restock them or they will show as sold out:": "މި ތަކެތި ހުރީ ސްޓޮކް މަދު މިންވަރުގައި ނުވަތަ އެއަށްވުރެ ދަށުގައި. އަލުން ސްޓޮކް ނުކުރާނަމަ ވިކި ހުސްވެފައި ކަމަށް ދައްކާނެ:",
+    ":stock left, low-stock level :threshold": ":stock ބާކީ، ސްޓޮކް މަދު މިންވަރު :threshold",
+    "You can change the low-stock level of each product when you edit it, or turn this email off under Settings → Notifications.": "ކޮންމެ ޕްރޮޑަކްޓެއްގެ ސްޓޮކް މަދު މިންވަރު އެޑިޓްކުރާއިރު ބަދަލުކުރެވޭނެ، ނުވަތަ ސެޓިންގްސް → ނޮޓިފިކޭޝަނުން މި އީމެއިލް ނިއްވާލެވޭނެ.",
+    "Open your products": "ތިޔަ ތަކެތި ހުޅުވާ",
+    "Notification settings saved.": "ނޮޓިފިކޭޝަން ސެޓިންގްސް ރައްކާކުރެވިއްޖެ.",
+    "New order": "އާ އޯޑަރު",
+    "When a customer orders something from your shop, with the items to pack.": "ކަސްޓަމަރަކު ތިޔަ ފިހާރައިން އެއްޗެއް އޯޑަރުކުރުމުން، ޕެކްކުރަންވީ ތަކެއްޗާއެކު.",
+    "When a customer asks to return items from one of your orders.": "ކަސްޓަމަރަކު ތިޔަ އޯޑަރަކުން ތަކެތި އަނބުރާ ދޭން އެދުމުން.",
+    "Payout sent": "ޕޭއައުޓް ފޮނުވިއްޖެ",
+    "When iruali transfers your earnings to your bank account.": "އިރުއަލިން ލިބޭ ފައިސާ ތިޔަ ބޭންކް އެކައުންޓަށް ޖަމާކުރުމުން.",
+    "Low stock (daily)": "ސްޓޮކް މަދު (ކޮންމެ ދުވަހަކު)",
+    "One email each morning listing products at or below their low-stock level. Not sent when nothing is low.": "ސްޓޮކް މަދު މިންވަރުގައި ނުވަތަ އެއަށްވުރެ ދަށުގައި ހުރި ތަކެތީގެ ލިސްޓާއެކު ކޮންމެ ހެނދުނަކު އެއް އީމެއިލް. މަދުވެފައި އެއްޗެއް ނެތްނަމަ ނުފޮނުވާނެ.",
+    "Emails from iruali": "އިރުއަލިން އަންނަ އީމެއިލް",
+    "Sent to :email. Turn off the ones you do not want; order details are always available in the Seller Centre.": ":email އަށް ފޮނުވޭ. ބޭނުން ނޫން އީމެއިލް ނިއްވާލާ؛ އޯޑަރުގެ ތަފްސީލު އަބަދުވެސް ސެލަރ ސެންޓަރުން ފެންނާނެ.",
+    "Save notification settings": "ނޮޓިފިކޭޝަން ސެޓިންގްސް ރައްކާކުރޭ"
 }

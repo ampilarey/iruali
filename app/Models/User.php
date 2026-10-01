@@ -60,6 +60,7 @@ class User extends Authenticatable implements HasLocalePreference
         'loyalty_points',
         'referral_code', 'referred_by', 'referral_rewarded_at',
         'shop_logo', 'shop_banner', 'delivery_notes', 'ships_to_islands', 'onboarding_completed_at',
+        'notification_preferences',
     ];
 
     /**
@@ -96,6 +97,7 @@ class User extends Authenticatable implements HasLocalePreference
         'referred_by' => 'integer',
         'ships_to_islands' => 'boolean',
         'onboarding_completed_at' => 'datetime',
+        'notification_preferences' => 'array',
     ];
 
     /**
@@ -440,5 +442,25 @@ class User extends Authenticatable implements HasLocalePreference
     public function isOnboarded(): bool
     {
         return $this->onboarding_completed_at !== null;
+    }
+
+    /**
+     * The shop emails this user can turn off, all on unless saved otherwise.
+     */
+    public const NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock'];
+
+    /**
+     * @return array<string, bool>
+     */
+    public function notificationPreferences(): array
+    {
+        $saved = is_array($this->notification_preferences) ? $this->notification_preferences : [];
+
+        return collect(self::NOTIFICATION_TYPES)->mapWithKeys(fn ($type) => [$type => (bool) ($saved[$type] ?? true)])->all();
+    }
+
+    public function wantsNotification(string $type): bool
+    {
+        return $this->notificationPreferences()[$type] ?? true;
     }
 }

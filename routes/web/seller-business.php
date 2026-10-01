@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/settings/bank', [SettingsController::class, 'bank'])->name('settings.bank');
     Route::put('/settings/bank', [SettingsController::class, 'updateBank'])->name('settings.bank.update')->middleware('throttle:10,1');
+    Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
+    Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

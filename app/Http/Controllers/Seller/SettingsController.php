@@ -59,6 +59,39 @@ class SettingsController extends Controller
         return redirect()->route('seller.settings.bank')->with('success', __('Bank details saved. Payouts go to this account from now on.'));
     }
 
+    public function notifications()
+    {
+        $user = Auth::user()->fresh();
+
+        return view('seller.settings.notifications', ['user' => $user, 'preferences' => $user->notificationPreferences(), 'types' => self::notificationTypes()]);
+    }
+
+    public function updateNotifications(Request $request)
+    {
+        $user = Auth::user();
+        $preferences = [];
+        foreach (array_keys(self::notificationTypes()) as $type) {
+            $preferences[$type] = $request->boolean($type);
+        }
+
+        $user->forceFill(['notification_preferences' => $preferences])->save();
+
+        return redirect()->route('seller.settings.notifications')->with('success', __('Notification settings saved.'));
+    }
+
+    /**
+     * @return array<string, array{label: string, hint: string}>
+     */
+    public static function notificationTypes(): array
+    {
+        return [
+            'new_order' => ['label' => __('New order'), 'hint' => __('When a customer orders something from your shop, with the items to pack.')],
+            'return' => ['label' => __('Return requested'), 'hint' => __('When a customer asks to return items from one of your orders.')],
+            'payout' => ['label' => __('Payout sent'), 'hint' => __('When iruali transfers your earnings to your bank account.')],
+            'low_stock' => ['label' => __('Low stock (daily)'), 'hint' => __('One email each morning listing products at or below their low-stock level. Not sent when nothing is low.')],
+        ];
+    }
+
     protected function masked(array $fields): array
     {
         if (! empty($fields['account_number'])) {

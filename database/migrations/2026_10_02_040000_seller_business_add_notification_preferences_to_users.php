@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // The SMS batch adds the same column (guarded); whichever runs first creates it.
+        if (Schema::hasColumn('users', 'notification_preferences')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->json('notification_preferences')->nullable()->after('onboarding_completed_at');
         });
@@ -18,8 +23,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('notification_preferences');
-        });
+        if (Schema::hasColumn('users', 'notification_preferences')) {
+            Schema::table('users', fn (Blueprint $table) => $table->dropColumn('notification_preferences'));
+        }
     }
 };

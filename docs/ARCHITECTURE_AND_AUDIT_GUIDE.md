@@ -35,28 +35,30 @@ The codebase is reasonably structured for an early-stage project. Controllers ar
 - Controller namespace separation is already meaningful
 - Sanctum API layer exists and is versioned (`/api/v1/`)
 - OTP / 2FA integration via `pragmarx/google2fa`
-- Spatie packages (permissions, translatable, backup) are production-grade
+- Spatie packages (translatable, backup) are production-grade; roles and permissions are the app's own `Role`/`Permission` models
 - Soft deletes on products, orders, users
 - Island-based delivery model (domain-appropriate)
-- SEO service and sitemap command exist
-- Backup command with OneDrive support exists
+- SEO service and sitemap routes exist
+- Nightly database backup via `spatie/laravel-backup` is scheduled in `routes/console.php`
 
-### Critical Problems Found
+### Critical Problems Found (and their status)
 
-| Severity | Issue |
-|----------|-------|
-| **Critical** | Admin routes protected only by `auth`, not `role:admin` — any logged-in user can access admin |
-| **Critical** | Public order tracking uses raw numeric `{order}` ID — enumerable IDOR |
-| **Critical** | API route order conflict: `/products/featured` declared after `/products/{product}` — Laravel resolves `featured` as a product ID |
-| **High** | `.env.example` has an unresolved git merge conflict — not a valid file |
-| **High** | No stock locking in checkout — race conditions possible under concurrent load |
-| **High** | Loyalty points economics are not defined in config — scattered assumptions |
-| **High** | Product creation endpoint (`POST /api/v1/products`) is inside `auth:sanctum` but not role-gated — any authenticated user can create products via API |
-| **Medium** | Seller routes have `role:seller` middleware but only 1 controller (`SellerController`) — missing seller product management web routes |
-| **Medium** | Route name duplication: `admin.admin.sellers.approve` (double prefix) |
-| **Medium** | No `role:admin` middleware — admin protection is effectively absent |
-| **Low** | Test routes (`/test-css`, `/test-images`) are live in production routing |
-| **Low** | `IslandController` at root controller level (not namespaced) |
+These were the findings of the original audit. All of them have since been fixed; the table is kept as a record
+of what was wrong and where the fix lives.
+
+| Severity | Issue | Status |
+|----------|-------|--------|
+| **Critical** | Admin routes protected only by `auth`, not `role:admin` | Fixed: the admin group in `routes/web.php` uses `['auth', 'role:admin']` |
+| **Critical** | Public order tracking used a raw numeric `{order}` ID (enumerable IDOR) | Fixed: `order.track.show` requires a signed URL |
+| **Critical** | API route order conflict: `/products/featured` declared after `/products/{product}` | Fixed: static routes come first in `routes/api.php`; covered by `AdminAndApiCoverageTest` |
+| **High** | `.env.example` had an unresolved git merge conflict | Fixed |
+| **High** | No stock locking in checkout | Fixed: stock is decremented with a conditional `where('stock_quantity', '>=', qty)->decrement()` inside the order transaction, and vouchers are `lockForUpdate` |
+| **High** | Loyalty points economics not defined in config | Fixed: `loyalty_spend_per_point` and referral points live in `Setting::DEFAULTS` and are editable in Admin → Settings |
+| **High** | `POST /api/v1/products` not role-gated | Fixed: `StoreProductRequest::authorize()` requires an approved seller or admin |
+| **Medium** | Seller area had only one controller, no product management | Fixed: `Seller\ProductController` resource routes under `/seller/products` |
+| **Medium** | Route name duplication (`admin.admin.sellers.approve`) | Fixed |
+| **Low** | Test routes (`/test-css`, `/test-images`) live in production | Removed |
+| **Low** | `IslandController` at root controller level | Removed (it was empty) |
 
 ### Architecture Verdict
 
@@ -165,7 +167,6 @@ From migrations, the following ownership fields exist:
 | `Order` | `user_id` | Customer ownership |
 | `Cart` | `user_id` | Customer ownership |
 | `Wishlist` | `user_id` | Customer ownership |
-| `SupportTicket` | `user_id` | Customer ownership |
 | `ProductReview` | `user_id` | Customer ownership |
 
 **Key risk:** If `ProductPolicy` or seller-scoped queries use a different field than `seller_id`, there is an ownership bypass. This must be verified.
@@ -181,7 +182,6 @@ From migrations, the following ownership fields exist:
 **Missing policies:**
 - No `CartPolicy` (ownership enforced in controller, not policy)
 - No `WishlistPolicy`
-- No `SupportTicketPolicy`
 - No `UserPolicy` (admin user management)
 
 ### 3.6 Services
@@ -194,7 +194,7 @@ From migrations, the following ownership fields exist:
 | `SeoService` | Meta tags | Exists and good |
 | `NotificationService` | User notifications | Exists |
 | `LocalizationService` | i18n support | Exists |
-| `ApiService` | External API calls | Purpose unclear — review |
+| `ApiService` | External API calls | Removed: it was unused (and nothing sends SMS; OTP is email only) |
 
 **Missing services:**
 - No `LoyaltyService` — loyalty points logic is inline
@@ -205,7 +205,6 @@ From migrations, the following ownership fields exist:
 
 **Form Requests present:**
 - `RegisterUserRequest`
-- `StoreCategoryRequest`
 - `StoreOrderRequest`
 - `StoreProductRequest`
 - `StoreVoucherRequest`
@@ -942,7 +941,7 @@ Using `spatie/laravel-translatable`. Verify:
 
 - `<x-seo-meta>` component exists — verify it sets title, description, og:image
 - Product URLs use slugs (`/products/{slug}` not `/products/{id}`)
-- Sitemap command (`GenerateSitemap`) is scheduled in `routes/console.php`
+- Sitemap and robots.txt are generated on request by `SitemapController` (no scheduled command)
 - Canonical URL set on paginated pages
 - `robots.txt` and `sitemap.xml` accessible at web root
 
@@ -990,14 +989,21 @@ These tests already exist and should pass after the fixes:
 
 ### 9.3 Test Environment
 
-Ensure tests use an in-memory SQLite or a dedicated test database. Key `phpunit.xml` settings:
+The suite does **not** use SQLite. `phpunit.xml` points at a dedicated MySQL/MariaDB database so the tests
+run against the same engine as production (JSON columns, `lockForUpdate`, enum columns):
 ```xml
-<env name="DB_CONNECTION" value="sqlite"/>
-<env name="DB_DATABASE" value=":memory:"/>
-<env name="CACHE_DRIVER" value="array"/>
+<env name="DB_CONNECTION" value="mysql"/>
+<env name="DB_DATABASE" value="iruali_test"/>
+<env name="DB_USERNAME" value="root"/>
+<env name="DB_PASSWORD" value=""/>
+<env name="CACHE_STORE" value="array"/>
 <env name="SESSION_DRIVER" value="array"/>
 <env name="QUEUE_CONNECTION" value="sync"/>
+<env name="MAIL_MAILER" value="array"/>
 ```
+The host defaults to `127.0.0.1`; create the empty `iruali_test` database before running `php artisan test`.
+Tests use `RefreshDatabase`. To run against another database (for example several workers at once), override the
+name on the command line: `DB_DATABASE=iruali_test_a php artisan test`.
 
 ---
 
@@ -1028,7 +1034,7 @@ composer install --optimize-autoloader --no-dev
 
 - [ ] Queue worker running and managed by Supervisor or Laravel Octane
 - [ ] Cron job set up: `* * * * * php /path/to/artisan schedule:run`
-- [ ] Scheduled commands verified: `GenerateSitemap`, `BackupCommand`
+- [ ] Scheduled commands verified (`routes/console.php`): `orders:cancel-unpaid-card`, `backup:run --only-db`, `backup:clean`, `sanctum:prune-expired`, guest-cart pruning
 - [ ] Failed job monitoring configured
 
 ### 10.4 Security Settings
@@ -1050,7 +1056,7 @@ composer install --optimize-autoloader --no-dev
 
 - [ ] `storage/app/public` symlinked to `public/storage`
 - [ ] Image uploads are stored with unpredictable paths
-- [ ] Backup storage configured (OneDrive backup command exists)
+- [ ] Backup storage configured (`config/backup.php`; backups go to the `local` disk, copy them off the server)
 - [ ] Backup encryption enabled if storing sensitive order data
 
 ### 10.7 Database
@@ -1090,7 +1096,7 @@ These cannot be implemented without explicit product/business decisions from the
 | **Delivery islands** | How does island selection affect shipping cost calculation? Is it manual or computed? | Checkout flow, `islands` + `product_island` tables |
 | **Voucher stacking** | Can multiple vouchers be applied to one order? | `CartService::applyVoucher` |
 | **Flash sales** | Who can create flash sales? Is it time-limited automatically? | `flash_sale_ends_at` migration exists but admin UI unclear |
-| **OTP channel** | Is SMS actually working? What SMS provider? | `ApiService` — purpose unclear, may be SMS gateway |
+| **OTP channel** | Is SMS actually working? What SMS provider? | Email only: `VerifyEmailCode` notification; there is no SMS gateway |
 | **Referral rewards** | What does the referrer receive? What does the referred user receive? | `ReferralTest.php` exists but economics not in config |
 | **Order tracking exposure** | Should tracking be completely public (no auth needed)? Or require order number + email verification? | `OrderTrackingController` |
 | **Mobile app timeline** | When is the mobile app planned? This affects API hardening priority | Phase 4 planning |

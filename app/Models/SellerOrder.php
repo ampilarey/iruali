@@ -109,4 +109,9 @@ class SellerOrder extends Model
     {
         return $this->hasOne(Conversation::class, 'seller_order_id');
     }
+
+    public function disputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class);
+    }
 }

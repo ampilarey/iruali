@@ -28,6 +28,25 @@
                 <span>Your total</span>
                 <span>{{ \App\Support\Money::format($order->items->sum(fn ($i) => $i->price * $i->quantity)) }}</span>
             </div>
+            @if($disputes->isNotEmpty())
+                <div class="border-t border-gray-100 px-5 py-4 space-y-2">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Disputes</h3>
+                    @foreach($disputes as $dispute)
+                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <p class="font-medium text-gray-900">{{ \App\Models\Dispute::TYPES[$dispute->type] ?? $dispute->type }} · claiming {{ \App\Support\Money::format($dispute->amount_claimed) }}</p>
+                                <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ \App\Models\Dispute::STATUSES[$dispute->status] ?? $dispute->status }}</span>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-600">Opened {{ $dispute->opened_at->format('d M Y') }}.
+                                @if($dispute->isOpen())Reply to the customer in the conversation below; iruali decides within 5 business days.
+                                @elseif($dispute->amount_resolved > 0)Refund of {{ \App\Support\Money::format($dispute->amount_resolved) }} agreed; your share is taken from your next payout.
+                                @else The claim was not upheld.@endif
+                                @if($dispute->resolution_note)<span class="block">Note from iruali: {{ $dispute->resolution_note }}</span>@endif
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
             <div class="border-t border-gray-100 px-5 py-4">
                 @include('messaging._thread', [
                     'part' => $part,

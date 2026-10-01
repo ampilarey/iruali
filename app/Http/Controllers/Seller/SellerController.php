@@ -63,8 +63,9 @@ class SellerController extends Controller
             $messaging->markRead($conversation, 'seller');
         }
         $messagingOpen = $messaging->isOpenFor($order);
+        $disputes = $part->disputes()->latest('id')->get();
 
-        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops', 'conversation', 'messagingOpen'));
+        return view('seller.orders.show', compact('order', 'part', 'nextStatuses', 'otherShops', 'conversation', 'messagingOpen', 'disputes'));
     }
 
     /**

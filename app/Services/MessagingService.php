@@ -71,7 +71,7 @@ class MessagingService
      * Add a message, bump the other participants' unread counts and tell them (at most once
      * every ten minutes per thread and person).
      */
-    public function send(Conversation $conversation, User $sender, string $role, string $body, ?UploadedFile $attachment = null): Message
+    public function send(Conversation $conversation, User $sender, string $role, string $body, ?UploadedFile $attachment = null, bool $notify = true): Message
     {
         $path = null;
         if ($attachment) {
@@ -95,7 +95,10 @@ class MessagingService
             return $message;
         });
 
-        $this->notify($conversation->fresh(['customer', 'seller', 'order']), $message);
+        // A dispute's own notifications already cover its opening and decision messages
+        if ($notify) {
+            $this->notify($conversation->fresh(['customer', 'seller', 'order']), $message);
+        }
 
         return $message;
     }

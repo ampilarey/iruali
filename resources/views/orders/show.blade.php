@@ -64,6 +64,7 @@
                             @endforeach
                             @if($part)
                                 @include('orders._returns', ['part' => $part])
+                                @include('orders._disputes', ['part' => $part])
                                 @include('messaging._thread', [
                                     'part' => $part,
                                     'conversation' => $part->conversation,

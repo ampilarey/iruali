@@ -31,7 +31,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['items.product' => fn ($q) => $q->withTrashed()->with(['mainImage', 'seller']), 'sellerOrders.seller', 'sellerOrders.returnRequests.items.orderItem.product', 'sellerOrders.conversation.messages.sender']);
+        $order->load(['items.product' => fn ($q) => $q->withTrashed()->with(['mainImage', 'seller']), 'sellerOrders.seller', 'sellerOrders.returnRequests.items.orderItem.product', 'sellerOrders.conversation.messages.sender', 'sellerOrders.disputes']);
 
         // Seeing the page counts as reading the shops' messages
         $messaging = app(\App\Services\MessagingService::class);

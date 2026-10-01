@@ -18,7 +18,7 @@ class CartServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cartService = new CartService();
+        $this->cartService = new CartService;
     }
 
     public function test_get_or_create_cart_for_authenticated_user()
@@ -47,14 +47,14 @@ class CartServiceTest extends TestCase
     {
         $user = User::factory()->create();
         Auth::login($user);
-        
+
         $cart = $this->cartService->getOrCreateCart();
-        
+
         // Add some items to cart (this would be done through addToCart method)
         // For now, we'll test the totals calculation with an empty cart
-        
+
         $totals = $this->cartService->getCartTotals($cart);
-        
+
         $this->assertArrayHasKey('subtotal', $totals);
         $this->assertArrayHasKey('voucher_discount', $totals);
         $this->assertArrayHasKey('points_discount', $totals);
@@ -67,9 +67,9 @@ class CartServiceTest extends TestCase
     {
         $user = User::factory()->create();
         Auth::login($user);
-        
+
         $cart = $this->cartService->getOrCreateCart();
-        
+
         $this->assertTrue($this->cartService->isCartEmpty($cart));
     }
 
@@ -77,11 +77,11 @@ class CartServiceTest extends TestCase
     {
         $user = User::factory()->create();
         Auth::login($user);
-        
+
         $cart = $this->cartService->getOrCreateCart();
-        
+
         $summary = $this->cartService->getCartSummary($cart);
-        
+
         $this->assertArrayHasKey('item_count', $summary);
         $this->assertArrayHasKey('subtotal', $summary);
         $this->assertArrayHasKey('voucher_discount', $summary);
@@ -89,4 +89,4 @@ class CartServiceTest extends TestCase
         $this->assertArrayHasKey('total', $summary);
         $this->assertArrayHasKey('voucher', $summary);
     }
-} 
+}

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Wishlist;
-use App\Models\User;
 use App\Models\Product;
+use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WishlistFactory extends Factory
@@ -18,4 +18,4 @@ class WishlistFactory extends Factory
             'product_id' => Product::factory(),
         ];
     }
-} 
+}

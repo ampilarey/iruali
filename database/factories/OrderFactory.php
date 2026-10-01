@@ -21,7 +21,7 @@ class OrderFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'order_number' => 'ORD-' . str_pad($this->faker->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
+            'order_number' => 'ORD-'.str_pad($this->faker->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
             'status' => $this->faker->randomElement(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
             'total_amount' => $totalAmount,
             'voucher_code' => $this->faker->optional()->regexify('[A-Z]{3}[0-9]{3}'),

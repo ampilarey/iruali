@@ -40,9 +40,9 @@ class LocalizationService
 
         // Try current locale first
         $value = $model->getTranslation($field, $locale, false);
-        
+
         // If not found, try fallback locale
-        if (!$value && $locale !== $fallbackLocale) {
+        if (! $value && $locale !== $fallbackLocale) {
             $value = $model->getTranslation($field, $fallbackLocale, false);
         }
 
@@ -63,6 +63,7 @@ class LocalizationService
     public static function hasTranslation($model, string $field, ?string $locale = null): bool
     {
         $locale = $locale ?: self::getCurrentLocale();
+
         return $model->hasTranslation($field, $locale);
     }
 
@@ -96,11 +97,11 @@ class LocalizationService
     public static function formatForApi($model, array $translatableFields = ['name', 'description']): array
     {
         $data = [];
-        
+
         foreach ($translatableFields as $field) {
             if (in_array($field, $model->translatable ?? [])) {
                 $data[$field] = self::getLocalizedValue($model, $field);
-                $data[$field . '_translations'] = self::getAllTranslations($model, $field);
+                $data[$field.'_translations'] = self::getAllTranslations($model, $field);
             }
         }
 
@@ -113,13 +114,13 @@ class LocalizationService
     public static function validateTranslationData(array $data, array $requiredLocales = ['en']): array
     {
         $errors = [];
-        
+
         foreach ($requiredLocales as $locale) {
-            if (!isset($data[$locale]) || empty($data[$locale])) {
+            if (! isset($data[$locale]) || empty($data[$locale])) {
                 $errors[] = "Translation for locale '{$locale}' is required.";
             }
         }
 
         return $errors;
     }
-} 
+}

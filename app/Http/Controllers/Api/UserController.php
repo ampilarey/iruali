@@ -44,8 +44,8 @@ class UserController extends BaseController
         }
 
         $user->update($request->only([
-            'name', 'phone', 'address', 'city', 'state', 
-            'country', 'postal_code', 'date_of_birth', 'gender'
+            'name', 'phone', 'address', 'city', 'state',
+            'country', 'postal_code', 'date_of_birth', 'gender',
         ]));
 
         return $this->sendResponse(new UserResource($user), 'Profile updated successfully');
@@ -68,13 +68,13 @@ class UserController extends BaseController
         $user = Auth::user();
 
         // Check current password
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return $this->sendError('Current password is incorrect');
         }
 
         // Update password
         $user->update([
-            'password' => Hash::make($request->new_password)
+            'password' => Hash::make($request->new_password),
         ]);
 
         return $this->sendResponse([], 'Password changed successfully');

@@ -33,7 +33,7 @@ class UpdateProductRequest extends FormRequest
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('products', 'sku')->ignore($productId)
+                Rule::unique('products', 'sku')->ignore($productId),
             ],
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0|max:999999.99',

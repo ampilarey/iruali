@@ -20,4 +20,4 @@ class WishlistItemResource extends JsonResource
             'added_at' => $this->created_at,
         ];
     }
-} 
+}

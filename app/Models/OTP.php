@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class OTP extends Model
 {
@@ -19,12 +19,12 @@ class OTP extends Model
         'type',
         'purpose',
         'is_used',
-        'expires_at'
+        'expires_at',
     ];
 
     protected $casts = [
         'is_used' => 'boolean',
-        'expires_at' => 'datetime'
+        'expires_at' => 'datetime',
     ];
 
     /**
@@ -40,7 +40,7 @@ class OTP extends Model
      */
     public function isValid(): bool
     {
-        return !$this->is_used && !$this->isExpired();
+        return ! $this->is_used && ! $this->isExpired();
     }
 
     /**
@@ -74,7 +74,7 @@ class OTP extends Model
             'code' => self::generateCode(),
             'type' => 'sms',
             'purpose' => $purpose,
-            'expires_at' => Carbon::now()->addMinutes(10)
+            'expires_at' => Carbon::now()->addMinutes(10),
         ]);
     }
 
@@ -93,7 +93,7 @@ class OTP extends Model
             'code' => self::generateCode(),
             'type' => 'email',
             'purpose' => $purpose,
-            'expires_at' => Carbon::now()->addMinutes(10)
+            'expires_at' => Carbon::now()->addMinutes(10),
         ]);
     }
 
@@ -102,15 +102,15 @@ class OTP extends Model
      */
     public static function verify(string $identifier, string $code, string $purpose = 'verification'): ?self
     {
-        $otp = self::where(function($query) use ($identifier) {
+        $otp = self::where(function ($query) use ($identifier) {
             $query->where('phone', $identifier)
-                  ->orWhere('email', $identifier);
+                ->orWhere('email', $identifier);
         })
-        ->where('code', $code)
-        ->where('purpose', $purpose)
-        ->where('is_used', false)
-        ->where('expires_at', '>', Carbon::now())
-        ->first();
+            ->where('code', $code)
+            ->where('purpose', $purpose)
+            ->where('is_used', false)
+            ->where('expires_at', '>', Carbon::now())
+            ->first();
 
         if ($otp) {
             $otp->markAsUsed();

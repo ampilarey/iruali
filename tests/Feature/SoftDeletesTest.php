@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Product;
-use App\Models\Order;
-use App\Models\User;
 use App\Models\Category;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,7 +17,7 @@ class SoftDeletesTest extends TestCase
     {
         // Create a category first
         $category = Category::factory()->create();
-        
+
         // Create a product
         $product = Product::factory()->create([
             'category_id' => $category->id,
@@ -34,11 +34,11 @@ class SoftDeletesTest extends TestCase
 
         // Verify product is soft deleted (not in normal queries)
         $this->assertNull(Product::find($productId));
-        
+
         // Verify product still exists in database with deleted_at timestamp
         $this->assertDatabaseHas('products', [
             'id' => $productId,
-            'deleted_at' => $product->fresh()->deleted_at
+            'deleted_at' => $product->fresh()->deleted_at,
         ]);
 
         // Verify trashed() method works
@@ -53,7 +53,7 @@ class SoftDeletesTest extends TestCase
     {
         // Create a category first
         $category = Category::factory()->create();
-        
+
         // Create a product
         $product = Product::factory()->create([
             'category_id' => $category->id,
@@ -79,7 +79,7 @@ class SoftDeletesTest extends TestCase
     {
         // Create a category first
         $category = Category::factory()->create();
-        
+
         // Create a product
         $product = Product::factory()->create([
             'category_id' => $category->id,
@@ -100,7 +100,7 @@ class SoftDeletesTest extends TestCase
     {
         // Create a user
         $user = User::factory()->create();
-        
+
         // Create an order
         $order = Order::factory()->create([
             'user_id' => $user->id,
@@ -124,7 +124,7 @@ class SoftDeletesTest extends TestCase
     {
         // Create a user
         $user = User::factory()->create();
-        
+
         // Create an order
         $order = Order::factory()->create([
             'user_id' => $user->id,
@@ -180,13 +180,13 @@ class SoftDeletesTest extends TestCase
         // Create a category first
         $category = Category::factory()->create();
         $user = User::factory()->create();
-        
+
         // Create products
         $activeProduct = Product::factory()->create([
             'category_id' => $category->id,
             'seller_id' => $user->id,
         ]);
-        
+
         $deletedProduct = Product::factory()->create([
             'category_id' => $category->id,
             'seller_id' => $user->id,
@@ -209,7 +209,7 @@ class SoftDeletesTest extends TestCase
     {
         // Create a user
         $user = User::factory()->create();
-        
+
         // Create an order for the user
         $order = Order::factory()->create([
             'user_id' => $user->id,

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -16,10 +16,10 @@ class SeoService
     {
         $name = LocalizationService::getLocalizedValue($product, 'name');
         $description = LocalizationService::getLocalizedValue($product, 'description');
-        
+
         // Clean description for meta
         $metaDescription = Str::limit(strip_tags($description), 160);
-        
+
         // Generate keywords from product data
         $keywords = collect([
             $name,
@@ -28,11 +28,11 @@ class SeoService
             $product->tags ? implode(', ', $product->tags) : null,
             'iruali',
             'Maldives',
-            'e-commerce'
+            'e-commerce',
         ])->filter()->implode(', ');
 
         return [
-            'title' => $name . ' - iruali',
+            'title' => $name.' - iruali',
             'description' => $metaDescription,
             'keywords' => $keywords,
             'og_title' => $name,
@@ -54,11 +54,11 @@ class SeoService
     {
         $name = LocalizationService::getLocalizedValue($category, 'name');
         $description = LocalizationService::getLocalizedValue($category, 'description');
-        
+
         $metaDescription = Str::limit(strip_tags($description), 160);
-        
+
         return [
-            'title' => $name . ' - iruali',
+            'title' => $name.' - iruali',
             'description' => $metaDescription,
             'keywords' => "{$name}, iruali, Maldives, e-commerce, online shopping",
             'og_title' => $name,
@@ -79,11 +79,11 @@ class SeoService
     public static function forSearch(string $query, int $totalResults = 0): array
     {
         $title = "Search results for '{$query}'";
-        $description = "Find the best products for '{$query}' on iruali. " . 
-                      ($totalResults > 0 ? "{$totalResults} products found." : "Shop now!");
-        
+        $description = "Find the best products for '{$query}' on iruali. ".
+                      ($totalResults > 0 ? "{$totalResults} products found." : 'Shop now!');
+
         return [
-            'title' => $title . ' - iruali',
+            'title' => $title.' - iruali',
             'description' => $description,
             'keywords' => "{$query}, search, iruali, Maldives, e-commerce",
             'og_title' => $title,
@@ -104,14 +104,14 @@ class SeoService
     public static function forUser(User $user): array
     {
         $title = $user->is_seller ? "Shop by {$user->name}" : "{$user->name}'s Profile";
-        $description = $user->is_seller 
+        $description = $user->is_seller
             ? "Discover amazing products from {$user->name} on iruali. Shop the latest collection now!"
             : "View {$user->name}'s profile on iruali.";
-        
+
         return [
-            'title' => $title . ' - iruali',
+            'title' => $title.' - iruali',
             'description' => $description,
-            'keywords' => "{$user->name}, iruali, Maldives, e-commerce" . ($user->is_seller ? ", seller, shop" : ""),
+            'keywords' => "{$user->name}, iruali, Maldives, e-commerce".($user->is_seller ? ', seller, shop' : ''),
             'og_title' => $title,
             'og_description' => $description,
             'og_type' => 'profile',
@@ -152,7 +152,7 @@ class SeoService
     {
         $name = LocalizationService::getLocalizedValue($product, 'name');
         $description = LocalizationService::getLocalizedValue($product, 'description');
-        
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
@@ -161,14 +161,14 @@ class SeoService
             'image' => $product->main_image ? asset($product->main_image) : asset('images/og-image.png'),
             'brand' => [
                 '@type' => 'Brand',
-                'name' => $product->brand ?? 'iruali'
+                'name' => $product->brand ?? 'iruali',
             ],
             'offers' => [
                 '@type' => 'Offer',
                 'price' => $product->final_price,
                 'priceCurrency' => 'MVR',
                 'availability' => $product->is_in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-                'url' => route('products.show', $product->slug)
+                'url' => route('products.show', $product->slug),
             ],
             'category' => $product->category ? LocalizationService::getLocalizedValue($product->category, 'name') : null,
             'sku' => $product->sku,
@@ -182,7 +182,7 @@ class SeoService
     {
         $name = LocalizationService::getLocalizedValue($category, 'name');
         $description = LocalizationService::getLocalizedValue($category, 'description');
-        
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'CollectionPage',
@@ -229,9 +229,9 @@ class SeoService
             'description' => 'iruali is a modern, multi-vendor e-commerce platform for the Maldives.',
             'potentialAction' => [
                 '@type' => 'SearchAction',
-                'target' => route('search') . '?q={search_term_string}',
-                'query-input' => 'required name=search_term_string'
-            ]
+                'target' => route('search').'?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
         ];
     }
-} 
+}

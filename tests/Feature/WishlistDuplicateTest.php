@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Wishlist;
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -54,7 +54,7 @@ class WishlistDuplicateTest extends TestCase
 
         // Try to create duplicate directly (should fail)
         $this->expectException(\Illuminate\Database\QueryException::class);
-        
+
         Wishlist::create([
             'user_id' => $user->id,
             'product_id' => $product->id,

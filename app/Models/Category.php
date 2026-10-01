@@ -21,7 +21,7 @@ class Category extends Model
         'image',
         'status',
         'meta_title',
-        'meta_description'
+        'meta_description',
     ];
 
     protected $casts = [
@@ -61,13 +61,13 @@ class Category extends Model
     {
         $path = [$this->getTranslation('name', app()->getLocale(), false) ?: $this->getTranslation('name', config('app.fallback_locale'), false)];
         $parent = $this->parent;
-        
+
         while ($parent) {
             $parentName = $parent->getTranslation('name', app()->getLocale(), false) ?: $parent->getTranslation('name', config('app.fallback_locale'), false);
             array_unshift($path, $parentName);
             $parent = $parent->parent;
         }
-        
+
         return implode(' > ', $path);
     }
 

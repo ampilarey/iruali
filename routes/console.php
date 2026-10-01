@@ -1,11 +1,16 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Everything here needs the Laravel scheduler cron on the server:
+//   * * * * * cd /path/to/iruali && php artisan schedule:run >> /dev/null 2>&1
 
-// Needs the Laravel scheduler cron on the server: * * * * * php artisan schedule:run
-\Illuminate\Support\Facades\Schedule::command('orders:cancel-unpaid-card')->hourly()->withoutOverlapping();
+// Card orders nobody paid for are cancelled after 24 hours and their stock released
+Schedule::command('orders:cancel-unpaid-card')->hourly()->withoutOverlapping();
+
+// Database backup every night (config/backup.php says where it goes), old ones cleaned up
+Schedule::command('backup:clean')->dailyAt('01:30');
+Schedule::command('backup:run --only-db')->dailyAt('02:00')->withoutOverlapping();
+
+// Expired API tokens
+Schedule::command('sanctum:prune-expired --hours=24')->daily();

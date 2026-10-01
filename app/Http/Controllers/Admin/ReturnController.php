@@ -24,8 +24,9 @@ class ReturnController extends Controller
             ->withQueryString();
 
         $counts = ReturnRequest::selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status');
+        $refundsDue = \App\Models\Order::where('refund_status', 'due')->with('user')->latest('updated_at')->get();
 
-        return view('admin.returns.index', compact('returns', 'status', 'counts'));
+        return view('admin.returns.index', compact('returns', 'status', 'counts', 'refundsDue'));
     }
 
     public function show(ReturnRequest $return, ReturnService $returns)

@@ -682,5 +682,11 @@
     "Your iruali verification code": "ތިބާގެ iruali ވެރިފިކޭޝަން ކޯޑު",
     "Your verification code is:": "ތިބާގެ ވެރިފިކޭޝަން ކޯޑަކީ:",
     "It expires in 10 minutes. If you did not create an iruali account, you can ignore this email.": "10 މިނިޓު ތެރޭގައި މުއްދަތު ހަމަވާނެ. iruali އެކައުންޓެއް ނުހައްދަވާނަމަ މި އީމެއިލް އަޅާނުލައްވާ.",
-    "Verify my email": "އަހަރެންގެ އީމެއިލް ވެރިފައިކުރޭ"
+    "Verify my email": "އަހަރެންގެ އީމެއިލް ވެރިފައިކުރޭ",
+    "A refund of :amount is on its way to you. We email you when it is sent.": ":amount ގެ ރީފަންޑެއް ތިބާއަށް ފޮނުވަނީ. ފޮނުވުމުން އީމެއިލް ކުރާނަން.",
+    "Refunded :amount on :date. Reference: :ref": ":date ގައި :amount ރީފަންޑް ކުރެވިއްޖެ. ރެފަރެންސް: :ref",
+    "We have sent your refund of :amount.": "ތިބާގެ :amount ގެ ރީފަންޑް ފޮނުވައިފިން.",
+    "Refund sent for order :number": "އޯޑަރު :number އަށް ރީފަންޑް ފޮނުވިއްޖެ",
+    "Reference: :ref": "ރެފަރެންސް: :ref",
+    "Refunds usually reach you within 5–7 business days, depending on your bank.": "ރީފަންޑް ލިބޭނީ ގިނަފަހަރު 5–7 މަސައްކަތު ދުވަހުގެ ތެރޭގައި، ބޭންކަށް ބަލައި."
 }

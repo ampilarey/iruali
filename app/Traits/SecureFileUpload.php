@@ -13,17 +13,22 @@ trait SecureFileUpload
      */
     protected function generateSecureFilename(UploadedFile $file): string
     {
-        $extension = $file->getClientOriginalExtension();
+        // Never trust the name the browser sent: a "photo.html" would be served as a web page.
+        $extension = strtolower((string) ($file->extension() ?: $file->getClientOriginalExtension()));
+        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+            $extension = 'bin';
+        }
         $uuid = Uuid::uuid4()->toString();
-        return $uuid . '.' . $extension;
+
+        return $uuid.'.'.$extension;
     }
 
     /**
      * Validate and store file securely
      */
     protected function storeFileSecurely(
-        UploadedFile $file, 
-        string $directory, 
+        UploadedFile $file,
+        string $directory,
         array $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'],
         int $maxSize = 2048
     ): ?string {
@@ -33,13 +38,13 @@ trait SecureFileUpload
         }
 
         // Validate MIME type
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
+        if (! in_array($file->getMimeType(), $allowedMimes)) {
             return null;
         }
 
         // Generate secure filename
         $filename = $this->generateSecureFilename($file);
-        
+
         // Store file
         return $file->storeAs($directory, $filename, 'public');
     }
@@ -49,10 +54,10 @@ trait SecureFileUpload
      */
     protected function deleteFile(?string $filePath): bool
     {
-        if (!$filePath) {
+        if (! $filePath) {
             return false;
         }
 
         return Storage::disk('public')->delete($filePath);
     }
-} 
+}

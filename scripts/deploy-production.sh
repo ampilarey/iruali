@@ -69,7 +69,8 @@ if [[ -n "$DOCROOT" ]]; then
   mkdir -p "$DOCROOT/build" "$DOCROOT/images"
   cp -a "$ROOT/public/build/." "$DOCROOT/build/"
   cp -a "$ROOT/public/images/." "$DOCROOT/images/"
-  for f in favicon.svg site.webmanifest .htaccess; do
+  ln -sfn "$ROOT/storage/app/public" "$DOCROOT/storage"
+  for f in favicon.svg site.webmanifest robots.txt .htaccess; do
     [[ -f "$ROOT/public/$f" ]] && cp -a "$ROOT/public/$f" "$DOCROOT/$f"
   done
   # Front controller in the docroot points at the app root

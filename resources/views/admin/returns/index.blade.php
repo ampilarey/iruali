@@ -7,6 +7,20 @@
     @include('admin.payouts._header', ['title' => 'Returns'])
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        @if($refundsDue->isNotEmpty())
+            <section class="rounded-lg border border-red-200 bg-red-50 p-4">
+                <h2 class="font-semibold text-red-800">Refunds due ({{ $refundsDue->count() }})</h2>
+                <p class="text-sm text-red-700">Money owed outside a return: a payment that arrived after the order was cancelled, a paid order that was cancelled, or a double payment. Refund it in the BML portal, then record the reference on the order.</p>
+                <ul class="mt-3 divide-y divide-red-100 text-sm">
+                    @foreach($refundsDue as $o)
+                        <li class="flex flex-wrap items-center justify-between gap-2 py-2">
+                            <span><a href="{{ route('admin.orders.show', $o) }}" class="font-medium text-primary-700 hover:underline">#{{ $o->order_number }}</a> · {{ $o->user?->name }} · {{ $o->refund_reason }}</span>
+                            <span class="font-semibold">{{ Money::format($o->refund_amount) }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
         <nav class="flex flex-wrap gap-2 text-sm">
             @foreach(['open' => 'Open', 'requested' => 'New', 'approved' => 'Approved, refund due', 'refunded' => 'Refunded', 'rejected' => 'Rejected', 'all' => 'All'] as $key => $label)
                 @php $n = $key === 'open' ? ($counts['requested'] ?? 0) + ($counts['approved'] ?? 0) : ($counts[$key] ?? null); @endphp

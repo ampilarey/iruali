@@ -335,6 +335,18 @@ class AdminController extends Controller
         return back()->with('success', $part->shopName().' part marked as '.$request->status.'.');
     }
 
+    public function recordRefund(Request $request, Order $order, PaymentService $payments)
+    {
+        $this->checkAdminRole();
+        $data = $request->validate(['refund_reference' => 'required|string|max:100']);
+
+        if (! $payments->markRefunded($order, $data['refund_reference'])) {
+            return back()->with('error', 'No refund is due on this order.');
+        }
+
+        return back()->with('success', 'Refund recorded. The customer has been emailed.');
+    }
+
     public function updatePayment(Request $request, Order $order, PaymentService $payments)
     {
         $this->checkAdminRole();
@@ -342,6 +354,10 @@ class AdminController extends Controller
         $request->validate(['action' => 'required|in:confirm']);
 
         // Card orders are confirmed by BML; this is for older cash on delivery / bank transfer orders.
+        if ($order->payment_method === 'bml' || $order->status === 'cancelled' || $order->payment_status === 'paid') {
+            return back()->with('error', 'Card payments are confirmed by BML, and cancelled or already-paid orders can\'t be marked paid.');
+        }
+
         $payments->confirm($order);
 
         return back()->with('success', 'Payment confirmed.');

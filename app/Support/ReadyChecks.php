@@ -340,8 +340,14 @@ class ReadyChecks
         }
 
         try {
-            if (app()->runningInConsole()) {
-                $response = app(HttpKernel::class)->handle(Request::create('/storage/'.$name, 'GET'));
+            // From the command line (not inside a web request) also fetch it the way a browser would
+            if (app()->runningInConsole() && app('request')->route() === null) {
+                $original = app('request');
+                try {
+                    $response = app(HttpKernel::class)->handle(Request::create('/storage/'.$name, 'GET'));
+                } finally {
+                    app()->instance('request', $original);
+                }
                 if ($response->getStatusCode() !== 200) {
                     return $this->fail('GET /storage/'.$name.' answered HTTP '.$response->getStatusCode(), 'StorageController must serve files from the public disk; check .htaccess rewrites reach index.php.');
                 }

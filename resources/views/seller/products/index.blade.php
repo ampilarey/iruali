@@ -42,7 +42,10 @@
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $product->category->name ?? '—' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($product->price) }}</td>
-                                <td class="px-4 py-3 text-right text-sm {{ $product->stock_quantity <= $product->reorder_point ? 'font-semibold text-red-600' : 'text-gray-900' }}">{{ $product->stock_quantity }}</td>
+                                <td class="px-4 py-3 text-right text-sm {{ $product->isLowStock() ? 'font-semibold text-red-600' : 'text-gray-900' }}">
+                                    {{ $product->stock_quantity }}
+                                    @if($product->has_variants)<span class="block text-xs font-normal text-gray-500">{{ trans_choice(':count variant|:count variants', $product->variants->count(), ['count' => $product->variants->count()]) }}</span>@endif
+                                </td>
                                 <td class="px-4 py-3">
                                     @if($product->is_active)
                                         <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Live</span>

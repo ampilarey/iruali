@@ -41,6 +41,8 @@ class Setting extends Model
         'free_delivery_over' => 1000,
         // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
         'default_commission_rate' => 10,
+        // Marketplace: a shop part not shipped within this many days of payment counts as late
+        'late_shipment_days' => 3,
     ];
 
     protected $fillable = ['key', 'value'];

@@ -120,6 +120,11 @@ class SellerController extends Controller
         return view('seller.analytics', compact('stats', 'months', 'topProducts'));
     }
 
+    public function performance(\App\Services\SellerPerformanceService $performance)
+    {
+        return view('seller.performance', ['report' => $performance->report(Auth::user())]);
+    }
+
     public function questions(Request $request)
     {
         $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', Auth::id()));

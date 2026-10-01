@@ -65,8 +65,9 @@ class AdminController extends Controller
             ->orderBy('seller_approved') // pending applications first
             ->latest('seller_applied_at')
             ->paginate(10);
+        $performance = app(\App\Services\SellerPerformanceService::class)->summaryFor($sellers->pluck('id'));
 
-        return view('admin.sellers.index', compact('sellers'));
+        return view('admin.sellers.index', compact('sellers', 'performance'));
     }
 
     public function approveSeller($id)

@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\PayoutBatchController;
 use App\Http\Controllers\Admin\PayoutController;
+use App\Http\Controllers\Admin\SellerPerformanceController;
 use App\Http\Controllers\Seller\HelpController;
+use App\Http\Controllers\Seller\SellerController;
 use App\Http\Controllers\Seller\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,10 +17,12 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/help/{guide}', [HelpController::class, 'show'])->name('help.show');
+    Route::get('/performance', [SellerController::class, 'performance'])->name('performance');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('/sellers/{seller}/bank/verify', [PayoutController::class, 'toggleBankVerified'])->name('sellers.bank.verify');
+    Route::get('/sellers/{seller}/performance', [SellerPerformanceController::class, 'show'])->name('sellers.performance');
 
     // Payout batches (one bank bulk transfer for several shops)
     Route::get('/payout-batches', [PayoutBatchController::class, 'index'])->name('payout-batches.index');

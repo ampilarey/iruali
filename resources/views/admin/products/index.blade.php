@@ -42,6 +42,14 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $product->name ?? 'N/A' }}</div>
+                                            @if($product->has_variants)
+                                                <div class="mt-1 text-xs text-gray-500">
+                                                    {{ trans_choice(':count variant|:count variants', $product->variants->count(), ['count' => $product->variants->count()]) }}:
+                                                    @foreach($product->variants as $variant)
+                                                        <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 {{ $variant->is_active ? '' : 'line-through' }}" dir="ltr">{{ $variant->displayName() }} · {{ $variant->sku }} · {{ $variant->stock_quantity }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

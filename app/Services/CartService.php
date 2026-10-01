@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -73,7 +74,7 @@ class CartService
 
         foreach ($guest->items as $item) {
             $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)->first();
-            $stock = (int) ($item->product?->stock_quantity ?? 0);
+            $stock = $item->availableStock(); // the variant's stock when the line has one
             $existing
                 ? $existing->update(['quantity' => max(1, min($existing->quantity + $item->quantity, $stock, 999))])
                 : $item->update(['cart_id' => $cart->id, 'quantity' => max(1, min($item->quantity, $stock, 999))]);
@@ -100,6 +101,7 @@ class CartService
     {
         $cart = $this->getOrCreateCart();
         $product = Product::findOrFail($productId);
+        $variant = $variantId ? ProductVariant::where('product_id', $product->id)->findOrFail($variantId) : null;
 
         // Check if product (and variant) is already in cart
         $existingItem = $cart->items()
@@ -116,11 +118,42 @@ class CartService
                 'product_id' => $productId,
                 'product_variant_id' => $variantId,
                 'quantity' => $quantity,
-                'price' => $product->price,
+                'price' => $variant ? $variant->setRelation('product', $product)->effectivePrice() : $product->final_price,
             ]);
         }
 
         return true;
+    }
+
+    /**
+     * Which variant a shopper is buying, if the product is sold in variants.
+     *
+     * @return array{0: ?ProductVariant, 1: ?string} the variant (null for a plain product) and an error message
+     */
+    public function resolveVariant(Product $product, ?int $variantId): array
+    {
+        if (! $product->has_variants) {
+            return [null, null];
+        }
+
+        if (! $variantId) {
+            return [null, __('Please choose an option (size, colour...) first.')];
+        }
+
+        $variant = ProductVariant::where('product_id', $product->id)->find($variantId);
+        if (! $variant || ! $variant->is_active) {
+            return [null, __('This option is not available.')];
+        }
+
+        return [$variant->setRelation('product', $product), null];
+    }
+
+    /**
+     * Units that can be sold of a product, or of one of its variants.
+     */
+    public function availableStock(Product $product, ?ProductVariant $variant): int
+    {
+        return $variant ? (int) $variant->stock_quantity : (int) $product->stock_quantity;
     }
 
     /**

@@ -140,7 +140,7 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $product = Product::findOrFail($id);
-        $product->update(['is_active' => true]);
+        $product->update(['is_active' => true, 'approved_at' => $product->approved_at ?? now()]);
 
         return redirect()->back()->with('success', 'Product approved successfully.');
     }

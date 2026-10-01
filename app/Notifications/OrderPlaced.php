@@ -25,7 +25,7 @@ class OrderPlaced extends Notification
             ->line(__('We have your order :number. The shop will prepare it and we will email you when it ships.', ['number' => $order->order_number]));
 
         foreach ($order->items as $item) {
-            $mail->line('• '.($item->product->name ?? __('Product')).' × '.$item->quantity.' — '.Money::format($item->price * $item->quantity));
+            $mail->line('• '.$item->displayName().' × '.$item->quantity.' — '.Money::format($item->price * $item->quantity));
         }
 
         $mail->line(__('Delivery').': '.Money::format($order->shipping_amount))

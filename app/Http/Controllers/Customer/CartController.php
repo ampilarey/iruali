@@ -31,11 +31,12 @@ class CartController extends Controller
     {
         $cart = $this->cartService->getOrCreateCart();
         $cart->load(['items.product.mainImage', 'items.product.seller', 'items.variant']);
+        $cart->items->each(fn ($item) => $item->variant?->setRelation('product', $item->product));
 
         $cartSummary = $this->cartService->getCartSummary($cart);
 
         $saved = Auth::check()
-            ? SavedItem::where('user_id', Auth::id())->with('product.mainImage')->latest()->get()->filter(fn ($s) => $s->product)
+            ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->filter(fn ($s) => $s->product)
             : collect();
 
         return view('cart.index', [
@@ -52,6 +53,7 @@ class CartController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'product_variant_id' => 'nullable|integer',
         ]);
 
         $product = Product::find($request->product_id);
@@ -62,16 +64,26 @@ class CartController extends Controller
             return back();
         }
 
-        $inCart = (int) ($this->cartService->getOrCreateCart()->items()->where('product_id', $product->id)->sum('quantity'));
-        if ($product->stock_quantity < $inCart + (int) $request->quantity) {
-            NotificationService::error(__('Only :count left in stock.', ['count' => max(0, $product->stock_quantity - $inCart)]));
+        // A product sold in variants needs one chosen; its stock is the variant's
+        [$variant, $error] = $this->cartService->resolveVariant($product, $request->integer('product_variant_id') ?: null);
+        if ($error) {
+            NotificationService::error($error);
+
+            return back();
+        }
+
+        $available = $this->cartService->availableStock($product, $variant);
+        $inCart = (int) ($this->cartService->getOrCreateCart()->items()->where('product_id', $product->id)->where('product_variant_id', $variant?->id)->sum('quantity'));
+        if ($available < $inCart + (int) $request->quantity) {
+            NotificationService::error(__('Only :count left in stock.', ['count' => max(0, $available - $inCart)]));
 
             return back();
         }
 
         $this->cartService->addToCart(
             $request->product_id,
-            $request->quantity
+            $request->quantity,
+            $variant?->id
         );
 
         NotificationService::addedToCart($product->name);
@@ -90,7 +102,8 @@ class CartController extends Controller
         $added = 0;
         foreach (Product::whereIn('id', $data['product_ids'])->get() as $product) {
             $inCart = (int) $cart->items()->where('product_id', $product->id)->sum('quantity');
-            if ($product->is_active && $product->stock_quantity > $inCart) {
+            // Products sold in variants need an option picked on their own page
+            if ($product->is_active && ! $product->has_variants && $product->stock_quantity > $inCart) {
                 $this->cartService->addToCart($product->id, 1);
                 $added++;
             }
@@ -111,7 +124,7 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1|max:999',
         ]);
 
-        $quantity = min((int) $request->quantity, max(1, (int) $item->product->stock_quantity));
+        $quantity = min((int) $request->quantity, max(1, $item->availableStock()));
         $this->cartService->updateCartItem($item, $quantity);
 
         if (! $request->expectsJson()) {
@@ -134,7 +147,7 @@ class CartController extends Controller
 
         SavedItem::updateOrCreate(
             ['user_id' => Auth::id(), 'product_id' => $item->product_id],
-            ['quantity' => $item->quantity]
+            ['quantity' => $item->quantity, 'product_variant_id' => $item->product_variant_id]
         );
         $this->cartService->removeFromCart($item);
 
@@ -148,13 +161,15 @@ class CartController extends Controller
         abort_unless($saved->user_id === Auth::id(), 403);
 
         $product = $saved->product;
-        if (! $product || ! $product->is_active || $product->stock_quantity < 1) {
-            NotificationService::error(__('This product is not available.'));
+        [$variant, $error] = $product ? $this->cartService->resolveVariant($product, $saved->product_variant_id) : [null, null];
+        $available = $product ? $this->cartService->availableStock($product, $variant) : 0;
+        if (! $product || ! $product->is_active || $error || $available < 1) {
+            NotificationService::error($error ?: __('This product is not available.'));
 
             return redirect()->route('cart');
         }
 
-        $this->cartService->addToCart($product->id, min($saved->quantity, $product->stock_quantity));
+        $this->cartService->addToCart($product->id, min($saved->quantity, $available), $variant?->id);
         $saved->delete();
 
         NotificationService::addedToCart($product->name);

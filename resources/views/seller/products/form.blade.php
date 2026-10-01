@@ -80,9 +80,11 @@
                     <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
                     <input id="brand" name="brand" class="{{ $field }}" value="{{ old('brand', $product->brand) }}">
                 </div>
-                <div>
+                @php $hasVariants = (bool) old('has_variants', $product->has_variants); @endphp
+                <div data-product-stock class="{{ $hasVariants ? 'hidden' : '' }}">
                     <label for="stock_quantity" class="block text-sm font-medium text-gray-700">Stock *</label>
-                    <input id="stock_quantity" name="stock_quantity" type="number" min="0" required class="{{ $field }}" value="{{ old('stock_quantity', $product->stock_quantity) }}">
+                    <input id="stock_quantity" name="stock_quantity" type="number" min="0" @disabled($hasVariants) class="{{ $field }}" value="{{ old('stock_quantity', $product->stock_quantity) }}">
+                    <p class="mt-1 text-xs text-gray-500 {{ $hasVariants ? '' : 'hidden' }}" data-stock-derived>{{ __('With variants, stock is the total of the variants below.') }}</p>
                 </div>
                 <div>
                     <label for="reorder_point" class="block text-sm font-medium text-gray-700">Low-stock alert at</label>
@@ -102,6 +104,8 @@
                 <input id="main_image" name="main_image" type="file" accept="image/jpeg,image/png,image/gif" class="mt-2 block w-full text-sm text-gray-700">
                 <p class="mt-1 text-xs text-gray-500">JPEG, PNG or GIF, up to 2 MB.</p>
             </div>
+
+            @include('seller.products._variants', ['product' => $product, 'variants' => $variants])
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
                 <a href="{{ route('seller.products.index') }}" class="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Cancel</a>

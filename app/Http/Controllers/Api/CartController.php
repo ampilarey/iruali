@@ -59,6 +59,10 @@ class CartController extends BaseController
         if ($variantId && ! ProductVariant::where('id', $variantId)->where('product_id', $product->id)->exists()) {
             return $this->sendValidationError(['product_variant_id' => ['The selected variant does not belong to this product.']]);
         }
+        [$variant, $error] = $this->cartService->resolveVariant($product, $variantId ? (int) $variantId : null);
+        if ($error) {
+            return $this->sendValidationError(['product_variant_id' => [$error]]);
+        }
 
         $cart = $this->cartService->getOrCreateCart();
         $alreadyInCart = (int) $cart->items()
@@ -66,7 +70,7 @@ class CartController extends BaseController
             ->where('product_variant_id', $variantId)
             ->sum('quantity');
 
-        if ($product->stock_quantity < $alreadyInCart + $request->quantity) {
+        if ($this->cartService->availableStock($product, $variant) < $alreadyInCart + $request->quantity) {
             return $this->sendError('Insufficient stock available');
         }
 

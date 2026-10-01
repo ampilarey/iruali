@@ -17,7 +17,7 @@
                 @foreach($order->items as $item)
                     <li class="flex items-center justify-between px-5 py-3">
                         <div>
-                            <p class="text-sm font-medium text-gray-900">{{ $item->product->name ?? 'Deleted product' }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $item->product ? $item->displayName() : 'Deleted product' }}@if($item->variant_sku) <span class="text-xs text-gray-500" dir="ltr">({{ $item->variant_sku }})</span>@endif</p>
                             <p class="text-xs text-gray-500">{{ $item->quantity }} × {{ \App\Support\Money::format($item->price) }}</p>
                         </div>
                         <span class="text-sm font-medium text-gray-900">{{ \App\Support\Money::format($item->price * $item->quantity) }}</span>

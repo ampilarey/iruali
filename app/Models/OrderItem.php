@@ -10,6 +10,9 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'product_variant_id',
+        'variant_name',
+        'variant_sku',
         'quantity',
         'price',
     ];
@@ -39,5 +42,20 @@ class OrderItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withTrashed();
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    /**
+     * The product name plus the variant as it was when ordered ("Hoodie – M / Blue").
+     */
+    public function displayName(): string
+    {
+        $name = (string) ($this->product?->name ?? __('Product'));
+
+        return $this->variant_name ? $name.' – '.$this->variant_name : $name;
     }
 }

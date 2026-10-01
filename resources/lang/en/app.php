@@ -177,8 +177,6 @@ return [
     'credit_card' => 'Credit Card',
     'debit_card' => 'Debit Card',
     'paypal' => 'PayPal',
-    'cash_on_delivery' => 'Cash on Delivery',
-    'bank_transfer' => 'Bank Transfer',
     'bml_online' => 'BML Online Payment',
     'payment_success' => 'Payment Successful',
     'payment_failed' => 'Payment Failed',
@@ -306,7 +304,7 @@ return [
     'message_info' => 'Please note this information.',
     'message_confirm_delete' => 'Are you sure you want to delete this item?',
     'message_confirm_action' => 'Are you sure you want to perform this action?',
-    
+
     // Notification messages
     'created_successfully' => ':model created successfully!',
     'updated_successfully' => ':model updated successfully!',
@@ -355,4 +353,4 @@ return [
     'enter_email' => 'Enter your email',
     'subscribe' => 'Subscribe',
     'loyalty_points' => 'Loyalty Points',
-]; 
+];

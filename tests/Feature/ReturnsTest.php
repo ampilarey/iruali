@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Notifications\ReturnRequested;
 use App\Notifications\ReturnUpdated;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use App\Services\PayoutService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -73,14 +74,15 @@ class ReturnsTest extends TestCase
 
         $order = app(OrderService::class)->createOrderFromCart($this->customer, [
             'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
-            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'cod',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'payment_method' => 'bml',
         ])['order'];
 
         $this->actingAs($this->admin);
         foreach (['processing', 'shipped', 'delivered'] as $status) {
             $this->post(route('admin.orders.status', $order), ['status' => $status]);
         }
-        $this->post(route('admin.orders.payment', $order), ['action' => 'confirm']);
+        // BML confirms card payments (via the webhook); do the same here
+        app(PaymentService::class)->confirm($order->fresh());
 
         return $order->fresh();
     }

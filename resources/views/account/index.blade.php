@@ -75,6 +75,16 @@
                         <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Change password') }}</button>
                     </form>
 
+                    <form method="POST" action="{{ route('account.marketing') }}" class="border-t border-gray-100 pt-5 flex flex-wrap items-center justify-between gap-3">
+                        @csrf @method('PUT')
+                        <div>
+                            <h3 class="font-medium text-gray-900">{{ __('Marketing emails') }}</h3>
+                            <p class="text-sm text-gray-600">{{ $user->marketing_opt_out_at ? __('Off. You only get emails about your orders.') : __('On. Offers and reminders about items left in your cart.') }}</p>
+                        </div>
+                        <input type="hidden" name="marketing_emails" value="{{ $user->marketing_opt_out_at ? 1 : 0 }}">
+                        <button type="submit" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ $user->marketing_opt_out_at ? __('Turn on') : __('Turn off') }}</button>
+                    </form>
+
                     <div class="border-t border-gray-100 pt-5 flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h3 class="font-medium text-gray-900">{{ __('Two-step sign-in') }}</h3>

@@ -250,6 +250,8 @@ class AdminController extends Controller
             'delivery_fee_islands' => 'sometimes|required|numeric|min:0|max:100000',
             'free_delivery_over' => 'sometimes|required|numeric|min:0|max:1000000',
             'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
+            'abandoned_cart_emails_enabled' => 'sometimes|boolean',
+            'abandoned_cart_voucher_percent' => 'sometimes|required|numeric|min:0|max:100',
         ]);
 
         Setting::set($validated);

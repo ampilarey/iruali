@@ -97,6 +97,11 @@ class DiscountService
             return ['valid' => false, 'message' => __('Invalid or inactive voucher.')];
         }
 
+        // A voucher issued to one customer (e.g. an abandoned-cart nudge) can't be used by anyone else
+        if (! $voucher->usableBy(auth()->id())) {
+            return ['valid' => false, 'message' => __('Invalid or inactive voucher.')];
+        }
+
         if ($voucher->valid_from && now()->lt($voucher->valid_from)) {
             return ['valid' => false, 'message' => __('Voucher not yet valid.')];
         }

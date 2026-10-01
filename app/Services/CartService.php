@@ -252,7 +252,7 @@ class CartService
             ->where('is_active', true)
             ->first();
 
-        if (! $voucher) {
+        if (! $voucher || ! $voucher->usableBy(Auth::id())) {
             return ['success' => false, 'message' => __('Invalid or inactive voucher.')];
         }
 

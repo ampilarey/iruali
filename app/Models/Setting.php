@@ -41,6 +41,9 @@ class Setting extends Model
         'free_delivery_over' => 1000,
         // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
         'default_commission_rate' => 10,
+        // Abandoned-cart emails (3 h and 48 h nudges); the second nudge carries a voucher when the percent is > 0
+        'abandoned_cart_emails_enabled' => 1,
+        'abandoned_cart_voucher_percent' => 0,
     ];
 
     protected $fillable = ['key', 'value'];

@@ -90,6 +90,7 @@ class User extends Authenticatable implements HasLocalePreference
         'seller_approved' => 'boolean',
         'two_factor_enabled' => 'boolean',
         'referral_rewarded_at' => 'datetime',
+        'marketing_opt_out_at' => 'datetime',
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',

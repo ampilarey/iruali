@@ -75,9 +75,10 @@ class OrderService
                 }
             }
 
-            // Process loyalty points and referral rewards
-            $this->processLoyaltyPoints($user, $loyaltyPointsEarned, $discounts['points']['points_redeemed']);
-            $this->discountService->processReferralRewards($user);
+            // Redeemed points are taken now; earned points and referral rewards come when the order is paid.
+            if ($discounts['points']['points_redeemed'] > 0) {
+                $user->decrement('loyalty_points', $discounts['points']['points_redeemed']);
+            }
 
             // Clear cart
             $this->clearCart($cart);
@@ -162,7 +163,28 @@ class OrderService
     }
 
     /**
-     * Process loyalty points
+     * Give the customer the points this order earns, and the referral reward if this is their first
+     * paid order. Runs when payment is confirmed; safe to call again.
+     */
+    public function awardRewards(Order $order): void
+    {
+        $user = $order->user;
+        if (! $user || $order->payment_status !== 'paid' || $order->status === 'cancelled') {
+            return;
+        }
+
+        if (! $order->loyalty_points_awarded_at) {
+            if ($order->loyalty_points_earned > 0) {
+                $user->increment('loyalty_points', $order->loyalty_points_earned);
+            }
+            $order->forceFill(['loyalty_points_awarded_at' => now()])->save();
+        }
+
+        $this->discountService->processReferralRewards($user);
+    }
+
+    /**
+     * @deprecated Points are awarded by awardRewards() once the order is paid.
      */
     protected function processLoyaltyPoints(User $user, int $pointsEarned, int $pointsRedeemed): void
     {
@@ -315,8 +337,11 @@ class OrderService
             if ($order->points_redeemed > 0) {
                 $user->increment('loyalty_points', $order->points_redeemed);
             }
-            if ($order->loyalty_points_earned > 0) {
-                $user->update(['loyalty_points' => max(0, $user->fresh()->loyalty_points - $order->loyalty_points_earned)]);
+            // Earned points are only taken back if they were actually given (the order was paid).
+            // The balance can go below zero if they were already spent; nothing can be redeemed until it recovers.
+            if ($order->loyalty_points_earned > 0 && $order->loyalty_points_awarded_at) {
+                $user->decrement('loyalty_points', $order->loyalty_points_earned);
+                $order->forceFill(['loyalty_points_awarded_at' => null])->save();
             }
         }
 

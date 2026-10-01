@@ -3,411 +3,193 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\RegisterUserRequest;
 use App\Models\OTP;
 use App\Models\Role;
+use App\Models\User;
+use App\Notifications\VerifyEmailCode;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Str;
 use PragmaRX\Google2FA\Google2FA;
-use App\Http\Requests\RegisterUserRequest;
-use App\Services\NotificationService;
+use Throwable;
 
+/**
+ * Sign up, sign in (with two-step codes) and email verification.
+ */
 class AuthController extends Controller
 {
-    protected $google2fa;
+    public function __construct(protected Google2FA $google2fa) {}
 
-    public function __construct()
-    {
-        $this->google2fa = new Google2FA();
-    }
-
-    /**
-     * Show login form
-     */
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    /**
-     * Show registration form
-     */
     public function showRegister()
     {
         return view('auth.register');
     }
 
     /**
-     * Handle user registration
+     * Create the account, sign the customer in and email them a verification code.
+     * Sellers are not created here: they apply from the Seller Centre after signing up.
      */
     public function register(RegisterUserRequest $request)
     {
-        $referredBy = null;
-        if ($request->filled('referral_code')) {
-            $referrer = User::where('referral_code', $request->referral_code)->first();
-            if ($referrer) {
-                $referredBy = $referrer->id;
-            }
-        }
-        // Generate unique referral code for new user
+        $referrer = $request->filled('referral_code') ? User::where('referral_code', $request->referral_code)->first() : null;
+
         do {
-            $newReferralCode = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
-        } while (User::where('referral_code', $newReferralCode)->exists());
+            $code = strtoupper(Str::random(8));
+        } while (User::where('referral_code', $code)->exists());
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
+            'phone' => $request->filled('phone') ? preg_replace('/\s+/', '', $request->phone) : null,
             'password' => Hash::make($request->password),
-            'address' => $request->address,
-            'city' => $request->city,
-            'state' => $request->state,
-            'country' => $request->country,
-            'postal_code' => $request->postal_code,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-            'is_seller' => $request->boolean('is_seller'),
             'is_active' => true,
-            'referral_code' => $newReferralCode,
-            'referred_by' => $referredBy,
+            'referral_code' => $code,
+            'referred_by' => $referrer?->id,
+            'preferred_language' => app()->getLocale(),
         ]);
 
-        // Assign default role
-        $defaultRole = $user->is_seller ? 'seller' : 'customer';
-        $role = Role::where('name', $defaultRole)->first();
-        if ($role) {
-            $user->roles()->attach($role->id);
-        }
+        $user->roles()->attach(Role::firstOrCreate(['name' => 'customer'], ['display_name' => 'Customer'])->id);
 
-        // Reward referral (optional: adjust points/logic as needed)
-        if ($referredBy) {
-            // Reward referrer
-            $referrer->increment('loyalty_points', 100); // e.g., 100 points
-            // Reward referee
-            $user->increment('loyalty_points', 50); // e.g., 50 points
-        }
-
-        // Send verification OTPs
-        OTP::createForEmail($user->email, 'verification');
-        OTP::createForPhone($user->phone, 'verification');
+        $this->sendEmailCode($user);
 
         Auth::login($user);
+        $request->session()->regenerate();
 
         NotificationService::registrationSuccess();
 
         return redirect()->route('verification.notice');
     }
 
-    /**
-     * Handle user login
-     */
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember' => 'boolean'
-        ]);
+        $request->validate(['email' => 'required|string|email', 'password' => 'required|string']);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $credentials = $request->only('email', 'password');
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
-
-            // Check if user is banned
-            if ($user->isBanned()) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => __('auth.account_banned', ['reason' => $user->banned_reason])
-                ]);
-            }
-
-            // Check if user is active
-            if (!$user->isActive()) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => __('auth.account_inactive')
-                ]);
-            }
-
-            // Update login tracking
-            $user->updateLoginTracking($request->ip());
-
-            // Check if 2FA is required
-            if ($user->isTwoFactorEnabled()) {
-                // The password was right but the user is not signed in until the 2FA code is checked
-                Auth::logout();
-                session(['2fa_user_id' => $user->id, '2fa_remember' => $remember]);
-
-                return redirect()->route('2fa.show');
-            }
-
-            // Check if email/phone verification is required
-            if (!$user->isEmailVerified() || !$user->isPhoneVerified()) {
-                return redirect()->route('verification.notice');
-            }
-
-            NotificationService::loginSuccess();
-            return $this->redirectBasedOnRole($user);
+        if (! Auth::attempt($request->only('email', 'password'), $remember)) {
+            return back()->withInput($request->only('email', 'remember'))->withErrors(['email' => __('auth.failed')]);
         }
 
-        return back()->withErrors([
-            'email' => __('auth.failed')
-        ]);
+        $user = Auth::user();
+
+        if ($user->isBanned() || ! $user->isActive()) {
+            Auth::logout();
+
+            return back()->withErrors(['email' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
+        }
+
+        if ($user->isTwoFactorEnabled()) {
+            // The password was right but the user is not signed in until the 2FA code is checked
+            Auth::logout();
+            session(['2fa_user_id' => $user->id, '2fa_remember' => $remember]);
+
+            return redirect()->route('2fa.show');
+        }
+
+        $request->session()->regenerate();
+        $user->updateLoginTracking($request->ip());
+        NotificationService::loginSuccess();
+
+        // Unverified emails get a reminder banner on every page; they are not locked out.
+        return $this->redirectBasedOnRole($user);
     }
 
-    /**
-     * Show 2FA form
-     */
     public function show2FA()
     {
-        if (!session('2fa_user_id')) {
+        if (! session('2fa_user_id')) {
             return redirect()->route('login');
         }
 
         return view('auth.2fa');
     }
 
-    /**
-     * Handle 2FA verification
-     */
     public function verify2FA(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'code' => 'required|string|size:6'
-        ]);
+        $request->validate(['code' => 'required|string|min:6|max:11']);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator);
-        }
-
-        $userId = session('2fa_user_id');
-        $user = User::find($userId);
-
-        if (!$user) {
+        $user = User::find(session('2fa_user_id'));
+        if (! $user) {
             return redirect()->route('login');
         }
 
-        $code = $request->code;
+        $code = strtoupper(trim($request->code));
+        $valid = $user->useRecoveryCode($code)
+            || (ctype_digit($code) && strlen($code) === 6 && $this->google2fa->verifyKey(decrypt($user->two_factor_secret), $code));
 
-        // Check if it's a recovery code
-        $recoveryCodes = $user->getRecoveryCodes();
-        if (in_array($code, $recoveryCodes)) {
-            // Remove used recovery code
-            $recoveryCodes = array_diff($recoveryCodes, [$code]);
-            $user->update([
-                'two_factor_recovery_codes' => encrypt(json_encode(array_values($recoveryCodes)))
-            ]);
-            
-            $remember = (bool) session('2fa_remember', false);
-            session()->forget(['2fa_user_id', '2fa_remember']);
-            Auth::login($user, $remember);
-            return $this->redirectBasedOnRole($user);
+        if (! $valid) {
+            return back()->withErrors(['code' => __('auth.invalid_2fa_code')]);
         }
 
-        // Verify TOTP code
-        $secret = decrypt($user->two_factor_secret);
-        $valid = $this->google2fa->verifyKey($secret, $code);
+        $remember = (bool) session('2fa_remember', false);
+        session()->forget(['2fa_user_id', '2fa_remember']);
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+        $user->updateLoginTracking($request->ip());
 
-        if ($valid) {
-            $remember = (bool) session('2fa_remember', false);
-            session()->forget(['2fa_user_id', '2fa_remember']);
-            Auth::login($user, $remember);
-            return $this->redirectBasedOnRole($user);
-        }
-
-        return back()->withErrors([
-            'code' => __('auth.invalid_2fa_code')
-        ]);
+        return $this->redirectBasedOnRole($user);
     }
 
-    /**
-     * Show user account page
-     */
-    public function account()
+    public function showVerificationNotice(Request $request)
     {
-        $user = auth()->user();
-        return view('account.index', compact('user'));
+        return view('auth.verification-notice', ['user' => $request->user()]);
     }
 
     /**
-     * Show verification notice
-     */
-    public function showVerificationNotice()
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        $user = Auth::user();
-        return view('auth.verification-notice', compact('user'));
-    }
-
-    /**
-     * Send email verification OTP
+     * Email a fresh code to the signed-in user (never to an address from the request).
      */
     public function sendEmailOTP(Request $request)
     {
-        $email = $request->email ?? Auth::user()->email;
-        
-        $otp = OTP::createForEmail($email, 'verification');
-        
-        // Send email with OTP
-        // Mail::to($email)->send(new EmailVerificationOTP($otp));
-        
-        return back()->with('success', __('auth.email_otp_sent'));
+        $user = $request->user();
+        if ($user->isEmailVerified()) {
+            return redirect()->route('account');
+        }
+
+        $this->sendEmailCode($user);
+
+        return back()->with('status', __('We have emailed a new code to :email.', ['email' => $user->email]));
     }
 
-    /**
-     * Send SMS verification OTP
-     */
-    public function sendSMSOTP(Request $request)
-    {
-        $phone = $request->phone ?? Auth::user()->phone;
-        
-        $otp = OTP::createForPhone($phone, 'verification');
-        
-        // Send SMS with OTP
-        // $this->sendSMS($phone, "Your verification code is: {$otp->code}");
-        
-        return back()->with('success', __('auth.sms_otp_sent'));
-    }
-
-    /**
-     * Verify email OTP
-     */
     public function verifyEmailOTP(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'code' => 'required|string|size:6'
-        ]);
+        $request->validate(['code' => 'required|digits:6']);
+        $user = $request->user();
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator);
+        if (! OTP::verify($user->email, $request->code, 'verification')) {
+            return back()->withErrors(['code' => __('auth.invalid_otp')]);
         }
 
-        $otp = OTP::verify($request->email, $request->code, 'verification');
-
-        if (!$otp) {
-            return back()->withErrors([
-                'code' => __('auth.invalid_otp')
-            ]);
-        }
-
-        $user = User::where('email', $request->email)->first();
-        $user->update(['email_verified_at' => now()]);
-
+        $user->forceFill(['email_verified_at' => now()])->save();
         NotificationService::emailVerified();
 
-        return back();
+        return redirect()->intended(route('account'));
     }
 
     /**
-     * Verify phone OTP
+     * Phone codes: kept for when an SMS provider is connected. Always for the signed-in user's own number.
      */
     public function verifyPhoneOTP(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'phone' => 'required|string',
-            'code' => 'required|string|size:6'
-        ]);
+        $request->validate(['code' => 'required|digits:6']);
+        $user = $request->user();
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator);
+        if (! $user->phone || ! OTP::verify($user->phone, $request->code, 'verification')) {
+            return back()->withErrors(['code' => __('auth.invalid_otp')]);
         }
 
-        $otp = OTP::verify($request->phone, $request->code, 'verification');
-
-        if (!$otp) {
-            return back()->withErrors([
-                'code' => __('auth.invalid_otp')
-            ]);
-        }
-
-        $user = User::where('phone', $request->phone)->first();
-        $user->update(['phone_verified_at' => now()]);
-
+        $user->forceFill(['phone_verified_at' => now()])->save();
         NotificationService::phoneVerified();
 
         return back();
     }
 
-    /**
-     * Show 2FA setup
-     */
-    public function show2FASetup()
-    {
-        $user = Auth::user();
-        $secret = $this->google2fa->generateSecretKey();
-        $qrCodeUrl = $this->google2fa->getQRCodeUrl(
-            config('app.name'),
-            $user->email,
-            $secret
-        );
-
-        return view('auth.2fa-setup', compact('secret', 'qrCodeUrl'));
-    }
-
-    /**
-     * Enable 2FA
-     */
-    public function enable2FA(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'secret' => 'required|string',
-            'code' => 'required|string|size:6'
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator);
-        }
-
-        $user = Auth::user();
-        $valid = $this->google2fa->verifyKey($request->secret, $request->code);
-
-        if (!$valid) {
-            return back()->withErrors([
-                'code' => __('auth.invalid_2fa_code')
-            ]);
-        }
-
-        $user->update([
-            'two_factor_enabled' => true,
-            'two_factor_secret' => encrypt($request->secret),
-            'two_factor_recovery_codes' => encrypt(json_encode($user->generateRecoveryCodes()))
-        ]);
-
-        NotificationService::twoFactorEnabled();
-
-        return redirect()->route('profile.2fa');
-    }
-
-    /**
-     * Disable 2FA
-     */
-    public function disable2FA(Request $request)
-    {
-        $user = Auth::user();
-        $user->disableTwoFactor();
-
-        NotificationService::twoFactorDisabled();
-
-        return back();
-    }
-
-    /**
-     * Handle logout
-     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -419,21 +201,26 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    /**
-     * Redirect user based on their role
-     */
-    private function redirectBasedOnRole(User $user)
+    protected function sendEmailCode(User $user): void
     {
-        if ($user->isAdmin()) {
-            $default = route('admin.dashboard');
-        } elseif ($user->isSeller()) {
-            $default = route('seller.dashboard');
-        } else {
-            $default = route('home');
-        }
+        $otp = OTP::createForEmail($user->email, 'verification');
 
-        // Send users back to the page that required login (e.g. /seller/apply)
-        return redirect()->intended($default);
+        try {
+            $user->notify(new VerifyEmailCode($otp));
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 
-} 
+    protected function redirectBasedOnRole(User $user)
+    {
+        $default = match (true) {
+            $user->isAdmin() => route('admin.dashboard'),
+            $user->isSeller() => route('seller.dashboard'),
+            default => route('home'),
+        };
+
+        // Send users back to the page that required login (e.g. /checkout)
+        return redirect()->intended($default);
+    }
+}

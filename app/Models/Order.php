@@ -23,7 +23,7 @@ class Order extends Model
         'total_amount',
         'voucher_code',
         'voucher_discount',
-        'loyalty_points_earned',
+        'loyalty_points_earned', 'loyalty_points_awarded_at',
         'points_redeemed',
         'points_redeemed_discount',
         'shipping_address',
@@ -43,6 +43,7 @@ class Order extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'loyalty_points_awarded_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',

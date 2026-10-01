@@ -183,20 +183,23 @@ class DiscountService
     {
         $rewards = ['referrer_points' => 0, 'user_points' => 0];
 
-        // Only process referral rewards after first order
-        if ($user->referred_by && $user->orders()->count() === 1) {
-            $referrer = $user->referredBy;
-            if ($referrer) {
-                $referrerPoints = (int) Setting::get('referral_referrer_points');
-                $userPoints = (int) Setting::get('referral_referee_points');
-
-                $referrer->increment('loyalty_points', $referrerPoints);
-                $user->increment('loyalty_points', $userPoints);
-
-                $rewards['referrer_points'] = $referrerPoints;
-                $rewards['user_points'] = $userPoints;
-            }
+        // One reward per referred customer, given when their first order is paid.
+        if (! $user->referred_by || $user->referral_rewarded_at) {
+            return $rewards;
         }
+
+        $referrer = $user->referredBy;
+        if ($referrer) {
+            $referrerPoints = (int) Setting::get('referral_referrer_points');
+            $userPoints = (int) Setting::get('referral_referee_points');
+
+            $referrer->increment('loyalty_points', $referrerPoints);
+            $user->increment('loyalty_points', $userPoints);
+
+            $rewards = ['referrer_points' => $referrerPoints, 'user_points' => $userPoints];
+        }
+
+        $user->forceFill(['referral_rewarded_at' => now()])->save();
 
         return $rewards;
     }

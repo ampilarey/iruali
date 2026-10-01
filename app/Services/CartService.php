@@ -73,9 +73,10 @@ class CartService
 
         foreach ($guest->items as $item) {
             $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)->first();
+            $stock = (int) ($item->product?->stock_quantity ?? 0);
             $existing
-                ? $existing->update(['quantity' => $existing->quantity + $item->quantity])
-                : $item->update(['cart_id' => $cart->id]);
+                ? $existing->update(['quantity' => max(1, min($existing->quantity + $item->quantity, $stock, 999))])
+                : $item->update(['cart_id' => $cart->id, 'quantity' => max(1, min($item->quantity, $stock, 999))]);
         }
 
         $guest->items()->delete();

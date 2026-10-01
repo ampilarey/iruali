@@ -41,6 +41,40 @@ class PayoutService
     }
 
     /**
+     * balances() for every shop at once (the admin payouts page): a few grouped queries instead of five per shop.
+     *
+     * @return array<int, array{pending: float, available: float, adjustments: float, paid: float, commission: float}>
+     */
+    public function balancesForAll(): array
+    {
+        $parts = SellerOrder::query()->where('seller_orders.status', '!=', 'cancelled')->whereNotNull('seller_orders.seller_id')
+            ->leftJoin('orders', 'orders.id', '=', 'seller_orders.order_id')
+            ->groupBy('seller_orders.seller_id')
+            ->selectRaw("seller_orders.seller_id,
+                SUM(CASE WHEN seller_orders.payout_id IS NULL AND seller_orders.status = 'delivered' AND seller_orders.seller_earnings > 0 AND orders.payment_status = 'paid' THEN seller_orders.seller_earnings ELSE 0 END) AS payable,
+                SUM(CASE WHEN seller_orders.payout_id IS NULL THEN seller_orders.seller_earnings ELSE 0 END) AS unpaid,
+                SUM(CASE WHEN seller_orders.status = 'delivered' THEN seller_orders.commission_amount ELSE 0 END) AS commission")
+            ->get()->keyBy('seller_id');
+        $adjustments = SellerAdjustment::whereNull('payout_id')->groupBy('seller_id')->selectRaw('seller_id, SUM(amount) AS total')->pluck('total', 'seller_id');
+        $paid = SellerPayout::groupBy('seller_id')->selectRaw('seller_id, SUM(amount) AS total')->pluck('total', 'seller_id');
+
+        $out = [];
+        foreach (array_unique(array_merge($parts->keys()->all(), $adjustments->keys()->all(), $paid->keys()->all())) as $sellerId) {
+            $p = $parts[$sellerId] ?? null;
+            $adj = round((float) ($adjustments[$sellerId] ?? 0), 2);
+            $out[$sellerId] = [
+                'available' => round((float) ($p->payable ?? 0) + $adj, 2),
+                'pending' => round((float) ($p->unpaid ?? 0) - (float) ($p->payable ?? 0), 2),
+                'adjustments' => $adj,
+                'paid' => round((float) ($paid[$sellerId] ?? 0), 2),
+                'commission' => round((float) ($p->commission ?? 0), 2),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
      * Adjustments not yet settled in a payout.
      */
     public function openAdjustments(User $seller)

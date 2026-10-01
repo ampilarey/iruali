@@ -14,3 +14,9 @@ Schedule::command('backup:run --only-db')->dailyAt('02:00')->withoutOverlapping(
 
 // Expired API tokens
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
+
+// Guest carts nobody has touched for a month (and their lines) are dropped
+Schedule::call(function () {
+    \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))
+        ->each(fn ($cart) => $cart->delete());
+})->dailyAt('03:00')->name('prune-guest-carts');

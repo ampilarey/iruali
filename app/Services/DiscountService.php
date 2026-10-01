@@ -39,13 +39,14 @@ class DiscountService
             return ['amount' => 0, 'voucher' => null];
         }
 
-        $voucher = Voucher::where('code', $voucherCode)
-            ->where('is_active', true)
-            ->first();
+        $check = $this->validateVoucher($voucherCode, $cart);
+        if (! $check['valid']) {
+            // Expired, used up or below the minimum since it was applied: drop it quietly
+            Session::forget('voucher_code');
 
-        if (! $voucher) {
-            return ['amount' => 0, 'voucher' => null];
+            return ['amount' => 0, 'voucher' => null, 'error' => $check['message']];
         }
+        $voucher = $check['voucher'];
 
         $amount = $this->calculateVoucherAmount($cart, $voucher);
 

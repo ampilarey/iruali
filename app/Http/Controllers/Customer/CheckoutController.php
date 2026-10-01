@@ -25,6 +25,7 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         $cart = $this->cartService->getOrCreateCart();
+        $cart->load(['items.product.mainImage']);
 
         if ($this->cartService->isCartEmpty($cart)) {
             return redirect()->route('cart')->with('error', 'Your cart is empty.');

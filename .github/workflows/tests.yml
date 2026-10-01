@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  phpunit:
+    name: PHPUnit (MariaDB)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+          MARIADB_DATABASE: iruali_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, gd, zip, pdo_mysql, bcmath
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare app
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+          mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public bootstrap/cache
+      - name: Run tests
+        run: php artisan test --no-interaction
+        env:
+          DB_HOST: 127.0.0.1
+      - name: Built assets are committed and current
+        run: |
+          test -f public/build/manifest.json
+          git diff --exit-code --stat -- public/build || (echo "public/build is out of date: run npm run build and commit" && exit 1)

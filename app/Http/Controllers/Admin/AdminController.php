@@ -108,6 +108,7 @@ class AdminController extends Controller
 
         $seller = User::findOrFail($id);
         $seller->update(['status' => 'suspended']);
+        \App\Models\Product::where('seller_id', $seller->id)->update(['is_active' => false]);
 
         return redirect()->back()->with('success', 'Seller suspended successfully.');
     }

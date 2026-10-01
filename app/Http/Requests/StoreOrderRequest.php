@@ -37,7 +37,47 @@ class StoreOrderRequest extends FormRequest
             'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
             'delivery_zone' => 'nullable|in:greater_male,islands',
             'agree_terms' => 'required|accepted',
+            // Saved addresses and the island picker (their values are copied into shipping_* before validation)
+            'address_id' => 'nullable|integer',
+            'island_id' => 'nullable|integer|exists:islands,id',
+            'save_address' => 'nullable|boolean',
+            'address_label' => 'nullable|string|max:50',
         ];
+    }
+
+    /**
+     * The saved address the customer picked, when it is theirs.
+     */
+    public function savedAddress(): ?\App\Models\Address
+    {
+        if (! $this->filled('address_id') || ! auth()->check()) {
+            return null;
+        }
+
+        return \App\Models\Address::where('user_id', auth()->id())->find((int) $this->input('address_id'));
+    }
+
+    /**
+     * Fill the shipping_* fields from the chosen saved address, or the island name and atoll from
+     * the island picked in the list, so OrderService sees the same fields as a typed address.
+     */
+    protected function applyAddressChoice(): void
+    {
+        if ($this->filled('address_id')) {
+            if ($address = $this->savedAddress()) {
+                $this->merge(array_merge($address->toShippingData(), ['shipping_phone' => $address->phone ?: auth()->user()?->phone]));
+            }
+
+            return;
+        }
+
+        if ($this->filled('island_id') && ($island = \App\Models\Island::find((int) $this->input('island_id')))) {
+            $this->merge([
+                'shipping_city' => $island->getTranslation('name', 'en', false) ?: $island->getTranslation('name', config('app.fallback_locale'), false),
+                'shipping_state' => $island->atoll ?: (string) $this->input('shipping_state'),
+                'delivery_zone' => app(\App\Services\DeliveryService::class)->zoneForIsland($island),
+            ]);
+        }
     }
 
     /**
@@ -87,6 +127,8 @@ class StoreOrderRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $this->applyAddressChoice();
+
         // Trim whitespace from string inputs
         $this->merge([
             'shipping_address' => trim($this->input('shipping_address')),
@@ -121,6 +163,11 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            // A saved address must be one of the customer's own
+            if ($this->filled('address_id') && ! $this->savedAddress()) {
+                $validator->errors()->add('address_id', __('That saved address could not be found. Please choose another or enter a new one.'));
+            }
+
             // Check if user has items in cart
             $user = auth()->user();
             $cart = $user->carts()->where('status', 'active')->latest()->first();

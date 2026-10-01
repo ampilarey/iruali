@@ -5,7 +5,10 @@
 @php
     $field = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500';
     $user = auth()->user();
-    $selectedZone = old('delivery_zone', app(\App\Services\DeliveryService::class)->zoneFor(null, $user->city));
+    $isGuest = $isGuest ?? ! auth()->check();
+    $addresses = $addresses ?? collect();
+    $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
+    $selectedZone = old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
 @endphp
 
 @section('content')
@@ -29,32 +32,69 @@
     <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>
     <form id="remove-points-form" action="{{ route('checkout.removePoints') }}" method="POST">@csrf</form>
 
-    <form id="checkout-form" action="{{ route('orders.store') }}" method="POST">
+    <form id="checkout-form" action="{{ $isGuest ? route('checkout.guest.store') : route('orders.store') }}" method="POST">
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div class="lg:col-span-3 space-y-6">
-                <section class="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Address') }}</label>
-                            <input type="text" id="shipping_address" name="shipping_address" required autocomplete="shipping address-line1" class="{{ $field }}" value="{{ old('shipping_address', $user->address) }}" placeholder="{{ __('House name, street') }}" @error('shipping_address') aria-invalid="true" aria-describedby="shipping_address-error" @enderror>
-                            @error('shipping_address')<p id="shipping_address-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                @if($isGuest)
+                    <section class="bg-white rounded-2xl border border-gray-200 p-6">
+                        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">{{ __('Your details') }}</h2>
+                                <p class="text-sm text-gray-600">{{ __('Checking out as a guest. We email your order confirmation and tracking link to this address.') }}</p>
+                            </div>
+                            <a href="{{ route('login') }}" class="text-sm font-medium text-primary hover:underline">{{ __('Have an account? Sign in') }}</a>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="shipping_city" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Island') }}</label>
-                                <input type="text" id="shipping_city" name="shipping_city" required autocomplete="shipping address-level2" class="{{ $field }}" value="{{ old('shipping_city', $user->city) }}" placeholder="{{ __('e.g. Malé') }}" @error('shipping_city') aria-invalid="true" aria-describedby="shipping_city-error" @enderror>
-                                @error('shipping_city')<p id="shipping_city-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                                <label for="guest_email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email address') }}</label>
+                                <input type="email" id="guest_email" name="guest_email" required autocomplete="email" dir="ltr" class="{{ $field }}" value="{{ old('guest_email') }}" @error('guest_email') aria-invalid="true" @enderror>
+                                @error('guest_email')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <label for="shipping_state" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Atoll') }}</label>
-                                <input type="text" id="shipping_state" name="shipping_state" required autocomplete="shipping address-level1" class="{{ $field }}" value="{{ old('shipping_state', $user->state) }}" placeholder="{{ __('e.g. Kaafu') }}" @error('shipping_state') aria-invalid="true" aria-describedby="shipping_state-error" @enderror>
-                                @error('shipping_state')<p id="shipping_state-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                                <label for="guest_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Full name') }}</label>
+                                <input type="text" id="guest_name" name="guest_name" required autocomplete="name" maxlength="120" class="{{ $field }}" value="{{ old('guest_name') }}" @error('guest_name') aria-invalid="true" @enderror>
+                                @error('guest_name')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                             </div>
+                        </div>
+                    </section>
+                @endif
+                <section class="bg-white rounded-2xl border border-gray-200 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>
+                    @if($addresses->isNotEmpty())
+                        <div class="space-y-3 mb-5" role="radiogroup" aria-label="{{ __('Saved addresses') }}">
+                            @foreach($addresses as $address)
+                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
+                                    <input type="radio" name="address_id" value="{{ $address->id }}" data-zone="{{ $address->deliveryZone() }}" @checked((string) $selectedAddressId === (string) $address->id) class="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                    <span class="min-w-0 text-sm">
+                                        <span class="flex flex-wrap items-center gap-2 font-medium text-gray-900">{{ $address->label ?: __('Address') }} @if($address->is_default)<span class="rounded-full bg-primary-100 text-primary-700 px-2 py-0.5 text-xs font-semibold">{{ __('Default') }}</span>@endif</span>
+                                        <span class="block text-gray-700">{{ $address->recipient_name }} · {{ $address->summary() }}</span>
+                                        @if($address->phone)<span class="block text-gray-500" dir="ltr">{{ $address->phone }}</span>@endif
+                                        <span class="block text-xs text-primary font-medium mt-1">{{ __('Use this address') }}</span>
+                                    </span>
+                                </label>
+                            @endforeach
+                            <label class="flex items-center gap-3 rounded-xl border border-dashed border-gray-300 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
+                                <input type="radio" name="address_id" value="" @checked((string) $selectedAddressId === '') class="h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm font-medium text-gray-900">{{ __('Deliver to a new address') }}</span>
+                            </label>
+                            @error('address_id')<p class="text-sm text-danger">{{ $message }}</p>@enderror
+                        </div>
+                        <p class="mb-4 text-xs text-gray-500"><a href="{{ route('account.addresses') }}" class="text-primary hover:underline">{{ __('Manage saved addresses') }}</a></p>
+                    @endif
+                    <div class="space-y-4 {{ $addresses->isNotEmpty() && (string) $selectedAddressId !== '' ? 'hidden' : '' }}" data-new-address>
+                        <div>
+                            <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Address') }}</label>
+                            <input type="text" id="shipping_address" name="shipping_address" required autocomplete="shipping address-line1" class="{{ $field }}" value="{{ old('shipping_address', $user?->address) }}" placeholder="{{ __('House name, street') }}" @error('shipping_address') aria-invalid="true" aria-describedby="shipping_address-error" @enderror>
+                            @error('shipping_address')<p id="shipping_address-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                        </div>
+                        <x-island-picker :islands-by-atoll="$islandsByAtoll" :selected-id="old('island_id')" :island="old('shipping_city', $user?->city)" :atoll="old('shipping_state', $user?->state)" island-name="shipping_city" atoll-name="shipping_state" prefix="ship" />
+                        @error('shipping_city')<p id="shipping_city-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                        @error('shipping_state')<p id="shipping_state-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="shipping_phone" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Phone for delivery') }}</label>
-                                <input type="tel" id="shipping_phone" name="shipping_phone" required inputmode="tel" autocomplete="tel" dir="ltr" class="{{ $field }}" value="{{ old('shipping_phone', $user->phone) }}" placeholder="7771234" @error('shipping_phone') aria-invalid="true" aria-describedby="shipping_phone-error" @enderror>
+                                <input type="tel" id="shipping_phone" name="shipping_phone" required inputmode="tel" autocomplete="tel" dir="ltr" class="{{ $field }}" value="{{ old('shipping_phone', $user?->phone) }}" placeholder="7771234" @error('shipping_phone') aria-invalid="true" aria-describedby="shipping_phone-error" @enderror>
                                 @error('shipping_phone')
                                     <p id="shipping_phone-error" class="mt-1 text-sm text-danger">{{ $message }}</p>
                                 @else
@@ -63,7 +103,7 @@
                             </div>
                             <div>
                                 <label for="shipping_zip" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Postal code') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
-                                <input type="text" id="shipping_zip" name="shipping_zip" autocomplete="shipping postal-code" class="{{ $field }}" value="{{ old('shipping_zip', $user->postal_code) }}" placeholder="20026" @error('shipping_zip') aria-invalid="true" aria-describedby="shipping_zip-error" @enderror>
+                                <input type="text" id="shipping_zip" name="shipping_zip" autocomplete="shipping postal-code" class="{{ $field }}" value="{{ old('shipping_zip', $user?->postal_code) }}" placeholder="20026" @error('shipping_zip') aria-invalid="true" aria-describedby="shipping_zip-error" @enderror>
                                 @error('shipping_zip')<p id="shipping_zip-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                             </div>
                             <div>
@@ -72,6 +112,18 @@
                                 @error('shipping_country')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                             </div>
                         </div>
+                        @auth
+                            <div class="rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 space-y-2">
+                                <label class="flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="save_address" value="1" @checked(old('save_address', $addresses->isEmpty())) class="rounded text-primary-600 focus:ring-primary-500">
+                                    {{ __('Save this address to my account for next time') }}
+                                </label>
+                                <div>
+                                    <label for="address_label" class="sr-only">{{ __('Label') }}</label>
+                                    <input type="text" id="address_label" name="address_label" maxlength="50" class="{{ $field }} bg-white" value="{{ old('address_label') }}" placeholder="{{ __('Label, e.g. Home (optional)') }}">
+                                </div>
+                            </div>
+                        @endauth
                     </div>
                 </section>
 

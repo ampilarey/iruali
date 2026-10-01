@@ -30,6 +30,23 @@
                         <p class="mt-1 text-sm"><span class="text-amber-500" aria-label="{{ $review->rating }} out of 5">{{ str_repeat('★', $review->rating) }}<span class="text-gray-300">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
                             @if($review->title)<span class="font-semibold ms-1">{{ $review->title }}</span>@endif</p>
                         <p class="mt-1 text-sm text-gray-700 whitespace-pre-line">{{ $review->comment }}</p>
+                        @if($review->photos->isNotEmpty())
+                            <div class="mt-2 flex gap-2">
+                                @foreach($review->photos as $photo)
+                                    <a href="{{ $photo->variant(1200) }}" target="_blank" rel="noopener"><img src="{{ $photo->variant(400) }}" alt="" class="w-14 h-14 object-cover rounded border border-gray-200"></a>
+                                @endforeach
+                            </div>
+                        @endif
+                        @if($review->hasReply())
+                            <div class="mt-2 rounded-lg bg-primary-50 px-3 py-2 text-sm">
+                                <p class="text-xs text-gray-500">Reply from <span class="font-semibold text-gray-800">{{ $review->replyShopName() }}</span> &middot; {{ $review->seller_replied_at?->diffForHumans() }}</p>
+                                <p class="mt-1 text-gray-700 whitespace-pre-line">{{ $review->seller_reply }}</p>
+                                <form method="POST" action="{{ route('admin.reviews.reply.destroy', $review) }}" class="mt-2" onsubmit="return confirm('Remove the shop\'s reply?')">
+                                    @csrf @method('DELETE')
+                                    <button class="px-3 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100">Remove reply</button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                     <div class="flex sm:flex-col gap-2 shrink-0">
                         <form method="POST" action="{{ route('admin.reviews.toggle', $review) }}">

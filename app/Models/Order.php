@@ -40,6 +40,7 @@ class Order extends Model
         'refund_status', 'refund_amount', 'refund_reason', 'refund_reference', 'refunded_at',
         'notes',
         'tracking_number',
+        'guest_email', 'guest_name', 'guest_token',
     ];
 
     protected $casts = [
@@ -154,5 +155,52 @@ class Order extends Model
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    /**
+     * Placed without an account (guest checkout). Guest orders keep their token even after
+     * the guest signs up and the order is attached to the new account.
+     */
+    public function isGuest(): bool
+    {
+        return $this->user_id === null;
+    }
+
+    /**
+     * Who the order is for: the account holder, or the guest who gave their details at checkout.
+     */
+    public function customerName(): ?string
+    {
+        return $this->user?->name ?? $this->guest_name;
+    }
+
+    public function customerEmail(): ?string
+    {
+        return $this->user?->email ?? $this->guest_email;
+    }
+
+    /**
+     * The guest's order page: a signed link that carries the order's token (only for orders that have one).
+     */
+    public function guestUrl(string $route = 'show'): ?string
+    {
+        if (! $this->guest_token) {
+            return null;
+        }
+
+        return \Illuminate\Support\Facades\URL::signedRoute('guest.orders.'.$route, ['order' => $this->getKey(), 'token' => $this->guest_token]);
+    }
+
+    /**
+     * Where the customer views this order: My Orders for accounts, the signed guest page otherwise.
+     */
+    public function customerUrl(): string
+    {
+        return $this->isGuest() && $this->guest_token ? $this->guestUrl() : route('orders.show', $this);
+    }
+
+    public function customerReceiptUrl(): string
+    {
+        return $this->isGuest() && $this->guest_token ? $this->guestUrl('receipt') : route('orders.receipt', $this);
     }
 }

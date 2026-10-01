@@ -61,6 +61,9 @@ class AuthController extends Controller
 
         $user->roles()->attach(Role::firstOrCreate(['name' => 'customer'], ['display_name' => 'Customer'])->id);
 
+        // Orders placed as a guest with this email now show under My Orders
+        \App\Models\Order::whereNull('user_id')->where('guest_email', mb_strtolower($user->email))->update(['user_id' => $user->id]);
+
         $this->sendEmailCode($user);
         if ($user->phone && $this->sms->isLive()) {
             $this->sendPhoneCode($user);

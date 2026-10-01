@@ -39,8 +39,8 @@
                                     <div class="text-sm font-medium text-gray-900">#{{ $order->id ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $order->user->name ?? 'Guest' }}</div>
-                                    <div class="text-sm text-gray-500">{{ $order->user->email ?? 'N/A' }}</div>
+                                    <div class="text-sm text-gray-900">{{ $order->customerName() ?? 'Deleted user' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span>@endif</div>
+                                    <div class="text-sm text-gray-500">{{ $order->customerEmail() ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ \App\Support\Money::format($order->total_amount ?? 0) }}</div>

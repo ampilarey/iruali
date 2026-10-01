@@ -21,6 +21,7 @@
                         <a href="{{ route('account') }}" class="block px-4 py-2 text-primary bg-primary/10 rounded-lg font-medium" aria-current="page">{{ __('Profile') }}</a>
                         <a href="{{ route('orders') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My Orders') }}</a>
                         <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wishlist') }}</a>
+                        <a href="{{ route('account.rewards') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Rewards') }}</a>
                         <a href="#security" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Security') }}</a>
                     </nav>
                 </div>
@@ -47,7 +48,7 @@
                         <div class="sm:col-span-2"><dt class="text-gray-500">{{ __('Delivery address') }}</dt>
                             <dd class="text-gray-900">@if($user->address){{ $user->address }}@if($user->city), {{ $user->city }}@endif @if($user->state){{ $user->state }}@endif @if($user->postal_code){{ $user->postal_code }}@endif @else{{ __('Not added') }}@endif</dd></div>
                         <div><dt class="text-gray-500">{{ __('Member Since') }}</dt><dd class="text-gray-900">{{ $user->created_at->translatedFormat('j F Y') }}</dd></div>
-                        <div><dt class="text-gray-500">{{ __('Loyalty Points') }}</dt><dd class="text-gray-900">{{ max(0, (int) $user->loyalty_points) }}</dd></div>
+                        <div><dt class="text-gray-500">{{ __('Loyalty Points') }}</dt><dd class="text-gray-900">{{ max(0, (int) $user->loyalty_points) }} · <a href="{{ route('account.rewards') }}" class="text-primary hover:underline">{{ __('Rewards') }}</a></dd></div>
                     </dl>
                 </section>
 

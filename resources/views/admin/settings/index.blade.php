@@ -78,6 +78,11 @@
                         <input id="referral_referee_points" name="referral_referee_points" type="number" min="0" required class="{{ $field }}" value="{{ old('referral_referee_points', $settings['referral_referee_points']) }}">
                     </div>
                 </div>
+                <div class="mt-4 max-w-xs">
+                    <label for="points_expire_months" class="block text-sm font-medium text-gray-700">Points expire after (months)</label>
+                    <input id="points_expire_months" name="points_expire_months" type="number" min="0" max="120" class="{{ $field }}" value="{{ old('points_expire_months', $settings['points_expire_months'] ?? 0) }}">
+                    <p class="mt-1 text-xs text-gray-500">0 = never. Oldest points go first; customers are emailed a month before. Needs the scheduler cron. Report under <a href="{{ route('admin.rewards') }}" class="underline">Rewards</a>.</p>
+                </div>
                 <p class="mt-2 text-xs text-gray-500">Referral rewards are paid once, when a referred customer places their first order.</p>
             </section>
 

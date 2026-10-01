@@ -44,6 +44,8 @@ class Setting extends Model
         // Abandoned-cart emails (3 h and 48 h nudges); the second nudge carries a voucher when the percent is > 0
         'abandoned_cart_emails_enabled' => 1,
         'abandoned_cart_voucher_percent' => 0,
+        // Loyalty points expire this many months after they were earned (0 = never)
+        'points_expire_months' => 0,
     ];
 
     protected $fillable = ['key', 'value'];

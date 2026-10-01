@@ -108,6 +108,7 @@
                                     <a href="{{ route('account') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Account') }}</a>
                                     <a href="{{ route('orders') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Orders') }}</a>
                                     <a href="{{ route('wishlist') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wishlist') }}</a>
+                                    <a href="{{ route('account.rewards') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Rewards') }}</a>
                                     <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ auth()->user()->hasRole('seller') ? __('Seller Centre') : __('Sell on iruali') }}</a>
                                     @if(auth()->user()->hasRole('admin'))
                                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>

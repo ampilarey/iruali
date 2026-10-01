@@ -91,6 +91,7 @@ class User extends Authenticatable implements HasLocalePreference
         'two_factor_enabled' => 'boolean',
         'referral_rewarded_at' => 'datetime',
         'marketing_opt_out_at' => 'datetime',
+        'points_expiry_reminded_at' => 'datetime',
         'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'referred_by' => 'integer',
@@ -417,5 +418,13 @@ class User extends Authenticatable implements HasLocalePreference
     public function preferredLocale(): ?string
     {
         return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
+    }
+
+    /**
+     * Every loyalty-point movement; loyalty_points is their running sum.
+     */
+    public function pointsTransactions(): HasMany
+    {
+        return $this->hasMany(PointsTransaction::class);
     }
 }

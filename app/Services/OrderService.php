@@ -101,7 +101,7 @@ class OrderService
 
             // Redeemed points are taken now; earned points and referral rewards come when the order is paid.
             if ($discounts['points']['points_redeemed'] > 0) {
-                $user->decrement('loyalty_points', $discounts['points']['points_redeemed']);
+                app(PointsService::class)->record($user, -(int) $discounts['points']['points_redeemed'], 'redeemed', $order);
             }
 
             // Clear cart
@@ -250,12 +250,12 @@ class OrderService
 
         if (! $order->loyalty_points_awarded_at) {
             if ($order->loyalty_points_earned > 0) {
-                $user->increment('loyalty_points', $order->loyalty_points_earned);
+                app(PointsService::class)->record($user, (int) $order->loyalty_points_earned, 'earned', $order);
             }
             $order->forceFill(['loyalty_points_awarded_at' => now()])->save();
         }
 
-        $this->discountService->processReferralRewards($user);
+        $this->discountService->processReferralRewards($user, $order);
     }
 
     /**
@@ -416,12 +416,12 @@ class OrderService
         $user = $order->user;
         if ($user) {
             if ($order->points_redeemed > 0) {
-                $user->increment('loyalty_points', $order->points_redeemed);
+                app(PointsService::class)->record($user, (int) $order->points_redeemed, 'refund', $order, __('Redeemed points returned'));
             }
             // Earned points are only taken back if they were actually given (the order was paid).
             // The balance can go below zero if they were already spent; nothing can be redeemed until it recovers.
             if ($order->loyalty_points_earned > 0 && $order->loyalty_points_awarded_at) {
-                $user->decrement('loyalty_points', $order->loyalty_points_earned);
+                app(PointsService::class)->record($user, -(int) $order->loyalty_points_earned, 'refund', $order, __('Earned points taken back'));
                 $order->forceFill(['loyalty_points_awarded_at' => null])->save();
             }
         }

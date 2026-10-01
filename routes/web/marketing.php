@@ -14,6 +14,14 @@ Route::get('/marketing/unsubscribe/{user}', [MarketingController::class, 'unsubs
 
 Route::middleware('auth')->group(function () {
     Route::put('/account/marketing', [MarketingController::class, 'update'])->name('account.marketing');
+    Route::get('/account/rewards', [\App\Http\Controllers\Customer\RewardsController::class, 'index'])->name('account.rewards');
+});
+
+// A shared referral link: remembers the code for 30 days, then shows the home page
+Route::get('/r/{code}', [\App\Http\Controllers\Customer\RewardsController::class, 'visit'])->name('referral.visit')->where('code', '[A-Za-z0-9]{4,20}');
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/rewards', [\App\Http\Controllers\Admin\RewardsReportController::class, 'index'])->name('rewards');
 });
 
 // Campaign landing pages (sales and events)

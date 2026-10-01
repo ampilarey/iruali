@@ -252,6 +252,7 @@ class AdminController extends Controller
             'default_commission_rate' => 'sometimes|required|numeric|min:0|max:100',
             'abandoned_cart_emails_enabled' => 'sometimes|boolean',
             'abandoned_cart_voucher_percent' => 'sometimes|required|numeric|min:0|max:100',
+            'points_expire_months' => 'sometimes|required|integer|min:0|max:120',
         ]);
 
         Setting::set($validated);

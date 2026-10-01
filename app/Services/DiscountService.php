@@ -185,7 +185,7 @@ class DiscountService
     /**
      * Process referral rewards
      */
-    public function processReferralRewards(User $user): array
+    public function processReferralRewards(User $user, ?\App\Models\Order $order = null): array
     {
         $rewards = ['referrer_points' => 0, 'user_points' => 0];
 
@@ -199,8 +199,9 @@ class DiscountService
             $referrerPoints = (int) Setting::get('referral_referrer_points');
             $userPoints = (int) Setting::get('referral_referee_points');
 
-            $referrer->increment('loyalty_points', $referrerPoints);
-            $user->increment('loyalty_points', $userPoints);
+            $points = app(PointsService::class);
+            $points->record($referrer, $referrerPoints, 'referral', $order, __('Referral reward: :name placed a first order', ['name' => PointsService::maskName($user->name)]));
+            $points->record($user, $userPoints, 'referral', $order, __('Welcome reward for signing up with a referral'));
 
             $rewards = ['referrer_points' => $referrerPoints, 'user_points' => $userPoints];
         }

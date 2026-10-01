@@ -25,7 +25,7 @@ class ProductController extends Controller
 
         $product->load([
             'category.parent', 'images', 'variants', 'seller',
-            'reviews' => fn ($q) => $q->where('is_approved', true)->with('user')->orderByDesc('helpful_count')->latest(),
+            'reviews' => fn ($q) => $q->where('is_approved', true)->with(['user', 'photos', 'replier'])->orderByDesc('helpful_count')->latest(),
         ]);
 
         $cards = fn ($q) => $q->active()->with(['category', 'mainImage', 'seller'])
@@ -60,6 +60,18 @@ class ProductController extends Controller
 
         $reviews = $product->reviews;
         $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(fn ($stars) => [$stars => $reviews->where('rating', $stars)->count()]);
+
+        // The list can be narrowed to reviews with photos and re-sorted; the summary above it always covers all reviews.
+        $reviewSort = in_array($request->query('sort'), ['newest', 'highest', 'lowest'], true) ? $request->query('sort') : 'helpful';
+        $reviewPhotosOnly = $request->boolean('photos');
+        $reviewList = $reviewPhotosOnly ? $reviews->filter(fn ($r) => $r->photos->isNotEmpty()) : $reviews;
+        $reviewList = match ($reviewSort) {
+            'newest' => $reviewList->sortByDesc('id'),
+            'highest' => $reviewList->sortBy([['rating', 'desc'], ['id', 'desc']]),
+            'lowest' => $reviewList->sortBy([['rating', 'asc'], ['id', 'desc']]),
+            default => $reviewList,
+        };
+        $reviewList = $reviewList->values();
         $myReview = $request->user() ? $reviews->firstWhere('user_id', $request->user()->id) : null;
         $votedReviewIds = $request->user()
             ? \Illuminate\Support\Facades\DB::table('review_votes')->where('user_id', $request->user()->id)->whereIn('product_review_id', $reviews->pluck('id'))->pluck('product_review_id')->all()
@@ -84,7 +96,8 @@ class ProductController extends Controller
 
         return view('products.show', compact(
             'product', 'relatedProducts', 'moreFromSeller', 'recentlyViewed', 'delivery', 'boughtTogether',
-            'ratingBreakdown', 'myReview', 'votedReviewIds', 'questions', 'isOwner', 'whatsapp'
+            'ratingBreakdown', 'myReview', 'votedReviewIds', 'questions', 'isOwner', 'whatsapp',
+            'reviewList', 'reviewSort', 'reviewPhotosOnly'
         ));
     }
 }

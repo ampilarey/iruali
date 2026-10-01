@@ -17,7 +17,7 @@ class ModerationController extends Controller
     public function reviews(Request $request)
     {
         $reviews = ProductReview::query()
-            ->with(['product', 'user'])
+            ->with(['product', 'user', 'photos', 'replier'])
             ->when($request->query('show') === 'hidden', fn ($q) => $q->where('is_approved', false))
             ->when($request->query('show') === 'low', fn ($q) => $q->where('rating', '<=', 2))
             ->when($request->filled('q'), function ($q) use ($request) {
@@ -49,6 +49,16 @@ class ModerationController extends Controller
         $review->delete();
 
         return back()->with('success', 'Review deleted.');
+    }
+
+    /**
+     * Take down a shop's reply that shouldn't be there (the review itself stays).
+     */
+    public function removeReply(ProductReview $review)
+    {
+        $review->forceFill(['seller_reply' => null, 'seller_replied_at' => null, 'seller_reply_user_id' => null])->save();
+
+        return back()->with('success', 'Shop reply removed.');
     }
 
     public function questions(Request $request)

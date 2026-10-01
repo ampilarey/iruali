@@ -6,6 +6,7 @@
         'seller.orders' => ['Orders', 'seller.orders*'],
         'seller.returns' => ['Returns', 'seller.returns'],
         'seller.questions' => ['Questions', 'seller.questions'],
+        'seller.reviews' => [__('Reviews'), 'seller.reviews'],
         'seller.earnings' => ['Earnings', 'seller.earnings'],
         'seller.analytics' => ['Analytics', 'seller.analytics'],
         'seller.profile' => ['Profile', 'seller.profile*'],

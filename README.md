@@ -1,212 +1,161 @@
-# iruali - Multi-Vendor E-commerce Platform
+# iruali — multi-vendor marketplace for the Maldives
 
-A modern, multi-vendor e-commerce platform built with Laravel for the Maldives market.
+Laravel 12 marketplace where island shops sell to the whole country: one checkout, one card
+payment through BML Connect, one order split into a part per shop, commission and payouts for
+the shops, delivery by zone (Greater Malé / islands). English and Dhivehi (right-to-left)
+throughout. Runs on cPanel shared hosting; `test.iruali.mv` deploys itself from `main`,
+`iruali.mv` runs tagged releases deployed by hand.
 
-## Features
+## What it does
 
-- Multi-vendor marketplace
-- Multilingual support (English & Dhivehi)
-- Flash sales with countdown timers
-- User authentication and authorization
-- Shopping cart and wishlist
-- Order management and tracking
-- Loyalty points system
-- Referral system
-- Card payments through BML Connect (Bank of Maldives) — the only payment method; see `docs/PAYMENTS_BML.md`
-- SEO optimized
+- **Customers:** catalogue with departments, brands, shops, deals, search with suggestions,
+  product variants, reviews with photos, Q&A, stock alerts, wishlist, compare, saved items;
+  cart with vouchers and loyalty points; checkout with an address book and island picker,
+  guest checkout, card payment through BML Connect; order tracking with a progress bar per
+  shop, messages to the shop, returns, disputes, cancel, buy again, receipts; email and SMS
+  notifications; accounts with OTP verification and two-step sign-in; referral rewards.
+- **Sellers:** application and approval, shop profile, products with photos (WebP variants),
+  variants, bulk edit and CSV import/export, stock page, order fulfilment with tracking
+  details, customer messages, returns, reviews with replies, earnings and payouts, analytics,
+  performance (late shipping), low-stock digest, bank account for payouts.
+- **Admin (admin / support / finance roles, 2FA required):** dashboard with system status,
+  inbox of everything waiting, sellers, products, users, orders and payments (BML re-check,
+  refunds), returns, disputes, messages, payouts and bank-file payout batches, vouchers,
+  reviews and questions moderation, settings and legal pages, newsletter, analytics, error
+  tracker, audit log, SMS log.
+- **Operations:** scripted deploy with health check, smoke test and automatic rollback;
+  readiness check; nightly backups with a monthly restore drill; error alerts and digests;
+  staging-data anonymiser; k6 load test; Sanctum REST API under `/api/v1`.
 
-## Local Development Setup
+`docs/FEATURES.md` has a paragraph per area with the routes and pages; `docs/` has the rest
+(index in `docs/DOCUMENTATION_INDEX.md`).
 
-### Prerequisites
-- PHP 8.4 (the app requires 8.2 or higher; production and the test suite run on 8.4)
-- Composer
-- Node.js & npm
-- MySQL/MariaDB for the test suite (`phpunit.xml` uses the `iruali_test` MySQL database); local development can use SQLite, which is what `.env.example` is set up for
+## Requirements
 
-### Installation
+- **PHP 8.4** (`composer.json` requires `^8.4`; production and CI run 8.4) with the usual
+  extensions: mbstring, intl, gd, zip, pdo_mysql, pdo_sqlite, bcmath
+- Composer 2
+- **Node.js 22** and npm (Vite 6, Tailwind 4; only needed to build assets or run the browser test)
+- **MySQL/MariaDB** for the test suite and for production; SQLite is enough for local development
+- cPanel with LiteSpeed and the scheduler cron for production (see `docs/PRODUCTION_DEPLOY.md`)
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/iruali.git
-   cd iruali
-   ```
-
-2. **Install PHP dependencies**
-   ```bash
-   composer install
-   ```
-
-3. **Install Node.js dependencies**
-   ```bash
-   npm install
-   ```
-
-4. **Environment setup**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-5. **Configure database in `.env`**
-
-   `.env.example` points at SQLite (`database/database.sqlite`; create it with `touch database/database.sqlite`). To use MySQL/MariaDB instead:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=iruali
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-6. **Run migrations and seeders**
-   ```bash
-   php artisan migrate --seed
-   ```
-
-7. **Create storage link**
-   ```bash
-   php artisan storage:link
-   ```
-
-8. **Build assets**
-   ```bash
-   npm run dev
-   ```
-
-9. **Start the development server**
-   ```bash
-   php artisan serve
-   ```
-
-10. **Visit** `http://127.0.0.1:8000`
-
-### Tests
+## Run it locally
 
 ```bash
-php artisan test
+git clone https://github.com/ampilarey/iruali.git && cd iruali
+composer install
+npm install
+cp .env.example .env            # SQLite, local mail log, BML off
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed       # admin@example.com / password, demo shops, products, islands
+php artisan storage:link
+npm run dev                      # or: npm run build (assets are committed in public/build)
+php artisan serve                # http://127.0.0.1:8000
 ```
 
-`phpunit.xml` runs the suite against a MySQL/MariaDB database named `iruali_test` (user `root`, empty password), not the SQLite development database, so that database must exist. Built assets live in `public/build/` and are committed: after frontend changes run `npm run build` and commit the result.
+- Admin: `http://127.0.0.1:8000/admin/dashboard` as `admin@example.com` / `password`
+  (`STAFF_REQUIRE_2FA=false` in `.env` skips the 2FA requirement on a dev machine).
+- Card payment needs BML Connect keys (`docs/PAYMENTS_BML.md`). To walk through checkout
+  without BML set `BML_FAKE=1` in `.env`: the payment page is skipped and the order stays
+  unpaid, and it is ignored when `APP_ENV=production`.
+- `composer dev` runs the server, queue listener, log tail and Vite together.
 
-## Deployment
+## Tests
 
-The site runs on cPanel. Deployment is scripted (`scripts/`) and documented in:
+```bash
+php artisan test                                           # PHPUnit, all Feature + Unit tests
+./vendor/bin/pint --test                                   # code style (CI fails on violations)
+npm run test:browser                                       # Playwright checkout test (see below)
+composer analyse                                           # Larastan level 5, after: composer require --dev larastan/larastan
+```
 
-- **[docs/PRODUCTION_DEPLOY.md](docs/PRODUCTION_DEPLOY.md)** — releasing `main` to `iruali.mv` by hand with `scripts/deploy-production.sh` (production is never deployed automatically).
-- **[docs/TEST_AUTO_DEPLOY.md](docs/TEST_AUTO_DEPLOY.md)** — how `test.iruali.mv` pulls `main` automatically on every push.
+- `phpunit.xml` runs against a MariaDB/MySQL database named `iruali_test` (user `root`, no
+  password, host `127.0.0.1`), not the SQLite dev database; create it first. Another database:
+  `DB_DATABASE=other php artisan test`.
+- The **browser test** (`tests/browser/`) boots its own SQLite database (`database/browser.sqlite`,
+  migrated and seeded, BML faked) and PHP's built-in server, signs in, searches, adds to cart,
+  checks out to the "Pay now" page and finds the order under My Orders. First time:
+  `npx playwright install --with-deps chromium`. With browsers already installed elsewhere, set
+  `PLAYWRIGHT_BROWSERS_PATH`, or `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to a Chromium binary.
+- **Load test:** `tests/load/README.md` (k6, against the test site only).
+- CI (`.github/workflows/tests.yml`) runs Pint, PHPUnit on MariaDB, the browser test, checks
+  that `public/build` is current, and Larastan as an advisory job.
 
-## Environment Variables
+## Build
 
-### Required for Production
+```bash
+npm run build      # vite build, then fix-manifest.sh copies .vite/manifest.json → public/build/manifest.json
+```
+
+`public/build/` is committed (cPanel deploys from git and has no Node), so after any change under
+`resources/css` or `resources/js` run the build and commit the result; CI fails when it is stale.
+`vite.config.js` uses `base: '/'` (the domains point at the app root).
+
+## Deploy and release
+
+- **Test site:** every push to `main` that passes CI is pulled by `test.iruali.mv` within a
+  minute (webhook, cron fallback) and smoke-tested. `docs/TEST_AUTO_DEPLOY.md`.
+- **Release:** `bash scripts/release.sh` on `main` makes an annotated `vYYYY.MM.DD` tag (after
+  checking CI is green when `GITHUB_TOKEN` is set) and pushes it; GitHub runs the suite on the
+  tag and publishes a Release with generated notes (`.github/workflows/release.yml`).
+- **Production:** on the server, `bash scripts/deploy-production.sh v2026.10.01` (or
+  `--latest-tag`): maintenance mode, detached checkout of the tag, composer, migrations, caches,
+  health check and `php artisan iruali:smoke`; any failure rolls back automatically.
+  `bash scripts/rollback-production.sh [tag]` rolls back on demand. Every attempt is in
+  `storage/app/deploys.log`. First-deploy walk-through and everything that must run on the
+  server: `docs/PRODUCTION_DEPLOY.md`.
+- After deploying: `php artisan iruali:ready` (`READY`), `/api/health` shows the tag.
+
+## Environment variables that matter
+
 ```env
-APP_NAME=iruali
-APP_ENV=production
-APP_KEY=base64:...
-APP_DEBUG=false
-APP_URL=https://yourdomain.com
-
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=your_db_name
-DB_USERNAME=your_db_user
-DB_PASSWORD=your_db_password
-
-SESSION_DRIVER=database
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-
-# Card payments (see docs/PAYMENTS_BML.md). Leave BML_API_KEY empty to hide card payment.
-BML_API_KEY=
-BML_ENVIRONMENT=sandbox
+APP_ENV=production  APP_DEBUG=false  APP_URL=https://iruali.mv  APP_TIMEZONE=Indian/Maldives
+DB_CONNECTION=mysql  DB_HOST=localhost  DB_DATABASE=…  DB_USERNAME=…  DB_PASSWORD=…
+SESSION_DRIVER=database  CACHE_STORE=database  QUEUE_CONNECTION=database
+MAIL_MAILER=smtp …  ALERTS_EMAIL=ops@iruali.mv
+BML_API_KEY=…  BML_ENVIRONMENT=production  BML_WEBHOOK_SECRET=…     # docs/PAYMENTS_BML.md
+BML_FAKE=0                                                           # 1 only on dev/test
+SMOKE_USER_EMAIL=smoke@iruali.mv  SMOKE_USER_PASSWORD=…              # php artisan iruali:smoke --setup
+STAFF_REQUIRE_2FA=true
+BACKUP_DISKS=local,s3  AWS_*=…                                       # off-site backups
+TEST_DEPLOY_WEBHOOK_SECRET=…                                         # test site only
 ```
+
+`.env.example` lists all of them with comments.
 
 ## Troubleshooting
 
-### Common Issues
+- **500 / blank page:** `storage/logs/laravel.log`; `php artisan iruali:ready` names the
+  missing piece (cache dir, APP_KEY, mail, queue…). Admin → Errors shows reported exceptions.
+- **`ViteManifestNotFoundException`:** `public/build/manifest.json` is missing — run
+  `npm run build` (locally) and commit, or `npm run dev` while developing.
+- **Card payment hidden at checkout:** `BML_API_KEY` is empty (or `BML_FAKE` is not set on a
+  dev machine). Run `php artisan iruali:ready` to see the BML row.
+- **Database connection error in tests:** the `iruali_test` MariaDB database must exist and
+  the server must be running (`sudo mysqld_safe &` where there is no systemd).
+- **Permissions on the server:** `chmod -R 775 storage bootstrap/cache`.
 
-1. **500 Error:**
-   - Check `storage/logs/laravel.log`
-   - Verify file permissions
-   - Ensure `.env` exists and is configured
+## API (Sanctum)
 
-2. **Database Connection Error:**
-   - Verify database credentials in `.env`
-   - Check if database exists
-   - Ensure user has proper permissions
+Sign in at `POST /api/v1/login` for a Bearer token, send it as `Authorization: Bearer …` to
+the protected endpoints, `POST /api/v1/logout` to revoke it. Tokens carry abilities
+(`order:read`, `cart:write`, `wishlist:write`, `profile:read`, `profile:write`) checked with
+`$request->user()->tokenCan('order:read')`, and expire after 30 days (`SANCTUM_EXPIRATION`,
+minutes); `sanctum:prune-expired` runs daily from the scheduler.
 
-3. **Missing Assets:**
-   - Run `npm run build`
-   - Upload `public/build/` to `public_html/`
+```bash
+curl -X POST https://iruali.mv/api/v1/login -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "password"}'
+# {"success":true,"data":{"user":{…},"token":"1|…","token_type":"Bearer","abilities":[…]}}
 
-4. **Permission Errors:**
-   ```bash
-   chmod -R 755 storage bootstrap/cache
-   chmod -R 644 storage/logs/*.log
-   ```
+curl https://iruali.mv/api/v1/user -H "Authorization: Bearer 1|…"
+```
 
-## Support
-
-For issues and questions, please check the Laravel documentation or create an issue in the repository.
+Endpoints: products (`/api/v1/products`, `/featured`, `/on-sale`, `/{id}`), categories, search,
+cart, wishlist, orders (`/api/v1/orders`, `/{id}`, `/{id}/track`), checkout points, profile and
+password. `routes/api.php` is the reference.
 
 ## License
 
-This project is proprietary software.
-
-# API Authentication & Usage
-
-## Authentication (Sanctum)
-
-- Login via `/api/v1/login` to receive a Bearer token.
-- Use the token in the `Authorization` header for all protected endpoints.
-- Logout via `/api/v1/logout` (requires token).
-- Tokens are issued with abilities (scopes) for fine-grained access control.
-- Tokens expire after 30 days (`SANCTUM_EXPIRATION`, in minutes); the scheduled `sanctum:prune-expired` command (`routes/console.php`) deletes expired tokens daily, which needs the Laravel scheduler cron on the server.
-
-### Example: Login
-
-```
-curl -X POST https://yourdomain.com/api/v1/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "password"}'
-```
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "user": { "id": 1, "name": "User", ... },
-    "token": "1|longsanctumtokenstring",
-    "token_type": "Bearer",
-    "abilities": ["order:read", "cart:write", "wishlist:write", "profile:read", "profile:write"]
-  },
-  "message": "Login successful"
-}
-```
-
-### Example: Authenticated Request
-
-```
-curl -X GET https://yourdomain.com/api/v1/user \
-  -H "Authorization: Bearer 1|longsanctumtokenstring"
-```
-
-### Example: Logout
-
-```
-curl -X POST https://yourdomain.com/api/v1/logout \
-  -H "Authorization: Bearer 1|longsanctumtokenstring"
-```
-
-## Token Abilities (Scopes)
-- Each token is issued with specific abilities.
-- Example: `order:read`, `cart:write`, `wishlist:write`, `profile:read`, `profile:write`
-- You can check abilities in your controllers using `$request->user()->tokenCan('order:read')`.
-
-## Token Expiration
-- Tokens expire 30 days after they are issued. Expired tokens are removed by the daily `sanctum:prune-expired --hours=24` schedule once the scheduler cron (`* * * * * php artisan schedule:run`) is set up on the server.
-
----
-
-For more endpoints and usage, see the API documentation or contact the backend team.
+Proprietary software developed for the iruali marketplace.

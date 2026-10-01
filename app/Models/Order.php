@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -88,18 +90,22 @@ class Order extends Model
         return 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 
-    public function getStatusBadgeAttribute()
+    public function getStatusBadgeAttribute(): string
     {
-        $statuses = [
-            'pending' => 'bg-yellow-100 text-yellow-800',
-            'processing' => 'bg-blue-100 text-blue-800',
-            'shipped' => 'bg-purple-100 text-purple-800',
-            'out_for_delivery' => 'bg-indigo-100 text-indigo-800',
-            'delivered' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-        ];
+        return OrderStatus::badgeFor($this->status);
+    }
 
-        return $statuses[$this->status] ?? 'bg-gray-100 text-gray-800';
+    /**
+     * The status as an enum case (null for a legacy value the enum does not know).
+     */
+    public function statusEnum(): ?OrderStatus
+    {
+        return OrderStatus::tryFrom((string) $this->status);
+    }
+
+    public function paymentStatusEnum(): ?PaymentStatus
+    {
+        return PaymentStatus::tryFrom((string) $this->payment_status);
     }
 
     public function scopeByUser($query, $userId)
@@ -225,5 +231,13 @@ class Order extends Model
     public function isGiftCardOrder(): bool
     {
         return $this->relationLoaded('giftCard') ? $this->giftCard !== null : $this->giftCard()->exists();
+    }
+
+    /**
+     * Leave out orders placed by the smoke-test customer (php artisan iruali:smoke --place-order).
+     */
+    public function scopeWithoutSmokeTests($query)
+    {
+        return $query->whereNotIn('orders.user_id', User::query()->where('is_smoke_test', true)->select('id'));
     }
 }

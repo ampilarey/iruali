@@ -63,6 +63,10 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "analyse": [
+            "test -f vendor/bin/phpstan || { echo 'Larastan is not installed: run composer require --dev larastan/larastan first'; exit 1; }",
+            "phpstan analyse --memory-limit=1G"
         ]
     },
     "extra": {

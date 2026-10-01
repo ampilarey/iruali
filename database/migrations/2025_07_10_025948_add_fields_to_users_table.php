@@ -49,7 +49,7 @@ return new class extends Migration
                 'phone', 'avatar', 'status', 'is_active', 'email_verified', 'phone_verified',
                 'two_factor_secret', 'two_factor_enabled', 'last_login_at', 'last_login_ip',
                 'referral_code', 'referred_by', 'loyalty_points', 'address', 'city',
-                'state', 'postal_code', 'country', 'date_of_birth', 'gender', 'is_seller', 'preferred_language'
+                'state', 'postal_code', 'country', 'date_of_birth', 'gender', 'is_seller', 'preferred_language',
             ]);
         });
     }

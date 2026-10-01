@@ -31,7 +31,7 @@ class BaseController extends Controller
             'message' => $error,
         ];
 
-        if (!empty($errorMessages)) {
+        if (! empty($errorMessages)) {
             $response['errors'] = $errorMessages;
         }
 
@@ -77,4 +77,4 @@ class BaseController extends Controller
     {
         return $this->sendError($message, [], 500);
     }
-} 
+}

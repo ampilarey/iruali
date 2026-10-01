@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Voucher;
 use App\Http\Requests\StoreVoucherRequest;
 use App\Http\Requests\UpdateVoucherRequest;
+use App\Models\Voucher;
 
 class VoucherController extends Controller
 {
@@ -15,6 +14,7 @@ class VoucherController extends Controller
         $this->authorize('viewAny', Voucher::class);
 
         $vouchers = Voucher::latest()->paginate(20);
+
         return view('admin.vouchers.index', compact('vouchers'));
     }
 
@@ -58,4 +58,4 @@ class VoucherController extends Controller
 
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher deleted successfully.');
     }
-} 
+}

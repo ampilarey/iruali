@@ -24,4 +24,4 @@ class AuthUserResource extends JsonResource
             'seller_approved' => $this->seller_approved,
         ];
     }
-} 
+}

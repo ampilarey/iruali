@@ -16,7 +16,17 @@ class BmlConnect
 {
     public function enabled(): bool
     {
-        return filled(config('services.bml.api_key'));
+        return $this->isFake() || filled(config('services.bml.api_key'));
+    }
+
+    /**
+     * BML_FAKE=1 (never in production): no call leaves the server. "Creating" a transaction sends
+     * the customer straight back to our return URL and the transaction stays unpaid, so the
+     * checkout can be walked through end to end (browser tests, a laptop without BML access).
+     */
+    public function isFake(): bool
+    {
+        return (bool) config('services.bml.fake') && ! app()->isProduction();
     }
 
     public function isSandbox(): bool
@@ -29,6 +39,17 @@ class BmlConnect
      */
     public function createTransaction(array $payload): array
     {
+        if ($this->isFake()) {
+            $id = 'FAKE'.($payload['localId'] ?? strtoupper(bin2hex(random_bytes(4))));
+
+            return [
+                'id' => $id,
+                'url' => $payload['redirectUrl'].(str_contains($payload['redirectUrl'], '?') ? '&' : '?').'transactionId='.$id.'&fake=1',
+                'state' => 'INITIATED',
+                'fake' => true,
+            ];
+        }
+
         $response = $this->http()->post('/v2/transactions', $payload);
 
         if (! $response->successful() || ! $response->json('id') || ! ($response->json('url') ?? $response->json('shortUrl'))) {
@@ -43,6 +64,11 @@ class BmlConnect
 
     public function getTransaction(string $id): array
     {
+        if ($this->isFake()) {
+            // Never confirmed: a fake payment can only be waited on, not received.
+            return ['id' => $id, 'state' => 'CREATED', 'fake' => true];
+        }
+
         // Reads are safe to retry; creating a transaction is not.
         $response = $this->http()->retry(2, 300, throw: false)->get('/v2/transactions/'.rawurlencode($id));
 

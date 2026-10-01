@@ -23,7 +23,7 @@
                                 <td class="px-4 py-3">{{ $return->items->map(fn ($l) => ($l->orderItem?->displayName() ?? 'Product').' × '.$l->quantity)->join(', ') }}</td>
                                 <td class="px-4 py-3">{{ $return->reasonLabel() }}@if($return->details)<span class="block text-xs text-gray-500">{{ \Illuminate\Support\Str::limit($return->details, 120) }}</span>@endif @if($return->photo_path)<a href="{{ route('returns.photo', $return) }}" target="_blank" rel="noopener" class="block text-xs text-primary-700 hover:underline">View photo</a>@endif</td>
                                 <td class="px-4 py-3 text-right">{{ Money::format($return->items_value) }}</td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ ucfirst($return->status) }}</span>@if($return->admin_note)<span class="block text-xs text-gray-500">{{ $return->admin_note }}</span>@endif</td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $return->status_badge }}">{{ $return->statusLabel() }}</span>@if($return->admin_note)<span class="block text-xs text-gray-500">{{ $return->admin_note }}</span>@endif</td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="px-4 py-10 text-center text-gray-500">No returns.</td></tr>

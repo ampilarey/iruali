@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\SellerOrderStatus;
 use App\Models\Order;
 use App\Models\SellerOrder;
 use App\Models\User;
@@ -127,12 +128,12 @@ class FulfilmentService
             return;
         }
 
-        $ranks = $parts->map(fn ($s) => SellerOrder::RANK[$s] ?? 0);
+        $ranks = $parts->map(fn ($s) => max(SellerOrderStatus::rankFor($s), 0));
         $target = match (true) {
-            $ranks->min() >= SellerOrder::RANK['delivered'] => 'delivered',
-            $ranks->min() >= SellerOrder::RANK['out_for_delivery'] => 'out_for_delivery',
-            $ranks->min() >= SellerOrder::RANK['shipped'] => 'shipped',
-            $ranks->max() >= SellerOrder::RANK['processing'] => 'processing',
+            $ranks->min() >= SellerOrderStatus::Delivered->rank() => 'delivered',
+            $ranks->min() >= SellerOrderStatus::OutForDelivery->rank() => 'out_for_delivery',
+            $ranks->min() >= SellerOrderStatus::Shipped->rank() => 'shipped',
+            $ranks->max() >= SellerOrderStatus::Processing->rank() => 'processing',
             default => 'pending',
         };
 
@@ -175,7 +176,7 @@ class FulfilmentService
                 continue;
             }
 
-            if ((SellerOrder::RANK[$part->status] ?? 0) < (SellerOrder::RANK[$status] ?? 0)) {
+            if (max(SellerOrderStatus::rankFor($part->status), 0) < max(SellerOrderStatus::rankFor($status), 0)) {
                 $part->update([
                     'status' => $status,
                     'shipped_at' => in_array($status, ['shipped', 'out_for_delivery', 'delivered'], true) ? ($part->shipped_at ?? now()) : $part->shipped_at,

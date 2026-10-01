@@ -15,26 +15,26 @@ class Banner extends Model
         'status',
         'position',
         'start_date',
-        'end_date'
+        'end_date',
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'status' => 'string'
+        'status' => 'string',
     ];
 
     public function scopeActive($query)
     {
         return $query->where('status', 'active')
-                    ->where(function ($q) {
-                        $q->whereNull('start_date')
-                          ->orWhere('start_date', '<=', now());
-                    })
-                    ->where(function ($q) {
-                        $q->whereNull('end_date')
-                          ->orWhere('end_date', '>=', now());
-                    });
+            ->where(function ($q) {
+                $q->whereNull('start_date')
+                    ->orWhere('start_date', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now());
+            });
     }
 
     public function scopeByPosition($query, $position)

@@ -9,7 +9,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6">
             <div class="rounded-lg bg-white p-5 shadow grid gap-3 sm:grid-cols-2 text-sm">
-                <div><p class="text-gray-500">Status</p><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ \App\Models\Dispute::STATUSES[$dispute->status] ?? $dispute->status }}</span></div>
+                <div><p class="text-gray-500">Status</p><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ $dispute->statusLabel() }}</span></div>
                 <div><p class="text-gray-500">Opened</p><p>{{ $dispute->opened_at->format('d M Y, H:i') }}</p></div>
                 <div><p class="text-gray-500">Type</p><p class="font-medium">{{ \App\Models\Dispute::TYPES[$dispute->type] ?? $dispute->type }}</p></div>
                 <div><p class="text-gray-500">Claimed</p><p class="font-semibold">{{ Money::format($dispute->amount_claimed) }}</p></div>
@@ -19,7 +19,7 @@
                 <div><p class="text-gray-500">Linked return</p>@if($dispute->returnRequest)<a href="{{ route('admin.returns.show', $dispute->returnRequest) }}" class="text-primary-700 hover:underline">Return #{{ $dispute->returnRequest->id }} ({{ $dispute->returnRequest->status }})</a>@else<p>—</p>@endif</div>
                 <div class="sm:col-span-2"><p class="text-gray-500">Customer's account</p><p class="whitespace-pre-line text-gray-800">{{ $dispute->details }}</p></div>
                 @if($dispute->resolved_at)
-                    <div class="sm:col-span-2 rounded-md bg-gray-50 p-3"><p class="text-gray-500">Decision ({{ $dispute->resolved_at->format('d M Y, H:i') }}@if($dispute->admin) by {{ $dispute->admin->name }}@endif)</p><p class="font-medium">{{ \App\Models\Dispute::STATUSES[$dispute->status] }} @if($dispute->amount_resolved > 0)· {{ Money::format($dispute->amount_resolved) }}@endif</p>@if($dispute->resolution_note)<p class="text-gray-700">{{ $dispute->resolution_note }}</p>@endif</div>
+                    <div class="sm:col-span-2 rounded-md bg-gray-50 p-3"><p class="text-gray-500">Decision ({{ $dispute->resolved_at->format('d M Y, H:i') }}@if($dispute->admin) by {{ $dispute->admin->name }}@endif)</p><p class="font-medium">{{ $dispute->statusLabel() }} @if($dispute->amount_resolved > 0)· {{ Money::format($dispute->amount_resolved) }}@endif</p>@if($dispute->resolution_note)<p class="text-gray-700">{{ $dispute->resolution_note }}</p>@endif</div>
                 @endif
             </div>
 

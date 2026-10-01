@@ -17,7 +17,7 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-1">{{ __('Order') }} #{{ $order->order_number }}</h1>
             <p class="text-gray-600">{{ __('Placed on :date', ['date' => $order->created_at->translatedFormat('j F Y, H:i')]) }} · {{ $order->guest_name }} <span dir="ltr">({{ $order->guest_email }})</span></p>
         </div>
-        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">{{ __(ucfirst($order->status)) }}</span>
+        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">{{ \App\Enums\OrderStatus::labelFor($order->status) }}</span>
     </div>
 
     @if($order->payment_status === 'paid')
@@ -32,16 +32,16 @@
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Items') }}</h2>
                 <div class="space-y-4">
                     @foreach($order->items->groupBy(fn ($i) => (string) $i->product?->seller_id) as $sellerId => $shopItems)
-                        @php $part = $parts[$sellerId] ?? null; $rank = \App\Models\SellerOrder::RANK[$part?->status] ?? -1; @endphp
+                        @php $part = $parts[$sellerId] ?? null; $rank = \App\Enums\SellerOrderStatus::rankFor($part?->status); @endphp
                         <div class="rounded-lg border border-gray-200 p-4 space-y-3">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
-                                @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(ucfirst($part->status)) }}</span>@endif
+                                @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? \App\Enums\SellerOrderStatus::labelFor($part->status) }}</span>@endif
                             </div>
                             @if($part && $part->status !== 'cancelled')
                                 <ol class="grid grid-cols-4 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
-                                        @php $done = $rank >= \App\Models\SellerOrder::RANK[$key]; @endphp
+                                        @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
                                         <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>
                                     @endforeach
                                 </ol>

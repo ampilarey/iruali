@@ -30,7 +30,7 @@
                         $steps = \App\Support\OrderStatus::steps();
                     @endphp
                     @foreach($order->items->groupBy(fn ($i) => (string) $i->product?->seller_id) as $sellerId => $shopItems)
-                        @php $part = $parts[$sellerId] ?? null; $rank = \App\Models\SellerOrder::RANK[$part?->status] ?? -1; @endphp
+                        @php $part = $parts[$sellerId] ?? null; $rank = \App\Enums\SellerOrderStatus::rankFor($part?->status); @endphp
                         <div class="rounded-lg border border-gray-200 p-4 space-y-3">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
@@ -39,7 +39,7 @@
                             @if($part && $part->status !== 'cancelled')
                                 <ol class="grid grid-cols-5 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
-                                        @php $done = $rank >= \App\Models\SellerOrder::RANK[$key]; @endphp
+                                        @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
                                         <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>
                                     @endforeach
                                 </ol>

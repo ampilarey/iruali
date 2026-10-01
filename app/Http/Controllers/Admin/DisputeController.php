@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DisputeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Dispute;
 use App\Services\DisputeService;
@@ -19,8 +20,8 @@ class DisputeController extends Controller
 
         $disputes = Dispute::with(['order', 'customer', 'seller'])
             ->when($status === 'open', fn ($q) => $q->open())
-            ->when($status === 'resolved', fn ($q) => $q->whereNotIn('status', Dispute::OPEN_STATUSES))
-            ->when(array_key_exists($status, Dispute::STATUSES), fn ($q) => $q->where('status', $status))
+            ->when($status === 'resolved', fn ($q) => $q->whereNotIn('status', DisputeStatus::openValues()))
+            ->when(DisputeStatus::tryFrom($status) !== null, fn ($q) => $q->where('status', $status))
             ->latest('opened_at')
             ->paginate(25)
             ->withQueryString();

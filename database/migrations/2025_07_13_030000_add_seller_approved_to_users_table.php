@@ -26,4 +26,4 @@ return new class extends Migration
             $table->dropColumn(['seller_approved', 'seller_approved_at']);
         });
     }
-}; 
+};

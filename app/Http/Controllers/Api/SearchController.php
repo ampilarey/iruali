@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\ProductResource;
 
 class SearchController extends BaseController
 {
@@ -30,16 +30,16 @@ class SearchController extends BaseController
         }
 
         $query = $request->q;
-        
+
         $productQuery = Product::with(['category', 'mainImage', 'seller'])
             ->active()
             ->where('is_active', true)
             ->where(function ($q) use ($query) {
-                $q->whereRaw("JSON_EXTRACT(name, '$.en') LIKE ?", ['%' . $query . '%'])
-                  ->orWhereRaw("JSON_EXTRACT(description, '$.en') LIKE ?", ['%' . $query . '%'])
-                  ->orWhere('sku', 'LIKE', '%' . $query . '%')
-                  ->orWhere('brand', 'LIKE', '%' . $query . '%')
-                  ->orWhere('model', 'LIKE', '%' . $query . '%');
+                $q->whereRaw("JSON_EXTRACT(name, '$.en') LIKE ?", ['%'.$query.'%'])
+                    ->orWhereRaw("JSON_EXTRACT(description, '$.en') LIKE ?", ['%'.$query.'%'])
+                    ->orWhere('sku', 'LIKE', '%'.$query.'%')
+                    ->orWhere('brand', 'LIKE', '%'.$query.'%')
+                    ->orWhere('model', 'LIKE', '%'.$query.'%');
             });
 
         // Apply filters

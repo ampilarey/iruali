@@ -130,3 +130,13 @@ fi
 
 write_stamp
 echo "$(date '+%F %T') deploy complete: ${REMOTE:0:8}"
+
+# Post-deploy smoke test (pages, health, and checkout when SMOKE_USER_EMAIL is set). The test
+# site is not rolled back on failure; the result is in this log and the health endpoint.
+SMOKE_ARGS=()
+grep -qE '^SMOKE_USER_EMAIL=.+' "$ROOT/.env" 2>/dev/null && SMOKE_ARGS+=(--place-order)
+if php artisan iruali:smoke "${SMOKE_ARGS[@]}"; then
+  echo "$(date '+%F %T') smoke test passed"
+else
+  echo "$(date '+%F %T') WARN: smoke test FAILED on ${REMOTE:0:8} — look at the rows above"
+fi

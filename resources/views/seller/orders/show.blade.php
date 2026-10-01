@@ -35,7 +35,7 @@
                         <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <p class="font-medium text-gray-900">{{ \App\Models\Dispute::TYPES[$dispute->type] ?? $dispute->type }} · claiming {{ \App\Support\Money::format($dispute->amount_claimed) }}</p>
-                                <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ \App\Models\Dispute::STATUSES[$dispute->status] ?? $dispute->status }}</span>
+                                <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ $dispute->statusLabel() }}</span>
                             </div>
                             <p class="mt-1 text-xs text-gray-600">Opened {{ $dispute->opened_at->format('d M Y') }}.
                                 @if($dispute->isOpen())Reply to the customer in the conversation below; iruali decides within 5 business days.

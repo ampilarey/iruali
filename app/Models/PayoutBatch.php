@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PayoutBatchStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,8 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class PayoutBatch extends Model
 {
-    public const STATUSES = ['draft', 'exported', 'paid', 'cancelled'];
-
     protected $fillable = ['reference', 'created_by', 'status', 'total', 'count', 'exported_at', 'paid_at', 'bank_reference', 'notes'];
 
     protected $casts = [
@@ -55,16 +54,21 @@ class PayoutBatch extends Model
 
     public function isOpen(): bool
     {
-        return in_array($this->status, ['draft', 'exported'], true);
+        return (bool) $this->statusEnum()?->isOpen();
     }
 
     public function getStatusBadgeAttribute(): string
     {
-        return [
-            'draft' => 'bg-gray-100 text-gray-800',
-            'exported' => 'bg-blue-100 text-blue-800',
-            'paid' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-        ][$this->status] ?? 'bg-gray-100 text-gray-800';
+        return PayoutBatchStatus::badgeFor($this->status);
+    }
+
+    public function statusLabel(): string
+    {
+        return PayoutBatchStatus::labelFor($this->status);
+    }
+
+    public function statusEnum(): ?PayoutBatchStatus
+    {
+        return PayoutBatchStatus::tryFrom((string) $this->status);
     }
 }

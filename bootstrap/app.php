@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        // /dv/... storefront URLs: runs before routing (see the middleware)
+        $middleware->append(\App\Http\Middleware\LocalePrefix::class);
         $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -38,7 +38,14 @@
 <meta property="og:image:height" content="630">
 @endif
 <meta property="og:site_name" content="{{ config('app.name') }}">
-<meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+<meta property="og:locale" content="{{ app()->getLocale() === 'dv' ? 'dv_MV' : 'en_US' }}">
+@php $alternates = \App\Support\LocaleUrl::alternates(); @endphp
+@if($alternates)
+<meta property="og:locale:alternate" content="{{ app()->getLocale() === 'dv' ? 'en_US' : 'dv_MV' }}">
+@foreach($alternates as $hreflang => $href)
+<link rel="alternate" hreflang="{{ $hreflang }}" href="{{ $href }}">
+@endforeach
+@endif
 
 {{-- Twitter Card Meta Tags --}}
 <meta name="twitter:card" content="summary_large_image">

@@ -42,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
         // A guest's cart follows them into their account when they sign in
         \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, fn ($event) => app(CartService::class)->mergeGuestCart($event->user));
 
+        // Dhivehi storefront URLs carry a /dv prefix (routes/web.php group + LocalePrefix middleware)
+        \App\Support\LocaleUrl::register();
+
         // Share SEO data with all views
         View::composer('layouts.app', function ($view) {
             $seo = $this->getSeoData();

@@ -36,30 +36,6 @@
   box-shadow: 0 0 0 2px rgba(11, 122, 112, 0.2);
 }
 
-/* Favicon and icon sizing */
-.favicon {
-  width: 16px;
-  height: 16px;
-  max-width: 16px;
-  max-height: 16px;
-}
-
-/* Ensure proper icon sizing for favicon and touch icons only */
-img[src*="favicon"],
-img[src*="apple-touch-icon"],
-img[src*="precomposed"] {
-  max-width: 32px !important;
-  max-height: 32px !important;
-  width: auto !important;
-  height: auto !important;
-}
-
-/* Hide any apple-touch-icon images that might still be requested */
-img[src*="apple-touch-icon"],
-img[src*="precomposed"] {
-  display: none !important;
-}
-
 /* Button styles */
 .btn {
   display: inline-flex;

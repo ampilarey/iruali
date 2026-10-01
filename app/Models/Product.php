@@ -27,6 +27,7 @@ class Product extends Model
         'price',
         'compare_price',
         'stock_quantity',
+        'has_variants',
         'reorder_point',
         'is_active',
         'is_featured',
@@ -55,6 +56,7 @@ class Product extends Model
         'tags' => 'array',
         'wholesale_pricing' => 'array',
         'is_active' => 'boolean',
+        'has_variants' => 'boolean',
         'is_featured' => 'boolean',
         'is_sponsored' => 'boolean',
         'sponsored_until' => 'datetime',
@@ -337,5 +339,89 @@ class Product extends Model
     public function forceDeleteProduct(): bool
     {
         return $this->forceDelete();
+    }
+
+    // ---- Variants -------------------------------------------------------------------------
+
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->where('is_active', true)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Units that can be sold: the sum of the active variants' stock when the product has variants,
+     * else its own stock column.
+     */
+    public function effectiveStock(): int
+    {
+        if (! $this->has_variants) {
+            return (int) $this->stock_quantity;
+        }
+
+        $variants = $this->relationLoaded('variants') ? $this->variants->where('is_active', true) : $this->activeVariants()->get();
+
+        return (int) $variants->sum('stock_quantity');
+    }
+
+    /**
+     * Keep the stock column equal to the active variants' total, so listings, "in stock" filters
+     * and sort orders need no extra query. Called whenever a variant is saved or deleted.
+     */
+    public function syncStockFromVariants(): void
+    {
+        if (! $this->has_variants) {
+            return;
+        }
+
+        $total = (int) $this->variants()->where('is_active', true)->sum('stock_quantity');
+        if ((int) $this->stock_quantity !== $total) {
+            $this->unsetRelation('variants');
+            $this->update(['stock_quantity' => $total]);
+        }
+    }
+
+    /**
+     * Running low: any active variant at or under its threshold, or the product at its reorder point.
+     */
+    public function isLowStock(): bool
+    {
+        if ($this->has_variants) {
+            $variants = $this->relationLoaded('variants') ? $this->variants->where('is_active', true) : $this->activeVariants()->get();
+
+            return $variants->contains(fn ($v) => $v->isLowStock());
+        }
+
+        return (int) $this->stock_quantity <= (int) ($this->reorder_point ?? 0);
+    }
+
+    /**
+     * [min, max] of the active variants' prices, or null when the product has no variants.
+     *
+     * @return array{0: float, 1: float}|null
+     */
+    public function variantPriceRange(): ?array
+    {
+        if (! $this->has_variants) {
+            return null;
+        }
+
+        $variants = $this->relationLoaded('variants') ? $this->variants->where('is_active', true) : $this->activeVariants()->get();
+        if ($variants->isEmpty()) {
+            return null;
+        }
+
+        $prices = $variants->map(fn ($v) => $v->setRelation('product', $this)->effectivePrice());
+
+        return [(float) $prices->min(), (float) $prices->max()];
+    }
+
+    /**
+     * The lowest variant price when variants are priced differently (cards show "from MVR x").
+     */
+    public function getFromPriceAttribute(): ?float
+    {
+        $range = $this->variantPriceRange();
+
+        return $range && $range[0] < $range[1] ? $range[0] : null;
     }
 }

@@ -677,5 +677,12 @@
     ":email will not get our newsletter or offers any more. Order and account emails continue as part of the service.": ":email އަށް ދެން ނިއުސްލެޓަރާއި އޮފަރުތައް ނުފޮނުވާނެ. އޯޑަރާއި އެކައުންޓުގެ އީމެއިލްތައް ޚިދުމަތުގެ ބައެއްގެ ގޮތުން ކުރިއަށްދާނެ.",
     "Back to shopping": "ވިޔަފާރިއަށް އަނބުރާ",
     "Subscribe again": "އަލުން ސަބްސްކްރައިބްކުރޭ",
-    "Every order is placed from your account, so you will find them all under My Orders. Lost the confirmation email? Use Track Order with the order code from it.": "ހުރިހާ އޯޑަރެއް ކުރެވެނީ އެކައުންޓުން ކަމަށްވާތީ، ހުރިހާ އޯޑަރެއް އަހަރެންގެ އޯޑަރުތަކުން ފެންނާނެ. ކޮންފަމޭޝަން އީމެއިލް ގެއްލުނީތަ؟ އޭގައިވާ އޯޑަރު ކޯޑު ބޭނުންކޮށްގެން އޯޑަރު ޓްރެކްކުރައްވާ."
+    "Every order is placed from your account, so you will find them all under My Orders. Lost the confirmation email? Use Track Order with the order code from it.": "ހުރިހާ އޯޑަރެއް ކުރެވެނީ އެކައުންޓުން ކަމަށްވާތީ، ހުރިހާ އޯޑަރެއް އަހަރެންގެ އޯޑަރުތަކުން ފެންނާނެ. ކޮންފަމޭޝަން އީމެއިލް ގެއްލުނީތަ؟ އޭގައިވާ އޯޑަރު ކޯޑު ބޭނުންކޮށްގެން އޯޑަރު ޓްރެކްކުރައްވާ.",
+    "Size": "ސައިޒު",
+    "Colour": "ކުލަ",
+    "Color": "ކުލަ",
+    "Material": "މެޓީރިއަލް",
+    "Style": "ސްޓައިލް",
+    "Variant": "ވޭރިއަންޓް",
+    "Variants": "ވޭރިއަންޓްތައް"
 }

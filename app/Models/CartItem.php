@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CartItem extends Model
 {
@@ -15,12 +15,12 @@ class CartItem extends Model
         'product_id',
         'product_variant_id',
         'quantity',
-        'price'
+        'price',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'quantity' => 'integer'
+        'quantity' => 'integer',
     ];
 
     public function cart(): BelongsTo
@@ -43,8 +43,40 @@ class CartItem extends Model
         return $this->quantity * $this->price;
     }
 
+    /**
+     * What one unit costs now: the variant's price when the line has one, else the product's.
+     */
+    public function getUnitPriceAttribute(): float
+    {
+        if ($this->variant) {
+            return $this->variant->setRelation('product', $this->product)->effectivePrice();
+        }
+
+        return (float) ($this->product?->final_price ?? 0);
+    }
+
     public function getFinalPriceAttribute()
     {
-        return $this->product->final_price;
+        return $this->unit_price;
+    }
+
+    /**
+     * Units that can still be bought of this line (the variant's stock when it has one).
+     */
+    public function availableStock(): int
+    {
+        if ($this->product_variant_id) {
+            return $this->variant && $this->variant->is_active ? (int) $this->variant->stock_quantity : 0;
+        }
+
+        return (int) ($this->product?->stock_quantity ?? 0);
+    }
+
+    /**
+     * The variant as shown to the customer ("M / Blue"), or null for a plain product.
+     */
+    public function variantLabel(): ?string
+    {
+        return $this->variant?->displayName();
     }
 }

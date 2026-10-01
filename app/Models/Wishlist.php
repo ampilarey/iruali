@@ -64,7 +64,7 @@ class Wishlist extends Model
         try {
             static::create([
                 'user_id' => $userId,
-                'product_id' => $productId
+                'product_id' => $productId,
             ]);
 
             return ['success' => true, 'message' => 'Product added to wishlist successfully.'];
@@ -73,7 +73,7 @@ class Wishlist extends Model
             if ($e->getCode() == 23000) {
                 return ['success' => false, 'message' => 'Product is already in your wishlist.'];
             }
-            
+
             return ['success' => false, 'message' => 'Failed to add product to wishlist.'];
         }
     }

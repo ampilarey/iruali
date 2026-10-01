@@ -1,123 +1,66 @@
-# 📚 Iruali - Multi-Vendor E-commerce Platform Documentation
+# Iruali documentation
 
-Welcome to the comprehensive documentation for the Iruali multi-vendor e-commerce platform. This documentation provides detailed information about the project architecture, features, deployment, and maintenance.
+Everything in this folder, and what each file is for. The repository `README.md` covers
+installing, running, testing, building and the release flow; `AGENTS.md` covers the dev
+container and the test database.
 
-## 📋 Documentation Structure
+## Start here
 
-### 🎯 Core Documentation
-- **[Project Overview](PROJECT_OVERVIEW.md)** - Vision, goals, target audience, and key differentiators
-- **[Tech Stack](TECH_STACK.md)** - The frameworks and packages actually installed
-- **[Architecture & Audit Guide](ARCHITECTURE_AND_AUDIT_GUIDE.md)** - Code structure, the original audit findings and their status, test environment, production checklist
+- **[FEATURES.md](FEATURES.md)** — one paragraph per feature area (customer, seller, admin,
+  operations) with the routes and pages involved. The quickest way to learn what the app does.
+- **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** — vision, target audience and goals.
+- **[TECH_STACK.md](TECH_STACK.md)** — the frameworks and packages actually installed.
+- **[ARCHITECTURE_AND_AUDIT_GUIDE.md](ARCHITECTURE_AND_AUDIT_GUIDE.md)** — code structure, the
+  original audit findings and their status, test environment, production checklist.
 
-### 🛒 How the marketplace works
-- **[Marketplace](MARKETPLACE.md)** - Per-shop order parts, commission, seller earnings and payouts, returns
-- **[Card payments with BML Connect](PAYMENTS_BML.md)** - Setup, payment flow, webhook and reconciliation (BML card is the only payment method)
-- **[BML website requirements](BML_COMPLIANCE.md)** - Where each of BML's website requirements is met
+## How the marketplace works
 
-### 🚀 Deployment
-- **[Production deploy](PRODUCTION_DEPLOY.md)** - Releasing `main` to iruali.mv by hand with `scripts/deploy-production.sh`
-- **[TEST auto-deploy](TEST_AUTO_DEPLOY.md)** - How test.iruali.mv pulls `main` automatically
-- The repository `README.md` covers local setup and tests; `AGENTS.md` covers running the app and the test database.
+- **[MARKETPLACE.md](MARKETPLACE.md)** — per-shop order parts, commission, seller earnings,
+  payouts and payout batches, returns.
+- **[PAYMENTS_BML.md](PAYMENTS_BML.md)** — BML Connect setup, the payment flow, webhook,
+  reconciliation; BML card is the only payment method.
+- **[BML_COMPLIANCE.md](BML_COMPLIANCE.md)** — where each of BML's website requirements is met.
 
-### 🎨 Brand
-- `brand/` - Colour and logo references used by the Tailwind theme
+## Deploying and running it
 
-The REST API has no separate specification document: `routes/api.php` and the `App\Http\Controllers\Api` controllers are the reference, and the README has the Sanctum authentication examples.
+- **[PRODUCTION_DEPLOY.md](PRODUCTION_DEPLOY.md)** — releases (`scripts/release.sh`), the
+  production deploy from a tag (`scripts/deploy-production.sh`), rollback
+  (`scripts/rollback-production.sh`), the first-deploy walk-through, and what must run on the
+  server: scheduler, backups and restore drill, error alerts, staff roles and 2FA, audit log,
+  admin inbox, staging refresh with the anonymiser.
+- **[TEST_AUTO_DEPLOY.md](TEST_AUTO_DEPLOY.md)** — how test.iruali.mv pulls `main`
+  automatically (webhook, cron fallback, Imunify360) and the smoke test that follows.
+- `../tests/load/README.md` — the k6 load test and what to expect on shared hosting.
 
-## 🏗️ Project Overview
+## Brand
 
-**Iruali** is a comprehensive multi-vendor e-commerce platform built with Laravel, featuring:
+- `brand/iruali-colours.png`, `brand/logo-options.png` — colour and logo references used by the
+  Tailwind theme.
 
-### ✨ Key Features
-- **Multi-Vendor Marketplace** - Complete seller onboarding and management system
-- **Multilingual Support** - English and Dhivehi with full RTL support
-- **Advanced Shopping Features** - Cart, wishlist, flash sales, and loyalty points
-- **Order Management** - Complete order processing with tracking and notifications
-- **Payment Integration** - Card payments through BML Connect (Bank of Maldives)
-- **Admin Panel** - Comprehensive dashboard for platform management
+## Reference
 
-### 🎨 Business Features
-- **Seller Management** - Vendor onboarding, approval, and performance tracking
-- **Product Management** - Advanced catalog with variants, reviews, and SEO
-- **Order Processing** - Multi-status order management with notifications
-- **Analytics Dashboard** - Sales, revenue, and performance insights
-- **Marketing Tools** - Vouchers, loyalty points and referrals
+- Schema: `database/migrations/`. Routes: `routes/web.php`, `routes/web/*.php`, `routes/api.php`
+  (`php artisan route:list`). Scheduled jobs: `routes/console.php`. Commands:
+  `php artisan list iruali` (`iruali:ready`, `iruali:smoke`, `iruali:anonymise`), `errors:digest`,
+  `seller:low-stock-digest`, `orders:cancel-unpaid-card`, `backup:restore-drill`,
+  `images:variants`.
+- The REST API has no separate specification: `routes/api.php` and the
+  `App\Http\Controllers\Api` controllers are the reference; the README has the Sanctum
+  authentication examples.
+- Status values (orders, shop parts, payments, returns, disputes, payouts) are the enums in
+  `app/Enums/`, each with `label()` and `badgeClass()`.
 
-### 🌐 Technology Stack
-- **Backend**: Laravel 12, PHP 8.4 (8.2+ required), MySQL/MariaDB
-- **Frontend**: Blade, TailwindCSS 4, Vite 6, SweetAlert2
-- **Authentication**: Laravel Sanctum with 2FA support
-- **Multilingual**: Spatie Laravel Translatable
-- **Image Processing**: Intervention Image with optimization
+## Getting started (short version)
 
-## 📁 Quick Navigation
-
-### For Developers
-1. Start with [Tech Stack](TECH_STACK.md) to understand what is installed
-2. Read the [Architecture & Audit Guide](ARCHITECTURE_AND_AUDIT_GUIDE.md) for code structure and the test environment
-3. `database/migrations/` is the reference for the schema; `routes/web.php` and `routes/api.php` for endpoints
-4. Follow [Production deploy](PRODUCTION_DEPLOY.md) and [TEST auto-deploy](TEST_AUTO_DEPLOY.md) for releases
-
-### For Operations
-1. Read [Marketplace](MARKETPLACE.md) for seller orders, commission and payouts
-2. Check [Card payments with BML Connect](PAYMENTS_BML.md) for payment setup and reconciliation
-3. Use [BML website requirements](BML_COMPLIANCE.md) when applying to BML
-
-### For Stakeholders
-1. Start with [Project Overview](PROJECT_OVERVIEW.md) for business context
-2. Review [Marketplace](MARKETPLACE.md) for how shops, orders and payouts work
-
-## 🚀 Getting Started
-
-### Local Development
 ```bash
-# Clone repository
-git clone <repository-url>
-cd iruali
-
-# Install dependencies
-composer install
-npm install
-
-# Setup environment
-cp .env.example .env
-php artisan key:generate
-
-# Database setup
-php artisan migrate --seed
-php artisan storage:link
-
-# Build assets and start server
-npm run build
-php artisan serve
+composer install && npm install
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite && php artisan migrate --seed && php artisan storage:link
+npm run build && php artisan serve
 ```
 
-### Admin Access
-- **URL**: `/admin/dashboard`
-- **Default Email**: admin@example.com (seeded outside production; override with `ADMIN_EMAIL`)
-- **Default Password**: password (override with `ADMIN_PASSWORD`; `php artisan db:seed --class=UserSeeder` creates the production admin)
+Admin: `/admin/dashboard`, `admin@example.com` / `password` (seeded outside production; on
+production create the admin with `ADMIN_EMAIL` / `ADMIN_PASSWORD` and
+`php artisan db:seed --class=UserSeeder`). Change the default credentials straight away.
 
-**⚠️ Important**: Change default credentials immediately after deployment.
-
-## 🔗 External Resources
-
-- **Laravel Documentation**: https://laravel.com/docs/12.x
-- **TailwindCSS Documentation**: https://tailwindcss.com/docs
-- **Spatie Packages**: https://spatie.be/open-source
-- **BML Connect**: https://www.bankofmaldives.com.mv/ (merchant portal; see PAYMENTS_BML.md)
-
-## 📞 Support & Contact
-
-- **Technical Support**: tech@iruali.mv
-- **Business Inquiries**: business@iruali.mv
-- **Project Repository**: [Internal Repository]
-
-## 📄 License
-
-This project is proprietary software developed for the Iruali marketplace platform.
-
----
-
-**Last Updated**: December 2024  
-**Version**: 1.0.0  
-**Laravel Version**: 12.x
+Contact: tech@iruali.mv (technical), business@iruali.mv (business).

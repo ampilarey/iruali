@@ -4,35 +4,27 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\User;
+use App\Support\DemoData;
 use Illuminate\Database\Seeder;
 
 /**
  * One-off cleanup for the TEST site: soft-deletes the old generic demo products
  * (iPhone, MacBook, Nike…) that the previous seeders created under the admin
  * account. Only matches those exact SKUs/names AND the admin@example.com seller,
- * so real listings are never touched.
+ * so real listings are never touched. The lists live in App\Support\DemoData
+ * (shared with Admin → Sample data, which can also remove and restore them).
  *
  *   php artisan db:seed --class=RemoveGenericDemoProductsSeeder --force
  */
 class RemoveGenericDemoProductsSeeder extends Seeder
 {
-    public const SKUS = [
-        'IPHONE15PRO', 'MACBOOKAIRM2', 'NIKEAIRMAX270', 'SAMSUNG4KTV',
-        'WIRELESSHP', 'COFFEEMAKER', 'YOGAMAT', 'WIRELESSCHARGER',
-    ];
+    public const SKUS = DemoData::GENERIC_SKUS;
 
-    public const NAMES = [
-        'Wireless Bluetooth Headphones', 'Smart LED TV 55"', 'Portable Bluetooth Speaker', 'Classic Denim Jacket',
-        'Premium Cotton T-Shirt', 'Modern Coffee Table', 'Indoor Plant Set', 'Professional Yoga Mat',
-        'Hiking Backpack 30L', 'Bestselling Novel Collection', 'Wireless Gaming Mouse', 'Organic Face Cream',
-        'Electric Toothbrush Set', 'Latest Smartphone Pro', 'Wireless Charging Pad', 'Ultrabook Laptop 14"',
-        'Laptop Stand & Cooling Pad', 'Formal Business Suit', 'Casual Polo Shirt', 'Elegant Evening Dress',
-        'Comfortable Leggings', 'Sample Product',
-    ];
+    public const NAMES = DemoData::GENERIC_NAMES;
 
     public function run(): void
     {
-        $adminId = User::where('email', 'admin@example.com')->value('id');
+        $adminId = User::where('email', DemoData::ADMIN_EMAIL)->value('id');
         if (! $adminId) {
             $this->command?->info('No admin@example.com user, nothing to remove.');
 

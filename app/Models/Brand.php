@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -80,6 +81,42 @@ class Brand extends Model
     public function activeProductCount(): int
     {
         return (int) ($this->getAttribute('active_products_count') ?? Product::query()->active()->where('brand_id', $this->id)->count());
+    }
+
+    /**
+     * Shops iruali has confirmed as authorised sellers of this brand (Admin → Brands → edit).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function authorisedSellers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'brand_authorised_sellers', 'brand_id', 'seller_id')
+            ->withPivot('authorised_by')
+            ->withTimestamps();
+    }
+
+    /**
+     * Is this shop an authorised seller of the brand? Reads the loaded authorisedSellers (loading
+     * just their ids the first time), so a page asking for every product or shop of a brand runs
+     * one query per brand, or none when the relation was eager loaded.
+     */
+    public function isAuthorisedSeller(int $sellerId): bool
+    {
+        if (! $this->relationLoaded('authorisedSellers')) {
+            $this->load('authorisedSellers:id');
+        }
+
+        return $this->authorisedSellers->contains('id', $sellerId);
+    }
+
+    /**
+     * Campaigns for this brand only: just its products can go in, and they show on its page.
+     *
+     * @return HasMany<Campaign, $this>
+     */
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
     }
 
     /**

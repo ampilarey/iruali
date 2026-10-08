@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -11,8 +12,11 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\OrderService;
 use App\Services\PaymentService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class AdminController extends Controller
 {
@@ -218,7 +222,7 @@ class AdminController extends Controller
             ->toBase() // plain rows: per-product totals, not order items
             ->get();
         $productNames = Product::withTrashed()->whereIn('id', $topProducts->pluck('product_id'))->get()->keyBy('id');
-        $topProducts->each(fn ($row) => $row->product = $productNames[$row->product_id] ?? null);
+        $topProducts->each(fn (OrderItem $row) => $row->setRelation('product', $productNames[$row->product_id] ?? null));
 
         $topSellers = (clone $salesLines)
             ->select('products.seller_id', DB::raw('SUM(order_items.quantity * order_items.price) as revenue'), DB::raw('COUNT(DISTINCT orders.id) as orders'))
@@ -228,13 +232,52 @@ class AdminController extends Controller
             ->toBase()
             ->get();
         $sellerNames = User::whereIn('id', $topSellers->pluck('seller_id'))->pluck('name', 'id');
-        $topSellers->each(fn ($row) => $row->name = $sellerNames[$row->seller_id] ?? 'Unknown seller');
+        $topSellers->each(fn (OrderItem $row) => $row->setAttribute('name', $sellerNames[$row->getAttribute('seller_id')] ?? 'Unknown seller'));
+
+        $brandSales = $this->brandSales($salesLines);
 
         // First-party shopping funnel (see FunnelService): visitors per step and product conversion
         $funnel = ['7' => \App\Services\FunnelService::funnel(7), '30' => \App\Services\FunnelService::funnel(30)];
         $funnelProducts = \App\Services\FunnelService::topProducts(30);
 
-        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers', 'funnel', 'funnelProducts'));
+        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers', 'funnel', 'funnelProducts', 'brandSales'));
+    }
+
+    /**
+     * Top brands for the analytics page: units and revenue per brand over the last 30 days, from
+     * the same order lines (and so the same idea of a sale) as the top products and sellers. One
+     * grouped query on products.brand_id; products in the bin still count, and products without a
+     * brand come out of it as the unbranded row. Share is of all branded revenue in the window.
+     *
+     * @param  Builder<OrderItem>  $salesLines
+     * @return array{rows: Collection<int, array{brand: ?Brand, units: int, revenue: float, share: float}>, unbranded: ?array{units: int, revenue: float}, brandRevenue: float}
+     */
+    protected function brandSales(Builder $salesLines, int $limit = 10): array
+    {
+        $groups = (clone $salesLines)
+            ->where('orders.created_at', '>=', now()->subDays(30))
+            ->toBase()
+            ->select('products.brand_id', DB::raw('SUM(order_items.quantity) as units'), DB::raw('SUM(order_items.quantity * order_items.price) as revenue'))
+            ->groupBy('products.brand_id')
+            ->orderByDesc('revenue')
+            ->get();
+
+        $unbranded = $groups->first(fn (stdClass $group) => $group->brand_id === null);
+        $branded = $groups->filter(fn (stdClass $group) => $group->brand_id !== null);
+        $brandRevenue = (float) $branded->sum('revenue');
+        $top = $branded->take($limit);
+        $brands = Brand::query()->withActiveProductCount()->whereIn('id', $top->pluck('brand_id'))->get()->keyBy('id');
+
+        return [
+            'rows' => $top->map(fn (stdClass $group) => [
+                'brand' => $brands->get($group->brand_id),
+                'units' => (int) $group->units,
+                'revenue' => (float) $group->revenue,
+                'share' => $brandRevenue > 0 ? (float) $group->revenue / $brandRevenue * 100 : 0.0,
+            ])->values(),
+            'unbranded' => $unbranded ? ['units' => (int) $unbranded->units, 'revenue' => (float) $unbranded->revenue] : null,
+            'brandRevenue' => $brandRevenue,
+        ];
     }
 
     public function settings()

@@ -18,6 +18,23 @@
                 <img src="{{ $campaign->banner_image }}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-60">
             @endif
             <div class="relative max-w-2xl">
+                @if($campaign->brand)
+                    {{-- A brand campaign: the brand's logo and name, leading to its page --}}
+                    @php $brandPage = $campaign->brand->activeProductCount() > 0 ? route('brands.show', $campaign->brand) : null; @endphp
+                    <div class="mb-3" data-campaign-brand>
+                        @if($brandPage)
+                            <a href="{{ $brandPage }}" class="inline-flex items-center gap-2 rounded-full bg-white ps-1 pe-3 py-1 text-sm font-semibold text-dark hover:bg-gray-50">
+                                @include('brands._logo', ['brand' => $campaign->brand, 'class' => 'w-8 h-8 text-sm'])
+                                {{ $campaign->brand->name }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" />
+                            </a>
+                        @else
+                            <span class="inline-flex items-center gap-2 rounded-full bg-white ps-1 pe-3 py-1 text-sm font-semibold text-dark">
+                                @include('brands._logo', ['brand' => $campaign->brand, 'class' => 'w-8 h-8 text-sm'])
+                                {{ $campaign->brand->name }}
+                            </span>
+                        @endif
+                    </div>
+                @endif
                 <p class="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold mb-3">{{ $campaign->type === 'event' ? __('Event') : __('Sale') }}</p>
                 <h1 class="font-display text-3xl sm:text-4xl font-bold leading-tight">{{ $campaign->headline }}</h1>
                 @if($campaign->subheadline)<p class="mt-2 text-white/90 sm:text-lg">{{ $campaign->subheadline }}</p>@endif
@@ -37,6 +54,12 @@
                 <h2 class="font-display text-xl lg:text-2xl font-bold text-dark">{{ __('Campaign products') }}</h2>
                 <span class="text-sm text-gray-500">{{ trans_choice(':count product|:count products', $products->total(), ['count' => $products->total()]) }}</span>
             </div>
+            @if($campaign->brand)
+                <p class="-mt-1 mb-3 text-sm text-gray-600">
+                    {{ __('Only :brand products are in this campaign.', ['brand' => $campaign->brand->name]) }}
+                    @if($brandPage)<a href="{{ $brandPage }}" class="font-semibold text-primary hover:underline">{{ __('See everything from :brand', ['brand' => $campaign->brand->name]) }}</a>@endif
+                </p>
+            @endif
             @if($products->isEmpty())
                 <p class="rounded-xl bg-white border border-gray-200 p-8 text-center text-gray-600">{{ $campaign->isLive() ? __('Shops are still adding products. Check back soon.') : __('Products will appear here when the campaign starts.') }}</p>
             @else

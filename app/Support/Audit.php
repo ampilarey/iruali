@@ -31,6 +31,8 @@ class Audit
         'brand.reviewed' => 'Brand reviewed',
         'brand.merged' => 'Brands merged',
         'brand.deleted' => 'Brand deleted',
+        'brand.seller_authorised' => 'Brand authorised seller added',
+        'brand.seller_unauthorised' => 'Brand authorised seller removed',
         'settings.saved' => 'Settings saved',
         'legal.saved' => 'Legal page saved',
         'voucher.created' => 'Voucher created',

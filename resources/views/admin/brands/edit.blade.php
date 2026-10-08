@@ -94,6 +94,8 @@
                 @endif
             </section>
 
+            @include('admin.brands._authorised_sellers')
+
             <section class="rounded-lg bg-white p-6 shadow text-sm">
                 <h2 class="text-base font-semibold text-gray-900">Merge into another brand</h2>
                 <p class="mt-1 text-gray-600">For duplicates. Every product of “{{ $brand->name }}” moves to the brand you choose, this brand's page redirects there, and shops typing “{{ $brand->name }}” get the other brand from now on.</p>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 /**
@@ -23,8 +24,11 @@ class CampaignController extends Controller
         // Live and upcoming campaigns have a page; switched-off or finished ones do not
         abort_unless($campaign->isJoinable(), 404);
 
+        $campaign->loadMissing('brand');
         $products = $campaign->approvedProducts()
             ->active()
+            // A brand campaign shows only that brand's products (one that changed brand gets no campaign price)
+            ->when($campaign->brand_id, fn (Builder $q) => $q->where('products.brand_id', $campaign->brand_id))
             ->with(['category', 'mainImage', 'seller'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating')

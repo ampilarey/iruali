@@ -71,6 +71,14 @@
                 <input id="sort_order" name="sort_order" type="number" min="0" class="{{ $field }}" value="{{ old('sort_order', $campaign->sort_order ?? 0) }}">
                 <p class="mt-1 text-xs text-gray-500">Lower comes first when several campaigns are live.</p>
             </div>
+            <div class="sm:col-span-2">
+                <label for="brand_id" class="block text-sm font-medium text-gray-700">{{ __('Only for brand') }}</label>
+                <select id="brand_id" name="brand_id" class="{{ $field }}">
+                    <option value="">{{ __('Any brand: every product can join') }}</option>
+                    @foreach($brands as $brandOption)<option value="{{ $brandOption->id }}" @selected((string) old('brand_id', $campaign->brand_id) === (string) $brandOption->id)>{{ $brandOption->name }}</option>@endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500">{{ __('With a brand, shops can only put in that brand\'s products; the campaign page shows the brand, and the brand page shows the campaign while it runs.') }}</p>
+            </div>
             <label class="flex items-center gap-2 text-sm text-gray-700 sm:col-span-2">
                 <input type="hidden" name="is_active" value="0">
                 <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $campaign->is_active)) class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
@@ -145,7 +153,7 @@
                         @foreach($campaign->participations->sortBy('approved_at') as $row)
                             @php $base = (float) ($row->product->sale_price ?? $row->product->price); $pct = $campaign->discountFor($row); @endphp
                             <tr>
-                                <td class="p-2">{{ $row->product->name }}</td>
+                                <td class="p-2">{{ $row->product->name }}@unless($campaign->acceptsProduct($row->product))<span class="block text-xs font-medium text-red-700">{{ __('Not a :brand product, so no campaign price', ['brand' => $campaign->brand?->name]) }}</span>@endunless</td>
                                 <td class="p-2">{{ $row->seller?->business_name ?: $row->seller?->name }}</td>
                                 <td class="p-2 text-end">{{ \App\Support\Money::format($base) }}</td>
                                 <td class="p-2 text-end">{{ rtrim(rtrim(number_format($pct, 2, '.', ''), '0'), '.') }}%</td>

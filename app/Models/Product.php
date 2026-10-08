@@ -68,11 +68,13 @@ class Product extends Model
         'flash_sale_ends_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /** @return HasMany<ProductVariant, $this> */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
@@ -93,11 +95,13 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    /** @return HasOne<ProductImage, $this> */
     public function mainImage(): HasOne
     {
         return $this->hasOne(ProductImage::class)->where('is_main', true);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
@@ -106,6 +110,8 @@ class Product extends Model
     /**
      * The shared brand record. Named brandModel because products.brand already holds the name
      * as text (search, feeds and filters read that column); BrandService keeps the two in step.
+     *
+     * @return BelongsTo<Brand, $this>
      */
     public function brandModel(): BelongsTo
     {
@@ -156,8 +162,9 @@ class Product extends Model
 
     /**
      * When a marked-down price ends, if the seller set an end time (drives the deal countdown).
+     * Returns the Carbon instance the flash_sale_ends_at datetime cast gives.
      */
-    public function getDealEndsAtAttribute(): ?\Illuminate\Support\Carbon
+    public function getDealEndsAtAttribute(): ?\Carbon\Carbon
     {
         return $this->is_on_sale && $this->flash_sale_ends_at && $this->flash_sale_ends_at->isFuture() ? $this->flash_sale_ends_at : null;
     }
@@ -371,6 +378,7 @@ class Product extends Model
 
     // ---- Variants -------------------------------------------------------------------------
 
+    /** @return HasMany<ProductVariant, $this> */
     public function activeVariants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->where('is_active', true)->orderBy('sort_order')->orderBy('id');

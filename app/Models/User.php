@@ -21,7 +21,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -67,7 +67,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -229,7 +229,10 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function isBanned(): bool
     {
-        return $this->banned_until && $this->banned_until->isFuture();
+        // No migration adds a banned_until column yet, so it is read with getAttribute(): null until one does
+        $until = $this->getAttribute('banned_until');
+
+        return $until !== null && $until->isFuture();
     }
 
     /**
@@ -521,6 +524,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Saved delivery addresses (My Account → Addresses).
+     *
+     * @return HasMany<Address, $this>
      */
     public function addresses(): HasMany
     {

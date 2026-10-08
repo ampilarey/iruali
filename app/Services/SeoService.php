@@ -287,13 +287,14 @@ class SeoService
             $schema['brand'] = ['@type' => 'Brand', 'name' => $product->brand];
         }
 
-        // Ratings only when there are approved reviews (Google rejects an empty aggregateRating)
+        // Ratings only when there are approved reviews (Google rejects an empty aggregateRating).
+        // n and avg are computed columns of this query, so they are read with getAttribute().
         $reviews = $product->reviews()->where('is_approved', true)->selectRaw('COUNT(*) as n, AVG(rating) as avg')->first();
-        if ($reviews && (int) $reviews->n > 0) {
+        if ($reviews && (int) $reviews->getAttribute('n') > 0) {
             $schema['aggregateRating'] = [
                 '@type' => 'AggregateRating',
-                'ratingValue' => round((float) $reviews->avg, 1),
-                'reviewCount' => (int) $reviews->n,
+                'ratingValue' => round((float) $reviews->getAttribute('avg'), 1),
+                'reviewCount' => (int) $reviews->getAttribute('n'),
                 'bestRating' => 5,
                 'worstRating' => 1,
             ];

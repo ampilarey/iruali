@@ -52,11 +52,13 @@ class ProductVariant extends Model
         static::deleted(fn (ProductVariant $variant) => $variant->product?->syncStockFromVariants());
     }
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withTrashed();
     }
 
+    /** @return HasMany<OrderItem, $this> */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);

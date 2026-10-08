@@ -33,6 +33,7 @@ class ProductImage extends Model
         return implode(', ', array_map(fn ($w) => $this->variant($w).' '.$w.'w', \App\Support\ImageVariants::WIDTHS));
     }
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

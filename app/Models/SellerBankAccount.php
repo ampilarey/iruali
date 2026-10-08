@@ -17,6 +17,7 @@ class SellerBankAccount extends Model
 
     protected $casts = ['verified_at' => 'datetime'];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

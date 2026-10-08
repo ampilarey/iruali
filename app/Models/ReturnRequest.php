@@ -37,21 +37,25 @@ class ReturnRequest extends Model
         'refunded_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /** @return BelongsTo<SellerOrder, $this> */
     public function sellerOrder(): BelongsTo
     {
         return $this->belongsTo(SellerOrder::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<ReturnRequestItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(ReturnRequestItem::class);

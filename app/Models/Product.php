@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -68,36 +69,43 @@ class Product extends Model
         'flash_sale_ends_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /** @return HasMany<ProductVariant, $this> */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }
 
+    /** @return HasMany<ProductReview, $this> */
     public function reviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);
     }
 
+    /** @return HasMany<ProductQuestion, $this> */
     public function questions(): HasMany
     {
         return $this->hasMany(ProductQuestion::class);
     }
 
+    /** @return HasMany<ProductImage, $this> */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 
+    /** @return HasOne<ProductImage, $this> */
     public function mainImage(): HasOne
     {
         return $this->hasOne(ProductImage::class)->where('is_main', true);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
@@ -106,13 +114,16 @@ class Product extends Model
     /**
      * The shared brand record. Named brandModel because products.brand already holds the name
      * as text (search, feeds and filters read that column); BrandService keeps the two in step.
+     *
+     * @return BelongsTo<Brand, $this>
      */
     public function brandModel(): BelongsTo
     {
         return $this->belongsTo(Brand::class, 'brand_id');
     }
 
-    public function islands()
+    /** @return BelongsToMany<Island, $this> */
+    public function islands(): BelongsToMany
     {
         return $this->belongsToMany(Island::class, 'product_island')
             ->withPivot('stock_quantity', 'reorder_point', 'is_active')
@@ -371,6 +382,7 @@ class Product extends Model
 
     // ---- Variants -------------------------------------------------------------------------
 
+    /** @return HasMany<ProductVariant, $this> */
     public function activeVariants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->where('is_active', true)->orderBy('sort_order')->orderBy('id');
@@ -455,13 +467,15 @@ class Product extends Model
 
     // ---- Campaigns ------------------------------------------------------------------------
 
-    public function campaigns()
+    /** @return BelongsToMany<Campaign, $this> */
+    public function campaigns(): BelongsToMany
     {
         return $this->belongsToMany(Campaign::class, 'campaign_products')
             ->withPivot(['seller_id', 'discount_percent', 'approved_at'])
             ->withTimestamps();
     }
 
+    /** @return HasMany<CampaignProduct, $this> */
     public function campaignParticipations(): HasMany
     {
         return $this->hasMany(CampaignProduct::class);

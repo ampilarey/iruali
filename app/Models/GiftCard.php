@@ -36,16 +36,19 @@ class GiftCard extends Model
         'redeemed_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function purchaser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'purchaser_id');
     }
 
+    /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class)->withTrashed();
     }
 
+    /** @return BelongsTo<User, $this> */
     public function redeemer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'redeemed_by');

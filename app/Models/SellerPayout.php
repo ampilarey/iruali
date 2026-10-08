@@ -20,21 +20,25 @@ class SellerPayout extends Model
         'paid_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
 
+    /** @return HasMany<SellerOrder, $this> */
     public function sellerOrders(): HasMany
     {
         return $this->hasMany(SellerOrder::class, 'payout_id');
     }
 
+    /** @return HasMany<SellerAdjustment, $this> */
     public function adjustments(): HasMany
     {
         return $this->hasMany(SellerAdjustment::class, 'payout_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -42,6 +46,8 @@ class SellerPayout extends Model
 
     /**
      * The bulk-transfer batch this payout was made in, if any.
+     *
+     * @return BelongsTo<PayoutBatch, $this>
      */
     public function batch(): BelongsTo
     {

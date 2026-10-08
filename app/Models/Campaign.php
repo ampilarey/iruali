@@ -68,11 +68,13 @@ class Campaign extends Model
         return $slug;
     }
 
+    /** @return HasMany<CampaignProduct, $this> */
     public function participations(): HasMany
     {
         return $this->hasMany(CampaignProduct::class);
     }
 
+    /** @return BelongsToMany<Product, $this> */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'campaign_products')

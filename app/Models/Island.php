@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
 class Island extends Model
@@ -20,7 +21,8 @@ class Island extends Model
         'is_active' => 'boolean',
     ];
 
-    public function products()
+    /** @return BelongsToMany<Product, $this> */
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_island')
             ->withPivot('stock_quantity', 'reorder_point', 'is_active')

@@ -13,6 +13,7 @@ class PushSubscription extends Model
 {
     protected $fillable = ['user_id', 'endpoint', 'public_key', 'auth_token', 'content_encoding'];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

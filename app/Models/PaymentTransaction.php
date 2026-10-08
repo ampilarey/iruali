@@ -18,6 +18,7 @@ class PaymentTransaction extends Model
         'confirmed_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

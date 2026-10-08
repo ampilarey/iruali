@@ -33,11 +33,13 @@ class ProductReview extends Model
         'seller_replied_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -60,6 +62,8 @@ class ProductReview extends Model
 
     /**
      * Photos the customer attached (up to three).
+     *
+     * @return HasMany<ReviewPhoto, $this>
      */
     public function photos(): HasMany
     {
@@ -68,6 +72,8 @@ class ProductReview extends Model
 
     /**
      * The shop user who wrote the reply.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function replier(): BelongsTo
     {

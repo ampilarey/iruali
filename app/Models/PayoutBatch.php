@@ -25,11 +25,13 @@ class PayoutBatch extends Model
         'paid_at' => 'datetime',
     ];
 
+    /** @return HasMany<SellerPayout, $this> */
     public function payouts(): HasMany
     {
         return $this->hasMany(SellerPayout::class, 'payout_batch_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

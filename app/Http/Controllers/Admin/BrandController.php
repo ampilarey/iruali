@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\Campaign;
 use App\Models\User;
 use App\Services\BrandService;
 use App\Support\Audit;
@@ -144,6 +145,9 @@ class BrandController extends Controller
 
     public function destroy(Brand $brand)
     {
+        if (Campaign::where('brand_id', $brand->id)->exists()) {
+            return back()->with('error', 'A campaign is only for this brand. Give that campaign another brand (or none) first, or merge this brand into another one: its campaigns move with it.');
+        }
         if (! $this->brands->delete($brand)) {
             return back()->with('error', 'Shops still list products under this brand. Merge it into another brand instead.');
         }

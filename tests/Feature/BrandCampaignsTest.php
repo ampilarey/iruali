@@ -246,6 +246,24 @@ class BrandCampaignsTest extends TestCase
             ->assertSee('No longer a Reefline product, so it gets no campaign price.');
     }
 
+    public function test_a_brand_with_a_brand_campaign_cannot_be_deleted(): void
+    {
+        $product = $this->product('Old stock', 'Reefline');
+        $brand = $product->brandModel;
+        $product->update(['brand' => null]); // no product uses the brand any more
+        $campaign = Campaign::factory()->create(['brand_id' => $brand->id]);
+
+        $this->actingAs($this->admin)->delete(route('admin.brands.destroy', $brand))
+            ->assertSessionHas('error', fn ($message) => str_contains($message, 'only for this brand'));
+        $this->assertNotNull($brand->fresh(), 'the brand stays');
+        $this->assertSame($brand->id, $campaign->fresh()->brand_id, 'the campaign stays a brand campaign');
+
+        // Once the campaign has no brand, the brand can go
+        $campaign->update(['brand_id' => null]);
+        $this->actingAs($this->admin)->delete(route('admin.brands.destroy', $brand))->assertRedirect(route('admin.brands'));
+        $this->assertNull($brand->fresh());
+    }
+
     public function test_merging_a_brand_keeps_its_campaigns_for_the_merged_brand(): void
     {
         $samsung = $this->product('Galaxy charger', 'Samsung')->brandModel;

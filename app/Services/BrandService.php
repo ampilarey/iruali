@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Brand;
 use App\Models\BrandAlias;
+use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
@@ -272,7 +273,8 @@ class BrandService
      */
     public function delete(Brand $brand): bool
     {
-        if (Product::where('brand_id', $brand->id)->exists()) {
+        // A brand campaign would silently open up to every product if its brand went away
+        if (Product::where('brand_id', $brand->id)->exists() || Campaign::where('brand_id', $brand->id)->exists()) {
             return false;
         }
 

@@ -219,7 +219,6 @@ class AdminController extends Controller
             ->groupBy('order_items.product_id')
             ->orderByDesc('revenue')
             ->take(5)
-            ->toBase() // plain rows: per-product totals, not order items
             ->get();
         $productNames = Product::withTrashed()->whereIn('id', $topProducts->pluck('product_id'))->get()->keyBy('id');
         $topProducts->each(fn (OrderItem $row) => $row->setRelation('product', $productNames[$row->product_id] ?? null));
@@ -229,7 +228,6 @@ class AdminController extends Controller
             ->groupBy('products.seller_id')
             ->orderByDesc('revenue')
             ->take(5)
-            ->toBase()
             ->get();
         $sellerNames = User::whereIn('id', $topSellers->pluck('seller_id'))->pluck('name', 'id');
         $topSellers->each(fn (OrderItem $row) => $row->setAttribute('name', $sellerNames[$row->getAttribute('seller_id')] ?? 'Unknown seller'));

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\User;
 use App\Services\BrandService;
 use App\Support\Audit;
 use App\Traits\SecureFileUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 /**
@@ -54,7 +56,7 @@ class BrandController extends Controller
             'brand' => $brand,
             'similar' => $similar,
             'others' => Brand::where('id', '!=', $brand->id)->whereNotIn('id', $similar->pluck('id'))->orderBy('name')->get(['id', 'name']),
-        ]);
+        ] + $this->authorisedSellerChoices($brand));
     }
 
     public function update(Request $request, Brand $brand)
@@ -148,5 +150,27 @@ class BrandController extends Controller
         Audit::record('brand.deleted', null, ['name' => $brand->name, 'slug' => $brand->slug]);
 
         return redirect()->route('admin.brands')->with('success', "Deleted “{$brand->name}”.");
+    }
+
+    /**
+     * The edit page's "Authorised sellers" panel: the shops confirmed now (and who confirmed them),
+     * the shops selling the brand that are not yet, and approved shops matching ?seller_q=.
+     *
+     * @return array{authorisedSellers: Collection<int, User>, authorisedBy: Collection<int, string>, sellingShops: Collection<int, User>, sellerSearch: string, sellerMatches: Collection<int, User>}
+     */
+    protected function authorisedSellerChoices(Brand $brand): array
+    {
+        $brand->load('authorisedSellers');
+        $search = request()->query('seller_q');
+        $search = is_string($search) ? trim($search) : '';
+        $notYet = fn (User $shop) => ! $brand->isAuthorisedSeller($shop->id);
+
+        return [
+            'authorisedSellers' => $brand->authorisedSellers->sortBy(fn (User $shop) => mb_strtolower($shop->shopName()))->values(),
+            'authorisedBy' => User::whereIn('id', $brand->authorisedSellers->pluck('pivot.authorised_by')->filter())->pluck('name', 'id'),
+            'sellingShops' => $this->brands->shops($brand, 100)['shops']->filter($notYet)->values(),
+            'sellerSearch' => $search,
+            'sellerMatches' => $search === '' ? collect() : $this->brands->findApprovedSellers($search)->filter($notYet)->values(),
+        ];
     }
 }

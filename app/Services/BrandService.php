@@ -240,6 +240,7 @@ class BrandService
                 $target->reviewed_at = $source->reviewed_at;
             }
             $target->save();
+            $this->carryOverBrandTrust($source, $target);
 
             [$key, $slug] = [$source->key, $source->slug];
             $source->delete();
@@ -249,6 +250,18 @@ class BrandService
         $this->deleteLogo($orphanLogo);
 
         return $moved;
+    }
+
+    /**
+     * A merge keeps what admins set up for the old brand, since its products are now the other
+     * brand's: its authorised sellers become the other brand's (unless they already are).
+     */
+    protected function carryOverBrandTrust(Brand $source, Brand $target): void
+    {
+        DB::table('brand_authorised_sellers')
+            ->where('brand_id', $source->id)
+            ->whereNotIn('seller_id', $target->authorisedSellers()->pluck('users.id'))
+            ->update(['brand_id' => $target->id, 'updated_at' => now()]);
     }
 
     /**
@@ -365,7 +378,8 @@ class BrandService
     }
 
     /**
-     * The shops selling this brand, most products first, each with brand_product_count set.
+     * The shops selling this brand, each with brand_product_count set: authorised sellers of the
+     * brand first, then most products first.
      *
      * @return array{shops: Collection, total: int}
      */
@@ -377,11 +391,33 @@ class BrandService
 
         $shops = User::whereIn('id', $counts->keys())->get(['id', 'name', 'business_name'])
             ->each(fn (User $shop) => $shop->setAttribute('brand_product_count', (int) $counts[$shop->id]))
-            ->sortBy([['brand_product_count', 'desc'], fn ($a, $b) => strcasecmp($a->business_name ?: $a->name, $b->business_name ?: $b->name)])
+            ->sortBy([
+                fn (User $a, User $b) => $brand->isAuthorisedSeller($b->id) <=> $brand->isAuthorisedSeller($a->id),
+                ['brand_product_count', 'desc'],
+                fn ($a, $b) => strcasecmp($a->business_name ?: $a->name, $b->business_name ?: $b->name),
+            ])
             ->take($limit)
             ->values();
 
         return ['shops' => $shops, 'total' => $counts->count()];
+    }
+
+    /**
+     * Approved shops whose shop name, name or email contains the text: for making a shop an
+     * authorised seller of a brand it does not list yet.
+     *
+     * @return Collection<int, User>
+     */
+    public function findApprovedSellers(string $search, int $limit = 10): Collection
+    {
+        $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $search).'%';
+
+        return User::query()
+            ->where('is_seller', true)->where('seller_approved', true)->where('status', '!=', 'suspended')
+            ->whereAny(['business_name', 'name', 'email'], 'like', $like)
+            ->orderBy('business_name')->orderBy('name')
+            ->limit($limit)
+            ->get(['id', 'name', 'business_name', 'email']);
     }
 
     /**

@@ -14,15 +14,22 @@
     </div>
 
     @if($brandShops->isNotEmpty())
+        {{-- Authorised sellers of the brand come first (BrandService::shops) and carry the badge --}}
+        @php $authorisedShopCount = $brandShops->filter(fn ($shop) => $brand->isAuthorisedSeller($shop->id))->count(); @endphp
         <div class="mt-4 flex flex-wrap items-center gap-2">
             <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 me-1">{{ __('Sold by') }}</span>
             @foreach($brandShops as $shop)
-                <a href="{{ route('sellers.show', $shop) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-sm font-medium text-dark hover:border-primary hover:text-primary">
-                    <x-icon name="store" class="w-4 h-4 text-gray-500" />{{ $shop->business_name ?: $shop->name }}
+                @php $authorisedShop = $brand->isAuthorisedSeller($shop->id); @endphp
+                <a href="{{ route('sellers.show', $shop) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border {{ $authorisedShop ? 'border-success-100 bg-success-50' : 'border-gray-200 bg-white' }} text-sm font-medium text-dark hover:border-primary hover:text-primary" @if($authorisedShop) title="{{ __('iruali has confirmed this shop is an authorised seller of :brand.', ['brand' => $brand->name]) }}" data-authorised-seller @endif>
+                    <x-icon :name="$authorisedShop ? 'badge' : 'store'" class="w-4 h-4 {{ $authorisedShop ? 'text-success' : 'text-gray-500' }}" />{{ $shop->business_name ?: $shop->name }}
+                    @if($authorisedShop)<span class="text-xs font-semibold text-success">{{ __('Authorised seller') }}</span>@endif
                     <span class="text-xs text-gray-500">{{ $shop->brand_product_count }}</span>
                 </a>
             @endforeach
         </div>
+        @if($authorisedShopCount > 0)
+            <p class="mt-2 flex items-start gap-1.5 text-xs text-gray-500"><x-icon name="badge" class="w-4 h-4 shrink-0 text-success" />{{ trans_choice('iruali has confirmed this shop is an authorised seller of :brand.|iruali has confirmed these shops are authorised sellers of :brand.', $authorisedShopCount, ['brand' => $brand->name]) }}</p>
+        @endif
     @endif
 
     @if($brandDepartments->count() > 1)

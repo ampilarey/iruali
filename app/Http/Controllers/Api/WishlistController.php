@@ -8,6 +8,7 @@ use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class WishlistController extends BaseController
 {
@@ -17,7 +18,9 @@ class WishlistController extends BaseController
     public function index()
     {
         $user = Auth::user();
+        // A product deleted since it was saved (it is in the bin) is left out
         $wishlistItems = Wishlist::where('user_id', $user->id)
+            ->whereHas('product')
             ->with(['product.mainImage', 'product.category', 'product.seller'])
             ->get();
 
@@ -33,7 +36,8 @@ class WishlistController extends BaseController
     public function add(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required|exists:products,id',
+            // Not a product in the bin (deleted, or taken off the site with the sample data)
+            'product_id' => ['required', Rule::exists('products', 'id')->whereNull('deleted_at')],
         ]);
 
         if ($validator->fails()) {

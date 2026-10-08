@@ -126,6 +126,10 @@ Every later release is step 2 above: `bash scripts/deploy-production.sh <tag>`.
 
 - `https://iruali.mv/api/health` shows `"tag"` and `"commit"` of the running release.
 - Demo data (`MarketplaceDemoSeeder`) is for test only. Don't seed it on production.
+- Before launch, take the demo shops and sample products off test.iruali.mv from
+  **Admin → Settings → Sample data** (or `php artisan demo:remove --force` on the server);
+  **Restore sample data** (`php artisan demo:restore --force`) puts them back. Keep at least one
+  real product on sale afterwards: the smoke test orders the cheapest product on sale.
 - `php artisan iruali:smoke --place-order` can be run at any time; it leaves one cancelled
   order per run under the smoke customer.
 

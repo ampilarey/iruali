@@ -278,6 +278,14 @@
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
             </div>
         </form>
+
+        @if(Route::has('admin.sample-data'))
+            <section class="mt-6 rounded-lg bg-white p-6 shadow">
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('Sample data') }}</h2>
+                <p class="mt-1 text-sm text-gray-500">{{ __('Take the demo shops and sample products off the site before launch, or bring them back.') }}</p>
+                <a href="{{ route('admin.sample-data') }}" class="mt-3 inline-block text-sm font-medium text-primary-700 hover:underline">{{ __('Open sample data') }}</a>
+            </section>
+        @endif
     </div>
 </div>
 @endsection

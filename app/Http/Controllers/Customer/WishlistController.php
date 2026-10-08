@@ -13,7 +13,9 @@ class WishlistController extends Controller
 {
     public function index()
     {
+        // A product deleted since it was saved (it is in the bin) is left out
         $wishlistItems = Wishlist::where('user_id', Auth::id())
+            ->whereHas('product')
             ->with('product.mainImage')
             ->get();
 
@@ -29,11 +31,18 @@ class WishlistController extends Controller
         $userId = Auth::id();
         $productId = $request->product_id;
 
+        // "exists" also matches a product in the bin: one deleted since the page was loaded
         $product = Product::find($productId);
+        if (! $product) {
+            NotificationService::error(__('This product is not available.'));
+
+            return redirect()->route('wishlist');
+        }
+
         $result = Wishlist::addToWishlist($userId, $productId);
 
         if ($result['success']) {
-            NotificationService::addedToWishlist($product->name);
+            NotificationService::addedToWishlist($product->localized_name);
         } else {
             NotificationService::info($result['message']);
         }
@@ -47,7 +56,7 @@ class WishlistController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        $productName = $wishlistItem->product->name;
+        $productName = $wishlistItem->product->localized_name ?? __('Product');
         $wishlistItem->delete();
 
         NotificationService::removedFromWishlist($productName);

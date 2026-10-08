@@ -16,7 +16,7 @@ class CompareController extends Controller
 
     public function index(Request $request)
     {
-        $ids = $request->session()->get('compare', []);
+        $ids = $this->compareIds($request);
 
         $products = Product::query()->active()->whereIn('id', $ids)
             ->with(['mainImage', 'seller', 'category'])
@@ -31,7 +31,7 @@ class CompareController extends Controller
 
     public function toggle(Request $request, Product $product)
     {
-        $ids = collect($request->session()->get('compare', []));
+        $ids = collect($this->compareIds($request));
 
         if ($ids->contains($product->id)) {
             $ids = $ids->reject(fn ($id) => $id === $product->id);
@@ -53,5 +53,27 @@ class CompareController extends Controller
         $request->session()->forget('compare');
 
         return redirect()->route('compare');
+    }
+
+    /**
+     * The products in the compare list, leaving out (and forgetting) any deleted since they were
+     * added, so they don't take up one of the places with nothing to show for it.
+     *
+     * @return array<int, mixed>
+     */
+    protected function compareIds(Request $request): array
+    {
+        $ids = array_values((array) $request->session()->get('compare', []));
+        if ($ids === []) {
+            return [];
+        }
+
+        $existing = Product::whereIn('id', $ids)->pluck('id');
+        $kept = array_values(array_filter($ids, fn ($id) => $existing->contains($id)));
+        if ($kept !== $ids) {
+            $request->session()->put('compare', $kept);
+        }
+
+        return $kept;
     }
 }

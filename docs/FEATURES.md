@@ -30,6 +30,23 @@ similar mean no brand. Products keep the brand name in `products.brand` and poin
 through `products.brand_id`; `BrandService` keeps the two in step on every save, and
 `php artisan brands:sync` links anything imported straight into the database.
 
+**Authorised sellers, brand campaigns and sales by brand.** On a brand's admin page
+(`/admin/brands/{id}/edit`, "Authorised sellers") an admin marks shops as authorised sellers of the
+brand, picking from the shops that sell it or searching any approved shop by name or email
+(`admin.brands.sellers.store` / `admin.brands.sellers.destroy`, table `brand_authorised_sellers`;
+both are in the audit log as `brand.seller_authorised` / `brand.seller_unauthorised`). Their
+products of that brand show an "Authorised seller" badge next to the shop name on the product
+page, and they come first, badged, in the brand page's "Sold by" strip. A campaign can be for one
+brand ("Only for brand" on the campaign form, `campaigns.brand_id`): shops can then put in only that
+brand's products (the Seller Centre lists only those and the server refuses others), the campaign
+page shows the brand's logo and links to its page, and the brand page shows a strip for the brand's
+running campaigns. A product whose brand changes after it went in stops getting the campaign price,
+and a campaign cannot be given a brand while it holds other brands' products (the admin removes
+them first). Merging two brands carries the authorised sellers and brand campaigns over to the
+brand that stays. `/admin/analytics` has a "Top brands" table: units, revenue (MVR) and share of
+branded revenue per brand over the last 30 days, counted from the same order lines as the top
+products and sellers (orders that are not cancelled), with unbranded products as their own row.
+
 **Accounts.** Register and sign in at `/register` and `/login` (email/phone OTP verification at
 `auth/send/*/otp` and `auth/verify/*/otp`, password reset at `/forgot-password`), optional
 two-step sign-in with an authenticator app (`/profile/2fa/setup`, `/2fa`), and the account area

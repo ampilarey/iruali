@@ -4,7 +4,8 @@
     <div class="flex items-center gap-4">
         @include('brands._logo', ['brand' => $brand, 'class' => 'w-16 h-16 lg:w-20 lg:h-20 text-2xl lg:text-3xl'])
         <div class="min-w-0">
-            <h1 class="font-display text-xl lg:text-3xl font-bold text-dark">{{ $brand->name }}</h1>
+            <h1 class="font-display text-xl lg:text-3xl font-bold text-dark">{{ $brand->localizedName() }}</h1>
+            @if($brand->localizedName() !== $brand->name)<p class="text-sm text-gray-500" lang="en"><bdi>{{ $brand->name }}</bdi></p>@endif
             <p class="text-sm text-gray-600 mt-1 max-w-3xl whitespace-pre-line">{{ $subtitle }}</p>
             <p class="text-sm text-gray-500 mt-1">
                 {{ trans_choice(':count product|:count products', $brand->active_products_count, ['count' => $brand->active_products_count]) }}

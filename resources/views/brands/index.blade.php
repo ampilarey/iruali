@@ -65,11 +65,12 @@
                             <h2 class="font-display text-lg font-bold text-dark border-b border-gray-100 pb-1 mb-2" dir="ltr">{{ $letter }}</h2>
                             <ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-1">
                                 @foreach($group as $brand)
-                                    <li data-brand-name="{{ mb_strtolower($brand->name) }}">
+                                    <li data-brand-name="{{ mb_strtolower(trim($brand->name.' '.$brand->name_dv)) }}">
                                         <a href="{{ route('brands.show', $brand) }}" class="group flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
                                             @include('brands._logo', ['brand' => $brand, 'class' => 'w-9 h-9 text-sm'])
                                             <span class="min-w-0 flex-1">
-                                                <span class="block text-sm font-semibold text-dark truncate group-hover:text-primary">{{ $brand->name }}</span>
+                                                <span class="block text-sm font-semibold text-dark truncate group-hover:text-primary">{{ $brand->localizedName() }}</span>
+                                                @if($brand->localizedName() !== $brand->name)<span class="block text-xs text-gray-500 truncate" lang="en"><bdi>{{ $brand->name }}</bdi></span>@endif
                                                 <span class="block text-xs text-gray-500">{{ trans_choice(':count product|:count products', $brand->active_products_count, ['count' => $brand->active_products_count]) }}</span>
                                             </span>
                                         </a>

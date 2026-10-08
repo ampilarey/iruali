@@ -43,6 +43,7 @@
                                         @include('brands._logo', ['brand' => $brand, 'class' => 'w-9 h-9 text-sm'])
                                         <div class="min-w-0">
                                             <a href="{{ route('admin.brands.edit', $brand) }}" class="font-medium text-primary-700 hover:underline">{{ $brand->name }}</a>
+                                            @if($brand->name_dv)<span class="ms-1 text-sm text-gray-600" lang="dv" dir="rtl">{{ $brand->name_dv }}</span>@endif
                                             <div class="text-xs text-gray-500">/brands/{{ $brand->slug }}</div>
                                         </div>
                                     </div>

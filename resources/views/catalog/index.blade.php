@@ -10,6 +10,8 @@
     $category = $category ?? null;
     $subcategories = $subcategories ?? collect();
     $subtitle = $subtitle ?? null;
+    // Dhivehi pages label the brand filter with the brands' Dhivehi names (the values stay the English ones)
+    $brandLabels = \App\Models\Brand::dhivehiNames($facets['brands']->keys());
 @endphp
 
 @section('content')
@@ -151,7 +153,7 @@
                                     @foreach($facets['brands'] as $brandName => $count)
                                         <label class="flex items-center gap-2 py-1 cursor-pointer {{ $loop->index >= 6 ? 'hidden' : '' }}" @if($loop->index >= 6) data-more @endif>
                                             <input type="checkbox" name="brand[]" value="{{ $brandName }}" class="rounded text-primary focus:ring-primary" @checked(in_array((string) $brandName, (array) request('brand', []), true)) data-autosubmit>
-                                            <span class="flex-1 truncate">{{ $brandName }}</span><span class="text-xs text-gray-500">{{ $count }}</span>
+                                            <span class="flex-1 truncate">{{ $brandLabels[$brandName] ?? $brandName }}</span><span class="text-xs text-gray-500">{{ $count }}</span>
                                         </label>
                                     @endforeach
                                 </div>

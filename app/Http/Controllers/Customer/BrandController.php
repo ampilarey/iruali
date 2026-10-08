@@ -50,8 +50,8 @@ class BrandController extends Controller
         $shops = $this->brands->shops($model);
 
         return view('catalog.index', $catalog->listing($request, ['brand' => $model]) + [
-            'title' => $model->name,
-            'subtitle' => $model->localizedDescription() ?: __('Everything from :brand on iruali.', ['brand' => $model->name]),
+            'title' => $model->localizedName(),
+            'subtitle' => $model->localizedDescription() ?: __('Everything from :brand on iruali.', ['brand' => $model->localizedName()]),
             'crumbs' => [['label' => __('Brands'), 'url' => route('brands.index')]],
             'brand' => $model,
             'brandShops' => $shops['shops'],

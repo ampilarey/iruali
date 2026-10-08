@@ -1415,5 +1415,9 @@
     "Shop by brand": "ބްރޭންޑްތަކުން ބައްލަވާ",
     "See all brands": "ހުރިހާ ބްރޭންޑްތައް ބައްލަވާ",
     "Buy :brand from shops across the Maldives on iruali.": "ރާއްޖޭގެ ފިހާރަތަކުން :brand އިރުއަލީގައި ގަންނަވާ.",
-    "Shop by brand: every brand sold on iruali by shops across the Maldives.": "ބްރޭންޑްތަކުން ބައްލަވާ: ރާއްޖޭގެ ފިހާރަތަކުން އިރުއަލީގައި ވިއްކާ ހުރިހާ ބްރޭންޑެއް."
+    "Shop by brand: every brand sold on iruali by shops across the Maldives.": "ބްރޭންޑްތަކުން ބައްލަވާ: ރާއްޖޭގެ ފިހާރަތަކުން އިރުއަލީގައި ވިއްކާ ހުރިހާ ބްރޭންޑެއް.",
+    "Name in Dhivehi (optional)": "ދިވެހި ނަން (ލާޒިމެއް ނޫން)",
+    "Only if shoppers know the brand by a name in Thaana. Dhivehi pages show it, Dhivehi search finds it, and shops typing it get this brand.": "ގަންނަ މީހުން މި ބްރޭންޑް ތާނައިން ލިޔާ ނަމަކުން ދަންނަނަމަ އެކަނި. ދިވެހި ޞަފްޙާތަކުގައި އެ ނަން ދައްކާނެ، ދިވެހިން ހޯދާއިރު އެ ނަމުން ފެންނާނެ، އަދި ފިހާރަތަކުން އެ ނަން ލިޔުމުން މި ބްރޭންޑާ ގުޅޭނެ.",
+    "That is not a brand name.": "އެއީ ބްރޭންޑެއްގެ ނަމެއް ނޫން.",
+    "“:brand” already has this name, now or as an old name. Use another Dhivehi name, or merge the two brands.": "މި ނަން މިހާރު، ނުވަތަ ކުރީގެ ނަމެއްގެ ގޮތުގައި “:brand” ގައި އެބައޮތް. އެހެން ދިވެހި ނަމެއް ބޭނުންކުރައްވާ، ނުވަތަ ދެ ބްރޭންޑް އެއްކުރައްވާ."
 }

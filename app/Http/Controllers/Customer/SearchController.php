@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CatalogService;
 use App\Support\Money;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -56,8 +58,11 @@ class SearchController extends Controller
         $departments = Category::active()->whereRaw('LOWER(CAST(name AS CHAR)) LIKE ?', [$like])->take(3)->get()
             ->map(fn (Category $c) => ['name' => $c->localized_name, 'url' => route('categories.show', $c)]);
 
-        $brands = \App\Models\Brand::query()->listed()->where('name', 'like', $like)->orderBy('name')->take(3)->get(['id', 'name', 'slug'])
-            ->map(fn ($b) => ['name' => $b->name, 'url' => route('brands.show', $b)]);
+        // By either name; Dhivehi pages show the Dhivehi one
+        $brands = Brand::query()->listed()
+            ->where(fn (Builder $names) => $names->where('name', 'like', $like)->orWhere('name_dv', 'like', $like))
+            ->orderBy('name')->take(3)->get(['id', 'name', 'name_dv', 'slug'])
+            ->map(fn (Brand $b) => ['name' => $b->localizedName(), 'url' => route('brands.show', $b)]);
 
         return response()->json(['products' => $products, 'departments' => $departments, 'brands' => $brands]);
     }

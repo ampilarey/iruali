@@ -280,7 +280,10 @@ class Product extends Model
     {
         $names = $this->getTranslations('name');
         $descriptions = $this->getTranslations('description');
-        $parts = array_merge(array_values($names), [$this->brand, $this->model, $this->sku], array_map(fn ($d) => mb_substr(strip_tags((string) $d), 0, 300), array_values($descriptions)));
+        // The brand's Dhivehi name too, so a search in Thaana finds its products. BrandService sets the
+        // relation whenever it links a product, so saving a list of products adds no query per product.
+        $brandDv = $this->brand_id ? $this->brandModel?->name_dv : null;
+        $parts = array_merge(array_values($names), [$this->brand, $brandDv, $this->model, $this->sku], array_map(fn ($d) => mb_substr(strip_tags((string) $d), 0, 300), array_values($descriptions)));
 
         return mb_strtolower(trim(preg_replace('/\s+/u', ' ', implode(' ', array_filter($parts, fn ($p) => filled($p))))));
     }

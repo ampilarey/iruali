@@ -588,4 +588,26 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return $this->belongsToMany(Brand::class, 'brand_follows')->withPivot('notified_at')->withTimestamps();
     }
+
+    /**
+     * Customer emails that are email-or-nothing rather than email, SMS or both. They are stored
+     * with the others in notification_preferences.customer.*: 'email' (the default) or 'off'.
+     */
+    public const OPTIONAL_EMAIL_TYPES = ['brand_updates'];
+
+    /** 'email' or 'off' for one of OPTIONAL_EMAIL_TYPES. */
+    public function emailPreference(string $type): string
+    {
+        return data_get($this->notification_preferences, 'customer.'.$type) === 'off' ? 'off' : 'email';
+    }
+
+    /**
+     * The daily email about brands this customer follows: on unless they switched it off, or
+     * switched off marketing emails altogether (they were told they would only get order emails).
+     */
+    public function wantsBrandUpdates(): bool
+    {
+        return $this->emailPreference('brand_updates') === 'email' && $this->marketing_opt_out_at === null
+            && filled($this->email) && $this->isActive() && ! $this->isSmokeTest();
+    }
 }

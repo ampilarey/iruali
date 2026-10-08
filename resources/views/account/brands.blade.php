@@ -30,6 +30,17 @@
                     </section>
                 @else
                     <section class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                        <p class="text-sm text-gray-600">
+                            @if($user->wantsBrandUpdates())
+                                {{ __('Once a day, we email you what these brands put on sale or into a sale since our last email.') }}
+                            @elseif($user->emailPreference('brand_updates') === 'off')
+                                {{ __('Emails about the brands you follow are off.') }}
+                            @elseif($user->marketing_opt_out_at)
+                                {{ __('Marketing emails are off, so we do not email you about the brands you follow.') }}
+                            @endif
+                            <a href="{{ route('account.notifications') }}" class="font-semibold text-primary hover:underline">{{ __('Email settings') }}</a>
+                        </p>
+
                         <ul class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
                             @foreach($brands as $brand)
                                 <li class="flex flex-col gap-2">

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Route;
 | My Account → Brands you follow
 |--------------------------------------------------------------------------
 | The Follow / Unfollow buttons (brands.follow, brands.unfollow) are in routes/web.php with the
-| other storefront actions that also work under /dv.
+| other storefront actions that also work under /dv. The daily email to followers is the
+| brands:notify-followers command (routes/console.php).
 */
 
 Route::middleware('auth')->group(function () {

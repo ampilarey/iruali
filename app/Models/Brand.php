@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -65,6 +66,48 @@ class Brand extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** The brand page shows how many people follow a brand once at least this many do. */
+    public const FOLLOWERS_SHOWN_FROM = 5;
+
+    /**
+     * Customers following the brand: they get a daily email when it puts products on sale
+     * (brands:notify-followers).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'brand_follows')->withPivot('notified_at')->withTimestamps();
+    }
+
+    /**
+     * The name shoppers see: the Dhivehi name on Dhivehi pages when the brand has one, else its
+     * own name (the English one, which products.brand stores).
+     */
+    public function localizedName(): string
+    {
+        return app()->getLocale() === 'dv' && filled($this->name_dv) ? $this->name_dv : $this->name;
+    }
+
+    /**
+     * Dhivehi labels for brands known only by name (the catalogue's brand filter): name => Dhivehi
+     * name for those that have one, on Dhivehi pages; nothing on English ones.
+     *
+     * @param  iterable<int|string>  $names
+     * @return array<string, string>
+     */
+    public static function dhivehiNames(iterable $names): array
+    {
+        $names = collect($names)->values();
+        if (app()->getLocale() !== 'dv' || $names->isEmpty()) {
+            return [];
+        }
+
+        return static::query()->whereIn('name', $names)->whereNotNull('name_dv')->get(['name', 'name_dv'])
+            ->mapWithKeys(fn (Brand $brand) => [$brand->name => $brand->localizedName()])
+            ->all();
+    }
+
     /** Brands with at least one product on sale: the ones the storefront shows. */
     public function scopeListed(Builder $query): Builder
     {
@@ -80,6 +123,42 @@ class Brand extends Model
     public function activeProductCount(): int
     {
         return (int) ($this->getAttribute('active_products_count') ?? Product::query()->active()->where('brand_id', $this->id)->count());
+    }
+
+    /**
+     * Shops iruali has confirmed as authorised sellers of this brand (Admin → Brands → edit).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function authorisedSellers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'brand_authorised_sellers', 'brand_id', 'seller_id')
+            ->withPivot('authorised_by')
+            ->withTimestamps();
+    }
+
+    /**
+     * Is this shop an authorised seller of the brand? Reads the loaded authorisedSellers (loading
+     * just their ids the first time), so a page asking for every product or shop of a brand runs
+     * one query per brand, or none when the relation was eager loaded.
+     */
+    public function isAuthorisedSeller(int $sellerId): bool
+    {
+        if (! $this->relationLoaded('authorisedSellers')) {
+            $this->load('authorisedSellers:id');
+        }
+
+        return $this->authorisedSellers->contains('id', $sellerId);
+    }
+
+    /**
+     * Campaigns for this brand only: just its products can go in, and they show on its page.
+     *
+     * @return HasMany<Campaign, $this>
+     */
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
     }
 
     /**

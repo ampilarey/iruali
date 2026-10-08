@@ -7,6 +7,7 @@ use App\Models\Campaign;
 use App\Models\CampaignProduct;
 use App\Models\Product;
 use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 /**
@@ -20,6 +21,7 @@ class CampaignController extends Controller
         $seller = $request->user();
 
         $campaigns = Campaign::joinable()->ordered()
+            ->with('brand:id,name')
             ->withCount([
                 'participations as mine_count' => fn ($q) => $q->where('seller_id', $seller->id),
                 'participations as mine_approved_count' => fn ($q) => $q->where('seller_id', $seller->id)->whereNotNull('approved_at'),
@@ -34,7 +36,10 @@ class CampaignController extends Controller
         abort_unless($campaign->isJoinable(), 404);
         $seller = $request->user();
 
-        $products = Product::where('seller_id', $seller->id)->where('is_active', true)->orderBy('id')->get();
+        $products = Product::where('seller_id', $seller->id)->where('is_active', true)
+            // A brand campaign lists only the shop's products of that brand
+            ->when($campaign->brand_id, fn (Builder $q) => $q->where('brand_id', $campaign->brand_id))
+            ->orderBy('id')->get();
         $participations = $campaign->participations()->where('seller_id', $seller->id)->get()->keyBy('product_id');
 
         return view('seller.campaigns.show', compact('campaign', 'products', 'participations'));
@@ -63,6 +68,9 @@ class CampaignController extends Controller
         $products = Product::where('seller_id', $seller->id)->where('is_active', true)->whereIn('id', $data['products'])->get();
         if ($products->count() !== count(array_unique($data['products']))) {
             abort(403);
+        }
+        if ($products->contains(fn (Product $product) => ! $campaign->acceptsProduct($product))) {
+            return back()->withErrors(['products' => __('Only :brand products can join this campaign.', ['brand' => $campaign->brand?->name])])->withInput();
         }
 
         $discount = round((float) $data['discount_percent'], 2);

@@ -84,25 +84,30 @@ class SeoService
     {
         $count = $brand->activeProductCount();
         $url = route('brands.show', $brand);
+        // Dhivehi pages use the brand's Dhivehi name when it has one
+        $name = $brand->localizedName();
         $description = $brand->localizedDescription()
             ? Str::limit(trim(strip_tags($brand->localizedDescription())), 160)
-            : __('Buy :brand from shops across the Maldives on iruali.', ['brand' => $brand->name]);
+            : __('Buy :brand from shops across the Maldives on iruali.', ['brand' => $name]);
         $image = $brand->logoUrl() ?? asset('images/og-image.png');
 
         $about = ['@type' => 'Brand', 'name' => $brand->name];
+        if (filled($brand->name_dv)) {
+            $about['alternateName'] = $brand->name_dv;
+        }
         if ($brand->logoUrl()) {
             $about['logo'] = $brand->logoUrl();
         }
 
         return [
-            'title' => $brand->name.' - iruali',
+            'title' => $name.' - iruali',
             'description' => $description,
-            'keywords' => "{$brand->name}, iruali, Maldives, online shopping",
-            'og_title' => $brand->name,
+            'keywords' => collect([$name, $brand->name, 'iruali', 'Maldives', 'online shopping'])->unique()->implode(', '),
+            'og_title' => $name,
             'og_description' => $description,
             'og_type' => 'website',
             'og_image' => $image,
-            'twitter_title' => $brand->name,
+            'twitter_title' => $name,
             'twitter_description' => $description,
             'twitter_image' => $image,
             'canonical_url' => $url,
@@ -110,12 +115,12 @@ class SeoService
             'schema' => [
                 '@context' => 'https://schema.org',
                 '@type' => 'CollectionPage',
-                'name' => $brand->name,
+                'name' => $name,
                 'description' => $description,
                 'url' => $url,
                 'about' => $about,
             ],
-            'extra_schema' => [self::listBreadcrumbs([[__('Brands'), route('brands.index')], [$brand->name, $url]])],
+            'extra_schema' => [self::listBreadcrumbs([[__('Brands'), route('brands.index')], [$name, $url]])],
         ];
     }
 
@@ -287,13 +292,14 @@ class SeoService
             $schema['brand'] = ['@type' => 'Brand', 'name' => $product->brand];
         }
 
-        // Ratings only when there are approved reviews (Google rejects an empty aggregateRating)
-        $reviews = $product->reviews()->where('is_approved', true)->selectRaw('COUNT(*) as n, AVG(rating) as avg')->toBase()->first();
-        if ($reviews && (int) $reviews->n > 0) {
+        // Ratings only when there are approved reviews (Google rejects an empty aggregateRating).
+        // n and avg are computed columns of this query, so they are read with getAttribute().
+        $reviews = $product->reviews()->where('is_approved', true)->selectRaw('COUNT(*) as n, AVG(rating) as avg')->first();
+        if ($reviews && (int) $reviews->getAttribute('n') > 0) {
             $schema['aggregateRating'] = [
                 '@type' => 'AggregateRating',
-                'ratingValue' => round((float) $reviews->avg, 1),
-                'reviewCount' => (int) $reviews->n,
+                'ratingValue' => round((float) $reviews->getAttribute('avg'), 1),
+                'reviewCount' => (int) $reviews->getAttribute('n'),
                 'bestRating' => 5,
                 'worstRating' => 1,
             ];

@@ -50,13 +50,16 @@ class BrandController extends Controller
         $shops = $this->brands->shops($model);
 
         return view('catalog.index', $catalog->listing($request, ['brand' => $model]) + [
-            'title' => $model->name,
-            'subtitle' => $model->localizedDescription() ?: __('Everything from :brand on iruali.', ['brand' => $model->name]),
+            'title' => $model->localizedName(),
+            'subtitle' => $model->localizedDescription() ?: __('Everything from :brand on iruali.', ['brand' => $model->localizedName()]),
             'crumbs' => [['label' => __('Brands'), 'url' => route('brands.index')]],
             'brand' => $model,
             'brandShops' => $shops['shops'],
             'brandShopCount' => $shops['total'],
             'brandDepartments' => $this->brands->departments($model),
+            // Follow / Following (brands._follow) and, once there are a few, how many follow it
+            'brandFollowers' => $model->followers()->count(),
+            'brandFollowing' => $request->user() !== null && $request->user()->followedBrands()->whereKey($model->id)->exists(),
         ]);
     }
 }

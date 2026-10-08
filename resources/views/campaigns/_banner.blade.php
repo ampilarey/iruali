@@ -1,7 +1,7 @@
-{{-- A campaign banner: hero (big) or strip (one line). --}}
-@props(['campaign', 'size' => 'hero'])
+{{-- A campaign banner: hero (big) or strip (one line). Pass link to go somewhere other than the button link. --}}
+@props(['campaign', 'size' => 'hero', 'link' => null])
 @php
-    $url = $campaign->cta_url ?: route('campaigns.show', $campaign);
+    $url = $link ?: ($campaign->cta_url ?: route('campaigns.show', $campaign));
     $cta = $campaign->cta_text ?: __('Shop the campaign');
 @endphp
 @if($size === 'hero')

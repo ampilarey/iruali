@@ -171,6 +171,60 @@
                 </div>
             @endforeach
         </div>
+
+        {{-- Sales by brand (AdminController::brandSales): the brand links to its admin page for staff who may open it --}}
+        @php $canEditBrands = \App\Support\StaffAccess::can('admin.brands.edit'); @endphp
+        <div class="overflow-hidden rounded-lg bg-white shadow" id="top-brands">
+            <div class="border-b border-gray-100 px-5 py-4">
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('Top brands') }}</h2>
+                <p class="mt-1 text-xs text-gray-500">{{ __('Last 30 days, counting orders the same way as top products and sellers: every order that is not cancelled. Share is of all branded sales.') }}</p>
+            </div>
+            <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Brand') }}</th>
+                        <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Units') }}</th>
+                        <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Revenue') }}</th>
+                        <th class="px-5 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Share of brand sales') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($brandSales['rows'] as $row)
+                        <tr data-top-brand="{{ $row['brand']?->id }}">
+                            <td class="px-5 py-3 text-sm text-gray-900">
+                                @if($row['brand'])
+                                    <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                        @if($canEditBrands)
+                                            <a href="{{ route('admin.brands.edit', $row['brand']) }}" class="font-medium text-primary-700 hover:underline">{{ $row['brand']->name }}</a>
+                                        @else
+                                            <span class="font-medium">{{ $row['brand']->name }}</span>
+                                        @endif
+                                        @if($row['brand']->activeProductCount() > 0)
+                                            <a href="{{ route('brands.show', $row['brand']) }}" target="_blank" rel="noopener" class="text-xs text-gray-600 hover:underline">{{ __('Brand page') }} ↗</a>
+                                        @endif
+                                    </span>
+                                @else
+                                    <span class="text-gray-500">{{ __('Deleted brand') }}</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-3 text-end text-sm text-gray-700 tabular-nums">{{ number_format($row['units']) }}</td>
+                            <td class="px-5 py-3 text-end text-sm text-gray-900 tabular-nums">{{ \App\Support\Money::format($row['revenue']) }}</td>
+                            <td class="px-5 py-3 text-end text-sm text-gray-700 tabular-nums">{{ number_format($row['share'], 1) }}%</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="px-5 py-8 text-center text-sm text-gray-500">{{ __('No brand sales in the last 30 days.') }}</td></tr>
+                    @endforelse
+                    @if($brandSales['unbranded'])
+                        <tr class="bg-gray-50" data-top-brand="unbranded">
+                            <td class="px-5 py-3 text-sm text-gray-600">{{ __('Unbranded products') }}</td>
+                            <td class="px-5 py-3 text-end text-sm text-gray-600 tabular-nums">{{ number_format($brandSales['unbranded']['units']) }}</td>
+                            <td class="px-5 py-3 text-end text-sm text-gray-600 tabular-nums">{{ \App\Support\Money::format($brandSales['unbranded']['revenue']) }}</td>
+                            <td class="px-5 py-3 text-end text-sm text-gray-400">—</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table></div>
+        </div>
     </div>
 </div>
 @endsection

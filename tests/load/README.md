@@ -93,3 +93,34 @@ request (below).
 After each fix, run the same k6 command again and compare the `RESULT:` line; keep
 `last-run.json` files from before and after if you want to graph them (`k6 run --out json=...`
 gives per-request data).
+
+## Light check without k6
+
+`light-baseline.py` needs only Python 3: one visitor, then 5, then 10, browsing with think time
+(about 100 requests a minute at most), and it stops by itself after 5 refused or failed requests.
+
+```bash
+python3 tests/load/light-baseline.py https://test.iruali.mv
+```
+
+## Baseline, 8 October 2026 (test site, about 11:45 pm Maldives time)
+
+Measured from a cloud machine outside the Maldives (every request opens a new secure
+connection, which costs about 0.55–0.8 s on that route before the server is even asked):
+
+| Page | Server time, one visitor (median) | Whole request from outside the Maldives (median) |
+| --- | --- | --- |
+| `/api/health` | 0.35 s | 1.0 s |
+| Home, category, product, search, `/brands`, `/dv` | 0.61–0.67 s | 1.4–1.9 s |
+
+"Server time" is time to first byte after the connection is up, so it still includes one round
+trip to the Maldives (roughly 0.3 s from where the test ran): the app itself spends about 0.3 s
+on a page. With 5 visitors browsing at once the medians did not move (1.7 s whole request), so
+light traffic does not slow the site down.
+
+What the run could not measure: about 1 in 20 new connections to test.iruali.mv stalled for 7–12
+seconds in the TLS handshake and then failed, even at one request every two seconds, while 20 of
+20 requests to another site from the same machine went through. That is the network route or the
+server's firewall (Imunify360 / connection limits), not the app, so the check stopped itself
+before the 10-visitor phase. Ask the host whether the firewall throttles new connections, and run
+the full k6 test from your own computer with its IP whitelisted (above) to measure capacity.

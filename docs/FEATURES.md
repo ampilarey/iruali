@@ -30,6 +30,47 @@ similar mean no brand. Products keep the brand name in `products.brand` and poin
 through `products.brand_id`; `BrandService` keeps the two in step on every save, and
 `php artisan brands:sync` links anything imported straight into the database.
 
+**Authorised sellers, brand campaigns and sales by brand.** On a brand's admin page
+(`/admin/brands/{id}/edit`, "Authorised sellers") an admin marks shops as authorised sellers of the
+brand, picking from the shops that sell it or searching any approved shop by name or email
+(`admin.brands.sellers.store` / `admin.brands.sellers.destroy`, table `brand_authorised_sellers`;
+both are in the audit log as `brand.seller_authorised` / `brand.seller_unauthorised`). Their
+products of that brand show an "Authorised seller" badge next to the shop name on the product
+page, and they come first, badged, in the brand page's "Sold by" strip. A campaign can be for one
+brand ("Only for brand" on the campaign form, `campaigns.brand_id`): shops can then put in only that
+brand's products (the Seller Centre lists only those and the server refuses others), the campaign
+page shows the brand's logo and links to its page, and the brand page shows a strip for the brand's
+running campaigns. A product whose brand changes after it went in stops getting the campaign price,
+and a campaign cannot be given a brand while it holds other brands' products (the admin removes
+them first). Merging two brands carries the authorised sellers and brand campaigns over to the
+brand that stays. `/admin/analytics` has a "Top brands" table: units, revenue (MVR) and share of
+branded revenue per brand over the last 30 days, counted from the same order lines as the top
+products and sellers (orders that are not cancelled), with unbranded products as their own row.
+
+**Following brands.** Each brand page has a Follow / Following button (`POST` / `DELETE`
+`/brands/{slug}/follow`, `brands.follow` / `brands.unfollow`, also under `/dv`; a guest is sent to
+sign in and comes back to the brand page), and shows the number of followers once there are five.
+`/account/brands` (`account.brands`, linked from the account menu) lists the brands a customer
+follows as tiles with an Unfollow button. `php artisan brands:notify-followers` runs daily at 09:00
+Maldives time and sends each follower at most one email (`BrandFollowDigest`, queued) with the
+products of their brands that went on sale (`products.sale_started_at`: when shoppers could first
+see the markdown) or were approved into a campaign that is running now, since the last email
+(`brand_follows.notified_at`, else since they followed): up to twelve, taken in turns from each
+brand, with a link to each brand page for the rest. Nothing is sent when there is nothing new and
+the same news is never sent twice. The email is in the customer's language and follows "Brands you
+follow" (email or off) under `/account/notifications`; customers who switched marketing emails off
+get none. Admin → Brands shows each brand's followers, and a merge moves them to the brand kept.
+
+**Dhivehi brand names.** A brand can have a name in Thaana ("Name in Dhivehi", `brands.name_dv`,
+set under Admin → Brands → edit). Dhivehi pages show it wherever shoppers see the brand: the
+directory (tiles and A–Z list, with the English name small underneath and still filed under its
+English letter), the brand page's title, heading, breadcrumbs and SEO tags, the product page's brand
+link, "Shop by brand" on the home page, search suggestions and the catalogue's brand filter.
+`products.brand` keeps the English name. The Dhivehi name is matched like an old name (a
+`brand_aliases` key, refused when another brand has it): shops typing it get the brand,
+`/brands/<the name>` redirects to the brand page, and earlier Dhivehi names keep matching. It is
+part of the products' search text, rewritten when it changes, so Thaana searches find them.
+
 **Accounts.** Register and sign in at `/register` and `/login` (email/phone OTP verification at
 `auth/send/*/otp` and `auth/verify/*/otp`, password reset at `/forgot-password`), optional
 two-step sign-in with an authenticator app (`/profile/2fa/setup`, `/2fa`), and the account area
@@ -114,6 +155,20 @@ BML (`admin.orders.bml-sync`), record a manual payment, flag and record refunds.
 **Payouts.** `/admin/payouts` per-seller balances and single payouts; `/admin/payout-batches`
 groups payable earnings into a batch, exports the bank file (`admin.payout-batches.file`), marks
 it paid with the bank reference or cancels it.
+
+**Sample data.** When the real shops are ready, **Admin → Settings → Sample data**
+(`/admin/sample-data`, `admin.sample-data`, full admins only) takes the six demo shops and the
+sample products off the site: the products go to the bin switched off, the shops are suspended
+(accounts kept), customers' carts, saved items, wishlists and stock alerts lose them, their
+campaign entries come out, and the cached sitemap and product feeds are rebuilt. Type REMOVE to
+confirm. **Restore sample data** puts back exactly what was removed (products, each shop's
+previous status, anything switched off with the shops, campaign entries). Orders that contain
+sample products keep working (order pages, receipts, payouts). Only the rows listed in
+`App\Support\DemoData`, which the demo seeders also read, are touched; where the seeders never ran
+(production) the page says there is nothing to remove. On the server: `php artisan demo:remove`
+and `php artisan demo:restore` (`--force` skips the question). Both show in the audit log. Bring
+removed sample data back with Restore, not by re-running the demo seeder: it cannot re-create
+products that are in the bin.
 
 **Observability.** `/admin/analytics` (revenue, orders by status, top products and shops,
 signups; the smoke-test customer is excluded), `/admin/errors` (every reported exception

@@ -56,9 +56,10 @@ class CartController extends Controller
             'product_variant_id' => 'nullable|integer',
         ]);
 
+        // "exists" also matches a product in the bin: one deleted since the page was loaded
         $product = Product::find($request->product_id);
 
-        if (! $product->is_active) {
+        if (! $product || ! $product->is_active) {
             NotificationService::error(__('This product is not available.'));
 
             return back();
@@ -190,7 +191,7 @@ class CartController extends Controller
     {
         $this->authorizeItem($item);
 
-        $productName = $item->product->name;
+        $productName = $item->product->name ?? __('Product');
         $this->cartService->removeFromCart($item);
 
         NotificationService::removedFromCart($productName);

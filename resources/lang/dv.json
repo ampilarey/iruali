@@ -1437,5 +1437,12 @@
     "Only approved shops can be authorised sellers.": "ހުއްދަ ލިބިފައިވާ ވިއްކާ ފަރާތަކަށް ހެދޭނީ އެޕްރޫވްކުރެވިފައިވާ ފިހާރަތަކަށް އެކަނި.",
     ":shop is already an authorised seller of :brand.": ":shop އަކީ މިހާރުވެސް :brand ގެ ހުއްދަ ލިބިފައިވާ ވިއްކާ ފަރާތެއް.",
     ":shop is now an authorised seller of :brand.": ":shop އަކީ މިހާރު :brand ގެ ހުއްދަ ލިބިފައިވާ ވިއްކާ ފަރާތެއް.",
-    ":shop is no longer an authorised seller of :brand.": ":shop އަކީ މިހާރު :brand ގެ ހުއްދަ ލިބިފައިވާ ވިއްކާ ފަރާތެއް ނޫން."
+    ":shop is no longer an authorised seller of :brand.": ":shop އަކީ މިހާރު :brand ގެ ހުއްދަ ލިބިފައިވާ ވިއްކާ ފަރާތެއް ނޫން.",
+    "Top brands": "އެންމެ ގިނައިން ވިކޭ ބްރޭންޑްތައް",
+    "Last 30 days, counting orders the same way as top products and sellers: every order that is not cancelled. Share is of all branded sales.": "ފަހުގެ 30 ދުވަސް. އޯޑަރުތައް ގުނެނީ އެންމެ ގިނައިން ވިކޭ ތަކެތި އަދި ފިހާރަތައް ގުނާ ގޮތަށް: ކެންސަލްނުކުރާ ކޮންމެ އޯޑަރެއް. ހިއްސާއަކީ ބްރޭންޑެއް ހުރި ހުރިހާ ތަކެތީގެ ވިއްކުމުން ލިބޭ ބައި.",
+    "Share of brand sales": "ބްރޭންޑްތަކުގެ ވިއްކުމުގެ ހިއްސާ",
+    "Brand page": "ބްރޭންޑްގެ ޞަފްޙާ",
+    "Deleted brand": "ފޮހެލެވިފައިވާ ބްރޭންޑް",
+    "No brand sales in the last 30 days.": "ފަހުގެ 30 ދުވަހު އެއްވެސް ބްރޭންޑެއްގެ ތަކެތި ވިކިފައެއް ނުވޭ.",
+    "Unbranded products": "ބްރޭންޑެއް ނެތް ތަކެތި"
 }

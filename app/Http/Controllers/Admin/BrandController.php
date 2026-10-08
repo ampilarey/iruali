@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\BrandService;
 use App\Support\Audit;
 use App\Traits\SecureFileUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -29,11 +30,12 @@ class BrandController extends Controller
         $show = $request->query('show') === 'review' ? 'review' : 'all';
         $q = trim((string) $request->query('q', ''));
 
+        $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
         $brands = Brand::query()
-            ->withCount(['products', 'products as active_products_count' => fn ($products) => $products->active()])
+            ->withCount(['products', 'products as active_products_count' => fn ($products) => $products->active(), 'followers'])
             ->with('creator:id,name,business_name')
             ->when($show === 'review', fn ($query) => $query->whereNull('reviewed_at'))
-            ->when($q !== '', fn ($query) => $query->where('name', 'like', '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%'))
+            ->when($q !== '', fn ($query) => $query->where(fn (Builder $names) => $names->where('name', 'like', $like)->orWhere('name_dv', 'like', $like)))
             ->orderBy('name')
             ->paginate(50)
             ->withQueryString();
@@ -49,7 +51,7 @@ class BrandController extends Controller
 
     public function edit(Brand $brand)
     {
-        $brand->loadCount(['products', 'products as active_products_count' => fn ($products) => $products->active()])
+        $brand->loadCount(['products', 'products as active_products_count' => fn ($products) => $products->active(), 'followers'])
             ->load(['aliases', 'creator:id,name,business_name']);
         $similar = $this->brands->similar($brand);
 
@@ -64,6 +66,7 @@ class BrandController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
+            'name_dv' => ['nullable', 'string', 'max:120'],
             'slug' => ['required', 'string', 'max:140', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
             'description_en' => ['nullable', 'string', 'max:600'],
             'description_dv' => ['nullable', 'string', 'max:600'],
@@ -86,6 +89,14 @@ class BrandController extends Controller
         if ($this->brands->slugTaken($data['slug'], $brand)) {
             return back()->withErrors(['slug' => 'Another brand uses this web address, now or as an old address.'])->withInput();
         }
+        // The Dhivehi name is matched like a name too, so it may not be another brand's
+        $nameDv = Brand::cleanName($data['name_dv'] ?? null);
+        if ($nameDv !== '' && Brand::isNoBrand(Brand::keyFor($nameDv))) {
+            return back()->withErrors(['name_dv' => __('That is not a brand name.')])->withInput();
+        }
+        if ($nameDv !== '' && ($owner = $this->brands->keyOwner(Brand::keyFor($nameDv), $brand))) {
+            return back()->withErrors(['name_dv' => __('“:brand” already has this name, now or as an old name. Use another Dhivehi name, or merge the two brands.', ['brand' => $owner->name])])->withInput();
+        }
 
         $oldLogo = $brand->logo;
         $logo = $oldLogo;
@@ -98,9 +109,10 @@ class BrandController extends Controller
             $logo = null;
         }
 
-        $before = $brand->only(['name', 'slug']);
+        $before = $brand->only(['name', 'name_dv', 'slug']);
         $this->brands->update($brand, [
             'name' => $name,
+            'name_dv' => $nameDv,
             'slug' => $data['slug'],
             'description' => ['en' => $data['description_en'] ?? null, 'dv' => $data['description_dv'] ?? null],
             'logo' => $logo,
@@ -112,6 +124,7 @@ class BrandController extends Controller
 
         Audit::record('brand.updated', $brand, array_filter([
             'name' => $before['name'] !== $brand->name ? $before['name'].' → '.$brand->name : null,
+            'name_dv' => $before['name_dv'] !== $brand->name_dv ? ($before['name_dv'] ?? '—').' → '.($brand->name_dv ?? '—') : null,
             'slug' => $before['slug'] !== $brand->slug ? $before['slug'].' → '.$brand->slug : null,
             'logo' => $oldLogo !== $logo ? ($logo ? 'new logo' : 'removed') : null,
             'reviewed' => $brand->reviewed_at ? 'yes' : 'no',

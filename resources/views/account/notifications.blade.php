@@ -14,6 +14,7 @@
                         <a href="{{ route('account') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Profile') }}</a>
                         <a href="{{ route('orders') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My Orders') }}</a>
                         <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wishlist') }}</a>
+                        <a href="{{ route('account.brands') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Brands you follow') }}</a>
                         <a href="{{ route('account.notifications') }}" class="block px-4 py-2 text-primary bg-primary/10 rounded-lg font-medium" aria-current="page">{{ __('Notifications') }}</a>
                     </nav>
                 </div>
@@ -43,14 +44,18 @@
                                 <legend class="font-medium text-gray-900">{{ $label }}</legend>
                                 <p class="text-sm text-gray-500 mb-2">{{ $description }}</p>
                                 <div class="flex flex-wrap gap-4 text-sm">
-                                    @foreach(['email' => __('Email'), 'sms' => __('SMS'), 'both' => __('Both')] as $value => $choice)
-                                        <label class="inline-flex items-center gap-2 {{ $value !== 'email' && ! $smsAvailable ? 'text-gray-400' : 'text-gray-800' }}">
+                                    @foreach($choices[$type] as $value => $choice)
+                                        @php $needsPhone = in_array($value, ['sms', 'both'], true); @endphp
+                                        <label class="inline-flex items-center gap-2 {{ $needsPhone && ! $smsAvailable ? 'text-gray-400' : 'text-gray-800' }}">
                                             <input type="radio" name="{{ $type }}" value="{{ $value }}" class="text-primary focus:ring-primary"
-                                                   @checked(old($type, $current[$type]) === $value) @disabled($value !== 'email' && ! $smsAvailable)>
+                                                   @checked(old($type, $current[$type]) === $value) @disabled($needsPhone && ! $smsAvailable)>
                                             {{ $choice }}
                                         </label>
                                     @endforeach
                                 </div>
+                                @if($type === 'brand_updates' && $user->marketing_opt_out_at)
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('Marketing emails are off, so these are not sent until you turn them back on in My Account.') }}</p>
+                                @endif
                                 @error($type)<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                             </fieldset>
                         @endforeach

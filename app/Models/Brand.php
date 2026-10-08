@@ -66,6 +66,48 @@ class Brand extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** The brand page shows how many people follow a brand once at least this many do. */
+    public const FOLLOWERS_SHOWN_FROM = 5;
+
+    /**
+     * Customers following the brand: they get a daily email when it puts products on sale
+     * (brands:notify-followers).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'brand_follows')->withPivot('notified_at')->withTimestamps();
+    }
+
+    /**
+     * The name shoppers see: the Dhivehi name on Dhivehi pages when the brand has one, else its
+     * own name (the English one, which products.brand stores).
+     */
+    public function localizedName(): string
+    {
+        return app()->getLocale() === 'dv' && filled($this->name_dv) ? $this->name_dv : $this->name;
+    }
+
+    /**
+     * Dhivehi labels for brands known only by name (the catalogue's brand filter): name => Dhivehi
+     * name for those that have one, on Dhivehi pages; nothing on English ones.
+     *
+     * @param  iterable<int|string>  $names
+     * @return array<string, string>
+     */
+    public static function dhivehiNames(iterable $names): array
+    {
+        $names = collect($names)->values();
+        if (app()->getLocale() !== 'dv' || $names->isEmpty()) {
+            return [];
+        }
+
+        return static::query()->whereIn('name', $names)->whereNotNull('name_dv')->get(['name', 'name_dv'])
+            ->mapWithKeys(fn (Brand $brand) => [$brand->name => $brand->localizedName()])
+            ->all();
+    }
+
     /** Brands with at least one product on sale: the ones the storefront shows. */
     public function scopeListed(Builder $query): Builder
     {

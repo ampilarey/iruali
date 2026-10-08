@@ -25,12 +25,12 @@
                         @if($brandPage)
                             <a href="{{ $brandPage }}" class="inline-flex items-center gap-2 rounded-full bg-white ps-1 pe-3 py-1 text-sm font-semibold text-dark hover:bg-gray-50">
                                 @include('brands._logo', ['brand' => $campaign->brand, 'class' => 'w-8 h-8 text-sm'])
-                                {{ $campaign->brand->name }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" />
+                                {{ $campaign->brand->localizedName() }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" />
                             </a>
                         @else
                             <span class="inline-flex items-center gap-2 rounded-full bg-white ps-1 pe-3 py-1 text-sm font-semibold text-dark">
                                 @include('brands._logo', ['brand' => $campaign->brand, 'class' => 'w-8 h-8 text-sm'])
-                                {{ $campaign->brand->name }}
+                                {{ $campaign->brand->localizedName() }}
                             </span>
                         @endif
                     </div>
@@ -56,8 +56,8 @@
             </div>
             @if($campaign->brand)
                 <p class="-mt-1 mb-3 text-sm text-gray-600">
-                    {{ __('Only :brand products are in this campaign.', ['brand' => $campaign->brand->name]) }}
-                    @if($brandPage)<a href="{{ $brandPage }}" class="font-semibold text-primary hover:underline">{{ __('See everything from :brand', ['brand' => $campaign->brand->name]) }}</a>@endif
+                    {{ __('Only :brand products are in this campaign.', ['brand' => $campaign->brand->localizedName()]) }}
+                    @if($brandPage)<a href="{{ $brandPage }}" class="font-semibold text-primary hover:underline">{{ __('See everything from :brand', ['brand' => $campaign->brand->localizedName()]) }}</a>@endif
                 </p>
             @endif
             @if($products->isEmpty())

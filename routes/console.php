@@ -52,3 +52,6 @@ Schedule::command('seller:low-stock-digest')->dailyAt('08:00')->timezone('Indian
 
 // Shopping funnel rows (Admin → Analytics) are kept for 90 days
 Schedule::call(fn () => \App\Services\FunnelService::prune())->dailyAt('03:30')->name('prune-funnel-events');
+
+// Brand followers get one email a day with what those brands put on sale (only when there is news)
+Schedule::command('brands:notify-followers')->dailyAt('09:00')->timezone('Indian/Maldives')->withoutOverlapping();

@@ -176,6 +176,7 @@ class Product extends Model
 
     /**
      * When a marked-down price ends, if the seller set an end time (drives the deal countdown).
+     * Returns the Carbon instance the flash_sale_ends_at datetime cast gives.
      */
     public function getDealEndsAtAttribute(): ?\Carbon\Carbon
     {
@@ -297,7 +298,10 @@ class Product extends Model
     {
         $names = $this->getTranslations('name');
         $descriptions = $this->getTranslations('description');
-        $parts = array_merge(array_values($names), [$this->brand, $this->model, $this->sku], array_map(fn ($d) => mb_substr(strip_tags((string) $d), 0, 300), array_values($descriptions)));
+        // The brand's Dhivehi name too, so a search in Thaana finds its products. BrandService sets the
+        // relation whenever it links a product, so saving a list of products adds no query per product.
+        $brandDv = $this->brand_id ? $this->brandModel?->name_dv : null;
+        $parts = array_merge(array_values($names), [$this->brand, $brandDv, $this->model, $this->sku], array_map(fn ($d) => mb_substr(strip_tags((string) $d), 0, 300), array_values($descriptions)));
 
         return mb_strtolower(trim(preg_replace('/\s+/u', ' ', implode(' ', array_filter($parts, fn ($p) => filled($p))))));
     }
@@ -320,6 +324,8 @@ class Product extends Model
             if ($product->isDirty(['name', 'description', 'brand', 'model', 'sku']) || $product->search_text === null) {
                 $product->search_text = $product->buildSearchText();
             }
+
+            $product->trackSaleStart();
         });
 
         // Tell shoppers who asked to be notified when a sold-out product is back
@@ -523,5 +529,33 @@ class Product extends Model
         $pct = $this->campaignDiscountPercent();
 
         return $pct > 0 ? round($price * (1 - $pct / 100), 2) : round($price, 2);
+    }
+
+    // ---- Brand followers ------------------------------------------------------------------
+
+    /**
+     * Note when shoppers can first see the current markdown (compare price above the price, on a
+     * product that is on show), so the brand followers' daily digest can tell what went on sale
+     * since it last wrote. Cleared when the markdown ends; a product put on sale while hidden
+     * (waiting for approval) counts from when it is shown.
+     */
+    public function trackSaleStart(): void
+    {
+        $attributes = $this->getAttributes();
+        if (! array_key_exists('price', $attributes) || ! array_key_exists('compare_price', $attributes)) {
+            return; // loaded without its prices (or created without a compare price): nothing changes
+        }
+
+        $onSale = fn (mixed $compare, mixed $price): bool => $compare !== null && (float) $compare > (float) $price;
+        if (! $onSale($this->compare_price, $this->price)) {
+            $this->sale_started_at = null;
+
+            return;
+        }
+
+        $shownBefore = $this->exists && $this->getOriginal('is_active') && $onSale($this->getOriginal('compare_price'), $this->getOriginal('price'));
+        if ($this->is_active && ! $shownBefore) {
+            $this->sale_started_at = $this->freshTimestamp();
+        }
     }
 }

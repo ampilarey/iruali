@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Brand;
 use App\Models\BrandAlias;
+use App\Models\BrandFollow;
 use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Product;
@@ -82,6 +83,7 @@ class BrandService
         if ($product->isDirty('brand_id') && $product->brand_id) {
             if ($brand = Brand::find($product->brand_id)) {
                 $product->brand = $brand->name;
+                $product->setRelation('brandModel', $brand);
 
                 return;
             }
@@ -98,6 +100,8 @@ class BrandService
         $brand = $this->resolve($name, $product->seller_id ?: auth()->id());
         $product->brand_id = $brand?->id;
         $product->brand = $brand?->name;
+        // Product::buildSearchText() reads the brand's Dhivehi name from here
+        $product->setRelation('brandModel', $brand);
     }
 
     /**
@@ -165,9 +169,10 @@ class BrandService
 
     /**
      * Save the admin's changes. A new name or address is stored as an alias, so old links and
-     * shops typing the old name still reach this brand; products take the new name.
+     * shops typing the old name still reach this brand; products take the new name. The Dhivehi
+     * name is matched the same way (see addDhivehiAlias) and goes into the products' search text.
      *
-     * @param  array{name: string, slug: string, description?: array<string, string>, logo?: ?string, reviewed_at?: mixed}  $data
+     * @param  array{name: string, slug: string, name_dv?: ?string, description?: array<string, string>, logo?: ?string, reviewed_at?: mixed}  $data
      */
     public function update(Brand $brand, array $data): Brand
     {
@@ -175,12 +180,15 @@ class BrandService
             $name = Brand::cleanName($data['name']);
             $key = Brand::keyFor($name);
             $slug = $data['slug'];
-            [$oldKey, $oldSlug, $oldName] = [$brand->key, $brand->slug, $brand->name];
+            [$oldKey, $oldSlug, $oldName, $oldNameDv] = [$brand->key, $brand->slug, $brand->name, $brand->name_dv];
 
             // Taking back an old name or address: it stops being an alias
             $this->releaseAliases($brand, $key, $slug);
 
             $brand->fill(['name' => $name, 'key' => $key, 'slug' => $slug]);
+            if (array_key_exists('name_dv', $data)) {
+                $brand->name_dv = Brand::cleanName($data['name_dv']) ?: null;
+            }
             foreach (['logo', 'reviewed_at'] as $field) {
                 if (array_key_exists($field, $data)) {
                     $brand->{$field} = $data[$field];
@@ -197,9 +205,10 @@ class BrandService
             if ($oldSlug !== $slug) {
                 BrandAlias::updateOrCreate(['slug' => $oldSlug], ['brand_id' => $brand->id]);
             }
-            if ($oldName !== $name) {
+            $this->addDhivehiAlias($brand);
+            if ($oldName !== $name || $oldNameDv !== $brand->name_dv) {
                 Product::withTrashed()->where('brand_id', $brand->id)->lazyById(200)
-                    ->each(fn (Product $product) => $this->storeBrandQuietly($product, $brand));
+                    ->each(fn (Product $product) => $this->storeBrandQuietly($product, $brand, refreshSearch: true));
             }
         });
 
@@ -228,6 +237,10 @@ class BrandService
                 });
 
             BrandAlias::where('brand_id', $source->id)->update(['brand_id' => $target->id]);
+
+            // Its followers follow the brand it joins (those already following both keep that one)
+            $following = BrandFollow::where('brand_id', $target->id)->pluck('user_id');
+            BrandFollow::where('brand_id', $source->id)->whereNotIn('user_id', $following)->update(['brand_id' => $target->id]);
 
             if (! $target->logo && $source->logo) {
                 $target->logo = $source->logo;
@@ -442,17 +455,35 @@ class BrandService
     }
 
     /** Point a product at a brand (or none) without firing model events, refreshing its search text. */
-    protected function storeBrandQuietly(Product $product, ?Brand $brand): void
+    protected function storeBrandQuietly(Product $product, ?Brand $brand, bool $refreshSearch = false): void
     {
         $product->brand_id = $brand?->id;
         $product->brand = $brand?->name;
-        if ($product->isDirty('brand') || $product->search_text === null) {
+        // The search text takes the brand's Dhivehi name from the relation: no query per product
+        $product->setRelation('brandModel', $brand);
+        if ($refreshSearch || $product->isDirty('brand') || $product->search_text === null) {
             $product->search_text = $product->buildSearchText();
         }
         if ($product->isDirty()) {
             $product->timestamps = false;
             $product->saveQuietly();
         }
+    }
+
+    /**
+     * The Dhivehi name is matched like an old name: a shop typing it gets this brand and
+     * /brands/<the name> finds it. Earlier Dhivehi names stay matched too, as renames keep the old
+     * names. Nothing is added when the name means "no brand", is the brand's own key, or belongs
+     * to another brand (the admin form refuses that).
+     */
+    protected function addDhivehiAlias(Brand $brand): void
+    {
+        $key = Brand::keyFor($brand->name_dv);
+        if (Brand::isNoBrand($key) || $key === $brand->key || $this->keyOwner($key, $brand)) {
+            return;
+        }
+
+        BrandAlias::firstOrCreate(['key' => $key], ['brand_id' => $brand->id]);
     }
 
     protected function releaseAliases(Brand $brand, string $key, string $slug): void

@@ -20,7 +20,7 @@
                             </div>
                             <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $campaign->isLive() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">{{ $campaign->isLive() ? __('Live') : __('Upcoming') }}</span>
                         </div>
-                        @if($campaign->brand)<p class="flex items-center gap-1.5 text-sm font-medium text-primary-700"><x-icon name="tag" class="w-4 h-4 shrink-0" />{{ __('Only for :brand products', ['brand' => $campaign->brand->name]) }}</p>@endif
+                        @if($campaign->brand)<p class="flex items-center gap-1.5 text-sm font-medium text-primary-700"><x-icon name="tag" class="w-4 h-4 shrink-0" />{{ __('Only for :brand products', ['brand' => $campaign->brand->localizedName()]) }}</p>@endif
                         <p class="text-sm text-gray-700">{{ $campaign->minimumDiscount() > 0 ? __('Minimum discount: :percent%', ['percent' => rtrim(rtrim(number_format($campaign->minimumDiscount(), 2, '.', ''), '0'), '.')]) : __('No minimum discount') }}</p>
                         <p class="text-sm text-gray-500">{{ trans_choice(':count of your products in, :approved approved|:count of your products in, :approved approved', $campaign->mine_count, ['count' => $campaign->mine_count, 'approved' => $campaign->mine_approved_count]) }}</p>
                         <a href="{{ route('seller.campaigns.show', $campaign) }}" class="self-start rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ $campaign->mine_count > 0 ? __('Manage products') : __('Join campaign') }}</a>

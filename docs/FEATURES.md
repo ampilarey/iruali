@@ -47,6 +47,30 @@ brand that stays. `/admin/analytics` has a "Top brands" table: units, revenue (M
 branded revenue per brand over the last 30 days, counted from the same order lines as the top
 products and sellers (orders that are not cancelled), with unbranded products as their own row.
 
+**Following brands.** Each brand page has a Follow / Following button (`POST` / `DELETE`
+`/brands/{slug}/follow`, `brands.follow` / `brands.unfollow`, also under `/dv`; a guest is sent to
+sign in and comes back to the brand page), and shows the number of followers once there are five.
+`/account/brands` (`account.brands`, linked from the account menu) lists the brands a customer
+follows as tiles with an Unfollow button. `php artisan brands:notify-followers` runs daily at 09:00
+Maldives time and sends each follower at most one email (`BrandFollowDigest`, queued) with the
+products of their brands that went on sale (`products.sale_started_at`: when shoppers could first
+see the markdown) or were approved into a campaign that is running now, since the last email
+(`brand_follows.notified_at`, else since they followed): up to twelve, taken in turns from each
+brand, with a link to each brand page for the rest. Nothing is sent when there is nothing new and
+the same news is never sent twice. The email is in the customer's language and follows "Brands you
+follow" (email or off) under `/account/notifications`; customers who switched marketing emails off
+get none. Admin → Brands shows each brand's followers, and a merge moves them to the brand kept.
+
+**Dhivehi brand names.** A brand can have a name in Thaana ("Name in Dhivehi", `brands.name_dv`,
+set under Admin → Brands → edit). Dhivehi pages show it wherever shoppers see the brand: the
+directory (tiles and A–Z list, with the English name small underneath and still filed under its
+English letter), the brand page's title, heading, breadcrumbs and SEO tags, the product page's brand
+link, "Shop by brand" on the home page, search suggestions and the catalogue's brand filter.
+`products.brand` keeps the English name. The Dhivehi name is matched like an old name (a
+`brand_aliases` key, refused when another brand has it): shops typing it get the brand,
+`/brands/<the name>` redirects to the brand page, and earlier Dhivehi names keep matching. It is
+part of the products' search text, rewritten when it changes, so Thaana searches find them.
+
 **Accounts.** Register and sign in at `/register` and `/login` (email/phone OTP verification at
 `auth/send/*/otp` and `auth/verify/*/otp`, password reset at `/forgot-password`), optional
 two-step sign-in with an authenticator app (`/profile/2fa/setup`, `/2fa`), and the account area

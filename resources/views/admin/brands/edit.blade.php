@@ -32,6 +32,15 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
+                    <label for="name_dv" class="block text-sm font-medium text-gray-700">{{ __('Name in Dhivehi (optional)') }}</label>
+                    <input id="name_dv" name="name_dv" maxlength="120" dir="rtl" lang="dv" class="{{ $field }}" value="{{ old('name_dv', $brand->name_dv) }}" aria-describedby="name_dv-hint">
+                    @error('name_dv')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    <p id="name_dv-hint" class="mt-1 text-xs text-gray-500">{{ __('Only if shoppers know the brand by a name in Thaana. Dhivehi pages show it, Dhivehi search finds it, and shops typing it get this brand.') }}</p>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
                     <label for="description_en" class="block text-sm font-medium text-gray-700">Description (English)</label>
                     <textarea id="description_en" name="description_en" rows="4" maxlength="600" class="{{ $field }}">{{ old('description_en', $brand->getTranslation('description', 'en', false)) }}</textarea>
                     @error('description_en')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -78,6 +87,7 @@
                 <dl class="mt-3 space-y-2">
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Products on sale</dt><dd class="font-medium tabular-nums">{{ $brand->active_products_count }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">All products</dt><dd class="font-medium tabular-nums">{{ $brand->products_count }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ __('Followers') }}</dt><dd class="font-medium tabular-nums">{{ $brand->followers_count }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Added by</dt><dd class="text-end">{{ $brand->creator ? ($brand->creator->business_name ?: $brand->creator->name) : 'Existing listings' }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Added</dt><dd>{{ $brand->created_at?->format('d M Y') }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Search engines</dt><dd class="text-end">{{ $brand->isIndexable((int) $brand->active_products_count) ? 'Listed' : 'Not yet (fewer than '.\App\Models\Brand::INDEX_MIN_PRODUCTS.' products on sale)' }}</dd></div>

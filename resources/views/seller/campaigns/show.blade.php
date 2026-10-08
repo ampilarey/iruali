@@ -20,7 +20,7 @@
         <div class="rounded-lg bg-white p-5 shadow text-sm text-gray-700 space-y-1">
             <p><span class="font-medium">{{ __('Runs') }}:</span> {{ $campaign->starts_at->translatedFormat('j M Y, H:i') }} – {{ $campaign->ends_at->translatedFormat('j M Y, H:i') }}</p>
             <p><span class="font-medium">{{ __('Minimum discount') }}:</span> {{ $campaign->minimumDiscount() > 0 ? $pct($campaign->minimumDiscount()).'%' : __('None') }}</p>
-            @if($campaign->brand)<p class="font-medium text-primary-700">{{ __('Only :brand products can join this campaign.', ['brand' => $campaign->brand->name]) }}</p>@endif
+            @if($campaign->brand)<p class="font-medium text-primary-700">{{ __('Only :brand products can join this campaign.', ['brand' => $campaign->brand->localizedName()]) }}</p>@endif
             <p class="text-gray-500">{{ __('The discount comes off the product\'s current price while the campaign runs. Approved products show the campaign price on the site and at checkout.') }}</p>
         </div>
 
@@ -41,7 +41,7 @@
                         @foreach($participations as $row)
                             @php $product = $products->firstWhere('id', $row->product_id) ?? $row->product; $base = (float) ($product->sale_price ?? $product->price); @endphp
                             <tr>
-                                <td class="px-4 py-2 text-gray-900">{{ $product->name }}@unless($campaign->acceptsProduct($product))<span class="block text-xs text-red-700">{{ __('No longer a :brand product, so it gets no campaign price.', ['brand' => $campaign->brand?->name]) }}</span>@endunless</td>
+                                <td class="px-4 py-2 text-gray-900">{{ $product->name }}@unless($campaign->acceptsProduct($product))<span class="block text-xs text-red-700">{{ __('No longer a :brand product, so it gets no campaign price.', ['brand' => $campaign->brand?->localizedName()]) }}</span>@endunless</td>
                                 <td class="px-4 py-2 text-end" dir="ltr">{{ $pct($campaign->discountFor($row)) }}%</td>
                                 <td class="px-4 py-2 text-end" dir="ltr">{{ \App\Support\Money::format(round($base * (1 - $campaign->discountFor($row) / 100), 2)) }}</td>
                                 <td class="px-4 py-2"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $row->isApproved() ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">{{ $row->isApproved() ? __('Approved') : __('Awaiting approval') }}</span></td>
@@ -62,7 +62,7 @@
             @csrf
             <h2 class="font-semibold text-gray-900">{{ __('Add products') }}</h2>
             @if($products->isEmpty())
-                <p class="text-sm text-gray-500">{{ $campaign->brand ? __('You have no active :brand products to add yet.', ['brand' => $campaign->brand->name]) : __('You have no active products to add yet.') }}</p>
+                <p class="text-sm text-gray-500">{{ $campaign->brand ? __('You have no active :brand products to add yet.', ['brand' => $campaign->brand->localizedName()]) : __('You have no active products to add yet.') }}</p>
             @else
                 <div class="max-w-xs">
                     <label for="discount_percent" class="block text-sm font-medium text-gray-700">{{ __('Discount (%)') }}</label>

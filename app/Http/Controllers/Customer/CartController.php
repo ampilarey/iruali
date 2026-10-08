@@ -36,7 +36,7 @@ class CartController extends Controller
         $cartSummary = $this->cartService->getCartSummary($cart);
 
         $saved = Auth::check()
-            ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->filter(fn ($s) => $s->product)
+            ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->filter(fn (SavedItem $s) => $s->product !== null)
             : collect();
 
         return view('cart.index', [
@@ -56,9 +56,10 @@ class CartController extends Controller
             'product_variant_id' => 'nullable|integer',
         ]);
 
+        // "exists" also matches a product in the bin: one deleted since the page was loaded
         $product = Product::find($request->product_id);
 
-        if (! $product->is_active) {
+        if (! $product || ! $product->is_active) {
             NotificationService::error(__('This product is not available.'));
 
             return back();
@@ -86,7 +87,7 @@ class CartController extends Controller
             $variant?->id
         );
 
-        NotificationService::addedToCart($product->name);
+        NotificationService::addedToCart($product->localized_name);
         \App\Services\FunnelService::record('add_to_cart', $product->id);
 
         return redirect()->route('cart');
@@ -173,7 +174,7 @@ class CartController extends Controller
         $this->cartService->addToCart($product->id, min($saved->quantity, $available), $variant?->id);
         $saved->delete();
 
-        NotificationService::addedToCart($product->name);
+        NotificationService::addedToCart($product->localized_name);
 
         return redirect()->route('cart');
     }
@@ -190,7 +191,7 @@ class CartController extends Controller
     {
         $this->authorizeItem($item);
 
-        $productName = $item->product->name;
+        $productName = $item->product->localized_name ?? __('Product');
         $this->cartService->removeFromCart($item);
 
         NotificationService::removedFromCart($productName);

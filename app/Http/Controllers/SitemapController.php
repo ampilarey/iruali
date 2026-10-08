@@ -62,7 +62,7 @@ class SitemapController extends Controller
                 ->each(function (Brand $b) use (&$pages) {
                     $pages[] = ['brands.show', $b->slug, $b->updated_at, 'weekly', '0.5'];
                 });
-            User::query()->where('is_seller', true)->where('seller_approved', true)->select(['id', 'updated_at'])->get()
+            User::query()->where('is_seller', true)->where('seller_approved', true)->where('status', '!=', 'suspended')->select(['id', 'updated_at'])->get()
                 ->each(function ($s) use (&$pages) {
                     $pages[] = ['sellers.show', $s->id, $s->updated_at, 'weekly', '0.5'];
                 });

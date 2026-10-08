@@ -53,7 +53,7 @@ class SellerController extends Controller
     public function showOrder(Order $order, FulfilmentService $fulfilment)
     {
         $part = $fulfilment->partFor($order, Auth::user());
-        abort_unless($part, 404);
+        abort_if($part === null, 404);
 
         $nextStatuses = $fulfilment->nextStatuses($part);
         $order->load(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product']);
@@ -77,7 +77,7 @@ class SellerController extends Controller
     public function updateOrderStatus(Request $request, Order $order, FulfilmentService $fulfilment)
     {
         $part = $fulfilment->partFor($order, Auth::user());
-        abort_unless($part, 404);
+        abort_if($part === null, 404);
 
         $data = $request->validate([
             'status' => 'required|in:processing,shipped,out_for_delivery,delivered',
@@ -112,6 +112,7 @@ class SellerController extends Controller
             ->groupBy('order_items.product_id')
             ->orderByDesc('revenue')
             ->take(5)
+            ->toBase() // plain rows: per-product totals, not order items
             ->get()
             ->map(function ($row) use ($user) {
                 $row->product = $user->products()->withTrashed()->find($row->product_id);
@@ -241,6 +242,8 @@ class SellerController extends Controller
 
     /**
      * Order items for the current seller's products on non-cancelled orders.
+     *
+     * @return Builder<OrderItem>
      */
     protected function ownItems(): Builder
     {

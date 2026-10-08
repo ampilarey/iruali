@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin \App\Models\Order */
 class OrderResource extends JsonResource
 {
     /**
@@ -33,11 +34,8 @@ class OrderResource extends JsonResource
                 'country' => $this->shipping_country,
                 'phone' => $this->shipping_phone,
             ],
-            'billing_address' => $this->billing_address,
             'payment_method' => $this->payment_method,
             'payment_status' => $this->payment_status,
-            'tracking_number' => $this->tracking_number,
-            'notes' => $this->notes,
             'items' => $this->whenLoaded('items', function () {
                 return collect($this->items)->map(function ($item) {
                     return [
@@ -72,8 +70,8 @@ class OrderResource extends JsonResource
             'user' => $this->whenLoaded('user', function () {
                 return [
                     'id' => $this->user?->id,
-                    'name' => $this->user?->name ?? $this->guest_name,
-                    'email' => $this->user?->email ?? $this->guest_email,
+                    'name' => $this->user->name ?? $this->guest_name,
+                    'email' => $this->user->email ?? $this->guest_email,
                 ];
             }),
             'created_at' => $this->created_at,

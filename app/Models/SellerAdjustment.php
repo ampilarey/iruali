@@ -14,16 +14,19 @@ class SellerAdjustment extends Model
 
     protected $casts = ['amount' => 'decimal:2'];
 
+    /** @return BelongsTo<User, $this> */
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
 
+    /** @return BelongsTo<SellerPayout, $this> */
     public function payout(): BelongsTo
     {
         return $this->belongsTo(SellerPayout::class, 'payout_id');
     }
 
+    /** @return BelongsTo<ReturnRequest, $this> */
     public function returnRequest(): BelongsTo
     {
         return $this->belongsTo(ReturnRequest::class);

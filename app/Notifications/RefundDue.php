@@ -34,7 +34,7 @@ class RefundDue extends Notification implements ShouldQueue
 
         return (new MailMessage)->salutation(__('The iruali team'))
             ->subject('Refund due on order '.$order->order_number.': '.Money::format($order->refund_amount))
-            ->line('Order '.$order->order_number.' ('.($order->user?->name ?? 'customer').') needs a refund of '.Money::format($order->refund_amount).'.')
+            ->line('Order '.$order->order_number.' ('.($order->user->name ?? 'customer').') needs a refund of '.Money::format($order->refund_amount).'.')
             ->line('Reason: '.$order->refund_reason)
             ->line('Card payments are refunded in the BML merchant portal. Then record the reference on the order.')
             ->action('Open the order', route('admin.orders.show', $order));

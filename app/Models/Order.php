@@ -62,6 +62,7 @@ class Order extends Model
         'billing_address' => 'array',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -69,17 +70,21 @@ class Order extends Model
 
     /**
      * One part per shop: its own fulfilment status and the shop's earnings.
+     *
+     * @return HasMany<SellerOrder, $this>
      */
     public function sellerOrders(): HasMany
     {
         return $this->hasMany(SellerOrder::class);
     }
 
+    /** @return HasMany<PaymentTransaction, $this> */
     public function paymentTransactions(): HasMany
     {
         return $this->hasMany(PaymentTransaction::class);
     }
 
+    /** @return HasMany<OrderItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -87,7 +92,7 @@ class Order extends Model
 
     public function getFormattedOrderNumberAttribute()
     {
-        return 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        return sprintf('ORD-%06d', $this->id);
     }
 
     public function getStatusBadgeAttribute(): string
@@ -160,6 +165,8 @@ class Order extends Model
 
     /**
      * Message threads about this order (one per shop).
+     *
+     * @return HasMany<Conversation, $this>
      */
     public function conversations(): HasMany
     {
@@ -180,12 +187,12 @@ class Order extends Model
      */
     public function customerName(): ?string
     {
-        return $this->user?->name ?? $this->guest_name;
+        return $this->user->name ?? $this->guest_name;
     }
 
     public function customerEmail(): ?string
     {
-        return $this->user?->email ?? $this->guest_email;
+        return $this->user->email ?? $this->guest_email;
     }
 
     /**

@@ -177,15 +177,14 @@ class StoreOrderRequest extends FormRequest
                 $validator->errors()->add('cart', __('Your cart is empty. Please add items before placing an order.'));
             }
 
-            // Check if all cart items are still available
+            // Check that every item is still on sale and in stock (the chosen size/colour's own stock),
+            // the same check as guest checkout
             if ($cart) {
                 foreach ($cart->items as $item) {
-                    if (! $item->product->is_active) {
-                        $validator->errors()->add('cart', "Product '{$item->product->name['en']}' is no longer available.");
-                    }
-
-                    if ($item->product->stock_quantity < $item->quantity) {
-                        $validator->errors()->add('cart', "Insufficient stock for '{$item->product->name['en']}'. Available: {$item->product->stock_quantity}");
+                    if (! $item->product || ! $item->product->is_active) {
+                        $validator->errors()->add('cart', __('A product in your cart is no longer available.'));
+                    } elseif ($item->availableStock() < $item->quantity) {
+                        $validator->errors()->add('cart', __('Not enough stock for :name.', ['name' => $item->product->name]));
                     }
                 }
             }

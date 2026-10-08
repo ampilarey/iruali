@@ -39,18 +39,27 @@ class Brand extends Model
         return 'slug';
     }
 
+    /** @return HasMany<Product, $this> */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
     }
 
-    /** Old names and old web addresses that still lead here (after a rename or a merge). */
+    /**
+     * Old names and old web addresses that still lead here (after a rename or a merge).
+     *
+     * @return HasMany<BrandAlias, $this>
+     */
     public function aliases(): HasMany
     {
         return $this->hasMany(BrandAlias::class);
     }
 
-    /** The shop whose product first used this brand (null for brands an admin or the backfill made). */
+    /**
+     * The shop whose product first used this brand (null for brands an admin or the backfill made).
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

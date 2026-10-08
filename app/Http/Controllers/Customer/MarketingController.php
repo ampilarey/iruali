@@ -20,7 +20,7 @@ class MarketingController extends Controller
             $row->forceFill(['marketing_opt_out_at' => now()])->save();
         }
 
-        return view('marketing.unsubscribed', ['email' => $row?->email ?? '']);
+        return view('marketing.unsubscribed', ['email' => $row->email ?? '']);
     }
 
     /**

@@ -16,6 +16,7 @@ class ReviewPhoto extends Model
 
     protected $casts = ['sort_order' => 'integer'];
 
+    /** @return BelongsTo<ProductReview, $this> */
     public function review(): BelongsTo
     {
         return $this->belongsTo(ProductReview::class, 'product_review_id');

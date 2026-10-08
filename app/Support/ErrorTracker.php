@@ -30,7 +30,6 @@ class ErrorTracker
     public const PAYMENT_CLASSES = [
         \App\Services\BmlConnect::class,
         \App\Services\PaymentService::class,
-        \App\Http\Controllers\Customer\PaymentController::class,
         \App\Http\Controllers\Customer\BmlPaymentController::class,
     ];
 
@@ -98,7 +97,9 @@ class ErrorTracker
 
     public static function sentryActive(): bool
     {
-        return filled(config('sentry.dsn') ?: env('SENTRY_LARAVEL_DSN')) && class_exists(\Sentry\Laravel\ServiceProvider::class);
+        // sentry/sentry-laravel merges its own config (sentry.dsn reads SENTRY_LARAVEL_DSN), so this also
+        // works once the config is cached, which a direct env() call would not
+        return class_exists(\Sentry\Laravel\ServiceProvider::class) && filled(config('sentry.dsn'));
     }
 
     /**

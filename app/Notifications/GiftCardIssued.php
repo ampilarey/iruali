@@ -26,7 +26,7 @@ class GiftCardIssued extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $card = $this->card->loadMissing('purchaser');
-        $from = $card->purchaser?->name ?? 'iruali';
+        $from = $card->purchaser->name ?? 'iruali';
 
         $mail = (new MailMessage)->salutation(__('The iruali team'))
             ->subject(__(':from sent you an iruali gift card', ['from' => $from]))

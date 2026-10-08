@@ -47,7 +47,7 @@ class CheckoutController extends Controller
 
         // Saved addresses as cards (the default one pre-selected), plus the island list for a new address
         $addresses = $user->addresses()->defaultFirst()->with('islandRecord')->get();
-        $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)?->id ?? $addresses->first()?->id ?? '');
+        $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)->id ?? $addresses->first()->id ?? '');
         $islandsByAtoll = app(DeliveryService::class)->islandsByAtoll();
 
         return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll'));

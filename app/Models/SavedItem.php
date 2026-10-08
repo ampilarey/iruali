@@ -9,11 +9,13 @@ class SavedItem extends Model
 {
     protected $fillable = ['user_id', 'product_id', 'product_variant_id', 'quantity'];
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /** @return BelongsTo<ProductVariant, $this> */
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');

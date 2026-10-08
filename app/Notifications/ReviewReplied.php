@@ -25,7 +25,7 @@ class ReviewReplied extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $review = $this->review->loadMissing(['product', 'replier']);
-        $product = $review->product?->name ?? __('Product');
+        $product = $review->product->name ?? __('Product');
 
         return (new MailMessage)->salutation(__('The iruali team'))
             ->subject(__(':shop replied to your review', ['shop' => $review->replyShopName()]))

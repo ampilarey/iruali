@@ -36,7 +36,7 @@ class CartController extends Controller
         $cartSummary = $this->cartService->getCartSummary($cart);
 
         $saved = Auth::check()
-            ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->filter(fn ($s) => $s->product)
+            ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->whereNotNull('product')
             : collect();
 
         return view('cart.index', [

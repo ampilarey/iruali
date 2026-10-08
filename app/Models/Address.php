@@ -24,11 +24,13 @@ class Address extends Model
         'is_default' => 'boolean',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Island, $this> */
     public function islandRecord(): BelongsTo
     {
         return $this->belongsTo(Island::class, 'island_id');

@@ -67,6 +67,8 @@ class CatalogService
     /**
      * Active, visible products with every filter applied, except the one named in $except
      * (so each facet can count what picking one of its options would return).
+     *
+     * @return Builder<Product>
      */
     public function filtered(?string $except = null): Builder
     {
@@ -149,11 +151,11 @@ class CatalogService
         $categories = Category::active()->root()->with(['children' => fn ($c) => $c->active()])->get()
             ->map(function (Category $category) use ($categoryCounts) {
                 $ids = $category->children->pluck('id')->push($category->id);
-                $category->facet_count = (int) $ids->sum(fn ($id) => $categoryCounts[$id] ?? 0);
+                $category->setAttribute('facet_count', (int) $ids->sum(fn ($id) => $categoryCounts[$id] ?? 0));
 
                 return $category;
             })
-            ->filter(fn ($c) => $c->facet_count > 0 || $this->selectedCategory()?->id === $c->id)
+            ->filter(fn (Category $c) => $c->getAttribute('facet_count') > 0 || $this->selectedCategory()?->id === $c->id)
             ->sortBy(fn ($c) => $c->localized_name)
             ->values();
 
@@ -165,7 +167,7 @@ class CatalogService
             $sellerCounts = $this->filtered('seller')->toBase()->whereNotNull('seller_id')
                 ->selectRaw('seller_id, count(*) as aggregate')->groupBy('seller_id')->pluck('aggregate', 'seller_id');
             $sellers = User::whereIn('id', $sellerCounts->keys())->get(['id', 'name', 'business_name', 'city'])
-                ->each(fn ($s) => $s->facet_count = (int) $sellerCounts[$s->id])
+                ->each(fn (User $s) => $s->setAttribute('facet_count', (int) $sellerCounts[$s->id]))
                 ->sortBy(fn ($s) => $s->business_name ?: $s->name)->values();
         }
 

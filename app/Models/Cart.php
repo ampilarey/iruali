@@ -22,11 +22,13 @@ class Cart extends Model
         'status' => 'string',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<CartItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(CartItem::class);
@@ -61,6 +63,8 @@ class Cart extends Model
 
     /**
      * Abandoned-cart reminder emails already sent for this cart.
+     *
+     * @return HasMany<CartReminder, $this>
      */
     public function reminders(): HasMany
     {

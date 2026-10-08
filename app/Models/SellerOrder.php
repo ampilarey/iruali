@@ -33,21 +33,25 @@ class SellerOrder extends Model
         'seller_earnings' => 'decimal:2',
     ];
 
+    /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
 
+    /** @return BelongsTo<SellerPayout, $this> */
     public function payout(): BelongsTo
     {
         return $this->belongsTo(SellerPayout::class, 'payout_id');
     }
 
+    /** @return HasMany<ReturnRequest, $this> */
     public function returnRequests(): HasMany
     {
         return $this->hasMany(ReturnRequest::class);
@@ -138,12 +142,15 @@ class SellerOrder extends Model
 
     /**
      * The message thread between the customer, this shop and iruali support about this part.
+     *
+     * @return HasOne<Conversation, $this>
      */
     public function conversation(): HasOne
     {
         return $this->hasOne(Conversation::class, 'seller_order_id');
     }
 
+    /** @return HasMany<Dispute, $this> */
     public function disputes(): HasMany
     {
         return $this->hasMany(Dispute::class);

@@ -25,16 +25,18 @@ class PayoutController extends Controller
             ->get();
         $all = $payouts->balancesForAll();
         $sellers = $sellers->map(function (User $seller) use ($all) {
-            $seller->balances = $all[$seller->id] ?? ['available' => 0.0, 'pending' => 0.0, 'adjustments' => 0.0, 'paid' => 0.0, 'commission' => 0.0];
+            // Shown on the page only (not a column): the view reads $seller->balances
+            $seller->setAttribute('balances', $all[$seller->id] ?? ['available' => 0.0, 'pending' => 0.0, 'adjustments' => 0.0, 'paid' => 0.0, 'commission' => 0.0]);
 
             return $seller;
         });
 
+        $total = fn (string $key) => $sellers->sum(fn (User $s) => $s->getAttribute('balances')[$key]);
         $totals = [
-            'available' => $sellers->sum(fn ($s) => $s->balances['available']),
-            'pending' => $sellers->sum(fn ($s) => $s->balances['pending']),
-            'paid' => $sellers->sum(fn ($s) => $s->balances['paid']),
-            'commission' => $sellers->sum(fn ($s) => $s->balances['commission']),
+            'available' => $total('available'),
+            'pending' => $total('pending'),
+            'paid' => $total('paid'),
+            'commission' => $total('commission'),
         ];
 
         $recent = SellerPayout::with(['seller', 'batch'])->latest('id')->take(15)->get();

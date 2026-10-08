@@ -34,16 +34,19 @@ class OrderItem extends Model
         });
     }
 
+    /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withTrashed();
     }
 
+    /** @return BelongsTo<ProductVariant, $this> */
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
@@ -54,7 +57,7 @@ class OrderItem extends Model
      */
     public function displayName(): string
     {
-        $name = (string) ($this->product?->name ?? __('Product'));
+        $name = (string) ($this->product->name ?? __('Product'));
 
         return $this->variant_name ? $name.' – '.$this->variant_name : $name;
     }

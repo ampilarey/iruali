@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -21,7 +22,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -67,7 +68,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -107,6 +108,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get the roles that belong to the user.
+     *
+     * @return BelongsToMany<Role, $this>
      */
     public function roles(): BelongsToMany
     {
@@ -115,6 +118,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get the user's cart.
+     *
+     * @return HasOne<Cart, $this>
      */
     public function cart(): HasOne
     {
@@ -123,6 +128,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get the user's wishlist.
+     *
+     * @return HasOne<Wishlist, $this>
      */
     public function wishlist(): HasOne
     {
@@ -131,6 +138,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get the user's orders.
+     *
+     * @return HasMany<Order, $this>
      */
     public function orders(): HasMany
     {
@@ -139,12 +148,15 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get the user's products (if seller).
+     *
+     * @return HasMany<SellerOrder, $this>
      */
     public function sellerOrders(): HasMany
     {
         return $this->hasMany(SellerOrder::class, 'seller_id');
     }
 
+    /** @return HasMany<SellerPayout, $this> */
     public function payouts(): HasMany
     {
         return $this->hasMany(SellerPayout::class, 'seller_id');
@@ -158,6 +170,7 @@ class User extends Authenticatable implements HasLocalePreference
         return (float) ($this->commission_rate ?? Setting::get('default_commission_rate'));
     }
 
+    /** @return HasMany<Product, $this> */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'seller_id');
@@ -165,6 +178,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get the user's reviews.
+     *
+     * @return HasMany<ProductReview, $this>
      */
     public function reviews(): HasMany
     {
@@ -173,6 +188,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Get all carts for the user.
+     *
+     * @return HasMany<Cart, $this>
      */
     public function carts(): HasMany
     {
@@ -370,12 +387,14 @@ class User extends Authenticatable implements HasLocalePreference
         ]);
     }
 
-    public function referredBy()
+    /** @return BelongsTo<User, $this> */
+    public function referredBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referred_by');
     }
 
-    public function referrals()
+    /** @return HasMany<User, $this> */
+    public function referrals(): HasMany
     {
         return $this->hasMany(User::class, 'referred_by');
     }
@@ -436,6 +455,7 @@ class User extends Authenticatable implements HasLocalePreference
         return \App\Support\StaffAccess::staffRoles($this) !== [];
     }
 
+    /** @return HasMany<AuditLog, $this> */
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
@@ -480,6 +500,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * The bank account iruali pays this shop's earnings to (Seller Centre → Settings → Bank).
+     *
+     * @return HasOne<SellerBankAccount, $this>
      */
     public function bankAccount(): HasOne
     {
@@ -521,6 +543,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Saved delivery addresses (My Account → Addresses).
+     *
+     * @return HasMany<Address, $this>
      */
     public function addresses(): HasMany
     {
@@ -534,6 +558,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Browsers that asked for push notifications about this user's orders.
+     *
+     * @return HasMany<PushSubscription, $this>
      */
     public function pushSubscriptions(): HasMany
     {
@@ -542,6 +568,8 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Every loyalty-point movement; loyalty_points is their running sum.
+     *
+     * @return HasMany<PointsTransaction, $this>
      */
     public function pointsTransactions(): HasMany
     {
@@ -550,12 +578,15 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Store credit movements; wallet_balance is their running sum.
+     *
+     * @return HasMany<WalletTransaction, $this>
      */
     public function walletTransactions(): HasMany
     {
         return $this->hasMany(WalletTransaction::class);
     }
 
+    /** @return HasMany<GiftCard, $this> */
     public function giftCardsBought(): HasMany
     {
         return $this->hasMany(GiftCard::class, 'purchaser_id');

@@ -6,6 +6,7 @@ use App\Services\LocalizationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin \App\Models\Category */
 class CategoryResource extends JsonResource
 {
     /**
@@ -21,7 +22,7 @@ class CategoryResource extends JsonResource
             'description' => LocalizationService::getLocalizedValue($this->resource, 'description'),
             'slug' => $this->slug,
             'image' => $this->image,
-            'is_active' => $this->is_active,
+            'is_active' => $this->status === 'active',
             'parent_id' => $this->parent_id,
             'parent' => $this->whenLoaded('parent', function () {
                 return new CategoryResource($this->parent);

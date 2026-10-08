@@ -67,7 +67,7 @@ php artisan serve                # http://127.0.0.1:8000
 php artisan test                                           # PHPUnit, all Feature + Unit tests
 ./vendor/bin/pint --test                                   # code style (CI fails on violations)
 npm run test:browser                                       # Playwright checkout test (see below)
-composer analyse                                           # Larastan level 5, after: composer require --dev larastan/larastan
+composer analyse                                           # Larastan level 5 over app/: must report nothing
 ```
 
 - `phpunit.xml` runs against a MariaDB/MySQL database named `iruali_test` (user `root`, no
@@ -80,7 +80,9 @@ composer analyse                                           # Larastan level 5, a
   `PLAYWRIGHT_BROWSERS_PATH`, or `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to a Chromium binary.
 - **Load test:** `tests/load/README.md` (k6, against the test site only).
 - CI (`.github/workflows/tests.yml`) runs Pint, PHPUnit on MariaDB, the browser test, checks
-  that `public/build` is current, and Larastan as an advisory job.
+  that `public/build` is current, and Larastan (level 5, no ignore rules). Any of them failing
+  fails the workflow, and the test-site deploy only runs after it passes. Larastan's conventions
+  are in `phpstan.neon`.
 
 ## Build
 

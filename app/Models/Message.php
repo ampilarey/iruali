@@ -11,11 +11,13 @@ class Message extends Model
 
     protected $casts = ['read_at' => 'datetime'];
 
+    /** @return BelongsTo<Conversation, $this> */
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
@@ -28,8 +30,8 @@ class Message extends Model
     {
         return match ($this->sender_role) {
             'admin' => __('iruali support'),
-            'seller' => $this->conversation?->shopName() ?? ($this->sender?->name ?? __('Shop')),
-            default => $this->sender?->name ?? __('Customer'),
+            'seller' => $this->conversation?->shopName() ?? ($this->sender->name ?? __('Shop')),
+            default => $this->sender->name ?? __('Customer'),
         };
     }
 }

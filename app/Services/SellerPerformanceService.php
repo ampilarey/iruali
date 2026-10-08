@@ -112,7 +112,7 @@ class SellerPerformanceService
             ->orderByDesc('orders.paid_at')
             ->get(['seller_orders.*', 'orders.paid_at as order_paid_at']);
 
-        $late = $parts->filter(fn ($part) => $this->isLate($part, Carbon::parse($part->order_paid_at)))->values();
+        $late = $parts->filter(fn (SellerOrder $part) => $this->isLate($part, Carbon::parse($part->getAttribute('order_paid_at'))))->values();
         $orders = Order::whereIn('id', $late->pluck('order_id'))->get()->keyBy('id');
         $late->each(fn ($part) => $part->setRelation('order', $orders[$part->order_id] ?? null));
 
@@ -227,12 +227,12 @@ class SellerPerformanceService
             ->where('product_reviews.is_approved', true)
             ->groupBy('products.seller_id')
             ->selectRaw('products.seller_id, AVG(product_reviews.rating) as avg_rating, COUNT(*) as n')
-            ->get()->keyBy('seller_id');
+            ->toBase()->get()->keyBy('seller_id');
 
         $out = [];
         foreach ($ids as $id) {
             $shopParts = $parts[$id] ?? collect();
-            $late = $shopParts->filter(fn ($p) => $this->isLate($p, Carbon::parse($p->order_paid_at), $days))->count();
+            $late = $shopParts->filter(fn (SellerOrder $p) => $this->isLate($p, Carbon::parse($p->getAttribute('order_paid_at')), $days))->count();
             $out[$id] = [
                 'late_count' => $late,
                 'shipped_total' => $shopParts->count(),

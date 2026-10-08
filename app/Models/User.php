@@ -578,4 +578,14 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return $query->where('users.is_smoke_test', false);
     }
+
+    /**
+     * Brands this customer follows (Follow on a brand page; My Account → Brands you follow).
+     *
+     * @return BelongsToMany<Brand, $this>
+     */
+    public function followedBrands(): BelongsToMany
+    {
+        return $this->belongsToMany(Brand::class, 'brand_follows')->withPivot('notified_at')->withTimestamps();
+    }
 }

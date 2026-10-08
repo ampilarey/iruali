@@ -87,6 +87,7 @@
                 <dl class="mt-3 space-y-2">
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Products on sale</dt><dd class="font-medium tabular-nums">{{ $brand->active_products_count }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">All products</dt><dd class="font-medium tabular-nums">{{ $brand->products_count }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ __('Followers') }}</dt><dd class="font-medium tabular-nums">{{ $brand->followers_count }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Added by</dt><dd class="text-end">{{ $brand->creator ? ($brand->creator->business_name ?: $brand->creator->name) : 'Existing listings' }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Added</dt><dd>{{ $brand->created_at?->format('d M Y') }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Search engines</dt><dd class="text-end">{{ $brand->isIndexable((int) $brand->active_products_count) ? 'Listed' : 'Not yet (fewer than '.\App\Models\Brand::INDEX_MIN_PRODUCTS.' products on sale)' }}</dd></div>

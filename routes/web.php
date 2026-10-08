@@ -79,6 +79,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
             Route::post('/reviews/{review}/helpful', [\App\Http\Controllers\Customer\ReviewController::class, 'helpful'])->name('reviews.helpful')->middleware('throttle:30,1');
             Route::post('/products/{product}/questions', [\App\Http\Controllers\Customer\QuestionController::class, 'store'])->name('questions.store')->middleware('throttle:10,1');
             Route::post('/questions/{question}/answer', [\App\Http\Controllers\Customer\QuestionController::class, 'answer'])->name('questions.answer');
+            // Follow / unfollow a brand (its page's button; guests sign in and come back to the page)
+            Route::post('/brands/{brand}/follow', [\App\Http\Controllers\Customer\BrandFollowController::class, 'store'])->name('brands.follow')->middleware('throttle:30,1');
+            Route::delete('/brands/{brand}/follow', [\App\Http\Controllers\Customer\BrandFollowController::class, 'destroy'])->name('brands.unfollow')->middleware('throttle:30,1');
             Route::post('/cart/{item}/save-for-later', [CartController::class, 'saveForLater'])->name('cart.saveForLater');
             Route::post('/saved/{saved}/move-to-cart', [CartController::class, 'moveToCart'])->name('saved.moveToCart');
             Route::delete('/saved/{saved}', [CartController::class, 'removeSaved'])->name('saved.remove');

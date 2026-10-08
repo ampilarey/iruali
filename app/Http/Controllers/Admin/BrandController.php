@@ -29,7 +29,7 @@ class BrandController extends Controller
 
         $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
         $brands = Brand::query()
-            ->withCount(['products', 'products as active_products_count' => fn ($products) => $products->active()])
+            ->withCount(['products', 'products as active_products_count' => fn ($products) => $products->active(), 'followers'])
             ->with('creator:id,name,business_name')
             ->when($show === 'review', fn ($query) => $query->whereNull('reviewed_at'))
             ->when($q !== '', fn ($query) => $query->where(fn (Builder $names) => $names->where('name', 'like', $like)->orWhere('name_dv', 'like', $like)))
@@ -48,7 +48,7 @@ class BrandController extends Controller
 
     public function edit(Brand $brand)
     {
-        $brand->loadCount(['products', 'products as active_products_count' => fn ($products) => $products->active()])
+        $brand->loadCount(['products', 'products as active_products_count' => fn ($products) => $products->active(), 'followers'])
             ->load(['aliases', 'creator:id,name,business_name']);
         $similar = $this->brands->similar($brand);
 

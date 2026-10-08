@@ -10,7 +10,11 @@
             <p class="text-sm text-gray-500 mt-1">
                 {{ trans_choice(':count product|:count products', $brand->active_products_count, ['count' => $brand->active_products_count]) }}
                 · {{ trans_choice('sold by :count shop|sold by :count shops', $brandShopCount, ['count' => $brandShopCount]) }}
+                @if(($brandFollowers ?? 0) >= \App\Models\Brand::FOLLOWERS_SHOWN_FROM)
+                    · {{ trans_choice(':count follower|:count followers', $brandFollowers, ['count' => $brandFollowers]) }}
+                @endif
             </p>
+            @include('brands._follow')
         </div>
     </div>
 

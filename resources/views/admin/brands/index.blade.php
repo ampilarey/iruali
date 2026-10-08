@@ -30,6 +30,7 @@
                             <th class="px-4 py-3 text-start">Brand</th>
                             <th class="px-4 py-3 text-end">On sale</th>
                             <th class="px-4 py-3 text-end">All products</th>
+                            <th class="px-4 py-3 text-end">{{ __('Followers') }}</th>
                             <th class="px-4 py-3 text-start">Added by</th>
                             <th class="px-4 py-3 text-start">Status</th>
                             <th class="px-4 py-3"><span class="sr-only">Actions</span></th>
@@ -50,6 +51,7 @@
                                 </td>
                                 <td class="px-4 py-3 text-end tabular-nums">{{ $brand->active_products_count }}</td>
                                 <td class="px-4 py-3 text-end tabular-nums">{{ $brand->products_count }}</td>
+                                <td class="px-4 py-3 text-end tabular-nums">{{ $brand->followers_count }}</td>
                                 <td class="px-4 py-3 text-gray-600">{{ $brand->creator ? ($brand->creator->business_name ?: $brand->creator->name) : 'Existing listings' }}</td>
                                 <td class="px-4 py-3">
                                     @if($brand->reviewed_at)
@@ -72,7 +74,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">{{ $q !== '' ? 'No brand matches that search.' : ($show === 'review' ? 'Nothing to review.' : 'No brands yet. They appear as shops add products with a brand.') }}</td></tr>
+                            <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">{{ $q !== '' ? 'No brand matches that search.' : ($show === 'review' ? 'Nothing to review.' : 'No brands yet. They appear as shops add products with a brand.') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>

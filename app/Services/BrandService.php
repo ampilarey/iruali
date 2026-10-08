@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Brand;
 use App\Models\BrandAlias;
+use App\Models\BrandFollow;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
@@ -235,6 +236,10 @@ class BrandService
                 });
 
             BrandAlias::where('brand_id', $source->id)->update(['brand_id' => $target->id]);
+
+            // Its followers follow the brand it joins (those already following both keep that one)
+            $following = BrandFollow::where('brand_id', $target->id)->pluck('user_id');
+            BrandFollow::where('brand_id', $source->id)->whereNotIn('user_id', $following)->update(['brand_id' => $target->id]);
 
             if (! $target->logo && $source->logo) {
                 $target->logo = $source->logo;

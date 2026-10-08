@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -54,6 +55,20 @@ class Brand extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** The brand page shows how many people follow a brand once at least this many do. */
+    public const FOLLOWERS_SHOWN_FROM = 5;
+
+    /**
+     * Customers following the brand: they get a daily email when it puts products on sale
+     * (brands:notify-followers).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'brand_follows')->withPivot('notified_at')->withTimestamps();
     }
 
     /**

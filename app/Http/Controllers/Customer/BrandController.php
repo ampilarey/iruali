@@ -57,6 +57,9 @@ class BrandController extends Controller
             'brandShops' => $shops['shops'],
             'brandShopCount' => $shops['total'],
             'brandDepartments' => $this->brands->departments($model),
+            // Follow / Following (brands._follow) and, once there are a few, how many follow it
+            'brandFollowers' => $model->followers()->count(),
+            'brandFollowing' => $request->user() !== null && $request->user()->followedBrands()->whereKey($model->id)->exists(),
         ]);
     }
 }

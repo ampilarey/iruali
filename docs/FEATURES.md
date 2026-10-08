@@ -115,6 +115,20 @@ BML (`admin.orders.bml-sync`), record a manual payment, flag and record refunds.
 groups payable earnings into a batch, exports the bank file (`admin.payout-batches.file`), marks
 it paid with the bank reference or cancels it.
 
+**Sample data.** When the real shops are ready, **Admin → Settings → Sample data**
+(`/admin/sample-data`, `admin.sample-data`, full admins only) takes the six demo shops and the
+sample products off the site: the products go to the bin switched off, the shops are suspended
+(accounts kept), customers' carts, saved items, wishlists and stock alerts lose them, their
+campaign entries come out, and the cached sitemap and product feeds are rebuilt. Type REMOVE to
+confirm. **Restore sample data** puts back exactly what was removed (products, each shop's
+previous status, anything switched off with the shops, campaign entries). Orders that contain
+sample products keep working (order pages, receipts, payouts). Only the rows listed in
+`App\Support\DemoData`, which the demo seeders also read, are touched; where the seeders never ran
+(production) the page says there is nothing to remove. On the server: `php artisan demo:remove`
+and `php artisan demo:restore` (`--force` skips the question). Both show in the audit log. Bring
+removed sample data back with Restore, not by re-running the demo seeder: it cannot re-create
+products that are in the bin.
+
 **Observability.** `/admin/analytics` (revenue, orders by status, top products and shops,
 signups; the smoke-test customer is excluded), `/admin/errors` (every reported exception
 counted per place in the code, with "mark resolved"), `/admin/audit` (who changed what, with

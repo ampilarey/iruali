@@ -29,7 +29,7 @@ class CatalogService
     /**
      * Filters the page itself pins (a department page always filters by its department, and so on).
      *
-     * @var array{category?: Category, seller?: User, brand?: string, deals?: bool}
+     * @var array{category?: Category, seller?: User, brand?: \App\Models\Brand, deals?: bool}
      */
     protected array $locked = [];
 
@@ -92,7 +92,7 @@ class CatalogService
         }
 
         if (isset($this->locked['brand'])) {
-            $query->where('brand', $this->locked['brand']);
+            $query->where('brand_id', $this->locked['brand']->id);
         } elseif ($except !== 'brand' && ($brands = $this->strings('brand'))) {
             $query->whereIn('brand', $brands);
         }

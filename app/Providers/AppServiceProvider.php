@@ -63,6 +63,15 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
+        // Admin inbox: brands shops added that nobody has checked yet
+        \App\Support\AdminInbox::register('brands', fn () => [
+            'label' => 'Brands to review',
+            'count' => \App\Models\Brand::whereNull('reviewed_at')->count(),
+            'route' => 'admin.brands',
+            'url' => route('admin.brands', ['show' => 'review']),
+            'severity' => 'info',
+        ]);
+
         // Temporarily disabled for debugging
         // $this->app->register(\App\Providers\ViteServiceProvider::class);
     }
@@ -95,6 +104,14 @@ class AppServiceProvider extends ServiceProvider
             if ($category instanceof Category) {
                 return SeoService::forCategory($category);
             }
+        }
+
+        // Brand page (BrandController puts the brand on the route) and the brands directory
+        if ($routeName === 'brands.show' && ($routeParameters['brand'] ?? null) instanceof \App\Models\Brand) {
+            return SeoService::forBrand($routeParameters['brand']);
+        }
+        if ($routeName === 'brands.index') {
+            return SeoService::forBrandDirectory();
         }
 
         // Seller shop page

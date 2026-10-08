@@ -11,10 +11,24 @@ and featured products; `/shop` lists everything with sorting and filters, `/prod
 `/products/{slug}` (`products.show`) are the catalogue and product page (photos with WebP
 variants, variants with their own price and stock, Q&A, reviews with photos, "notify me" stock
 alerts, related products), `/categories` and `/categories/{slug}` the departments,
-`/brands/{brand}` and `/shops/{seller}` (`sellers.show`) the brand and shop pages, `/deals` the
-discounted items. Search is `/search?q=` with live suggestions from `/search/suggest`; the
+`/shops/{seller}` (`sellers.show`) the shop pages, `/deals` the discounted items. Search is
+`/search?q=` with live suggestions from `/search/suggest` (products, departments and brands); the
 department picker in the header narrows it. `/compare` holds up to a few products side by side.
 `sitemap.xml` and `robots.txt` are generated from the database (`SitemapController`).
+
+**Brands.** `/brands` (`brands.index`) lists every brand with something on sale, A to Z with a
+filter box, plus the most popular brands once the list is long; the menu, the footer and a "Shop by
+brand" row on the home page link to it. `/brands/{slug}` (`brands.show`) shows one brand: its logo
+and description (English and Dhivehi), the shops that sell it, its departments as quick filters,
+then its products with the usual filters. Each brand has one address: old name-based links,
+other capitalisations and addresses from before a rename or merge redirect there (301). Brands
+with fewer than three products on sale are kept out of search engines (`noindex, follow`) and out
+of the sitemap until they grow. The brand list itself is shared: shops pick from it on the product
+form, and whatever they type is matched to an existing brand ignoring capitals, spaces and
+punctuation ("SAMSUNG", "Samsung" and "samsung." are one brand), while "N/A", "Generic" and
+similar mean no brand. Products keep the brand name in `products.brand` and point at the brand
+through `products.brand_id`; `BrandService` keeps the two in step on every save, and
+`php artisan brands:sync` links anything imported straight into the database.
 
 **Accounts.** Register and sign in at `/register` and `/login` (email/phone OTP verification at
 `auth/send/*/otp` and `auth/verify/*/otp`, password reset at `/forgot-password`), optional
@@ -81,10 +95,13 @@ delivered and the order paid; see `MARKETPLACE.md`.
 Staff roles are **admin**, **support** and **finance** (`config/staff.php`); two-step sign-in is
 required for all of them. `/admin/dashboard` has the key numbers and the system-status panel;
 `/admin/inbox` lists everything waiting for a person (shops to approve, products to review,
-refunds due, open returns, failed payments, low stock on best sellers, unresolved errors).
+refunds due, open returns, failed payments, low stock on best sellers, unresolved errors, new
+brands to check).
 
 **Marketplace management.** `/admin/sellers` (approve, reject, suspend, commission rate, bank
-verification, performance page), `/admin/products` (approve), `/admin/users` (roles),
+verification, performance page), `/admin/products` (approve), `/admin/brands` (check new
+brands, fix names and web addresses, add a logo and an English/Dhivehi description, merge
+duplicates, delete unused ones; old names and addresses keep working), `/admin/users` (roles),
 `/admin/reviews` and `/admin/questions` (moderation), `/admin/vouchers`, `/admin/newsletter`,
 `/admin/settings` (site settings, delivery fees, commission default) and `/admin/legal`.
 

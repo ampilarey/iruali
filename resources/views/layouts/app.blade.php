@@ -194,10 +194,12 @@
                 </div>
                 <div class="flex items-center gap-1 min-w-0 overflow-hidden">
                     @foreach($navDepartments->take(6) as $dept)
-                        <a href="{{ route('categories.show', $dept) }}" class="px-3 h-11 flex items-center whitespace-nowrap hover:bg-white/10 {{ (request()->route('category') instanceof \App\Models\Category ? request()->route('category')->id : null) === $dept->id ? 'bg-white/15' : '' }}">{{ $dept->localized_name }}</a>
+                        {{-- The sixth department needs a wide screen next to the Brands, New arrivals and Deals links --}}
+                        <a href="{{ route('categories.show', $dept) }}" class="px-3 h-11 {{ $loop->index >= 5 ? 'hidden 2xl:flex' : 'flex' }} items-center whitespace-nowrap hover:bg-white/10 {{ (request()->route('category') instanceof \App\Models\Category ? request()->route('category')->id : null) === $dept->id ? 'bg-white/15' : '' }}">{{ $dept->localized_name }}</a>
                     @endforeach
                 </div>
                 <div class="ms-auto flex items-center gap-1 shrink-0">
+                    <a href="{{ route('brands.index') }}" class="px-3 h-11 flex items-center hover:bg-white/10 {{ request()->routeIs('brands.*') ? 'bg-white/15' : '' }}">{{ __('Brands') }}</a>
                     <a href="{{ route('shop', ['sort' => 'newest']) }}" class="px-3 h-11 flex items-center hover:bg-white/10">{{ __('New arrivals') }}</a>
                     <a href="{{ route('deals') }}" class="ms-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sun text-sun-on font-semibold hover:bg-accent-400"><x-icon name="tag" class="w-4 h-4" />{{ __('Deals') }}</a>
                 </div>
@@ -236,6 +238,7 @@
                     <a href="{{ route('deals') }}" class="flex items-center gap-3 px-4 py-3 font-semibold text-coral hover:bg-gray-50"><x-icon name="tag" class="w-5 h-5" />{{ __('Today\'s deals') }}</a>
                     <a href="{{ route('shop', ['sort' => 'newest']) }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="gift" class="w-5 h-5 text-gray-500" />{{ __('New arrivals') }}</a>
                     <a href="{{ route('shop') }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="squares" class="w-5 h-5 text-gray-500" />{{ __('Shop all products') }}</a>
+                    <a href="{{ route('brands.index') }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="badge" class="w-5 h-5 text-gray-500" />{{ __('Brands') }}</a>
                     <a href="{{ route('compare') }}" class="flex items-center gap-3 px-4 py-3 text-dark hover:bg-gray-50"><x-icon name="columns" class="w-5 h-5 text-gray-500" />{{ __('Compare products') }}</a>
                 </div>
                 <div class="border-t border-gray-100 mt-2">
@@ -342,6 +345,7 @@
                 <ul class="space-y-2 text-white/70">
                     <li><a href="{{ route('shop') }}" class="hover:text-white">{{ __('Shop all products') }}</a></li>
                     <li><a href="{{ route('categories.index') }}" class="hover:text-white">{{ __('Departments') }}</a></li>
+                    <li><a href="{{ route('brands.index') }}" class="hover:text-white">{{ __('Brands') }}</a></li>
                     <li><a href="{{ route('deals') }}" class="hover:text-white">{{ __('Deals') }}</a></li>
                     <li><a href="{{ route('shop', ['sort' => 'newest']) }}" class="hover:text-white">{{ __('New arrivals') }}</a></li>
                     <li><a href="{{ route('gift-cards') }}" class="hover:text-white">{{ __('Gift cards') }}</a></li>

@@ -55,7 +55,7 @@
 <meta name="twitter:site" content="@iruali">
 
 {{-- Additional Meta Tags --}}
-<meta name="robots" content="{{ $noindex ? 'noindex, nofollow' : 'index, follow' }}">
+<meta name="robots" content="{{ $noindex ? 'noindex, nofollow' : ($seo['robots'] ?? 'index, follow') }}">
 <meta name="author" content="{{ config('app.name') }}">
 <meta name="language" content="{{ app()->getLocale() }}">
 

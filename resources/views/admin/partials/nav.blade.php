@@ -9,6 +9,7 @@
         ['admin.payouts', 'Payouts'],
         ['admin.sellers', 'Sellers'],
         ['admin.products', 'Products'],
+        ['admin.brands', 'Brands'],
         ['admin.users', 'Users'],
         ['admin.reviews', 'Moderation'],
         ['admin.vouchers.index', 'Vouchers'],

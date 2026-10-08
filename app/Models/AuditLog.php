@@ -55,6 +55,7 @@ class AuditLog extends Model
             Voucher::class => ['admin.vouchers.edit', 'voucher'],
             User::class => ['admin.users', null],
             Product::class => ['admin.products', null],
+            Brand::class => ['admin.brands.edit', 'brand'],
             default => null,
         };
 

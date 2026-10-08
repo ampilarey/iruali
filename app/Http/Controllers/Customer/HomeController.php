@@ -44,6 +44,9 @@ class HomeController extends Controller
         $heroCampaign = $campaigns->firstWhere('placement', 'home_hero');
         $stripCampaigns = $campaigns->where('placement', 'home_strip')->values();
 
-        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops', 'heroCampaign', 'stripCampaigns'));
+        // Shop by brand: the brands people buy most, then the ones with the most products
+        $brands = app(\App\Services\BrandService::class)->popular(12);
+
+        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns'));
     }
 }

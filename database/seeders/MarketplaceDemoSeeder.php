@@ -69,6 +69,8 @@ class MarketplaceDemoSeeder extends Seeder
                         'reorder_point' => 5,
                         'is_active' => true,
                         'is_featured' => $p['featured'] ?? false,
+                        // Each demo shop sells its own label, so the brand pages have something to show
+                        'brand' => $p['brand'] ?? $sellerData['brand'] ?? null,
                     ]
                 );
             }
@@ -81,7 +83,7 @@ class MarketplaceDemoSeeder extends Seeder
     {
         return [
             [
-                'email' => 'islandcrafts@example.com', 'owner' => 'Aishath Rasheed', 'shop' => 'Island Crafts',
+                'email' => 'islandcrafts@example.com', 'owner' => 'Aishath Rasheed', 'shop' => 'Island Crafts', 'brand' => 'Island Crafts',
                 'island' => 'Hithadhoo', 'atoll' => 'Addu City', 'phone' => '7771001',
                 'about' => 'Hand-woven thundu kunaa mats and coir work from Addu, made by a family of weavers.',
                 'products' => [
@@ -94,7 +96,7 @@ class MarketplaceDemoSeeder extends Seeder
                 ],
             ],
             [
-                'email' => 'thulhaadhoo@example.com', 'owner' => 'Ibrahim Waheed', 'shop' => 'Thulhaadhoo Lacquer',
+                'email' => 'thulhaadhoo@example.com', 'owner' => 'Ibrahim Waheed', 'shop' => 'Thulhaadhoo Lacquer', 'brand' => 'Thulhaadhoo Lacquer',
                 'island' => 'Thulhaadhoo', 'atoll' => 'Baa Atoll', 'phone' => '7771002',
                 'about' => 'Traditional lacquer work (laajehun) turned and painted by hand in Thulhaadhoo.',
                 'products' => [
@@ -105,7 +107,7 @@ class MarketplaceDemoSeeder extends Seeder
                 ],
             ],
             [
-                'email' => 'maafushifresh@example.com', 'owner' => 'Mariyam Shifa', 'shop' => 'Maafushi Fresh',
+                'email' => 'maafushifresh@example.com', 'owner' => 'Mariyam Shifa', 'shop' => 'Maafushi Fresh', 'brand' => 'Maafushi Fresh',
                 'island' => 'Maafushi', 'atoll' => 'Kaafu Atoll', 'phone' => '7771003',
                 'about' => 'Island kitchen staples: coconut oil, rihaakuru, dried fish and hand-ground spices.',
                 'products' => [
@@ -120,7 +122,7 @@ class MarketplaceDemoSeeder extends Seeder
                 ],
             ],
             [
-                'email' => 'reefline@example.com', 'owner' => 'Hassan Nizam', 'shop' => 'Reefline Marine',
+                'email' => 'reefline@example.com', 'owner' => 'Hassan Nizam', 'shop' => 'Reefline Marine', 'brand' => 'Reefline',
                 'island' => 'Malé', 'atoll' => 'Kaafu Atoll', 'phone' => '7771004',
                 'about' => 'Fishing and snorkel gear for island life, shipped to every atoll.',
                 'products' => [
@@ -133,7 +135,7 @@ class MarketplaceDemoSeeder extends Seeder
                 ],
             ],
             [
-                'email' => 'hulhumalestyle@example.com', 'owner' => 'Fathimath Zeena', 'shop' => 'Hulhumalé Style',
+                'email' => 'hulhumalestyle@example.com', 'owner' => 'Fathimath Zeena', 'shop' => 'Hulhumalé Style', 'brand' => 'Hulhumalé Style',
                 'island' => 'Hulhumalé', 'atoll' => 'Kaafu Atoll', 'phone' => '7771005',
                 'about' => 'Modest everyday fashion and libaas, tailored in Hulhumalé.',
                 'products' => [
@@ -146,7 +148,7 @@ class MarketplaceDemoSeeder extends Seeder
                 ],
             ],
             [
-                'email' => 'solarsouth@example.com', 'owner' => 'Ahmed Shareef', 'shop' => 'Solar South',
+                'email' => 'solarsouth@example.com', 'owner' => 'Ahmed Shareef', 'shop' => 'Solar South', 'brand' => 'Solar South',
                 'island' => 'Fuvahmulah', 'atoll' => 'Fuvahmulah City', 'phone' => '7771006',
                 'about' => 'Fans, power banks and solar lights for islands where power matters.',
                 'products' => [

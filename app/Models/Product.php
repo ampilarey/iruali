@@ -38,6 +38,7 @@ class Product extends Model
         'images',
         'tags',
         'brand',
+        'brand_id',
         'model',
         'weight',
         'dimensions',
@@ -100,6 +101,15 @@ class Product extends Model
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    /**
+     * The shared brand record. Named brandModel because products.brand already holds the name
+     * as text (search, feeds and filters read that column); BrandService keeps the two in step.
+     */
+    public function brandModel(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 
     public function islands()
@@ -278,8 +288,11 @@ class Product extends Model
             }
         });
 
-        // One plain column to search instead of five JSON casts per row
+        // One plain column to search instead of five JSON casts per row. The brand is linked first,
+        // since linking can change how the brand name is spelled.
         static::saving(function ($product) {
+            app(\App\Services\BrandService::class)->syncProduct($product);
+
             if ($product->isDirty(['name', 'description', 'brand', 'model', 'sku']) || $product->search_text === null) {
                 $product->search_text = $product->buildSearchText();
             }

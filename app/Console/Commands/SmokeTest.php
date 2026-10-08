@@ -38,10 +38,16 @@ class SmokeTest extends Command
         }
 
         $order = null;
+        $orderSkipped = null;
         if ($this->option('place-order')) {
+            if (! $this->smokeCustomerReady()) {
+                return self::FAILURE;
+            }
             $order = $this->orderTarget();
             if ($order === null) {
-                return self::FAILURE;
+                // A new site, or the sample data just removed: nothing to order is not a broken deploy
+                $orderSkipped = 'no product on sale with stock yet';
+                $this->warn('No product on sale with stock: the order round trip is skipped.');
             }
         }
 
@@ -52,6 +58,8 @@ class SmokeTest extends Command
             stockReader: fn (int $productId, ?int $variantId): int => $variantId
                 ? (int) ProductVariant::whereKey($variantId)->value('stock_quantity')
                 : (int) Product::whereKey($productId)->value('stock_quantity'),
+            catalogEmpty: ! Product::query()->active()->exists(),
+            orderSkipped: $orderSkipped,
         ))->run();
 
         $this->line("Smoke test against {$baseUrl}");
@@ -72,26 +80,33 @@ class SmokeTest extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * The smoke customer and the cheapest active product (its cheapest in-stock variant when it has them).
-     *
-     * @return array{email: string, password: string, product_id: int, variant_id: int|null}|null
-     */
-    protected function orderTarget(): ?array
+    /** --place-order needs the smoke customer's credentials in .env and the account itself. */
+    protected function smokeCustomerReady(): bool
     {
         $email = (string) config('services.smoke.email');
         $password = (string) config('services.smoke.password');
         if ($email === '' || $password === '') {
             $this->error('--place-order needs SMOKE_USER_EMAIL and SMOKE_USER_PASSWORD in .env (then run iruali:smoke --setup once).');
 
-            return null;
+            return false;
         }
         if (! User::where('email', $email)->where('is_smoke_test', true)->exists()) {
             $this->error("No smoke customer {$email}: run php artisan iruali:smoke --setup first.");
 
-            return null;
+            return false;
         }
 
+        return true;
+    }
+
+    /**
+     * The smoke customer and the cheapest active product (its cheapest in-stock variant when it has
+     * them), or null when nothing is on sale with stock.
+     *
+     * @return array{email: string, password: string, product_id: int, variant_id: int|null}|null
+     */
+    protected function orderTarget(): ?array
+    {
         $product = Product::query()->where('is_active', true)
             ->where(function ($q) {
                 $q->where('stock_quantity', '>', 0)
@@ -99,16 +114,14 @@ class SmokeTest extends Command
             })
             ->orderBy('price')->orderBy('id')->first();
         if (! $product) {
-            $this->error('No active product with stock to order.');
-
             return null;
         }
 
         $variant = $product->variants()->where('is_active', true)->where('stock_quantity', '>', 0)->orderBy('price')->orderBy('id')->first();
 
         return [
-            'email' => $email,
-            'password' => $password,
+            'email' => (string) config('services.smoke.email'),
+            'password' => (string) config('services.smoke.password'),
             'product_id' => $product->id,
             'variant_id' => $variant?->id,
         ];

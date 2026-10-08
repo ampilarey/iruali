@@ -28,15 +28,23 @@ final class SmokeChecks
 
     private ?string $categoryPath = null;
 
+    /** The order round trip's steps, in order (skipped together when there is nothing to order). */
+    private const ORDER_STEPS = ['Sign in as smoke user', 'Add cheapest product to cart', 'Checkout page', 'Place order', 'BML pay page loads', 'Order under My Orders', 'Cancel order', 'Stock restored'];
+
     /**
      * @param  array{email: string, password: string, product_id: int, variant_id: int|null}|null  $order  sign in and place an order with this product
      * @param  Closure(int, int|null): int|null  $stockReader  current stock for (product id, variant id); defaults to nothing checked
+     * @param  bool  $catalogEmpty  the database has no product on sale (a new site, or the sample data removed):
+     *                              a sitemap without products is then expected, so those checks are skipped, not failed
+     * @param  string|null  $orderSkipped  why the order round trip was asked for but cannot run (nothing in stock to order)
      */
     public function __construct(
         private readonly SmokeFetcher $fetcher,
         string $baseUrl,
         private readonly ?array $order = null,
         private readonly ?Closure $stockReader = null,
+        private readonly bool $catalogEmpty = false,
+        private readonly ?string $orderSkipped = null,
     ) {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->baseHost = (string) parse_url($this->baseUrl, PHP_URL_HOST);
@@ -67,11 +75,15 @@ final class SmokeChecks
 
         if ($this->productPath) {
             $this->page('Product page', $this->productPath, fn (Response $r) => $this->html($r));
+        } elseif ($this->catalogEmpty) {
+            $this->result('Product page', self::SKIP, 'no product on sale yet');
         } else {
-            $this->result('Product page', self::FAIL, 'sitemap lists no product; is any product active?');
+            $this->result('Product page', self::FAIL, 'sitemap lists no product, but products are on sale');
         }
         if ($this->categoryPath) {
             $this->page('Category page', $this->categoryPath, fn (Response $r) => $this->html($r));
+        } elseif ($this->catalogEmpty) {
+            $this->result('Category page', self::SKIP, 'no product on sale yet');
         } else {
             $this->result('Category page', self::FAIL, 'sitemap lists no category; is any category active?');
         }
@@ -90,6 +102,10 @@ final class SmokeChecks
 
         if ($this->order !== null) {
             $this->placeOrder();
+        } elseif ($this->orderSkipped !== null) {
+            foreach (self::ORDER_STEPS as $name) {
+                $this->result($name, self::SKIP, $this->orderSkipped);
+            }
         }
 
         return $this->results;
@@ -114,14 +130,14 @@ final class SmokeChecks
         $token = $login ? $this->csrfToken($login) : null;
         if (! $token) {
             $this->result('Sign in as smoke user', self::FAIL, 'could not load the login form');
-            $this->skipRest(['Add cheapest product to cart', 'Checkout page', 'Place order', 'BML pay page loads', 'Order under My Orders', 'Cancel order', 'Stock restored']);
+            $this->skipRest(array_slice(self::ORDER_STEPS, 1));
 
             return;
         }
         $signed = $this->fetch('POST', '/login', ['email' => $o['email'], 'password' => $o['password'], '_token' => $token]);
         if (! $signed || ! $this->redirectedAwayFrom($signed, '/login')) {
             $this->result('Sign in as smoke user', self::FAIL, $signed ? 'HTTP '.$signed->status().' to '.($signed->header('Location') ?: '(no redirect)').' — wrong SMOKE_USER_EMAIL / SMOKE_USER_PASSWORD?' : $this->noResponse());
-            $this->skipRest(['Add cheapest product to cart', 'Checkout page', 'Place order', 'BML pay page loads', 'Order under My Orders', 'Cancel order', 'Stock restored']);
+            $this->skipRest(array_slice(self::ORDER_STEPS, 1));
 
             return;
         }

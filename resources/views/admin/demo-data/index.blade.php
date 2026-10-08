@@ -91,7 +91,6 @@
 
         <div class="space-y-1 text-xs text-gray-500">
             <p>{{ __('On the server: php artisan demo:remove and php artisan demo:restore do the same (add --force to skip the question).') }}</p>
-            <p>{{ __('The smoke test after each deploy orders the cheapest product on sale, so keep at least one real product on sale once the sample data is gone.') }}</p>
         </div>
     </div>
 </div>

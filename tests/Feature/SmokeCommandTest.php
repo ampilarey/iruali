@@ -120,6 +120,43 @@ class SmokeCommandTest extends TestCase
         $this->assertSame('smoke@iruali.test', $site->sent('POST', '/login')['data']['email']);
     }
 
+    public function test_a_shop_with_nothing_on_sale_skips_the_product_checks_instead_of_failing(): void
+    {
+        // A new site, or the test site after Admin → Sample data → Remove
+        $this->fakeSite()->on('GET /sitemap.xml', 200, '<urlset><url><loc>http://smoke.test/categories/c</loc></url></urlset>');
+
+        $this->artisan('iruali:smoke --base-url=http://smoke.test')
+            ->expectsOutputToContain('no product on sale yet')
+            ->expectsOutputToContain('SMOKE OK')
+            ->assertExitCode(0);
+    }
+
+    public function test_a_sitemap_without_products_still_fails_while_products_are_on_sale(): void
+    {
+        Product::factory()->create(['is_active' => true, 'stock_quantity' => 3]);
+        $this->fakeSite()->on('GET /sitemap.xml', 200, '<urlset><url><loc>http://smoke.test/categories/c</loc></url></urlset>');
+
+        $this->artisan('iruali:smoke --base-url=http://smoke.test')
+            ->expectsOutputToContain('sitemap lists no product, but products are on sale')
+            ->expectsOutputToContain('SMOKE FAILED (1 failures)')
+            ->assertExitCode(1);
+    }
+
+    public function test_place_order_with_nothing_in_stock_skips_the_order_round_trip(): void
+    {
+        $site = $this->fakeSite();
+        config(['services.smoke.email' => 'smoke@iruali.test', 'services.smoke.password' => 'pw']);
+        $this->artisan('iruali:smoke --setup')->assertExitCode(0);
+        Product::factory()->create(['is_active' => true, 'stock_quantity' => 0]);
+
+        $this->artisan('iruali:smoke --base-url=http://smoke.test --place-order')
+            ->expectsOutputToContain('the order round trip is skipped')
+            ->expectsOutputToContain('no product on sale with stock yet')
+            ->expectsOutputToContain('SMOKE OK')
+            ->assertExitCode(0);
+        $this->assertNull($site->sent('POST', '/login'), 'no sign-in attempted');
+    }
+
     public function test_smoke_customer_gets_no_emails_rewards_or_analytics(): void
     {
         Notification::fake();

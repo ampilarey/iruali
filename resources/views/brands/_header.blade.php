@@ -1,5 +1,9 @@
 {{-- Top of a brand's page: logo, name, description, who sells it and where it sits in the shop. --}}
 @php $currentDepartment = request('category'); @endphp
+{{-- A running campaign for this brand only (Admin → Campaigns, "Only for brand"), like the category strips --}}
+@foreach($brand->campaigns()->live()->ordered()->get() as $brandCampaign)
+    <div class="mb-4" data-brand-campaign>@include('campaigns._banner', ['campaign' => $brandCampaign, 'size' => 'strip', 'link' => route('campaigns.show', $brandCampaign)])</div>
+@endforeach
 <div class="bg-white border border-gray-200 rounded-xl p-4 lg:p-6 mb-5">
     <div class="flex items-center gap-4">
         @include('brands._logo', ['brand' => $brand, 'class' => 'w-16 h-16 lg:w-20 lg:h-20 text-2xl lg:text-3xl'])

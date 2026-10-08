@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
@@ -26,7 +28,7 @@ class Campaign extends Model
 
     protected $fillable = [
         'name', 'slug', 'type', 'starts_at', 'ends_at', 'banner_image', 'headline', 'subheadline', 'cta_text', 'cta_url',
-        'theme_colour', 'is_active', 'discount_percent', 'placement', 'sort_order',
+        'theme_colour', 'is_active', 'discount_percent', 'placement', 'sort_order', 'brand_id',
     ];
 
     protected $casts = [
@@ -82,10 +84,31 @@ class Campaign extends Model
 
     /**
      * Products whose participation an admin approved.
+     *
+     * @return BelongsToMany<Product, $this>
      */
     public function approvedProducts(): BelongsToMany
     {
         return $this->products()->whereNotNull('campaign_products.approved_at');
+    }
+
+    /**
+     * The brand this campaign is for, if any. A brand campaign takes only that brand's products;
+     * without a brand every product can join.
+     *
+     * @return BelongsTo<Brand, $this>
+     */
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    /**
+     * May this product be in the campaign? Always, unless the campaign is for another brand.
+     */
+    public function acceptsProduct(Product $product): bool
+    {
+        return ! $this->brand_id || (int) $product->brand_id === (int) $this->brand_id;
     }
 
     // ---- Windows ------------------------------------------------------------------------------
@@ -172,6 +195,10 @@ class Campaign extends Model
             ->where('campaigns.is_active', true)
             ->where('campaigns.starts_at', '<=', now())
             ->where('campaigns.ends_at', '>=', now())
+            // A brand campaign discounts only that brand's products, even if a product's brand
+            // changed after it went in
+            ->where(fn (Builder $q) => $q->whereNull('campaigns.brand_id')
+                ->orWhereHas('product', fn (Builder $product) => $product->whereColumn('products.brand_id', 'campaigns.brand_id')))
             ->get(['campaign_products.product_id', 'campaign_products.discount_percent as own', 'campaigns.discount_percent as campaign'])
             ->each(function ($row) use (&$discounts) {
                 $pct = (float) ($row->own ?? $row->campaign ?? 0);

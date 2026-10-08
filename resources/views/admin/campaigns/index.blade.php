@@ -34,7 +34,7 @@
             <tbody class="divide-y divide-gray-100">
                 @forelse($campaigns as $campaign)
                     <tr>
-                        <td class="p-3"><a href="{{ route('admin.campaigns.edit', $campaign) }}" class="font-medium text-primary-600 hover:underline">{{ $campaign->name }}</a><br><span class="text-xs text-gray-500">/campaigns/{{ $campaign->slug }}</span></td>
+                        <td class="p-3"><a href="{{ route('admin.campaigns.edit', $campaign) }}" class="font-medium text-primary-600 hover:underline">{{ $campaign->name }}</a><br><span class="text-xs text-gray-500">/campaigns/{{ $campaign->slug }}</span>@if($campaign->brand)<br><span class="text-xs font-medium text-primary-700">{{ __('Only :brand', ['brand' => $campaign->brand->name]) }}</span>@endif</td>
                         <td class="p-3">{{ ucfirst($campaign->type) }}</td>
                         <td class="p-3 whitespace-nowrap">{{ $campaign->starts_at->format('d M Y H:i') }} – {{ $campaign->ends_at->format('d M Y H:i') }}</td>
                         <td class="p-3">{{ str_replace('_', ' ', $campaign->placement) }}</td>

@@ -254,7 +254,8 @@ class BrandService
 
     /**
      * A merge keeps what admins set up for the old brand, since its products are now the other
-     * brand's: its authorised sellers become the other brand's (unless they already are).
+     * brand's: its authorised sellers become the other brand's (unless they already are), and its
+     * brand campaigns become campaigns for the other brand instead of opening up to every product.
      */
     protected function carryOverBrandTrust(Brand $source, Brand $target): void
     {
@@ -262,6 +263,8 @@ class BrandService
             ->where('brand_id', $source->id)
             ->whereNotIn('seller_id', $target->authorisedSellers()->pluck('users.id'))
             ->update(['brand_id' => $target->id, 'updated_at' => now()]);
+
+        $source->campaigns()->update(['brand_id' => $target->id]);
     }
 
     /**

@@ -1444,5 +1444,19 @@
     "Brand page": "ބްރޭންޑްގެ ޞަފްޙާ",
     "Deleted brand": "ފޮހެލެވިފައިވާ ބްރޭންޑް",
     "No brand sales in the last 30 days.": "ފަހުގެ 30 ދުވަހު އެއްވެސް ބްރޭންޑެއްގެ ތަކެތި ވިކިފައެއް ނުވޭ.",
-    "Unbranded products": "ބްރޭންޑެއް ނެތް ތަކެތި"
+    "Unbranded products": "ބްރޭންޑެއް ނެތް ތަކެތި",
+    "Only for brand": "ހަމައެކަނި މި ބްރޭންޑަށް",
+    "Any brand: every product can join": "ކޮންމެ ބްރޭންޑެއް: ހުރިހާ ތަކެއްޗަކަށް ބައިވެރިވެވޭނެ",
+    "With a brand, shops can only put in that brand's products; the campaign page shows the brand, and the brand page shows the campaign while it runs.": "ބްރޭންޑެއް ހޮވައިފިނަމަ، ފިހާރަތަކަށް ލެވޭނީ އެ ބްރޭންޑްގެ ތަކެތި އެކަނި؛ ކެމްޕޭންގެ ޞަފްޙާގައި ބްރޭންޑް ފެންނާނެ، އަދި ކެމްޕޭން ހިނގާއިރު ބްރޭންޑްގެ ޞަފްޙާގައި ކެމްޕޭން ފެންނާނެ.",
+    "Not a :brand product, so no campaign price": ":brand ގެ އެއްޗެއް ނޫންކަމުން ކެމްޕޭން އަގެއް ނެތް",
+    "Only :brand": "ހަމައެކަނި :brand",
+    "Choose a brand from the list.": "ލިސްޓުން ބްރޭންޑެއް ހޮއްވަވާ.",
+    "This product is not a :brand product, so it cannot be approved for this campaign.": "މި އެއްޗަކީ :brand ގެ އެއްޗެއް ނޫންކަމުން، މި ކެމްޕޭނަށް އެޕްރޫވެއް ނުކުރެވޭނެ.",
+    ":count product in this campaign is not a :brand product. Remove it below first, or keep the campaign open to every brand.|:count products in this campaign are not :brand products. Remove them below first, or keep the campaign open to every brand.": "މި ކެމްޕޭނުގައިވާ :count އެއްޗަކީ :brand ގެ އެއްޗެއް ނޫން. ފުރަތަމަ އެ އެއްޗެއް ތިރީގައިވާ ލިސްޓުން ނައްތާލައްވާ، ނުވަތަ ކެމްޕޭން ހުރިހާ ބްރޭންޑަކަށް ހުޅުވާލާފައި ބަހައްޓަވާ.|މި ކެމްޕޭނުގައިވާ :count ތަކެތި :brand ގެ ތަކެތި ނޫން. ފުރަތަމަ އެ ތަކެތި ތިރީގައިވާ ލިސްޓުން ނައްތާލައްވާ، ނުވަތަ ކެމްޕޭން ހުރިހާ ބްރޭންޑަކަށް ހުޅުވާލާފައި ބަހައްޓަވާ.",
+    "Only for :brand products": "ހަމައެކަނި :brand ގެ ތަކެއްޗަށް",
+    "Only :brand products can join this campaign.": "މި ކެމްޕޭނުގައި ބައިވެރިވެވޭނީ :brand ގެ ތަކެތި އެކަނި.",
+    "No longer a :brand product, so it gets no campaign price.": "މިހާރު :brand ގެ އެއްޗެއް ނޫންކަމުން، ކެމްޕޭން އަގު ނުލިބޭނެ.",
+    "You have no active :brand products to add yet.": "އިތުރުކުރާނެ :brand ގެ އެކްޓިވް ތަކެއްޗެއް އަދި ނެތް.",
+    "Only :brand products are in this campaign.": "މި ކެމްޕޭނުގައި ހިމެނެނީ :brand ގެ ތަކެތި އެކަނި.",
+    "See everything from :brand": ":brand ގެ ހުރިހާ ތަކެތި ބައްލަވާ"
 }

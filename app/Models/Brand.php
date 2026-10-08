@@ -101,6 +101,16 @@ class Brand extends Model
     }
 
     /**
+     * Campaigns for this brand only: just its products can go in, and they show on its page.
+     *
+     * @return HasMany<Campaign, $this>
+     */
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
+
+    /**
      * How names are matched: lower case, letters, marks and digits only, so "Dr. Martens",
      * "DR MARTENS" and "dr-martens" are one brand. Thaana vowel signs are marks and are kept.
      */

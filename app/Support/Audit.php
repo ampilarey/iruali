@@ -33,6 +33,8 @@ class Audit
         'brand.deleted' => 'Brand deleted',
         'settings.saved' => 'Settings saved',
         'legal.saved' => 'Legal page saved',
+        'demo.removed' => 'Sample data removed',
+        'demo.restored' => 'Sample data restored',
         'voucher.created' => 'Voucher created',
         'voucher.updated' => 'Voucher updated',
         'voucher.deleted' => 'Voucher deleted',

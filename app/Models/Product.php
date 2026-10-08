@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * Translatable columns (HasTranslations) read as the text in the current language and can be
+ * written either as that text or as an array of locale => text.
+ *
+ * @property-read string $name
+ * @property-write string|array<string, string|null> $name
+ * @property-read string|null $description
+ * @property-write string|array<string, string|null>|null $description
+ */
 class Product extends Model
 {
     use HasFactory, HasTranslations, SoftDeletes;
@@ -168,7 +177,7 @@ class Product extends Model
     /**
      * When a marked-down price ends, if the seller set an end time (drives the deal countdown).
      */
-    public function getDealEndsAtAttribute(): ?\Illuminate\Support\Carbon
+    public function getDealEndsAtAttribute(): ?\Carbon\Carbon
     {
         return $this->is_on_sale && $this->flash_sale_ends_at && $this->flash_sale_ends_at->isFuture() ? $this->flash_sale_ends_at : null;
     }
@@ -257,11 +266,15 @@ class Product extends Model
     }
 
     /**
-     * Generate a unique slug for the product
+     * A unique slug for the product, from its English name: a Dhivehi name has no Latin letters and
+     * would give an empty slug (and so a broken product link) when the shop works in Dhivehi.
      */
-    public function generateSlug()
+    public function generateSlug(): string
     {
-        $baseSlug = \Illuminate\Support\Str::slug($this->name['en'] ?? $this->name);
+        $baseSlug = \Illuminate\Support\Str::slug($this->getTranslation('name', 'en', false) ?: $this->name);
+        if ($baseSlug === '') {
+            $baseSlug = \Illuminate\Support\Str::slug((string) $this->sku) ?: 'product';
+        }
         $slug = $baseSlug;
         $counter = 1;
 

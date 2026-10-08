@@ -23,6 +23,27 @@ class ApiTest extends TestCase
             ]);
     }
 
+    public function test_product_endpoint_shows_approved_reviews_with_their_author_and_live_variants_only()
+    {
+        $product = Product::factory()->create(['is_active' => true, 'has_variants' => true]);
+        $author = User::factory()->create(['name' => 'Aisha']);
+        $review = fn (User $user, bool $approved, string $comment) => \App\Models\ProductReview::forceCreate([
+            'product_id' => $product->id, 'user_id' => $user->id, 'reviewer_name' => $user->name, 'reviewer_email' => $user->email,
+            'rating' => 5, 'comment' => $comment, 'is_approved' => $approved, 'verified_purchase' => false,
+        ]);
+        $review($author, true, 'Lovely');
+        $review(User::factory()->create(), false, 'Waiting for moderation');
+        \App\Models\ProductVariant::factory()->create(['product_id' => $product->id, 'is_active' => true]);
+        \App\Models\ProductVariant::factory()->create(['product_id' => $product->id, 'is_active' => false]);
+
+        $this->getJson("/api/v1/products/{$product->slug}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data.reviews')
+            ->assertJsonPath('data.reviews.0.comment', 'Lovely')
+            ->assertJsonPath('data.reviews.0.user.name', 'Aisha')
+            ->assertJsonCount(1, 'data.variants');
+    }
+
     public function test_products_endpoint()
     {
         // Create test data

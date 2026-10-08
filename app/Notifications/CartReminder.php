@@ -28,7 +28,7 @@ class CartReminder extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $cart = $this->cart->loadMissing(['items.product.mainImage', 'items.variant']);
-        $items = $cart->items->filter(fn ($item) => $item->product);
+        $items = $cart->items->whereNotNull('product');
 
         $subject = $this->voucher
             ? __('Your cart is waiting, with :percent% off', ['percent' => self::percent($this->voucher)])

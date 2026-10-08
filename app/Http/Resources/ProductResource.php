@@ -67,12 +67,11 @@ class ProductResource extends JsonResource
                         'id' => $review->id,
                         'rating' => $review->rating,
                         'comment' => $review->comment,
-                        'user' => $review->whenLoaded('user', function () use ($review) {
-                            return [
-                                'id' => $review->user->id,
-                                'name' => $review->user->name,
-                            ];
-                        }),
+                        // $review is a plain model, so whenLoaded() (a JsonResource helper) is not available here
+                        'user' => $review->relationLoaded('user') && $review->user ? [
+                            'id' => $review->user->id,
+                            'name' => $review->user->name,
+                        ] : null,
                         'created_at' => $review->created_at,
                     ];
                 });

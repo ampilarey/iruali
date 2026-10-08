@@ -105,7 +105,12 @@ class ProductController extends BaseController
             return $this->sendNotFound('Product not found');
         }
 
-        $product->load(['category', 'images', 'reviews.user', 'seller', 'variants']);
+        // Same as the product page: approved reviews only (pending and rejected ones stay private), live variants only
+        $product->load([
+            'category', 'images', 'seller',
+            'reviews' => fn ($q) => $q->where('is_approved', true)->with('user')->latest(),
+            'variants' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->orderBy('id'),
+        ]);
 
         return $this->sendResponse(new ProductResource($product), 'Product retrieved successfully');
     }

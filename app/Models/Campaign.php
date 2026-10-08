@@ -84,6 +84,8 @@ class Campaign extends Model
 
     /**
      * Products whose participation an admin approved.
+     *
+     * @return BelongsToMany<Product, $this>
      */
     public function approvedProducts(): BelongsToMany
     {

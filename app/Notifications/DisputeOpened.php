@@ -35,7 +35,7 @@ class DisputeOpened extends Notification implements ShouldQueue
             ->subject(__('Dispute opened on order :number', ['number' => $order->order_number]))
             ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? 'iruali']))
             ->line(__(':customer has opened a dispute (:type) on order :number, claiming :amount.', [
-                'customer' => $dispute->customer?->name ?? __('A customer'),
+                'customer' => $dispute->customer->name ?? __('A customer'),
                 'type' => $dispute->typeLabel(),
                 'number' => $order->order_number,
                 'amount' => Money::format($dispute->amount_claimed),

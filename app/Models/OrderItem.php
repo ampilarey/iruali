@@ -57,7 +57,7 @@ class OrderItem extends Model
      */
     public function displayName(): string
     {
-        $name = (string) ($this->product?->name ?? __('Product'));
+        $name = (string) ($this->product->name ?? __('Product'));
 
         return $this->variant_name ? $name.' – '.$this->variant_name : $name;
     }

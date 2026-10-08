@@ -27,7 +27,7 @@ class UserResource extends JsonResource
             'postal_code' => $this->postal_code,
             'date_of_birth' => $this->date_of_birth,
             'gender' => $this->gender,
-            'profile_picture' => $this->profile_picture,
+            'profile_picture' => $this->avatar ? asset($this->avatar) : null,
             'loyalty_points' => $this->loyalty_points,
             'is_seller' => $this->is_seller,
             'seller_approved' => $this->seller_approved,

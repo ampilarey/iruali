@@ -39,6 +39,7 @@ class BulkProductService
                     : __(':from → :to', ['from' => $product->stock_quantity, 'to' => (int) $value]),
                 'activate' => $product->isApproved() ? __('activated') : __('stays pending until an admin approves it'),
                 'deactivate' => __('deactivated'),
+                default => throw new \InvalidArgumentException('Unknown bulk action: '.$action),
             };
 
             return ['product' => $product, 'note' => $note];
@@ -58,6 +59,7 @@ class BulkProductService
                     'stock_set' => $this->setStock($product, (int) $value),
                     'activate' => $product->update(['is_active' => $product->isApproved()]),
                     'deactivate' => $product->update(['is_active' => false]),
+                    default => throw new \InvalidArgumentException('Unknown bulk action: '.$action),
                 };
                 $count++;
             }
@@ -101,8 +103,7 @@ class BulkProductService
             foreach ($product->getTranslations('name') as $locale => $name) {
                 $copy->setTranslation('name', $locale, $name.' '.__('(copy)'));
             }
-            $copy->sku = $this->freeSku($product->sku);
-            $copy->slug = null; // generated on create
+            $copy->sku = $this->freeSku($product->sku); // the slug was left out above, so a new one is made on create
             $copy->is_active = false;
             $copy->approved_at = null;
             $copy->save();

@@ -55,7 +55,7 @@ class CartItem extends Model
             return $this->variant->setRelation('product', $this->product)->effectivePrice();
         }
 
-        return (float) ($this->product?->final_price ?? 0);
+        return (float) ($this->product->final_price ?? 0);
     }
 
     public function getFinalPriceAttribute()
@@ -72,7 +72,7 @@ class CartItem extends Model
             return $this->variant && $this->variant->is_active ? (int) $this->variant->stock_quantity : 0;
         }
 
-        return (int) ($this->product?->stock_quantity ?? 0);
+        return (int) ($this->product->stock_quantity ?? 0);
     }
 
     /**

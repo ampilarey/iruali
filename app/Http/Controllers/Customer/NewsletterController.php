@@ -27,7 +27,7 @@ class NewsletterController extends Controller
     public function unsubscribe(Request $request, int $subscriber)
     {
         $row = NewsletterSubscriber::find($subscriber);
-        $email = $row?->email ?? $request->query('email', '');
+        $email = $row->email ?? $request->query('email', '');
         $row?->delete();
 
         return view('newsletter.unsubscribed', ['email' => $email]);

@@ -48,6 +48,6 @@ class CampaignProduct extends Model
 
     public function discount(): float
     {
-        return (float) ($this->discount_percent ?? $this->campaign?->discount_percent ?? 0);
+        return (float) ($this->discount_percent ?? $this->campaign->discount_percent ?? 0);
     }
 }

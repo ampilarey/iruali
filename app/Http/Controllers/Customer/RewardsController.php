@@ -40,7 +40,7 @@ class RewardsController extends Controller
                 'signed_up_at' => $referee->created_at,
                 'status' => $referee->referral_rewarded_at ? 'rewarded' : ($firstPaid ? 'paid' : 'signed_up'),
                 'status_at' => $referee->referral_rewarded_at ?? $firstPaid?->paid_at,
-                'points' => $reward?->points ?? ($referee->referral_rewarded_at ? (int) Setting::get('referral_referrer_points') : 0),
+                'points' => $reward->points ?? ($referee->referral_rewarded_at ? (int) Setting::get('referral_referrer_points') : 0),
             ];
         });
 

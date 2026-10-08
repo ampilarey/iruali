@@ -30,8 +30,8 @@ class Message extends Model
     {
         return match ($this->sender_role) {
             'admin' => __('iruali support'),
-            'seller' => $this->conversation?->shopName() ?? ($this->sender?->name ?? __('Shop')),
-            default => $this->sender?->name ?? __('Customer'),
+            'seller' => $this->conversation?->shopName() ?? ($this->sender->name ?? __('Shop')),
+            default => $this->sender->name ?? __('Customer'),
         };
     }
 }

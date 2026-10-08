@@ -48,7 +48,7 @@ class SearchController extends Controller
             ->map(fn (Product $p) => [
                 'name' => $p->name,
                 'url' => route('products.show', $p),
-                'image' => $p->mainImage?->url ?? '/images/product-placeholder.svg',
+                'image' => $p->mainImage->url ?? '/images/product-placeholder.svg',
                 'price' => Money::format($p->final_price),
                 'in_stock' => $p->stock_quantity > 0,
             ]);

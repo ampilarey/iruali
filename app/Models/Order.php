@@ -92,7 +92,7 @@ class Order extends Model
 
     public function getFormattedOrderNumberAttribute()
     {
-        return 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        return sprintf('ORD-%06d', $this->id);
     }
 
     public function getStatusBadgeAttribute(): string
@@ -187,12 +187,12 @@ class Order extends Model
      */
     public function customerName(): ?string
     {
-        return $this->user?->name ?? $this->guest_name;
+        return $this->user->name ?? $this->guest_name;
     }
 
     public function customerEmail(): ?string
     {
-        return $this->user?->email ?? $this->guest_email;
+        return $this->user->email ?? $this->guest_email;
     }
 
     /**

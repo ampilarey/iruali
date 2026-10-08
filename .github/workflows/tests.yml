@@ -85,12 +85,9 @@ jobs:
           if-no-files-found: ignore
 
   static-analysis:
-    name: Larastan level 5 (advisory)
+    name: Larastan level 5
     runs-on: ubuntu-latest
-    # Larastan is not in composer.lock yet (it could not be fetched where the repo is developed),
-    # so this job installs it on the fly and never blocks a merge. Make it blocking once
-    # `composer require --dev larastan/larastan` is committed and `composer analyse` is clean.
-    continue-on-error: true
+    # Blocking: app/ is clean at level 5 with no ignore rules, so any finding is new and must be fixed
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -100,7 +97,5 @@ jobs:
           coverage: none
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
-      - name: Install Larastan (not in the lock file)
-        run: composer require --dev larastan/larastan --no-interaction --no-progress --with-all-dependencies
       - name: Analyse app/ at level 5
-        run: composer analyse
+        run: composer analyse -- --no-progress --error-format=github

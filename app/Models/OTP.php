@@ -56,7 +56,7 @@ class OTP extends Model
      */
     public static function generateCode(): string
     {
-        return str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        return sprintf('%06d', random_int(0, 999999));
     }
 
     /**

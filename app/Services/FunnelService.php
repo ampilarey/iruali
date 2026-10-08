@@ -111,6 +111,7 @@ class FunnelService
             ->select('product_id', DB::raw("{$carts} as carts"), DB::raw("{$paid} as paid"))
             ->groupBy('product_id')
             ->havingRaw("{$carts} > 0")
+            ->toBase() // plain rows: these are per-product totals, not funnel events
             ->get()
             ->map(function ($row) {
                 $row->carts = (int) $row->carts;

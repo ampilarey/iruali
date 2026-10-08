@@ -22,7 +22,7 @@ class CategoryResource extends JsonResource
             'description' => LocalizationService::getLocalizedValue($this->resource, 'description'),
             'slug' => $this->slug,
             'image' => $this->image,
-            'is_active' => $this->is_active,
+            'is_active' => $this->status === 'active',
             'parent_id' => $this->parent_id,
             'parent' => $this->whenLoaded('parent', function () {
                 return new CategoryResource($this->parent);

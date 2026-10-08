@@ -55,7 +55,7 @@ class PointsService
      * The customer's unspent points grouped by the day they were earned, oldest first (FIFO):
      * [['earned_at' => Carbon, 'points' => int], ...]. Spending (and expiry) always eats the oldest lot.
      *
-     * @return array<int, array{earned_at: Carbon, points: int}>
+     * @return list<array{earned_at: \Carbon\Carbon, points: int}>
      */
     public function unspentLots(User $user): array
     {

@@ -39,9 +39,9 @@ class ReadyChecks
     public static function cached(): array
     {
         try {
-            return Cache::remember(self::CACHE_KEY, 300, fn () => (new static(offline: true))->run());
+            return Cache::remember(self::CACHE_KEY, 300, fn () => (new self(offline: true))->run());
         } catch (Throwable) {
-            return (new static(offline: true))->run();
+            return (new self(offline: true))->run();
         }
     }
 

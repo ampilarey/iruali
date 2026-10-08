@@ -7,6 +7,7 @@ use App\Models\Dispute;
 use App\Notifications\Channels\SmsChannel;
 use App\Services\MessagingService;
 use App\Services\Sms\SmsManager;
+use App\Support\AdminInbox;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -33,28 +34,16 @@ class TrustServiceProvider extends ServiceProvider
         $this->registerAdminInboxCounts();
     }
 
-    /**
-     * Open disputes and unread threads in the admin inbox, when that inbox exists (another
-     * feature adds it): registered defensively so this works with or without it.
-     */
+    /** Open disputes and unread threads in the admin inbox. */
     protected function registerAdminInboxCounts(): void
     {
-        $inbox = 'App\Support\AdminInbox';
-        if (! class_exists($inbox) || ! method_exists($inbox, 'register')) {
-            return;
-        }
-
-        try {
-            $inbox::register('disputes', fn () => [
-                'label' => 'Open disputes', 'count' => Dispute::open()->count(),
-                'route' => 'admin.disputes', 'severity' => 'warn',
-            ]);
-            $inbox::register('messages', fn () => [
-                'label' => 'Unread messages', 'count' => (int) Conversation::sum('admin_unread_count'),
-                'route' => 'admin.messages', 'severity' => 'info',
-            ]);
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        AdminInbox::register('disputes', fn () => [
+            'label' => 'Open disputes', 'count' => Dispute::open()->count(),
+            'route' => 'admin.disputes', 'severity' => 'warn',
+        ]);
+        AdminInbox::register('messages', fn () => [
+            'label' => 'Unread messages', 'count' => (int) Conversation::sum('admin_unread_count'),
+            'route' => 'admin.messages', 'severity' => 'info',
+        ]);
     }
 }

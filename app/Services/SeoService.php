@@ -288,7 +288,7 @@ class SeoService
         }
 
         // Ratings only when there are approved reviews (Google rejects an empty aggregateRating)
-        $reviews = $product->reviews()->where('is_approved', true)->selectRaw('COUNT(*) as n, AVG(rating) as avg')->first();
+        $reviews = $product->reviews()->where('is_approved', true)->selectRaw('COUNT(*) as n, AVG(rating) as avg')->toBase()->first();
         if ($reviews && (int) $reviews->n > 0) {
             $schema['aggregateRating'] = [
                 '@type' => 'AggregateRating',

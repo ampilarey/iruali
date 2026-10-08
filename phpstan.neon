@@ -1,14 +1,13 @@
-# Static analysis with Larastan (PHPStan for Laravel).
+# Static analysis with Larastan (PHPStan for Laravel), level 5, over app/.
 #
-# Larastan is not in composer.lock (it could not be fetched in the sandbox where this repo is
-# worked on), so install it locally first, then run `composer analyse`:
-#
-#   composer require --dev larastan/larastan
 #   composer analyse
 #
-# CI runs the same at level 5 as a non-blocking job (see .github/workflows/tests.yml, job
-# "static-analysis"); findings are advisory until the package is committed to composer.json
-# and the job is made blocking.
+# Larastan is a locked dev dependency, and CI runs the same check (job "static-analysis" in
+# .github/workflows/tests.yml) and fails on any finding, so fix what it reports rather than
+# ignoring it. Two conventions keep it accurate:
+#   - every Eloquent relation declares its model: /** @return BelongsTo<Product, $this> */
+#   - values that are not real columns (counts, totals from a grouped query) are set with
+#     setAttribute() and read with getAttribute(), or the query uses ->toBase() for plain rows.
 includes:
     - vendor/larastan/larastan/extension.neon
 
@@ -18,7 +17,3 @@ parameters:
         - app
     tmpDir: storage/framework/cache/phpstan
     treatPhpDocTypesAsCertain: false
-    reportUnmatchedIgnoredErrors: false
-    ignoreErrors:
-        # Spatie translatable fields are arrays on write and strings on read; the models' docblocks say string
-        - '#Cannot access offset .* on array\|string#'

@@ -141,7 +141,7 @@ class WalletService
         }
 
         return DB::transaction(function () use ($return, $user) {
-            $row = $this->credit($user, (float) $return->refund_amount, 'refund', ['order_id' => $return->order_id, 'note' => __('Return refund for order :number', ['number' => $return->order?->order_number ?? '#'.$return->order_id])]);
+            $row = $this->credit($user, (float) $return->refund_amount, 'refund', ['order_id' => $return->order_id, 'note' => __('Return refund for order :number', ['number' => $return->order->order_number ?? '#'.$return->order_id])]);
             $row->update(['reference' => 'WALLET-'.$row->id]);
 
             return app(ReturnService::class)->markRefunded($return, 'WALLET-'.$row->id);

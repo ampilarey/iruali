@@ -27,7 +27,7 @@ class OrderTrackingController extends Controller
 
         // The status page is only reachable through a short-lived signed link,
         // so order ids in the URL can't be guessed or enumerated.
-        return redirect()->to(URL::temporarySignedRoute('order.track.show', now()->addMinutes(30), $order));
+        return redirect()->to(URL::temporarySignedRoute('order.track.show', now()->addMinutes(30), [$order]));
     }
 
     // Show order status

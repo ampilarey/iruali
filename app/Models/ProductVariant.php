@@ -84,7 +84,7 @@ class ProductVariant extends Model
             return $this->product ? $this->product->applyCampaignDiscount((float) $this->price) : round((float) $this->price, 2);
         }
 
-        return round((float) ($this->product?->final_price ?? 0) + (float) $this->price_adjustment, 2);
+        return round((float) ($this->product->final_price ?? 0) + (float) $this->price_adjustment, 2);
     }
 
     public function isInStock(): bool
@@ -97,7 +97,7 @@ class ProductVariant extends Model
      */
     public function isLowStock(): bool
     {
-        $threshold = $this->low_stock_threshold ?? $this->product?->reorder_point ?? 5;
+        $threshold = $this->low_stock_threshold ?? $this->product->reorder_point ?? 5;
 
         return $this->stock_quantity <= (int) $threshold;
     }

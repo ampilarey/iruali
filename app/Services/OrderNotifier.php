@@ -24,7 +24,7 @@ class OrderNotifier
         $this->sendToCustomer($order, new OrderPlaced($order));
 
         $order->items
-            ->filter(fn ($item) => $item->product?->seller)
+            ->whereNotNull('product.seller')
             ->groupBy(fn ($item) => $item->product->seller_id)
             ->each(fn ($items) => $this->send($items->first()->product->seller, new NewSellerOrder($order, $items)));
     }

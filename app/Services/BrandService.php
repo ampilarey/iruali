@@ -68,7 +68,7 @@ class BrandService
     public function findForUrl(string $value): ?Brand
     {
         return Brand::where('slug', $value)->first()
-            ?? BrandAlias::where('slug', $value)->first()?->brand
+            ?? BrandAlias::where('slug', $value)->first()->brand
             ?? $this->findByKey(Brand::keyFor($value));
     }
 
@@ -346,7 +346,7 @@ class BrandService
         $bestSellers = Brand::query()->listed()->withActiveProductCount()->whereIn('id', $sold->keys())->get()
             ->sortBy([
                 fn (Brand $a, Brand $b) => (int) $sold[$b->id] <=> (int) $sold[$a->id],
-                fn (Brand $a, Brand $b) => $b->active_products_count <=> $a->active_products_count,
+                fn (Brand $a, Brand $b) => $b->activeProductCount() <=> $a->activeProductCount(),
                 fn (Brand $a, Brand $b) => strcasecmp($a->name, $b->name),
             ])
             ->take($limit)
@@ -376,7 +376,7 @@ class BrandService
             ->pluck('aggregate', 'seller_id');
 
         $shops = User::whereIn('id', $counts->keys())->get(['id', 'name', 'business_name'])
-            ->each(fn (User $shop) => $shop->brand_product_count = (int) $counts[$shop->id])
+            ->each(fn (User $shop) => $shop->setAttribute('brand_product_count', (int) $counts[$shop->id]))
             ->sortBy([['brand_product_count', 'desc'], fn ($a, $b) => strcasecmp($a->business_name ?: $a->name, $b->business_name ?: $b->name)])
             ->take($limit)
             ->values();
@@ -394,7 +394,7 @@ class BrandService
             ->pluck('aggregate', 'category_id');
 
         return Category::active()->whereIn('id', $counts->keys())->get()
-            ->each(fn (Category $category) => $category->brand_product_count = (int) $counts[$category->id])
+            ->each(fn (Category $category) => $category->setAttribute('brand_product_count', (int) $counts[$category->id]))
             ->sortBy([['brand_product_count', 'desc'], fn ($a, $b) => strcasecmp((string) $a->localized_name, (string) $b->localized_name)])
             ->take($limit)
             ->values();

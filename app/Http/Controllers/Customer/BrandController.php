@@ -33,7 +33,7 @@ class BrandController extends Controller
     public function show(Request $request, string $brand, CatalogService $catalog)
     {
         $model = $this->brands->findForUrl($brand);
-        abort_unless($model, 404);
+        abort_if($model === null, 404);
 
         // One address per brand: old names, old slugs and other capitalisations move here for good
         if ($model->slug !== $brand) {
@@ -42,8 +42,8 @@ class BrandController extends Controller
             return redirect()->to(route('brands.show', $model).($query ? '?'.$query : ''), 301);
         }
 
-        $model->loadCount(['products as active_products_count' => fn ($products) => $products->active()]);
-        abort_if($model->active_products_count === 0, 404);
+        $model->setAttribute('active_products_count', \App\Models\Product::query()->active()->where('brand_id', $model->id)->count());
+        abort_if($model->activeProductCount() === 0, 404);
 
         // The layout's SEO tags and language links read the brand from the route
         $request->route()->setParameter('brand', $model);

@@ -13,6 +13,7 @@ class BrandAlias extends Model
 {
     protected $fillable = ['brand_id', 'key', 'slug'];
 
+    /** @return BelongsTo<Brand, $this> */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);

@@ -59,12 +59,18 @@ class Brand extends Model
     /** Brands with at least one product on sale: the ones the storefront shows. */
     public function scopeListed(Builder $query): Builder
     {
-        return $query->whereHas('products', fn ($products) => $products->active());
+        return $query->whereHas('products', fn (Builder $products) => $products->where('products.is_active', true));
     }
 
     public function scopeWithActiveProductCount(Builder $query): Builder
     {
-        return $query->withCount(['products as active_products_count' => fn ($products) => $products->active()]);
+        return $query->withCount(['products as active_products_count' => fn (Builder $products) => $products->where('products.is_active', true)]);
+    }
+
+    /** Products on sale: the loaded count when there is one (withActiveProductCount), else a query. */
+    public function activeProductCount(): int
+    {
+        return (int) ($this->getAttribute('active_products_count') ?? Product::query()->active()->where('brand_id', $this->id)->count());
     }
 
     /**

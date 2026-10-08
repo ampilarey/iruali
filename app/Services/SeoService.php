@@ -82,7 +82,7 @@ class SeoService
      */
     public static function forBrand(Brand $brand): array
     {
-        $count = (int) ($brand->active_products_count ?? $brand->products()->active()->count());
+        $count = $brand->activeProductCount();
         $url = route('brands.show', $brand);
         $description = $brand->localizedDescription()
             ? Str::limit(trim(strip_tags($brand->localizedDescription())), 160)

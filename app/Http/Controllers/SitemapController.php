@@ -58,7 +58,7 @@ class SitemapController extends Controller
             // Brand pages, once a brand has enough products on sale to be worth a search result
             $pages[] = ['brands.index', [], now(), 'weekly', '0.6'];
             Brand::query()->listed()->withActiveProductCount()->get()
-                ->filter(fn (Brand $b) => $b->isIndexable((int) $b->active_products_count))
+                ->filter(fn (Brand $b) => $b->isIndexable($b->activeProductCount()))
                 ->each(function (Brand $b) use (&$pages) {
                     $pages[] = ['brands.show', $b->slug, $b->updated_at, 'weekly', '0.5'];
                 });

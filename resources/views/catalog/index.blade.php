@@ -6,6 +6,7 @@
     $query = request()->query();
     $url = fn (array $changes) => request()->url().'?'.http_build_query(array_filter(array_merge(\Illuminate\Support\Arr::except($query, 'page'), $changes), fn ($v) => $v !== null && $v !== ''));
     $seller = $seller ?? null;
+    $brand = $brand ?? null;
     $category = $category ?? null;
     $subcategories = $subcategories ?? collect();
     $subtitle = $subtitle ?? null;
@@ -54,6 +55,8 @@
                     @if($seller->business_description)<p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $seller->business_description }}</p>@endif
                 </div>
             </div>
+        @elseif($brand)
+            @include('brands._header')
         @else
             <div class="mb-4">
                 <h1 class="font-display text-2xl lg:text-3xl font-bold text-dark">{{ $title }}</h1>
@@ -145,10 +148,10 @@
                             <fieldset class="bg-white lg:border lg:border-gray-200 lg:rounded-xl lg:p-4 text-sm" data-collapsible>
                                 <legend class="font-semibold text-sm mb-2 lg:float-left lg:w-full">{{ __('Brand') }}</legend>
                                 <div class="space-y-1 clear-both">
-                                    @foreach($facets['brands'] as $brand => $count)
+                                    @foreach($facets['brands'] as $brandName => $count)
                                         <label class="flex items-center gap-2 py-1 cursor-pointer {{ $loop->index >= 6 ? 'hidden' : '' }}" @if($loop->index >= 6) data-more @endif>
-                                            <input type="checkbox" name="brand[]" value="{{ $brand }}" class="rounded text-primary focus:ring-primary" @checked(in_array($brand, (array) request('brand', []), true)) data-autosubmit>
-                                            <span class="flex-1 truncate">{{ $brand }}</span><span class="text-xs text-gray-500">{{ $count }}</span>
+                                            <input type="checkbox" name="brand[]" value="{{ $brandName }}" class="rounded text-primary focus:ring-primary" @checked(in_array((string) $brandName, (array) request('brand', []), true)) data-autosubmit>
+                                            <span class="flex-1 truncate">{{ $brandName }}</span><span class="text-xs text-gray-500">{{ $count }}</span>
                                         </label>
                                     @endforeach
                                 </div>

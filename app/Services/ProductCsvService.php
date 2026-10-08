@@ -390,7 +390,8 @@ class ProductCsvService
                 $changes[] = __('description (:locale) updated', ['locale' => $locale]);
             }
         }
-        if ($row['brand'] !== null && $row['brand'] !== '' && $row['brand'] !== (string) $product->brand) {
+        // Brands match like the brand list does: "SAMSUNG" is the same brand as "Samsung"
+        if ($row['brand'] !== null && $row['brand'] !== '' && \App\Models\Brand::keyFor($row['brand']) !== \App\Models\Brand::keyFor($product->brand)) {
             $changes[] = __('brand: :from → :to', ['from' => $product->brand ?: '—', 'to' => $row['brand']]);
         }
         if ($price !== null && abs($price - (float) $product->price) >= 0.005) {

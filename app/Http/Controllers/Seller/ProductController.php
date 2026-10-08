@@ -39,6 +39,7 @@ class ProductController extends Controller
             'product' => new Product(['stock_quantity' => 0, 'reorder_point' => 5, 'has_variants' => false]),
             'categories' => $this->categories(),
             'variants' => collect(),
+            'brandOptions' => \App\Models\Brand::orderBy('name')->pluck('name'),
         ]);
     }
 
@@ -68,6 +69,7 @@ class ProductController extends Controller
             'product' => $product,
             'categories' => $this->categories(),
             'variants' => $product->variants()->ordered()->get(),
+            'brandOptions' => \App\Models\Brand::orderBy('name')->pluck('name'),
         ]);
     }
 

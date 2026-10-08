@@ -226,6 +226,11 @@
                         Manage Products
                     </a>
                     @endif
+                    @if($can('admin.brands'))
+                    <a href="{{ route('admin.brands') }}" class="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-lg text-center font-medium">
+                        Brands
+                    </a>
+                    @endif
                     @if($can('admin.orders'))
                     <a href="{{ route('admin.orders') }}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-center font-medium">
                         Manage Orders

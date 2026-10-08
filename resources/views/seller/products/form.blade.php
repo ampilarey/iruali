@@ -78,7 +78,13 @@
                 </div>
                 <div>
                     <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
-                    <input id="brand" name="brand" class="{{ $field }}" value="{{ old('brand', $product->brand) }}">
+                    <input id="brand" name="brand" list="brand-options" autocomplete="off" maxlength="120" class="{{ $field }}" value="{{ old('brand', $product->brand) }}" aria-describedby="brand-hint">
+                    <datalist id="brand-options">
+                        @foreach($brandOptions ?? [] as $brandOption)
+                            <option value="{{ $brandOption }}"></option>
+                        @endforeach
+                    </datalist>
+                    <p id="brand-hint" class="mt-1 text-xs text-gray-500">Pick the brand from the list so the product shows on that brand's page. If it isn't listed, type it and it will be added. Leave empty if the product has no brand.</p>
                 </div>
                 @php $hasVariants = (bool) old('has_variants', $product->has_variants); @endphp
                 <div data-product-stock class="{{ $hasVariants ? 'hidden' : '' }}">

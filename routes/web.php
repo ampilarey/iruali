@@ -44,7 +44,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/categories/{category:slug}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
         Route::get('/search', [SearchController::class, 'search'])->name('search');
         Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest')->middleware('throttle:60,1');
-        Route::get('/brands/{brand}', [ShopController::class, 'brand'])->name('brands.show')->where('brand', '.+');
+        Route::get('/brands', [\App\Http\Controllers\Customer\BrandController::class, 'index'])->name('brands.index');
+        // Slugs; old name-based links (/brands/Dr.%20Martens) still resolve and redirect, hence ".+"
+        Route::get('/brands/{brand}', [\App\Http\Controllers\Customer\BrandController::class, 'show'])->name('brands.show')->where('brand', '.+');
         Route::get('/deals', [ShopController::class, 'deals'])->name('deals');
         Route::get('/shops/{seller}', [ShopController::class, 'seller'])->name('sellers.show');
         Route::view('/help', 'pages.help')->name('help');

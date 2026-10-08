@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
@@ -72,6 +73,96 @@ class SeoService
             'twitter_image' => asset('images/og-image.png'),
             'canonical_url' => route('categories.show', $category->slug),
             'schema' => self::generateCategorySchema($category),
+        ];
+    }
+
+    /**
+     * A brand's page. Brands with only a product or two are left out of search engines until
+     * they have more (thin pages hurt the whole site); the links on them are still followed.
+     */
+    public static function forBrand(Brand $brand): array
+    {
+        $count = (int) ($brand->active_products_count ?? $brand->products()->active()->count());
+        $url = route('brands.show', $brand);
+        $description = $brand->localizedDescription()
+            ? Str::limit(trim(strip_tags($brand->localizedDescription())), 160)
+            : __('Buy :brand from shops across the Maldives on iruali.', ['brand' => $brand->name]);
+        $image = $brand->logoUrl() ?? asset('images/og-image.png');
+
+        $about = ['@type' => 'Brand', 'name' => $brand->name];
+        if ($brand->logoUrl()) {
+            $about['logo'] = $brand->logoUrl();
+        }
+
+        return [
+            'title' => $brand->name.' - iruali',
+            'description' => $description,
+            'keywords' => "{$brand->name}, iruali, Maldives, online shopping",
+            'og_title' => $brand->name,
+            'og_description' => $description,
+            'og_type' => 'website',
+            'og_image' => $image,
+            'twitter_title' => $brand->name,
+            'twitter_description' => $description,
+            'twitter_image' => $image,
+            'canonical_url' => $url,
+            'robots' => $brand->isIndexable($count) ? null : 'noindex, follow',
+            'schema' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => $brand->name,
+                'description' => $description,
+                'url' => $url,
+                'about' => $about,
+            ],
+            'extra_schema' => [self::listBreadcrumbs([[__('Brands'), route('brands.index')], [$brand->name, $url]])],
+        ];
+    }
+
+    /**
+     * The A–Z brands directory.
+     */
+    public static function forBrandDirectory(): array
+    {
+        $title = __('Brands');
+        $description = __('Shop by brand: every brand sold on iruali by shops across the Maldives.');
+        $url = route('brands.index');
+
+        return [
+            'title' => $title.' - iruali',
+            'description' => $description,
+            'keywords' => 'brands, iruali, Maldives, online shopping',
+            'og_title' => $title,
+            'og_description' => $description,
+            'og_type' => 'website',
+            'og_image' => asset('images/og-image.png'),
+            'twitter_title' => $title,
+            'twitter_description' => $description,
+            'twitter_image' => asset('images/og-image.png'),
+            'canonical_url' => $url,
+            'schema' => ['@context' => 'https://schema.org', '@type' => 'CollectionPage', 'name' => $title, 'description' => $description, 'url' => $url],
+            'extra_schema' => [self::listBreadcrumbs([[$title, $url]])],
+        ];
+    }
+
+    /**
+     * Home › … breadcrumbs for a listing page.
+     *
+     * @param  array<int, array{0: string, 1: string}>  $items  [name, url] after Home
+     */
+    private static function listBreadcrumbs(array $items): array
+    {
+        $items = array_merge([[__('Home'), route('home')]], $items);
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => array_map(fn ($item, $i) => [
+                '@type' => 'ListItem',
+                'position' => $i + 1,
+                'name' => $item[0],
+                'item' => $item[1],
+            ], $items, array_keys($items)),
         ];
     }
 

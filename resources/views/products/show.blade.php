@@ -55,7 +55,7 @@
 
         <!-- Title block (shown above the gallery, as on big camera stores) -->
         <div class="mb-4 lg:mb-6">
-            @if($product->brand)<a href="{{ route('brands.show', $product->brand) }}" class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-primary hover:underline">{{ $product->brand }}</a>@endif
+            @if($product->brandModel)<a href="{{ route('brands.show', $product->brandModel) }}" class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-primary hover:underline">{{ $product->brandModel->name }}</a>@elseif($product->brand)<span class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-gray-600">{{ $product->brand }}</span>@endif
             <h1 class="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-dark leading-tight">{{ $product->name }}</h1>
             <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-600">
                 <a href="#reviews" class="flex items-center gap-1.5 hover:text-primary">

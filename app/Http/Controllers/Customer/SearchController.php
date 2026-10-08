@@ -56,8 +56,8 @@ class SearchController extends Controller
         $departments = Category::active()->whereRaw('LOWER(CAST(name AS CHAR)) LIKE ?', [$like])->take(3)->get()
             ->map(fn (Category $c) => ['name' => $c->localized_name, 'url' => route('categories.show', $c)]);
 
-        $brands = Product::query()->active()->where('brand', 'like', $like)->distinct()->orderBy('brand')->take(3)->pluck('brand')
-            ->map(fn ($b) => ['name' => $b, 'url' => route('brands.show', $b)]);
+        $brands = \App\Models\Brand::query()->listed()->where('name', 'like', $like)->orderBy('name')->take(3)->get(['id', 'name', 'slug'])
+            ->map(fn ($b) => ['name' => $b->name, 'url' => route('brands.show', $b)]);
 
         return response()->json(['products' => $products, 'departments' => $departments, 'brands' => $brands]);
     }

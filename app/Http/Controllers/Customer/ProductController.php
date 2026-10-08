@@ -24,7 +24,7 @@ class ProductController extends Controller
         abort_unless($product->is_active, 404);
 
         $product->load([
-            'category.parent', 'images', 'variants', 'seller',
+            'category.parent', 'images', 'variants', 'seller', 'brandModel',
             'reviews' => fn ($q) => $q->where('is_approved', true)->with(['user', 'photos', 'replier'])->orderByDesc('helpful_count')->latest(),
         ]);
 

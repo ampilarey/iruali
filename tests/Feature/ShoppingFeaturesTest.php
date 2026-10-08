@@ -285,8 +285,10 @@ class ShoppingFeaturesTest extends TestCase
         $this->product(['brand' => 'Reefline', 'name' => ['en' => 'Hand line kit']]);
         $this->product(['brand' => 'Other', 'name' => ['en' => 'Not this']]);
 
-        $this->get(route('brands.show', 'Reefline'))->assertOk()->assertSee('Hand line kit')->assertDontSee('Not this');
-        $this->get(route('brands.show', 'Nobody'))->assertNotFound();
+        // Brand pages live at the brand's slug; the old name-based address redirects there
+        $this->get('/brands/Reefline')->assertRedirect('/brands/reefline')->assertStatus(301);
+        $this->get('/brands/reefline')->assertOk()->assertSee('Hand line kit')->assertDontSee('Not this');
+        $this->get('/brands/nobody')->assertNotFound();
 
         $this->get('/help')->assertDontSee('wa.me/960');
         Setting::set(['whatsapp_number' => '+960 777 1234']);

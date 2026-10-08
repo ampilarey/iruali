@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
@@ -53,6 +54,13 @@ class SitemapController extends Controller
             Category::query()->where('status', 'active')->select(['slug', 'updated_at'])->get()
                 ->each(function ($c) use (&$pages) {
                     $pages[] = ['categories.show', $c->slug, $c->updated_at, 'weekly', '0.6'];
+                });
+            // Brand pages, once a brand has enough products on sale to be worth a search result
+            $pages[] = ['brands.index', [], now(), 'weekly', '0.6'];
+            Brand::query()->listed()->withActiveProductCount()->get()
+                ->filter(fn (Brand $b) => $b->isIndexable((int) $b->active_products_count))
+                ->each(function (Brand $b) use (&$pages) {
+                    $pages[] = ['brands.show', $b->slug, $b->updated_at, 'weekly', '0.5'];
                 });
             User::query()->where('is_seller', true)->where('seller_approved', true)->select(['id', 'updated_at'])->get()
                 ->each(function ($s) use (&$pages) {

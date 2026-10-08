@@ -49,7 +49,7 @@ class ProductRequest extends FormRequest
             // With variants the product's stock is the sum of theirs, so the field is not submitted
             'stock_quantity' => ['exclude_if:has_variants,true', 'required', 'integer', 'min:0', 'max:999999'],
             'reorder_point' => 'nullable|integer|min:0|max:999999',
-            'brand' => 'nullable|string|max:255',
+            'brand' => 'nullable|string|max:120',
             'weight' => 'nullable|numeric|min:0|max:999.99',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
 

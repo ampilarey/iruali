@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\AuditLog;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Role;
+use App\Models\ShopStaff;
 use App\Models\User;
+use App\Support\AdminInbox;
 use App\Support\StaffAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -82,6 +85,100 @@ class StaffAccessTest extends TestCase
         $this->actingAs($finance)->post('/admin/errors/'.$event->id.'/resolve')->assertForbidden();
         $this->actingAs($finance)->get('/admin/users')->assertForbidden();
         $this->actingAs($finance)->get('/admin/settings')->assertForbidden();
+    }
+
+    public function test_catalogue_staff_look_after_brands_product_approvals_and_campaigns_only(): void
+    {
+        $catalogue = $this->staff('catalogue');
+        $this->assertTrue($catalogue->isStaff());
+        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'onboarding_completed_at' => now()]);
+        $product = Product::factory()->create(['seller_id' => $shop->id, 'brand' => 'Reefline', 'is_active' => false]);
+        $brand = $product->brandModel;
+        $order = Order::factory()->create(['status' => 'pending']);
+
+        $this->actingAs($catalogue)->get('/admin/dashboard')->assertOk()
+            ->assertSee('data-nav="admin.brands"', false)->assertSee('data-nav="admin.products"', false)->assertSee('data-nav="admin.campaigns.index"', false)
+            ->assertDontSee('data-nav="admin.orders"', false)->assertDontSee('data-nav="admin.users"', false)->assertDontSee('data-nav="admin.settings"', false);
+
+        // Their inbox lists what they can act on: new products and new brands, not refunds or shops
+        $rows = collect(AdminInbox::items($catalogue))->pluck('label');
+        $this->assertContains('Products pending review', $rows);
+        $this->assertContains('Brands to review', $rows);
+        $this->assertNotContains('Refunds due', $rows);
+        $this->assertNotContains('Shops awaiting approval', $rows);
+
+        // Brand pages, product approvals and campaigns
+        $this->actingAs($catalogue)->get('/admin/brands')->assertOk();
+        $this->actingAs($catalogue)->get(route('admin.brands.edit', $brand))->assertOk();
+        $this->actingAs($catalogue)->put(route('admin.brands.update', $brand), [
+            'name' => 'Reefline', 'slug' => 'reefline', 'description_en' => 'Marine gear for island life.', 'description_dv' => '', 'reviewed' => 1,
+        ])->assertSessionHasNoErrors()->assertRedirect(route('admin.brands.edit', $brand));
+        $this->assertSame('Marine gear for island life.', $brand->fresh()->getTranslation('description', 'en'));
+        $this->actingAs($catalogue)->get('/admin/products')->assertOk();
+        $this->actingAs($catalogue)->post(route('admin.products.approve', $product->id))->assertRedirect()->assertSessionHas('success');
+        $this->assertTrue($product->fresh()->is_active);
+        $this->actingAs($catalogue)->get(route('admin.campaigns.index'))->assertOk();
+        $this->actingAs($catalogue)->get(route('admin.campaigns.create'))->assertOk();
+
+        // Nothing about orders, money, people or settings
+        foreach (['/admin/orders', '/admin/orders/'.$order->id, '/admin/returns', '/admin/payouts', '/admin/tax', '/admin/analytics', '/admin/users', '/admin/sellers', '/admin/settings', '/admin/audit', '/admin/sample-data'] as $page) {
+            $this->actingAs($catalogue)->get($page)->assertForbidden();
+        }
+        $this->actingAs($catalogue)->post('/admin/users/'.$order->user_id.'/role', ['role' => 'catalogue'])->assertForbidden();
+    }
+
+    public function test_admins_make_a_user_catalogue_staff_but_never_someone_from_a_shop(): void
+    {
+        $admin = $this->staff('admin');
+        $user = User::factory()->create();
+
+        $this->actingAs($admin)->get('/admin/users')->assertOk()->assertSee('<option value="catalogue"', false);
+        $this->actingAs($admin)->post('/admin/users/'.$user->id.'/role', ['role' => 'catalogue'])->assertRedirect()->assertSessionHas('success');
+        $this->assertSame(['catalogue'], StaffAccess::staffRoles($user->fresh()));
+        $this->assertSame(['from' => [], 'to' => ['catalogue']], AuditLog::where('action', 'user.role')->sole()->changes);
+
+        // A shop's owner, or someone on its staff, would be approving their own shop's products
+        $owner = User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
+        $owner->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+        $member = User::factory()->create();
+        (new ShopStaff(['role' => 'manager']))->forceFill(['shop_id' => $owner->id, 'user_id' => $member->id, 'invited_by' => $owner->id])->save();
+        foreach ([$owner, $member] as $shopPerson) {
+            foreach (['catalogue', 'support', 'finance'] as $role) {
+                $this->actingAs($admin)->post('/admin/users/'.$shopPerson->id.'/role', ['role' => $role])
+                    ->assertSessionHas('error', $shopPerson->name.' has a shop or works for one, so cannot be iruali staff. Use a separate account for staff work.');
+            }
+            $this->assertFalse($shopPerson->fresh()->isStaff());
+        }
+
+        // Taking a role away always works
+        $member->roles()->attach(Role::firstOrCreate(['name' => 'support'], ['display_name' => 'Support'])->id);
+        $this->actingAs($admin)->post('/admin/users/'.$member->id.'/role', ['role' => 'none'])->assertSessionHas('success');
+        $this->assertFalse($member->fresh()->isStaff());
+    }
+
+    public function test_support_and_finance_open_every_page_their_role_lists_but_never_refund_to_the_wallet(): void
+    {
+        $support = $this->staff('support');
+        $finance = $this->staff('finance');
+        $order = Order::factory()->create(['status' => 'pending']);
+
+        // Disputes, order messages, SMS, rewards and gift cards used to be admin-only despite config/staff.php
+        foreach (['/admin/disputes', '/admin/messages', '/admin/sms'] as $page) {
+            $this->actingAs($support)->get($page)->assertOk();
+        }
+        foreach (['/admin/disputes', '/admin/rewards', '/admin/gift-cards'] as $page) {
+            $this->actingAs($finance)->get($page)->assertOk();
+        }
+        $this->actingAs($support)->get('/admin/rewards')->assertForbidden();
+        $this->actingAs($finance)->get('/admin/messages')->assertForbidden();
+        $this->actingAs($support)->get(route('admin.campaigns.index'))->assertForbidden();
+        $this->actingAs($this->staff('admin'))->get(route('admin.campaigns.index'))->assertOk();
+
+        // Store credit is money: only admins refund to the wallet, and staff are not offered the button
+        foreach ([$support, $finance] as $staff) {
+            $this->actingAs($staff)->post(route('admin.orders.refund-wallet', $order))->assertForbidden();
+        }
+        $this->actingAs($support)->get(route('admin.orders.show', $order))->assertOk()->assertDontSee('Refund to wallet');
     }
 
     public function test_admin_sees_everything_and_customers_nothing(): void

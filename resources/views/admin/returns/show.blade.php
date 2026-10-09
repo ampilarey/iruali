@@ -84,11 +84,13 @@
                         <input id="refund_reference" name="refund_reference" required maxlength="100" class="w-full rounded-lg border border-gray-300 px-3 py-2">
                         <button class="w-full rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700">Mark as refunded</button>
                     </form>
-                    <form method="POST" action="{{ route('admin.returns.refund-wallet', $return) }}" class="border-t border-gray-100 pt-3" onsubmit="return confirm('Credit {{ Money::format($return->refund_amount) }} to the customer\'s wallet instead of refunding the card?')">
-                        @csrf
-                        <p class="text-gray-600 mb-2">Or credit it to the customer's iruali wallet right now (store credit they can spend on any order).</p>
-                        <button class="w-full rounded-lg border border-primary-300 px-4 py-2 font-semibold text-primary-700 hover:bg-primary-50">Refund to wallet</button>
-                    </form>
+                    @if(auth()->user()->hasRole('admin')) {{-- store credit is for admins only (routes/web/wallet.php) --}}
+                        <form method="POST" action="{{ route('admin.returns.refund-wallet', $return) }}" class="border-t border-gray-100 pt-3" onsubmit="return confirm('Credit {{ Money::format($return->refund_amount) }} to the customer\'s wallet instead of refunding the card?')">
+                            @csrf
+                            <p class="text-gray-600 mb-2">Or credit it to the customer's iruali wallet right now (store credit they can spend on any order).</p>
+                            <button class="w-full rounded-lg border border-primary-300 px-4 py-2 font-semibold text-primary-700 hover:bg-primary-50">Refund to wallet</button>
+                        </form>
+                    @endif
                 </div>
             @endif
 

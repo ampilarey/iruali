@@ -8,6 +8,6 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::post('/orders/{order}/parts/{part}/tracking', [TrackingController::class, 'updateAsSeller'])->name('orders.tracking');
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('/orders/{order}/parts/{part}/tracking', [TrackingController::class, 'updateAsAdmin'])->name('orders.parts.tracking');
 });

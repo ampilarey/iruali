@@ -16,7 +16,7 @@
 return [
 
     // Roles that count as staff (User::isStaff()); they must have two-step sign-in turned on.
-    'roles' => ['admin', 'support', 'finance'],
+    'roles' => ['admin', 'support', 'finance', 'catalogue'],
 
     // Staff without 2FA are sent to the setup page before they can open /admin. Turn off locally.
     'require_two_factor' => (bool) env('STAFF_REQUIRE_2FA', true),
@@ -55,6 +55,16 @@ return [
             'admin.disputes', 'admin.disputes.show',
             'admin.rewards', 'admin.gift-cards', 'admin.gift-cards.*',
             'admin.tax', 'admin.tax.*', 'admin.orders.invoice', // GST settings, monthly GST report, shops' invoices
+        ],
+
+        // Catalogue: brand pages (names, logo, banner, description, merging duplicates, authorised
+        // sellers), new products waiting for approval, and sale campaigns (brand sales show on brand pages)
+        'catalogue' => [
+            'admin.dashboard',
+            'admin.inbox',
+            'admin.brands', 'admin.brands.*',
+            'admin.products', 'admin.products.approve',
+            'admin.campaigns.*',
         ],
     ],
 

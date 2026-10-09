@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\ShopStaff;
 use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Http\Request;
 
 /**
- * Admin → Users: give a user the support or finance role (or take it away). Admins only.
+ * Admin → Users: give a user the support, finance or catalogue role (or take it away). Admins only.
+ * Shop accounts (owners and their staff) are never iruali staff: someone approving products or
+ * campaign entries must not be approving their own shop's.
  */
 class StaffRoleController extends Controller
 {
-    public const ASSIGNABLE = ['support', 'finance'];
+    public const ASSIGNABLE = ['support', 'finance', 'catalogue'];
 
     public function update(Request $request, User $user)
     {
@@ -21,6 +24,9 @@ class StaffRoleController extends Controller
 
         if ($user->is($request->user()) || $user->hasRole('admin')) {
             return back()->with('error', 'Admin accounts and your own account cannot be changed here.');
+        }
+        if ($data['role'] !== 'none' && ($user->hasRole('seller') || $user->is_seller || ShopStaff::where('user_id', $user->id)->exists())) {
+            return back()->with('error', $user->name.' has a shop or works for one, so cannot be iruali staff. Use a separate account for staff work.');
         }
 
         $before = \App\Support\StaffAccess::staffRoles($user);

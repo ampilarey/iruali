@@ -19,9 +19,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/wallet/redeem', [WalletController::class, 'redeem'])->name('account.wallet.redeem')->middleware('throttle:10,1');
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/gift-cards', [WalletAdminController::class, 'giftCards'])->name('gift-cards');
     Route::post('/gift-cards/{giftCard}/cancel', [WalletAdminController::class, 'cancelGiftCard'])->name('gift-cards.cancel');
-    Route::post('/orders/{order}/refund-to-wallet', [WalletAdminController::class, 'refundOrderToWallet'])->name('orders.refund-wallet');
-    Route::post('/returns/{return}/refund-to-wallet', [WalletAdminController::class, 'refundReturnToWallet'])->name('returns.refund-wallet');
+    // Store credit is money: refunding to the wallet stays with admins, whatever a staff role's order pages allow
+    Route::post('/orders/{order}/refund-to-wallet', [WalletAdminController::class, 'refundOrderToWallet'])->name('orders.refund-wallet')->middleware('role:admin');
+    Route::post('/returns/{return}/refund-to-wallet', [WalletAdminController::class, 'refundReturnToWallet'])->name('returns.refund-wallet')->middleware('role:admin');
 });

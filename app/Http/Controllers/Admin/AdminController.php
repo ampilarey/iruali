@@ -30,7 +30,7 @@ class AdminController extends Controller
      */
     private function checkAdminRole()
     {
-        // Staff (admin, support, finance): which of these pages each role may open is enforced
+        // Staff (admin, support, finance, catalogue): which of these pages each role may open is enforced
         // per route by the StaffAccess middleware on the admin group (config/staff.php).
         if (! auth()->check() || ! auth()->user()->isStaff()) {
             abort(403, 'Access denied. Admin role required.');

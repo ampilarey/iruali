@@ -111,7 +111,7 @@ the first time they use Apple with iruali; later sign-ins keep the name the acco
 - Otherwise a new **customer** account is made with the name and email from the provider. It has
   no password of its own: My Account → Security offers "Email me a link to set a password". A
   Facebook-made account verifies its email with the usual emailed code.
-- **Staff** (admin, support, finance) can never use these buttons; they are told to use their
+- **Staff** (admin, support, finance, catalogue) can never use these buttons; they are told to use their
   password (and two-step sign-in). A staff account is never joined to a provider.
 - Customers with **two-step sign-in** on get the code page after the provider, as with a password.
 - **Banned or inactive** accounts are refused, as with a password.

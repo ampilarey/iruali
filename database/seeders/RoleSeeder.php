@@ -50,6 +50,12 @@ class RoleSeeder extends Seeder
                 'description' => 'Finance: shop payouts, refunds, analytics, errors and the audit log',
                 'is_default' => false,
             ],
+            [
+                'name' => 'catalogue',
+                'display_name' => 'Catalogue',
+                'description' => 'Catalogue: brand pages, product approvals and sale campaigns',
+                'is_default' => false,
+            ],
         ];
 
         foreach ($roles as $role) {

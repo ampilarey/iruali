@@ -14,6 +14,7 @@
 <ul>
     <li><strong>Name, email address and mobile number:</strong> to create your account, sign you in and contact you about your orders.</li>
     <li><strong>Password:</strong> stored only in hashed (scrambled) form; we cannot read it.</li>
+    <li><strong>Google, Facebook or Apple sign-in:</strong> if you choose to sign in with one of them, we receive your name, email address and an account ID from it, and nothing else (no posts, contacts or passwords). You can disconnect it in My Account.</li>
     <li><strong>Delivery address and island:</strong> to deliver your orders.</li>
     <li><strong>Order history:</strong> to show your orders, give loyalty points and handle returns.</li>
     <li><strong>Payment information:</strong> the payment method, amount, and the transaction reference and status sent to us by Bank of Maldives. <strong>We never receive or store your card number, expiry date or security code.</strong></li>
@@ -66,6 +67,7 @@
     <li><strong>Our SMS and email providers:</strong> your phone number or email address, only to deliver messages;</li>
     <li><strong>Authorities:</strong> when required by Maldivian law.</li>
 </ul>
+<p><strong>Product videos</strong> are hosted by YouTube, TikTok, Instagram or Facebook. Nothing is loaded from them until you press play on a video; the video site then receives your IP address and browser details under its own privacy policy.</p>
 
 <h2>8. Cookies</h2>
 <p>We use only the cookies needed for the website to work: keeping you signed in, your cart, your language, and items you recently viewed or are comparing. We do not use advertising cookies.</p>

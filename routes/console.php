@@ -55,3 +55,6 @@ Schedule::call(fn () => \App\Services\FunnelService::prune())->dailyAt('03:30')-
 
 // Brand followers get one email a day with what those brands put on sale (only when there is news)
 Schedule::command('brands:notify-followers')->dailyAt('09:00')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// Wishlist price-drop alerts: one email (and push) a day per customer, only when something got cheaper
+Schedule::command('wishlist:price-drops')->dailyAt('10:00')->timezone('Indian/Maldives')->withoutOverlapping();

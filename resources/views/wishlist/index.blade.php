@@ -48,6 +48,11 @@
                         </a>
                     </h3>
                     <p class="text-sm text-gray-600 mb-4">{{ Str::limit($item->product->description, 80) }}</p>
+                    @if($drop = $item->savedPriceDrop())
+                        <p class="-mt-2 mb-3 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-800" data-price-drop>
+                            <x-icon name="tag" class="w-3.5 h-3.5" />{{ __(':amount less than when you saved it', ['amount' => \App\Support\Money::format($drop)]) }}
+                        </p>
+                    @endif
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             @if($item->product->is_on_sale)

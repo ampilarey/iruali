@@ -89,8 +89,10 @@ class ModerationController extends Controller
         }
 
         $subscribers = NewsletterSubscriber::latest()->paginate(50);
+        // Newsletters written and sent here (admins only: see NewsletterIssueController)
+        $issues = \App\Support\StaffAccess::can('admin.newsletter-issues.create') ? \App\Models\NewsletterIssue::latest('id')->take(20)->get() : collect();
 
-        return view('admin.moderation.newsletter', compact('subscribers'));
+        return view('admin.moderation.newsletter', compact('subscribers', 'issues'));
     }
 
     public function destroySubscriber(NewsletterSubscriber $subscriber)
@@ -104,10 +106,10 @@ class ModerationController extends Controller
     {
         return response()->streamDownload(function () {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['email', 'language', 'subscribed_at']);
+            fputcsv($out, ['email', 'language', 'subscribed_at', 'confirmed_at']);
             NewsletterSubscriber::orderBy('id')->chunk(500, function ($rows) use ($out) {
                 foreach ($rows as $row) {
-                    fputcsv($out, [$row->email, $row->locale, $row->created_at?->toDateTimeString()]);
+                    fputcsv($out, [$row->email, $row->locale, $row->created_at?->toDateTimeString(), $row->confirmed_at?->toDateTimeString()]);
                 }
             });
             fclose($out);

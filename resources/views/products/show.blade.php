@@ -92,6 +92,7 @@
                                 @endforeach
                             </div>
                         @endif
+                        @include('products._video', ['product' => $product])
                     </div>
 
                     <!-- Key features -->

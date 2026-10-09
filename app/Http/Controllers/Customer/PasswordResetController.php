@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\NotificationService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -44,17 +45,27 @@ class PasswordResetController extends Controller
             'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
+        $resetUserId = null;
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, string $password) {
-                $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
+            function ($user, string $password) use (&$resetUserId) {
+                // has_password: an account made with Google, Facebook or Apple has one of its own now
+                $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60), 'has_password' => true])->save();
                 $user->tokens()->delete(); // sign out any app sessions too
                 event(new PasswordReset($user));
+                $resetUserId = $user->id;
             }
         );
 
         if ($status !== Password::PASSWORD_RESET) {
             return back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
+        }
+
+        // Set from My Account while signed in (a first password): back to the account page
+        if ($resetUserId !== null && Auth::id() === $resetUserId) {
+            NotificationService::success(__('Your password has been changed.'));
+
+            return redirect()->to(route('account').'#security');
         }
 
         NotificationService::success(__('Your password has been changed. Please sign in.'));

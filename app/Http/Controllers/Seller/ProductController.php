@@ -51,6 +51,7 @@ class ProductController extends Controller
         if ($product->has_variants) {
             $product->stock_quantity = 0; // set from the variants below
         }
+        $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
         $product->save();
 
         $this->storeImage($request, $product);
@@ -78,6 +79,7 @@ class ProductController extends Controller
     {
         $this->authorizeOwner($product);
 
+        $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
         $product->update($request->productAttributes());
 
         $this->storeImage($request, $product);

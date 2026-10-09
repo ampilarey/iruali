@@ -622,7 +622,7 @@ class User extends Authenticatable implements HasLocalePreference
      * Customer emails that are email-or-nothing rather than email, SMS or both. They are stored
      * with the others in notification_preferences.customer.*: 'email' (the default) or 'off'.
      */
-    public const OPTIONAL_EMAIL_TYPES = ['brand_updates'];
+    public const OPTIONAL_EMAIL_TYPES = ['brand_updates', 'wishlist_price_drops'];
 
     /** 'email' or 'off' for one of OPTIONAL_EMAIL_TYPES. */
     public function emailPreference(string $type): string
@@ -665,5 +665,34 @@ class User extends Authenticatable implements HasLocalePreference
     public function isOnHoliday(): bool
     {
         return (bool) $this->holiday_mode && ($this->holiday_until === null || today()->lt($this->holiday_until));
+    }
+
+    /**
+     * The daily price-drop alert for wishlisted products (wishlist:price-drops), by email and, on
+     * devices that allowed it, push: on unless switched off here or with marketing emails.
+     */
+    public function wantsWishlistPriceDrops(): bool
+    {
+        return $this->emailPreference('wishlist_price_drops') === 'email' && $this->marketing_opt_out_at === null
+            && filled($this->email) && $this->isActive() && ! $this->isSmokeTest();
+    }
+
+    /**
+     * Google, Facebook and Apple accounts this customer signs in with (My Account → Security).
+     *
+     * @return HasMany<SocialAccount, $this>
+     */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Does the customer have a password of their own? Accounts made by a Google, Facebook or Apple
+     * sign-in do not until they set one (by the emailed link), so they cannot unlink their last one.
+     */
+    public function hasPassword(): bool
+    {
+        return (bool) ($this->getAttribute('has_password') ?? true);
     }
 }

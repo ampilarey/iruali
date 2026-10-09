@@ -49,6 +49,7 @@ class Audit
         'payouts.verified_business_rule' => 'Payout rule (verified business) changed',
         'delivery.saved' => 'Delivery rates and time slots saved',
         'pickup.confirmed' => 'Pickup confirmed for a shop',
+        'newsletter.sent' => 'Newsletter sent',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

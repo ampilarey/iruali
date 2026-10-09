@@ -13,6 +13,7 @@
         ['admin.verifications', 'Verifications'],
         ['admin.products', 'Products'],
         ['admin.brands', 'Brands'],
+        ['admin.campaigns.index', 'Campaigns'],
         ['admin.users', 'Users'],
         ['admin.reviews', 'Moderation'],
         ['admin.vouchers.index', 'Vouchers'],

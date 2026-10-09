@@ -19,7 +19,10 @@ department picker in the header narrows it. `/compare` holds up to a few product
 **Brands.** `/brands` (`brands.index`) lists every brand with something on sale, A to Z with a
 filter box, plus the most popular brands once the list is long; the menu, the footer and a "Shop by
 brand" row on the home page link to it. `/brands/{slug}` (`brands.show`) shows one brand: its logo
-and description (English and Dhivehi), the shops that sell it, its departments as quick filters,
+and description (English and Dhivehi), a wide banner across the top when it has one (uploaded
+under Admin → Brands → Edit, at least 1000 px wide, 1600 × 400 ideal; phones load a smaller WebP
+copy and show its middle; it is also the picture when the page is shared), the shops that sell it,
+its departments as quick filters,
 then its products with the usual filters. Each brand has one address: old name-based links,
 other capitalisations and addresses from before a rename or merge redirect there (301). Brands
 with fewer than three products on sale are kept out of search engines (`noindex, follow`) and out
@@ -199,8 +202,11 @@ delivered and the order paid; see `MARKETPLACE.md`.
 
 ## Admin
 
-Staff roles are **admin**, **support** and **finance** (`config/staff.php`); two-step sign-in is
-required for all of them. `/admin/dashboard` has the key numbers and the system-status panel;
+Staff roles are **admin**, **support**, **finance** and **catalogue** (`config/staff.php`); two-step
+sign-in is required for all of them. Catalogue staff look after brand pages (Admin → Brands: names,
+logo, banner, descriptions, merging, authorised sellers), approve new products and run campaigns,
+and open nothing about orders, money, people or settings. A shop's owner or someone on a shop's staff
+cannot be given a staff role (they would be approving their own shop's products). `/admin/dashboard` has the key numbers and the system-status panel;
 `/admin/inbox` lists everything waiting for a person (shops to approve, products to review,
 refunds due, open returns, failed payments, low stock on best sellers, unresolved errors, new
 brands to check).

@@ -190,10 +190,13 @@ nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either
 ## Staff roles, 2FA and the audit log
 
 - Roles: **admin** (everything), **support** (dashboard, inbox, orders, returns, moderation,
-  users read-only) and **finance** (dashboard, inbox, payouts, refunds, analytics, errors
-  read-only, audit log). What each may open is the route list in `config/staff.php`; the
+  disputes, messages, SMS, users read-only), **finance** (dashboard, inbox, payouts, refunds,
+  analytics, errors read-only, audit log, rewards, gift cards) and **catalogue** (dashboard,
+  inbox, brand pages, product approvals, campaigns). Refunding to a customer's wallet stays
+  with admins. What each may open is the route list in `config/staff.php`; the
   `StaffAccess` middleware on the admin group enforces it and the admin nav hides the rest.
-  Admins give someone support/finance from **Admin → Users**.
+  Admins give someone support, finance or catalogue from **Admin → Users**; shop owners and
+  shop staff cannot be given a staff role (use a separate account).
 - Every staff member must have **two-step sign-in** on (`STAFF_REQUIRE_2FA`, default true);
   without it, `/admin` redirects to My Account → Security. Set `STAFF_REQUIRE_2FA=false`
   only on a development machine.
@@ -210,7 +213,7 @@ personal data replaced**. `php artisan iruali:anonymise --force` gives every non
 a made-up Maldivian name, `user<id>@example.test`, phone `7000000+id`, a random password,
 and clears their tokens, 2FA secrets, addresses and bank account; order delivery
 addresses/phones, return request notes, newsletter emails and OTPs are rewritten or
-emptied. Staff accounts (admin, support, finance) are kept so the team can sign in.
+emptied. Staff accounts (every role in `config/staff.php`) are kept so the team can sign in.
 Without `--force` it only prints the counts; on an `APP_ENV=production` install it refuses
 unless `--i-know-this-is-production` is given.
 

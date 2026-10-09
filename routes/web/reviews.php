@@ -15,6 +15,6 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::post('/reviews/{review}/reply', [ReviewController::class, 'reply'])->name('reviews.reply')->middleware('throttle:30,1');
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::delete('/reviews/{review}/reply', [ModerationController::class, 'removeReply'])->name('reviews.reply.destroy');
 });

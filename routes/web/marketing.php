@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
 // A shared referral link: remembers the code for 30 days, then shows the home page
 Route::get('/r/{code}', [\App\Http\Controllers\Customer\RewardsController::class, 'visit'])->name('referral.visit')->where('code', '[A-Za-z0-9]{4,20}');
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/rewards', [\App\Http\Controllers\Admin\RewardsReportController::class, 'index'])->name('rewards');
 });
 
@@ -37,7 +37,7 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
 });
 
 // Admin → Campaigns
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('campaigns', \App\Http\Controllers\Admin\CampaignController::class)->except(['show']);
     Route::post('/campaigns/{campaign}/products/{participation}/approve', [\App\Http\Controllers\Admin\CampaignController::class, 'approve'])->name('campaigns.approve');
     Route::delete('/campaigns/{campaign}/products/{participation}', [\App\Http\Controllers\Admin\CampaignController::class, 'reject'])->name('campaigns.reject');

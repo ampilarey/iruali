@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ImageVariants;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,7 +30,7 @@ class Brand extends Model
 
     public $translatable = ['description'];
 
-    protected $fillable = ['name', 'slug', 'key', 'logo', 'description', 'created_by', 'reviewed_at'];
+    protected $fillable = ['name', 'slug', 'key', 'logo', 'banner', 'description', 'created_by', 'reviewed_at'];
 
     protected $casts = [
         'reviewed_at' => 'datetime',
@@ -185,6 +186,20 @@ class Brand extends Model
     public function logoUrl(): ?string
     {
         return $this->logo ? Storage::disk('public')->url($this->logo) : null;
+    }
+
+    /**
+     * The wide cover image across the top of the brand's page: the uploaded file, or its smaller
+     * WebP copy at the given width (400 or 1200, see ImageVariants) when there is one.
+     */
+    public function bannerUrl(?int $width = null): ?string
+    {
+        if (! $this->banner) {
+            return null;
+        }
+        $url = Storage::disk('public')->url($this->banner);
+
+        return $width ? ImageVariants::url($url, $width) : $url;
     }
 
     /** The description in the shopper's language, falling back to English. */

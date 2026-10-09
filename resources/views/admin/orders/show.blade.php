@@ -166,7 +166,7 @@
                                 <input id="refund_reference" name="refund_reference" required maxlength="100" placeholder="Refund reference" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
                                 <button class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">Mark as refunded</button>
                             </form>
-                            @if($order->user)
+                            @if($order->user && auth()->user()->hasRole('admin')) {{-- store credit is for admins only (routes/web/wallet.php) --}}
                                 <form method="POST" action="{{ route('admin.orders.refund-wallet', $order) }}" class="border-t border-red-200 pt-2" onsubmit="return confirm('Credit {{ \App\Support\Money::format($order->refund_amount) }} to the customer\'s wallet instead of refunding the card?')">
                                     @csrf
                                     <button class="rounded-lg border border-primary-300 bg-white px-3 py-1.5 text-sm font-semibold text-primary-700 hover:bg-primary-50">Refund to wallet</button>

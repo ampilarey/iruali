@@ -68,6 +68,21 @@
                 <p id="logo-hint" class="mt-1 text-xs text-gray-500">PNG, JPG or WebP under 1 MB, ideally square with a transparent or white background. Only use a logo the brand allows resellers to use.</p>
             </div>
 
+            <div>
+                <span class="block text-sm font-medium text-gray-700">Banner</span>
+                @if($brand->banner)
+                    <img src="{{ $brand->bannerUrl(400) }}" alt="" class="mt-2 w-full max-w-md aspect-[4/1] rounded-lg border border-gray-200 object-cover" data-banner-preview>
+                @endif
+                <div class="mt-2 space-y-2">
+                    <input id="banner" name="banner" type="file" accept="image/png,image/jpeg,image/webp" class="block text-sm" aria-describedby="banner-hint">
+                    @if($brand->banner)
+                        <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" name="remove_banner" value="1" class="rounded border-gray-300"> Remove the banner</label>
+                    @endif
+                </div>
+                @error('banner')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                <p id="banner-hint" class="mt-1 text-xs text-gray-500">A wide image across the top of the brand page: PNG, JPG or WebP under 2 MB, ideally 1600 × 400 pixels (at least 1000 wide). Phones show the middle three quarters, so keep text and faces away from the left and right edges. Only use images the brand allows resellers to use.</p>
+            </div>
+
             <label class="flex items-start gap-2 text-sm text-gray-700">
                 <input type="checkbox" name="reviewed" value="1" class="mt-0.5 rounded border-gray-300" @checked(old('reviewed', $brand->reviewed_at !== null))>
                 <span><span class="font-medium">Reviewed</span> — the name is right and this is not a duplicate of another brand.</span>

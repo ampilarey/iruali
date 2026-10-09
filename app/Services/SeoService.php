@@ -89,7 +89,8 @@ class SeoService
         $description = $brand->localizedDescription()
             ? Str::limit(trim(strip_tags($brand->localizedDescription())), 160)
             : __('Buy :brand from shops across the Maldives on iruali.', ['brand' => $name]);
-        $image = $brand->logoUrl() ?? asset('images/og-image.png');
+        // Shared links show the wide banner when the brand has one (it suits link previews), else the logo
+        $image = $brand->bannerUrl() ?? $brand->logoUrl() ?? asset('images/og-image.png');
 
         $about = ['@type' => 'Brand', 'name' => $brand->name];
         if (filled($brand->name_dv)) {

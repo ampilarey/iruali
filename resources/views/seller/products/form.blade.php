@@ -76,6 +76,7 @@
                     <input id="flash_sale_ends_at" name="flash_sale_ends_at" type="datetime-local" class="{{ $field }}" value="{{ old('flash_sale_ends_at', $product->flash_sale_ends_at?->format('Y-m-d\TH:i')) }}">
                     <p class="mt-1 text-xs text-gray-500">Only used when a compare-at price is set.</p>
                 </div>
+                @include('seller.products._multibuy', ['product' => $product])
                 <div>
                     <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
                     <input id="brand" name="brand" list="brand-options" autocomplete="off" maxlength="120" class="{{ $field }}" value="{{ old('brand', $product->brand) }}" aria-describedby="brand-hint">

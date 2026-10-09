@@ -124,6 +124,7 @@
             <!-- Buy box -->
             <aside id="buy-box" class="lg:sticky lg:top-[132px] bg-white border border-gray-200 rounded-xl p-4 lg:p-5 shadow-sm">
                 <div data-variant-price><x-price :product="$product" size="xl" /></div>
+                @include('products._multibuy', ['product' => $product])
                 @if($product->deal_ends_at)
                     <x-deal-countdown :ends="$product->deal_ends_at" class="mt-2" />
                 @endif

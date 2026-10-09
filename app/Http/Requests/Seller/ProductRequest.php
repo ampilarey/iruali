@@ -63,7 +63,7 @@ class ProductRequest extends FormRequest
             'variants.*.low_stock_threshold' => 'nullable|integer|min:0|max:999999',
             'variants.*.is_active' => 'nullable|boolean',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ];
+        ] + \App\Services\MultiBuyService::formRules();
     }
 
     public function attributes(): array
@@ -78,6 +78,7 @@ class ProductRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
+        $validator->after(fn (Validator $validator) => app(\App\Services\MultiBuyService::class)->validateForm($validator, $this->user(), (array) $this->input('multibuy', [])));
         $validator->after(function (Validator $validator) {
             if (! $this->boolean('has_variants')) {
                 return;

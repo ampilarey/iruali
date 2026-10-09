@@ -111,6 +111,8 @@
                 <p class="mt-1 text-xs text-gray-500">JPEG, PNG or GIF, up to 2 MB.</p>
             </div>
 
+            @include('seller.products._video', ['product' => $product])
+
             @include('seller.products._variants', ['product' => $product, 'variants' => $variants])
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">

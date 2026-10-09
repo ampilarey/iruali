@@ -1555,5 +1555,17 @@
     "Prices can change again, so do not wait too long if you want it.": "އަގުތައް އަލުން ބަދަލުވެދާނެތީ، ގަންނަވަން ބޭނުންނަމަ ލަސްނުކުރައްވާ.",
     "See your wishlist": "ވިޝްލިސްޓު ބައްލަވާ",
     "You get this email because these items are on your wishlist on iruali.": "iruali ގައި ތިބާގެ ވިޝްލިސްޓުގައި މި ތަކެތި ހުރުމުން މި އީމެއިލް ލިބިވަޑައިގަންނަވަނީ.",
-    ":amount less than when you saved it": "ސޭވްކުރެއްވިއިރަށްވުރެ :amount ހެޔޮ"
+    ":amount less than when you saved it": "ސޭވްކުރެއްވިއިރަށްވުރެ :amount ހެޔޮ",
+    "Use a link to a video on YouTube, TikTok, Instagram or Facebook.": "YouTube، TikTok، Instagram ނުވަތަ Facebook ގައިވާ ވީޑިއޯއެއްގެ ލިންކެއް ބޭނުންކުރައްވާ.",
+    "This is a short share link. Open the video and copy the full link from the address bar (or \"Copy link\" on a computer).": "މިއީ ކުރު ޝެއަރ ލިންކެއް. ވީޑިއޯ ހުޅުއްވާފައި، އެޑްރެސް ބާރުން (ނުވަތަ ކޮމްޕިއުޓަރުގައި \"Copy link\" އިން) ފުރިހަމަ ލިންކު ކޮޕީ ކުރައްވާ.",
+    "Video": "ވީޑިއޯ",
+    "Video link": "ވީޑިއޯ ލިންކު",
+    "A link to a video on YouTube (also Shorts), TikTok, Instagram (post or reel) or Facebook. It shows on the product page and only plays when a shopper presses play. Leave empty for no video.": "YouTube (ޝޯޓްސްވެސް)، TikTok، Instagram (ޕޯސްޓް ނުވަތަ ރީލް) ނުވަތަ Facebook ގައިވާ ވީޑިއޯއެއްގެ ލިންކު. ތަކެތީގެ ޕޭޖުގައި ފެންނާނެ، އަދި ވީޑިއޯ ކުޅެނީ ގަންނަ މީހާ ޕްލޭއަށް ފިއްތުމުން. ވީޑިއޯއެއް ނުލައްވާނަމަ ހުސްކޮށް ބާއްވަވާ.",
+    "Now showing a :provider video.": "މިހާރު ދައްކަނީ :provider ވީޑިއޯއެއް.",
+    "Open it": "ހުޅުއްވާ",
+    "Product video": "ތަކެތީގެ ވީޑިއޯ",
+    "Video: :product": "ވީޑިއޯ: :product",
+    "Play the video": "ވީޑިއޯ ކުޅުއްވާ",
+    "From :provider. Nothing loads from :provider until you press play.": ":provider އިން. ޕްލޭއަށް ފިއްތަވާލައްވާހާ ހިނދަކު :provider އިން އެއްވެސް އެއްޗެއް ލޯޑެއް ނުވޭ.",
+    "Watch the video on :provider": ":provider ގައި ވީޑިއޯ ބައްލަވާ"
 }

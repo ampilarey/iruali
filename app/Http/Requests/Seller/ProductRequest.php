@@ -52,6 +52,7 @@ class ProductRequest extends FormRequest
             'brand' => 'nullable|string|max:120',
             'weight' => 'nullable|numeric|min:0|max:999.99',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'video_url' => ['nullable', 'string', 'max:500', new \App\Rules\ProductVideoUrl],
 
             'variants' => ['exclude_if:has_variants,false', 'required', 'array', 'min:1', 'max:'.self::MAX_VARIANTS],
             'variants.*.id' => 'nullable|integer',
@@ -162,5 +163,23 @@ class ProductRequest extends FormRequest
     public function variantRows(): array
     {
         return $this->boolean('has_variants') ? array_values($this->validated()['variants'] ?? []) : [];
+    }
+
+    /**
+     * The video columns from the form's video link (both null when it was emptied), or nothing
+     * when the form did not send the field, so the video stays as it was.
+     *
+     * @return array{video_provider?: string|null, video_id?: string|null}
+     */
+    public function videoAttributes(): array
+    {
+        $data = $this->validated();
+        if (! array_key_exists('video_url', $data)) {
+            return [];
+        }
+
+        $video = \App\Support\ProductVideo::parse($data['video_url']);
+
+        return ['video_provider' => $video?->provider, 'video_id' => $video?->id];
     }
 }

@@ -36,6 +36,11 @@ class OrderService
             return ['success' => false, 'message' => 'Your cart is empty.'];
         }
 
+        // Bulk quotes: a quoted line whose quote expired or was closed comes out of the cart, and quoted stock is checked
+        if ($quoteProblem = app(QuoteService::class)->checkCart($cart)) {
+            return ['success' => false, 'message' => $quoteProblem];
+        }
+
         // Stock check before order creation
         foreach ($cart->items as $cartItem) {
             $product = $cartItem->product;
@@ -65,6 +70,9 @@ class OrderService
 
         try {
             DB::beginTransaction();
+
+            // Bulk quotes in the cart are locked before anything is read (checked in placeOrder below)
+            app(QuoteService::class)->lockQuotes($cart);
 
             // Calculate discounts and totals. Redeemed points come from the session; re-check them
             // against the customer's real balance and the cart as it is now.
@@ -100,6 +108,9 @@ class OrderService
 
             // Create order items
             $this->createOrderItems($order, $cart);
+
+            // Bulk quotes: each quote in the cart is taken (locked, checked again) and its business details kept for the invoices
+            app(QuoteService::class)->placeOrder($order, $cart);
 
             // Shop-funded discounts (multi-buy, shop codes) onto the items, and the codes' uses recorded
             app(ShopDiscountService::class)->applyToOrder($order, $discounts['shop'], $user, $guest['email'] ?? null);
@@ -228,6 +239,7 @@ class OrderService
                 'variant_sku' => $variant?->sku,
                 'quantity' => $cartItem->quantity,
                 'price' => $cartItem->unit_price,
+                'quote_request_id' => $cartItem->quote_request_id, // a bulk quote's line, at the quoted price
             ]);
         }
     }

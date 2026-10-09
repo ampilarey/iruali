@@ -20,6 +20,7 @@ class DiscountService
     {
         $shopDiscount = app(ShopDiscountService::class)->forCart($cart);
         $afterShop = round(max(0, (float) $cart->total - $shopDiscount['amount']), 2);
+        $afterShop = app(QuoteService::class)->voucherBase($cart, $afterShop); // lines bought on a bulk quote get no voucher
         $voucherDiscount = $this->calculateVoucherDiscount($cart, $afterShop);
         $pointsDiscount = $this->calculatePointsDiscount($cart);
 
@@ -83,11 +84,13 @@ class DiscountService
 
     /**
      * The cart's goods after the shops' own discounts (multi-buy offers and shop codes): what an
-     * iruali voucher is worked out on.
+     * iruali voucher is worked out on. Lines bought on a bulk quote are left out (QuoteService).
      */
     public function goodsAfterShopDiscounts(Cart $cart): float
     {
-        return round(max(0, (float) $cart->total - app(ShopDiscountService::class)->forCart($cart)['amount']), 2);
+        $goods = round(max(0, (float) $cart->total - app(ShopDiscountService::class)->forCart($cart)['amount']), 2);
+
+        return app(QuoteService::class)->voucherBase($cart, $goods); // lines bought on a bulk quote get no voucher
     }
 
     /**
@@ -135,7 +138,12 @@ class DiscountService
             return ['valid' => false, 'message' => __('Voucher usage limit reached.')];
         }
 
-        if ($voucher->min_order && ($base ?? $this->goodsAfterShopDiscounts($cart)) < (float) $voucher->min_order) {
+        $base ??= $this->goodsAfterShopDiscounts($cart);
+        if ($quoteProblem = app(QuoteService::class)->voucherProblem($cart, $base)) {
+            return ['valid' => false, 'message' => $quoteProblem]; // everything in the cart is bought on a quote
+        }
+
+        if ($voucher->min_order && $base < (float) $voucher->min_order) {
             return ['valid' => false, 'message' => __('Order does not meet minimum amount for this voucher.')];
         }
 

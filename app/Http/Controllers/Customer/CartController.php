@@ -30,6 +30,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = $this->cartService->getOrCreateCart();
+        app(\App\Services\QuoteService::class)->pruneCart($cart); // expired bulk quotes come out, with a notice
         $cart->load(['items.product.mainImage', 'items.product.seller', 'items.variant']);
         $cart->items->each(fn ($item) => $item->variant?->setRelation('product', $item->product));
 

@@ -73,7 +73,8 @@ class CartService
         }
 
         foreach ($guest->items as $item) {
-            $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)->first();
+            $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)
+                ->whereNull('quote_request_id')->first(); // a quoted line keeps its own quantity
             $stock = $item->availableStock(); // the variant's stock when the line has one
             $existing
                 ? $existing->update(['quantity' => max(1, min($existing->quantity + $item->quantity, $stock, 999))])
@@ -111,6 +112,7 @@ class CartService
         $existingItem = $cart->items()
             ->where('product_id', $productId)
             ->where('product_variant_id', $variantId)
+            ->whereNull('quote_request_id') // a quoted line (bulk quote) stays as quoted; more units are a line of their own
             ->first();
 
         if ($existingItem) {
@@ -165,6 +167,11 @@ class CartService
      */
     public function updateCartItem(CartItem $item, int $quantity): bool
     {
+        // A quoted line's quantity is the quote's: it can only be removed
+        if ($item->quote_request_id !== null) {
+            return false;
+        }
+
         $item->update(['quantity' => $quantity]);
 
         return true;

@@ -176,6 +176,7 @@
                                         <p class="text-sm font-medium text-gray-900 truncate">{{ $item->product->name }}</p>
                                         @if($item->variant)<p class="text-xs text-gray-600">{{ $item->variant->displayName() }}</p>@endif
                                         <p class="text-xs text-gray-500">{{ __('Qty') }}: {{ $item->quantity }}</p>
+                                        @include('quotes._checkout_line', ['item' => $item])
                                     </div>
                                 </div>
                                 <span class="text-sm font-medium text-gray-900" dir="ltr">{{ \App\Support\Money::format($item->quantity * $item->unit_price) }}</span>

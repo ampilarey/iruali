@@ -15,6 +15,7 @@ class OrderItem extends Model
         'variant_sku',
         'quantity',
         'price',
+        'quote_request_id',
     ];
 
     protected $casts = [
@@ -77,5 +78,15 @@ class OrderItem extends Model
     public function netTotal(): float
     {
         return round((float) $this->price * (int) $this->quantity - $this->shopDiscount(), 2);
+    }
+
+    /**
+     * The bulk quote this line was bought on (its price is the quoted one).
+     *
+     * @return BelongsTo<QuoteRequest, $this>
+     */
+    public function quoteRequest(): BelongsTo
+    {
+        return $this->belongsTo(QuoteRequest::class);
     }
 }

@@ -25,6 +25,10 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         $cart = $this->cartService->getOrCreateCart();
+        // A bulk quote that expired or was closed comes out of the cart; the cart page says why
+        if (app(\App\Services\QuoteService::class)->pruneCart($cart)) {
+            return redirect()->route('cart');
+        }
         $cart->load(['items.product.mainImage']);
 
         if ($this->cartService->isCartEmpty($cart)) {

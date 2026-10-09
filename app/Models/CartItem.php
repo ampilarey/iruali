@@ -51,6 +51,11 @@ class CartItem extends Model
      */
     public function getUnitPriceAttribute(): float
     {
+        // A quoted line (bulk quote) keeps the price the shop quoted
+        if ($this->quote_request_id !== null) {
+            return round((float) $this->price, 2);
+        }
+
         if ($this->variant) {
             return $this->variant->setRelation('product', $this->product)->effectivePrice();
         }
@@ -81,5 +86,16 @@ class CartItem extends Model
     public function variantLabel(): ?string
     {
         return $this->variant?->displayName();
+    }
+
+    /**
+     * The accepted bulk quote this line was made from: its quantity is locked and its price fixed
+     * (QuoteService).
+     *
+     * @return BelongsTo<QuoteRequest, $this>
+     */
+    public function quoteRequest(): BelongsTo
+    {
+        return $this->belongsTo(QuoteRequest::class);
     }
 }

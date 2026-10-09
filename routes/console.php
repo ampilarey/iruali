@@ -27,6 +27,9 @@ Schedule::command('rewards:expire-points')->monthlyOn(1, '04:00')->withoutOverla
 // Gift cards past their 12 months are marked expired
 Schedule::call(fn () => app(\App\Services\GiftCardService::class)->expireOld())->dailyAt('03:30')->name('expire-gift-cards');
 
+// Bulk quotes past their valid-until day are marked expired (their cart lines go when the cart is next opened)
+Schedule::command('quotes:expire')->hourly()->withoutOverlapping();
+
 // Guest carts nobody has touched for a month (and their lines) are dropped
 Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))

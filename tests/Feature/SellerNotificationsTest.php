@@ -56,7 +56,7 @@ class SellerNotificationsTest extends TestCase
     public function test_seller_manages_notification_preferences(): void
     {
         $seller = $this->seller();
-        $this->assertSame(['new_order' => true, 'return' => true, 'payout' => true, 'low_stock' => true], $seller->notificationPreferences());
+        $this->assertSame(['new_order' => true, 'return' => true, 'payout' => true, 'low_stock' => true, 'quotes' => true], $seller->notificationPreferences());
 
         $this->actingAs($seller)->get('/seller/settings/notifications')->assertOk()
             ->assertSee('New order')->assertSee('Return requested')->assertSee('Payout sent')->assertSee('Low stock (daily)');

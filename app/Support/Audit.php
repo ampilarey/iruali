@@ -59,6 +59,9 @@ class Audit
         'shop_staff.removed' => 'Shop staff removed',
         'shop_staff.two_factor' => 'Shop staff two-step sign-in rule changed',
         'shop.staff_action' => 'Change made by shop staff',
+        'preorder.stock_arrived' => 'Pre-order stock arrived',
+        'preorder.date_moved' => 'Pre-order date moved',
+        'preorder.cancelled' => 'Pre-order cancelled by the customer',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

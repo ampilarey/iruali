@@ -79,6 +79,11 @@ class FulfilmentService
             return $part->status === 'pending' ? ['processing'] : [];
         }
 
+        // Pre-order items still waiting for their stock: the part can be prepared but not sent (PreorderService)
+        if ($part->isAwaitingStock()) {
+            return array_values(array_diff(OrderService::TRANSITIONS[$part->status] ?? [], ['cancelled', 'shipped']));
+        }
+
         return array_values(array_diff(OrderService::TRANSITIONS[$part->status] ?? [], ['cancelled']));
     }
 
@@ -261,6 +266,7 @@ class FulfilmentService
             $part->status === 'cancelled' || $part->order->status === 'cancelled' => 'cancelled',
             $part->status === 'delivered' => 'collected',
             $part->pickup_ready_at !== null => 'ready',
+            $part->isAwaitingStock() => 'awaiting_stock', // pre-order items whose stock has not arrived yet
             $part->order->payment_status !== 'paid' => 'unpaid',
             default => 'ok',
         };

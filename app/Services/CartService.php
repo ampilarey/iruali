@@ -153,11 +153,14 @@ class CartService
     }
 
     /**
-     * Units that can be sold of a product, or of one of its variants.
+     * Units that can be sold of a product, or of one of its variants: its stock, or when it is sold
+     * out and the shop takes pre-orders for it, the pre-order units still open (PreorderService).
      */
     public function availableStock(Product $product, ?ProductVariant $variant): int
     {
-        return $variant ? (int) $variant->stock_quantity : (int) $product->stock_quantity;
+        $stock = $variant ? (int) $variant->stock_quantity : (int) $product->stock_quantity;
+
+        return $stock > 0 || ($product->has_variants && ! $variant) ? $stock : app(PreorderService::class)->unitsLeft($product, $variant);
     }
 
     /**

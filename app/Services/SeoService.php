@@ -292,6 +292,12 @@ class SeoService
             $schema['brand'] = ['@type' => 'Brand', 'name' => $product->brand];
         }
 
+        // Sold out but open for pre-orders: on pre-order, from the date it is expected to ship
+        if ($product->preorder_ship_date && app(PreorderService::class)->isPreorderable($product)) {
+            $schema['offers']['availability'] = 'https://schema.org/PreOrder';
+            $schema['offers']['availabilityStarts'] = $product->preorder_ship_date->toDateString();
+        }
+
         // Ratings only when there are approved reviews (Google rejects an empty aggregateRating).
         // n and avg are computed columns of this query, so they are read with getAttribute().
         $reviews = $product->reviews()->where('is_approved', true)->selectRaw('COUNT(*) as n, AVG(rating) as avg')->first();

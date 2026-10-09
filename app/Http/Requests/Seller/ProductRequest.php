@@ -66,7 +66,8 @@ class ProductRequest extends FormRequest
             'variants.*.low_stock_threshold' => 'nullable|integer|min:0|max:999999',
             'variants.*.is_active' => 'nullable|boolean',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ] + \App\Services\MultiBuyService::formRules();
+        ] + \App\Services\MultiBuyService::formRules()
+          + \App\Services\PreorderService::formRules();
     }
 
     public function attributes(): array
@@ -188,5 +189,26 @@ class ProductRequest extends FormRequest
         $video = \App\Support\ProductVideo::parse($data['video_url']);
 
         return ['video_provider' => $video?->provider, 'video_id' => $video?->id];
+    }
+
+    /**
+     * Messages for the "Pre-order" fieldset.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return \App\Services\PreorderService::formMessages();
+    }
+
+    /**
+     * The pre-order columns from the form's "Pre-order" fieldset, or nothing when the form did not
+     * have it (PreorderService::attributesFromForm()).
+     *
+     * @return array<string, mixed>
+     */
+    public function preorderAttributes(): array
+    {
+        return app(\App\Services\PreorderService::class)->attributesFromForm($this->validated());
     }
 }

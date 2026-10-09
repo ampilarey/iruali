@@ -64,15 +64,23 @@ class CartItem extends Model
     }
 
     /**
-     * Units that can still be bought of this line (the variant's stock when it has one).
+     * Units that can still be bought of this line (the variant's stock when it has one), or when it
+     * is sold out and the shop takes pre-orders for it, the pre-order units still open.
      */
     public function availableStock(): int
     {
         if ($this->product_variant_id) {
-            return $this->variant && $this->variant->is_active ? (int) $this->variant->stock_quantity : 0;
+            $stock = $this->variant && $this->variant->is_active ? (int) $this->variant->stock_quantity : 0;
+        } else {
+            $stock = (int) ($this->product->stock_quantity ?? 0);
         }
 
-        return (int) ($this->product->stock_quantity ?? 0);
+        // Sold out: the pre-order units still open, if the shop takes pre-orders (App\Services\PreorderService)
+        if ($stock > 0 || ! $this->product || ($this->product_variant_id && ! $this->variant) || ($this->product->has_variants && ! $this->product_variant_id)) {
+            return $stock;
+        }
+
+        return app(\App\Services\PreorderService::class)->unitsLeft($this->product, $this->variant);
     }
 
     /**

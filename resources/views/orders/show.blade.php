@@ -47,6 +47,7 @@
                             @if($part)
                                 @include('orders._tracking', ['part' => $part])
                                 @include('orders._pickup', ['part' => $part, 'showCode' => $order->user_id !== null && (int) $order->user_id === (int) auth()->id()])
+                                @include('preorders._part', ['part' => $part, 'items' => $shopItems])
                             @endif
                             @foreach($shopItems as $item)
                             <div class="flex items-center gap-4">

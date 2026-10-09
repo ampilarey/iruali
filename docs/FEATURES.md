@@ -160,6 +160,29 @@ automatic WebP variants, variants (options, SKU, price, stock), bulk edit
 wait for admin approval before they are public. A daily low-stock email goes to each shop
 (`seller:low-stock-digest`).
 
+**Pre-orders.** Stock reaches the islands by ship, so a shop can take orders for what is coming:
+the product form's "Pre-order" fieldset switches it on with the expected ship date (after today,
+within a year), the most units it takes (counted across the product's options) and an optional note
+(`products.preorder_*`). While the product, or the chosen option, has no stock and units are left,
+the product page says "Pre-order: ships around 3 Nov" with the note, the button says "Pre-order"
+and the delivery box says "Arrives around …" (the date plus the shop's dispatch and transit days);
+the cart and checkout mark the line, and the customer pays in full by card as usual. A shop on
+holiday takes none. No stock is taken for a pre-order line: `OrderService` has
+`PreorderService::reserveForCheckout()` lock the cart's stock rows first in its transaction and
+hold the units against the limit, so two checkouts for the last unit cannot both get it; the order
+line records `is_preorder` and its date, and the shop's part shows "Awaiting stock" (to the shop,
+the customer and admins) and cannot be sent until its stock is in. **Seller Centre → Pre-orders**
+(`seller.preorders`) lists the open pre-orders per product: "Stock arrived" takes the units received,
+gives them (with any already on the shelf) to the paid pre-orders oldest first, partly when not
+enough came, emails those customers and puts the rest on sale (back-in-stock alerts go out for it);
+moving the expected date (there or on the product form) emails the waiting customers with a link to
+cancel. Customers cancel until anything in the order is sent (`orders.preorder.cancel`, a signed
+link for guests): it is the normal cancellation, so a card payment is flagged for refund. Every
+morning `preorders:flag-late` flags pre-orders more than 7 days past their date: "Late pre-orders"
+in Admin → Inbox, listed at `/admin/preorders`. Feeds say `preorder` with `availability_date`
+(Google) and `in stock` (Meta only takes in/out of stock), the JSON-LD `https://schema.org/PreOrder`.
+A part's days to ship (late shipments, "not delivered" disputes) count from when its stock arrived.
+
 **Orders and fulfilment.** `/seller/orders` lists the shop's parts of orders; `/seller/orders/{order}`
 moves a part through pending → processing → shipped → out for delivery → delivered
 (`seller.orders.status`), records courier, tracking number/URL, vessel or flight and expected
@@ -290,7 +313,8 @@ customer). Both run at the end of a deploy. `tests/load/` has a k6 load test.
 nightly database backups to local and optional S3/B2 with a monthly restore drill
 (`backup:restore-drill`), queued mail sent every minute by a short-lived worker, expired tokens
 and failed jobs pruned, guest carts cleaned, the daily errors digest (`errors:digest`) and the
-seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts.
+seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts, and the
+late pre-orders check (`preorders:flag-late`).
 
 **Staging data.** `php artisan iruali:anonymise --force` rewrites personal data on a copy of
 the production database before it is used on the test site.

@@ -37,6 +37,7 @@ return [
             'admin.disputes', 'admin.disputes.*',
             'admin.messages', 'admin.messages.*',
             'admin.sms', 'admin.sms.*',
+            'admin.preorders', // late pre-orders (inbox row)
         ],
 
         // Finance: payouts, refunds, analytics, errors (read), audit log

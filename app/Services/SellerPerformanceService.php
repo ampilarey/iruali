@@ -126,6 +126,7 @@ class SellerPerformanceService
 
     public function isLate(SellerOrder $part, Carbon $paidAt, ?int $days = null): bool
     {
+        $paidAt = app(PreorderService::class)->dispatchClockStart($part, $paidAt); // pre-orders: from when their stock is in
         $deadline = $paidAt->copy()->addDays($days ?? $this->lateShipmentDays());
 
         if ($part->shipped_at) {

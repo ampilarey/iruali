@@ -27,6 +27,7 @@ class OrderDeliveryController extends Controller
                 'unpaid' => __('Wait until the customer has paid before getting it ready for pickup.'),
                 'ready' => __('This part is already marked ready for pickup.'),
                 'collected' => __('The customer has already collected this part.'),
+                'awaiting_stock' => __('These pre-order items are still waiting for their stock. Record it under Pre-orders when it arrives.'),
                 default => __('This order was cancelled. Don\'t hand over these items.'),
             });
         }

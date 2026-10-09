@@ -78,12 +78,14 @@ class FeedController extends Controller
                 if ($variants->isNotEmpty()) {
                     foreach ($variants as $variant) {
                         $variant->setRelation('product', $product);
+                        $preorderDate = $onHoliday ? null : self::preorderDate($product, $variant); // sold out but open for pre-orders
                         $items[] = $common + [
                             'id' => $base.$product->id.'-V'.$variant->id,
                             'item_group_id' => $base.$product->id,
                             'title' => Str::limit($name.' - '.$variant->displayName(), 150, ''),
                             'price' => number_format($variant->effectivePrice(), 2, '.', '').' MVR',
-                            'availability' => $variant->stock_quantity > 0 && ! $onHoliday ? 'in_stock' : 'out_of_stock',
+                            'availability' => $variant->stock_quantity > 0 && ! $onHoliday ? 'in_stock' : ($preorderDate ? 'preorder' : 'out_of_stock'),
+                            'availability_date' => $preorderDate,
                             'image_link' => $variant->image ? self::absolute($variant->image) : ($images->first() ?? asset('images/product-placeholder.svg')),
                             'attributes' => $variant->attributes_list,
                         ];
@@ -92,12 +94,14 @@ class FeedController extends Controller
                     return;
                 }
 
+                $preorderDate = $onHoliday ? null : self::preorderDate($product); // sold out but open for pre-orders
                 $items[] = $common + [
                     'id' => $base.$product->id,
                     'item_group_id' => null,
                     'title' => Str::limit($name, 150, ''),
                     'price' => number_format((float) $product->final_price, 2, '.', '').' MVR',
-                    'availability' => $product->effectiveStock() > 0 && ! $onHoliday ? 'in_stock' : 'out_of_stock',
+                    'availability' => $product->effectiveStock() > 0 && ! $onHoliday ? 'in_stock' : ($preorderDate ? 'preorder' : 'out_of_stock'),
+                    'availability_date' => $preorderDate,
                     'image_link' => $images->first() ?? asset('images/product-placeholder.svg'),
                     'attributes' => [],
                 ];
@@ -127,6 +131,9 @@ class FeedController extends Controller
                 $out .= '<g:additional_image_link>'.$x($image).'</g:additional_image_link>'."\n";
             }
             $out .= '<g:availability>'.$item['availability'].'</g:availability>'."\n";
+            if (! empty($item['availability_date'])) {
+                $out .= '<g:availability_date>'.$x($item['availability_date']).'</g:availability_date>'."\n"; // required with preorder
+            }
             $out .= '<g:price>'.$x($item['price']).'</g:price>'."\n";
             if ($item['brand'] !== '') {
                 $out .= '<g:brand>'.$x($item['brand']).'</g:brand>'."\n";
@@ -168,7 +175,8 @@ class FeedController extends Controller
                 $item['id'],
                 $item['title'],
                 $item['description'] !== '' ? $item['description'] : $item['title'],
-                $item['availability'] === 'in_stock' ? 'in stock' : 'out of stock',
+                // Meta's catalogue takes only "in stock" / "out of stock": an open pre-order can be bought now
+                in_array($item['availability'], ['in_stock', 'preorder'], true) ? 'in stock' : 'out of stock',
                 'new',
                 $item['price'],
                 $item['link'],
@@ -210,5 +218,19 @@ class FeedController extends Controller
     protected static function absolute(string $url): string
     {
         return str_starts_with($url, 'http') ? $url : asset(ltrim($url, '/'));
+    }
+
+    /**
+     * When a sold-out product (or option) open for pre-orders is expected to ship, as Google's
+     * availability_date wants it (ISO 8601 with the Maldives offset), or null when it is not one.
+     */
+    protected static function preorderDate(Product $product, ?\App\Models\ProductVariant $variant = null): ?string
+    {
+        $date = $product->preorder_ship_date;
+        if ($date === null || ! app(\App\Services\PreorderService::class)->isPreorderable($product, $variant)) {
+            return null;
+        }
+
+        return $date->copy()->startOfDay()->format('Y-m-d\TH:iO');
     }
 }

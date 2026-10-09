@@ -26,6 +26,7 @@ return [
             'seller.dashboard',
             'seller.products.*',
             'seller.stock', 'seller.stock.*',
+            'seller.preorders', 'seller.preorders.*',
             'seller.campaigns', 'seller.campaigns.*',
             'seller.discounts', 'seller.discounts.*',
             'seller.orders', 'seller.orders.*',
@@ -52,6 +53,7 @@ return [
             'seller.orders.pickup.ready',
             'seller.orders.pickup.collected',
             'seller.stock', 'seller.stock.update',
+            'seller.preorders', 'seller.preorders.arrived', // booking in stock that came; moving a promised date is for managers
             'seller.questions',
             'seller.help', 'seller.help.*',
         ],

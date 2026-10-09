@@ -45,6 +45,10 @@ class SellerOrder extends Model
         'invoice_sequence' => 'integer',
         'invoiced_at' => 'datetime',
         'gst_reversed_at' => 'datetime',
+        // Pre-order items waiting for their stock (App\Services\PreorderService)
+        'awaiting_stock' => 'boolean',
+        'preorder_ship_date' => 'date',
+        'stock_arrived_at' => 'datetime',
     ];
 
     /** The customer's pickup code is never serialised (the shop must ask the customer for it). */
@@ -227,5 +231,16 @@ class SellerOrder extends Model
     public function taxableGoodsTotal(): float
     {
         return $this->netSubtotal();
+    }
+
+    // ---- Pre-orders -----------------------------------------------------------------------
+
+    /**
+     * "Awaiting stock": some of its pre-order items are still waiting for their stock, so the shop
+     * can prepare the part but not send it (App\Services\PreorderService).
+     */
+    public function isAwaitingStock(): bool
+    {
+        return (bool) $this->awaiting_stock && $this->status !== 'cancelled';
     }
 }

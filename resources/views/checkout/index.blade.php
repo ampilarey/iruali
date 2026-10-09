@@ -11,6 +11,9 @@
     $selectedZone = old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
     // Deliver or pickup per shop, area fees, bulky-item charges, Malé time slots (checkout/_fulfilment, _delivery)
     $deliveryCheckout = app(\App\Services\DeliveryService::class)->checkout($cart, (float) $goodsTotal, $selectedAddress, $user, $addresses);
+    // Pre-order lines: marked in the summary, remembered for placing the order, and their shops' estimates count from their date
+    $preorderLines = app(\App\Services\PreorderService::class)->checkoutLines($cart);
+    $deliveryCheckout['shops'] = app(\App\Services\PreorderService::class)->withCheckoutEstimates($deliveryCheckout['shops'], $cart, $deliveryCheckout['areas'], $preorderLines);
 @endphp
 
 @section('content')
@@ -30,6 +33,7 @@
         </div>
     @endif
     @include('cart._holiday_notice', ['cart' => $cart])
+    @include('checkout._preorder_notice', ['lines' => $preorderLines])
 
     {{-- Loyalty-point forms live outside the order form (forms can't nest); their controls point at them with form="" --}}
     <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>
@@ -176,6 +180,7 @@
                                         <p class="text-sm font-medium text-gray-900 truncate">{{ $item->product->name }}</p>
                                         @if($item->variant)<p class="text-xs text-gray-600">{{ $item->variant->displayName() }}</p>@endif
                                         <p class="text-xs text-gray-500">{{ __('Qty') }}: {{ $item->quantity }}</p>
+                                        @include('checkout._preorder_line', ['line' => $preorderLines[$item->id] ?? null])
                                     </div>
                                 </div>
                                 <span class="text-sm font-medium text-gray-900" dir="ltr">{{ \App\Support\Money::format($item->quantity * $item->unit_price) }}</span>

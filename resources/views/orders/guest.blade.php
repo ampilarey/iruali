@@ -51,6 +51,7 @@
                             @endif
                             @if($part)
                                 @include('orders._pickup', ['part' => $part, 'showCode' => true])
+                                @include('preorders._part', ['part' => $part, 'items' => $shopItems])
                             @endif
                             @foreach($shopItems as $item)
                                 <div class="flex items-center gap-4">

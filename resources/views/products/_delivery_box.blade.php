@@ -4,6 +4,7 @@
      Needs $product. --}}
 @php
     $box = app(\App\Services\DeliveryService::class)->productBox($product, auth()->user());
+    $box = app(\App\Services\PreorderService::class)->deliveryBox($box, $product); // a pre-order: "Arrives around …" from its expected date
     $destination = $box['destination'];
 @endphp
 <div id="delivery-box" class="flex gap-2 scroll-mt-40" data-delivery-box>

@@ -5,6 +5,7 @@
         'seller.stock' => [__('Stock'), 'seller.stock*'],
         'seller.campaigns' => [__('Campaigns'), 'seller.campaigns*'],
         'seller.discounts' => [__('Discount codes'), 'seller.discounts*'],
+        'seller.quotes' => [__('Quote requests'), 'seller.quotes*'],
         'seller.orders' => ['Orders', 'seller.orders*'],
         'seller.returns' => ['Returns', 'seller.returns'],
         'seller.questions' => ['Questions', 'seller.questions'],

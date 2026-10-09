@@ -52,6 +52,7 @@ class ProductController extends Controller
             $product->stock_quantity = 0; // set from the variants below
         }
         $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
+        $product->forceFill($request->quoteAttributes()); // bulk quotes: the smallest quantity to ask for
         $product->save();
 
         $this->storeImage($request, $product);
@@ -80,6 +81,7 @@ class ProductController extends Controller
         $this->authorizeOwner($product);
 
         $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
+        $product->forceFill($request->quoteAttributes()); // bulk quotes: the smallest quantity to ask for
         $product->update($request->productAttributes());
 
         $this->storeImage($request, $product);

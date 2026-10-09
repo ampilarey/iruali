@@ -206,6 +206,7 @@
                         <x-icon name="heart" class="w-5 h-5" />{{ __('Add to Wishlist') }}
                     </button>
                 </form>
+                @include('quotes._product_button', ['product' => $product])
 
                 @php
                     $shareUrl = route('products.show', $product);

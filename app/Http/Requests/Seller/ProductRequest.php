@@ -51,6 +51,8 @@ class ProductRequest extends FormRequest
             'reorder_point' => 'nullable|integer|min:0|max:999999',
             'brand' => 'nullable|string|max:120',
             'weight' => 'nullable|numeric|min:0|max:999.99',
+            // Bulk quotes: the smallest quantity a customer can ask a quote for (empty: the default)
+            'quote_min_quantity' => 'nullable|integer|min:2|max:'.\App\Services\QuoteService::MAX_QUANTITY,
             // Bulky items: added to the delivery fee per unit delivered, never waived by free delivery
             'delivery_surcharge' => 'nullable|numeric|min:0|max:99999.99',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -188,5 +190,21 @@ class ProductRequest extends FormRequest
         $video = \App\Support\ProductVideo::parse($data['video_url']);
 
         return ['video_provider' => $video?->provider, 'video_id' => $video?->id];
+    }
+
+    /**
+     * The "Bulk quotes" fieldset's minimum quantity (null for the default), or nothing when the
+     * form did not send the field, so it stays as it was.
+     *
+     * @return array{quote_min_quantity?: int|null}
+     */
+    public function quoteAttributes(): array
+    {
+        $data = $this->validated();
+        if (! array_key_exists('quote_min_quantity', $data)) {
+            return [];
+        }
+
+        return ['quote_min_quantity' => filled($data['quote_min_quantity']) ? (int) $data['quote_min_quantity'] : null];
     }
 }

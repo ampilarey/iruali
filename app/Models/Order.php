@@ -60,6 +60,11 @@ class Order extends Model
         'wallet_refunded_at' => 'datetime',
         'shipping_address' => 'array',
         'billing_address' => 'array',
+        // iruali's GST as it was when the order was placed (App\Services\GstService)
+        'gst_platform_registered' => 'boolean',
+        'gst_rate' => 'decimal:2',
+        'delivery_gst' => 'decimal:2',
+        'gst_captured_at' => 'datetime',
     ];
 
     /** @return BelongsTo<User, $this> */

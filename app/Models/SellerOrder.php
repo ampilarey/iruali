@@ -31,6 +31,16 @@ class SellerOrder extends Model
         'commission_rate' => 'decimal:2',
         'commission_amount' => 'decimal:2',
         'seller_earnings' => 'decimal:2',
+        // GST as it was when the order was placed (App\Services\GstService)
+        'gst_registered' => 'boolean',
+        'gst_rate' => 'decimal:2',
+        'gst_taxable' => 'decimal:2',
+        'gst_amount' => 'decimal:2',
+        'commission_gst' => 'decimal:2',
+        'gst_captured_at' => 'datetime',
+        'invoice_sequence' => 'integer',
+        'invoiced_at' => 'datetime',
+        'gst_reversed_at' => 'datetime',
     ];
 
     /** @return BelongsTo<Order, $this> */
@@ -154,5 +164,14 @@ class SellerOrder extends Model
     public function disputes(): HasMany
     {
         return $this->hasMany(Dispute::class);
+    }
+
+    /**
+     * The shop's goods total after any shop-level discount: what its GST is worked out on (prices
+     * include GST). The one place for it; take the shop discount (shop_discount) off here.
+     */
+    public function taxableGoodsTotal(): float
+    {
+        return round((float) $this->subtotal, 2);
     }
 }

@@ -52,6 +52,7 @@ return [
             'admin.audit',
             'admin.disputes', 'admin.disputes.show',
             'admin.rewards', 'admin.gift-cards', 'admin.gift-cards.*',
+            'admin.tax', 'admin.tax.*', 'admin.orders.invoice', // GST settings, monthly GST report, shops' invoices
         ],
     ],
 

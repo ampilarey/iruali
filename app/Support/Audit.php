@@ -42,6 +42,8 @@ class Audit
         'voucher.deleted' => 'Voucher deleted',
         'user.role' => 'User role changed',
         'staff.login' => 'Staff signed in',
+        'tax.settings_saved' => 'Tax settings saved',
+        'shop.tax_details_saved' => 'Shop tax details saved',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

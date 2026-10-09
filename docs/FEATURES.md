@@ -253,6 +253,64 @@ must show with your accountant or MIRA before you switch registration on.**
   "Buying for a business?" block, prefilled from the profile and open to guests, stores them on
   the order and every shop's invoice prints them.
 
+## Bulk quotes (businesses)
+
+Resorts, offices and cafés buying in quantity ask a shop for a price instead of paying the listed
+one (`App\Services\QuoteService`; routes in `routes/web/quotes.php`, tables `quote_requests` and
+`quote_messages`).
+
+- **Asking.** Signed-in customers see "Request a bulk quote" in the product page's buy box (guests
+  are sent to sign in first) and, on a shop's page, a box to ask for a price on any of its products
+  (they pick the product first). The form (`quotes.create`, `quotes.store`) takes the quantity (at
+  least 10, or the shop's own minimum for the product: "Bulk quotes" on the product form,
+  `products.quote_min_quantity`), the delivery island (island picker, prefilled from the default
+  address), a needed-by date and notes, plus the business details for the invoice, prefilled from
+  **My account → Business details** and saved back there unless unticked. One open request (new,
+  quoted or accepted) per customer and product; at most 10 requests an hour per customer (rate
+  limiter `quote-requests`). Not on a shop's own products or while it is on holiday. Customers
+  follow their requests under **Quote requests** in the account menu (`quotes.index`, `quotes.show`).
+- **The shop's reply.** **Seller Centre → Quote requests** (`seller.quotes`, tabs new, quoted,
+  accepted, ordered, declined, expired, all; a shop sees only its own) shows each request with the
+  business details. The shop sends a unit price in MVR (it may be under the listed price), the
+  quantity it can supply, the last day the price holds (7 days unless it picks another, at most 60)
+  and a message (`seller.quotes.quote`; it can change the quote until the customer accepts), or
+  declines with a reason (`seller.quotes.decline`). Price × quantity is capped at MVR 9,999,999.99.
+  Both sides (and staff, as iruali support) write short messages in the request's thread, with an
+  unread count; the other side gets at most one email per request every 10 minutes.
+- **Emails.** New request (to the shop), quote sent or changed and request declined or closed (to
+  the customer, by email and/or SMS as they chose for order updates), quote accepted and quote
+  declined or request withdrawn (to the shop). Shops can turn all quote emails off under Settings →
+  Notifications ("Bulk quote requests").
+- **Accepting and buying.** The customer accepts the quote before its last day ends (`quotes.accept`;
+  stock is checked then): it goes into the cart as a quoted line, "Quote #123", whose quantity is
+  locked and whose price is the quoted one even if the shop's price changes (`cart_items.quote_request_id`;
+  `CartItem::unit_price`). It can only be removed, and goes back in from the quote page while the
+  quote holds (`quotes.cart`). The customer can decline a quote or withdraw a request
+  (`quotes.decline`). Checkout is the normal one (BML card); stock is checked again, counting the
+  quote with any other units of the same product, and a quote never holds stock. The order item
+  keeps the quote (`order_items.quote_request_id`) and the quote is marked ordered; commission and
+  earnings are on the quoted price. When the buyer leaves checkout's business box off, the quote's
+  business details go on the order, so every shop's invoice carries them. An unpaid order that is
+  cancelled gives its quotes back (accepted again while they hold).
+- **Discounts on quoted lines.** None of the shop's: no multi-buy saving and no shop code (their
+  units do not count towards a multi-buy tier either). **No iruali voucher either:** the voucher and
+  its minimum order work on the rest of the cart only, and a cart of quoted lines alone refuses one
+  ("iruali vouchers do not apply to items bought on a quote"), because a quote is already the shop's
+  negotiated price and a percent voucher on a large business order would cost iruali a share of it.
+  **Loyalty points and wallet credit do pay for quoted lines** (they are the customer's own balance)
+  and the order earns points as usual. All amounts are worked in laari, so lines less shop discounts,
+  voucher and points, plus delivery, add up to the order total exactly.
+- **Expiry.** A quote holds to the end of its last day (Maldives time). After that it can't be
+  accepted; `php artisan quotes:expire` (hourly) marks quoted and accepted quotes past their day
+  expired, and a quoted line whose quote expired or was closed comes out of the cart with a notice
+  the next time the cart or checkout is opened (placing the order refuses it the same way).
+- **Admin.** **Admin → Quotes** (`/admin/quotes`, `admin.quotes`; admins and support staff) lists
+  every request with status filters, including "waiting": new requests no shop has answered for more
+  than 2 days, which is also an **Admin → Inbox** row. Staff can write in a request as iruali support
+  (`admin.quotes.messages`) and close a request with a reason both sides are emailed
+  (`admin.quotes.close`; a quote in the cart comes out). Only these staff actions are in the audit
+  log (`quote.message`, `quote.closed`); what customers and shops do is not.
+
 ## Operations
 
 **Deploy and release.** `main` auto-deploys to test.iruali.mv (`TEST_AUTO_DEPLOY.md`);

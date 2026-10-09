@@ -290,9 +290,12 @@ class GstService
             $this->ensureSeries('shop:'.($sellerId ?: 0)); // before locking, so the row lock is never upgraded
         }
 
-        foreach ($parts->pluck('id') as $partId) {
-            DB::transaction(function () use ($partId, $order) {
-                $part = SellerOrder::whereKey($partId)->lockForUpdate()->first();
+        foreach ($parts as $row) {
+            $series = 'shop:'.($row->seller_id ?: 0);
+            DB::transaction(function () use ($row, $series, $order) {
+                // The counter is locked before anything else is read: see lockCounter()
+                $last = $this->lockCounter($series);
+                $part = SellerOrder::whereKey($row->id)->lockForUpdate()->first();
                 if (! $part || $part->invoice_number) {
                     return;
                 }
@@ -300,13 +303,13 @@ class GstService
                 // Final amounts from the frozen details (an order placed before GST existed is captured now)
                 $this->snapshot($part, $order);
                 $sellerId = $part->seller_id ?: null;
-                $sequence = $this->nextNumber('shop:'.($sellerId ?? 0), fn () => SellerOrder::where('seller_id', $sellerId)->max('invoice_sequence'));
+                $sequence = $this->takeNumber($series, $last, fn () => SellerOrder::where('seller_id', $sellerId)->max('invoice_sequence'));
                 $this->persist($part, [
                     'invoice_sequence' => $sequence,
                     'invoice_number' => $this->shopInvoiceNumber($sellerId, $sequence),
                     'invoiced_at' => $order->paid_at ?? now(),
                 ]);
-            }, 3);
+            }, 5);
         }
     }
 
@@ -352,13 +355,15 @@ class GstService
                 return;
             }
 
+            $this->ensureSeries(self::COMMISSION_SERIES);
             DB::transaction(function () use ($payout) {
+                $last = $this->lockCounter(self::COMMISSION_SERIES); // first, before any other read
                 $locked = SellerPayout::whereKey($payout->getKey())->lockForUpdate()->first();
                 if (! $locked || ! $locked->isPaid() || $locked->invoice_number) {
                     return;
                 }
 
-                $sequence = $this->nextNumber(self::COMMISSION_SERIES, fn () => SellerPayout::max('invoice_sequence'));
+                $sequence = $this->takeNumber(self::COMMISSION_SERIES, $last, fn () => SellerPayout::max('invoice_sequence'));
                 $values = [
                     'invoice_sequence' => $sequence,
                     'invoice_number' => sprintf('%s-C-%06d', $this->invoicePrefix(), $sequence),
@@ -475,17 +480,26 @@ class GstService
     // ---- Helpers --------------------------------------------------------------------------------
 
     /**
-     * The next number in an invoice series. Runs inside a transaction: the series row stays locked
-     * until it commits, so concurrent callers queue behind each other. Never goes below a number
-     * already issued (e.g. after a database restore).
+     * Lock a series' counter row (it must exist: ensureSeries() runs before the transaction) and
+     * return its last number. Call it FIRST in the transaction, before any plain read: with
+     * MariaDB's snapshot isolation (innodb_snapshot_isolation, on by default from 11.6) a locking
+     * read that comes after a plain read fails ("Record has changed since last read") whenever
+     * another payment moved the counter in between, which two payments for one shop at the same
+     * moment would do. A lock taken before the transaction has read anything never conflicts.
+     */
+    protected function lockCounter(string $series): int
+    {
+        return (int) DB::table('invoice_sequences')->where('series', $series)->lockForUpdate()->value('last_number');
+    }
+
+    /**
+     * The next number after the locked counter, or after the highest number already issued if
+     * that is higher (e.g. after a database restore), saved as the series' last number.
      *
      * @param  Closure(): mixed  $highestIssued
      */
-    protected function nextNumber(string $series, Closure $highestIssued): int
+    protected function takeNumber(string $series, int $last, Closure $highestIssued): int
     {
-        $this->ensureSeries($series);
-
-        $last = (int) DB::table('invoice_sequences')->where('series', $series)->lockForUpdate()->value('last_number');
         $next = max($last, (int) $highestIssued()) + 1;
         DB::table('invoice_sequences')->where('series', $series)->update(['last_number' => $next, 'updated_at' => now()]);
 

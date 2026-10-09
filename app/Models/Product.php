@@ -59,6 +59,7 @@ class Product extends Model
         'meta_title',
         'meta_description',
         'flash_sale_ends_at',
+        'delivery_surcharge',
     ];
 
     protected $casts = [
@@ -76,6 +77,7 @@ class Product extends Model
         'requires_shipping' => 'boolean',
         'is_digital' => 'boolean',
         'flash_sale_ends_at' => 'datetime',
+        'delivery_surcharge' => 'decimal:2',
     ];
 
     /** @return BelongsTo<Category, $this> */

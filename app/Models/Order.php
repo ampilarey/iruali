@@ -60,6 +60,11 @@ class Order extends Model
         'wallet_refunded_at' => 'datetime',
         'shipping_address' => 'array',
         'billing_address' => 'array',
+        'delivery_surcharge' => 'decimal:2',
+        'delivery_slot_starts_at' => 'datetime',
+        'delivery_slot_ends_at' => 'datetime',
+        'is_gift' => 'boolean',
+        'gift_hide_prices' => 'boolean',
     ];
 
     /** @return BelongsTo<User, $this> */
@@ -246,5 +251,35 @@ class Order extends Model
     public function scopeWithoutSmokeTests($query)
     {
         return $query->whereNotIn('orders.user_id', User::query()->where('is_smoke_test', true)->select('id'));
+    }
+
+    // ---- Delivery options (areas, Malé time slots, gifts) ----------------------------------
+
+    /**
+     * The Malé delivery time slot the customer picked, e.g. "Sat 12 Oct, 09:00–12:00" (null = any time).
+     */
+    public function deliverySlotLabel(): ?string
+    {
+        if (! $this->delivery_slot_starts_at) {
+            return null;
+        }
+
+        return \App\Services\DeliverySlotService::label($this->delivery_slot_starts_at, $this->delivery_slot_ends_at);
+    }
+
+    /**
+     * Where the delivery fee was charged for: Greater Malé, an atoll or other islands (null when
+     * everything was picked up). Orders from before areas existed fall back to their zone.
+     */
+    public function deliveryAreaLabel(): ?string
+    {
+        $area = $this->delivery_area ?? $this->delivery_zone;
+
+        return $area ? app(\App\Services\DeliveryService::class)->areaLabel($area) : null;
+    }
+
+    public function isGift(): bool
+    {
+        return (bool) $this->is_gift;
     }
 }

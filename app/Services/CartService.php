@@ -101,6 +101,10 @@ class CartService
     {
         $cart = $this->getOrCreateCart();
         $product = Product::findOrFail($productId);
+        // A shop on holiday takes no new orders: its products stay listed, carts keep what is already in them
+        if ($product->seller?->isOnHoliday()) {
+            throw new \App\Exceptions\ShopOnHolidayException($product);
+        }
         $variant = $variantId ? ProductVariant::where('product_id', $product->id)->findOrFail($variantId) : null;
 
         // Check if product (and variant) is already in cart

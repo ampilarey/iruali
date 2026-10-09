@@ -57,6 +57,7 @@
                     @if($seller->business_description)<p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $seller->business_description }}</p>@endif
                 </div>
             </div>
+            @include('sellers._holiday_notice', ['seller' => $seller, 'banner' => true])
         @elseif($brand)
             @include('brands._header')
         @else

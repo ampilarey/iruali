@@ -155,7 +155,7 @@ class OrderController extends Controller
         $added = 0;
         foreach ($order->items()->with('product')->get() as $item) {
             $product = $item->product;
-            if ($product && $product->is_active && $product->stock_quantity > 0) {
+            if ($product && $product->is_active && $product->stock_quantity > 0 && ! $product->seller?->isOnHoliday()) {
                 $cart->addToCart($product->id, min($item->quantity, $product->stock_quantity));
                 $added++;
             }

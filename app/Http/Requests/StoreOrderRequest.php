@@ -183,6 +183,8 @@ class StoreOrderRequest extends FormRequest
                 foreach ($cart->items as $item) {
                     if (! $item->product || ! $item->product->is_active) {
                         $validator->errors()->add('cart', __('A product in your cart is no longer available.'));
+                    } elseif ($item->product->seller?->isOnHoliday()) {
+                        $validator->errors()->add('cart', \App\Support\ShopHoliday::cartMessage($item->product));
                     } elseif ($item->availableStock() < $item->quantity) {
                         $validator->errors()->add('cart', __('Not enough stock for :name.', ['name' => $item->product->name]));
                     }

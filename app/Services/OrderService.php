@@ -46,6 +46,10 @@ class OrderService
             if ($product->seller_id && $product->seller?->is_seller && ! $product->seller->isSeller()) {
                 return ['success' => false, 'message' => __('":name" is no longer available: the shop has closed.', ['name' => $product->name['en'] ?? $product->name])];
             }
+            // A shop on holiday takes no new orders until it is back; the item stays in the cart
+            if ($product->seller?->isOnHoliday()) {
+                return ['success' => false, 'message' => \App\Support\ShopHoliday::cartMessage($product)];
+            }
             // A product sold in variants must be bought as one of them; stock is then the variant's
             if ($product->has_variants && (! $cartItem->variant || ! $cartItem->variant->is_active)) {
                 return ['success' => false, 'message' => __('":name" needs an option (size, colour...) chosen. Please add it to your cart again.', ['name' => $product->name['en'] ?? $product->name])];

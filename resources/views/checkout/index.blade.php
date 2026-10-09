@@ -27,6 +27,7 @@
             </ul>
         </div>
     @endif
+    @include('cart._holiday_notice', ['cart' => $cart])
 
     {{-- Loyalty-point forms live outside the order form (forms can't nest); their controls point at them with form="" --}}
     <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>

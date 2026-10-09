@@ -59,6 +59,9 @@ class ProductResource extends JsonResource
                 return [
                     'id' => $this->seller->id,
                     'name' => $this->seller->name,
+                    // Holiday mode: still listed, but it can't be added to a cart or ordered until holiday_until (the back-on date)
+                    'on_holiday' => $this->seller->isOnHoliday(),
+                    'holiday_until' => $this->seller->isOnHoliday() ? $this->seller->holiday_until?->toDateString() : null,
                 ];
             }),
             'reviews' => $this->whenLoaded('reviews', function () {

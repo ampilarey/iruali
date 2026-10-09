@@ -104,6 +104,9 @@ class User extends Authenticatable implements HasLocalePreference
         'notification_preferences' => 'array',
         'wallet_balance' => 'decimal:2',
         'is_smoke_test' => 'boolean',
+        'holiday_mode' => 'boolean',
+        'holiday_until' => 'date',
+        'holiday_started_at' => 'datetime',
     ];
 
     /**
@@ -635,5 +638,15 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return $this->emailPreference('brand_updates') === 'email' && $this->marketing_opt_out_at === null
             && filled($this->email) && $this->isActive() && ! $this->isSmokeTest();
+    }
+
+    /**
+     * Holiday mode (Seller Centre → Settings → Holiday mode): the shop's products stay listed but
+     * nobody can order them. It ends by itself on the back-on date (holiday_until is the first day
+     * the shop takes orders again; a date check, no scheduled job) or when the shop switches it off.
+     */
+    public function isOnHoliday(): bool
+    {
+        return (bool) $this->holiday_mode && ($this->holiday_until === null || today()->lt($this->holiday_until));
     }
 }

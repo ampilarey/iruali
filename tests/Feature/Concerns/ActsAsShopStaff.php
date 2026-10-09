@@ -143,6 +143,7 @@ trait ActsAsShopStaff
                 'guide' => array_key_first(HelpController::guides()),
                 'member' => ShopStaff::where('user_id', $this->staffMember($shop, 'packer')->id)->firstOrFail(),
                 'invitation' => $this->pendingInvitationFor($shop),
+                'quote' => $this->quoteRequestFor($shop, $productFor()),
                 default => $this->fail("No test record for the route parameter {{$name}}: add one to ActsAsShopStaff::sellerRouteFixtures()."),
             };
         }
@@ -172,5 +173,18 @@ trait ActsAsShopStaff
         ])->save();
 
         return $invitation;
+    }
+
+    /** A bulk quote request a customer sent the shop, for the quote pages. */
+    protected function quoteRequestFor(User $shop, Product $product): \App\Models\QuoteRequest
+    {
+        $quote = new \App\Models\QuoteRequest([
+            'product_id' => $product->id, 'product_name' => 'Fixture product', 'quantity' => 40,
+            'delivery_island' => 'Hithadhoo', 'delivery_atoll' => 'Addu', 'needed_by' => today()->addDays(10)->toDateString(),
+            'notes' => 'For the staff canteen.', 'business_name' => 'Sun Island Resort Pvt Ltd',
+        ]);
+        $quote->forceFill(['customer_id' => User::factory()->create()->id, 'seller_id' => $shop->id, 'status' => 'new'])->save();
+
+        return $quote;
     }
 }

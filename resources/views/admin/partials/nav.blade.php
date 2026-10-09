@@ -6,6 +6,7 @@
         ['admin.inbox', 'Inbox'],
         ['admin.orders', 'Orders'],
         ['admin.returns', 'Returns'],
+        ['admin.quotes', 'Quotes'],
         ['admin.payouts', 'Payouts'],
         ['admin.tax', 'Tax'],
         ['admin.sellers', 'Sellers'],

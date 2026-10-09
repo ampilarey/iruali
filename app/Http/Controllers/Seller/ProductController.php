@@ -53,6 +53,7 @@ class ProductController extends Controller
         }
         $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
         $product->forceFill($request->preorderAttributes()); // pre-orders while out of stock
+        $product->forceFill($request->quoteAttributes()); // bulk quotes: the smallest quantity to ask for
         $product->save();
 
         $this->storeImage($request, $product);
@@ -82,6 +83,7 @@ class ProductController extends Controller
 
         $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
         $product->forceFill($request->preorderAttributes()); // pre-orders while out of stock (a new date emails the waiting customers)
+        $product->forceFill($request->quoteAttributes()); // bulk quotes: the smallest quantity to ask for
         $product->update($request->productAttributes());
 
         $this->storeImage($request, $product);

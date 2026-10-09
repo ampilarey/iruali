@@ -527,7 +527,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * The shop emails this user can turn off, all on unless saved otherwise.
      */
-    public const SELLER_NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock'];
+    public const SELLER_NOTIFICATION_TYPES = ['new_order', 'return', 'payout', 'low_stock', 'quotes'];
 
     /**
      * @return array<string, bool>

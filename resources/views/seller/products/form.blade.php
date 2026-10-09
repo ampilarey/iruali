@@ -118,6 +118,8 @@
 
             @include('seller.products._video', ['product' => $product])
 
+            @include('seller.products._quotes', ['product' => $product])
+
             @include('seller.products._variants', ['product' => $product, 'variants' => $variants])
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">

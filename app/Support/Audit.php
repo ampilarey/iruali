@@ -50,6 +50,8 @@ class Audit
         'delivery.saved' => 'Delivery rates and time slots saved',
         'pickup.confirmed' => 'Pickup confirmed for a shop',
         'newsletter.sent' => 'Newsletter sent',
+        'quote.closed' => 'Quote request closed by staff',
+        'quote.message' => 'Quote request message from staff',
         'tax.settings_saved' => 'Tax settings saved',
         'shop.tax_details_saved' => 'Shop tax details saved',
         'shop_staff.invited' => 'Shop staff invited',

@@ -15,6 +15,7 @@ class OrderItem extends Model
         'variant_sku',
         'quantity',
         'price',
+        'quote_request_id',
     ];
 
     protected $casts = [
@@ -113,5 +114,15 @@ class OrderItem extends Model
         return $this->is_preorder && $this->preorder_allocated_at === null
             ? min((int) $this->quantity, (int) $this->preorder_allocated_quantity)
             : (int) $this->quantity;
+    }
+
+    /**
+     * The bulk quote this line was bought on (its price is the quoted one).
+     *
+     * @return BelongsTo<QuoteRequest, $this>
+     */
+    public function quoteRequest(): BelongsTo
+    {
+        return $this->belongsTo(QuoteRequest::class);
     }
 }

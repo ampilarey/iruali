@@ -29,6 +29,7 @@ return [
             'seller.preorders', 'seller.preorders.*',
             'seller.campaigns', 'seller.campaigns.*',
             'seller.discounts', 'seller.discounts.*',
+            'seller.quotes', 'seller.quotes.*',
             'seller.orders', 'seller.orders.*',
             'seller.returns',
             'seller.questions',

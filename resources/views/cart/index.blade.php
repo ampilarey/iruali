@@ -13,6 +13,7 @@
 <div class="bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 lg:py-8">
         <h1 class="font-display text-2xl lg:text-3xl font-bold text-dark mb-4">{{ __('Cart') }}@if($units)<span class="text-gray-500 font-sans font-normal text-base ms-2">({{ trans_choice(':count item|:count items', $units, ['count' => $units]) }})</span>@endif</h1>
+        @include('quotes._cart_notices')
 
         @if($items->isEmpty())
             <div class="bg-white border border-gray-200 rounded-xl p-10 text-center">
@@ -32,6 +33,7 @@
             <div class="grid lg:grid-cols-[1fr_22rem] gap-5 lg:gap-6 items-start">
                 <section class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-200" aria-label="{{ __('Items in your cart') }}">
                     @foreach($items as $item)
+                        @if($item->quote_request_id) @include('quotes._cart_item', ['item' => $item]) @continue @endif
                         @php $product = $item->product; $seller = $product->seller; @endphp
                         <div class="p-4 flex gap-3 sm:gap-4">
                             <a href="{{ route('products.show', $product) }}" class="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-primary-50">

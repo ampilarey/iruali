@@ -90,6 +90,7 @@ class SettingsController extends Controller
             'return' => ['label' => __('Return requested'), 'hint' => __('When a customer asks to return items from one of your orders.')],
             'payout' => ['label' => __('Payout sent'), 'hint' => __('When iruali transfers your earnings to your bank account.')],
             'low_stock' => ['label' => __('Low stock (daily)'), 'hint' => __('One email each morning listing products at or below their low-stock level. Not sent when nothing is low.')],
+            'quotes' => ['label' => __('Bulk quote requests'), 'hint' => __('When a business asks you for a quote, accepts or declines one, or writes in a request\'s messages.')],
         ];
     }
 

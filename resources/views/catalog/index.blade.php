@@ -59,6 +59,7 @@
                 </div>
             </div>
             @include('sellers._holiday_notice', ['seller' => $seller, 'banner' => true])
+            @include('quotes._shop_button', ['seller' => $seller])
         @elseif($brand)
             @include('brands._header')
         @else

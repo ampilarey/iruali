@@ -9,6 +9,7 @@
     $reviews = $product->reviews;
     $rating = round((float) $reviews->avg('rating'), 1);
     $stock = $product->effectiveStock();
+    $preorder = app(\App\Services\PreorderService::class)->productOffer($product); // out of stock but the shop takes pre-orders (products/_preorder)
     // Variants: the active ones, their option types/values, and what the picker needs per variant
     $variants = $product->has_variants ? $product->variants->where('is_active', true)->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values() : collect();
     $variants->each(fn ($v) => $v->setRelation('product', $product));
@@ -19,6 +20,7 @@
         'price' => $v->effectivePrice(),
         'price_text' => \App\Support\Money::format($v->effectivePrice()),
         'stock' => (int) $v->stock_quantity,
+        'preorder' => $preorder && $v->stock_quantity <= 0 ? $preorder['left'] : 0,
         'sku' => $v->sku,
         'image' => $v->image ? \App\Support\ImageVariants::url($v->image, 1200) : null,
         'srcset' => $v->image ? implode(', ', array_map(fn ($w) => \App\Support\ImageVariants::url($v->image, $w).' '.$w.'w', \App\Support\ImageVariants::WIDTHS)) : null,
@@ -130,15 +132,16 @@
                 @if($product->deal_ends_at)
                     <x-deal-countdown :ends="$product->deal_ends_at" class="mt-2" />
                 @endif
-                <div data-variant-stock data-text-out="{{ __('Out of stock') }}" data-text-low="{{ __('Only :count left', ['count' => '#']) }}" data-text-in="{{ __('In stock') }}"><x-stock :quantity="$stock" class="mt-2 !text-sm" /></div>
+                <div data-variant-stock data-text-out="{{ __('Out of stock') }}" data-text-low="{{ __('Only :count left', ['count' => '#']) }}" data-text-in="{{ __('In stock') }}" data-text-preorder="{{ __('Available to pre-order') }}">@if($preorder && $preorder['whole'])<p class="mt-2 text-sm font-semibold text-primary">{{ __('Available to pre-order') }}</p>@else<x-stock :quantity="$stock" class="mt-2 !text-sm" />@endif</div>
                 @include('sellers._holiday_notice', ['seller' => $seller])
+                @include('products._preorder', ['preorder' => $preorder])
 
                 <div class="mt-4 rounded-lg bg-gray-50 p-3 text-sm space-y-2">
                     @include('products._delivery_box')
                     <div class="flex gap-2"><x-icon name="bank" class="w-5 h-5 shrink-0 text-primary" /><div><img src="/images/card-brands.png" alt="{{ __('We accept American Express, Visa, Mastercard and Maestro') }}" width="147" height="30" class="h-8 w-auto -ms-1"><span class="block mt-1 text-xs text-gray-500">{{ __('Prices in MVR') }}</span></div></div>
                 </div>
 
-                @if($stock > 0)
+                @if($stock > 0 || $preorder)
                     <form action="{{ route('cart.add') }}" method="POST" class="mt-4" id="buy-form" @if($variants->isNotEmpty()) data-variant-picker data-variants="{{ $variantData->toJson() }}" @endif>
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -158,7 +161,7 @@
                                 <select id="variant-select" name="product_variant_id" required data-variant-select class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
                                     <option value="">{{ __('Choose an option') }}</option>
                                     @foreach($variants as $variant)
-                                        <option value="{{ $variant->id }}" @disabled($variant->stock_quantity <= 0)>{{ $variant->displayNameWithKeys() }} – {{ \App\Support\Money::format($variant->effectivePrice()) }}@if($variant->stock_quantity <= 0) ({{ __('Out of stock') }})@endif</option>
+                                        <option value="{{ $variant->id }}" @disabled($variant->stock_quantity <= 0 && ! $preorder)>{{ $variant->displayNameWithKeys() }} – {{ \App\Support\Money::format($variant->effectivePrice()) }}@if($variant->stock_quantity <= 0) ({{ $preorder ? __('Pre-order: ships around :date', ['date' => $preorder['date']->translatedFormat('j M')]) : __('Out of stock') }})@endif</option>
                                     @endforeach
                                 </select>
                                 <p class="text-xs text-danger hidden" data-variant-unavailable>{{ __('This combination is not available.') }}</p>
@@ -168,11 +171,11 @@
                         <div class="mt-1 flex gap-2">
                             <div class="flex items-center rounded-lg border border-gray-300" data-qty>
                                 <button type="button" data-qty-step="-1" class="w-10 h-11 flex items-center justify-center text-gray-600 hover:text-primary" aria-label="{{ __('Decrease quantity') }}"><x-icon name="minus" class="w-4 h-4" /></button>
-                                <input id="quantity" name="quantity" type="number" inputmode="numeric" min="1" max="{{ $stock }}" value="1" class="w-12 h-11 border-0 text-center font-semibold focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+                                <input id="quantity" name="quantity" type="number" inputmode="numeric" min="1" max="{{ $stock > 0 ? $stock : ($preorder['left'] ?? 1) }}" value="1" class="w-12 h-11 border-0 text-center font-semibold focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
                                 <button type="button" data-qty-step="1" class="w-10 h-11 flex items-center justify-center text-gray-600 hover:text-primary" aria-label="{{ __('Increase quantity') }}"><x-icon name="plus" class="w-4 h-4" /></button>
                             </div>
                             <button type="submit" data-add-to-cart @if($onHoliday) disabled data-holiday @endif class="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                                <x-icon name="cart" class="w-5 h-5" />{{ __('Add to cart') }}
+                                <x-icon name="cart" class="w-5 h-5" /><span data-buy-label data-text-cart="{{ __('Add to cart') }}" data-text-preorder="{{ __('Pre-order') }}">{{ $preorder && $preorder['whole'] ? __('Pre-order') : __('Add to cart') }}</span>
                             </button>
                         </div>
                     </form>
@@ -512,11 +515,11 @@
 </div>
 
 <!-- Sticky buy bar (mobile) -->
-@if($stock > 0)
+@if($stock > 0 || $preorder)
     <div class="lg:hidden fixed inset-x-0 bottom-16 z-40 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_12px_rgba(15,42,58,0.08)]" style="margin-bottom: env(safe-area-inset-bottom);">
         <x-price :product="$product" class="min-w-0 [&_p]:whitespace-nowrap [&_p]:truncate" />
         <button type="submit" form="buy-form" @disabled($onHoliday) class="ms-auto shrink-0 whitespace-nowrap inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-            <x-icon name="cart" class="w-5 h-5" />{{ __('Add to cart') }}
+            <x-icon name="cart" class="w-5 h-5" />{{ $preorder && $preorder['whole'] ? __('Pre-order') : __('Add to cart') }}
         </button>
     </div>
     <div class="lg:hidden h-16" aria-hidden="true"></div>

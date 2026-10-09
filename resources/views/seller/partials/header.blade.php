@@ -3,6 +3,7 @@
         'seller.dashboard' => ['Dashboard', 'seller.dashboard'],
         'seller.products.index' => ['Products', 'seller.products.*'],
         'seller.stock' => [__('Stock'), 'seller.stock*'],
+        'seller.preorders' => [__('Pre-orders'), 'seller.preorders*'],
         'seller.campaigns' => [__('Campaigns'), 'seller.campaigns*'],
         'seller.discounts' => [__('Discount codes'), 'seller.discounts*'],
         'seller.orders' => ['Orders', 'seller.orders*'],

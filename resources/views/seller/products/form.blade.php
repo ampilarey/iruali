@@ -103,6 +103,8 @@
                 </div>
             </div>
 
+            @include('seller.products._preorder', ['product' => $product])
+
             @include('seller.products._delivery', ['product' => $product])
 
             <div>

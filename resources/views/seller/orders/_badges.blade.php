@@ -2,6 +2,9 @@
 @if($part->isPickup())
     <span class="ms-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">{{ $part->isReadyForPickup() ? __('Ready for pickup') : __('Pickup') }}</span>
 @endif
+@if($part->isAwaitingStock())
+    <span class="ms-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800" data-awaiting-stock>{{ __('Awaiting stock') }}</span>
+@endif
 @if($order->isGift())
     <span class="ms-1 rounded-full bg-pink-100 px-2 py-0.5 text-xs font-medium text-pink-800">{{ __('Gift') }}</span>
 @endif

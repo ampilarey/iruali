@@ -55,6 +55,7 @@
                                 </div>
                                 <p class="mt-1 text-xs text-gray-500">Items {{ \App\Support\Money::format($part->subtotal) }}@if((float) $part->shop_discount > 0) · shop's discounts &minus;{{ \App\Support\Money::format($part->shop_discount) }}@endif · commission {{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}% ({{ \App\Support\Money::format($part->commission_amount) }}) · shop earns {{ \App\Support\Money::format($part->seller_earnings) }} · {{ str_replace('_', ' ', $part->earningsState()) }}</p>
                                 <div class="mt-2">@include('orders._tracking', ['part' => $part])</div>
+                                @include('preorders._part', ['part' => $part, 'for' => 'admin', 'class' => 'mt-2'])
                                 @include('admin.orders._part_delivery', ['order' => $order, 'part' => $part])
                                 @if($next = $fulfilment->nextStatuses($part))
                                     <div class="mt-2 flex flex-wrap gap-2">

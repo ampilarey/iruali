@@ -22,6 +22,10 @@ function initPicker(form) {
     const skuBox = document.querySelector('[data-variant-sku]');
     const mainImage = document.querySelector('[data-gallery-main]');
     const alertSelect = document.querySelector('[data-alert-variant]');
+    // Pre-orders: an option with no stock can be ordered when the shop takes pre-orders (variant.preorder = units left)
+    const buyLabel = form.querySelector('[data-buy-label]');
+    const preorderNotice = document.querySelector('[data-preorder-notice]');
+    const orderable = (v) => v.stock > 0 || v.preorder > 0;
     const chosen = {};
 
     // Buttons take over from the select
@@ -47,7 +51,7 @@ function initPicker(form) {
                 const others = Object.assign({}, chosen);
                 delete others[option];
                 others[option] = value;
-                const possible = variants.some((v) => v.stock > 0 && matches(v, others));
+                const possible = variants.some((v) => orderable(v) && matches(v, others));
                 button.disabled = !possible;
                 button.setAttribute('aria-pressed', chosen[option] === value ? 'true' : 'false');
             });
@@ -56,12 +60,15 @@ function initPicker(form) {
         });
     }
 
-    function setStock(stock) {
+    function setStock(stock, preorder) {
         if (!stockBox) return;
         const p = stockBox.querySelector('p');
         if (!p) return;
-        p.classList.remove('text-danger', 'text-sun-ink', 'text-success');
-        if (stock <= 0) {
+        p.classList.remove('text-danger', 'text-sun-ink', 'text-success', 'text-primary');
+        if (stock <= 0 && preorder > 0 && stockBox.dataset.textPreorder) {
+            p.textContent = stockBox.dataset.textPreorder;
+            p.classList.add('text-primary');
+        } else if (stock <= 0) {
             p.textContent = stockBox.dataset.textOut;
             p.classList.add('text-danger');
         } else if (stock <= 5) {
@@ -80,16 +87,22 @@ function initPicker(form) {
         if (select) select.value = variant ? String(variant.id) : '';
         if (unavailable) unavailable.classList.toggle('hidden', !(complete && !variant));
         // data-holiday: the shop is on holiday, so the button stays disabled whatever is picked
-        if (submit) submit.disabled = !variant || variant.stock <= 0 || submit.hasAttribute('data-holiday');
+        if (submit) submit.disabled = !variant || !orderable(variant) || submit.hasAttribute('data-holiday');
+        // Every option sold out: it is a pre-order whatever is picked; otherwise only the sold-out options are
+        const allPreorder = !variants.some((v) => v.stock > 0);
+        const preordering = variant ? variant.stock <= 0 && variant.preorder > 0 : allPreorder;
+        if (buyLabel) buyLabel.textContent = preordering ? buyLabel.dataset.textPreorder : buyLabel.dataset.textCart;
+        if (preorderNotice && !allPreorder) preorderNotice.classList.toggle('hidden', !preordering);
         if (!variant) return;
 
         if (priceBox) {
             priceBox.textContent = variant.price_text;
         }
-        setStock(variant.stock);
+        setStock(variant.stock, variant.preorder);
         if (qty) {
-            qty.max = Math.max(1, variant.stock);
-            if (parseInt(qty.value, 10) > variant.stock) qty.value = Math.max(1, variant.stock);
+            const most = variant.stock > 0 ? variant.stock : variant.preorder;
+            qty.max = Math.max(1, most);
+            if (parseInt(qty.value, 10) > most) qty.value = Math.max(1, most);
         }
         if (skuBox && variant.sku) skuBox.textContent = variant.sku;
         if (mainImage && variant.image) {
@@ -110,9 +123,9 @@ function initPicker(form) {
         });
     });
 
-    // One option type with a single in-stock value: pick it for the shopper
+    // One option type with a single in-stock (or pre-order) value: pick it for the shopper
     if (groups.length === 1) {
-        const inStock = variants.filter((v) => v.stock > 0);
+        const inStock = variants.filter(orderable);
         if (inStock.length === 1) {
             chosen[groups[0].dataset.optionGroup] = inStock[0].attributes[groups[0].dataset.optionGroup];
         }

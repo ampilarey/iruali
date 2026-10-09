@@ -222,6 +222,11 @@ class NewsletterSenderTest extends TestCase
         $html = $mail->locale('en')->render();
         $this->assertStringContainsString(e(URL::signedRoute('marketing.unsubscribe', ['user' => $admin->id])), $html);
         $this->assertSame('<'.URL::signedRoute('marketing.unsubscribe', ['user' => $admin->id]).'>', $mail->headers()->text['List-Unsubscribe']);
+
+        // A blank line (even with spaces on it) starts a new paragraph; a single line break does not
+        $this->assertSame(["One\nline two", 'Three'], NewsletterMail::paragraphs("One\nline two\n  \n\nThree\n"));
+        $html = app(NewsletterService::class)->mail($this->issue(['intro_en' => "One\nline two\n\nThree"]), null, null)->locale('en')->render();
+        $this->assertMatchesRegularExpression('/>One<br\s*\/?>\s*line two<\/p>\s*<p[^>]*>Three<\/p>/', $html);
     }
 
     public function test_only_admins_write_and_send_support_sees_the_subscribers(): void

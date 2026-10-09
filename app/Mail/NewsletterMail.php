@@ -43,10 +43,22 @@ class NewsletterMail extends Mailable
 
         return new Content(markdown: 'mail.newsletter', with: [
             'name' => $this->name,
-            'paragraphs' => array_values(array_filter(preg_split('/\R{2,}/u', trim($this->issue->introFor($locale))) ?: [], fn (string $p) => trim($p) !== '')),
+            'paragraphs' => self::paragraphs($this->issue->introFor($locale)),
             'sections' => $this->sections,
             'unsubscribeUrl' => $this->unsubscribeUrl(),
         ]);
+    }
+
+    /**
+     * The admin's text as paragraphs: a blank line (spaces allowed) starts a new one.
+     *
+     * @return list<string>
+     */
+    public static function paragraphs(string $text): array
+    {
+        $parts = preg_split('/\R[ \t]*\R/u', trim($text)) ?: [];
+
+        return array_values(array_filter(array_map('trim', $parts), fn (string $paragraph) => $paragraph !== ''));
     }
 
     /**

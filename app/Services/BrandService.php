@@ -172,7 +172,7 @@ class BrandService
      * shops typing the old name still reach this brand; products take the new name. The Dhivehi
      * name is matched the same way (see addDhivehiAlias) and goes into the products' search text.
      *
-     * @param  array{name: string, slug: string, name_dv?: ?string, description?: array<string, string>, logo?: ?string, reviewed_at?: mixed}  $data
+     * @param  array{name: string, slug: string, name_dv?: ?string, description?: array<string, string>, logo?: ?string, banner?: ?string, reviewed_at?: mixed}  $data
      */
     public function update(Brand $brand, array $data): Brand
     {
@@ -189,7 +189,7 @@ class BrandService
             if (array_key_exists('name_dv', $data)) {
                 $brand->name_dv = Brand::cleanName($data['name_dv']) ?: null;
             }
-            foreach (['logo', 'reviewed_at'] as $field) {
+            foreach (['logo', 'banner', 'reviewed_at'] as $field) {
                 if (array_key_exists($field, $data)) {
                     $brand->{$field} = $data[$field];
                 }
@@ -227,9 +227,9 @@ class BrandService
         }
 
         $moved = 0;
-        $orphanLogo = null;
+        $orphans = [];
 
-        DB::transaction(function () use ($source, $target, &$moved, &$orphanLogo) {
+        DB::transaction(function () use ($source, $target, &$moved, &$orphans) {
             Product::withTrashed()->where('brand_id', $source->id)->lazyById(200)
                 ->each(function (Product $product) use ($target, &$moved) {
                     $this->storeBrandQuietly($product, $target);
@@ -242,10 +242,12 @@ class BrandService
             $following = BrandFollow::where('brand_id', $target->id)->pluck('user_id');
             BrandFollow::where('brand_id', $source->id)->whereNotIn('user_id', $following)->update(['brand_id' => $target->id]);
 
-            if (! $target->logo && $source->logo) {
-                $target->logo = $source->logo;
-            } else {
-                $orphanLogo = $source->logo;
+            foreach (['logo', 'banner'] as $image) {
+                if (! $target->{$image} && $source->{$image}) {
+                    $target->{$image} = $source->{$image};
+                } else {
+                    $orphans[] = $source->{$image};
+                }
             }
             if (! filled(array_filter($target->getTranslations('description'))) && filled(array_filter($source->getTranslations('description')))) {
                 $target->replaceTranslations('description', array_filter($source->getTranslations('description')));
@@ -261,7 +263,9 @@ class BrandService
             BrandAlias::create(['brand_id' => $target->id, 'key' => $key, 'slug' => $slug]);
         });
 
-        $this->deleteLogo($orphanLogo);
+        foreach ($orphans as $path) {
+            $this->deleteImage($path);
+        }
 
         return $moved;
     }
@@ -296,7 +300,8 @@ class BrandService
             Product::onlyTrashed()->where('brand_id', $brand->id)->update(['brand_id' => null]);
             $brand->delete();
         });
-        $this->deleteLogo($brand->logo);
+        $this->deleteImage($brand->logo);
+        $this->deleteImage($brand->banner);
 
         return true;
     }
@@ -500,7 +505,8 @@ class BrandService
             });
     }
 
-    protected function deleteLogo(?string $path): void
+    /** A logo or banner, with its smaller copies. */
+    protected function deleteImage(?string $path): void
     {
         if ($path) {
             ImageVariants::delete($path);

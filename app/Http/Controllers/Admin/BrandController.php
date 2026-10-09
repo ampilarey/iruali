@@ -72,10 +72,15 @@ class BrandController extends Controller
             'description_dv' => ['nullable', 'string', 'max:600'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
             'remove_logo' => ['sometimes', 'boolean'],
+            // A wide cover image: big enough to stay sharp across the page (1600 x 400 is ideal)
+            'banner' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:min_width=1000,min_height=200'],
+            'remove_banner' => ['sometimes', 'boolean'],
             'reviewed' => ['sometimes', 'boolean'],
         ], [
             'slug.regex' => 'Use lower-case letters, digits and single hyphens only, like "dr-martens".',
             'logo.max' => 'The logo must be under 1 MB.',
+            'banner.max' => 'The banner must be under 2 MB.',
+            'banner.dimensions' => 'The banner must be at least 1000 pixels wide and 200 high (1600 × 400 is ideal).',
         ]);
 
         $name = Brand::cleanName($data['name']);
@@ -109,6 +114,21 @@ class BrandController extends Controller
             $logo = null;
         }
 
+        $oldBanner = $brand->banner;
+        $banner = $oldBanner;
+        if ($request->hasFile('banner')) {
+            $banner = $this->storeFileSecurely($request->file('banner'), 'brands/banners', ['image/jpeg', 'image/png', 'image/webp'], 2048);
+            if (! $banner) {
+                if ($logo && $logo !== $oldLogo) {
+                    $this->deleteFile($logo); // the new logo was stored a moment ago but is not saved
+                }
+
+                return back()->withErrors(['banner' => 'The banner must be a JPG, PNG or WebP image under 2 MB.'])->withInput();
+            }
+        } elseif ($request->boolean('remove_banner')) {
+            $banner = null;
+        }
+
         $before = $brand->only(['name', 'name_dv', 'slug']);
         $this->brands->update($brand, [
             'name' => $name,
@@ -116,10 +136,14 @@ class BrandController extends Controller
             'slug' => $data['slug'],
             'description' => ['en' => $data['description_en'] ?? null, 'dv' => $data['description_dv'] ?? null],
             'logo' => $logo,
+            'banner' => $banner,
             'reviewed_at' => $request->boolean('reviewed') ? ($brand->reviewed_at ?? now()) : null,
         ]);
         if ($oldLogo && $oldLogo !== $logo) {
             $this->deleteFile($oldLogo);
+        }
+        if ($oldBanner && $oldBanner !== $banner) {
+            $this->deleteFile($oldBanner);
         }
 
         Audit::record('brand.updated', $brand, array_filter([
@@ -127,6 +151,7 @@ class BrandController extends Controller
             'name_dv' => $before['name_dv'] !== $brand->name_dv ? ($before['name_dv'] ?? '—').' → '.($brand->name_dv ?? '—') : null,
             'slug' => $before['slug'] !== $brand->slug ? $before['slug'].' → '.$brand->slug : null,
             'logo' => $oldLogo !== $logo ? ($logo ? 'new logo' : 'removed') : null,
+            'banner' => $oldBanner !== $banner ? ($banner ? 'new banner' : 'removed') : null,
             'reviewed' => $brand->reviewed_at ? 'yes' : 'no',
         ]));
 

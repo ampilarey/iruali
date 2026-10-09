@@ -4,6 +4,11 @@
 @foreach($brand->campaigns()->live()->ordered()->get() as $brandCampaign)
     <div class="mb-4" data-brand-campaign>@include('campaigns._banner', ['campaign' => $brandCampaign, 'size' => 'strip', 'link' => route('campaigns.show', $brandCampaign)])</div>
 @endforeach
+{{-- The brand's cover image (Admin → Brands → Edit), placed like a shop's banner; phones show its middle --}}
+@if($brand->banner)
+    <img src="{{ $brand->bannerUrl(1200) }}" srcset="{{ $brand->bannerUrl(400) }} 400w, {{ $brand->bannerUrl(1200) }} 1200w" sizes="(min-width: 1280px) 1232px, 100vw"
+         alt="" fetchpriority="high" class="w-full aspect-[3/1] sm:aspect-[4/1] object-cover rounded-xl mb-3 border border-gray-200 bg-gray-100" data-brand-banner>
+@endif
 <div class="bg-white border border-gray-200 rounded-xl p-4 lg:p-6 mb-5">
     <div class="flex items-center gap-4">
         @include('brands._logo', ['brand' => $brand, 'class' => 'w-16 h-16 lg:w-20 lg:h-20 text-2xl lg:text-3xl'])

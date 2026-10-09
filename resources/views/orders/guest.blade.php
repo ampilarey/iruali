@@ -106,6 +106,7 @@
             <div class="bg-white rounded-lg shadow-md p-6 lg:sticky lg:top-32">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
                 <div class="space-y-3 text-sm">
+                    @include('orders._shop_deals', ['order' => $order])
                     <div class="flex justify-between"><span class="text-gray-600">{{ __('Subtotal') }}</span><span class="text-gray-900" dir="ltr">{{ \App\Support\Money::format($order->total_amount - $order->shipping_amount + $order->voucher_discount) }}</span></div>
                     @if($order->voucher_code && $order->voucher_discount > 0)
                         <div class="flex justify-between"><span class="text-green-700">{{ __('Voucher Discount') }} ({{ $order->voucher_code }})</span><span class="text-green-700" dir="ltr">-{{ \App\Support\Money::format($order->voucher_discount) }}</span></div>

@@ -65,15 +65,17 @@ class OrderService
             // Calculate discounts and totals. Redeemed points come from the session; re-check them
             // against the customer's real balance and the cart as it is now.
             $discounts = $this->discountService->calculateTotalDiscount($cart);
+            // Shop codes again, for whoever is ordering (a guest by email): one that stopped working refuses the order
+            app(ShopDiscountService::class)->assertStillValid($discounts['shop'], $user, $guest['email'] ?? null);
             $redeem = min(
                 (int) $discounts['points']['points_redeemed'],
                 max(0, (int) $user?->fresh()->loyalty_points),
-                (int) floor(max(0, $cart->total - $discounts['voucher']['amount']))
+                (int) floor(max(0, $cart->total - $discounts['shop']['amount'] - $discounts['voucher']['amount']))
             );
             if ($redeem !== (int) $discounts['points']['points_redeemed']) {
                 $discounts['points']['points_redeemed'] = $redeem;
                 $discounts['points']['amount'] = $redeem;
-                $discounts['total_discount'] = $discounts['voucher']['amount'] + $redeem;
+                $discounts['total_discount'] = $discounts['shop']['amount'] + $discounts['voucher']['amount'] + $redeem;
                 $discounts['final_total'] = max(0, $cart->total - $discounts['total_discount']);
             }
             $loyaltyPointsEarned = $user ? $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']) : 0;
@@ -91,6 +93,9 @@ class OrderService
 
             // Create order items
             $this->createOrderItems($order, $cart);
+
+            // Shop-funded discounts (multi-buy, shop codes) onto the items, and the codes' uses recorded
+            app(ShopDiscountService::class)->applyToOrder($order, $discounts['shop'], $user, $guest['email'] ?? null);
 
             // One part per shop, with its own fulfilment status and the shop's earnings
             app(FulfilmentService::class)->createParts($order);

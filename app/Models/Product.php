@@ -558,4 +558,17 @@ class Product extends Model
             $this->sale_started_at = $this->freshTimestamp();
         }
     }
+
+    // ---- Shop deals -----------------------------------------------------------------------
+
+    /**
+     * The shop's multi-buy offer on this product ("buy 2, save 5%"), shared with the other products
+     * of a mix-and-match group when the offer has a name.
+     *
+     * @return BelongsTo<MultiBuyOffer, $this>
+     */
+    public function multibuyOffer(): BelongsTo
+    {
+        return $this->belongsTo(MultiBuyOffer::class, 'multibuy_offer_id');
+    }
 }

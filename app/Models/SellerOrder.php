@@ -155,4 +155,13 @@ class SellerOrder extends Model
     {
         return $this->hasMany(Dispute::class);
     }
+
+    /**
+     * The shop's items as the customer paid for them: subtotal less what the shop funded
+     * (multi-buy offers, its discount code). Commission and earnings are worked out on this.
+     */
+    public function netSubtotal(): float
+    {
+        return round((float) $this->subtotal - (float) $this->shop_discount, 2);
+    }
 }

@@ -34,7 +34,7 @@
                             <td class="px-4 py-2"><input type="checkbox" name="parts[]" value="{{ $part->id }}" data-amount="{{ $part->seller_earnings }}" checked class="rounded" aria-label="Include order {{ $part->order?->order_number }}"></td>
                             <td class="px-4 py-2"><a href="{{ route('admin.orders.show', $part->order) }}" class="font-medium text-primary-700 hover:underline">#{{ $part->order?->order_number }}</a>@if($part->returnRequests->where('status', 'requested')->isNotEmpty())<span class="ms-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Return requested</span>@endif</td>
                             <td class="px-4 py-2 text-gray-600">{{ $part->delivered_at?->format('d M Y') }}</td>
-                            <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}</td>
+                            <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}@if((float) $part->shop_discount > 0)<span class="block text-xs text-gray-500">less shop's discounts {{ Money::format($part->shop_discount) }}</span>@endif</td>
                             <td class="px-4 py-2 text-right text-gray-600">&minus;{{ Money::format($part->commission_amount) }} ({{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}%)</td>
                             <td class="px-4 py-2 text-right font-semibold">{{ Money::format($part->seller_earnings) }}</td>
                         </tr>

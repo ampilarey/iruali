@@ -27,7 +27,7 @@
                                 <td class="px-4 py-2">{{ $line->orderItem?->displayName() ?? 'Product' }} <span class="text-xs text-gray-500">(ordered {{ $line->orderItem?->quantity }})</span></td>
                                 <td class="px-4 py-2 text-right">{{ $line->quantity }}</td>
                                 <td class="px-4 py-2 text-right">{{ Money::format($line->orderItem?->price) }}</td>
-                                <td class="px-4 py-2 text-right font-semibold">{{ Money::format($line->orderItem?->price * $line->quantity) }}</td>
+                                <td class="px-4 py-2 text-right font-semibold">{{ Money::format($line->refund_value ?? $line->orderItem?->price * $line->quantity) }}@if($line->orderItem && $line->orderItem->shopDiscount() > 0)<span class="block text-xs font-normal text-gray-500">after the shop's discounts</span>@endif</td>
                             </tr>
                         @endforeach
                     </tbody>

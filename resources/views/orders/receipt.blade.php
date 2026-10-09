@@ -73,6 +73,7 @@
         </table>
         <table class="totals" style="margin-top:8px;max-width:320px;margin-left:auto">
             @if((float) $order->subtotal > 0)<tr><td>{{ __('Subtotal') }}</td><td class="num">{{ Money::format($order->subtotal) }}</td></tr>@endif
+            @include('orders._shop_deals', ['order' => $order, 'as' => 'table'])
             @if((float) $order->voucher_discount > 0)<tr><td>{{ __('Voucher') }} {{ $order->voucher_code }}</td><td class="num">&minus;{{ Money::format($order->voucher_discount) }}</td></tr>@endif
             @if((float) $order->points_redeemed_discount > 0)<tr><td>{{ __('Loyalty points') }}</td><td class="num">&minus;{{ Money::format($order->points_redeemed_discount) }}</td></tr>@endif
             <tr><td>{{ __('Delivery') }}</td><td class="num">{{ Money::format($order->shipping_amount) }}</td></tr>

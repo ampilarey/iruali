@@ -119,6 +119,7 @@
             <div class="bg-white rounded-lg shadow-md p-6 lg:sticky lg:top-32">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
                 <div class="space-y-3">
+                    @include('orders._shop_deals', ['order' => $order])
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Subtotal') }}</span>
                         <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount - $order->shipping_amount + $order->voucher_discount + $order->points_redeemed_discount) }}</span>

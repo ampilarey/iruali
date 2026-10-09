@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\OrderItem;
 use App\Models\ReturnRequest;
 use App\Models\SellerAdjustment;
 use App\Models\SellerOrder;
@@ -83,7 +84,9 @@ class ReturnService
             return null;
         }
 
-        $value = $lines->sum(fn ($l) => $returnable[$l['id']]['item']->price * $l['qty']);
+        // What the customer actually paid for these units: the shop's discounts are shared over them
+        $lines = $lines->map(fn ($l) => $l + ['value' => $this->unitsValue($returnable[$l['id']]['item'], $l['qty'])]);
+        $value = $lines->sum('value');
 
         $request = DB::transaction(function () use ($part, $user, $lines, $reason, $details, $photo, $value) {
             $request = ReturnRequest::create([
@@ -97,7 +100,7 @@ class ReturnService
                 'items_value' => round($value, 2),
             ]);
             foreach ($lines as $line) {
-                $request->items()->create(['order_item_id' => $line['id'], 'quantity' => $line['qty']]);
+                $request->items()->create(['order_item_id' => $line['id'], 'quantity' => $line['qty'], 'refund_value' => $line['value']]);
             }
 
             return $request;
@@ -106,6 +109,35 @@ class ReturnService
         $this->notifyRequested($request);
 
         return $request;
+    }
+
+    /**
+     * What the customer paid for $count more units of an order item: the line's total after the
+     * shop's discounts (multi-buy, shop code), pro rata to the units. It is the value of every unit
+     * returned so far plus these, round(net × units / quantity), less what earlier returns of the
+     * line already took, so returning all the units, at once or in several requests, gives back
+     * exactly the line's net total.
+     */
+    public function unitsValue(OrderItem $item, int $count): float
+    {
+        $quantity = max(1, (int) $item->quantity);
+        $net = ShopDiscountService::toLaari($item->netTotal());
+
+        // Returns from before refund values were kept were valued at the item's price
+        $earlier = DB::table('return_request_items')
+            ->join('return_requests', 'return_requests.id', '=', 'return_request_items.return_request_id')
+            ->join('order_items', 'order_items.id', '=', 'return_request_items.order_item_id')
+            ->where('return_request_items.order_item_id', $item->id)
+            ->where('return_requests.status', '!=', 'rejected')
+            ->selectRaw('COALESCE(SUM(return_request_items.quantity), 0) AS units, COALESCE(SUM(COALESCE(return_request_items.refund_value, return_request_items.quantity * order_items.price)), 0) AS value')
+            ->first();
+        $units = min($quantity, (int) ($earlier->units ?? 0) + $count);
+        $taken = ShopDiscountService::toLaari($earlier->value ?? 0);
+
+        // Round half up, in laari: net × units / quantity
+        $upTo = intdiv(2 * $net * $units + $quantity, 2 * $quantity);
+
+        return max(0, $upTo - $taken) / 100;
     }
 
     /**

@@ -23,6 +23,7 @@ class OrderResource extends JsonResource
             'total_amount' => $this->total_amount,
             'voucher_code' => $this->voucher_code,
             'voucher_discount' => $this->voucher_discount,
+            'shop_discount' => $this->shop_discount, // the shops' own discounts: multi-buy offers and shop codes
             'loyalty_points_earned' => $this->loyalty_points_earned,
             'points_redeemed' => $this->points_redeemed,
             'points_redeemed_discount' => $this->points_redeemed_discount,
@@ -44,6 +45,8 @@ class OrderResource extends JsonResource
                         'quantity' => $item->quantity,
                         'price' => $item->price,
                         'subtotal' => $item->quantity * $item->price,
+                        'multibuy_discount' => $item->multibuy_discount,
+                        'shop_code_discount' => $item->shop_code_discount,
                         // $item is a plain model, so whenLoaded() (a JsonResource helper) is not available here
                         'product' => $this->when($item->relationLoaded('product') && $item->product, function () use ($item) {
                             return [

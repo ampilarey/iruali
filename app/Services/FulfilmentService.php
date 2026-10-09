@@ -51,8 +51,13 @@ class FulfilmentService
             $part->commission_rate = $seller ? $seller->effectiveCommissionRate() : 0;
         }
 
-        $commission = round($subtotal * (float) $part->commission_rate / 100, 2);
-        $part->fill(['subtotal' => $subtotal, 'commission_amount' => $commission, 'seller_earnings' => $subtotal - $commission])->save();
+        // What the shop funds (multi-buy offers, its discount code) comes off its goods: commission and
+        // earnings are worked out on the discounted total (subtotal - shop_discount)
+        $part->shop_discount = round($items->sum(fn ($i) => $i->shopDiscount()), 2);
+        $net = round($subtotal - (float) $part->shop_discount, 2);
+
+        $commission = round($net * (float) $part->commission_rate / 100, 2);
+        $part->fill(['subtotal' => $subtotal, 'commission_amount' => $commission, 'seller_earnings' => round($net - $commission, 2)])->save();
 
         return $part;
     }

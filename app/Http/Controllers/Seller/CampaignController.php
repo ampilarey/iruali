@@ -7,6 +7,7 @@ use App\Models\Campaign;
 use App\Models\CampaignProduct;
 use App\Models\Product;
 use App\Services\NotificationService;
+use App\Support\CurrentShop;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,7 @@ class CampaignController extends Controller
 {
     public function index(Request $request)
     {
-        $seller = $request->user();
+        $seller = CurrentShop::get();
 
         $campaigns = Campaign::joinable()->ordered()
             ->with('brand:id,name')
@@ -34,7 +35,7 @@ class CampaignController extends Controller
     public function show(Request $request, Campaign $campaign)
     {
         abort_unless($campaign->isJoinable(), 404);
-        $seller = $request->user();
+        $seller = CurrentShop::get();
 
         $products = Product::where('seller_id', $seller->id)->where('is_active', true)
             // A brand campaign lists only the shop's products of that brand
@@ -52,7 +53,7 @@ class CampaignController extends Controller
     public function store(Request $request, Campaign $campaign)
     {
         abort_unless($campaign->isJoinable(), 404);
-        $seller = $request->user();
+        $seller = CurrentShop::get();
         $minimum = $campaign->minimumDiscount();
 
         $data = $request->validate([
@@ -96,7 +97,7 @@ class CampaignController extends Controller
 
     public function destroy(Request $request, Campaign $campaign, CampaignProduct $participation)
     {
-        abort_unless($participation->campaign_id === $campaign->id && $participation->seller_id === $request->user()->id, 403);
+        abort_unless($participation->campaign_id === $campaign->id && $participation->seller_id === CurrentShop::id(), 403);
         $participation->delete();
 
         NotificationService::success(__('Product taken out of the campaign.'));

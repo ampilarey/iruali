@@ -17,7 +17,7 @@ class ModerationController extends Controller
     public function reviews(Request $request)
     {
         $reviews = ProductReview::query()
-            ->with(['product', 'user', 'photos', 'replier'])
+            ->with(['product.seller', 'user', 'photos', 'replier'])
             ->when($request->query('show') === 'hidden', fn ($q) => $q->where('is_approved', false))
             ->when($request->query('show') === 'low', fn ($q) => $q->where('rating', '<=', 2))
             ->when($request->filled('q'), function ($q) use ($request) {

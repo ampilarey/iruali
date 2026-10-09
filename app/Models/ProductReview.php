@@ -91,7 +91,8 @@ class ProductReview extends Model
     }
 
     /**
-     * Can this user reply on behalf of the shop? Only the product's seller.
+     * Can this user reply on behalf of the shop? Only the product's seller: its owner, or its staff
+     * whose role may reply to reviews.
      */
     public function canBeRepliedBy(?User $user): bool
     {
@@ -100,15 +101,16 @@ class ProductReview extends Model
         }
         $product = $this->relationLoaded('product') ? $this->product : Product::withTrashed()->find($this->product_id);
 
-        return $product && $product->seller_id && (int) $product->seller_id === (int) $user->id;
+        return $product && $product->seller_id
+            && ((int) $product->seller_id === (int) $user->id || \App\Support\CurrentShop::worksFor($user, (int) $product->seller_id, 'seller.reviews.reply'));
     }
 
     /**
-     * Shop name shown on the reply.
+     * Shop name shown on the reply: the product's shop (the reply may have been written by one of its staff).
      */
     public function replyShopName(): string
     {
-        $seller = $this->replier ?? $this->product?->seller;
+        $seller = ($this->product ?? Product::withTrashed()->find($this->product_id))->seller ?? $this->replier;
 
         return $seller ? ($seller->business_name ?: $seller->name) : 'iruali';
     }

@@ -471,7 +471,7 @@
                     <p class="flex gap-2"><span class="font-bold text-primary shrink-0">{{ __('Q:') }}</span><span class="font-medium text-dark">{{ $question->question }}</span></p>
                     @if($question->answer)
                         <p class="mt-2 flex gap-2 text-sm"><span class="font-bold text-sun-ink shrink-0">{{ __('A:') }}</span><span class="text-gray-700">{{ $question->answer }}
-                            <span class="block text-xs text-gray-500 mt-1">{{ $question->answered_by === $product->seller_id ? ($sellerName ?? __('The shop')) : 'iruali' }} &middot; {{ $question->answered_at?->format('j M Y') }}</span></span></p>
+                            <span class="block text-xs text-gray-500 mt-1">{{ $question->answeredByShop($product->seller_id) ? ($sellerName ?? __('The shop')) : 'iruali' }} &middot; {{ $question->answered_at?->format('j M Y') }}</span></span></p>
                     @else
                         <p class="mt-2 text-sm text-gray-500 ps-6">{{ __('Waiting for the shop to answer.') }}</p>
                     @endif

@@ -110,7 +110,7 @@
                                     <a href="{{ route('wishlist') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wishlist') }}</a>
                                     <a href="{{ route('account.rewards') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Rewards') }}</a>
                                     <a href="{{ route('account.wallet') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wallet') }}</a>
-                                    <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ auth()->user()->hasRole('seller') ? __('Seller Centre') : __('Sell on iruali') }}</a>
+                                    <a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>
                                     @if(auth()->user()->isStaff())
                                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
                                     @endif
@@ -247,7 +247,7 @@
                     <a href="{{ route('wishlist') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Wishlist') }}</a>
                     <a href="{{ route('order.track.form') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Track Order') }}</a>
                     @auth
-                        <a href="{{ route(auth()->user()->hasRole('seller') ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ auth()->user()->hasRole('seller') ? __('Seller Centre') : __('Sell on iruali') }}</a>
+                        <a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>
                         @if(auth()->user()->isStaff())
                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
                         @endif

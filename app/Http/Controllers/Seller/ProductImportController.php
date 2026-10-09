@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Services\ProductCsvService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -20,9 +20,9 @@ class ProductImportController extends Controller
 
     public function export()
     {
-        $name = 'products-'.Str::slug(Auth::user()->business_name ?: Auth::user()->name).'-'.now()->format('Y-m-d').'.csv';
+        $name = 'products-'.Str::slug(CurrentShop::get()->business_name ?: CurrentShop::get()->name).'-'.now()->format('Y-m-d').'.csv';
 
-        return response($this->csv->export(Auth::user()), 200, [
+        return response($this->csv->export(CurrentShop::get()), 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="'.$name.'"',
         ]);
@@ -58,7 +58,7 @@ class ProductImportController extends Controller
         Storage::disk(self::DISK)->put($this->path($token), $contents);
 
         return view('seller.products.import', [
-            'preview' => $this->csv->preview(Auth::user(), $parsed['rows']),
+            'preview' => $this->csv->preview(CurrentShop::get(), $parsed['rows']),
             'token' => $token,
             'result' => null,
         ]);
@@ -81,7 +81,7 @@ class ProductImportController extends Controller
             return redirect()->route('seller.products.import')->withErrors(['file' => $parsed['errors']]);
         }
 
-        $counts = $this->csv->apply(Auth::user(), $parsed['rows']);
+        $counts = $this->csv->apply(CurrentShop::get(), $parsed['rows']);
 
         return redirect()->route('seller.products.import')->with('import_result', $counts);
     }
@@ -91,6 +91,6 @@ class ProductImportController extends Controller
      */
     protected function path(string $token): string
     {
-        return 'imports/'.Auth::id().'/'.$token.'.csv';
+        return 'imports/'.CurrentShop::id().'/'.$token.'.csv';
     }
 }

@@ -7,9 +7,9 @@ use App\Http\Requests\Seller\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\VariantService;
+use App\Support\CurrentShop;
 use App\Traits\SecureFileUpload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -18,7 +18,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $products = Auth::user()->products()
+        $products = CurrentShop::get()->products()
             ->with(['category', 'variants'])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->q.'%';
@@ -46,7 +46,7 @@ class ProductController extends Controller
     public function store(ProductRequest $request, VariantService $variants)
     {
         $product = new Product($request->productAttributes());
-        $product->seller_id = Auth::id();
+        $product->seller_id = CurrentShop::id();
         $product->is_active = false; // new listings wait for admin approval
         if ($product->has_variants) {
             $product->stock_quantity = 0; // set from the variants below
@@ -57,7 +57,7 @@ class ProductController extends Controller
         $this->storeImage($request, $product);
         $variants->sync($product, $request->variantRows());
         $this->saveMultiBuy($request, $product);
-        app(\App\Services\OnboardingService::class)->refresh(Auth::user()->fresh());
+        app(\App\Services\OnboardingService::class)->refresh(CurrentShop::get()->fresh());
 
         return redirect()->route('seller.products.index')
             ->with('success', 'Product submitted. It will be visible in the shop once an admin approves it.');
@@ -102,7 +102,7 @@ class ProductController extends Controller
 
     protected function authorizeOwner(Product $product): void
     {
-        abort_unless((int) $product->seller_id === (int) Auth::id(), 403);
+        abort_unless((int) $product->seller_id === (int) CurrentShop::id(), 403);
     }
 
     protected function categories()

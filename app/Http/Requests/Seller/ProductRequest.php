@@ -81,7 +81,7 @@ class ProductRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
-        $validator->after(fn (Validator $validator) => app(\App\Services\MultiBuyService::class)->validateForm($validator, $this->user(), (array) $this->input('multibuy', [])));
+        $validator->after(fn (Validator $validator) => app(\App\Services\MultiBuyService::class)->validateForm($validator, \App\Support\CurrentShop::get(), (array) $this->input('multibuy', [])));
         $validator->after(function (Validator $validator) {
             if (! $this->boolean('has_variants')) {
                 return;

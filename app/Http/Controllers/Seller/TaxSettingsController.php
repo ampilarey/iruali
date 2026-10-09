@@ -7,6 +7,7 @@ use App\Models\ShopTaxProfile;
 use App\Rules\MiraTin;
 use App\Services\GstService;
 use App\Support\Audit;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 /**
@@ -17,14 +18,14 @@ class TaxSettingsController extends Controller
 {
     public function edit(Request $request)
     {
-        $user = $request->user();
+        $user = CurrentShop::get();
 
         return view('seller.settings.tax', ['user' => $user, 'profile' => ShopTaxProfile::forUser($user->id), 'rate' => app(GstService::class)->rate()]);
     }
 
     public function update(Request $request)
     {
-        $user = $request->user();
+        $user = CurrentShop::get();
         $request->merge(['tin' => GstService::normaliseTin($request->input('tin')) ?: null]);
 
         $data = $request->validate([

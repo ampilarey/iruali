@@ -160,6 +160,7 @@ class AuthController extends BaseController
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password),
+                    'has_password' => true, // an account made with Google, Facebook or Apple has one of its own now
                 ])->save();
             }
         );

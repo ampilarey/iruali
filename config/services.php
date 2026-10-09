@@ -118,4 +118,35 @@ return [
         'password' => env('SMOKE_USER_PASSWORD'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sign in with Google, Facebook and Apple (docs/SOCIAL_LOGIN.md)
+    |--------------------------------------------------------------------------
+    |
+    | A provider's button shows on the sign-in and sign-up pages only when its keys are set. The
+    | redirect URL to register with each is https://<site>/auth/<google|facebook|apple>/callback.
+    |
+    */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+    ],
+
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),          // the App ID
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),  // the App secret
+        'graph_version' => env('FACEBOOK_GRAPH_VERSION', 'v25.0'),
+        // PKCE uses Facebook's OpenID Connect flow; false falls back to the classic code flow
+        'pkce' => (bool) env('FACEBOOK_PKCE', true),
+    ],
+
+    'apple' => [
+        'client_id' => env('APPLE_CLIENT_ID'),   // the Services ID, e.g. mv.iruali.signin
+        'team_id' => env('APPLE_TEAM_ID'),
+        'key_id' => env('APPLE_KEY_ID'),
+        // The .p8 key: its contents (line breaks may be written as \n) or the path to the file
+        'private_key' => env('APPLE_PRIVATE_KEY'),
+        'private_key_path' => env('APPLE_PRIVATE_KEY_PATH'),
+    ],
+
 ];

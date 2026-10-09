@@ -646,4 +646,23 @@ class User extends Authenticatable implements HasLocalePreference
         return $this->emailPreference('wishlist_price_drops') === 'email' && $this->marketing_opt_out_at === null
             && filled($this->email) && $this->isActive() && ! $this->isSmokeTest();
     }
+
+    /**
+     * Google, Facebook and Apple accounts this customer signs in with (My Account → Security).
+     *
+     * @return HasMany<SocialAccount, $this>
+     */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Does the customer have a password of their own? Accounts made by a Google, Facebook or Apple
+     * sign-in do not until they set one (by the emailed link), so they cannot unlink their last one.
+     */
+    public function hasPassword(): bool
+    {
+        return (bool) ($this->getAttribute('has_password') ?? true);
+    }
 }

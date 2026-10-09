@@ -98,9 +98,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         // Password reset
         Route::get('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'request'])->name('password.request');
         Route::post('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'email'])->name('password.email')->middleware('throttle:3,1');
-        Route::get('/reset-password/{token}', [\App\Http\Controllers\Customer\PasswordResetController::class, 'reset'])->name('password.reset');
-        Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
     });
+    // The emailed link also works while signed in: an account made with Google, Facebook or Apple sets its first password this way
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\Customer\PasswordResetController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
 
     // 2FA routes
     Route::middleware('guest')->group(function () {

@@ -42,7 +42,11 @@ class Audit
         'voucher.deleted' => 'Voucher deleted',
         'user.role' => 'User role changed',
         'staff.login' => 'Staff signed in',
+        'seller.verification_submitted' => 'Business documents sent',
+        'seller.verification_approved' => 'Business verified',
+        'seller.verification_rejected' => 'Business verification rejected',
         'seller.holiday' => 'Shop holiday mode changed',
+        'payouts.verified_business_rule' => 'Payout rule (verified business) changed',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

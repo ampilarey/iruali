@@ -5,6 +5,9 @@
     if (\Illuminate\Support\Facades\Route::has('seller.settings.notifications')) {
         $settingsTabs['seller.settings.notifications'] = __('Notifications');
     }
+    if (\Illuminate\Support\Facades\Route::has('seller.settings.verification')) {
+        $settingsTabs['seller.settings.verification'] = __('Business verification');
+    }
     if (\Illuminate\Support\Facades\Route::has('seller.settings.holiday')) {
         $settingsTabs['seller.settings.holiday'] = __('Holiday mode');
     }

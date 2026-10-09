@@ -236,6 +236,7 @@
                         <div class="min-w-0 flex-1 text-sm">
                             <p class="text-gray-500">{{ __('Sold by') }}</p>
                             <a href="{{ route('sellers.show', $seller) }}" class="font-semibold text-dark hover:text-primary hover:underline truncate block">{{ $sellerName }}</a>
+                            @include('sellers._verified_badge', ['seller' => $seller])
                             @if($seller->city)<p class="text-xs text-gray-500">{{ $seller->city }}</p>@endif
                             @if($product->brandModel?->isAuthorisedSeller($seller->id))
                                 @include('brands._authorised_badge', ['brand' => $product->brandModel])

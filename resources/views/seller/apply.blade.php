@@ -38,7 +38,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('seller.apply.store') }}" class="space-y-6 rounded-lg bg-white p-6 shadow">
+            <form method="POST" action="{{ route('seller.apply.store') }}" enctype="multipart/form-data" class="space-y-6 rounded-lg bg-white p-6 shadow">
                 @csrf
 
                 <section class="space-y-4">
@@ -74,6 +74,8 @@
                         </div>
                     </div>
                 </section>
+
+                @include('seller.verification._apply')
 
                 <div class="border-t border-gray-100 pt-6">
                     <label class="flex items-start gap-3 text-sm text-gray-700">

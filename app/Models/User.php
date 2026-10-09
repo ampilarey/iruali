@@ -641,6 +641,23 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
+     * The shop's business verification (registration certificate and the owner's ID card), checked
+     * by iruali in Admin → Verifications.
+     *
+     * @return HasOne<SellerVerification, $this>
+     */
+    public function businessVerification(): HasOne
+    {
+        return $this->hasOne(SellerVerification::class);
+    }
+
+    /** iruali has checked this shop's business registration: it shows "Verified business". */
+    public function hasVerifiedBusiness(): bool
+    {
+        return $this->businessVerification?->status === SellerVerification::APPROVED;
+    }
+
+    /**
      * Holiday mode (Seller Centre → Settings → Holiday mode): the shop's products stay listed but
      * nobody can order them. It ends by itself on the back-on date (holiday_until is the first day
      * the shop takes orders again; a date check, no scheduled job) or when the shop switches it off.

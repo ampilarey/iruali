@@ -49,6 +49,7 @@
                 @endif
                 <div class="min-w-0">
                     <h1 class="font-display text-xl lg:text-3xl font-bold text-dark truncate">{{ $title }}</h1>
+                    @include('sellers._verified_badge', ['seller' => $seller, 'style' => 'inline'])
                     <p class="text-sm text-gray-600 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                         @if($seller->city)<span class="inline-flex items-center gap-1"><x-icon name="map-pin" class="w-4 h-4" />{{ $seller->city }}</span>@endif
                         <span class="inline-flex items-center gap-1 text-success font-medium"><x-icon name="shield" class="w-4 h-4" />{{ __('Reviewed seller') }}</span>

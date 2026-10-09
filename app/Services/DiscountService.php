@@ -11,27 +11,34 @@ use Illuminate\Support\Facades\Session;
 class DiscountService
 {
     /**
-     * Calculate total discount for a cart
+     * Calculate total discount for a cart.
+     *
+     * Shop-funded discounts come first (multi-buy offers, then each shop's code: see
+     * ShopDiscountService), then the iruali voucher on what is left, then loyalty points.
      */
     public function calculateTotalDiscount(Cart $cart): array
     {
-        $voucherDiscount = $this->calculateVoucherDiscount($cart);
+        $shopDiscount = app(ShopDiscountService::class)->forCart($cart);
+        $afterShop = round(max(0, (float) $cart->total - $shopDiscount['amount']), 2);
+        $voucherDiscount = $this->calculateVoucherDiscount($cart, $afterShop);
         $pointsDiscount = $this->calculatePointsDiscount($cart);
 
-        $totalDiscount = $voucherDiscount['amount'] + $pointsDiscount['amount'];
+        $totalDiscount = round($shopDiscount['amount'] + $voucherDiscount['amount'] + $pointsDiscount['amount'], 2);
 
         return [
+            'shop' => $shopDiscount,
             'voucher' => $voucherDiscount,
             'points' => $pointsDiscount,
             'total_discount' => $totalDiscount,
-            'final_total' => max(0, $cart->total - $totalDiscount),
+            'final_total' => round(max(0, $cart->total - $totalDiscount), 2),
         ];
     }
 
     /**
-     * Calculate voucher discount
+     * Calculate voucher discount. $base is what the voucher works on: the goods after the shops'
+     * own discounts (worked out here when not given).
      */
-    public function calculateVoucherDiscount(Cart $cart): array
+    public function calculateVoucherDiscount(Cart $cart, ?float $base = null): array
     {
         // Web checkout keeps the voucher in the session; API clients store it on the cart.
         $voucherCode = Session::get('voucher_code') ?: $cart->voucher_code;
@@ -39,7 +46,8 @@ class DiscountService
             return ['amount' => 0, 'voucher' => null];
         }
 
-        $check = $this->validateVoucher($voucherCode, $cart);
+        $base ??= $this->goodsAfterShopDiscounts($cart);
+        $check = $this->validateVoucher($voucherCode, $cart, $base);
         if (! $check['valid']) {
             // Expired, used up or below the minimum since it was applied: drop it quietly
             Session::forget('voucher_code');
@@ -48,7 +56,7 @@ class DiscountService
         }
         $voucher = $check['voucher'];
 
-        $amount = $this->calculateVoucherAmount($cart, $voucher);
+        $amount = $this->calculateVoucherAmount($cart, $voucher, $base);
 
         return [
             'amount' => $amount,
@@ -59,15 +67,27 @@ class DiscountService
     }
 
     /**
-     * Calculate voucher discount amount
+     * Calculate voucher discount amount, on $base when given (else the cart's total). Never more
+     * than the base, so the total can't go below zero.
      */
-    public function calculateVoucherAmount(Cart $cart, Voucher $voucher): float
+    public function calculateVoucherAmount(Cart $cart, Voucher $voucher, ?float $base = null): float
     {
+        $base ??= (float) $cart->total;
+
         if ($voucher->type === 'percent') {
-            return round($cart->total * ($voucher->amount / 100), 2);
+            return round($base * ((float) $voucher->amount / 100), 2);
         }
 
-        return min($voucher->amount, $cart->total);
+        return round(min((float) $voucher->amount, $base), 2);
+    }
+
+    /**
+     * The cart's goods after the shops' own discounts (multi-buy offers and shop codes): what an
+     * iruali voucher is worked out on.
+     */
+    public function goodsAfterShopDiscounts(Cart $cart): float
+    {
+        return round(max(0, (float) $cart->total - app(ShopDiscountService::class)->forCart($cart)['amount']), 2);
     }
 
     /**
@@ -85,9 +105,10 @@ class DiscountService
     }
 
     /**
-     * Validate voucher for application
+     * Validate voucher for application. The minimum order is checked on $base: the goods after the
+     * shops' own discounts (worked out here when not given).
      */
-    public function validateVoucher(string $voucherCode, Cart $cart): array
+    public function validateVoucher(string $voucherCode, Cart $cart, ?float $base = null): array
     {
         $voucher = Voucher::where('code', $voucherCode)
             ->where('is_active', true)
@@ -114,7 +135,7 @@ class DiscountService
             return ['valid' => false, 'message' => __('Voucher usage limit reached.')];
         }
 
-        if ($voucher->min_order && $cart->total < $voucher->min_order) {
+        if ($voucher->min_order && ($base ?? $this->goodsAfterShopDiscounts($cart)) < (float) $voucher->min_order) {
             return ['valid' => false, 'message' => __('Order does not meet minimum amount for this voucher.')];
         }
 

@@ -18,7 +18,9 @@ use Throwable;
  *
  * A shop earns its item subtotal minus commission on every order part. Earnings become payable
  * once the part is delivered and the customer's payment is confirmed. Delivery fees, vouchers and
- * loyalty-point discounts are iruali's and don't change what the shop earns.
+ * loyalty-point discounts are iruali's and don't change what the shop earns. The shop's own
+ * discounts (multi-buy offers, its discount codes) are the shop's: they come off its subtotal
+ * before commission (SellerOrder::shop_discount, see FulfilmentService::refreshPart).
  *
  * Adjustments (e.g. the shop's share of an approved return, taken back) are settled in the shop's
  * next payout, whether or not the order they relate to was already paid out.

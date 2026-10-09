@@ -1542,5 +1542,18 @@
     "And :count more new product.|And :count more new products.": "އަދި އިތުރު :count އާ ތަކެތި.|އަދި އިތުރު :count އާ ތަކެތި.",
     "Also new from:": "މި ބްރޭންޑްތަކުންވެސް އާ ތަކެތި:",
     "You get this email because you follow these brands on iruali.": "iruali ގައި މި ބްރޭންޑްތައް ފޮލޯ ކުރައްވާތީ މި އީމެއިލް ލިބިވަޑައިގަންނަވަނީ.",
-    "Change your email settings": "އީމެއިލް ސެޓިންގްސް ބަދަލުކުރައްވާ"
+    "Change your email settings": "އީމެއިލް ސެޓިންގްސް ބަދަލުކުރައްވާ",
+    "Price drops on your wishlist": "ވިޝްލިސްޓުގައިވާ ތަކެތީގެ އަގު ދަށްވުން",
+    "One email a day when something on your wishlist gets cheaper by at least 5% and MVR 10, plus a notification on devices where you turned them on.": "ވިޝްލިސްޓުގައިވާ ތަކެއްޗެއްގެ އަގު މަދުވެގެން 5% އާއި 10 ރުފިޔާ ހެޔޮވާއިރު ދުވާލަކު އެއް އީމެއިލް، އަދި ނޮޓިފިކޭޝަން އޮން ކުރައްވާފައިވާ ޑިވައިސްތަކަށް ނޮޓިފިކޭޝަނެއް.",
+    "Price drop: :product": ":product ގެ އަގު ދަށްވެއްޖެ",
+    "Prices dropped on your wishlist": "ވިޝްލިސްޓުގައިވާ ތަކެތީގެ އަގު ދަށްވެއްޖެ",
+    ":product is now :price (was :was).": ":product މިހާރު :price (ކުރިން :was).",
+    ":count items on your wishlist are cheaper now.": "ވިޝްލިސްޓުގައިވާ :count ތަކެތި މިހާރު ހެޔޮވެއްޖެ.",
+    "Price drop on your wishlist": "ވިޝްލިސްޓުގައިވާ ތަކެއްޗެއްގެ އަގު ދަށްވެއްޖެ",
+    "Good news: an item on your wishlist is cheaper now.|Good news: :count items on your wishlist are cheaper now.": "އުފާވެރި ޚަބަރެއް: ވިޝްލިސްޓުގައިވާ ތަކެއްޗެއް މިހާރު ހެޔޮވެއްޖެ.|އުފާވެރި ޚަބަރެއް: ވިޝްލިސްޓުގައިވާ :count ތަކެތި މިހާރު ހެޔޮވެއްޖެ.",
+    "You save :amount (:percent%)": "ތިބާއަށް :amount ސޭވްވޭ (:percent%)",
+    "Prices can change again, so do not wait too long if you want it.": "އަގުތައް އަލުން ބަދަލުވެދާނެތީ، ގަންނަވަން ބޭނުންނަމަ ލަސްނުކުރައްވާ.",
+    "See your wishlist": "ވިޝްލިސްޓު ބައްލަވާ",
+    "You get this email because these items are on your wishlist on iruali.": "iruali ގައި ތިބާގެ ވިޝްލިސްޓުގައި މި ތަކެތި ހުރުމުން މި އީމެއިލް ލިބިވަޑައިގަންނަވަނީ.",
+    ":amount less than when you saved it": "ސޭވްކުރެއްވިއިރަށްވުރެ :amount ހެޔޮ"
 }

@@ -63,6 +63,7 @@ class NotificationPreferencesController extends Controller
             'marketing' => [__('Offers and news'), __('Deals, new arrivals and the occasional newsletter.')],
             'security' => [__('Security'), __('Sign-in codes, password changes and other account alerts.')],
             'brand_updates' => [__('Brands you follow'), __('One email a day when brands you follow put products on sale or join a sale.')],
+            'wishlist_price_drops' => [__('Price drops on your wishlist'), __('One email a day when something on your wishlist gets cheaper by at least 5% and MVR 10, plus a notification on devices where you turned them on.')],
         ];
     }
 

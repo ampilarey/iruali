@@ -16,7 +16,7 @@ class WishlistController extends Controller
         // A product deleted since it was saved (it is in the bin) is left out
         $wishlistItems = Wishlist::where('user_id', Auth::id())
             ->whereHas('product')
-            ->with('product.mainImage')
+            ->with(['product.mainImage', 'product.variants', 'variant'])
             ->get();
 
         return view('wishlist.index', compact('wishlistItems'));

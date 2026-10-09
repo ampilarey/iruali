@@ -52,6 +52,9 @@ class Audit
         'newsletter.sent' => 'Newsletter sent',
         'tax.settings_saved' => 'Tax settings saved',
         'shop.tax_details_saved' => 'Shop tax details saved',
+        'preorder.stock_arrived' => 'Pre-order stock arrived',
+        'preorder.date_moved' => 'Pre-order date moved',
+        'preorder.cancelled' => 'Pre-order cancelled by the customer',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

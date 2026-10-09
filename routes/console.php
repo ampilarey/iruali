@@ -58,3 +58,6 @@ Schedule::command('brands:notify-followers')->dailyAt('09:00')->timezone('Indian
 
 // Wishlist price-drop alerts: one email (and push) a day per customer, only when something got cheaper
 Schedule::command('wishlist:price-drops')->dailyAt('10:00')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// Pre-orders more than a week past their expected date go to Admin → Inbox ("Late pre-orders")
+Schedule::command('preorders:flag-late')->dailyAt('06:45')->timezone('Indian/Maldives')->withoutOverlapping();

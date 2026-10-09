@@ -5,4 +5,5 @@ return [
     App\Providers\AuthServiceProvider::class,
     App\Providers\TrustServiceProvider::class,
     App\Providers\SellerTrustServiceProvider::class,
+    App\Providers\PreorderServiceProvider::class,
 ];

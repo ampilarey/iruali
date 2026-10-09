@@ -20,6 +20,12 @@ class OrderItem extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'quantity' => 'integer',
+        // A pre-order line (App\Services\PreorderService)
+        'is_preorder' => 'boolean',
+        'preorder_ship_date' => 'date',
+        'preorder_allocated_quantity' => 'integer',
+        'preorder_allocated_at' => 'datetime',
+        'preorder_late_at' => 'datetime',
     ];
 
     /**
@@ -77,5 +83,35 @@ class OrderItem extends Model
     public function netTotal(): float
     {
         return round((float) $this->price * (int) $this->quantity - $this->shopDiscount(), 2);
+    }
+
+    // ---- Pre-orders -----------------------------------------------------------------------
+
+    /**
+     * Units of this pre-order line still waiting for their stock (0 for an ordinary line).
+     */
+    public function preorderWaitingQuantity(): int
+    {
+        if (! $this->is_preorder || $this->preorder_allocated_at !== null) {
+            return 0;
+        }
+
+        return max(0, (int) $this->quantity - (int) $this->preorder_allocated_quantity);
+    }
+
+    public function isPreorderWaiting(): bool
+    {
+        return $this->preorderWaitingQuantity() > 0;
+    }
+
+    /**
+     * Units this line took from stock: all of them for an ordinary line, only those the arrived
+     * stock has covered for a pre-order. What a cancellation may put back on the shelf.
+     */
+    public function stockedQuantity(): int
+    {
+        return $this->is_preorder && $this->preorder_allocated_at === null
+            ? min((int) $this->quantity, (int) $this->preorder_allocated_quantity)
+            : (int) $this->quantity;
     }
 }

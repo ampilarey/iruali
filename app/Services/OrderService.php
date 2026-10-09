@@ -66,6 +66,10 @@ class OrderService
         try {
             DB::beginTransaction();
 
+            // Pre-orders: the cart's stock rows are locked first, before any plain read (snapshot isolation),
+            // and lines with no stock that the shop takes pre-orders for are held against its limit
+            $preorders = app(PreorderService::class)->reserveForCheckout($cart, $user);
+
             // Calculate discounts and totals. Redeemed points come from the session; re-check them
             // against the customer's real balance and the cart as it is now.
             $discounts = $this->discountService->calculateTotalDiscount($cart);
@@ -110,9 +114,15 @@ class OrderService
             // Deliver or pickup per shop part, and the order's delivery area, time slot and gift details
             $delivery->applyToOrder($order, $shippingData);
 
+            // Pre-order lines take no stock: they are flagged on the order and its shop parts ("Awaiting stock")
+            app(PreorderService::class)->markOrder($order, $preorders);
+
             // Take the stock atomically: two checkouts racing for the last unit can't both win.
             // A line with a variant takes it from the variant row (the product total follows).
             foreach ($cart->items as $cartItem) {
+                if (isset($preorders[$cartItem->id])) {
+                    continue; // a pre-order: its units come with the shop's next delivery
+                }
                 $taken = $this->takeStock($cartItem->product_id, $cartItem->product_variant_id, $cartItem->quantity);
                 if ($taken === 0) {
                     throw new \RuntimeException(__('Sorry, ":name" just sold out.', ['name' => ($cartItem->product->name['en'] ?? $cartItem->product->name).($cartItem->variant ? ' ('.$cartItem->variant->displayName().')' : '')]));
@@ -145,6 +155,12 @@ class OrderService
                 'message' => 'Order placed successfully!',
             ];
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            // A database error is a RuntimeException too, but its message (SQL) is not for customers
+            DB::rollBack();
+            report($e);
+
+            return ['success' => false, 'message' => __('We could not place your order. Please try again.')];
         } catch (\RuntimeException $e) {
             DB::rollBack();
 
@@ -372,6 +388,11 @@ class OrderService
             $next = array_values(array_diff($next, ['cancelled']));
         }
 
+        // A shop's part still awaiting pre-order stock can't be sent, so neither can the whole order
+        if (in_array('shipped', $next, true) && app(PreorderService::class)->orderAwaitingStock($order)) {
+            $next = array_values(array_diff($next, ['shipped']));
+        }
+
         return $next;
     }
 
@@ -444,10 +465,13 @@ class OrderService
     protected function reverseOrder(Order $order): void
     {
         foreach ($order->items()->with('product')->get() as $item) {
-            if ($item->product) {
-                $this->restock($item->product, $item->product_variant_id, $item->quantity);
+            // A pre-order puts back only the units whose stock had arrived for it (the rest never existed)
+            if ($item->product && $item->stockedQuantity() > 0) {
+                $this->restock($item->product, $item->product_variant_id, $item->stockedQuantity());
             }
         }
+        // Units given back go first to pre-orders still waiting for the same products
+        app(PreorderService::class)->afterOrderReversed($order);
 
         $user = $order->user;
         if ($user) {

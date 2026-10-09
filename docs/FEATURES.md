@@ -175,6 +175,54 @@ signups; the smoke-test customer is excluded), `/admin/errors` (every reported e
 counted per place in the code, with "mark resolved"), `/admin/audit` (who changed what, with
 IP and diff), `/admin/sms` (sent messages and a test send).
 
+## Tax (GST-ready)
+
+iruali is **GST-ready**: everything is configurable and, until someone is marked GST-registered,
+nothing a shopper sees changes. Prices on iruali **include GST**, so the GST in an amount is
+`amount × rate ÷ (100 + rate)`, rounded to the laari (`App\Services\GstService::gstIncluded`).
+This is a tool for keeping records, not tax advice: **confirm the rate and what your invoices
+must show with your accountant or MIRA before you switch registration on.**
+
+- **iruali's settings** at **Admin → Tax** (`/admin/tax`, `admin.tax`; admins and finance staff):
+  GST-registered yes/no (default no), iruali's TIN (MIRA format, 7 digits + `GST` + 3 digits, e.g.
+  `1012345GST501`), the GST rate (default 8.00 %) and the invoice number prefix (default `INV`).
+  iruali's name and address on invoices come from **Admin → Settings → Business details**. Every
+  change is in the audit log (`tax.settings_saved`).
+- **Shops** say whether they are GST-registered under **Seller Centre → Settings → Tax**
+  (`seller.settings.tax`): TIN (spaces and case forgiven, stored normalised), registered name and
+  business address (`shop_tax_profiles`, audited as `shop.tax_details_saved`). Admins see it on
+  **Admin → Sellers** and in the list on Admin → Tax.
+- **Frozen when the order is placed.** Each shop part (`seller_orders`) keeps whether the shop was
+  registered, its TIN, name and address, the rate, the goods total after any shop discount
+  (`SellerOrder::taxableGoodsTotal()`), the GST in it and the GST in iruali's commission; each
+  order keeps iruali's registration, TIN, rate and the GST in the delivery fee (delivery is
+  iruali's, not the shops'). Later changes never alter an order already placed
+  (`FulfilmentService::refreshPart` → `GstService::capturePart`).
+- **Invoices.** When an order is paid each shop part gets a number from that shop's own series,
+  e.g. `INV-12-000034` (`IR` for iruali's own sales), taken with the series row locked so payments
+  landing together never share or skip a number; unpaid orders get none. A part is a **tax
+  invoice** when the shop was GST-registered at order time, otherwise a **receipt**: date, shop
+  name/address/TIN, buyer (and business details when given), lines with GST-inclusive prices, GST
+  breakdown and totals; English, with the Dhivehi under each label on Dhivehi pages. Customers
+  open them from the order page (`orders.invoice`; guests through the signed link,
+  `guest.orders.invoice`), shops from their order page (`seller.orders.invoice`), staff from the
+  admin order page (`admin.orders.invoice`). iruali's own receipt (`orders.receipt`) shows the GST
+  in the delivery fee when iruali was registered.
+- **Commission invoices.** Each paid payout gets iruali's invoice to the shop for the commission
+  in it (`INV-C-000001`, numbered when the payout or its batch is paid), with GST for orders placed
+  while iruali was registered. The commission is treated as GST-inclusive, so shops' earnings do
+  not change. From Seller Centre → Earnings (`seller.payouts.invoice`) and Admin → Payouts
+  (`admin.payouts.invoice`).
+- **Monthly GST report** at `/admin/tax/report?month=2026-10` (`admin.tax.report`, CSV with
+  `&export=csv`): paid orders only, a sale in the month it was paid, refunds in the month a return
+  or dispute was approved or a paid order was cancelled. Per GST-registered shop: sales, GST,
+  refunds and the GST in them; for iruali: commission and delivery fees with their GST, less what
+  was given back. Gift-card orders are left out (GST applies when a card is spent).
+- **Business buyers.** Customers can save business details (company name, optional TIN, address)
+  under **My account → Edit profile** (`account.business.update`). At checkout an optional
+  "Buying for a business?" block, prefilled from the profile and open to guests, stores them on
+  the order and every shop's invoice prints them.
+
 ## Operations
 
 **Deploy and release.** `main` auto-deploys to test.iruali.mv (`TEST_AUTO_DEPLOY.md`);

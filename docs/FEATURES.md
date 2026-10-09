@@ -65,7 +65,9 @@ get none. Admin → Brands shows each brand's followers, and a merge moves them 
 set under Admin → Brands → edit). Dhivehi pages show it wherever shoppers see the brand: the
 directory (tiles and A–Z list, with the English name small underneath and still filed under its
 English letter), the brand page's title, heading, breadcrumbs and SEO tags, the product page's brand
-link, "Shop by brand" on the home page, search suggestions and the catalogue's brand filter.
+link, "Shop by brand" on the home page, search suggestions, the catalogue's brand filter and the
+chip of a picked brand, product cards and the compare table (`Product::brandLabel()`; the listings
+eager-load `brandModel`, so cards add no query per product).
 `products.brand` keeps the English name. The Dhivehi name is matched like an old name (a
 `brand_aliases` key, refused when another brand has it): shops typing it get the brand,
 `/brands/<the name>` redirects to the brand page, and earlier Dhivehi names keep matching. It is

@@ -5,12 +5,15 @@ namespace Tests\Feature;
 use App\Models\AuditLog;
 use App\Models\Brand;
 use App\Models\BrandAlias;
+use App\Models\Campaign;
+use App\Models\CampaignProduct;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\BrandService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -166,6 +169,56 @@ class BrandDhivehiNamesTest extends TestCase
             ->assertSee('<span class="flex-1 truncate">Bose</span>', false);
         $this->get('/shop')->assertOk()->assertSee('<span class="flex-1 truncate">Samsung</span>', false);
         $this->get('/dv/shop?brand[]=Samsung')->assertOk()->assertSee('ގެލެކްސީ ޗާޖަރ')->assertDontSee('ހެޑްފޯން');
+    }
+
+    public function test_product_cards_the_compare_table_and_filter_chips_show_the_dhivehi_name(): void
+    {
+        $this->nameInDhivehi($this->brand('Samsung'), 'ސާމްސަންގް');
+        $charger = $this->product(['brand' => 'Samsung', 'slug' => 'galaxy-charger', 'name' => ['en' => 'Galaxy charger', 'dv' => 'ގެލެކްސީ ޗާޖަރ']]);
+        $headphones = $this->product(['brand' => 'Bose', 'slug' => 'bose-headphones', 'name' => ['en' => 'Headphones', 'dv' => 'ހެޑްފޯން']]);
+        $grid = fn (string $brand) => '<p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 truncate">'.$brand.'</p>';
+        $list = fn (string $brand) => '<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">'.$brand.'</p>';
+
+        // The catalogue's cards in both layouts; a brand without a Dhivehi name keeps its own
+        $this->get('/dv/shop')->assertOk()
+            ->assertSee($grid('ސާމްސަންގް'), false)->assertSee($grid('Bose'), false)->assertDontSee($grid('Samsung'), false);
+        $this->get('/dv/shop?view=list')->assertOk()->assertSee($list('ސާމްސަންގް'), false)->assertDontSee($list('Samsung'), false);
+        $this->get('/shop')->assertOk()->assertSee($grid('Samsung'), false)->assertDontSee($grid('ސާމްސަންގް'), false);
+        $this->get('/shop?view=list')->assertOk()->assertSee($list('Samsung'), false);
+
+        // The rows on the home page and under a product (more from the shop, related products)
+        $this->get('/dv')->assertOk()->assertSee($grid('ސާމްސަންގް'), false)->assertDontSee($grid('Samsung'), false);
+        $this->get('/')->assertOk()->assertSee($grid('Samsung'), false);
+        $this->get('/dv/products/bose-headphones')->assertOk()->assertSee($grid('ސާމްސަންގް'), false)->assertDontSee($grid('Samsung'), false);
+
+        // A campaign page (its language follows the session)
+        $campaign = Campaign::factory()->create(['name' => 'Eid sale', 'headline' => ['en' => 'Eid sale']]);
+        CampaignProduct::create(['campaign_id' => $campaign->id, 'product_id' => $charger->id, 'seller_id' => $charger->seller_id, 'approved_at' => now()]);
+        $this->withSession(['locale' => 'dv'])->get(route('campaigns.show', $campaign))->assertOk()->assertSee($grid('ސާމްސަންގް'), false);
+        $this->withSession(['locale' => 'en'])->get(route('campaigns.show', $campaign))->assertOk()->assertSee($grid('Samsung'), false);
+
+        // The compare table's brand row
+        $this->withSession(['compare' => [$charger->id, $headphones->id]])->get('/dv/compare')->assertOk()
+            ->assertSeeInOrder(['ސާމްސަންގް', 'Bose'])->assertDontSee('Samsung');
+
+        // The chip for a picked brand is labelled like the brand filter (the link keeps the English value)
+        $chip = '<a href="'.url('/dv/shop').'" class="inline-flex items-center gap-1.5 ps-3 pe-2 py-1 rounded-full bg-primary-50 text-primary-800 text-sm font-medium hover:bg-primary-100">';
+        $this->get('/dv/shop?brand[]=Samsung')->assertOk()->assertSee($chip."\n                                ސާމްސަންގް<svg", false);
+        $this->get('/shop?brand[]=Samsung')->assertOk()->assertSee(str_replace('/dv/shop', '/shop', $chip)."\n                                Samsung<svg", false);
+
+        // One query loads the brands of a whole page of cards, however many there are
+        $brandQueries = 0;
+        DB::listen(function ($query) use (&$brandQueries) {
+            $brandQueries += (int) (bool) preg_match('/from [`"]?brands[`"]?/i', $query->sql);
+        });
+        $this->get('/dv/shop')->assertOk();
+        $withTwoProducts = $brandQueries;
+        foreach (['Apple' => 'އެޕަލް', 'Sony' => 'ސޯނީ', 'Canon' => 'ކެނަން', 'Philips' => 'ފިލިޕްސް'] as $name => $nameDv) {
+            $this->brand($name)->forceFill(['name_dv' => $nameDv])->save();
+        }
+        $brandQueries = 0;
+        $this->get('/dv/shop')->assertOk()->assertSee($grid('ކެނަން'), false);
+        $this->assertSame($withTwoProducts, $brandQueries, 'the cards add no query per product');
     }
 
     public function test_thaana_searches_and_suggestions_find_the_brand(): void

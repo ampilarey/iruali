@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
@@ -46,7 +47,7 @@ class CatalogService
         $view = $request->query('view') === 'list' ? 'list' : 'grid';
 
         $query = $this->filtered()
-            ->with(['category', 'mainImage', 'seller'])
+            ->with(['category', 'mainImage', 'seller', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating');
 
@@ -197,8 +198,10 @@ class CatalogService
         if (! isset($this->locked['category']) && ($category = $this->selectedCategory())) {
             $chips->push(['label' => $category->localized_name, 'url' => $this->urlWithout('category')]);
         }
-        foreach (isset($this->locked['brand']) ? [] : $this->strings('brand') as $brand) {
-            $chips->push(['label' => $brand, 'url' => $this->urlWithout('brand', $brand)]);
+        $brands = isset($this->locked['brand']) ? [] : $this->strings('brand');
+        $brandLabels = Brand::dhivehiNames($brands); // labelled like the brand filter
+        foreach ($brands as $brand) {
+            $chips->push(['label' => $brandLabels[$brand] ?? $brand, 'url' => $this->urlWithout('brand', $brand)]);
         }
         if (! isset($this->locked['seller'])) {
             foreach (User::whereIn('id', $this->ids('seller'))->get() as $seller) {

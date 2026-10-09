@@ -70,7 +70,7 @@
                                                 @if($product->rating_count)<x-rating :value="round((float) $product->rating_avg, 1)" :count="$product->rating_count" />@else<span class="text-gray-500">{{ __('No reviews yet') }}</span>@endif
                                                 @break
                                             @case('stock') <x-stock :quantity="(int) $product->stock_quantity" /> @break
-                                            @case('brand') {{ $product->brand ?: '—' }} @break
+                                            @case('brand') {{ $product->brandLabel() ?? '—' }} @break
                                             @case('model') {{ $product->model ?: '—' }} @break
                                             @case('sku') {{ $product->sku ?: '—' }} @break
                                             @case('department') {{ $product->category?->localized_name ?: '—' }} @break

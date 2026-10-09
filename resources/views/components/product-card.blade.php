@@ -8,6 +8,7 @@
     $ratingCount = (int) ($product->rating_count ?? 0);
     $stock = (int) $product->stock_quantity;
     $wasPrice = $product->was_price;
+    $brandLabel = $product->brandLabel(); // the Dhivehi name on Dhivehi pages
 @endphp
 
 @if($layout === 'list')
@@ -21,7 +22,7 @@
     </a>
     <div class="flex-1 min-w-0 grid sm:grid-cols-[1fr_13rem] gap-3 sm:gap-6">
         <div class="min-w-0">
-            @if($product->brand)<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $product->brand }}</p>@endif
+            @if($brandLabel)<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $brandLabel }}</p>@endif
             <h3 class="font-semibold text-dark leading-snug line-clamp-2"><a href="{{ $url }}" class="hover:text-primary hover:underline">{{ $product->name }}</a></h3>
             <p class="mt-1 text-xs text-gray-500">{{ __('SKU') }} <span dir="ltr">{{ $product->sku }}</span>@if($product->model) &middot; {{ __('Model') }} <span dir="ltr">{{ $product->model }}</span>@endif</p>
             @if($ratingCount > 0)
@@ -63,7 +64,7 @@
         <x-wishlist-button :product="$product" floating />
     @endunless
     <div class="p-3 flex flex-col flex-1">
-        @if($product->brand)<p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 truncate">{{ $product->brand }}</p>@endif
+        @if($brandLabel)<p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 truncate">{{ $brandLabel }}</p>@endif
         <h3 class="text-sm font-semibold text-dark leading-snug line-clamp-2 min-h-[2.5rem]"><a href="{{ $url }}" class="hover:text-primary hover:underline">{{ $product->name }}</a></h3>
         @if($ratingCount > 0)
             <x-rating :value="$rating" :count="$ratingCount" class="mt-1" />

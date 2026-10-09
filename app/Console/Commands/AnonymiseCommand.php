@@ -49,6 +49,7 @@ class AnonymiseCommand extends Command
             'newsletter emails replaced' => DB::table('newsletter_subscribers')->count(),
             'OTP rows truncated' => DB::table('otps')->count(),
             'shop owners\' ID card numbers replaced' => DB::table('seller_verifications')->count(),
+            'shop staff invitation emails replaced' => DB::table('shop_staff_invitations')->count(),
         ];
 
         if (! $this->option('force')) {
@@ -110,6 +111,13 @@ class AnonymiseCommand extends Command
         DB::table('seller_verifications')->orderBy('id')->select('id')->chunkById(500, function ($rows) {
             foreach ($rows as $row) {
                 DB::table('seller_verifications')->where('id', $row->id)->update(['national_id_number' => \Illuminate\Support\Facades\Crypt::encryptString('A'.str_pad((string) $row->id, 6, '0', STR_PAD_LEFT))]);
+            }
+        });
+
+        // Shop staff invitations: the invited email addresses (their links stop working too)
+        DB::table('shop_staff_invitations')->orderBy('id')->select('id')->chunkById(1000, function ($rows) {
+            foreach ($rows as $row) {
+                DB::table('shop_staff_invitations')->where('id', $row->id)->update(['email' => "invitation{$row->id}@example.test", 'token_hash' => hash('sha256', 'anonymised-'.$row->id.'-'.\Illuminate\Support\Str::random(20))]);
             }
         });
 

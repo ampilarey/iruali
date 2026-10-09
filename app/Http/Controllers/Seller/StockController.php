@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -18,7 +18,7 @@ class StockController extends Controller
     {
         $lowOnly = $request->boolean('low');
 
-        $products = Auth::user()->products()
+        $products = CurrentShop::get()->products()
             ->with(['variants' => fn ($q) => $q->ordered()])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->q.'%';
@@ -32,7 +32,7 @@ class StockController extends Controller
             $products = $products->filter(fn ($p) => $p->isLowStock())->values();
         }
 
-        $lowCount = Auth::user()->products()->with('variants')->get()->filter(fn ($p) => $p->isLowStock())->count();
+        $lowCount = CurrentShop::get()->products()->with('variants')->get()->filter(fn ($p) => $p->isLowStock())->count();
 
         return view('seller.stock', compact('products', 'lowOnly', 'lowCount'));
     }
@@ -49,7 +49,7 @@ class StockController extends Controller
             'variants.*' => 'required|integer|min:0|max:999999',
         ]);
 
-        $sellerId = Auth::id();
+        $sellerId = CurrentShop::id();
         $productIds = array_map('intval', array_keys($data['products'] ?? []));
         $variantIds = array_map('intval', array_keys($data['variants'] ?? []));
 

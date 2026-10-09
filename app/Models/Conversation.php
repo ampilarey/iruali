@@ -74,6 +74,10 @@ class Conversation extends Model
         if ($this->seller_id && $user->id === $this->seller_id) {
             return 'seller';
         }
+        // The shop's staff who can open its order pages take part for the shop
+        if ($this->seller_id && \App\Support\CurrentShop::worksFor($user, (int) $this->seller_id, 'seller.orders.show')) {
+            return 'seller';
+        }
 
         return $user->isAdmin() ? 'admin' : null;
     }

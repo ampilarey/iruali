@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Island;
 use App\Models\SellerDeliverySetting;
 use App\Services\DeliveryService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 /**
@@ -19,7 +19,7 @@ class DeliverySettingsController extends Controller
     public function edit(DeliveryService $delivery)
     {
         return view('seller.settings.delivery', [
-            'setting' => SellerDeliverySetting::for(Auth::id()),
+            'setting' => SellerDeliverySetting::for(CurrentShop::id()),
             'islandsByAtoll' => $delivery->islandsByAtoll(),
         ]);
     }
@@ -40,7 +40,7 @@ class DeliverySettingsController extends Controller
             'pickup_hours.required' => __('Please give your opening hours, so customers know when to come.'),
         ]);
 
-        SellerDeliverySetting::updateOrCreate(['seller_id' => Auth::id()], [
+        SellerDeliverySetting::updateOrCreate(['seller_id' => CurrentShop::id()], [
             'ships_within_days' => (int) $data['ships_within_days'],
             'pickup_enabled' => $pickup,
             'pickup_address' => filled($data['pickup_address'] ?? null) ? trim($data['pickup_address']) : null,

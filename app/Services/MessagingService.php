@@ -9,6 +9,7 @@ use App\Models\ReturnRequest;
 use App\Models\SellerOrder;
 use App\Models\User;
 use App\Notifications\NewMessage;
+use App\Support\CurrentShop;
 use App\Traits\SecureFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -120,7 +121,8 @@ class MessagingService
     }
 
     /**
-     * Unread messages waiting for this user, as a customer and as a shop (admins: everything).
+     * Unread messages waiting for this user, as a customer and as a shop (admins: everything). The
+     * shop's count also shows for its staff who answer customers.
      *
      * @return array{customer: int, seller: int, admin: int}
      */
@@ -130,11 +132,27 @@ class MessagingService
             return ['customer' => 0, 'seller' => 0, 'admin' => 0];
         }
 
+        $shopId = $this->shopIdFor($user);
+
         return [
             'customer' => (int) Conversation::where('customer_id', $user->id)->sum('customer_unread_count'),
-            'seller' => $user->is_seller ? (int) Conversation::where('seller_id', $user->id)->sum('seller_unread_count') : 0,
+            'seller' => $shopId ? (int) Conversation::where('seller_id', $shopId)->sum('seller_unread_count') : 0,
             'admin' => $user->isAdmin() ? (int) Conversation::sum('admin_unread_count') : 0,
         ];
+    }
+
+    /**
+     * The shop whose messages this user answers: their own, or the shop they work for when their
+     * staff role may write to customers. 0 for nobody.
+     */
+    protected function shopIdFor(User $user): int
+    {
+        if ($user->is_seller) {
+            return (int) $user->id;
+        }
+        $shopId = (int) CurrentShop::membershipOf($user)?->shop_id;
+
+        return CurrentShop::worksFor($user, $shopId, 'seller.orders.messages.store') ? $shopId : 0;
     }
 
     public function attachmentResponse(Message $message)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Support\Audit;
+use App\Support\CurrentShop;
 use App\Support\ShopHoliday;
 use Illuminate\Http\Request;
 
@@ -16,12 +17,12 @@ class HolidayController extends Controller
 {
     public function show(Request $request)
     {
-        return view('seller.settings.holiday', ['user' => $request->user()]);
+        return view('seller.settings.holiday', ['user' => CurrentShop::get()]);
     }
 
     public function update(Request $request)
     {
-        $user = $request->user();
+        $user = CurrentShop::get();
         $data = $request->validate([
             'on_holiday' => 'required|boolean',
             'holiday_until' => ['nullable', 'exclude_unless:on_holiday,1', 'date', 'after:today', 'before_or_equal:'.today()->addYear()->toDateString()],

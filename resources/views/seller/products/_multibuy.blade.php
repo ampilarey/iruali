@@ -1,7 +1,7 @@
 {{-- Product form: "Multi-buy offer" (up to 3 quantity tiers, for this product or a mix-and-match group). Saved by MultiBuyService. --}}
 @php
     $multibuyOffer = $product->exists ? $product->multibuyOffer : null;
-    $multibuyGroups = auth()->user() ? app(\App\Services\MultiBuyService::class)->groupsFor(auth()->user()) : collect();
+    $multibuyGroups = auth()->user() ? app(\App\Services\MultiBuyService::class)->groupsFor(\App\Support\CurrentShop::get()) : collect();
     $multibuyTiers = array_values((array) old('multibuy.tiers', $multibuyOffer?->tierList() ?? []));
     $multibuyGroup = (string) old('multibuy.group', $multibuyOffer?->isShared() ? $multibuyOffer->id : '');
     $multibuyNumber = fn ($value) => $value === null || $value === '' ? '' : rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');

@@ -9,7 +9,7 @@
     @endcomponent
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        @if(! auth()->user()->seller_approved)
+        @if(! \App\Support\CurrentShop::get()->seller_approved)
             <div class="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
                 Your seller account is awaiting admin approval. You can prepare listings now; they go live once approved.
             </div>
@@ -32,7 +32,8 @@
                             <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $item['done'] ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400' }}">{{ $item['done'] ? '✓' : '·' }}</span>
                             <span>
                                 @if($item['done'])<span class="text-gray-500 line-through">{{ $item['label'] }}</span>
-                                @else<a href="{{ $item['url'] }}" class="font-medium text-primary-700 hover:underline">{{ $item['label'] }}</a><span class="block text-xs text-gray-500">{{ $item['hint'] }}</span>@endif
+                                @elseif(\App\Support\CurrentShop::canOpenUrl($item['url']))<a href="{{ $item['url'] }}" class="font-medium text-primary-700 hover:underline">{{ $item['label'] }}</a><span class="block text-xs text-gray-500">{{ $item['hint'] }}</span>
+                                @else<span class="font-medium text-gray-900">{{ $item['label'] }}</span><span class="block text-xs text-gray-500">{{ __('The shop owner does this step.') }}</span>@endif
                             </span>
                         </li>
                     @endforeach

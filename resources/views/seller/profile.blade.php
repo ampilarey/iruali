@@ -38,18 +38,22 @@
                     <label for="business_name" class="block text-sm font-medium text-gray-700">Shop name *</label>
                     <input id="business_name" name="business_name" required class="{{ $field }}" value="{{ old('business_name', $user->business_name ?: $user->name) }}">
                 </div>
+                @unless(\App\Support\CurrentShop::isStaff())
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Your name *</label>
                     <input id="name" name="name" required class="{{ $field }}" value="{{ old('name', $user->name) }}">
                 </div>
+                @endunless
                 <div class="sm:col-span-2">
                     <label for="business_description" class="block text-sm font-medium text-gray-700">About your shop</label>
                     <textarea id="business_description" name="business_description" rows="3" class="{{ $field }}">{{ old('business_description', $user->business_description) }}</textarea>
                 </div>
+                @unless(\App\Support\CurrentShop::isStaff())
                 <div class="sm:col-span-2">
                     <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
                     <input id="phone" name="phone" class="{{ $field }}" value="{{ old('phone', $user->phone) }}">
                 </div>
+                @endunless
                 <div class="sm:col-span-2">
                     <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
                     <input id="address" name="address" class="{{ $field }}" value="{{ old('address', $user->address) }}">
@@ -105,6 +109,7 @@
                 </div>
             </div>
 
+            @if(\App\Support\CurrentShop::can('seller.settings.bank'))
             <div class="border-t border-gray-100 pt-4">
                 <h2 class="text-base font-semibold text-gray-900">{{ __('Payout bank account') }}</h2>
                 <p class="text-sm text-gray-500">
@@ -116,6 +121,7 @@
                     <a href="{{ route('seller.settings.bank') }}" class="ms-1 font-medium text-primary-600 hover:underline">{{ __('Manage bank account') }}</a>
                 </p>
             </div>
+            @endif
 
             <div class="flex justify-end border-t border-gray-100 pt-4">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save profile</button>

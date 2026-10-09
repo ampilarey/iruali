@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\SellerVerification;
 use App\Services\SellerVerificationService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 /**
@@ -17,14 +18,14 @@ class VerificationController extends Controller
 
     public function show(Request $request)
     {
-        $user = $request->user();
+        $user = CurrentShop::get();
 
         return view('seller.settings.verification', ['user' => $user, 'verification' => $user->businessVerification]);
     }
 
     public function update(Request $request)
     {
-        $user = $request->user();
+        $user = CurrentShop::get();
         $data = $request->validate(
             $this->verifications->rules($user->businessVerification),
             $this->verifications->messages(),
@@ -44,7 +45,7 @@ class VerificationController extends Controller
     public function document(Request $request, string $document)
     {
         abort_unless(array_key_exists($document, SellerVerification::DOCUMENTS), 404);
-        $verification = $request->user()->businessVerification;
+        $verification = CurrentShop::get()->businessVerification;
         abort_unless($verification !== null, 404);
 
         return $this->verifications->documentResponse($verification, $document);

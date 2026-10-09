@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\SellerOrder;
 use App\Services\FulfilmentService;
+use App\Support\CurrentShop;
 use App\Support\PackingSlip;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * A shop's own part of an order: get it ready for pickup, confirm the customer collected it
@@ -59,7 +59,7 @@ class OrderDeliveryController extends Controller
 
     protected function ownPart(Order $order, FulfilmentService $fulfilment): SellerOrder
     {
-        $part = $fulfilment->partFor($order, Auth::user());
+        $part = $fulfilment->partFor($order, CurrentShop::get());
         abort_if($part === null, 404);
 
         return $part;

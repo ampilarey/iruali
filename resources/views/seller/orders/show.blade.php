@@ -53,8 +53,8 @@
                     'conversation' => $conversation,
                     'role' => 'seller',
                     'action' => route('seller.orders.messages.store', [$order, $part]),
-                    'canReply' => $messagingOpen && (! $conversation || $conversation->isOpen()),
-                    'closedNote' => 'This conversation is closed.',
+                    'canReply' => $messagingOpen && (! $conversation || $conversation->isOpen()) && \App\Support\CurrentShop::can('seller.orders.messages.store'),
+                    'closedNote' => \App\Support\CurrentShop::can('seller.orders.messages.store') ? 'This conversation is closed.' : null,
                 ])
             </div>
         </div>
@@ -103,6 +103,7 @@
                 @endif
             </div>
             @include('seller.orders._delivery', ['order' => $order, 'part' => $part])
+            @if(\App\Support\CurrentShop::can('seller.earnings'))
             <div class="rounded-lg bg-white p-5 shadow text-sm">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your earnings</h2>
                 <dl class="mt-2 space-y-1">
@@ -113,7 +114,10 @@
                 </dl>
                 <p class="mt-2 text-xs text-gray-500">{{ ['pending' => 'Payable once your part is delivered and the customer has paid.', 'available' => 'Ready for the next payout.', 'paid_out' => 'Paid to you.', 'cancelled' => 'Cancelled: nothing is payable.'][$part->earningsState()] }}</p>
             </div>
+            @endif
+            @if(\App\Support\CurrentShop::can('seller.orders.invoice'))
             @include('tax.partials.seller-order-document', ['order' => $order, 'part' => $part])
+            @endif
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Ship to</h2>
                 <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span> <span class="block text-xs text-gray-500">{{ $order->guest_email }}</span>@endif</p>

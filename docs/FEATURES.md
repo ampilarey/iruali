@@ -133,6 +133,26 @@ rejects or suspends it. Onboarding steps, `/seller/profile` (logo, banner, descr
 notes, "ships to islands"), `/seller/settings/bank` (payout account, verified by an admin) and
 `/seller/settings/notifications`. Seller help guides at `/seller/help/{guide}`.
 
+**Staff.** An owner lets employees into the Seller Centre with their own sign-in under
+**Seller Centre → Staff** (`/seller/staff`, `seller.staff*`, the owner only): invite by email and role
+(a signed link that works for 7 days; with an account they sign in and accept, without one they make
+one and the link confirms the email), change a role, remove someone (they lose access on their next
+request), withdraw or send an invitation again, and optionally require two-step sign-in for staff.
+Roles and the seller route names each may open are in `config/shop_staff.php`: **manager** (everything
+except bank details, earnings and payouts, tax registration, business verification, holiday mode and
+staff) and **packer** (orders: view, status, delivery details, packing slips, ready for pickup and the
+pickup code; the stock page; product questions). Pages on no list stay owner-only; the `owner_only`
+list can never be opened by staff. The role:seller middleware (`App\Http\Middleware\ShopAccess`)
+enforces it on every seller route, a suspended or rejected shop is closed to its staff too, and the
+nav hides what a role cannot open (earnings, commission and bank details are hidden in pages too).
+In code, "the shop" is `App\Support\CurrentShop::get()` and "who did it" stays `auth()->user()`:
+messages, review replies and answers record the staff member but show the shop's name, and every
+change staff make is in the audit log (`shop.staff_action`, the staff member as actor, the shop as
+subject), as are invitations and staff changes (`shop_staff.*`). One shop per staff account: shop
+owners, another shop's staff and iruali's team cannot be invited, and staff accounts cannot apply to
+sell; otherwise they are customers with their own cart and orders. Invitations are limited to 10 an
+hour and 20 staff plus open invitations per shop.
+
 **Products and stock.** `/seller/products` with create/edit/duplicate/delete, photos with
 automatic WebP variants, variants (options, SKU, price, stock), bulk edit
 (`seller.products.bulk*`), CSV import with preview and a sample file

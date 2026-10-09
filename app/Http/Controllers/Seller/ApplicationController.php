@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\User;
+use App\Support\CurrentShop;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,6 +19,9 @@ class ApplicationController extends Controller
         if ($user->hasRole('seller')) {
             return redirect()->route('seller.dashboard');
         }
+        if ($staffOf = $this->staffOf($user)) {
+            return $staffOf;
+        }
 
         return view('seller.apply', compact('user'));
     }
@@ -26,6 +32,9 @@ class ApplicationController extends Controller
 
         if ($user->hasRole('seller')) {
             return redirect()->route('seller.dashboard');
+        }
+        if ($staffOf = $this->staffOf($user)) {
+            return $staffOf;
         }
 
         $validated = $request->validate([
@@ -65,5 +74,18 @@ class ApplicationController extends Controller
 
         return redirect()->route('seller.dashboard')
             ->with('success', 'Application received! You can start adding products now; they go live once an admin approves your shop.');
+    }
+
+    /**
+     * One shop per account: someone on a shop's staff opens a shop of their own with another account.
+     */
+    protected function staffOf(User $user): ?RedirectResponse
+    {
+        $membership = CurrentShop::membershipOf($user);
+        if (! $membership) {
+            return null;
+        }
+
+        return redirect()->route('seller.dashboard')->with('error', __('This account works for :shop, so it cannot open a shop of its own. To sell on iruali yourself, sign up with a different email.', ['shop' => $membership->shop?->shopName()]));
     }
 }

@@ -50,6 +50,8 @@ class AnonymiseCommand extends Command
             'OTP rows truncated' => DB::table('otps')->count(),
             'shop owners\' ID card numbers replaced' => DB::table('seller_verifications')->count(),
             'shop staff invitation emails replaced' => DB::table('shop_staff_invitations')->count(),
+            'business details (profiles, orders, quote requests) replaced' => DB::table('business_profiles')->count() + DB::table('orders')->whereNotNull('buyer_business_name')->count() + DB::table('quote_requests')->count(),
+            'quote request messages replaced' => DB::table('quote_messages')->count(),
         ];
 
         if (! $this->option('force')) {
@@ -120,6 +122,24 @@ class AnonymiseCommand extends Command
                 DB::table('shop_staff_invitations')->where('id', $row->id)->update(['email' => "invitation{$row->id}@example.test", 'token_hash' => hash('sha256', 'anonymised-'.$row->id.'-'.\Illuminate\Support\Str::random(20))]);
             }
         });
+
+        // Business buyers: company names, TINs and addresses on profiles, orders and bulk quote requests,
+        // and what customers and shops wrote to each other about a quote
+        $chunked = function (string $table, callable $values, ?callable $scope = null): void {
+            $query = DB::table($table)->orderBy('id')->select('id');
+            if ($scope) {
+                $scope($query);
+            }
+            $query->chunkById(1000, function ($rows) use ($table, $values) {
+                foreach ($rows as $row) {
+                    DB::table($table)->where('id', $row->id)->update($values((int) $row->id));
+                }
+            });
+        };
+        $chunked('business_profiles', fn (int $id) => ['company_name' => "Business {$id}", 'tin' => null, 'business_address' => "Test business address {$id}"]);
+        $chunked('orders', fn (int $id) => ['buyer_business_name' => "Business {$id}", 'buyer_tin' => null, 'buyer_business_address' => "Test business address {$id}"], fn ($q) => $q->whereNotNull('buyer_business_name'));
+        $chunked('quote_requests', fn (int $id) => ['business_name' => "Business {$id}", 'business_tin' => null, 'business_address' => "Test business address {$id}", 'notes' => null]);
+        $chunked('quote_messages', fn (int $id) => ['body' => "Message {$id}"]);
 
         $this->table(['Changed', 'Rows'], collect($plan)->map(fn ($n, $k) => [$k, $n])->values()->all());
         $this->info('Done. Anonymised users can no longer sign in (random passwords); staff accounts are unchanged.');

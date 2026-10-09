@@ -181,7 +181,7 @@ trait ActsAsShopStaff
         $quote = new \App\Models\QuoteRequest([
             'product_id' => $product->id, 'product_name' => 'Fixture product', 'quantity' => 40,
             'delivery_island' => 'Hithadhoo', 'delivery_atoll' => 'Addu', 'needed_by' => today()->addDays(10)->toDateString(),
-            'notes' => 'For the staff canteen.', 'business_name' => 'Sun Island Resort Pvt Ltd',
+            'notes' => 'For the staff canteen.', 'business_name' => 'Sun Island Resort Pvt Ltd', 'business_tin' => '1012345GST501', 'business_address' => 'M. Sunny Building, Malé',
         ]);
         $quote->forceFill(['customer_id' => User::factory()->create()->id, 'seller_id' => $shop->id, 'status' => 'new'])->save();
 

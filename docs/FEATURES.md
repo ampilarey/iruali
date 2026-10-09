@@ -133,12 +133,55 @@ rejects or suspends it. Onboarding steps, `/seller/profile` (logo, banner, descr
 notes, "ships to islands"), `/seller/settings/bank` (payout account, verified by an admin) and
 `/seller/settings/notifications`. Seller help guides at `/seller/help/{guide}`.
 
+**Staff.** An owner lets employees into the Seller Centre with their own sign-in under
+**Seller Centre → Staff** (`/seller/staff`, `seller.staff*`, the owner only): invite by email and role
+(a signed link that works for 7 days; with an account they sign in and accept, without one they make
+one and the link confirms the email), change a role, remove someone (they lose access on their next
+request), withdraw or send an invitation again, and optionally require two-step sign-in for staff.
+Roles and the seller route names each may open are in `config/shop_staff.php`: **manager** (everything
+except bank details, earnings and payouts, tax registration, business verification, holiday mode and
+staff) and **packer** (orders: view, status, delivery details, packing slips, ready for pickup and the
+pickup code; the stock page; product questions). Pages on no list stay owner-only; the `owner_only`
+list can never be opened by staff. The role:seller middleware (`App\Http\Middleware\ShopAccess`)
+enforces it on every seller route, a suspended or rejected shop is closed to its staff too, and the
+nav hides what a role cannot open (earnings, commission and bank details are hidden in pages too).
+In code, "the shop" is `App\Support\CurrentShop::get()` and "who did it" stays `auth()->user()`:
+messages, review replies and answers record the staff member but show the shop's name, and every
+change staff make is in the audit log (`shop.staff_action`, the staff member as actor, the shop as
+subject), as are invitations and staff changes (`shop_staff.*`). One shop per staff account: shop
+owners, another shop's staff and iruali's team cannot be invited, and staff accounts cannot apply to
+sell; otherwise they are customers with their own cart and orders. Invitations are limited to 10 an
+hour and 20 staff plus open invitations per shop.
+
 **Products and stock.** `/seller/products` with create/edit/duplicate/delete, photos with
 automatic WebP variants, variants (options, SKU, price, stock), bulk edit
 (`seller.products.bulk*`), CSV import with preview and a sample file
 (`seller.products.import*`), CSV export, and `/seller/stock` for quick stock edits. New products
 wait for admin approval before they are public. A daily low-stock email goes to each shop
 (`seller:low-stock-digest`).
+
+**Pre-orders.** Stock reaches the islands by ship, so a shop can take orders for what is coming:
+the product form's "Pre-order" fieldset switches it on with the expected ship date (after today,
+within a year), the most units it takes (counted across the product's options) and an optional note
+(`products.preorder_*`). While the product, or the chosen option, has no stock and units are left,
+the product page says "Pre-order: ships around 3 Nov" with the note, the button says "Pre-order"
+and the delivery box says "Arrives around …" (the date plus the shop's dispatch and transit days);
+the cart and checkout mark the line, and the customer pays in full by card as usual. A shop on
+holiday takes none. No stock is taken for a pre-order line: `OrderService` has
+`PreorderService::reserveForCheckout()` lock the cart's stock rows first in its transaction and
+hold the units against the limit, so two checkouts for the last unit cannot both get it; the order
+line records `is_preorder` and its date, and the shop's part shows "Awaiting stock" (to the shop,
+the customer and admins) and cannot be sent until its stock is in. **Seller Centre → Pre-orders**
+(`seller.preorders`) lists the open pre-orders per product: "Stock arrived" takes the units received,
+gives them (with any already on the shelf) to the paid pre-orders oldest first, partly when not
+enough came, emails those customers and puts the rest on sale (back-in-stock alerts go out for it);
+moving the expected date (there or on the product form) emails the waiting customers with a link to
+cancel. Customers cancel until anything in the order is sent (`orders.preorder.cancel`, a signed
+link for guests): it is the normal cancellation, so a card payment is flagged for refund. Every
+morning `preorders:flag-late` flags pre-orders more than 7 days past their date: "Late pre-orders"
+in Admin → Inbox, listed at `/admin/preorders`. Feeds say `preorder` with `availability_date`
+(Google) and `in stock` (Meta only takes in/out of stock), the JSON-LD `https://schema.org/PreOrder`.
+A part's days to ship (late shipments, "not delivered" disputes) count from when its stock arrived.
 
 **Orders and fulfilment.** `/seller/orders` lists the shop's parts of orders; `/seller/orders/{order}`
 moves a part through pending → processing → shipped → out for delivery → delivered
@@ -253,6 +296,64 @@ must show with your accountant or MIRA before you switch registration on.**
   "Buying for a business?" block, prefilled from the profile and open to guests, stores them on
   the order and every shop's invoice prints them.
 
+## Bulk quotes (businesses)
+
+Resorts, offices and cafés buying in quantity ask a shop for a price instead of paying the listed
+one (`App\Services\QuoteService`; routes in `routes/web/quotes.php`, tables `quote_requests` and
+`quote_messages`).
+
+- **Asking.** Signed-in customers see "Request a bulk quote" in the product page's buy box (guests
+  are sent to sign in first) and, on a shop's page, a box to ask for a price on any of its products
+  (they pick the product first). The form (`quotes.create`, `quotes.store`) takes the quantity (at
+  least 10, or the shop's own minimum for the product: "Bulk quotes" on the product form,
+  `products.quote_min_quantity`), the delivery island (island picker, prefilled from the default
+  address), a needed-by date and notes, plus the business details for the invoice, prefilled from
+  **My account → Business details** and saved back there unless unticked. One open request (new,
+  quoted or accepted) per customer and product; at most 10 requests an hour per customer (rate
+  limiter `quote-requests`). Not on a shop's own products or while it is on holiday. Customers
+  follow their requests under **Quote requests** in the account menu (`quotes.index`, `quotes.show`).
+- **The shop's reply.** **Seller Centre → Quote requests** (`seller.quotes`, tabs new, quoted,
+  accepted, ordered, declined, expired, all; a shop sees only its own) shows each request with the
+  business details. The shop sends a unit price in MVR (it may be under the listed price), the
+  quantity it can supply, the last day the price holds (7 days unless it picks another, at most 60)
+  and a message (`seller.quotes.quote`; it can change the quote until the customer accepts), or
+  declines with a reason (`seller.quotes.decline`). Price × quantity is capped at MVR 9,999,999.99.
+  Both sides (and staff, as iruali support) write short messages in the request's thread, with an
+  unread count; the other side gets at most one email per request every 10 minutes.
+- **Emails.** New request (to the shop), quote sent or changed and request declined or closed (to
+  the customer, by email and/or SMS as they chose for order updates), quote accepted and quote
+  declined or request withdrawn (to the shop). Shops can turn all quote emails off under Settings →
+  Notifications ("Bulk quote requests").
+- **Accepting and buying.** The customer accepts the quote before its last day ends (`quotes.accept`;
+  stock is checked then): it goes into the cart as a quoted line, "Quote #123", whose quantity is
+  locked and whose price is the quoted one even if the shop's price changes (`cart_items.quote_request_id`;
+  `CartItem::unit_price`). It can only be removed, and goes back in from the quote page while the
+  quote holds (`quotes.cart`). The customer can decline a quote or withdraw a request
+  (`quotes.decline`). Checkout is the normal one (BML card); stock is checked again, counting the
+  quote with any other units of the same product, and a quote never holds stock. The order item
+  keeps the quote (`order_items.quote_request_id`) and the quote is marked ordered; commission and
+  earnings are on the quoted price. When the buyer leaves checkout's business box off, the quote's
+  business details go on the order, so every shop's invoice carries them. An unpaid order that is
+  cancelled gives its quotes back (accepted again while they hold).
+- **Discounts on quoted lines.** None of the shop's: no multi-buy saving and no shop code (their
+  units do not count towards a multi-buy tier either). **No iruali voucher either:** the voucher and
+  its minimum order work on the rest of the cart only, and a cart of quoted lines alone refuses one
+  ("iruali vouchers do not apply to items bought on a quote"), because a quote is already the shop's
+  negotiated price and a percent voucher on a large business order would cost iruali a share of it.
+  **Loyalty points and wallet credit do pay for quoted lines** (they are the customer's own balance)
+  and the order earns points as usual. All amounts are worked in laari, so lines less shop discounts,
+  voucher and points, plus delivery, add up to the order total exactly.
+- **Expiry.** A quote holds to the end of its last day (Maldives time). After that it can't be
+  accepted; `php artisan quotes:expire` (hourly) marks quoted and accepted quotes past their day
+  expired, and a quoted line whose quote expired or was closed comes out of the cart with a notice
+  the next time the cart or checkout is opened (placing the order refuses it the same way).
+- **Admin.** **Admin → Quotes** (`/admin/quotes`, `admin.quotes`; admins and support staff) lists
+  every request with status filters, including "waiting": new requests no shop has answered for more
+  than 2 days, which is also an **Admin → Inbox** row. Staff can write in a request as iruali support
+  (`admin.quotes.messages`) and close a request with a reason both sides are emailed
+  (`admin.quotes.close`; a quote in the cart comes out). Only these staff actions are in the audit
+  log (`quote.message`, `quote.closed`); what customers and shops do is not.
+
 ## Operations
 
 **Deploy and release.** `main` auto-deploys to test.iruali.mv (`TEST_AUTO_DEPLOY.md`);
@@ -270,7 +371,8 @@ customer). Both run at the end of a deploy. `tests/load/` has a k6 load test.
 nightly database backups to local and optional S3/B2 with a monthly restore drill
 (`backup:restore-drill`), queued mail sent every minute by a short-lived worker, expired tokens
 and failed jobs pruned, guest carts cleaned, the daily errors digest (`errors:digest`) and the
-seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts.
+seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts, and the
+late pre-orders check (`preorders:flag-late`).
 
 **Staging data.** `php artisan iruali:anonymise --force` rewrites personal data on a copy of
 the production database before it is used on the test site.

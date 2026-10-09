@@ -73,7 +73,8 @@ class CartService
         }
 
         foreach ($guest->items as $item) {
-            $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)->first();
+            $existing = $cart->items()->where('product_id', $item->product_id)->where('product_variant_id', $item->product_variant_id)
+                ->whereNull('quote_request_id')->first(); // a quoted line keeps its own quantity
             $stock = $item->availableStock(); // the variant's stock when the line has one
             $existing
                 ? $existing->update(['quantity' => max(1, min($existing->quantity + $item->quantity, $stock, 999))])
@@ -111,6 +112,7 @@ class CartService
         $existingItem = $cart->items()
             ->where('product_id', $productId)
             ->where('product_variant_id', $variantId)
+            ->whereNull('quote_request_id') // a quoted line (bulk quote) stays as quoted; more units are a line of their own
             ->first();
 
         if ($existingItem) {
@@ -153,11 +155,14 @@ class CartService
     }
 
     /**
-     * Units that can be sold of a product, or of one of its variants.
+     * Units that can be sold of a product, or of one of its variants: its stock, or when it is sold
+     * out and the shop takes pre-orders for it, the pre-order units still open (PreorderService).
      */
     public function availableStock(Product $product, ?ProductVariant $variant): int
     {
-        return $variant ? (int) $variant->stock_quantity : (int) $product->stock_quantity;
+        $stock = $variant ? (int) $variant->stock_quantity : (int) $product->stock_quantity;
+
+        return $stock > 0 || ($product->has_variants && ! $variant) ? $stock : app(PreorderService::class)->unitsLeft($product, $variant);
     }
 
     /**
@@ -165,6 +170,11 @@ class CartService
      */
     public function updateCartItem(CartItem $item, int $quantity): bool
     {
+        // A quoted line's quantity is the quote's: it can only be removed
+        if ($item->quote_request_id !== null) {
+            return false;
+        }
+
         $item->update(['quantity' => $quantity]);
 
         return true;

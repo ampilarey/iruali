@@ -51,6 +51,8 @@ class ProductRequest extends FormRequest
             'reorder_point' => 'nullable|integer|min:0|max:999999',
             'brand' => 'nullable|string|max:120',
             'weight' => 'nullable|numeric|min:0|max:999.99',
+            // Bulk quotes: the smallest quantity a customer can ask a quote for (empty: the default)
+            'quote_min_quantity' => 'nullable|integer|min:2|max:'.\App\Services\QuoteService::MAX_QUANTITY,
             // Bulky items: added to the delivery fee per unit delivered, never waived by free delivery
             'delivery_surcharge' => 'nullable|numeric|min:0|max:99999.99',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -66,7 +68,8 @@ class ProductRequest extends FormRequest
             'variants.*.low_stock_threshold' => 'nullable|integer|min:0|max:999999',
             'variants.*.is_active' => 'nullable|boolean',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ] + \App\Services\MultiBuyService::formRules();
+        ] + \App\Services\MultiBuyService::formRules()
+          + \App\Services\PreorderService::formRules();
     }
 
     public function attributes(): array
@@ -81,7 +84,7 @@ class ProductRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
-        $validator->after(fn (Validator $validator) => app(\App\Services\MultiBuyService::class)->validateForm($validator, $this->user(), (array) $this->input('multibuy', [])));
+        $validator->after(fn (Validator $validator) => app(\App\Services\MultiBuyService::class)->validateForm($validator, \App\Support\CurrentShop::get(), (array) $this->input('multibuy', [])));
         $validator->after(function (Validator $validator) {
             if (! $this->boolean('has_variants')) {
                 return;
@@ -188,5 +191,42 @@ class ProductRequest extends FormRequest
         $video = \App\Support\ProductVideo::parse($data['video_url']);
 
         return ['video_provider' => $video?->provider, 'video_id' => $video?->id];
+    }
+
+    /**
+     * Messages for the "Pre-order" fieldset.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return \App\Services\PreorderService::formMessages();
+    }
+
+    /**
+     * The pre-order columns from the form's "Pre-order" fieldset, or nothing when the form did not
+     * have it (PreorderService::attributesFromForm()).
+     *
+     * @return array<string, mixed>
+     */
+    public function preorderAttributes(): array
+    {
+        return app(\App\Services\PreorderService::class)->attributesFromForm($this->validated());
+    }
+
+    /**
+     * The "Bulk quotes" fieldset's minimum quantity (null for the default), or nothing when the
+     * form did not send the field, so it stays as it was.
+     *
+     * @return array{quote_min_quantity?: int|null}
+     */
+    public function quoteAttributes(): array
+    {
+        $data = $this->validated();
+        if (! array_key_exists('quote_min_quantity', $data)) {
+            return [];
+        }
+
+        return ['quote_min_quantity' => filled($data['quote_min_quantity']) ? (int) $data['quote_min_quantity'] : null];
     }
 }

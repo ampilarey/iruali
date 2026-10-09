@@ -27,6 +27,7 @@ class ProductController extends Controller
             'category.parent', 'images', 'variants', 'seller', 'brandModel',
             'reviews' => fn ($q) => $q->where('is_approved', true)->with(['user', 'photos', 'replier'])->orderByDesc('helpful_count')->latest(),
         ]);
+        $product->reviews->each->setRelation('product', $product); // replies are signed with the product's shop
 
         $cards = fn ($q) => $q->active()->with(['category', 'mainImage', 'seller'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
@@ -78,7 +79,7 @@ class ProductController extends Controller
             : [];
 
         $questions = $product->questions()->with('user')->latest()->get();
-        $isOwner = $request->user() && ($request->user()->id === $product->seller_id || $request->user()->hasRole('admin'));
+        $isOwner = $request->user() && ($request->user()->id === $product->seller_id || \App\Support\CurrentShop::worksFor($request->user(), (int) $product->seller_id, 'seller.questions') || $request->user()->hasRole('admin'));
 
         // Recently viewed, newest first; this product goes to the front for the next page.
         $viewed = collect($request->session()->get('recently_viewed', []))->reject(fn ($id) => $id === $product->id);

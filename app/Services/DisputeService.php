@@ -55,6 +55,7 @@ class DisputeService
 
         $types = [];
         $paidAt = $order->paid_at ?? $order->created_at;
+        $paidAt = $paidAt ? app(PreorderService::class)->dispatchClockStart($part, $paidAt) : null; // pre-orders: from when their stock is in
 
         if ($order->payment_status === 'paid' && $part->status !== 'delivered' && $paidAt && $paidAt->copy()->addDays($this->nonDeliveryAfterDays())->isPast()) {
             $types[] = 'non_delivery';

@@ -51,6 +51,11 @@ class CartItem extends Model
      */
     public function getUnitPriceAttribute(): float
     {
+        // A quoted line (bulk quote) keeps the price the shop quoted
+        if ($this->quote_request_id !== null) {
+            return round((float) $this->price, 2);
+        }
+
         if ($this->variant) {
             return $this->variant->setRelation('product', $this->product)->effectivePrice();
         }
@@ -64,15 +69,23 @@ class CartItem extends Model
     }
 
     /**
-     * Units that can still be bought of this line (the variant's stock when it has one).
+     * Units that can still be bought of this line (the variant's stock when it has one), or when it
+     * is sold out and the shop takes pre-orders for it, the pre-order units still open.
      */
     public function availableStock(): int
     {
         if ($this->product_variant_id) {
-            return $this->variant && $this->variant->is_active ? (int) $this->variant->stock_quantity : 0;
+            $stock = $this->variant && $this->variant->is_active ? (int) $this->variant->stock_quantity : 0;
+        } else {
+            $stock = (int) ($this->product->stock_quantity ?? 0);
         }
 
-        return (int) ($this->product->stock_quantity ?? 0);
+        // Sold out: the pre-order units still open, if the shop takes pre-orders (App\Services\PreorderService)
+        if ($stock > 0 || ! $this->product || ($this->product_variant_id && ! $this->variant) || ($this->product->has_variants && ! $this->product_variant_id)) {
+            return $stock;
+        }
+
+        return app(\App\Services\PreorderService::class)->unitsLeft($this->product, $this->variant);
     }
 
     /**
@@ -81,5 +94,16 @@ class CartItem extends Model
     public function variantLabel(): ?string
     {
         return $this->variant?->displayName();
+    }
+
+    /**
+     * The accepted bulk quote this line was made from: its quantity is locked and its price fixed
+     * (QuoteService).
+     *
+     * @return BelongsTo<QuoteRequest, $this>
+     */
+    public function quoteRequest(): BelongsTo
+    {
+        return $this->belongsTo(QuoteRequest::class);
     }
 }

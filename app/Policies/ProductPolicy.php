@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Product;
 use App\Models\User;
+use App\Support\CurrentShop;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProductPolicy
@@ -29,8 +30,8 @@ class ProductPolicy
             return true;
         }
 
-        // Only admins and the product's seller can view inactive products
-        return $user->isAdmin() || $user->id === $product->seller_id;
+        // Only admins and the product's seller (its owner or staff) can view inactive products
+        return $user->isAdmin() || CurrentShop::for($user)?->id === $product->seller_id;
     }
 
     /**
@@ -38,8 +39,8 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        // Only authenticated users who are sellers or admins can create products
-        return $user->isSeller() || $user->isAdmin();
+        // Only authenticated users who are sellers (or work for one) or admins can create products
+        return CurrentShop::for($user)?->isSeller() || $user->isAdmin();
     }
 
     /**
@@ -52,9 +53,10 @@ class ProductPolicy
             return true;
         }
 
-        // Sellers can only update their own products
-        if ($user->isSeller()) {
-            return $user->id === $product->seller_id;
+        // Sellers can only update their own products (the shop's, for its staff; their role is checked by the route)
+        $shop = CurrentShop::for($user);
+        if ($shop?->isSeller()) {
+            return $shop->id === $product->seller_id;
         }
 
         return false;
@@ -70,9 +72,10 @@ class ProductPolicy
             return true;
         }
 
-        // Sellers can only delete their own products
-        if ($user->isSeller()) {
-            return $user->id === $product->seller_id;
+        // Sellers can only delete their own products (the shop's, for its staff; their role is checked by the route)
+        $shop = CurrentShop::for($user);
+        if ($shop?->isSeller()) {
+            return $shop->id === $product->seller_id;
         }
 
         return false;

@@ -7,18 +7,21 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SellerOrder;
 use App\Services\FulfilmentService;
+use App\Support\CurrentShop;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SellerController extends Controller
 {
     use \App\Traits\SecureFileUpload;
 
+    /** Profile fields that are the owner's own (their name and phone, the payout bank details): shop staff can't see or change them. */
+    public const OWNER_FIELDS = ['name', 'phone', 'payout_bank_name', 'payout_account_name', 'payout_account_number'];
+
     public function dashboard()
     {
-        $user = Auth::user();
+        $user = CurrentShop::get();
 
         $stats = [
             'total_products' => $user->products()->count(),
@@ -40,7 +43,7 @@ class SellerController extends Controller
     public function orders(Request $request)
     {
         $parts = SellerOrder::query()
-            ->where('seller_id', Auth::id())
+            ->where('seller_id', CurrentShop::id())
             ->with(['order.user', 'order.items' => fn ($q) => $this->onlyOwnItems($q), 'order.items.product'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest()
@@ -52,17 +55,17 @@ class SellerController extends Controller
 
     public function showOrder(Order $order, FulfilmentService $fulfilment)
     {
-        $part = $fulfilment->partFor($order, Auth::user());
+        $part = $fulfilment->partFor($order, CurrentShop::get());
         abort_if($part === null, 404);
 
         $nextStatuses = $fulfilment->nextStatuses($part);
         $order->load(['user', 'items' => fn ($q) => $this->onlyOwnItems($q), 'items.product']);
-        $otherShops = $order->sellerOrders()->where('seller_id', '!=', Auth::id())->count();
+        $otherShops = $order->sellerOrders()->where('seller_id', '!=', CurrentShop::id())->count();
 
-        // The thread with the customer; opening the page marks it read
+        // The thread with the customer; opening the page marks it read (for whoever answers it: staff who may not write leave it unread)
         $messaging = app(\App\Services\MessagingService::class);
         $conversation = $messaging->existingConversationFor($part)?->load('messages.sender', 'customer');
-        if ($conversation) {
+        if ($conversation && CurrentShop::can('seller.orders.messages.store')) {
             $messaging->markRead($conversation, 'seller');
         }
         $messagingOpen = $messaging->isOpenFor($order);
@@ -76,7 +79,7 @@ class SellerController extends Controller
      */
     public function updateOrderStatus(Request $request, Order $order, FulfilmentService $fulfilment)
     {
-        $part = $fulfilment->partFor($order, Auth::user());
+        $part = $fulfilment->partFor($order, CurrentShop::get());
         abort_if($part === null, 404);
 
         $data = $request->validate([
@@ -93,7 +96,7 @@ class SellerController extends Controller
 
     public function analytics()
     {
-        $user = Auth::user();
+        $user = CurrentShop::get();
 
         $monthlySales = $this->ownItems()
             ->where('orders.created_at', '>=', now()->subMonths(11)->startOfMonth())
@@ -132,12 +135,12 @@ class SellerController extends Controller
 
     public function performance(\App\Services\SellerPerformanceService $performance)
     {
-        return view('seller.performance', ['report' => $performance->report(Auth::user())]);
+        return view('seller.performance', ['report' => $performance->report(CurrentShop::get())]);
     }
 
     public function questions(Request $request)
     {
-        $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', Auth::id()));
+        $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', CurrentShop::id()));
 
         $questions = \App\Models\ProductQuestion::query()->tap($own)
             ->when($request->query('show') !== 'all', fn ($q) => $q->whereNull('answer'))
@@ -153,7 +156,7 @@ class SellerController extends Controller
 
     public function earnings(\App\Services\PayoutService $payouts)
     {
-        $user = Auth::user();
+        $user = CurrentShop::get();
 
         $user->load('bankAccount');
         $balances = $payouts->balances($user);
@@ -167,7 +170,7 @@ class SellerController extends Controller
 
     public function returns()
     {
-        $returns = \App\Models\ReturnRequest::whereHas('sellerOrder', fn ($q) => $q->where('seller_id', Auth::id()))
+        $returns = \App\Models\ReturnRequest::whereHas('sellerOrder', fn ($q) => $q->where('seller_id', CurrentShop::id()))
             ->with(['order', 'items.orderItem.product'])
             ->latest()
             ->paginate(20);
@@ -177,17 +180,19 @@ class SellerController extends Controller
 
     public function profile()
     {
-        $user = Auth::user();
-        $user->load('bankAccount');
+        $user = CurrentShop::get();
+        if (CurrentShop::can('seller.settings.bank')) {
+            $user->load('bankAccount'); // staff never see the bank details
+        }
 
         return view('seller.profile', compact('user'));
     }
 
     public function updateProfile(Request $request)
     {
-        $user = Auth::user();
+        $user = CurrentShop::get();
 
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'business_name' => 'required|string|max:255',
             'business_description' => 'nullable|string|max:2000',
@@ -204,7 +209,11 @@ class SellerController extends Controller
             'ships_to_islands' => 'nullable|boolean',
             'shop_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'shop_banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
-        ]);
+        ];
+        if (CurrentShop::isStaff()) {
+            $rules = array_diff_key($rules, array_flip(self::OWNER_FIELDS)); // staff keep to the shop's details
+        }
+        $validated = $request->validate($rules);
 
         unset($validated['shop_logo'], $validated['shop_banner']);
         if ($request->has('ships_to_islands') || $request->has('delivery_notes')) {
@@ -229,7 +238,7 @@ class SellerController extends Controller
      */
     protected function sellerOrders(): Builder
     {
-        return Order::whereHas('items.product', fn ($q) => $q->withTrashed()->where('seller_id', Auth::id()));
+        return Order::whereHas('items.product', fn ($q) => $q->withTrashed()->where('seller_id', CurrentShop::id()));
     }
 
     /**
@@ -237,7 +246,7 @@ class SellerController extends Controller
      */
     protected function onlyOwnItems($query)
     {
-        return $query->whereHas('product', fn ($q) => $q->withTrashed()->where('seller_id', Auth::id()));
+        return $query->whereHas('product', fn ($q) => $q->withTrashed()->where('seller_id', CurrentShop::id()));
     }
 
     /**
@@ -250,7 +259,7 @@ class SellerController extends Controller
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->join('products', 'products.id', '=', 'order_items.product_id')
-            ->where('products.seller_id', Auth::id())
+            ->where('products.seller_id', CurrentShop::id())
             ->where('orders.status', '!=', 'cancelled')
             ->whereNull('orders.deleted_at');
     }

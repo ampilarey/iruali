@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductQuestion;
 use App\Services\NotificationService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 class QuestionController extends Controller
@@ -24,16 +25,19 @@ class QuestionController extends Controller
     }
 
     /**
-     * The product's seller (or an admin) answers a question.
+     * The product's seller (its owner, or its staff whose role covers questions) or an admin answers
+     * a question. answered_by is the person; answered_as_shop says the shop answered, not iruali.
      */
     public function answer(Request $request, ProductQuestion $question)
     {
         $user = $request->user();
-        abort_unless($user->hasRole('admin') || $question->product?->seller_id === $user->id, 403);
+        $shopId = (int) $question->product?->seller_id;
+        $forShop = $shopId !== 0 && ($shopId === (int) $user->id || CurrentShop::worksFor($user, $shopId, 'seller.questions'));
+        abort_unless($user->hasRole('admin') || $forShop, 403);
 
         $data = $request->validate(['answer' => 'required|string|min:2|max:2000']);
 
-        $question->update($data + ['answered_by' => $user->id, 'answered_at' => now()]);
+        $question->forceFill($data + ['answered_by' => $user->id, 'answered_at' => now(), 'answered_as_shop' => $forShop])->save();
 
         return back()->with('success', __('Answer published.'));
     }

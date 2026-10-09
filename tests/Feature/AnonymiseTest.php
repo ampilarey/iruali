@@ -66,6 +66,29 @@ class AnonymiseTest extends TestCase
         $this->assertSame(0, DB::table('otps')->count());
     }
 
+    public function test_business_details_and_quote_requests_are_replaced(): void
+    {
+        $customer = \App\Models\User::factory()->create();
+        $shop = \App\Models\User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
+        $product = \App\Models\Product::factory()->create(['seller_id' => $shop->id]);
+        \Illuminate\Support\Facades\DB::table('business_profiles')->insert(['user_id' => $customer->id, 'company_name' => 'Sun Island Resort Pvt Ltd', 'tin' => '1012345GST501', 'business_address' => 'M. Sunny Building', 'created_at' => now(), 'updated_at' => now()]);
+        $order = \App\Models\Order::factory()->create(['user_id' => $customer->id]);
+        $order->forceFill(['buyer_business_name' => 'Sun Island Resort Pvt Ltd', 'buyer_tin' => '1012345GST501', 'buyer_business_address' => 'M. Sunny Building'])->save();
+        $quote = new \App\Models\QuoteRequest(['product_id' => $product->id, 'product_name' => 'Rope', 'quantity' => 40, 'delivery_island' => 'Hithadhoo', 'delivery_atoll' => 'Addu', 'needed_by' => today()->addDays(10)->toDateString(), 'notes' => 'Ask for Aisha at reception', 'business_name' => 'Sun Island Resort Pvt Ltd', 'business_tin' => '1012345GST501', 'business_address' => 'M. Sunny Building']);
+        $quote->forceFill(['customer_id' => $customer->id, 'seller_id' => $shop->id, 'status' => 'new'])->save();
+        \Illuminate\Support\Facades\DB::table('quote_messages')->insert(['quote_request_id' => $quote->id, 'sender_id' => $customer->id, 'sender_role' => 'customer', 'body' => 'Call me on 7771234', 'created_at' => now(), 'updated_at' => now()]);
+
+        $this->artisan('iruali:anonymise --force')->assertExitCode(0);
+
+        $this->assertDatabaseMissing('business_profiles', ['company_name' => 'Sun Island Resort Pvt Ltd']);
+        $this->assertDatabaseMissing('business_profiles', ['tin' => '1012345GST501']);
+        $this->assertDatabaseMissing('orders', ['buyer_business_name' => 'Sun Island Resort Pvt Ltd']);
+        $this->assertDatabaseMissing('orders', ['buyer_tin' => '1012345GST501']);
+        $this->assertDatabaseMissing('quote_requests', ['business_name' => 'Sun Island Resort Pvt Ltd']);
+        $this->assertNull($quote->fresh()->notes);
+        $this->assertDatabaseMissing('quote_messages', ['body' => 'Call me on 7771234']);
+    }
+
     public function test_without_force_it_is_a_dry_run(): void
     {
         $customer = User::factory()->create(['email' => 'keep@gmail.com']);

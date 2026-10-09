@@ -24,7 +24,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Customer</th>
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Your items</th>
                             <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Your total</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">You earn</th>
+                            @if(\App\Support\CurrentShop::can('seller.earnings'))<th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">You earn</th>@endif
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Your status</th>
                             <th class="px-4 py-3"></th>
                         </tr>
@@ -40,7 +40,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="text-xs text-amber-700 font-medium">(Guest)</span>@endif<span class="block text-xs text-gray-500">{{ $order->shipping_city }}</span></td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $order->items->sum('quantity') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->subtotal) }}</td>
-                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->seller_earnings) }}</td>
+                                @if(\App\Support\CurrentShop::can('seller.earnings'))<td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->seller_earnings) }}</td>@endif
                                 <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span>@include('seller.orders._badges', ['part' => $part, 'order' => $order])</td>
                                 <td class="px-4 py-3 text-right text-sm"><a href="{{ route('seller.orders.show', $order) }}" class="font-medium text-primary-600 hover:text-primary-700">View</a></td>
                             </tr>

@@ -36,6 +36,11 @@ class OrderService
             return ['success' => false, 'message' => 'Your cart is empty.'];
         }
 
+        // Bulk quotes: a quoted line whose quote expired or was closed comes out of the cart, and quoted stock is checked
+        if ($quoteProblem = app(QuoteService::class)->checkCart($cart)) {
+            return ['success' => false, 'message' => $quoteProblem];
+        }
+
         // Stock check before order creation
         foreach ($cart->items as $cartItem) {
             $product = $cartItem->product;
@@ -65,6 +70,13 @@ class OrderService
 
         try {
             DB::beginTransaction();
+
+            // Pre-orders: the cart's stock rows are locked first, before any plain read (snapshot isolation),
+            // and lines with no stock that the shop takes pre-orders for are held against its limit
+            $preorders = app(PreorderService::class)->reserveForCheckout($cart, $user);
+            // Bulk quotes in the cart are locked next (checked in placeOrder below). The pre-order locks
+            // come first: product and variant rows are the ones other checkouts change all the time
+            app(QuoteService::class)->lockQuotes($cart);
 
             // Calculate discounts and totals. Redeemed points come from the session; re-check them
             // against the customer's real balance and the cart as it is now.
@@ -101,6 +113,9 @@ class OrderService
             // Create order items
             $this->createOrderItems($order, $cart);
 
+            // Bulk quotes: each quote in the cart is taken (locked, checked again) and its business details kept for the invoices
+            app(QuoteService::class)->placeOrder($order, $cart);
+
             // Shop-funded discounts (multi-buy, shop codes) onto the items, and the codes' uses recorded
             app(ShopDiscountService::class)->applyToOrder($order, $discounts['shop'], $user, $guest['email'] ?? null);
 
@@ -110,9 +125,15 @@ class OrderService
             // Deliver or pickup per shop part, and the order's delivery area, time slot and gift details
             $delivery->applyToOrder($order, $shippingData);
 
+            // Pre-order lines take no stock: they are flagged on the order and its shop parts ("Awaiting stock")
+            app(PreorderService::class)->markOrder($order, $preorders);
+
             // Take the stock atomically: two checkouts racing for the last unit can't both win.
             // A line with a variant takes it from the variant row (the product total follows).
             foreach ($cart->items as $cartItem) {
+                if (isset($preorders[$cartItem->id])) {
+                    continue; // a pre-order: its units come with the shop's next delivery
+                }
                 $taken = $this->takeStock($cartItem->product_id, $cartItem->product_variant_id, $cartItem->quantity);
                 if ($taken === 0) {
                     throw new \RuntimeException(__('Sorry, ":name" just sold out.', ['name' => ($cartItem->product->name['en'] ?? $cartItem->product->name).($cartItem->variant ? ' ('.$cartItem->variant->displayName().')' : '')]));
@@ -145,6 +166,12 @@ class OrderService
                 'message' => 'Order placed successfully!',
             ];
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            // A database error is a RuntimeException too, but its message (SQL) is not for customers
+            DB::rollBack();
+            report($e);
+
+            return ['success' => false, 'message' => __('We could not place your order. Please try again.')];
         } catch (\RuntimeException $e) {
             DB::rollBack();
 
@@ -228,6 +255,7 @@ class OrderService
                 'variant_sku' => $variant?->sku,
                 'quantity' => $cartItem->quantity,
                 'price' => $cartItem->unit_price,
+                'quote_request_id' => $cartItem->quote_request_id, // a bulk quote's line, at the quoted price
             ]);
         }
     }
@@ -372,6 +400,11 @@ class OrderService
             $next = array_values(array_diff($next, ['cancelled']));
         }
 
+        // A shop's part still awaiting pre-order stock can't be sent, so neither can the whole order
+        if (in_array('shipped', $next, true) && app(PreorderService::class)->orderAwaitingStock($order)) {
+            $next = array_values(array_diff($next, ['shipped']));
+        }
+
         return $next;
     }
 
@@ -444,10 +477,13 @@ class OrderService
     protected function reverseOrder(Order $order): void
     {
         foreach ($order->items()->with('product')->get() as $item) {
-            if ($item->product) {
-                $this->restock($item->product, $item->product_variant_id, $item->quantity);
+            // A pre-order puts back only the units whose stock had arrived for it (the rest never existed)
+            if ($item->product && $item->stockedQuantity() > 0) {
+                $this->restock($item->product, $item->product_variant_id, $item->stockedQuantity());
             }
         }
+        // Units given back go first to pre-orders still waiting for the same products
+        app(PreorderService::class)->afterOrderReversed($order);
 
         $user = $order->user;
         if ($user) {

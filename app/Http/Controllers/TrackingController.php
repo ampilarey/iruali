@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\SellerOrder;
 use App\Services\FulfilmentService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 /**
@@ -29,7 +30,7 @@ class TrackingController extends Controller
 
     public function updateAsSeller(Request $request, Order $order, SellerOrder $part, FulfilmentService $fulfilment)
     {
-        abort_unless($part->order_id === $order->id && $part->seller_id === $request->user()->id, 403);
+        abort_unless($part->order_id === $order->id && $part->seller_id === CurrentShop::id(), 403);
 
         return $this->update($request, $part, $fulfilment);
     }

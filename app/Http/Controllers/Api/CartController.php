@@ -96,7 +96,13 @@ class CartController extends BaseController
             return $this->sendForbidden('Unauthorized access to cart item');
         }
 
-        if ($item->product->stock_quantity < $request->quantity) {
+        // A bulk-quote line keeps the quoted quantity and price: it can only be removed
+        if ($item->quote_request_id !== null) {
+            return $this->sendError('This line is a bulk quote: its quantity cannot be changed. Remove it instead.');
+        }
+
+        // The same stock as the web cart: the chosen option's, and pre-order units when sold out
+        if ($item->availableStock() < (int) $request->quantity) {
             return $this->sendError('Insufficient stock available');
         }
 

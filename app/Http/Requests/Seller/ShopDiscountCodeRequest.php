@@ -4,6 +4,7 @@ namespace App\Http\Requests\Seller;
 
 use App\Models\Product;
 use App\Models\ShopDiscountCode;
+use App\Support\CurrentShop;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -38,7 +39,7 @@ class ShopDiscountCodeRequest extends FormRequest
         return [
             // Unique per shop; codes are kept in capitals, so "save10" and "SAVE10" are the same code
             'code' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[A-Z0-9_-]+$/',
-                Rule::unique('shop_discount_codes', 'code')->where('seller_id', (int) $this->user()?->id)->ignore($code?->id)],
+                Rule::unique('shop_discount_codes', 'code')->where('seller_id', CurrentShop::id())->ignore($code?->id)],
             'type' => ['required', Rule::in(ShopDiscountCode::TYPES)],
             'value' => ['required', 'numeric', 'min:0.01', $this->input('type') === 'percent' ? 'max:90' : 'max:999999.99'],
             'min_spend' => 'nullable|numeric|min:0|max:999999.99',
@@ -75,7 +76,7 @@ class ShopDiscountCodeRequest extends FormRequest
                 $ids = array_unique(array_map('intval', (array) $this->input('product_ids', [])));
                 if ($ids === []) {
                     $validator->errors()->add('product_ids', __('Choose at least one product, or let the code cover all your products.'));
-                } elseif (Product::where('seller_id', (int) $this->user()?->id)->whereIn('id', $ids)->count() !== count($ids)) {
+                } elseif (Product::where('seller_id', CurrentShop::id())->whereIn('id', $ids)->count() !== count($ids)) {
                     $validator->errors()->add('product_ids', __('Choose products from your own shop.'));
                 }
             }

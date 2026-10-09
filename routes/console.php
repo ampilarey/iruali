@@ -27,6 +27,9 @@ Schedule::command('rewards:expire-points')->monthlyOn(1, '04:00')->withoutOverla
 // Gift cards past their 12 months are marked expired
 Schedule::call(fn () => app(\App\Services\GiftCardService::class)->expireOld())->dailyAt('03:30')->name('expire-gift-cards');
 
+// Bulk quotes past their valid-until day are marked expired (their cart lines go when the cart is next opened)
+Schedule::command('quotes:expire')->hourly()->withoutOverlapping();
+
 // Guest carts nobody has touched for a month (and their lines) are dropped
 Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))
@@ -58,3 +61,6 @@ Schedule::command('brands:notify-followers')->dailyAt('09:00')->timezone('Indian
 
 // Wishlist price-drop alerts: one email (and push) a day per customer, only when something got cheaper
 Schedule::command('wishlist:price-drops')->dailyAt('10:00')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// Pre-orders more than a week past their expected date go to Admin → Inbox ("Late pre-orders")
+Schedule::command('preorders:flag-late')->dailyAt('06:45')->timezone('Indian/Maldives')->withoutOverlapping();

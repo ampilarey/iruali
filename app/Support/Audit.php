@@ -50,8 +50,20 @@ class Audit
         'delivery.saved' => 'Delivery rates and time slots saved',
         'pickup.confirmed' => 'Pickup confirmed for a shop',
         'newsletter.sent' => 'Newsletter sent',
+        'quote.closed' => 'Quote request closed by staff',
+        'quote.message' => 'Quote request message from staff',
         'tax.settings_saved' => 'Tax settings saved',
         'shop.tax_details_saved' => 'Shop tax details saved',
+        'shop_staff.invited' => 'Shop staff invited',
+        'shop_staff.invitation_revoked' => 'Shop staff invitation withdrawn',
+        'shop_staff.joined' => 'Shop staff joined',
+        'shop_staff.role_changed' => 'Shop staff role changed',
+        'shop_staff.removed' => 'Shop staff removed',
+        'shop_staff.two_factor' => 'Shop staff two-step sign-in rule changed',
+        'shop.staff_action' => 'Change made by shop staff',
+        'preorder.stock_arrived' => 'Pre-order stock arrived',
+        'preorder.date_moved' => 'Pre-order date moved',
+        'preorder.cancelled' => 'Pre-order cancelled by the customer',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

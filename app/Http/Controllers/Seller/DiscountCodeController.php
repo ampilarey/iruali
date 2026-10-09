@@ -7,6 +7,7 @@ use App\Http\Requests\Seller\ShopDiscountCodeRequest;
 use App\Models\Product;
 use App\Models\ShopDiscountCode;
 use App\Services\ShopDiscountService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class DiscountCodeController extends Controller
 {
     public function index(Request $request, ShopDiscountService $discounts)
     {
-        $codes = ShopDiscountCode::where('seller_id', $request->user()->id)
+        $codes = ShopDiscountCode::where('seller_id', CurrentShop::id())
             ->withCount('products')
             ->latest('id')
             ->get();
@@ -36,7 +37,7 @@ class DiscountCodeController extends Controller
     public function store(ShopDiscountCodeRequest $request)
     {
         $code = new ShopDiscountCode($request->codeAttributes());
-        $code->seller_id = $request->user()->id;
+        $code->seller_id = CurrentShop::id();
         $code->save();
         $code->products()->sync($request->productIds());
 
@@ -80,7 +81,7 @@ class DiscountCodeController extends Controller
 
     protected function authorizeOwner(Request $request, ShopDiscountCode $code): void
     {
-        abort_unless((int) $code->seller_id === (int) $request->user()->id, 403);
+        abort_unless((int) $code->seller_id === (int) CurrentShop::id(), 403);
     }
 
     /**
@@ -90,6 +91,6 @@ class DiscountCodeController extends Controller
      */
     protected function products(Request $request)
     {
-        return Product::where('seller_id', $request->user()->id)->orderBy('id')->get(['id', 'name', 'sku', 'is_active']);
+        return Product::where('seller_id', CurrentShop::id())->orderBy('id')->get(['id', 'name', 'sku', 'is_active']);
     }
 }

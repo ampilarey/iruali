@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\SellerOrder;
 use App\Models\SellerPayout;
 use App\Services\GstService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 /**
@@ -42,7 +43,7 @@ class TaxInvoiceController extends Controller
      */
     public function seller(Request $request, Order $order)
     {
-        $part = $order->sellerOrders()->where('seller_id', $request->user()->id)->first();
+        $part = $order->sellerOrders()->where('seller_id', CurrentShop::id())->first();
         abort_if($part === null, 404);
 
         return $this->invoice($order, $part, route('seller.orders.show', $order));
@@ -58,7 +59,7 @@ class TaxInvoiceController extends Controller
 
     public function sellerCommission(Request $request, SellerPayout $payout)
     {
-        abort_unless($payout->seller_id === $request->user()->id, 403);
+        abort_unless($payout->seller_id === CurrentShop::id(), 403);
 
         return $this->commission($payout, route('seller.earnings'));
     }

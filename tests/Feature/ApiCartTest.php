@@ -57,6 +57,30 @@ class ApiCartTest extends TestCase
         $this->getJson('/api/v1/cart')->assertOk()->assertJsonPath('data.user_id', $this->user->id);
     }
 
+    public function test_a_bulk_quote_line_keeps_its_quantity_and_a_variant_line_uses_the_variants_stock(): void
+    {
+        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
+        $product = Product::factory()->create(['seller_id' => $shop->id, 'price' => 100, 'stock_quantity' => 100, 'is_active' => true]);
+        $quote = new \App\Models\QuoteRequest(['product_id' => $product->id, 'product_name' => 'Rope', 'quantity' => 40, 'delivery_island' => 'Hithadhoo', 'delivery_atoll' => 'Addu', 'needed_by' => today()->addDays(10)->toDateString(), 'business_name' => 'Sun Island Resort Pvt Ltd', 'business_address' => 'M. Sunny Building']);
+        $quote->forceFill(['customer_id' => $this->user->id, 'seller_id' => $shop->id, 'status' => 'accepted', 'unit_price' => 80, 'quoted_quantity' => 30, 'list_price' => 100, 'valid_until' => today()->addDays(7)->toDateString(), 'quoted_at' => now()])->save();
+        $cart = Cart::factory()->create(['user_id' => $this->user->id, 'status' => 'active']);
+        $quoted = CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => 30, 'price' => 80]);
+        $quoted->forceFill(['quote_request_id' => $quote->id])->save();
+
+        $this->putJson("/api/v1/cart/update/{$quoted->id}", ['quantity' => 31])
+            ->assertStatus(400)->assertJsonPath('success', false);
+        $this->assertSame(30, $quoted->fresh()->quantity);
+
+        // A line in an option checks the option's own stock, not the product total
+        $variantProduct = Product::factory()->create(['price' => 50, 'stock_quantity' => 0, 'is_active' => true, 'has_variants' => true]);
+        $small = ProductVariant::factory()->create(['product_id' => $variantProduct->id, 'stock_quantity' => 2]);
+        ProductVariant::factory()->create(['product_id' => $variantProduct->id, 'stock_quantity' => 20]);
+        $line = CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $variantProduct->id, 'product_variant_id' => $small->id, 'quantity' => 1, 'price' => 50]);
+
+        $this->putJson("/api/v1/cart/update/{$line->id}", ['quantity' => 3])->assertStatus(400);
+        $this->putJson("/api/v1/cart/update/{$line->id}", ['quantity' => 2])->assertOk();
+    }
+
     public function test_stock_is_enforced_including_quantity_already_in_cart(): void
     {
         $product = Product::factory()->create(['stock_quantity' => 3, 'is_active' => true]);

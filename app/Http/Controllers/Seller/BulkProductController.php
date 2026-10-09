@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\BulkProductService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 /**
@@ -74,7 +74,7 @@ class BulkProductController extends Controller
     {
         $ids = array_values(array_unique(array_map('intval', $ids)));
         $products = Product::whereIn('id', $ids)->with('variants')->get();
-        abort_if($products->count() !== count($ids) || $products->contains(fn ($p) => (int) $p->seller_id !== (int) Auth::id()), 403);
+        abort_if($products->count() !== count($ids) || $products->contains(fn ($p) => (int) $p->seller_id !== (int) CurrentShop::id()), 403);
 
         return $products;
     }

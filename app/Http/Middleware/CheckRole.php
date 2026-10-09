@@ -19,14 +19,13 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        if (! auth()->user()->hasRole($role)) {
-            abort(403, 'Access denied. '.ucfirst($role).' role required.');
+        // The Seller Centre: the shop's owner, or one of its staff for their role's pages (ShopAccess)
+        if ($role === 'seller') {
+            return app(ShopAccess::class)->handle($request, $next);
         }
 
-        // A pending shop may look around (it sees "awaiting approval"); a suspended one may not.
-        // (Rejection removes the seller role, so the role check above already covers it.)
-        if ($role === 'seller' && auth()->user()->status === 'suspended') {
-            abort(403, 'Your shop is not active.');
+        if (! auth()->user()->hasRole($role)) {
+            abort(403, 'Access denied. '.ucfirst($role).' role required.');
         }
 
         return $next($request);

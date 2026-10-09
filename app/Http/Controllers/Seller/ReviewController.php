@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\ProductReview;
 use App\Notifications\ReviewReplied;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -16,7 +17,7 @@ class ReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', Auth::id()));
+        $own = fn ($q) => $q->whereHas('product', fn ($p) => $p->withTrashed()->where('seller_id', CurrentShop::id()));
 
         $reviews = ProductReview::query()->tap($own)
             ->where('is_approved', true)
@@ -44,7 +45,7 @@ class ReviewController extends Controller
         $review->forceFill([
             'seller_reply' => trim($data['seller_reply']),
             'seller_replied_at' => $first ? now() : ($review->seller_replied_at ?? now()),
-            'seller_reply_user_id' => Auth::id(),
+            'seller_reply_user_id' => Auth::id(), // who wrote it (the owner or one of the shop's staff)
         ])->save();
 
         if ($first && $review->user?->email) {

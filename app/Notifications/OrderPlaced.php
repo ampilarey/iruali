@@ -37,6 +37,9 @@ class OrderPlaced extends Notification implements ShouldQueue
         foreach ($order->items as $item) {
             $mail->line('• '.$item->displayName().' × '.$item->quantity.' — '.Money::format($item->price * $item->quantity));
         }
+        foreach (app(\App\Services\PreorderService::class)->customerNotes($order) as $note) {
+            $mail->line($note); // pre-order items: when they should ship
+        }
         if ((float) $order->shop_discount > 0) {
             $mail->line(__('Shop discounts (multi-buy offers and shop codes)').': −'.Money::format($order->shop_discount));
         }

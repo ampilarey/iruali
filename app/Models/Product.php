@@ -78,6 +78,10 @@ class Product extends Model
         'is_digital' => 'boolean',
         'flash_sale_ends_at' => 'datetime',
         'delivery_surcharge' => 'decimal:2',
+        // Pre-orders while out of stock (App\Services\PreorderService)
+        'preorder_enabled' => 'boolean',
+        'preorder_ship_date' => 'date',
+        'preorder_limit' => 'integer',
     ];
 
     /** @return BelongsTo<Category, $this> */

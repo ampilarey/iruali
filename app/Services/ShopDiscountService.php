@@ -31,6 +31,8 @@ use RuntimeException;
  *     left over go to the lines with the biggest remainders), so the shares add up to it exactly.
  *  4. DiscountService then takes the iruali voucher off what is left (its minimum order is checked
  *     on that too), then loyalty points (at most what is left). Nothing goes below zero.
+ *  A line bought on a bulk quote (QuoteService) is the shop's negotiated price: it gets no multi-buy,
+ *  no shop code and no voucher, and its units do not count towards a multi-buy tier.
  *
  * The shop pays for 2 and 3: each order item keeps its multibuy_discount and shop_code_discount,
  * each shop's part sums them into shop_discount, and commission and earnings are worked out on the
@@ -187,17 +189,19 @@ class ShopDiscountService
             }
             $sellerId = $product->seller_id ? (int) $product->seller_id : null;
             $offer = $product->multibuyOffer;
+            $quoted = $item->quote_request_id !== null; // a bulk quote's line: the quoted price, no multi-buy or shop code on top
             $lines[$item->id] = [
                 'product_id' => (int) $product->id,
                 'variant_id' => $item->product_variant_id ? (int) $item->product_variant_id : null,
                 'seller_id' => $sellerId,
                 'quantity' => (int) $item->quantity,
                 'gross' => self::toLaari($item->unit_price) * (int) $item->quantity,
-                'offer' => $offer && $sellerId && (int) $offer->seller_id === $sellerId ? $offer : null,
+                'offer' => ! $quoted && $offer && $sellerId && (int) $offer->seller_id === $sellerId ? $offer : null,
                 'multibuy' => 0,
                 'multibuy_percent' => null,
                 'next_tier' => null,
                 'code' => 0,
+                'quoted' => $quoted,
             ];
         }
 
@@ -307,9 +311,13 @@ class ShopDiscountService
             return ['error' => $problem];
         }
 
-        $eligible = array_filter($shopLines, fn ($line) => $code->covers($line['product_id']));
+        $eligible = array_filter($shopLines, fn ($line) => empty($line['quoted']) && $code->covers($line['product_id']));
         if ($eligible === []) {
-            return ['error' => __('The shop code :code does not cover the items in your cart.', ['code' => $code->code])];
+            $onQuote = array_filter($shopLines, fn ($line) => ! empty($line['quoted']) && $code->covers($line['product_id'])) !== [];
+
+            return ['error' => $onQuote
+                ? __('Shop codes do not apply to items bought on a quote.')
+                : __('The shop code :code does not cover the items in your cart.', ['code' => $code->code])];
         }
 
         $weights = array_map(fn ($line) => $line['gross'] - $line['multibuy'], $eligible);

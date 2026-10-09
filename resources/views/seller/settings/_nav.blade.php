@@ -17,6 +17,7 @@
     if (\Illuminate\Support\Facades\Route::has('seller.settings.tax')) {
         $settingsTabs['seller.settings.tax'] = __('Tax');
     }
+    $settingsTabs = array_filter($settingsTabs, fn ($route) => \App\Support\CurrentShop::can($route), ARRAY_FILTER_USE_KEY); // staff: their role's pages only
 @endphp
 <nav class="flex flex-wrap gap-2 text-sm" aria-label="{{ __('Settings') }}">
     @foreach($settingsTabs as $route => $label)

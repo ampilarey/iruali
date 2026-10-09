@@ -6,6 +6,7 @@ use App\Models\Message;
 use App\Models\Order;
 use App\Models\SellerOrder;
 use App\Services\MessagingService;
+use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 
 /**
@@ -24,7 +25,7 @@ class MessageController extends Controller
 
     public function storeAsSeller(Request $request, Order $order, SellerOrder $part)
     {
-        abort_unless($part->order_id === $order->id && $part->seller_id === $request->user()->id, 403);
+        abort_unless($part->order_id === $order->id && $part->seller_id === CurrentShop::id(), 403);
 
         return $this->store($request, $part, 'seller', route('seller.orders.show', $order).'#conversation');
     }

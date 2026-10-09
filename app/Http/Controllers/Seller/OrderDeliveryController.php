@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\SellerOrder;
 use App\Services\FulfilmentService;
+use App\Support\CurrentShop;
 use App\Support\PackingSlip;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * A shop's own part of an order: get it ready for pickup, confirm the customer collected it
@@ -27,6 +27,7 @@ class OrderDeliveryController extends Controller
                 'unpaid' => __('Wait until the customer has paid before getting it ready for pickup.'),
                 'ready' => __('This part is already marked ready for pickup.'),
                 'collected' => __('The customer has already collected this part.'),
+                'awaiting_stock' => __('These pre-order items are still waiting for their stock. Record it under Pre-orders when it arrives.'),
                 default => __('This order was cancelled. Don\'t hand over these items.'),
             });
         }
@@ -59,7 +60,7 @@ class OrderDeliveryController extends Controller
 
     protected function ownPart(Order $order, FulfilmentService $fulfilment): SellerOrder
     {
-        $part = $fulfilment->partFor($order, Auth::user());
+        $part = $fulfilment->partFor($order, CurrentShop::get());
         abort_if($part === null, 404);
 
         return $part;

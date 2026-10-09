@@ -287,6 +287,21 @@ class ShopHolidayTest extends TestCase
         $this->assertSame('shipped', SellerOrder::where('order_id', $order->id)->value('status'));
     }
 
+    public function test_feeds_and_search_engines_see_a_holiday_shops_products_as_out_of_stock(): void
+    {
+        $product = $this->product(['name' => ['en' => 'Coir Rope Basket'], 'sku' => 'CRB-1']);
+        $this->get(\App\Support\FeedToken::url('feeds.google-merchant'))->assertOk()->assertSee('<g:availability>in_stock</g:availability>', false);
+
+        $this->goOnHoliday();
+        \Illuminate\Support\Facades\Cache::flush(); // the feeds are cached for a while
+
+        $this->get(\App\Support\FeedToken::url('feeds.google-merchant'))->assertOk()
+            ->assertSee('<g:availability>out_of_stock</g:availability>', false)
+            ->assertDontSee('<g:availability>in_stock</g:availability>', false);
+        $this->get(\App\Support\FeedToken::url('feeds.facebook-catalog'))->assertOk()->assertSee('out of stock');
+        $this->get(route('products.show', $product))->assertOk()->assertSee('https://schema.org/OutOfStock', false);
+    }
+
     public function test_the_shop_page_catalog_cards_and_admin_sellers_list_show_the_holiday(): void
     {
         $this->product(['name' => 'Coir Rope Basket']);

@@ -93,15 +93,15 @@
                     <h2 class="font-semibold text-lg">{{ __('Order Summary') }}</h2>
 
                     @if($freeOver > 0)
-                        @php $left = max(0, $freeOver - $subtotal); @endphp
+                        @php $left = max(0, $freeOver - $total); /* the same goods total the delivery fee uses: after discounts */ @endphp
                         <div class="rounded-lg bg-primary-50 p-3 text-sm">
                             @if($left > 0)
                                 <p>{{ __('Add :amount more for free delivery.', ['amount' => \App\Support\Money::format($left)]) }}</p>
                             @else
                                 <p class="font-semibold text-success flex items-center gap-1.5"><x-icon name="check" class="w-4 h-4" />{{ __('Your order gets free delivery.') }}</p>
                             @endif
-                            <div class="mt-2 h-2 rounded-full bg-white overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (int) min(100, $subtotal / $freeOver * 100) }}">
-                                <div class="h-full bg-primary rounded-full" style="width: {{ min(100, $subtotal / $freeOver * 100) }}%"></div>
+                            <div class="mt-2 h-2 rounded-full bg-white overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (int) min(100, $total / $freeOver * 100) }}">
+                                <div class="h-full bg-primary rounded-full" style="width: {{ min(100, $total / $freeOver * 100) }}%"></div>
                             </div>
                         </div>
                     @endif

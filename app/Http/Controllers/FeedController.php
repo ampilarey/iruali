@@ -71,6 +71,8 @@ class FeedController extends Controller
                     'additional_images' => $images->slice(1, 10)->values()->all(),
                 ];
                 $name = $product->getTranslation('name', 'en', false) ?: $product->getTranslation('name', 'dv', false);
+                // A shop on holiday takes no orders: its products are listed as out of stock until it is back
+                $onHoliday = (bool) $product->seller?->isOnHoliday();
 
                 $variants = $product->has_variants ? $product->variants->filter(fn ($v) => $v->attributes_list !== []) : collect();
                 if ($variants->isNotEmpty()) {
@@ -81,7 +83,7 @@ class FeedController extends Controller
                             'item_group_id' => $base.$product->id,
                             'title' => Str::limit($name.' - '.$variant->displayName(), 150, ''),
                             'price' => number_format($variant->effectivePrice(), 2, '.', '').' MVR',
-                            'availability' => $variant->stock_quantity > 0 ? 'in_stock' : 'out_of_stock',
+                            'availability' => $variant->stock_quantity > 0 && ! $onHoliday ? 'in_stock' : 'out_of_stock',
                             'image_link' => $variant->image ? self::absolute($variant->image) : ($images->first() ?? asset('images/product-placeholder.svg')),
                             'attributes' => $variant->attributes_list,
                         ];
@@ -95,7 +97,7 @@ class FeedController extends Controller
                     'item_group_id' => null,
                     'title' => Str::limit($name, 150, ''),
                     'price' => number_format((float) $product->final_price, 2, '.', '').' MVR',
-                    'availability' => $product->effectiveStock() > 0 ? 'in_stock' : 'out_of_stock',
+                    'availability' => $product->effectiveStock() > 0 && ! $onHoliday ? 'in_stock' : 'out_of_stock',
                     'image_link' => $images->first() ?? asset('images/product-placeholder.svg'),
                     'attributes' => [],
                 ];

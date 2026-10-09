@@ -78,10 +78,31 @@ under `/account` (profile, password, notification preferences at `/account/notif
 address book at `/account/addresses` with the island picker and a default address). Referral
 codes and loyalty points live on the account; `locale/switch` changes the language.
 
+**Sign in with Google, Facebook or Apple.** "Continue with …" on `/login` and `/register`
+(`social.redirect`, `social.callback`; Apple posts to `social.apple.post`), shown per provider once
+its keys are set (`docs/SOCIAL_LOGIN.md`). New customers get an account without a password;
+existing accounts are joined only when the provider verified the email; staff must use their
+password; two-step sign-in, bans and the guest-cart merge apply as with a password. My Account →
+Security lists the connected accounts (`account.social.unlink`) and emails a link to set a
+password (`account.password.link`).
+
 **Cart, wishlist, saved items.** `/cart` (`cart`, `cart.add`, `cart.addMany` for bundles,
 `cart.update`, `cart.remove`, `cart.clear`, `cart.saveForLater` → `/saved/*`), vouchers applied
 on the cart (`cart.applyVoucher` / `cart.removeVoucher`), `/wishlist` with add/remove/clear. Guest
 carts are kept for 30 days.
+
+**Wishlist price drops.** A wishlisted item remembers its final price (campaign and markdown
+included). Every day at 10:00 Maldives time `wishlist:price-drops` sends each customer at most one
+email (and a push on devices that allowed it) listing items now at least 5% and MVR 10 under the
+last price they were told about; that price then becomes the reference, so a drop is never
+repeated. "Price drops on your wishlist" on `/account/notifications` (or the marketing opt-out)
+turns it off; hidden, sold-out and deleted products are skipped. `/wishlist` shows "MVR X less than
+when you saved it".
+
+**Product videos.** A shop can add a YouTube (or Shorts), TikTok, Instagram or Facebook video link
+to a product (its own fieldset in the product form, stored as `products.video_provider` and
+`video_id`). The product page shows a play button; the provider's player is only loaded when the
+shopper presses it, and the Content-Security-Policy allows frames from those four players only.
 
 **Checkout and payment.** `/checkout` collects the delivery address (saved address or island
 picker, which sets the delivery zone and fee), lets points be redeemed (`checkout.redeemPoints`),
@@ -146,6 +167,15 @@ duplicates, delete unused ones; old names and addresses keep working), `/admin/u
 `/admin/reviews` and `/admin/questions` (moderation), `/admin/vouchers`, `/admin/newsletter`,
 `/admin/settings` (site settings, delivery fees, commission default) and `/admin/legal`.
 
+**Newsletter.** `/admin/newsletter` lists the footer subscribers (who confirm by email first) and
+the newsletters. "Write a newsletter" (`admin.newsletter-issues.*`, admins only): subject and text
+in English and Dhivehi, plus sections picked when it is sent (new arrivals from the last N days,
+current deals, a running campaign, featured brands), a preview in both languages and "Send me a
+test". "Send" queues it in spaced batches (`config/newsletter.php`) to confirmed subscribers and
+customers who accept marketing emails, one email per address in its own language with the signed
+unsubscribe link; an address never gets an issue twice. Each issue keeps its status and counts,
+and the send is in the audit log.
+
 **Orders, payments, returns, disputes.** `/admin/orders` and `/admin/orders/{order}`: change the
 order or a part's status, add tracking, message the shop or customer, re-check a payment with
 BML (`admin.orders.bml-sync`), record a manual payment, flag and record refunds.
@@ -192,7 +222,7 @@ customer). Both run at the end of a deploy. `tests/load/` has a k6 load test.
 nightly database backups to local and optional S3/B2 with a monthly restore drill
 (`backup:restore-drill`), queued mail sent every minute by a short-lived worker, expired tokens
 and failed jobs pruned, guest carts cleaned, the daily errors digest (`errors:digest`) and the
-seller low-stock digest.
+seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts.
 
 **Staging data.** `php artisan iruali:anonymise --force` rewrites personal data on a copy of
 the production database before it is used on the test site.

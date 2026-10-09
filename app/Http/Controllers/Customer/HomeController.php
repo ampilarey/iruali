@@ -12,7 +12,7 @@ class HomeController extends Controller
     public function index()
     {
         $cards = fn () => Product::query()->active()->inStock()
-            ->with(['category', 'mainImage', 'seller'])
+            ->with(['category', 'mainImage', 'seller', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating');
 

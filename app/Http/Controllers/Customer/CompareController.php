@@ -19,7 +19,7 @@ class CompareController extends Controller
         $ids = $this->compareIds($request);
 
         $products = Product::query()->active()->whereIn('id', $ids)
-            ->with(['mainImage', 'seller', 'category'])
+            ->with(['mainImage', 'seller', 'category', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating')
             ->get()

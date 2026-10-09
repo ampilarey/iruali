@@ -29,7 +29,7 @@ class CampaignController extends Controller
             ->active()
             // A brand campaign shows only that brand's products (one that changed brand gets no campaign price)
             ->when($campaign->brand_id, fn (Builder $q) => $q->where('products.brand_id', $campaign->brand_id))
-            ->with(['category', 'mainImage', 'seller'])
+            ->with(['category', 'mainImage', 'seller', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating')
             ->orderByDesc('campaign_products.approved_at')

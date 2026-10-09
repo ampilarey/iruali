@@ -137,6 +137,20 @@ class Product extends Model
         return $this->belongsTo(Brand::class, 'brand_id');
     }
 
+    /**
+     * The brand name shoppers see on product cards and in the compare table: the brand's Dhivehi
+     * name on Dhivehi pages when it has one, else the name in products.brand. English pages need
+     * no query; the listings that show cards eager-load brandModel for the Dhivehi ones.
+     */
+    public function brandLabel(): ?string
+    {
+        if (app()->getLocale() === 'dv' && $this->brand_id && filled($nameDv = $this->brandModel?->name_dv)) {
+            return $nameDv;
+        }
+
+        return filled($this->brand) ? $this->brand : null;
+    }
+
     /** @return BelongsToMany<Island, $this> */
     public function islands(): BelongsToMany
     {

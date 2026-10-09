@@ -29,7 +29,7 @@ class ProductController extends Controller
         ]);
         $product->reviews->each->setRelation('product', $product); // replies are signed with the product's shop
 
-        $cards = fn ($q) => $q->active()->with(['category', 'mainImage', 'seller'])
+        $cards = fn ($q) => $q->active()->with(['category', 'mainImage', 'seller', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating');
 

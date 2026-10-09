@@ -53,8 +53,9 @@
                                     <p class="font-semibold text-gray-900">{{ $part->shopName() }}</p>
                                     <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span>
                                 </div>
-                                <p class="mt-1 text-xs text-gray-500">Items {{ \App\Support\Money::format($part->subtotal) }} · commission {{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}% ({{ \App\Support\Money::format($part->commission_amount) }}) · shop earns {{ \App\Support\Money::format($part->seller_earnings) }} · {{ str_replace('_', ' ', $part->earningsState()) }}</p>
+                                <p class="mt-1 text-xs text-gray-500">Items {{ \App\Support\Money::format($part->subtotal) }}@if((float) $part->shop_discount > 0) · shop's discounts &minus;{{ \App\Support\Money::format($part->shop_discount) }}@endif · commission {{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}% ({{ \App\Support\Money::format($part->commission_amount) }}) · shop earns {{ \App\Support\Money::format($part->seller_earnings) }} · {{ str_replace('_', ' ', $part->earningsState()) }}</p>
                                 <div class="mt-2">@include('orders._tracking', ['part' => $part])</div>
+                                @include('admin.orders._part_delivery', ['order' => $order, 'part' => $part])
                                 @if($next = $fulfilment->nextStatuses($part))
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         @foreach($next as $status)
@@ -102,6 +103,7 @@
                     @endforeach
                 </div>
                 <dl class="space-y-1 border-t border-gray-100 px-5 py-4 text-sm">
+                    @include('orders._shop_deals', ['order' => $order, 'as' => 'dl'])
                     @if($order->voucher_discount > 0)
                         <div class="flex justify-between text-gray-600"><dt>Voucher {{ $order->voucher_code }}</dt><dd>−{{ \App\Support\Money::format($order->voucher_discount) }}</dd></div>
                     @endif
@@ -196,6 +198,8 @@
                     @endif
                     <p class="mt-3 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}</p>
                 </div>
+                @include('admin.orders._delivery', ['order' => $order])
+                @include('admin.tax._order', ['order' => $order])
             </div>
         </div>
     </div>

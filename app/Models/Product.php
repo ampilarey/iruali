@@ -59,6 +59,7 @@ class Product extends Model
         'meta_title',
         'meta_description',
         'flash_sale_ends_at',
+        'delivery_surcharge',
     ];
 
     protected $casts = [
@@ -76,6 +77,7 @@ class Product extends Model
         'requires_shipping' => 'boolean',
         'is_digital' => 'boolean',
         'flash_sale_ends_at' => 'datetime',
+        'delivery_surcharge' => 'decimal:2',
     ];
 
     /** @return BelongsTo<Category, $this> */
@@ -557,5 +559,18 @@ class Product extends Model
         if ($this->is_active && ! $shownBefore) {
             $this->sale_started_at = $this->freshTimestamp();
         }
+    }
+
+    // ---- Shop deals -----------------------------------------------------------------------
+
+    /**
+     * The shop's multi-buy offer on this product ("buy 2, save 5%"), shared with the other products
+     * of a mix-and-match group when the offer has a name.
+     *
+     * @return BelongsTo<MultiBuyOffer, $this>
+     */
+    public function multibuyOffer(): BelongsTo
+    {
+        return $this->belongsTo(MultiBuyOffer::class, 'multibuy_offer_id');
     }
 }

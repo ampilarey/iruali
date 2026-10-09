@@ -68,6 +68,7 @@ class GuestCheckoutController extends Controller
     public function store(StoreGuestOrderRequest $request)
     {
         $cart = $this->cartService->currentCart();
+        $buyer = app(\App\Services\GstService::class)->buyerFromRequest($request); // "Buying for a business?" details, checked before the order exists
 
         $shippingData = [
             'shipping_address' => $request->shipping_address,
@@ -79,6 +80,8 @@ class GuestCheckoutController extends Controller
             'delivery_zone' => $request->delivery_zone,
             'payment_method' => $request->payment_method,
         ];
+        // Deliver or pick up per shop, the Malé time slot and the gift details
+        $shippingData += $request->deliveryChoices();
 
         $result = $this->orderService->createOrderFromCart(null, $shippingData, $cart, [
             'email' => $request->guest_email,
@@ -92,6 +95,7 @@ class GuestCheckoutController extends Controller
         }
 
         $order = $result['order'];
+        app(\App\Services\GstService::class)->recordBuyer($order, $buyer); // printed on every shop's invoice
         // Remember this browser placed the order, so the confirmation page can be reopened from the cart
         $request->session()->push('guest_orders', $order->id);
 

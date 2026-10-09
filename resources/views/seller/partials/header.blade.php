@@ -4,6 +4,7 @@
         'seller.products.index' => ['Products', 'seller.products.*'],
         'seller.stock' => [__('Stock'), 'seller.stock*'],
         'seller.campaigns' => [__('Campaigns'), 'seller.campaigns*'],
+        'seller.discounts' => [__('Discount codes'), 'seller.discounts*'],
         'seller.orders' => ['Orders', 'seller.orders*'],
         'seller.returns' => ['Returns', 'seller.returns'],
         'seller.questions' => ['Questions', 'seller.questions'],
@@ -48,4 +49,5 @@
     @if(session('error'))
         <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('error') }}</div>
     @endif
+    @include('seller.partials._holiday_reminder')
 </div>

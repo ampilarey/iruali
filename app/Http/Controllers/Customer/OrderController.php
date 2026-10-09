@@ -46,6 +46,7 @@ class OrderController extends Controller
         // $this->authorize('create', Order::class); // Removed as StoreOrderRequest handles authorization
 
         $user = Auth::user();
+        $buyer = app(\App\Services\GstService::class)->buyerFromRequest($request); // "Buying for a business?" details, checked before the order exists
 
         $shippingData = [
             'shipping_address' => $request->shipping_address,
@@ -58,6 +59,8 @@ class OrderController extends Controller
             'payment_method' => $request->payment_method,
             'use_wallet' => $request->boolean('use_wallet'),
         ];
+        // Deliver or pick up per shop, the Malé time slot and the gift details
+        $shippingData += $request->deliveryChoices();
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);
 
@@ -68,9 +71,10 @@ class OrderController extends Controller
         }
 
         $order = $result['order'];
+        app(\App\Services\GstService::class)->recordBuyer($order, $buyer); // printed on every shop's invoice
 
-        // "Save this address for next time" (a new address typed at checkout)
-        if ($request->boolean('save_address') && ! $request->filled('address_id')) {
+        // "Save this address for next time" (a new address typed at checkout; none when all is picked up)
+        if ($request->boolean('save_address') && ! $request->filled('address_id') && ! $request->everythingPickedUp()) {
             $this->saveAddressFromOrder($user, $request, $order);
         }
 
@@ -155,7 +159,7 @@ class OrderController extends Controller
         $added = 0;
         foreach ($order->items()->with('product')->get() as $item) {
             $product = $item->product;
-            if ($product && $product->is_active && $product->stock_quantity > 0) {
+            if ($product && $product->is_active && $product->stock_quantity > 0 && ! $product->seller?->isOnHoliday()) {
                 $cart->addToCart($product->id, min($item->quantity, $product->stock_quantity));
                 $added++;
             }

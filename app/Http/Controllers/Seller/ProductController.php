@@ -51,10 +51,12 @@ class ProductController extends Controller
         if ($product->has_variants) {
             $product->stock_quantity = 0; // set from the variants below
         }
+        $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
         $product->save();
 
         $this->storeImage($request, $product);
         $variants->sync($product, $request->variantRows());
+        $this->saveMultiBuy($request, $product);
         app(\App\Services\OnboardingService::class)->refresh(Auth::user()->fresh());
 
         return redirect()->route('seller.products.index')
@@ -77,10 +79,12 @@ class ProductController extends Controller
     {
         $this->authorizeOwner($product);
 
+        $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
         $product->update($request->productAttributes());
 
         $this->storeImage($request, $product);
         $variants->sync($product, $request->variantRows());
+        $this->saveMultiBuy($request, $product);
 
         return redirect()->route('seller.products.index')
             ->with('success', 'Product updated successfully.');
@@ -130,5 +134,15 @@ class ProductController extends Controller
             'is_main' => true,
             'sort_order' => 0,
         ]);
+    }
+
+    /**
+     * The form's "Multi-buy offer" fieldset (forms without it leave the offer alone).
+     */
+    protected function saveMultiBuy(ProductRequest $request, Product $product): void
+    {
+        if ($request->has('multibuy')) {
+            app(\App\Services\MultiBuyService::class)->saveFromForm($product, (array) ($request->validated()['multibuy'] ?? []));
+        }
     }
 }

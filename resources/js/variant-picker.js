@@ -79,7 +79,8 @@ function initPicker(form) {
         const complete = Object.keys(chosen).length === groups.length;
         if (select) select.value = variant ? String(variant.id) : '';
         if (unavailable) unavailable.classList.toggle('hidden', !(complete && !variant));
-        if (submit) submit.disabled = !variant || variant.stock <= 0;
+        // data-holiday: the shop is on holiday, so the button stays disabled whatever is picked
+        if (submit) submit.disabled = !variant || variant.stock <= 0 || submit.hasAttribute('data-holiday');
         if (!variant) return;
 
         if (priceBox) {

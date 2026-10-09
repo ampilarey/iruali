@@ -61,4 +61,21 @@ class OrderItem extends Model
 
         return $this->variant_name ? $name.' – '.$this->variant_name : $name;
     }
+
+    /**
+     * What the shop took off this line: its multi-buy saving plus its share of the shop's code.
+     */
+    public function shopDiscount(): float
+    {
+        return round((float) $this->multibuy_discount + (float) $this->shop_code_discount, 2);
+    }
+
+    /**
+     * The line as the customer paid for it, before any iruali voucher or points: price × quantity
+     * less the shop's discounts.
+     */
+    public function netTotal(): float
+    {
+        return round((float) $this->price * (int) $this->quantity - $this->shopDiscount(), 2);
+    }
 }

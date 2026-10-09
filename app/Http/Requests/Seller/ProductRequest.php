@@ -51,7 +51,10 @@ class ProductRequest extends FormRequest
             'reorder_point' => 'nullable|integer|min:0|max:999999',
             'brand' => 'nullable|string|max:120',
             'weight' => 'nullable|numeric|min:0|max:999.99',
+            // Bulky items: added to the delivery fee per unit delivered, never waived by free delivery
+            'delivery_surcharge' => 'nullable|numeric|min:0|max:99999.99',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'video_url' => ['nullable', 'string', 'max:500', new \App\Rules\ProductVideoUrl],
 
             'variants' => ['exclude_if:has_variants,false', 'required', 'array', 'min:1', 'max:'.self::MAX_VARIANTS],
             'variants.*.id' => 'nullable|integer',
@@ -63,7 +66,7 @@ class ProductRequest extends FormRequest
             'variants.*.low_stock_threshold' => 'nullable|integer|min:0|max:999999',
             'variants.*.is_active' => 'nullable|boolean',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ];
+        ] + \App\Services\MultiBuyService::formRules();
     }
 
     public function attributes(): array
@@ -78,6 +81,7 @@ class ProductRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
+        $validator->after(fn (Validator $validator) => app(\App\Services\MultiBuyService::class)->validateForm($validator, $this->user(), (array) $this->input('multibuy', [])));
         $validator->after(function (Validator $validator) {
             if (! $this->boolean('has_variants')) {
                 return;
@@ -152,6 +156,10 @@ class ProductRequest extends FormRequest
         if (array_key_exists('stock_quantity', $data)) {
             $attributes['stock_quantity'] = $data['stock_quantity'];
         }
+        // Only when the form sent it, so a form without the field leaves the charge as it was
+        if (array_key_exists('delivery_surcharge', $data)) {
+            $attributes['delivery_surcharge'] = round((float) ($data['delivery_surcharge'] ?? 0), 2);
+        }
 
         return $attributes;
     }
@@ -162,5 +170,23 @@ class ProductRequest extends FormRequest
     public function variantRows(): array
     {
         return $this->boolean('has_variants') ? array_values($this->validated()['variants'] ?? []) : [];
+    }
+
+    /**
+     * The video columns from the form's video link (both null when it was emptied), or nothing
+     * when the form did not send the field, so the video stays as it was.
+     *
+     * @return array{video_provider?: string|null, video_id?: string|null}
+     */
+    public function videoAttributes(): array
+    {
+        $data = $this->validated();
+        if (! array_key_exists('video_url', $data)) {
+            return [];
+        }
+
+        $video = \App\Support\ProductVideo::parse($data['video_url']);
+
+        return ['video_provider' => $video?->provider, 'video_id' => $video?->id];
     }
 }

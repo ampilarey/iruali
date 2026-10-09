@@ -18,6 +18,10 @@ class SellerPayout extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
+        // iruali's commission invoice (App\Services\GstService)
+        'invoice_sequence' => 'integer',
+        'invoiced_at' => 'datetime',
+        'invoice_details' => 'array',
     ];
 
     /** @return BelongsTo<User, $this> */

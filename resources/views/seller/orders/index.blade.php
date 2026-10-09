@@ -41,7 +41,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $order->items->sum('quantity') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->subtotal) }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\Money::format($part->seller_earnings) }}</td>
-                                <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span></td>
+                                <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span>@include('seller.orders._badges', ['part' => $part, 'order' => $order])</td>
                                 <td class="px-4 py-3 text-right text-sm"><a href="{{ route('seller.orders.show', $order) }}" class="font-medium text-primary-600 hover:text-primary-700">View</a></td>
                             </tr>
                         @empty

@@ -53,7 +53,7 @@
                                         </label>
                                     @endforeach
                                 </div>
-                                @if($type === 'brand_updates' && $user->marketing_opt_out_at)
+                                @if(in_array($type, ['brand_updates', 'wishlist_price_drops'], true) && $user->marketing_opt_out_at)
                                     <p class="mt-1 text-xs text-gray-500">{{ __('Marketing emails are off, so these are not sent until you turn them back on in My Account.') }}</p>
                                 @endif
                                 @error($type)<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror

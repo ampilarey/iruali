@@ -56,6 +56,7 @@
                     <tbody class="divide-y divide-gray-100">
                         <tr><th scope="row" class="text-start font-medium text-gray-600 py-2">{{ __('Greater Malé (Malé, Hulhumalé, Villimalé)') }}</th><td class="text-end font-semibold">{{ Money::format($male) }}</td></tr>
                         <tr><th scope="row" class="text-start font-medium text-gray-600 py-2">{{ __('Other islands') }}</th><td class="text-end font-semibold">{{ Money::format($islands) }}</td></tr>
+                        @include('pages._delivery_rates')
                         @if($freeOver > 0)
                             <tr><th scope="row" class="text-start font-medium text-gray-600 py-2">{{ __('Orders over :amount', ['amount' => Money::format($freeOver)]) }}</th><td class="text-end font-semibold text-success">{{ __('Free') }}</td></tr>
                         @endif

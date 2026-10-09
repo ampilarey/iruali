@@ -43,6 +43,7 @@ class CartController extends Controller
             'cart' => $cart,
             'voucher' => $cartSummary['voucher'],
             'discount' => $cartSummary['voucher_discount'],
+            'shopDeals' => $cartSummary['shop_deals'] + ['voucher_error' => $cartSummary['voucher_error']],
             'saved' => $saved,
             'freeOver' => (float) Setting::get('free_delivery_over'),
         ]);
@@ -105,7 +106,7 @@ class CartController extends Controller
         foreach (Product::whereIn('id', $data['product_ids'])->get() as $product) {
             $inCart = (int) $cart->items()->where('product_id', $product->id)->sum('quantity');
             // Products sold in variants need an option picked on their own page
-            if ($product->is_active && ! $product->has_variants && $product->stock_quantity > $inCart) {
+            if ($product->is_active && ! $product->has_variants && $product->stock_quantity > $inCart && ! $product->seller?->isOnHoliday()) {
                 $this->cartService->addToCart($product->id, 1);
                 $added++;
             }

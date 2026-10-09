@@ -17,6 +17,7 @@
         @if($wasPrice)
             <span dir="ltr" class="absolute top-2 start-2 bg-coral text-white text-[11px] font-bold px-1.5 py-0.5 rounded">&minus;{{ $product->discount_percentage }}%</span>
         @endif
+        @include('sellers._holiday_label', ['seller' => $seller, 'class' => 'absolute bottom-2 start-2'])
     </a>
     <div class="flex-1 min-w-0 grid sm:grid-cols-[1fr_13rem] gap-3 sm:gap-6">
         <div class="min-w-0">
@@ -55,6 +56,7 @@
             @if($product->is_featured && ! $compact)
                 <span class="bg-sun text-sun-on text-[11px] font-bold px-1.5 py-0.5 rounded">{{ __('Top pick') }}</span>
             @endif
+            @include('sellers._holiday_label', ['seller' => $seller])
         </span>
     </a>
     @unless($compact)

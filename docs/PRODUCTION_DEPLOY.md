@@ -136,6 +136,30 @@ Every later release is step 2 above: `bash scripts/deploy-production.sh <tag>`.
 - `php artisan iruali:smoke --place-order` can be run at any time; it leaves one cancelled
   order per run under the smoke customer.
 
+## GST (tax): before you switch it on
+
+iruali is **GST-ready** but ships with nothing switched on: iruali is "not GST-registered", no shop
+is registered, and checkout, prices and receipts look exactly as before. Before launch or before
+registering:
+
+1. **Confirm with your accountant or MIRA** that 8 % is the right rate for what is sold on iruali,
+   what your tax invoices must show, and how commission and delivery fees should be treated. This
+   software does not decide any of that for you.
+2. Fill in **Admin → Settings → Business details** (registered name, address): they print on
+   iruali's receipts and commission invoices.
+3. Once registered, open **Admin → Tax** (`/admin/tax`), choose "Yes, GST-registered", enter the
+   TIN from the MIRA certificate (format `1012345GST501`), check the rate and the invoice number
+   prefix, and save. It applies to orders placed from then on; earlier orders keep the GST they
+   were placed with. Every change is in the audit log.
+4. Ask GST-registered shops to fill in **Seller Centre → Settings → Tax**; their paid orders then
+   get tax invoices instead of receipts.
+5. Each month, **Admin → Tax → Monthly GST report** (CSV download) has the figures for your
+   accountant. Finance staff can open the tax pages too (`config/staff.php`).
+
+Commission is treated as including GST (shops' earnings do not change when iruali registers); if
+your accountant wants GST added on top of commission instead, that is a change to the commission
+rules, not a setting.
+
 ## What must keep running on the server
 
 - **Scheduler cron** (set up in the first-deploy steps; unpaid-order cleanup, nightly database

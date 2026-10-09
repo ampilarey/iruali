@@ -5,7 +5,7 @@
 @php
     $items = $cart->items->filter(fn ($i) => $i->product);
     $subtotal = (float) $cart->total;
-    $total = max(0, $subtotal - (float) $discount);
+    $total = max(0, $subtotal - (float) ($shopDeals['amount'] ?? 0) - (float) $discount);
     $units = (int) $items->sum('quantity');
 @endphp
 
@@ -28,6 +28,7 @@
                 @endguest
             </div>
         @else
+            @include('cart._holiday_notice', ['cart' => $cart])
             <div class="grid lg:grid-cols-[1fr_22rem] gap-5 lg:gap-6 items-start">
                 <section class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-200" aria-label="{{ __('Items in your cart') }}">
                     @foreach($items as $item)
@@ -41,6 +42,8 @@
                                     <a href="{{ route('products.show', $product) }}" class="font-semibold text-dark leading-snug hover:text-primary hover:underline line-clamp-2">{{ $product->name }}</a>
                                     @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->displayNameWithKeys() }}@if($item->variant->sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant->sku }})</span>@endif</p>@endif
                                     @if($seller)<p class="text-xs text-gray-500 mt-0.5">{{ __('Sold by') }} {{ $seller->business_name ?: $seller->name }}</p>@endif
+                                    @include('cart._holiday_item', ['seller' => $seller])
+                                    @include('cart._delivery_surcharge', ['product' => $product])
                                     <x-stock :quantity="$item->availableStock()" class="mt-1" />
                                     <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                                         <form action="{{ route('cart.update', $item) }}" method="POST" class="flex items-center gap-2">
@@ -71,6 +74,7 @@
                                     <p class="font-bold text-dark text-lg">{{ \App\Support\Money::format($item->subtotal) }}</p>
                                     @if($item->quantity > 1)<p class="text-xs text-gray-500">{{ \App\Support\Money::format($item->unit_price) }} {{ __('each') }}</p>@endif
                                     @if($product->was_price && ! $item->variant)<p class="text-xs font-semibold text-coral">{{ __('Save :amount', ['amount' => \App\Support\Money::format($product->savings * $item->quantity)]) }}</p>@endif
+                                    @include('cart._shop_deals_line', ['deal' => $shopDeals['lines'][$item->id] ?? null])
                                 </div>
                             </div>
                         </div>
@@ -89,21 +93,22 @@
                     <h2 class="font-semibold text-lg">{{ __('Order Summary') }}</h2>
 
                     @if($freeOver > 0)
-                        @php $left = max(0, $freeOver - $subtotal); @endphp
+                        @php $left = max(0, $freeOver - $total); /* the same goods total the delivery fee uses: after discounts */ @endphp
                         <div class="rounded-lg bg-primary-50 p-3 text-sm">
                             @if($left > 0)
                                 <p>{{ __('Add :amount more for free delivery.', ['amount' => \App\Support\Money::format($left)]) }}</p>
                             @else
                                 <p class="font-semibold text-success flex items-center gap-1.5"><x-icon name="check" class="w-4 h-4" />{{ __('Your order gets free delivery.') }}</p>
                             @endif
-                            <div class="mt-2 h-2 rounded-full bg-white overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (int) min(100, $subtotal / $freeOver * 100) }}">
-                                <div class="h-full bg-primary rounded-full" style="width: {{ min(100, $subtotal / $freeOver * 100) }}%"></div>
+                            <div class="mt-2 h-2 rounded-full bg-white overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (int) min(100, $total / $freeOver * 100) }}">
+                                <div class="h-full bg-primary rounded-full" style="width: {{ min(100, $total / $freeOver * 100) }}%"></div>
                             </div>
                         </div>
                     @endif
 
                     <dl class="space-y-2 text-sm">
                         <div class="flex justify-between"><dt class="text-gray-600">{{ __('Subtotal') }}</dt><dd class="font-medium">{{ \App\Support\Money::format($subtotal) }}</dd></div>
+                        @include('cart._shop_deals_summary')
                         @if($voucher && $discount > 0)
                             <div class="flex justify-between text-success"><dt>{{ __('Voucher') }} ({{ $voucher->code }})</dt><dd class="font-medium">&minus;{{ \App\Support\Money::format($discount) }}</dd></div>
                         @endif
@@ -127,6 +132,7 @@
                             @error('voucher_code')<p class="text-danger text-sm mt-1">{{ $message }}</p>@enderror
                         </form>
                     @endif
+                    @include('cart._shop_code_form')
 
                     @auth
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>

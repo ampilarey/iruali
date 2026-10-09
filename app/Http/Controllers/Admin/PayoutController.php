@@ -21,7 +21,7 @@ class PayoutController extends Controller
         $sellers = User::query()
             ->where(fn ($q) => $q->where('is_seller', true)->orWhereHas('sellerOrders'))
             ->orderByRaw('COALESCE(business_name, name)')
-            ->with('bankAccount')
+            ->with(['bankAccount', 'businessVerification'])
             ->get();
         $all = $payouts->balancesForAll();
         $sellers = $sellers->map(function (User $seller) use ($all) {
@@ -118,19 +118,20 @@ class PayoutController extends Controller
     {
         return response()->streamDownload(function () use ($payout) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['payout_id', 'shop', 'paid_at', 'reference', 'order', 'order_date', 'items', 'commission_rate', 'commission', 'shop_earnings']);
+            // shop_discount (last, so older spreadsheets keep their columns): the shop's own discounts, taken off items before commission
+            fputcsv($out, ['payout_id', 'shop', 'paid_at', 'reference', 'order', 'order_date', 'items', 'commission_rate', 'commission', 'shop_earnings', 'shop_discount']);
             $shop = $payout->seller?->business_name ?: $payout->seller?->name;
             foreach ($payout->sellerOrders as $part) {
                 fputcsv($out, [
                     $payout->id, $shop, $payout->paid_at?->toDateString(), $payout->reference,
                     $part->order?->order_number, $part->order?->created_at?->toDateString(),
-                    $part->subtotal, $part->commission_rate, $part->commission_amount, $part->seller_earnings,
+                    $part->subtotal, $part->commission_rate, $part->commission_amount, $part->seller_earnings, $part->shop_discount,
                 ]);
             }
             foreach ($payout->adjustments as $adjustment) {
                 fputcsv($out, [
                     $payout->id, $shop, $payout->paid_at?->toDateString(), $payout->reference,
-                    $adjustment->reason, $adjustment->created_at?->toDateString(), '', '', '', $adjustment->amount,
+                    $adjustment->reason, $adjustment->created_at?->toDateString(), '', '', '', $adjustment->amount, '',
                 ]);
             }
             fclose($out);

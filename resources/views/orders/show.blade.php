@@ -36,7 +36,7 @@
                                 <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
                                 @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(\App\Support\OrderStatus::label($part->status)) }}</span>@endif
                             </div>
-                            @if($part && $part->status !== 'cancelled')
+                            @if($part && $part->status !== 'cancelled' && ! $part->isPickup())
                                 <ol class="grid grid-cols-5 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
                                         @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
@@ -46,6 +46,7 @@
                             @endif
                             @if($part)
                                 @include('orders._tracking', ['part' => $part])
+                                @include('orders._pickup', ['part' => $part, 'showCode' => $order->user_id !== null && (int) $order->user_id === (int) auth()->id()])
                             @endif
                             @foreach($shopItems as $item)
                             <div class="flex items-center gap-4">
@@ -111,6 +112,7 @@
                         </div>
                     @endif
                 </div>
+                @include('orders._delivery_details', ['order' => $order])
             </div>
         </div>
 
@@ -119,6 +121,7 @@
             <div class="bg-white rounded-lg shadow-md p-6 lg:sticky lg:top-32">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Order Summary') }}</h2>
                 <div class="space-y-3">
+                    @include('orders._shop_deals', ['order' => $order])
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Subtotal') }}</span>
                         <span class="text-gray-900 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount - $order->shipping_amount + $order->voucher_discount + $order->points_redeemed_discount) }}</span>
@@ -209,6 +212,7 @@
                 @endif
 
                 <a href="{{ route('orders.receipt', $order) }}" target="_blank" rel="noopener" class="mt-3 w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-50">{{ __('View / print receipt') }}</a>
+                @include('tax.partials.order-documents', ['order' => $order])
                 <p class="mt-4 text-xs text-gray-500">{{ __('Please keep a copy of your order confirmation, payment receipt and our policies for your records.') }} <a href="{{ route('policies.refunds') }}" class="text-primary hover:underline">{{ __('Returns, Refunds & Cancellations') }}</a></p>
 
                 <div class="mt-4">

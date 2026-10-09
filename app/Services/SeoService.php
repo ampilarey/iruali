@@ -279,7 +279,7 @@ class SeoService
                 'price' => number_format((float) $product->final_price, 2, '.', ''),
                 'priceCurrency' => 'MVR',
                 'priceValidUntil' => ($product->deal_ends_at ?? now()->addYear())->toDateString(),
-                'availability' => $product->effectiveStock() > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                'availability' => $product->effectiveStock() > 0 && ! $seller?->isOnHoliday() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
                 'itemCondition' => 'https://schema.org/NewCondition',
                 'seller' => [
                     '@type' => 'Organization',

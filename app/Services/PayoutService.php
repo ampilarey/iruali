@@ -18,7 +18,9 @@ use Throwable;
  *
  * A shop earns its item subtotal minus commission on every order part. Earnings become payable
  * once the part is delivered and the customer's payment is confirmed. Delivery fees, vouchers and
- * loyalty-point discounts are iruali's and don't change what the shop earns.
+ * loyalty-point discounts are iruali's and don't change what the shop earns. The shop's own
+ * discounts (multi-buy offers, its discount codes) are the shop's: they come off its subtotal
+ * before commission (SellerOrder::shop_discount, see FulfilmentService::refreshPart).
  *
  * Adjustments (e.g. the shop's share of an approved return, taken back) are settled in the shop's
  * next payout, whether or not the order they relate to was already paid out.
@@ -104,6 +106,10 @@ class PayoutService
         if (! $seller->bankAccount) {
             return __('This shop has not added a bank account yet, so it cannot be paid out.');
         }
+        // Admin → Payouts: "Require verified business before payouts" (off by default)
+        if (\App\Models\SellerVerification::payoutHeld($seller)) {
+            return __('Held: payouts need a verified business, and this shop\'s business has not been verified yet (Admin → Verifications).');
+        }
 
         return null;
     }
@@ -143,7 +149,7 @@ class PayoutService
 
             $total = 0.0;
             $count = 0;
-            foreach (User::whereIn('id', $sellerIds)->with('bankAccount')->get() as $seller) {
+            foreach (User::whereIn('id', $sellerIds)->with(['bankAccount', 'businessVerification'])->get() as $seller) {
                 if ($this->payoutBlockedReason($seller)) {
                     continue;
                 }
@@ -197,6 +203,7 @@ class PayoutService
             $payouts = SellerPayout::where('payout_batch_id', $batch->id)->where('status', 'pending')->lockForUpdate()->get();
             foreach ($payouts as $payout) {
                 $payout->update(['status' => 'paid', 'paid_at' => $paidAt, 'reference' => BankFileFormat::remark($batch, $payout->id)]);
+                app(GstService::class)->payoutPaid($payout); // iruali's commission invoice
             }
 
             $locked->update(['status' => 'paid', 'paid_at' => $paidAt, 'bank_reference' => $bankReference]);
@@ -250,7 +257,7 @@ class PayoutService
     public function batchCandidates()
     {
         $all = $this->balancesForAll();
-        $sellers = User::whereIn('id', array_keys($all))->with('bankAccount')->orderByRaw('COALESCE(business_name, name)')->get();
+        $sellers = User::whereIn('id', array_keys($all))->with(['bankAccount', 'businessVerification'])->orderByRaw('COALESCE(business_name, name)')->get();
 
         return $sellers
             ->map(fn (User $seller) => ['seller' => $seller, 'available' => $all[$seller->id]['available'], 'blocked' => $this->payoutBlockedReason($seller)])
@@ -292,6 +299,7 @@ class PayoutService
 
         SellerOrder::whereIn('id', $parts->pluck('id'))->update(['payout_id' => $payout->id]);
         SellerAdjustment::whereIn('id', $adjustments->pluck('id'))->update(['payout_id' => $payout->id]);
+        app(GstService::class)->payoutPaid($payout); // numbers iruali's commission invoice once the payout is paid
         \App\Support\Audit::record('payout.created', $payout, ['seller_id' => $seller->id, 'shop' => $seller->business_name ?: $seller->name, 'amount' => $amount, 'reference' => $reference, 'batch' => $batch?->reference, 'parts' => $parts->count()]);
 
         return $payout;

@@ -30,6 +30,9 @@ container and the test database.
   admin inbox, staging refresh with the anonymiser.
 - **[TEST_AUTO_DEPLOY.md](TEST_AUTO_DEPLOY.md)** — how test.iruali.mv pulls `main`
   automatically (webhook, cron fallback, Imunify360) and the smoke test that follows.
+- **[SOCIAL_LOGIN.md](SOCIAL_LOGIN.md)** — Sign in with Google, Facebook and Apple: where to create
+  each app, the redirect URLs for iruali.mv and test.iruali.mv, the `.env` keys, and how accounts
+  are matched.
 - `../tests/load/README.md` — the k6 load test and what to expect on shared hosting.
 
 ## Brand

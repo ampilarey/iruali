@@ -79,6 +79,7 @@
                 <section id="security" class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 scroll-mt-36 space-y-6">
                     <h2 class="text-xl font-semibold text-dark">{{ __('Security') }}</h2>
 
+                    @if($user->hasPassword())
                     <form method="POST" action="{{ route('account.password') }}" class="space-y-3 max-w-md">
                         @csrf @method('PUT')
                         <h3 class="font-medium text-gray-900">{{ __('Change password') }}</h3>
@@ -99,6 +100,9 @@
                         </div>
                         <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Change password') }}</button>
                     </form>
+                    @endif
+
+                    @include('account._social_accounts', ['user' => $user])
 
                     <form method="POST" action="{{ route('account.marketing') }}" class="border-t border-gray-100 pt-5 flex flex-wrap items-center justify-between gap-3">
                         @csrf @method('PUT')

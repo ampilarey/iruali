@@ -76,6 +76,7 @@
                     <input id="flash_sale_ends_at" name="flash_sale_ends_at" type="datetime-local" class="{{ $field }}" value="{{ old('flash_sale_ends_at', $product->flash_sale_ends_at?->format('Y-m-d\TH:i')) }}">
                     <p class="mt-1 text-xs text-gray-500">Only used when a compare-at price is set.</p>
                 </div>
+                @include('seller.products._multibuy', ['product' => $product])
                 <div>
                     <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
                     <input id="brand" name="brand" list="brand-options" autocomplete="off" maxlength="120" class="{{ $field }}" value="{{ old('brand', $product->brand) }}" aria-describedby="brand-hint">
@@ -102,6 +103,8 @@
                 </div>
             </div>
 
+            @include('seller.products._delivery', ['product' => $product])
+
             <div>
                 <label for="main_image" class="block text-sm font-medium text-gray-700">Main image</label>
                 @if($product->mainImage)
@@ -110,6 +113,8 @@
                 <input id="main_image" name="main_image" type="file" accept="image/jpeg,image/png,image/gif" class="mt-2 block w-full text-sm text-gray-700">
                 <p class="mt-1 text-xs text-gray-500">JPEG, PNG or GIF, up to 2 MB.</p>
             </div>
+
+            @include('seller.products._video', ['product' => $product])
 
             @include('seller.products._variants', ['product' => $product, 'variants' => $variants])
 

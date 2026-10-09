@@ -61,6 +61,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
         Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
         Route::get('/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('signed')->whereNumber('subscriber');
+        Route::get('/newsletter/confirm/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'confirm'])->name('newsletter.confirm')->middleware('signed')->whereNumber('subscriber');
         Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');
         Route::post('/compare/{product}', [\App\Http\Controllers\Customer\CompareController::class, 'toggle'])->name('compare.toggle');
         Route::delete('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'clear'])->name('compare.clear');
@@ -74,6 +75,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
         Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
         Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
+        Route::post('cart/shop-code', [\App\Http\Controllers\Customer\ShopCodeController::class, 'apply'])->name('cart.shopCode.apply')->middleware('throttle:20,1');
+        Route::post('cart/shop-code/remove', [\App\Http\Controllers\Customer\ShopCodeController::class, 'remove'])->name('cart.shopCode.remove');
         Route::middleware('auth')->group(function () {
             Route::post('/products/{product}/reviews', [\App\Http\Controllers\Customer\ReviewController::class, 'store'])->name('reviews.store')->middleware('throttle:10,1');
             Route::post('/reviews/{review}/helpful', [\App\Http\Controllers\Customer\ReviewController::class, 'helpful'])->name('reviews.helpful')->middleware('throttle:30,1');
@@ -97,9 +100,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         // Password reset
         Route::get('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'request'])->name('password.request');
         Route::post('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'email'])->name('password.email')->middleware('throttle:3,1');
-        Route::get('/reset-password/{token}', [\App\Http\Controllers\Customer\PasswordResetController::class, 'reset'])->name('password.reset');
-        Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
     });
+    // The emailed link also works while signed in: an account made with Google, Facebook or Apple sets its first password this way
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\Customer\PasswordResetController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
 
     // 2FA routes
     Route::middleware('guest')->group(function () {

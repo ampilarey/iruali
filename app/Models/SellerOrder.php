@@ -31,7 +31,24 @@ class SellerOrder extends Model
         'commission_rate' => 'decimal:2',
         'commission_amount' => 'decimal:2',
         'seller_earnings' => 'decimal:2',
+        'delivery_surcharge' => 'decimal:2',
+        'pickup_code_attempts' => 'integer',
+        'pickup_ready_at' => 'datetime',
+        'pickup_collected_at' => 'datetime',
+        // GST as it was when the order was placed (App\Services\GstService)
+        'gst_registered' => 'boolean',
+        'gst_rate' => 'decimal:2',
+        'gst_taxable' => 'decimal:2',
+        'gst_amount' => 'decimal:2',
+        'commission_gst' => 'decimal:2',
+        'gst_captured_at' => 'datetime',
+        'invoice_sequence' => 'integer',
+        'invoiced_at' => 'datetime',
+        'gst_reversed_at' => 'datetime',
     ];
+
+    /** The customer's pickup code is never serialised (the shop must ask the customer for it). */
+    protected $hidden = ['pickup_code'];
 
     /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
@@ -154,5 +171,61 @@ class SellerOrder extends Model
     public function disputes(): HasMany
     {
         return $this->hasMany(Dispute::class);
+    }
+
+    /**
+     * The shop's items as the customer paid for them: subtotal less what the shop funded
+     * (multi-buy offers, its discount code). Commission and earnings are worked out on this.
+     */
+    public function netSubtotal(): float
+    {
+        return round((float) $this->subtotal - (float) $this->shop_discount, 2);
+    }
+
+    // ---- Pick up from the shop ------------------------------------------------------------
+
+    public const METHOD_DELIVER = 'deliver';
+
+    public const METHOD_PICKUP = 'pickup';
+
+    /** Wrong pickup codes a shop may enter before only iruali can confirm the collection. */
+    public const MAX_PICKUP_ATTEMPTS = 5;
+
+    /**
+     * The customer collects this part from the shop instead of having it delivered.
+     */
+    public function isPickup(): bool
+    {
+        return $this->delivery_method === self::METHOD_PICKUP;
+    }
+
+    /**
+     * Waiting at the shop: marked ready, not yet collected (or cancelled).
+     */
+    public function isReadyForPickup(): bool
+    {
+        return $this->isPickup() && $this->pickup_ready_at !== null && ! in_array($this->status, ['delivered', 'cancelled'], true);
+    }
+
+    public function isCollected(): bool
+    {
+        return $this->isPickup() && $this->pickup_collected_at !== null;
+    }
+
+    /**
+     * Too many wrong codes: the shop can no longer confirm the collection itself.
+     */
+    public function pickupLocked(): bool
+    {
+        return (int) $this->pickup_code_attempts >= self::MAX_PICKUP_ATTEMPTS;
+    }
+
+    /**
+     * The shop's goods total after any shop-level discount: what its GST is worked out on (prices
+     * include GST). The one place for it; take the shop discount (shop_discount) off here.
+     */
+    public function taxableGoodsTotal(): float
+    {
+        return $this->netSubtotal();
     }
 }

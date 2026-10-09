@@ -78,10 +78,31 @@ under `/account` (profile, password, notification preferences at `/account/notif
 address book at `/account/addresses` with the island picker and a default address). Referral
 codes and loyalty points live on the account; `locale/switch` changes the language.
 
+**Sign in with Google, Facebook or Apple.** "Continue with …" on `/login` and `/register`
+(`social.redirect`, `social.callback`; Apple posts to `social.apple.post`), shown per provider once
+its keys are set (`docs/SOCIAL_LOGIN.md`). New customers get an account without a password;
+existing accounts are joined only when the provider verified the email; staff must use their
+password; two-step sign-in, bans and the guest-cart merge apply as with a password. My Account →
+Security lists the connected accounts (`account.social.unlink`) and emails a link to set a
+password (`account.password.link`).
+
 **Cart, wishlist, saved items.** `/cart` (`cart`, `cart.add`, `cart.addMany` for bundles,
 `cart.update`, `cart.remove`, `cart.clear`, `cart.saveForLater` → `/saved/*`), vouchers applied
 on the cart (`cart.applyVoucher` / `cart.removeVoucher`), `/wishlist` with add/remove/clear. Guest
 carts are kept for 30 days.
+
+**Wishlist price drops.** A wishlisted item remembers its final price (campaign and markdown
+included). Every day at 10:00 Maldives time `wishlist:price-drops` sends each customer at most one
+email (and a push on devices that allowed it) listing items now at least 5% and MVR 10 under the
+last price they were told about; that price then becomes the reference, so a drop is never
+repeated. "Price drops on your wishlist" on `/account/notifications` (or the marketing opt-out)
+turns it off; hidden, sold-out and deleted products are skipped. `/wishlist` shows "MVR X less than
+when you saved it".
+
+**Product videos.** A shop can add a YouTube (or Shorts), TikTok, Instagram or Facebook video link
+to a product (its own fieldset in the product form, stored as `products.video_provider` and
+`video_id`). The product page shows a play button; the provider's player is only loaded when the
+shopper presses it, and the Content-Security-Policy allows frames from those four players only.
 
 **Checkout and payment.** `/checkout` collects the delivery address (saved address or island
 picker, which sets the delivery zone and fee), lets points be redeemed (`checkout.redeemPoints`),
@@ -146,6 +167,15 @@ duplicates, delete unused ones; old names and addresses keep working), `/admin/u
 `/admin/reviews` and `/admin/questions` (moderation), `/admin/vouchers`, `/admin/newsletter`,
 `/admin/settings` (site settings, delivery fees, commission default) and `/admin/legal`.
 
+**Newsletter.** `/admin/newsletter` lists the footer subscribers (who confirm by email first) and
+the newsletters. "Write a newsletter" (`admin.newsletter-issues.*`, admins only): subject and text
+in English and Dhivehi, plus sections picked when it is sent (new arrivals from the last N days,
+current deals, a running campaign, featured brands), a preview in both languages and "Send me a
+test". "Send" queues it in spaced batches (`config/newsletter.php`) to confirmed subscribers and
+customers who accept marketing emails, one email per address in its own language with the signed
+unsubscribe link; an address never gets an issue twice. Each issue keeps its status and counts,
+and the send is in the audit log.
+
 **Orders, payments, returns, disputes.** `/admin/orders` and `/admin/orders/{order}`: change the
 order or a part's status, add tracking, message the shop or customer, re-check a payment with
 BML (`admin.orders.bml-sync`), record a manual payment, flag and record refunds.
@@ -175,6 +205,54 @@ signups; the smoke-test customer is excluded), `/admin/errors` (every reported e
 counted per place in the code, with "mark resolved"), `/admin/audit` (who changed what, with
 IP and diff), `/admin/sms` (sent messages and a test send).
 
+## Tax (GST-ready)
+
+iruali is **GST-ready**: everything is configurable and, until someone is marked GST-registered,
+nothing a shopper sees changes. Prices on iruali **include GST**, so the GST in an amount is
+`amount × rate ÷ (100 + rate)`, rounded to the laari (`App\Services\GstService::gstIncluded`).
+This is a tool for keeping records, not tax advice: **confirm the rate and what your invoices
+must show with your accountant or MIRA before you switch registration on.**
+
+- **iruali's settings** at **Admin → Tax** (`/admin/tax`, `admin.tax`; admins and finance staff):
+  GST-registered yes/no (default no), iruali's TIN (MIRA format, 7 digits + `GST` + 3 digits, e.g.
+  `1012345GST501`), the GST rate (default 8.00 %) and the invoice number prefix (default `INV`).
+  iruali's name and address on invoices come from **Admin → Settings → Business details**. Every
+  change is in the audit log (`tax.settings_saved`).
+- **Shops** say whether they are GST-registered under **Seller Centre → Settings → Tax**
+  (`seller.settings.tax`): TIN (spaces and case forgiven, stored normalised), registered name and
+  business address (`shop_tax_profiles`, audited as `shop.tax_details_saved`). Admins see it on
+  **Admin → Sellers** and in the list on Admin → Tax.
+- **Frozen when the order is placed.** Each shop part (`seller_orders`) keeps whether the shop was
+  registered, its TIN, name and address, the rate, the goods total after any shop discount
+  (`SellerOrder::taxableGoodsTotal()`), the GST in it and the GST in iruali's commission; each
+  order keeps iruali's registration, TIN, rate and the GST in the delivery fee (delivery is
+  iruali's, not the shops'). Later changes never alter an order already placed
+  (`FulfilmentService::refreshPart` → `GstService::capturePart`).
+- **Invoices.** When an order is paid each shop part gets a number from that shop's own series,
+  e.g. `INV-12-000034` (`IR` for iruali's own sales), taken with the series row locked so payments
+  landing together never share or skip a number; unpaid orders get none. A part is a **tax
+  invoice** when the shop was GST-registered at order time, otherwise a **receipt**: date, shop
+  name/address/TIN, buyer (and business details when given), lines with GST-inclusive prices, GST
+  breakdown and totals; English, with the Dhivehi under each label on Dhivehi pages. Customers
+  open them from the order page (`orders.invoice`; guests through the signed link,
+  `guest.orders.invoice`), shops from their order page (`seller.orders.invoice`), staff from the
+  admin order page (`admin.orders.invoice`). iruali's own receipt (`orders.receipt`) shows the GST
+  in the delivery fee when iruali was registered.
+- **Commission invoices.** Each paid payout gets iruali's invoice to the shop for the commission
+  in it (`INV-C-000001`, numbered when the payout or its batch is paid), with GST for orders placed
+  while iruali was registered. The commission is treated as GST-inclusive, so shops' earnings do
+  not change. From Seller Centre → Earnings (`seller.payouts.invoice`) and Admin → Payouts
+  (`admin.payouts.invoice`).
+- **Monthly GST report** at `/admin/tax/report?month=2026-10` (`admin.tax.report`, CSV with
+  `&export=csv`): paid orders only, a sale in the month it was paid, refunds in the month a return
+  or dispute was approved or a paid order was cancelled. Per GST-registered shop: sales, GST,
+  refunds and the GST in them; for iruali: commission and delivery fees with their GST, less what
+  was given back. Gift-card orders are left out (GST applies when a card is spent).
+- **Business buyers.** Customers can save business details (company name, optional TIN, address)
+  under **My account → Edit profile** (`account.business.update`). At checkout an optional
+  "Buying for a business?" block, prefilled from the profile and open to guests, stores them on
+  the order and every shop's invoice prints them.
+
 ## Operations
 
 **Deploy and release.** `main` auto-deploys to test.iruali.mv (`TEST_AUTO_DEPLOY.md`);
@@ -192,7 +270,7 @@ customer). Both run at the end of a deploy. `tests/load/` has a k6 load test.
 nightly database backups to local and optional S3/B2 with a monthly restore drill
 (`backup:restore-drill`), queued mail sent every minute by a short-lived worker, expired tokens
 and failed jobs pruned, guest carts cleaned, the daily errors digest (`errors:digest`) and the
-seller low-stock digest.
+seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts.
 
 **Staging data.** `php artisan iruali:anonymise --force` rewrites personal data on a copy of
 the production database before it is used on the test site.

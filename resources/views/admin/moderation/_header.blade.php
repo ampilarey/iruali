@@ -9,7 +9,7 @@
         </div>
         <nav class="flex gap-1 overflow-x-auto -mb-px">
             @foreach(['admin.reviews' => 'Reviews', 'admin.questions' => 'Questions', 'admin.newsletter' => 'Newsletter'] as $route => $label)
-                <a href="{{ route($route) }}" class="whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium {{ request()->routeIs($route) ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">{{ $label }}</a>
+                <a href="{{ route($route) }}" class="whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium {{ request()->routeIs($route, $route.'-issues.*') ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">{{ $label }}</a>
             @endforeach
         </nav>
     </div>

@@ -71,6 +71,8 @@
                 <div class="mt-4 space-y-2">
                     @if($order->status === 'cancelled')
                         <p class="text-sm text-gray-600">This order was cancelled. Don't send these items.</p>
+                    @elseif(empty($nextStatuses) && $part->isPickup())
+                        <p class="text-sm text-gray-600">{{ __('The customer picks this part up from your shop: see Pickup below.') }}</p>
                     @elseif(empty($nextStatuses))
                         <p class="text-sm text-gray-600">Your part is {{ str_replace('_', ' ', $part->status) }}. Nothing more to update.</p>
                     @else
@@ -100,15 +102,18 @@
                     </details>
                 @endif
             </div>
+            @include('seller.orders._delivery', ['order' => $order, 'part' => $part])
             <div class="rounded-lg bg-white p-5 shadow text-sm">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your earnings</h2>
                 <dl class="mt-2 space-y-1">
                     <div class="flex justify-between"><dt class="text-gray-600">Your items</dt><dd>{{ \App\Support\Money::format($part->subtotal) }}</dd></div>
+                    @if((float) $part->shop_discount > 0)<div class="flex justify-between"><dt class="text-gray-600">{{ __('Your discounts (multi-buy, codes)') }}</dt><dd>&minus;{{ \App\Support\Money::format($part->shop_discount) }}</dd></div>@endif
                     <div class="flex justify-between"><dt class="text-gray-600">Commission ({{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}%)</dt><dd>&minus;{{ \App\Support\Money::format($part->commission_amount) }}</dd></div>
                     <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-100 pt-1"><dt>You earn</dt><dd>{{ \App\Support\Money::format($part->seller_earnings) }}</dd></div>
                 </dl>
                 <p class="mt-2 text-xs text-gray-500">{{ ['pending' => 'Payable once your part is delivered and the customer has paid.', 'available' => 'Ready for the next payout.', 'paid_out' => 'Paid to you.', 'cancelled' => 'Cancelled: nothing is payable.'][$part->earningsState()] }}</p>
             </div>
+            @include('tax.partials.seller-order-document', ['order' => $order, 'part' => $part])
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Ship to</h2>
                 <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span> <span class="block text-xs text-gray-500">{{ $order->guest_email }}</span>@endif</p>

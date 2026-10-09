@@ -7,7 +7,9 @@
         ['admin.orders', 'Orders'],
         ['admin.returns', 'Returns'],
         ['admin.payouts', 'Payouts'],
+        ['admin.tax', 'Tax'],
         ['admin.sellers', 'Sellers'],
+        ['admin.verifications', 'Verifications'],
         ['admin.products', 'Products'],
         ['admin.brands', 'Brands'],
         ['admin.users', 'Users'],
@@ -17,6 +19,7 @@
         ['admin.errors', 'Errors'],
         ['admin.audit', 'Audit log'],
         ['admin.legal', 'Legal pages'],
+        ['admin.delivery', 'Delivery'],
         ['admin.settings', 'Settings'],
     ];
     $inboxTotal = (Route::has('admin.inbox') && StaffAccess::can('admin.inbox')) ? \App\Support\AdminInbox::total() : 0;

@@ -45,6 +45,7 @@
                                     @if($seller->business_description)
                                         <p class="mt-1 max-w-sm text-xs text-gray-600">{{ \Illuminate\Support\Str::limit($seller->business_description, 140) }}</p>
                                     @endif
+                                    @include('admin.tax._seller', ['seller' => $seller])
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div>{{ $seller->email }}</div>
@@ -58,6 +59,7 @@
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
                                     @endif
+                                    @include('admin.sellers._trust_status', ['seller' => $seller])
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ ($seller->seller_applied_at ?? $seller->created_at)->format('M d, Y') }}

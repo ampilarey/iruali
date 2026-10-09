@@ -101,6 +101,10 @@ class CartService
     {
         $cart = $this->getOrCreateCart();
         $product = Product::findOrFail($productId);
+        // A shop on holiday takes no new orders: its products stay listed, carts keep what is already in them
+        if ($product->seller?->isOnHoliday()) {
+            throw new \App\Exceptions\ShopOnHolidayException($product);
+        }
         $variant = $variantId ? ProductVariant::where('product_id', $product->id)->findOrFail($variantId) : null;
 
         // Check if product (and variant) is already in cart
@@ -301,14 +305,23 @@ class CartService
     public function getCartSummary(Cart $cart): array
     {
         $totals = $this->getCartTotals($cart);
+        // The same sums checkout uses: the shops' own discounts first (multi-buy offers, shop codes),
+        // then the iruali voucher on what is left (see ShopDiscountService and DiscountService)
+        $discounts = app(DiscountService::class)->calculateTotalDiscount($cart);
+        $shop = $discounts['shop'];
 
         return [
             'item_count' => $cart->item_count,
             'subtotal' => $totals['subtotal'],
-            'voucher_discount' => $totals['voucher_discount'],
+            'voucher_discount' => $discounts['voucher']['amount'],
             'points_discount' => $totals['points_discount'],
-            'total' => $totals['total'],
-            'voucher' => $totals['voucher'],
+            'total' => round(max(0, (float) $totals['subtotal'] - $shop['amount'] - $discounts['voucher']['amount'] - (float) $totals['points_discount']), 2),
+            'voucher' => $discounts['voucher']['voucher'],
+            'voucher_error' => $discounts['voucher']['error'] ?? null,
+            'shop_discount' => $shop['amount'],
+            'multibuy_discount' => $shop['multibuy_discount'],
+            'shop_code_discount' => $shop['code_discount'],
+            'shop_deals' => $shop,
         ];
     }
 }

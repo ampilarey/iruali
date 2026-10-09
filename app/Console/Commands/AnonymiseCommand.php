@@ -48,6 +48,7 @@ class AnonymiseCommand extends Command
             'return request notes cleared' => DB::table('return_requests')->count(),
             'newsletter emails replaced' => DB::table('newsletter_subscribers')->count(),
             'OTP rows truncated' => DB::table('otps')->count(),
+            'shop owners\' ID card numbers replaced' => DB::table('seller_verifications')->count(),
         ];
 
         if (! $this->option('force')) {
@@ -104,6 +105,13 @@ class AnonymiseCommand extends Command
         });
 
         DB::table('otps')->delete(); // delete, not truncate: truncate would commit a surrounding transaction
+
+        // Business verification: the shop owner's ID card number (stored encrypted, with this install's key)
+        DB::table('seller_verifications')->orderBy('id')->select('id')->chunkById(500, function ($rows) {
+            foreach ($rows as $row) {
+                DB::table('seller_verifications')->where('id', $row->id)->update(['national_id_number' => \Illuminate\Support\Facades\Crypt::encryptString('A'.str_pad((string) $row->id, 6, '0', STR_PAD_LEFT))]);
+            }
+        });
 
         $this->table(['Changed', 'Rows'], collect($plan)->map(fn ($n, $k) => [$k, $n])->values()->all());
         $this->info('Done. Anonymised users can no longer sign in (random passwords); staff accounts are unchanged.');

@@ -106,6 +106,10 @@ class PayoutService
         if (! $seller->bankAccount) {
             return __('This shop has not added a bank account yet, so it cannot be paid out.');
         }
+        // Admin → Payouts: "Require verified business before payouts" (off by default)
+        if (\App\Models\SellerVerification::payoutHeld($seller)) {
+            return __('Held: payouts need a verified business, and this shop\'s business has not been verified yet (Admin → Verifications).');
+        }
 
         return null;
     }
@@ -145,7 +149,7 @@ class PayoutService
 
             $total = 0.0;
             $count = 0;
-            foreach (User::whereIn('id', $sellerIds)->with('bankAccount')->get() as $seller) {
+            foreach (User::whereIn('id', $sellerIds)->with(['bankAccount', 'businessVerification'])->get() as $seller) {
                 if ($this->payoutBlockedReason($seller)) {
                     continue;
                 }
@@ -252,7 +256,7 @@ class PayoutService
     public function batchCandidates()
     {
         $all = $this->balancesForAll();
-        $sellers = User::whereIn('id', array_keys($all))->with('bankAccount')->orderByRaw('COALESCE(business_name, name)')->get();
+        $sellers = User::whereIn('id', array_keys($all))->with(['bankAccount', 'businessVerification'])->orderByRaw('COALESCE(business_name, name)')->get();
 
         return $sellers
             ->map(fn (User $seller) => ['seller' => $seller, 'available' => $all[$seller->id]['available'], 'blocked' => $this->payoutBlockedReason($seller)])

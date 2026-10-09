@@ -36,6 +36,7 @@
                                 @if($seller->bankAccount)
                                     {{ $seller->bankAccount->account_name }} · {{ $seller->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $seller->bankAccount->account_number }}</span>
                                     @unless($seller->bankAccount->isVerified())<span class="ms-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">{{ __('Not verified') }}</span>@endunless
+                                    @if($row['blocked'])<span class="mt-1 block text-amber-700" data-payout-blocked>{{ $row['blocked'] }}</span>@endif
                                 @else
                                     <span class="text-amber-700">{{ $row['blocked'] }}</span>
                                 @endif

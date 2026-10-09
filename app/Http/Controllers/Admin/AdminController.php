@@ -70,7 +70,7 @@ class AdminController extends Controller
 
         $sellers = User::whereHas('roles', function ($q) {
             $q->where('name', 'seller');
-        })->with('roles')
+        })->with(['roles', 'businessVerification'])
             ->orderBy('seller_approved') // pending applications first
             ->latest('seller_applied_at')
             ->paginate(10);

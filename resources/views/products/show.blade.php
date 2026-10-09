@@ -5,6 +5,7 @@
     $mainImage = $images->first()?->variant(1200) ?? '/images/product-placeholder.svg';
     $seller = $product->seller;
     $sellerName = $seller ? ($seller->business_name ?: $seller->name) : null;
+    $onHoliday = (bool) $seller?->isOnHoliday(); // the shop is away: still listed, nothing can be ordered (sellers._holiday_notice)
     $reviews = $product->reviews;
     $rating = round((float) $reviews->avg('rating'), 1);
     $stock = $product->effectiveStock();
@@ -129,6 +130,7 @@
                     <x-deal-countdown :ends="$product->deal_ends_at" class="mt-2" />
                 @endif
                 <div data-variant-stock data-text-out="{{ __('Out of stock') }}" data-text-low="{{ __('Only :count left', ['count' => '#']) }}" data-text-in="{{ __('In stock') }}"><x-stock :quantity="$stock" class="mt-2 !text-sm" /></div>
+                @include('sellers._holiday_notice', ['seller' => $seller])
 
                 <div class="mt-4 rounded-lg bg-gray-50 p-3 text-sm space-y-2">
                     <p class="flex gap-2"><x-icon name="truck" class="w-5 h-5 shrink-0 text-primary" />
@@ -172,7 +174,7 @@
                                 <input id="quantity" name="quantity" type="number" inputmode="numeric" min="1" max="{{ $stock }}" value="1" class="w-12 h-11 border-0 text-center font-semibold focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
                                 <button type="button" data-qty-step="1" class="w-10 h-11 flex items-center justify-center text-gray-600 hover:text-primary" aria-label="{{ __('Increase quantity') }}"><x-icon name="plus" class="w-4 h-4" /></button>
                             </div>
-                            <button type="submit" data-add-to-cart class="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button type="submit" data-add-to-cart @if($onHoliday) disabled data-holiday @endif class="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                                 <x-icon name="cart" class="w-5 h-5" />{{ __('Add to cart') }}
                             </button>
                         </div>
@@ -235,6 +237,7 @@
                         <div class="min-w-0 flex-1 text-sm">
                             <p class="text-gray-500">{{ __('Sold by') }}</p>
                             <a href="{{ route('sellers.show', $seller) }}" class="font-semibold text-dark hover:text-primary hover:underline truncate block">{{ $sellerName }}</a>
+                            @include('sellers._verified_badge', ['seller' => $seller])
                             @if($seller->city)<p class="text-xs text-gray-500">{{ $seller->city }}</p>@endif
                             @if($product->brandModel?->isAuthorisedSeller($seller->id))
                                 @include('brands._authorised_badge', ['brand' => $product->brandModel])
@@ -259,7 +262,7 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8 space-y-10">
-        @if($boughtTogether->isNotEmpty() && $stock > 0)
+        @if($boughtTogether->isNotEmpty() && $stock > 0 && ! $onHoliday)
             @php $bundle = collect([$product])->merge($boughtTogether); @endphp
             <section class="rounded-xl border border-gray-200 p-4 lg:p-5" aria-labelledby="bought-together">
                 <h2 id="bought-together" class="font-display text-xl font-bold text-dark mb-4">{{ __('Frequently bought together') }}</h2>
@@ -515,7 +518,7 @@
 @if($stock > 0)
     <div class="lg:hidden fixed inset-x-0 bottom-16 z-40 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_12px_rgba(15,42,58,0.08)]" style="margin-bottom: env(safe-area-inset-bottom);">
         <x-price :product="$product" class="min-w-0 [&_p]:whitespace-nowrap [&_p]:truncate" />
-        <button type="submit" form="buy-form" class="ms-auto shrink-0 whitespace-nowrap inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold">
+        <button type="submit" form="buy-form" @disabled($onHoliday) class="ms-auto shrink-0 whitespace-nowrap inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
             <x-icon name="cart" class="w-5 h-5" />{{ __('Add to cart') }}
         </button>
     </div>

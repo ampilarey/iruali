@@ -40,6 +40,8 @@ class ApplicationController extends Controller
             'agree_seller_terms.accepted' => 'You must agree to the seller terms.',
             'business_description.min' => 'Please tell us a little more about what you sell (at least 20 characters).',
         ]);
+        // Optional: business documents for the "Verified business" badge (all of them, or none)
+        $verification = app(\App\Services\SellerVerificationService::class)->validateApplication($request);
 
         $role = Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller']);
 
@@ -57,6 +59,9 @@ class ApplicationController extends Controller
         ])->save();
 
         $user->roles()->syncWithoutDetaching([$role->id]);
+        if ($verification) {
+            app(\App\Services\SellerVerificationService::class)->submit($user, $verification);
+        }
 
         return redirect()->route('seller.dashboard')
             ->with('success', 'Application received! You can start adding products now; they go live once an admin approves your shop.');

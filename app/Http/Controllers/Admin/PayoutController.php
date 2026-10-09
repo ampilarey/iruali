@@ -21,7 +21,7 @@ class PayoutController extends Controller
         $sellers = User::query()
             ->where(fn ($q) => $q->where('is_seller', true)->orWhereHas('sellerOrders'))
             ->orderByRaw('COALESCE(business_name, name)')
-            ->with('bankAccount')
+            ->with(['bankAccount', 'businessVerification'])
             ->get();
         $all = $payouts->balancesForAll();
         $sellers = $sellers->map(function (User $seller) use ($all) {

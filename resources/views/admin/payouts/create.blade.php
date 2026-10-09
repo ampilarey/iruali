@@ -14,6 +14,7 @@
                 <p class="mt-1">{{ $seller->bankAccount->account_name }} · {{ $seller->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $seller->bankAccount->account_number }}</span>
                     <span class="ms-2 rounded-full px-2 py-0.5 text-xs font-medium {{ $seller->bankAccount->isVerified() ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">{{ $seller->bankAccount->isVerified() ? __('Verified') : __('Not verified') }}</span>
                 </p>
+                @if($blocked)<p class="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800" data-payout-blocked>{{ $blocked }}</p>@endif
             @else
                 <p class="mt-1 text-amber-700">{{ $blocked }} {{ __('Ask the shop to add it under Seller Centre → Settings → Bank account.') }}</p>
             @endif

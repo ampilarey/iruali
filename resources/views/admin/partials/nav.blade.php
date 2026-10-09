@@ -8,6 +8,7 @@
         ['admin.returns', 'Returns'],
         ['admin.payouts', 'Payouts'],
         ['admin.sellers', 'Sellers'],
+        ['admin.verifications', 'Verifications'],
         ['admin.products', 'Products'],
         ['admin.brands', 'Brands'],
         ['admin.users', 'Users'],

@@ -49,6 +49,8 @@ class StoreGuestOrderRequest extends StoreOrderRequest
 
     public function withValidator($validator)
     {
+        $validator->after(fn ($validator) => $this->validateDeliveryChoices($validator));
+
         $validator->after(function ($validator) {
             $cart = app(CartService::class)->currentCart();
 
@@ -66,5 +68,13 @@ class StoreGuestOrderRequest extends StoreOrderRequest
                 }
             }
         });
+    }
+
+    /**
+     * The guest's token-keyed cart.
+     */
+    protected function deliveryCart(): ?\App\Models\Cart
+    {
+        return app(CartService::class)->currentCart();
     }
 }

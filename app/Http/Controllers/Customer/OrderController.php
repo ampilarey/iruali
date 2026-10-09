@@ -58,6 +58,8 @@ class OrderController extends Controller
             'payment_method' => $request->payment_method,
             'use_wallet' => $request->boolean('use_wallet'),
         ];
+        // Deliver or pick up per shop, the Malé time slot and the gift details
+        $shippingData += $request->deliveryChoices();
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);
 
@@ -69,8 +71,8 @@ class OrderController extends Controller
 
         $order = $result['order'];
 
-        // "Save this address for next time" (a new address typed at checkout)
-        if ($request->boolean('save_address') && ! $request->filled('address_id')) {
+        // "Save this address for next time" (a new address typed at checkout; none when all is picked up)
+        if ($request->boolean('save_address') && ! $request->filled('address_id') && ! $request->everythingPickedUp()) {
             $this->saveAddressFromOrder($user, $request, $order);
         }
 

@@ -66,6 +66,12 @@ class FulfilmentService
             return [];
         }
 
+        // A part the customer collects is only started here; then it is marked ready for pickup and
+        // completed with the customer's code (markReadyForPickup(), confirmPickup())
+        if ($part->isPickup()) {
+            return $part->status === 'pending' ? ['processing'] : [];
+        }
+
         return array_values(array_diff(OrderService::TRANSITIONS[$part->status] ?? [], ['cancelled']));
     }
 
@@ -204,5 +210,168 @@ class FulfilmentService
     {
         // The account holder, or the guest's email for a guest order
         app(OrderNotifier::class)->sendToCustomer($part->order, new SellerOrderShipped($part));
+    }
+
+    // ---- Pick up from the shop ------------------------------------------------------------
+    //
+    // A pickup part goes pending → processing (the shop starts preparing) → ready for pickup
+    // (pickup_ready_at; the customer gets a 6-digit code) → delivered when the shop types the
+    // code the customer shows. Delivered has the same effects as a delivery: the order's status
+    // follows, the shop's earnings become payable and the return window starts.
+
+    /**
+     * Record how each shop part reaches the customer, as worked out by DeliveryService::prepareOrder().
+     *
+     * @param  array<int, array{method: string, surcharge: float, pickup_address: ?string, pickup_island: ?string, pickup_hours: ?string}>  $choices  keyed by seller id (0 for none)
+     */
+    public function applyDeliveryMethods(Order $order, array $choices): void
+    {
+        foreach ($order->sellerOrders()->get() as $part) {
+            $choice = $choices[(int) ($part->seller_id ?? 0)] ?? null;
+            if ($choice === null) {
+                continue;
+            }
+
+            $part->forceFill([
+                'delivery_method' => $choice['method'],
+                'delivery_surcharge' => $choice['surcharge'],
+                'pickup_address' => $choice['pickup_address'],
+                'pickup_island' => $choice['pickup_island'],
+                'pickup_hours' => $choice['pickup_hours'],
+            ])->save();
+        }
+    }
+
+    /**
+     * Can the shop mark this part ready for pickup now? "ok", or why not: not_pickup, cancelled,
+     * collected, ready (already) or unpaid (no code goes out before the customer has paid).
+     */
+    public function pickupReadiness(SellerOrder $part): string
+    {
+        return match (true) {
+            ! $part->isPickup() => 'not_pickup',
+            $part->status === 'cancelled' || $part->order->status === 'cancelled' => 'cancelled',
+            $part->status === 'delivered' => 'collected',
+            $part->pickup_ready_at !== null => 'ready',
+            $part->order->payment_status !== 'paid' => 'unpaid',
+            default => 'ok',
+        };
+    }
+
+    /**
+     * The shop has the part at its counter: the customer is sent a new 6-digit pickup code by
+     * email (and by text when SMS is set up). Being ready counts as sent on time for the shop's
+     * late-shipment figures.
+     */
+    public function markReadyForPickup(SellerOrder $part): bool
+    {
+        if ($this->pickupReadiness($part) !== 'ok') {
+            return false;
+        }
+
+        $marked = DB::transaction(function () use ($part) {
+            // Checked again with the row locked, so a double click can't send two different codes
+            if (SellerOrder::whereKey($part->id)->lockForUpdate()->value('pickup_ready_at') !== null) {
+                return false;
+            }
+
+            // Send the shop's latest pickup details with the code
+            $setting = \App\Models\SellerDeliverySetting::for($part->seller_id);
+            if ($setting->offersPickup()) {
+                $part->forceFill([
+                    'pickup_address' => $setting->pickup_address,
+                    'pickup_island' => $setting->pickupIslandForOrder(),
+                    'pickup_hours' => $setting->pickup_hours,
+                ]);
+            }
+
+            $part->forceFill([
+                'status' => $part->status === 'pending' ? 'processing' : $part->status,
+                'pickup_code' => $this->newPickupCode(),
+                'pickup_code_attempts' => 0,
+                'pickup_ready_at' => now(),
+                'shipped_at' => $part->shipped_at ?? now(),
+            ])->save();
+
+            return true;
+        });
+        if (! $marked) {
+            return false;
+        }
+
+        $this->syncOrder($part->order->fresh());
+        $this->notifyPickupReady($part->fresh());
+
+        return true;
+    }
+
+    /**
+     * The shop types the code the customer shows. The right code completes the pickup; wrong
+     * codes are counted, and after SellerOrder::MAX_PICKUP_ATTEMPTS only iruali can confirm it.
+     *
+     * @return string collected, wrong, locked or not_ready
+     */
+    public function confirmPickup(SellerOrder $part, string $code): string
+    {
+        if (! $part->isReadyForPickup() || $part->order->status === 'cancelled') {
+            return 'not_ready';
+        }
+        if ($part->pickupLocked()) {
+            return 'locked';
+        }
+
+        $code = (string) preg_replace('/\D/', '', $code);
+        if (strlen($code) !== 6 || ! hash_equals((string) $part->pickup_code, $code)) {
+            SellerOrder::whereKey($part->id)->increment('pickup_code_attempts');
+
+            return $part->refresh()->pickupLocked() ? 'locked' : 'wrong';
+        }
+
+        $this->completePickup($part);
+
+        return 'collected';
+    }
+
+    /**
+     * The customer has collected the part: it counts as delivered.
+     */
+    public function completePickup(SellerOrder $part): void
+    {
+        DB::transaction(function () use ($part) {
+            $part->forceFill([
+                'status' => 'delivered',
+                'delivered_at' => now(),
+                'pickup_collected_at' => now(),
+                'shipped_at' => $part->shipped_at ?? now(),
+            ])->save();
+        });
+
+        $this->syncOrder($part->order->fresh());
+    }
+
+    protected function newPickupCode(): string
+    {
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Email the customer (the account, or the guest's address) and text the phone given at
+     * checkout when an SMS gateway is set up: the code is what they collect with.
+     */
+    protected function notifyPickupReady(SellerOrder $part): void
+    {
+        $order = $part->order;
+        app(OrderNotifier::class)->sendToCustomer($order, new \App\Notifications\PickupReady($part));
+
+        $phone = $order->shipping_phone ?: $order->user?->phone;
+        if (! $phone || ! app(\App\Services\Sms\SmsManager::class)->isLive() || $order->user?->isSmokeTest()) {
+            return;
+        }
+
+        try {
+            \Illuminate\Support\Facades\Notification::route('sms', $phone)->notify(new \App\Notifications\PickupReady($part));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

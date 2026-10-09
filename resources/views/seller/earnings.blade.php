@@ -52,7 +52,7 @@
                                 <tr>
                                     <td class="px-4 py-2"><a href="{{ route('seller.orders.show', $part->order) }}" class="font-medium text-primary-700 hover:underline">#{{ $part->order?->order_number }}</a><span class="block text-xs text-gray-500">{{ $part->created_at->format('d M Y') }}</span></td>
                                     <td class="px-4 py-2"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span></td>
-                                    <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}@if((float) $part->shop_discount > 0)<span class="block text-xs text-gray-500">{{ __('less your discounts :amount', ['amount' => Money::format($part->shop_discount)]) }}</span>@endif</td>
                                     <td class="px-4 py-2 text-right text-gray-600">&minus;{{ Money::format($part->commission_amount) }}</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ Money::format($part->seller_earnings) }}</td>
                                     <td class="px-4 py-2 text-xs">

@@ -104,6 +104,7 @@
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your earnings</h2>
                 <dl class="mt-2 space-y-1">
                     <div class="flex justify-between"><dt class="text-gray-600">Your items</dt><dd>{{ \App\Support\Money::format($part->subtotal) }}</dd></div>
+                    @if((float) $part->shop_discount > 0)<div class="flex justify-between"><dt class="text-gray-600">{{ __('Your discounts (multi-buy, codes)') }}</dt><dd>&minus;{{ \App\Support\Money::format($part->shop_discount) }}</dd></div>@endif
                     <div class="flex justify-between"><dt class="text-gray-600">Commission ({{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}%)</dt><dd>&minus;{{ \App\Support\Money::format($part->commission_amount) }}</dd></div>
                     <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-100 pt-1"><dt>You earn</dt><dd>{{ \App\Support\Money::format($part->seller_earnings) }}</dd></div>
                 </dl>

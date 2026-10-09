@@ -8,6 +8,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /** @mixin \App\Models\Cart */
 class CartResource extends JsonResource
 {
+    protected ?float $shopDiscount = null;
+
     /**
      * Transform the resource into an array.
      *
@@ -23,8 +25,9 @@ class CartResource extends JsonResource
             }),
             'subtotal' => $this->whenLoaded('items', fn () => (float) $this->total),
             'voucher_code' => $this->voucher_code,
+            'shop_discount' => $this->whenLoaded('items', fn () => $this->shopDiscount()),
             'voucher_discount' => $this->whenLoaded('items', fn () => (float) $this->voucherDiscount()),
-            'total' => $this->whenLoaded('items', fn () => (float) max(0, $this->total - $this->voucherDiscount())),
+            'total' => $this->whenLoaded('items', fn () => (float) max(0, round($this->total - $this->shopDiscount() - $this->voucherDiscount(), 2))),
             'items' => $this->whenLoaded('items', function () {
                 return collect($this->items)->map(function ($item) {
                     return [
@@ -56,6 +59,17 @@ class CartResource extends JsonResource
 
         $voucher = \App\Models\Voucher::where('code', $this->voucher_code)->where('is_active', true)->first();
 
-        return $voucher ? app(\App\Services\DiscountService::class)->calculateVoucherAmount($this->resource, $voucher) : 0;
+        $base = round(max(0, $this->total - $this->shopDiscount()), 2);
+
+        return $voucher ? app(\App\Services\DiscountService::class)->calculateVoucherAmount($this->resource, $voucher, $base) : 0;
+    }
+
+    /**
+     * The shops' multi-buy savings on this cart, which checkout takes off by itself (shop codes are
+     * entered on the website's cart page).
+     */
+    protected function shopDiscount(): float
+    {
+        return $this->shopDiscount ??= app(\App\Services\ShopDiscountService::class)->evaluate($this->resource, [])['amount'];
     }
 }

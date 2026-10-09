@@ -24,7 +24,7 @@
                     @foreach($payout->sellerOrders as $part)
                         <tr>
                             <td class="px-4 py-2"><a href="{{ route('admin.orders.show', $part->order) }}" class="text-primary-700 hover:underline">#{{ $part->order?->order_number }}</a></td>
-                            <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}</td>
+                            <td class="px-4 py-2 text-right">{{ Money::format($part->subtotal) }}@if((float) $part->shop_discount > 0)<span class="block text-xs text-gray-500">less shop's discounts {{ Money::format($part->shop_discount) }}</span>@endif</td>
                             <td class="px-4 py-2 text-right text-gray-600">&minus;{{ Money::format($part->commission_amount) }}</td>
                             <td class="px-4 py-2 text-right font-semibold">{{ Money::format($part->seller_earnings) }}</td>
                         </tr>

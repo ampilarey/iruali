@@ -5,7 +5,7 @@
 @php
     $items = $cart->items->filter(fn ($i) => $i->product);
     $subtotal = (float) $cart->total;
-    $total = max(0, $subtotal - (float) $discount);
+    $total = max(0, $subtotal - (float) ($shopDeals['amount'] ?? 0) - (float) $discount);
     $units = (int) $items->sum('quantity');
 @endphp
 
@@ -71,6 +71,7 @@
                                     <p class="font-bold text-dark text-lg">{{ \App\Support\Money::format($item->subtotal) }}</p>
                                     @if($item->quantity > 1)<p class="text-xs text-gray-500">{{ \App\Support\Money::format($item->unit_price) }} {{ __('each') }}</p>@endif
                                     @if($product->was_price && ! $item->variant)<p class="text-xs font-semibold text-coral">{{ __('Save :amount', ['amount' => \App\Support\Money::format($product->savings * $item->quantity)]) }}</p>@endif
+                                    @include('cart._shop_deals_line', ['deal' => $shopDeals['lines'][$item->id] ?? null])
                                 </div>
                             </div>
                         </div>
@@ -104,6 +105,7 @@
 
                     <dl class="space-y-2 text-sm">
                         <div class="flex justify-between"><dt class="text-gray-600">{{ __('Subtotal') }}</dt><dd class="font-medium">{{ \App\Support\Money::format($subtotal) }}</dd></div>
+                        @include('cart._shop_deals_summary')
                         @if($voucher && $discount > 0)
                             <div class="flex justify-between text-success"><dt>{{ __('Voucher') }} ({{ $voucher->code }})</dt><dd class="font-medium">&minus;{{ \App\Support\Money::format($discount) }}</dd></div>
                         @endif
@@ -127,6 +129,7 @@
                             @error('voucher_code')<p class="text-danger text-sm mt-1">{{ $message }}</p>@enderror
                         </form>
                     @endif
+                    @include('cart._shop_code_form')
 
                     @auth
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>

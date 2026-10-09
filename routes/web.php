@@ -74,6 +74,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
         Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
         Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
+        Route::post('cart/shop-code', [\App\Http\Controllers\Customer\ShopCodeController::class, 'apply'])->name('cart.shopCode.apply')->middleware('throttle:20,1');
+        Route::post('cart/shop-code/remove', [\App\Http\Controllers\Customer\ShopCodeController::class, 'remove'])->name('cart.shopCode.remove');
         Route::middleware('auth')->group(function () {
             Route::post('/products/{product}/reviews', [\App\Http\Controllers\Customer\ReviewController::class, 'store'])->name('reviews.store')->middleware('throttle:10,1');
             Route::post('/reviews/{review}/helpful', [\App\Http\Controllers\Customer\ReviewController::class, 'helpful'])->name('reviews.helpful')->middleware('throttle:30,1');

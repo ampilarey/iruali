@@ -226,6 +226,7 @@
                             <dt class="text-gray-600">{{ __('Subtotal') }}</dt>
                             <dd class="font-medium" dir="ltr">{{ \App\Support\Money::format($cart->total) }}</dd>
                         </div>
+                        @include('checkout._shop_deals')
                         @if($voucherDiscount > 0)
                             <div class="flex justify-between">
                                 <dt class="text-gray-600">{{ __('Voucher Discount') }} ({{ $voucherCode }})</dt>

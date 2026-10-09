@@ -43,6 +43,7 @@ class CartController extends Controller
             'cart' => $cart,
             'voucher' => $cartSummary['voucher'],
             'discount' => $cartSummary['voucher_discount'],
+            'shopDeals' => $cartSummary['shop_deals'] + ['voucher_error' => $cartSummary['voucher_error']],
             'saved' => $saved,
             'freeOver' => (float) Setting::get('free_delivery_over'),
         ]);

@@ -17,6 +17,7 @@
         ['admin.errors', 'Errors'],
         ['admin.audit', 'Audit log'],
         ['admin.legal', 'Legal pages'],
+        ['admin.delivery', 'Delivery'],
         ['admin.settings', 'Settings'],
     ];
     $inboxTotal = (Route::has('admin.inbox') && StaffAccess::can('admin.inbox')) ? \App\Support\AdminInbox::total() : 0;

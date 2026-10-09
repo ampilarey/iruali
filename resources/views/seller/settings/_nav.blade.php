@@ -5,6 +5,9 @@
     if (\Illuminate\Support\Facades\Route::has('seller.settings.notifications')) {
         $settingsTabs['seller.settings.notifications'] = __('Notifications');
     }
+    if (\Illuminate\Support\Facades\Route::has('seller.settings.delivery')) {
+        $settingsTabs['seller.settings.delivery'] = __('Delivery & pickup');
+    }
 @endphp
 <nav class="flex gap-2 text-sm" aria-label="{{ __('Settings') }}">
     @foreach($settingsTabs as $route => $label)

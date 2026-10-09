@@ -36,7 +36,7 @@
                                 <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
                                 @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(\App\Support\OrderStatus::label($part->status)) }}</span>@endif
                             </div>
-                            @if($part && $part->status !== 'cancelled')
+                            @if($part && $part->status !== 'cancelled' && ! $part->isPickup())
                                 <ol class="grid grid-cols-5 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
                                         @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
@@ -46,6 +46,7 @@
                             @endif
                             @if($part)
                                 @include('orders._tracking', ['part' => $part])
+                                @include('orders._pickup', ['part' => $part, 'showCode' => $order->user_id !== null && (int) $order->user_id === (int) auth()->id()])
                             @endif
                             @foreach($shopItems as $item)
                             <div class="flex items-center gap-4">
@@ -111,6 +112,7 @@
                         </div>
                     @endif
                 </div>
+                @include('orders._delivery_details', ['order' => $order])
             </div>
         </div>
 

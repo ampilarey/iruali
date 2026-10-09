@@ -29,7 +29,7 @@
                         <p class="font-medium text-gray-900">{{ __('From :shop', ['shop' => $part->shopName()]) }}</p>
                         <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? __(\App\Support\OrderStatus::label($part->status)) }}</span>
                     </div>
-                    @if($part->status !== 'cancelled')
+                    @if($part->status !== 'cancelled' && ! $part->isPickup())
                         <ol class="grid grid-cols-5 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                             @foreach($steps as $key => $label)
                                 @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
@@ -38,6 +38,7 @@
                         </ol>
                     @endif
                     @include('orders._tracking', ['part' => $part])
+                    @include('orders._pickup', ['part' => $part, 'showCode' => false])
                 </div>
             @empty
                 <p class="text-sm text-gray-600">{{ __(\App\Support\OrderStatus::label($order->status)) }}</p>

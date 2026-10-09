@@ -102,6 +102,8 @@
                 </div>
             </div>
 
+            @include('seller.products._delivery', ['product' => $product])
+
             <div>
                 <label for="main_image" class="block text-sm font-medium text-gray-700">Main image</label>
                 @if($product->mainImage)

@@ -38,7 +38,7 @@
                                 <p class="font-semibold text-gray-900">{{ __('From :shop', ['shop' => $part?->shopName() ?? ($shopItems->first()->product?->seller?->business_name ?: 'iruali')]) }}</p>
                                 @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? \App\Enums\SellerOrderStatus::labelFor($part->status) }}</span>@endif
                             </div>
-                            @if($part && $part->status !== 'cancelled')
+                            @if($part && $part->status !== 'cancelled' && ! $part->isPickup())
                                 <ol class="grid grid-cols-4 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
                                         @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
@@ -48,6 +48,9 @@
                             @endif
                             @if($part?->tracking_note)
                                 <p class="text-sm text-gray-700"><span class="font-medium">{{ __('Tracking') }}:</span> {{ $part->tracking_note }}</p>
+                            @endif
+                            @if($part)
+                                @include('orders._pickup', ['part' => $part, 'showCode' => true])
                             @endif
                             @foreach($shopItems as $item)
                                 <div class="flex items-center gap-4">
@@ -79,6 +82,7 @@
                         </div>
                     @endif
                 </div>
+                @include('orders._delivery_details', ['order' => $order])
             </div>
 
             <div class="rounded-lg border border-primary-200 bg-primary-50 p-6">

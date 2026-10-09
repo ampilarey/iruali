@@ -19,6 +19,7 @@
 <ul>
     <li><strong>Greater Malé</strong> (Malé, Hulhumalé and Villimalé): {{ Money::format($male) }} per order.</li>
     <li><strong>Other islands:</strong> {{ Money::format($islands) }} per order.</li>
+    @include('policies._delivery_rates')
     @if($freeOver > 0)
         <li><strong>Free delivery</strong> on orders of {{ Money::format($freeOver) }} or more (after discounts).</li>
     @endif

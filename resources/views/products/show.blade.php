@@ -130,11 +130,7 @@
                 <div data-variant-stock data-text-out="{{ __('Out of stock') }}" data-text-low="{{ __('Only :count left', ['count' => '#']) }}" data-text-in="{{ __('In stock') }}"><x-stock :quantity="$stock" class="mt-2 !text-sm" /></div>
 
                 <div class="mt-4 rounded-lg bg-gray-50 p-3 text-sm space-y-2">
-                    <p class="flex gap-2"><x-icon name="truck" class="w-5 h-5 shrink-0 text-primary" />
-                        <span>{{ __('Delivery :fee in Greater Malé, :islands to other islands.', ['fee' => \App\Support\Money::format($delivery['male']), 'islands' => \App\Support\Money::format($delivery['islands'])]) }}
-                            @if($delivery['free_over'] > 0)<span class="block text-success font-medium">{{ __('Free delivery on orders over :amount', ['amount' => \App\Support\Money::format($delivery['free_over'])]) }}</span>@endif
-                        </span>
-                    </p>
+                    @include('products._delivery_box')
                     <div class="flex gap-2"><x-icon name="bank" class="w-5 h-5 shrink-0 text-primary" /><div><img src="/images/card-brands.png" alt="{{ __('We accept American Express, Visa, Mastercard and Maestro') }}" width="147" height="30" class="h-8 w-auto -ms-1"><span class="block mt-1 text-xs text-gray-500">{{ __('Prices in MVR') }}</span></div></div>
                 </div>
 

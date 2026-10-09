@@ -79,6 +79,8 @@ class GuestCheckoutController extends Controller
             'delivery_zone' => $request->delivery_zone,
             'payment_method' => $request->payment_method,
         ];
+        // Deliver or pick up per shop, the Malé time slot and the gift details
+        $shippingData += $request->deliveryChoices();
 
         $result = $this->orderService->createOrderFromCart(null, $shippingData, $cart, [
             'email' => $request->guest_email,

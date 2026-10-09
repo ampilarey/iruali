@@ -71,6 +71,8 @@
                 <div class="mt-4 space-y-2">
                     @if($order->status === 'cancelled')
                         <p class="text-sm text-gray-600">This order was cancelled. Don't send these items.</p>
+                    @elseif(empty($nextStatuses) && $part->isPickup())
+                        <p class="text-sm text-gray-600">{{ __('The customer picks this part up from your shop: see Pickup below.') }}</p>
                     @elseif(empty($nextStatuses))
                         <p class="text-sm text-gray-600">Your part is {{ str_replace('_', ' ', $part->status) }}. Nothing more to update.</p>
                     @else
@@ -100,6 +102,7 @@
                     </details>
                 @endif
             </div>
+            @include('seller.orders._delivery', ['order' => $order, 'part' => $part])
             <div class="rounded-lg bg-white p-5 shadow text-sm">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your earnings</h2>
                 <dl class="mt-2 space-y-1">

@@ -51,6 +51,8 @@ class ProductRequest extends FormRequest
             'reorder_point' => 'nullable|integer|min:0|max:999999',
             'brand' => 'nullable|string|max:120',
             'weight' => 'nullable|numeric|min:0|max:999.99',
+            // Bulky items: added to the delivery fee per unit delivered, never waived by free delivery
+            'delivery_surcharge' => 'nullable|numeric|min:0|max:99999.99',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
 
             'variants' => ['exclude_if:has_variants,false', 'required', 'array', 'min:1', 'max:'.self::MAX_VARIANTS],
@@ -152,6 +154,10 @@ class ProductRequest extends FormRequest
 
         if (array_key_exists('stock_quantity', $data)) {
             $attributes['stock_quantity'] = $data['stock_quantity'];
+        }
+        // Only when the form sent it, so a form without the field leaves the charge as it was
+        if (array_key_exists('delivery_surcharge', $data)) {
+            $attributes['delivery_surcharge'] = round((float) ($data['delivery_surcharge'] ?? 0), 2);
         }
 
         return $attributes;

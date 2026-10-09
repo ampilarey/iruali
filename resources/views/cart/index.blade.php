@@ -43,6 +43,7 @@
                                     @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->displayNameWithKeys() }}@if($item->variant->sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant->sku }})</span>@endif</p>@endif
                                     @if($seller)<p class="text-xs text-gray-500 mt-0.5">{{ __('Sold by') }} {{ $seller->business_name ?: $seller->name }}</p>@endif
                                     @include('cart._holiday_item', ['seller' => $seller])
+                                    @include('cart._delivery_surcharge', ['product' => $product])
                                     <x-stock :quantity="$item->availableStock()" class="mt-1" />
                                     <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                                         <form action="{{ route('cart.update', $item) }}" method="POST" class="flex items-center gap-2">

@@ -47,6 +47,8 @@ class Audit
         'seller.verification_rejected' => 'Business verification rejected',
         'seller.holiday' => 'Shop holiday mode changed',
         'payouts.verified_business_rule' => 'Payout rule (verified business) changed',
+        'delivery.saved' => 'Delivery rates and time slots saved',
+        'pickup.confirmed' => 'Pickup confirmed for a shop',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

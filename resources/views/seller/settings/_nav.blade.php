@@ -5,6 +5,9 @@
     if (\Illuminate\Support\Facades\Route::has('seller.settings.notifications')) {
         $settingsTabs['seller.settings.notifications'] = __('Notifications');
     }
+    if (\Illuminate\Support\Facades\Route::has('seller.settings.delivery')) {
+        $settingsTabs['seller.settings.delivery'] = __('Delivery & pickup');
+    }
     if (\Illuminate\Support\Facades\Route::has('seller.settings.verification')) {
         $settingsTabs['seller.settings.verification'] = __('Business verification');
     }

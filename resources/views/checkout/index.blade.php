@@ -9,6 +9,8 @@
     $addresses = $addresses ?? collect();
     $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
     $selectedZone = old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
+    // Deliver or pickup per shop, area fees, bulky-item charges, Malé time slots (checkout/_fulfilment, _delivery)
+    $deliveryCheckout = app(\App\Services\DeliveryService::class)->checkout($cart, (float) $goodsTotal, $selectedAddress, $user, $addresses);
 @endphp
 
 @section('content')
@@ -60,6 +62,7 @@
                         </div>
                     </section>
                 @endif
+                @include('checkout._fulfilment')
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>
                     @if($addresses->isNotEmpty())
@@ -128,23 +131,8 @@
                     </div>
                 </section>
 
-                <section class="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-1">{{ __('Delivery area') }}</h2>
-                    @if($freeDeliveryOver > 0)
-                        <p class="text-sm text-gray-600 mb-4">{{ __('Free delivery on orders over :amount.', ['amount' => \App\Support\Money::format($freeDeliveryOver)]) }}</p>
-                    @endif
-                    <div class="space-y-3">
-                        @foreach($deliveryZones as $zone => $label)
-                            <label class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
-                                <span class="flex items-center gap-3">
-                                    <input type="radio" name="delivery_zone" value="{{ $zone }}" data-fee="{{ $deliveryQuotes[$zone] }}" @checked($selectedZone === $zone) class="h-4 w-4 text-primary-600 focus:ring-primary-500">
-                                    <span class="text-sm font-medium text-gray-900">{{ $label }}</span>
-                                </span>
-                                <span class="text-sm font-semibold text-gray-900" dir="ltr">{{ $deliveryQuotes[$zone] > 0 ? \App\Support\Money::format($deliveryQuotes[$zone]) : __('Free') }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </section>
+                @include('checkout._delivery')
+                @include('checkout._gift')
 
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
@@ -242,11 +230,11 @@
                         @endif
                         <div class="flex justify-between">
                             <dt class="text-gray-600">{{ __('Delivery') }}</dt>
-                            <dd class="font-medium" dir="ltr" id="delivery-fee">{{ \App\Support\Money::format($deliveryQuotes[$selectedZone] ?? 0) }}</dd>
+                            <dd class="font-medium" dir="ltr" id="delivery-fee">{{ \App\Support\Money::format($deliveryCheckout['fee']) }}</dd>
                         </div>
                         <div class="flex justify-between border-t border-gray-200 pt-3 text-base">
                             <dt class="font-semibold">{{ __('Total') }}</dt>
-                            <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + ($deliveryQuotes[$selectedZone] ?? 0)) }}</dd>
+                            <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + $deliveryCheckout['fee']) }}</dd>
                         </div>
                         @if($walletBalance > 0)
                             <div class="flex justify-between hidden" id="wallet-row">

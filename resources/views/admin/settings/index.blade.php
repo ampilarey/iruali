@@ -129,6 +129,7 @@
                     </div>
                 </div>
                 <p class="mt-2 text-xs text-gray-500">Greater Malé is Malé, Hulhumalé and Villimalé. Set "Free delivery over" to 0 to always charge delivery. Checked against the order total after discounts.</p>
+                @if(Route::has('admin.delivery'))<p class="mt-1 text-xs text-gray-500"><a href="{{ route('admin.delivery') }}" class="font-medium text-primary-700 underline">{{ __('Fees for each atoll, delivery estimates and Malé time slots') }}</a></p>@endif
             </section>
 
             @php $missing = \App\Support\Company::missing(); @endphp

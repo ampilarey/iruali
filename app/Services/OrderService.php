@@ -84,10 +84,13 @@ class OrderService
             }
             $loyaltyPointsEarned = $user ? $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']) : 0;
 
-            // Delivery fee by area (points are earned on goods only, not delivery)
+            // Delivery fee by area (points are earned on goods only, not delivery): the area's fee once
+            // for the shop parts that are delivered (none when everything is picked up) plus their
+            // items' extra charges, which free delivery does not waive; also the Malé time slot
+            // (checked again under a lock) and the gift details
             $delivery = app(DeliveryService::class);
             $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null);
-            $shippingData['shipping_amount'] = $delivery->fee($shippingData['delivery_zone'], $discounts['final_total']);
+            $shippingData = $delivery->prepareOrder($cart, $shippingData, (float) $discounts['final_total']);
 
             // Create order
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
@@ -103,6 +106,9 @@ class OrderService
 
             // One part per shop, with its own fulfilment status and the shop's earnings
             app(FulfilmentService::class)->createParts($order);
+
+            // Deliver or pickup per shop part, and the order's delivery area, time slot and gift details
+            $delivery->applyToOrder($order, $shippingData);
 
             // Take the stock atomically: two checkouts racing for the last unit can't both win.
             // A line with a variant takes it from the variant row (the product total follows).

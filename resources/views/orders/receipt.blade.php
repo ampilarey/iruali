@@ -79,6 +79,7 @@
             <tr><td>{{ __('Delivery') }}</td><td class="num">{{ Money::format($order->shipping_amount) }}</td></tr>
             <tr class="grand"><td>{{ __('Total') }} (MVR)</td><td class="num">{{ Money::format($order->total_amount) }}</td></tr>
         </table>
+        @include('tax.partials.receipt-gst', ['order' => $order])
 
         <h2>{{ __('Payment') }}</h2>
         <p style="margin:0;font-size:14px">

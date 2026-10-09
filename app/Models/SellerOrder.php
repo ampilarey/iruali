@@ -35,6 +35,16 @@ class SellerOrder extends Model
         'pickup_code_attempts' => 'integer',
         'pickup_ready_at' => 'datetime',
         'pickup_collected_at' => 'datetime',
+        // GST as it was when the order was placed (App\Services\GstService)
+        'gst_registered' => 'boolean',
+        'gst_rate' => 'decimal:2',
+        'gst_taxable' => 'decimal:2',
+        'gst_amount' => 'decimal:2',
+        'commission_gst' => 'decimal:2',
+        'gst_captured_at' => 'datetime',
+        'invoice_sequence' => 'integer',
+        'invoiced_at' => 'datetime',
+        'gst_reversed_at' => 'datetime',
     ];
 
     /** The customer's pickup code is never serialised (the shop must ask the customer for it). */
@@ -208,5 +218,14 @@ class SellerOrder extends Model
     public function pickupLocked(): bool
     {
         return (int) $this->pickup_code_attempts >= self::MAX_PICKUP_ATTEMPTS;
+    }
+
+    /**
+     * The shop's goods total after any shop-level discount: what its GST is worked out on (prices
+     * include GST). The one place for it; take the shop discount (shop_discount) off here.
+     */
+    public function taxableGoodsTotal(): float
+    {
+        return $this->netSubtotal();
     }
 }

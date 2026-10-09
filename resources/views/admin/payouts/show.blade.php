@@ -14,6 +14,7 @@
             <div><p class="text-gray-500">Reference</p><p class="font-mono">{{ $payout->reference ?: '—' }}</p></div>
             @if($payout->note)<div class="sm:col-span-2"><p class="text-gray-500">Note</p><p>{{ $payout->note }}</p></div>@endif
             <div class="sm:col-span-2"><a href="{{ route('admin.payouts.show', [$payout, 'export' => 'csv']) }}" class="inline-block rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Download statement (CSV)</a></div>
+            @include('tax.partials.payout-invoice-link', ['payout' => $payout, 'route' => 'admin.payouts.invoice', 'class' => 'sm:col-span-2 justify-self-start rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50'])
         </div>
         <div class="overflow-x-auto rounded-lg bg-white shadow">
             <table class="min-w-full divide-y divide-gray-200 text-sm">

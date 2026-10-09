@@ -14,6 +14,9 @@
     if (\Illuminate\Support\Facades\Route::has('seller.settings.holiday')) {
         $settingsTabs['seller.settings.holiday'] = __('Holiday mode');
     }
+    if (\Illuminate\Support\Facades\Route::has('seller.settings.tax')) {
+        $settingsTabs['seller.settings.tax'] = __('Tax');
+    }
 @endphp
 <nav class="flex flex-wrap gap-2 text-sm" aria-label="{{ __('Settings') }}">
     @foreach($settingsTabs as $route => $label)

@@ -148,6 +148,7 @@
                 @endif
 
                 <a href="{{ $order->guestUrl('receipt') }}" target="_blank" rel="noopener" class="mt-6 w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-50">{{ __('View / print receipt') }}</a>
+                @include('tax.partials.order-documents', ['order' => $order])
                 <p class="mt-4 text-xs text-gray-500">{{ __('Please keep a copy of your order confirmation, payment receipt and our policies for your records.') }}</p>
                 <p class="mt-4 text-center"><a href="{{ route('order.track.form') }}" class="text-primary-600 hover:underline text-sm">{{ __('Track another order') }}</a></p>
             </div>

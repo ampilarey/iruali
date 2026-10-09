@@ -203,6 +203,7 @@ class PayoutService
             $payouts = SellerPayout::where('payout_batch_id', $batch->id)->where('status', 'pending')->lockForUpdate()->get();
             foreach ($payouts as $payout) {
                 $payout->update(['status' => 'paid', 'paid_at' => $paidAt, 'reference' => BankFileFormat::remark($batch, $payout->id)]);
+                app(GstService::class)->payoutPaid($payout); // iruali's commission invoice
             }
 
             $locked->update(['status' => 'paid', 'paid_at' => $paidAt, 'bank_reference' => $bankReference]);
@@ -298,6 +299,7 @@ class PayoutService
 
         SellerOrder::whereIn('id', $parts->pluck('id'))->update(['payout_id' => $payout->id]);
         SellerAdjustment::whereIn('id', $adjustments->pluck('id'))->update(['payout_id' => $payout->id]);
+        app(GstService::class)->payoutPaid($payout); // numbers iruali's commission invoice once the payout is paid
         \App\Support\Audit::record('payout.created', $payout, ['seller_id' => $seller->id, 'shop' => $seller->business_name ?: $seller->name, 'amount' => $amount, 'reference' => $reference, 'batch' => $batch?->reference, 'parts' => $parts->count()]);
 
         return $payout;

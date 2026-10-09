@@ -50,6 +50,8 @@ class Audit
         'delivery.saved' => 'Delivery rates and time slots saved',
         'pickup.confirmed' => 'Pickup confirmed for a shop',
         'newsletter.sent' => 'Newsletter sent',
+        'tax.settings_saved' => 'Tax settings saved',
+        'shop.tax_details_saved' => 'Shop tax details saved',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

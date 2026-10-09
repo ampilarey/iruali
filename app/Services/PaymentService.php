@@ -180,6 +180,7 @@ class PaymentService
     {
         $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
         FunnelService::orderPaid($order);
+        app(GstService::class)->orderPaid($order); // each shop's invoice number, once the payment is committed
 
         app(OrderService::class)->awardRewards($order->fresh());
         app(GiftCardService::class)->issueForOrder($order); // a paid gift-card order sends the card

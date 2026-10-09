@@ -46,6 +46,7 @@ class OrderController extends Controller
         // $this->authorize('create', Order::class); // Removed as StoreOrderRequest handles authorization
 
         $user = Auth::user();
+        $buyer = app(\App\Services\GstService::class)->buyerFromRequest($request); // "Buying for a business?" details, checked before the order exists
 
         $shippingData = [
             'shipping_address' => $request->shipping_address,
@@ -70,6 +71,7 @@ class OrderController extends Controller
         }
 
         $order = $result['order'];
+        app(\App\Services\GstService::class)->recordBuyer($order, $buyer); // printed on every shop's invoice
 
         // "Save this address for next time" (a new address typed at checkout; none when all is picked up)
         if ($request->boolean('save_address') && ! $request->filled('address_id') && ! $request->everythingPickedUp()) {

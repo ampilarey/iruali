@@ -45,6 +45,7 @@
                                     @if($seller->business_description)
                                         <p class="mt-1 max-w-sm text-xs text-gray-600">{{ \Illuminate\Support\Str::limit($seller->business_description, 140) }}</p>
                                     @endif
+                                    @include('admin.tax._seller', ['seller' => $seller])
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div>{{ $seller->email }}</div>

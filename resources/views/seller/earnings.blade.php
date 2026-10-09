@@ -81,6 +81,7 @@
                                 @if($payout->isPaid()){{ $payout->paid_at?->format('d M Y') }}@else<span class="text-blue-700">{{ __('On its way') }}</span>@endif
                                 @if($payout->batch)<span class="block text-xs text-gray-500">{{ __('Batch') }} {{ $payout->batch->reference }}@if($payout->batch->bank_reference) · {{ $payout->batch->bank_reference }}@endif</span>@endif
                                 @if($payout->reference)<span class="block text-xs text-gray-500">Ref {{ $payout->reference }}</span>@endif
+                                @include('tax.partials.payout-invoice-link', ['payout' => $payout, 'route' => 'seller.payouts.invoice', 'class' => 'block text-xs font-medium text-primary-700 hover:underline'])
                             </span>
                             <span class="font-semibold">{{ Money::format($payout->amount) }}</span>
                         </li>

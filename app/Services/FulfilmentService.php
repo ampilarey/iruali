@@ -59,6 +59,8 @@ class FulfilmentService
         $commission = round($net * (float) $part->commission_rate / 100, 2);
         $part->fill(['subtotal' => $subtotal, 'commission_amount' => $commission, 'seller_earnings' => round($net - $commission, 2)])->save();
 
+        app(GstService::class)->capturePart($part, $order); // GST as it is when the order is placed
+
         return $part;
     }
 
@@ -183,6 +185,7 @@ class FulfilmentService
         foreach ($order->sellerOrders()->where('status', '!=', 'cancelled')->get() as $part) {
             if ($status === 'cancelled') {
                 $part->update(['status' => 'cancelled']);
+                app(GstService::class)->partCancelled($part); // a paid sale reversed (GST report)
 
                 continue;
             }

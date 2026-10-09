@@ -7,6 +7,7 @@
         ['admin.orders', 'Orders'],
         ['admin.returns', 'Returns'],
         ['admin.payouts', 'Payouts'],
+        ['admin.tax', 'Tax'],
         ['admin.sellers', 'Sellers'],
         ['admin.products', 'Products'],
         ['admin.brands', 'Brands'],

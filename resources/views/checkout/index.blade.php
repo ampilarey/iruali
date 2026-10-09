@@ -145,6 +145,7 @@
                     </div>
                 </section>
 
+                @include('checkout._business-details')
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
                     @php

@@ -45,6 +45,7 @@
                 <a href="{{ route('account') }}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Cancel') }}</a>
             </div>
         </form>
+        @include('account._business-details')
     </div>
 </div>
 @endsection

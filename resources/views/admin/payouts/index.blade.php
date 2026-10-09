@@ -77,6 +77,7 @@
                 @forelse($recent as $payout)
                     <li class="px-5 py-3 flex flex-wrap items-center justify-between gap-3">
                         <span><a href="{{ route('admin.payouts.show', $payout) }}" class="font-medium text-primary-700 hover:underline">#{{ $payout->id }}</a> · {{ $payout->seller?->business_name ?: $payout->seller?->name }} · @if($payout->isPaid()){{ $payout->paid_at?->format('d M Y') }}@else<span class="text-amber-700">{{ __('In batch') }} {{ $payout->batch?->reference }}</span>@endif @if($payout->reference) · ref {{ $payout->reference }}@endif</span>
+                        @include('tax.partials.payout-invoice-link', ['payout' => $payout, 'route' => 'admin.payouts.invoice', 'class' => 'ms-auto text-xs font-medium text-primary-700 hover:underline'])
                         <span class="font-semibold">{{ Money::format($payout->amount) }}</span>
                     </li>
                 @empty

@@ -196,6 +196,7 @@
                     @endif
                     <p class="mt-3 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}</p>
                 </div>
+                @include('admin.tax._order', ['order' => $order])
             </div>
         </div>
     </div>

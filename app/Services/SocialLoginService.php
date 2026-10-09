@@ -13,6 +13,7 @@ use App\Services\SocialLogin\Provider;
 use App\Services\SocialLogin\SocialLoginException;
 use App\Services\SocialLogin\SocialProfile;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -112,7 +113,13 @@ class SocialLoginService
             throw SocialLoginException::failed($provider->label());
         }
 
-        return $provider->profile($code, $attempt['verifier'] ?? null, (string) $attempt['nonce'], $callback);
+        try {
+            return $provider->profile($code, $attempt['verifier'] ?? null, (string) $attempt['nonce'], $callback);
+        } catch (ConnectionException $e) {
+            report($e); // the provider could not be reached (or timed out)
+
+            throw SocialLoginException::failed($provider->label());
+        }
     }
 
     /**

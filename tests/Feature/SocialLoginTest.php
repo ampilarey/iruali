@@ -12,6 +12,7 @@ use App\Services\SocialLogin\Jwt;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Hash;
@@ -229,6 +230,27 @@ class SocialLoginTest extends TestCase
         }
         $this->assertGuest();
         $this->assertSame(0, User::count());
+    }
+
+    public function test_a_provider_that_fails_or_times_out_gives_a_message_not_an_error_page(): void
+    {
+        $this->configure();
+        $calls = 0;
+        Http::fake(['oauth2.googleapis.com/token' => function () use (&$calls) {
+            if (++$calls === 1) {
+                throw new ConnectionException('Connection timed out');
+            }
+
+            return Http::response(['error' => 'invalid_grant'], 400);
+        }]);
+
+        foreach ([1, 2] as $try) {
+            $query = $this->start('google');
+            $this->get(route('social.callback', ['provider' => 'google', 'state' => $query['state'], 'code' => 'google-code']))
+                ->assertRedirect(route('login'))->assertSessionHasErrors(['social' => 'We could not sign you in with Google. Please try again.']);
+        }
+        $this->assertSame(2, $calls);
+        $this->assertGuest();
     }
 
     public function test_cancelling_at_the_provider_says_so(): void

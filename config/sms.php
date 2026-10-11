@@ -38,11 +38,13 @@ return [
         // "to={to}&text={message}&from={sender}". Left blank, the gateway gets to, message
         // and sender as plain parameters.
         //
-        // Dhiraagu (messaging.dhiraagu.com.mv), with KEY = base64 of "username:password" from
-        // the Dhiraagu Bulk SMS portal:
+        // Dhiraagu (messaging.dhiraagu.com.mv), the same call Akuru makes, with KEY = base64 of
+        // "username:password" from the Dhiraagu Bulk SMS portal:
         //   SMS_URL=https://messaging.dhiraagu.com.mv/v1/api/sms
-        //   SMS_BODY_TEMPLATE='{"destination":["{to_plain}"],"content":"{message}","source":"{sender}","authorizationKey":"KEY"}'
-        // Try one with: php artisan sms:test 7771234
+        //   SMS_BODY_TEMPLATE='{"destination":["{to_plain}"],"content":"{message}","authorizationKey":"KEY"}'
+        //   SMS_SUCCESS_REGEX='"transactionStatus"\s*:\s*"true"'
+        // Add "source":"{sender}" only when Dhiraagu has approved SMS_SENDER_ID for the account
+        // (without it the account's default sender name is used). Try one: php artisan sms:test 7771234
         'body_template' => env('SMS_BODY_TEMPLATE'),
 
         // Matched against the response body to decide the message was accepted; left blank,

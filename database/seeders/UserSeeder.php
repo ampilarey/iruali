@@ -26,6 +26,14 @@ class UserSeeder extends Seeder
 
         $admin = User::where('email', $email)->first();
 
+        // A site whose admin already has another email (the owner's own) gets no second admin with
+        // the default password
+        if (! $admin && User::whereHas('roles', fn ($roles) => $roles->where('name', 'admin'))->exists()) {
+            $this->command?->info('✅ An admin account already exists, skipping creation');
+
+            return;
+        }
+
         if (! $admin) {
             $admin = User::create([
                 'name' => 'Admin User',

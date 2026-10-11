@@ -249,7 +249,8 @@ class DemoDataService
 
     /**
      * Every sample product, in the bin or not: each demo shop's own SKUs under that shop's account,
-     * and the generic demo products (exact SKU or exact English name) under admin@example.com.
+     * and the generic demo products (exact SKU or exact English name) under the demo admin account
+     * (DemoData::genericProductsOwner()).
      *
      * @param  Collection<int, User>  $shops
      * @return Collection<int, Product>
@@ -262,8 +263,7 @@ class DemoDataService
             $skusBySeller[$shop->id] = $skus[$shop->email] ?? [];
         }
 
-        $admin = User::withTrashed()->where('email', DemoData::ADMIN_EMAIL)->get()
-            ->first(fn (User $user) => $user->email === DemoData::ADMIN_EMAIL);
+        $admin = DemoData::genericProductsOwner();
         $sellerIds = array_keys($skusBySeller);
         if ($admin) {
             $sellerIds[] = $admin->id;

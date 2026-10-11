@@ -1,22 +1,55 @@
 # Production deploy (iruali.mv)
 
 Production is **never** deployed automatically. `test.iruali.mv` deploys itself on every
-merge to `main` (see `TEST_AUTO_DEPLOY.md`); production runs **tagged releases only**, deployed
-by hand with one command on the server, and rolled back with one command.
+merge to `main` (see `TEST_AUTO_DEPLOY.md`); production is deployed **by hand** with one
+command in cPanel → Terminal, and rolled back with one command.
+
+**For now production follows `main`** (no release tags needed): once a change is on
+test.iruali.mv and looks right, run on the server
+
+```bash
+bash ~/deploy-live.sh
+```
+
+`~/deploy-live.sh` (made once, below) fetches the newest deploy scripts from `main` and runs
+`scripts/deploy-production.sh main ~/iruali ~/public_html`: the newest commit on `main`, the
+one test.iruali.mv runs, refused while GitHub's checks for it are failing or still running.
+Everything else is as for a tag: maintenance page, composer, migrations, caches, docroot sync,
+health check and smoke test, automatic rollback on failure, a line in `deploys.log`.
+
+Make `~/deploy-live.sh` once:
+
+```bash
+cat > ~/deploy-live.sh <<'SH'
+#!/bin/bash
+# Deploy the newest main to iruali.mv (docs/PRODUCTION_DEPLOY.md)
+set -e
+cd ~/iruali
+git fetch -q origin main
+mkdir -p ~/deploy-tools
+for f in deploy-production.sh deploy-lib.sh rollback-production.sh; do git show origin/main:scripts/$f > ~/deploy-tools/$f; done
+bash ~/deploy-tools/deploy-production.sh main ~/iruali ~/public_html
+SH
+```
+
+Release tags (below) still work and can come back later: `deploy-production.sh <tag>` or
+`--latest-tag`.
 
 ```
 main ──push──▶ GitHub Tests ──▶ test.iruali.mv (automatic)
   │
-  └─ scripts/release.sh ──▶ tag vYYYY.MM.DD ──▶ GitHub "Release" workflow (tests + release notes)
+  ├─ on the server, when ready: bash ~/deploy-live.sh                  (newest main)
+  │
+  └─ later, optionally: scripts/release.sh ──▶ tag vYYYY.MM.DD ──▶ GitHub "Release" workflow
                                   │
                                   └─ on the server: bash scripts/deploy-production.sh vYYYY.MM.DD
-                                                    bash scripts/rollback-production.sh   (if needed)
+                         rollback either way: bash scripts/rollback-production.sh
 ```
 
 Why no deploy from GitHub: the production server is cPanel shared hosting reached over SSH /
 cPanel Terminal, and a release should go out when a person has looked at the test site, picked
 a quiet moment, and is there to watch the health check and smoke test (which roll the release
-back on failure). GitHub's job stops at "the tagged commit passes the suite, here are the notes".
+back on failure).
 
 ## 1. Cut a release (on your machine)
 

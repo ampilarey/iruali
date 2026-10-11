@@ -47,6 +47,28 @@ describe_head() {
   git -C "$ROOT" describe --tags --exact-match HEAD 2>/dev/null || git -C "$ROOT" rev-parse --short=7 HEAD
 }
 
+# GitHub's check runs for a commit, asked without a token (public repository): prints "ok",
+# "pending: …", "failed: …", "none" or "unknown <reason>".
+github_checks() {
+  local sha=$1 url repo json
+  url=$(git -C "$ROOT" remote get-url origin 2>/dev/null)
+  [[ "$url" =~ ^(git@github\.com:|https://github\.com/)([^/]+/[^/]+)$ ]] || { echo "unknown origin is not on GitHub"; return 0; }
+  repo=${BASH_REMATCH[2]%.git}
+  json=$(curl -fsS -m 20 -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$repo/commits/$sha/check-runs?per_page=100" 2>&1) \
+    || { echo "unknown ${json:0:120}"; return 0; }
+  printf '%s' "$json" | php -r '
+    $runs = json_decode(stream_get_contents(STDIN), true)["check_runs"] ?? null;
+    if (! is_array($runs)) { echo "unknown unreadable reply"; exit; }
+    if ($runs === []) { echo "none"; exit; }
+    $pending = $failed = [];
+    foreach ($runs as $r) {
+        if (($r["status"] ?? "") !== "completed") { $pending[] = $r["name"]; }
+        elseif (! in_array($r["conclusion"] ?? "", ["success", "neutral", "skipped"], true)) { $failed[] = $r["name"]."=".$r["conclusion"]; }
+    }
+    echo $failed ? "failed: ".implode(", ", $failed) : ($pending ? "pending: ".implode(", ", $pending) : "ok");
+  '
+}
+
 checkout_commit() {
   git -C "$ROOT" checkout -q --detach "$1"
 }

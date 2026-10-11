@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# PRODUCTION deploy for iruali.mv (cPanel) from a tagged release, with automatic rollback.
+# PRODUCTION deploy for iruali.mv (cPanel), with automatic rollback.
 # Production is never deployed from GitHub; run this by hand in cPanel → Terminal (or over SSH)
 # after the change has been checked on test.iruali.mv.
 #
-#   bash scripts/deploy-production.sh <tag | --latest-tag> [app root] [docroot]
+#   bash scripts/deploy-production.sh <main | tag | --latest-tag> [app root] [docroot]
 #
+#   main          the newest commit on origin/main, the one test.iruali.mv runs. Refused while
+#                 GitHub's checks for it are failing or still running (asked without a token:
+#                 the repository is public); if GitHub cannot be reached it warns and goes on.
 #   tag           a release tag such as v2026.10.01 (made by scripts/release.sh)
 #   --latest-tag  the newest v* tag on origin
 #   app root      the Laravel checkout (folder with artisan and .env); default: the folder this
@@ -13,7 +16,7 @@
 #                 built assets, favicon, .htaccess and a front-controller index.php are synced there
 #                 ($DEPLOY_DOCROOT works too)
 #
-# Steps: refuse anything that is not a tag → maintenance mode → git fetch --tags → detached checkout
+# Steps: refuse anything that is not main or a tag → maintenance mode → git fetch --tags → detached checkout
 # of the tag → composer install --no-dev → migrate --force → config/route/view/event caches →
 # storage:link if missing → docroot sync → deploy stamp → queue:restart → up → /api/health →
 # php artisan iruali:smoke. Any failure rolls back to the previous commit (checkout, composer
@@ -28,7 +31,7 @@ ROOT="${2:-${DEPLOY_ROOT:-$(dirname "$SCRIPT_DIR")}}"
 DOCROOT="${3:-${DEPLOY_DOCROOT:-}}"
 
 usage() {
-  echo "Usage: bash scripts/deploy-production.sh <tag | --latest-tag> [app root] [docroot]" >&2
+  echo "Usage: bash scripts/deploy-production.sh <main | tag | --latest-tag> [app root] [docroot]" >&2
   exit 1
 }
 [[ -n "$TAG_ARG" ]] || usage
@@ -53,23 +56,38 @@ if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
   exit 1
 fi
 
-say "fetching tags"
+say "fetching main and tags"
 git fetch --tags --prune origin --quiet || { say "git fetch failed"; exit 1; }
 
-if [[ "$TAG_ARG" == "--latest-tag" ]]; then
-  TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
-  [[ -n "$TAG" ]] || { say "ERROR: no v* tag exists yet (make one with scripts/release.sh)"; exit 1; }
+if [[ "$TAG_ARG" == "main" || "$TAG_ARG" == "--main" ]]; then
+  REF="refs/remotes/origin/main"
+  NEXT=$(git rev-parse "$REF^{commit}") || { say "ERROR: origin/main not found"; exit 1; }
+  TAG="main@${NEXT:0:7}"
 else
-  TAG="$TAG_ARG"
+  if [[ "$TAG_ARG" == "--latest-tag" ]]; then
+    TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
+    [[ -n "$TAG" ]] || { say "ERROR: no v* tag exists yet (make one with scripts/release.sh, or deploy main)"; exit 1; }
+  else
+    TAG="$TAG_ARG"
+  fi
+  # Otherwise only a tag may be deployed: another branch name or a bare commit is refused.
+  if ! git rev-parse -q --verify "refs/tags/$TAG^{commit}" >/dev/null; then
+    say "ERROR: '$TAG' is not a tag. Deploy 'main' (the newest commit on main), a release tag, or --latest-tag."
+    exit 1
+  fi
+  REF="refs/tags/$TAG"
+  NEXT=$(git rev-parse "$REF^{commit}")
 fi
 
-# Only a tag may be deployed: a branch name or a bare commit is refused.
-if ! git rev-parse -q --verify "refs/tags/$TAG^{commit}" >/dev/null; then
-  say "ERROR: '$TAG' is not a tag. Production deploys only from release tags (scripts/release.sh); use --latest-tag for the newest."
-  exit 1
+# main: GitHub's checks for that commit must all have passed (the test site deploys on the same signal)
+if [[ "$REF" == "refs/remotes/origin/main" ]]; then
+  ci=$(github_checks "$NEXT")
+  case "$ci" in
+    ok) say "GitHub checks passed for ${NEXT:0:8}" ;;
+    unknown*) say "WARN: could not ask GitHub about ${NEXT:0:8} (${ci#unknown }); deploying anyway" ;;
+    *) say "ERROR: GitHub checks for ${NEXT:0:8} have not all passed: $ci. Wait for them (test.iruali.mv updates when they pass) and run this again."; exit 1 ;;
+  esac
 fi
-
-NEXT=$(git rev-parse "refs/tags/$TAG^{commit}")
 PREV=$(git rev-parse HEAD)
 PREV_NAME=$(describe_head)
 
@@ -100,7 +118,7 @@ rollback() {
 say "deploying $PREV_NAME (${PREV:0:8}) -> $TAG (${NEXT:0:8})"
 php artisan down --retry=30 >/dev/null 2>&1 || say "WARN: could not enter maintenance mode"
 
-checkout_commit "refs/tags/$TAG" || rollback "git checkout $TAG"
+checkout_commit "$NEXT" || rollback "git checkout $TAG"
 build_app || rollback "build (composer install / migrate / caches / docroot sync)"
 php artisan up || rollback "php artisan up"
 verify_site || rollback "health check or smoke test"

@@ -22,6 +22,8 @@ class HttpSms implements SmsDriver
         }
 
         $values = ['to' => $to, 'message' => $message, 'sender' => $sender];
+        // The same number for gateways that want it without the plus (Dhiraagu: 9607771234) or local (7771234)
+        $placeholders = $values + ['to_plain' => ltrim($to, '+'), 'to_local' => preg_replace('/^\+?960/', '', $to) ?? $to];
         $method = ($this->config['method'] ?? 'POST') === 'GET' ? 'GET' : 'POST';
         $template = trim((string) ($this->config['body_template'] ?? ''));
 
@@ -29,7 +31,7 @@ class HttpSms implements SmsDriver
             $request = $this->request();
 
             if ($template !== '' && str_starts_with($template, '{')) {
-                $body = json_decode($this->fill($template, $values, fn ($v) => substr(json_encode($v, JSON_UNESCAPED_UNICODE), 1, -1)), true);
+                $body = json_decode($this->fill($template, $placeholders, fn ($v) => substr(json_encode($v, JSON_UNESCAPED_UNICODE), 1, -1)), true);
                 if (! is_array($body)) {
                     return SmsResult::failed('SMS_BODY_TEMPLATE is not valid JSON');
                 }
@@ -37,7 +39,7 @@ class HttpSms implements SmsDriver
             } else {
                 $params = $values;
                 if ($template !== '') {
-                    parse_str($this->fill($template, $values, 'rawurlencode'), $params);
+                    parse_str($this->fill($template, $placeholders, 'rawurlencode'), $params);
                 }
                 $response = $method === 'GET' ? $request->get($url, $params) : $request->asForm()->post($url, $params);
             }
@@ -72,7 +74,7 @@ class HttpSms implements SmsDriver
     }
 
     /**
-     * Replace {to} {message} {sender} in the template, escaping each value for its context.
+     * Replace {to} {to_plain} {to_local} {message} {sender} in the template, escaping each value for its context.
      */
     protected function fill(string $template, array $values, callable $escape): string
     {

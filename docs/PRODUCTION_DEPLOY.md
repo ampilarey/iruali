@@ -187,6 +187,27 @@ The admin dashboard shows the same checks (offline, refreshed every 5 minutes) i
 works from a heartbeat the cron writes every minute; if it says the scheduler has not run,
 nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either.
 
+## Text messages (SMS) through Dhiraagu
+
+Until an SMS gateway is set, texts (verification codes, order updates) are only written to
+**Admin → SMS** (`SMS_DRIVER=log`). For Dhiraagu's messaging API you need the username and
+password of a Dhiraagu Bulk SMS account with API access, and a sender name Dhiraagu has
+approved (`SMS_SENDER_ID`, sent as `source`). In `.env`, with `KEY` replaced by the base64 of
+`username:password` (`printf '%s' 'username:password' | base64`):
+
+```
+SMS_DRIVER=http
+SMS_SENDER_ID=iruali
+SMS_URL=https://messaging.dhiraagu.com.mv/v1/api/sms
+SMS_METHOD=POST
+SMS_BODY_TEMPLATE='{"destination":["{to_plain}"],"content":"{message}","source":"{sender}","authorizationKey":"KEY"}'
+```
+
+`{to_plain}` is the number as Dhiraagu wants it (`9607771234`); `{to}` keeps the plus and
+`{to_local}` is the seven digits. Then `php artisan config:cache` and
+`php artisan sms:test 7771234` (or Admin → SMS → test send), which prints the gateway's reply.
+A 401 means the key is wrong; a 422 usually means the sender name is not approved.
+
 ## Staff roles, 2FA and the audit log
 
 - Roles: **admin** (everything), **support** (dashboard, inbox, orders, returns, moderation,

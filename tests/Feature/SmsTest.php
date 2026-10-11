@@ -102,6 +102,52 @@ class SmsTest extends TestCase
             && str_contains($request->url(), 'src=iruali'));
     }
 
+    public function test_a_dhiraagu_style_gateway_gets_the_number_without_the_plus(): void
+    {
+        $this->gateway([
+            'sms.http.url' => 'https://messaging.dhiraagu.test/v1/api/sms',
+            'sms.http.auth_header' => '',
+            'sms.http.body_template' => '{"destination":["{to_plain}"],"content":"{message}","source":"{sender}","authorizationKey":"dXNlcjpwYXNz"}',
+            'sms.http.success_regex' => '',
+        ]);
+        Http::fake(['messaging.dhiraagu.test/*' => Http::response(['transactionId' => 't1', 'transactionStatus' => 'true'], 200)]);
+
+        $this->assertTrue(app(SmsManager::class)->send('+960 777-1234', 'Your code is 123456')->success);
+        Http::assertSent(fn ($request) => $request->method() === 'POST'
+            && $request['destination'] === ['9607771234']
+            && $request['content'] === 'Your code is 123456'
+            && $request['source'] === 'iruali'
+            && $request['authorizationKey'] === 'dXNlcjpwYXNz');
+
+        // And the local seven digits for gateways that want only those
+        $this->gateway(['sms.http.method' => 'GET', 'sms.http.body_template' => 'to={to_local}&msg={message}', 'sms.http.success_regex' => '']);
+        Http::fake(['sms.test/*' => Http::response('OK', 200)]);
+        $this->assertTrue(app(SmsManager::class)->send('9609991234', 'Hi')->success);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'to=9991234&'));
+    }
+
+    public function test_the_sms_test_command_sends_one_message_and_shows_the_reply(): void
+    {
+        $this->gateway(['sms.http.success_regex' => '']);
+        Http::fakeSequence('sms.test/*')->push(['transactionStatus' => 'true'], 200)->push('Unauthorized', 401);
+
+        $this->artisan('sms:test', ['number' => '7771234'])
+            ->expectsOutputToContain('Driver: http (https://sms.test/send)')
+            ->expectsOutputToContain('transactionStatus')
+            ->expectsOutput('SMS sent.')
+            ->assertSuccessful();
+        $this->assertDatabaseHas('sms_messages', ['to' => '+9607771234', 'status' => 'sent']);
+
+        $this->artisan('sms:test', ['number' => '7771234', '--message' => 'Hello'])
+            ->expectsOutputToContain('HTTP 401')
+            ->expectsOutput('SMS not sent.')
+            ->assertFailed();
+
+        config(['sms.driver' => 'log']);
+        app(SmsManager::class)->using(null);
+        $this->artisan('sms:test', ['number' => '7771234'])->expectsOutput('SMS logged, not sent.')->assertSuccessful();
+    }
+
     public function test_a_rejected_or_unreachable_gateway_is_a_failure_and_never_throws(): void
     {
         $this->gateway();

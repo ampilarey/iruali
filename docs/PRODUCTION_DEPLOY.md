@@ -223,23 +223,27 @@ nothing scheduled (backups, queued mail, unpaid-order cleanup) is running either
 ## Text messages (SMS) through Dhiraagu
 
 Until an SMS gateway is set, texts (verification codes, order updates) are only written to
-**Admin → SMS** (`SMS_DRIVER=log`). For Dhiraagu's messaging API you need the username and
-password of a Dhiraagu Bulk SMS account with API access, and a sender name Dhiraagu has
-approved (`SMS_SENDER_ID`, sent as `source`). In `.env`, with `KEY` replaced by the base64 of
-`username:password` (`printf '%s' 'username:password' | base64`):
+**Admin → SMS** (`SMS_DRIVER=log`). iruali calls Dhiraagu's messaging API the same way Akuru
+does (`SmsGatewayService::sendViaDhiraagu` there): a POST to
+`https://messaging.dhiraagu.com.mv/v1/api/sms` with the number as `9607771234`, the text, and
+`authorizationKey` = base64 of the Dhiraagu Bulk SMS `username:password`
+(`printf '%s' 'username:password' | base64`); a reply with `"transactionStatus": "true"` means
+sent. In `.env`, with `KEY` replaced:
 
 ```
 SMS_DRIVER=http
-SMS_SENDER_ID=iruali
 SMS_URL=https://messaging.dhiraagu.com.mv/v1/api/sms
 SMS_METHOD=POST
-SMS_BODY_TEMPLATE='{"destination":["{to_plain}"],"content":"{message}","source":"{sender}","authorizationKey":"KEY"}'
+SMS_BODY_TEMPLATE='{"destination":["{to_plain}"],"content":"{message}","authorizationKey":"KEY"}'
+SMS_SUCCESS_REGEX='"transactionStatus"\s*:\s*"true"'
 ```
 
-`{to_plain}` is the number as Dhiraagu wants it (`9607771234`); `{to}` keeps the plus and
+Texts then go out under the account's default sender name. To show another name (e.g.
+`iruali`), have Dhiraagu approve it, set `SMS_SENDER_ID=iruali` and add `"source":"{sender}"`
+to the template. `{to_plain}` is the number as Dhiraagu wants it; `{to}` keeps the plus and
 `{to_local}` is the seven digits. Then `php artisan config:cache` and
-`php artisan sms:test 7771234` (or Admin → SMS → test send), which prints the gateway's reply.
-A 401 means the key is wrong; a 422 usually means the sender name is not approved.
+`php artisan sms:test 7771234` (or Admin → SMS → test send), which prints Dhiraagu's reply:
+`transactionDescription` says why a text was refused; HTTP 401 means the key is wrong.
 
 ## Staff roles, 2FA and the audit log
 

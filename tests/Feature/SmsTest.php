@@ -104,20 +104,28 @@ class SmsTest extends TestCase
 
     public function test_a_dhiraagu_style_gateway_gets_the_number_without_the_plus(): void
     {
+        // The settings in docs/PRODUCTION_DEPLOY.md: the same call Akuru makes
         $this->gateway([
             'sms.http.url' => 'https://messaging.dhiraagu.test/v1/api/sms',
             'sms.http.auth_header' => '',
-            'sms.http.body_template' => '{"destination":["{to_plain}"],"content":"{message}","source":"{sender}","authorizationKey":"dXNlcjpwYXNz"}',
-            'sms.http.success_regex' => '',
+            'sms.http.body_template' => '{"destination":["{to_plain}"],"content":"{message}","authorizationKey":"dXNlcjpwYXNz"}',
+            'sms.http.success_regex' => '"transactionStatus"\\s*:\\s*"true"',
         ]);
-        Http::fake(['messaging.dhiraagu.test/*' => Http::response(['transactionId' => 't1', 'transactionStatus' => 'true'], 200)]);
+        Http::fakeSequence('messaging.dhiraagu.test/*')
+            ->push(['transactionId' => 't1', 'transactionStatus' => 'true'], 200)
+            ->push(['transactionStatus' => 'false', 'transactionDescription' => 'Insufficient credit'], 200);
 
         $this->assertTrue(app(SmsManager::class)->send('+960 777-1234', 'Your code is 123456')->success);
         Http::assertSent(fn ($request) => $request->method() === 'POST'
             && $request['destination'] === ['9607771234']
             && $request['content'] === 'Your code is 123456'
-            && $request['source'] === 'iruali'
-            && $request['authorizationKey'] === 'dXNlcjpwYXNz');
+            && $request['authorizationKey'] === 'dXNlcjpwYXNz'
+            && ! isset($request['source']));
+
+        // Dhiraagu answers 200 with transactionStatus "false" when it refuses a text
+        $refused = app(SmsManager::class)->send('7771234', 'Hi');
+        $this->assertFalse($refused->success);
+        $this->assertStringContainsString('Insufficient credit', $refused->providerResponse);
 
         // And the local seven digits for gateways that want only those
         $this->gateway(['sms.http.method' => 'GET', 'sms.http.body_template' => 'to={to_local}&msg={message}', 'sms.http.success_regex' => '']);

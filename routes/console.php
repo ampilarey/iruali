@@ -30,6 +30,9 @@ Schedule::call(fn () => app(\App\Services\GiftCardService::class)->expireOld())-
 // Bulk quotes past their valid-until day are marked expired (their cart lines go when the cart is next opened)
 Schedule::command('quotes:expire')->hourly()->withoutOverlapping();
 
+// Paused or hidden shop applications reopen on their reopening day; the waiting list is emailed
+Schedule::command('sellers:applications-reopen')->hourly()->withoutOverlapping();
+
 // Guest carts nobody has touched for a month (and their lines) are dropped
 Schedule::call(function () {
     \App\Models\Cart::whereNull('user_id')->where('updated_at', '<', now()->subDays(30))

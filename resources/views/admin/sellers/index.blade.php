@@ -9,6 +9,11 @@
                     <h1 class="text-2xl font-bold text-gray-900">Manage Sellers</h1>
                 </div>
                 <div class="flex items-center space-x-4">
+                    @php $applications = \App\Support\SellerApplications::status(); @endphp
+                    <a href="{{ route('admin.seller-applications') }}" class="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50" data-applications-status="{{ $applications }}">
+                        New shop applications
+                        <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $applications === 'open' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">{{ ucfirst($applications) }}</span>
+                    </a>
                     <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                         Back to Dashboard
                     </a>

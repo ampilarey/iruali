@@ -162,9 +162,11 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show')->middleware('signed');
 
     // Seller routes
-    // Seller application (any logged-in user)
+    // Seller application: the page answers anyone (it shows the admins' message while applications
+    // are paused or hidden, with "Tell me when you reopen"); sending the form needs an account
+    Route::get('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'create'])->name('seller.apply');
+    Route::post('/seller/waitlist', [\App\Http\Controllers\Seller\ApplicationController::class, 'waitlist'])->name('seller.waitlist')->middleware('throttle:5,1');
     Route::middleware('auth')->group(function () {
-        Route::get('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'create'])->name('seller.apply');
         Route::post('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'store'])->name('seller.apply.store')->middleware('throttle:5,1');
     });
 
@@ -187,6 +189,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/sellers', [AdminController::class, 'sellers'])->name('sellers');
+        Route::get('/seller-applications', [\App\Http\Controllers\Admin\SellerApplicationsController::class, 'edit'])->name('seller-applications');
+        Route::put('/seller-applications', [\App\Http\Controllers\Admin\SellerApplicationsController::class, 'update'])->name('seller-applications.update');
         Route::get('/products', [AdminController::class, 'products'])->name('products');
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::get('/orders/{order}', [AdminController::class, 'showOrder'])->name('orders.show');

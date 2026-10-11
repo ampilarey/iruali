@@ -2510,5 +2510,18 @@
     "Decline this request": "މި އެދުން ނުބަލައިގަންނަވާ",
     "Reason (the customer sees it)": "ސަބަބު (ކަސްޓަމަރަށް ފެންނާނެ)",
     "e.g. We cannot supply this quantity before that date.": "މިސާލު: އެ ތާރީޚުގެ ކުރިން މި އަދަދު ފޯރުކޮށެއް ނުދެވޭނެ.",
-    "Decline request": "އެދުން ނުބަލައިގަންނަވާ"
+    "Decline request": "އެދުން ނުބަލައިގަންނަވާ",
+    "We are not taking new shops right now": "މިވަގުތު އައު ފިހާރަތައް ބަލައެއް ނުގަނަމު",
+    "We have paused new shop applications for a while.": "އައު ފިހާރަތަކުގެ އެޕްލިކޭޝަން ބަލައިގަތުން ކުޑަ މުއްދަތަކަށް ހުއްޓާލާފައި ވަނީ.",
+    "Applications reopen on :date.": "އެޕްލިކޭޝަން އަލުން ބަލައިގަންނަން ފަށާނީ :date ގައި.",
+    "You are on the list. We will email you when applications reopen.": "ތިޔަބޭފުޅާ ލިސްޓުގައި ހިމެނިއްޖެ. އެޕްލިކޭޝަން އަލުން ބަލައިގަންނަން ފަށާއިރު އީމެއިލަކުން އަންގާނަން.",
+    "We will email :email once, when applications reopen.": "އެޕްލިކޭޝަން އަލުން ބަލައިގަންނަން ފަށާއިރު :email އަށް އެއް ފަހަރު އީމެއިލް ކުރާނަން.",
+    "We only use it to tell you once when applications reopen.": "މީގެ ބޭނުން ކުރާނީ އެޕްލިކޭޝަން އަލުން ބަލައިގަންނަން ފަށާކަން އެއް ފަހަރު އެންގުމަށް އެކަނި.",
+    "Tell me when you reopen": "އަލުން ހުޅުވާއިރު އަންގަވާ",
+    "Enter your email so we can tell you when applications reopen.": "އެޕްލިކޭޝަން އަލުން ބަލައިގަންނަން ފަށާއިރު އެންގުމަށް ތިޔަބޭފުޅާގެ އީމެއިލް ޖައްސަވާ.",
+    "Thank you. We will email :email when iruali takes new shops again.": "ޝުކުރިއްޔާ. iruali އިން އަލުން އައު ފިހާރަތައް ބަލައިގަންނަން ފަށާއިރު :email އަށް އީމެއިލް ކުރާނަން.",
+    "iruali is not taking new shops right now, so your application was not sent.": "މިވަގުތު iruali އިން އައު ފިހާރަތައް ބަލައެއް ނުގަންނާތީ، ތިޔަބޭފުޅާގެ އެޕްލިކޭޝަން ފޮނުވިފައެއް ނުވޭ.",
+    "You can open your shop on iruali now": "މިހާރު iruali ގައި ތިޔަ ފިހާރަ ހުޅުއްވިދާނެ",
+    "You asked us to tell you when iruali takes new shops again. Applications are open now.": "iruali އިން އަލުން އައު ފިހާރަތައް ބަލައިގަންނަން ފަށާއިރު އަންގަން ތިޔަބޭފުޅާ އެދިވަޑައިގެންނެވި. މިހާރު އެޕްލިކޭޝަން ބަލައިގަނެމުން ދަނީ.",
+    "Applying takes five minutes. We check every shop before its products go on sale.": "އެޕްލައިކުރުމަށް ފަސް މިނެޓު ނަގާނެ. ކޮންމެ ފިހާރައެއްގެ ތަކެތި ވިއްކަން ފެށުމުގެ ކުރިން އަޅުގަނޑުމެން އެ ފިހާރައެއް ޗެކްކުރާނަން."
 }

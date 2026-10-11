@@ -64,6 +64,12 @@ class Setting extends Model
         'abandoned_cart_voucher_percent' => 0,
         // Loyalty points expire this many months after they were earned (0 = never)
         'points_expire_months' => 0,
+        // New shop applications: open, paused or hidden, an optional reopening day (Y-m-d) and the
+        // message would-be sellers see meanwhile (Admin → Sellers → New shop applications)
+        'seller_applications' => 'open',
+        'seller_applications_until' => '',
+        'seller_applications_message_en' => '',
+        'seller_applications_message_dv' => '',
     ];
 
     protected $fillable = ['key', 'value'];

@@ -22,7 +22,8 @@
                 </div>
             </div>
             @endif
-            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
+            @php $sellLinks = \App\Support\SellerApplications::linksShown(); @endphp
+            <div class="grid {{ $sellLinks ? 'grid-cols-2' : 'grid-cols-1' }} lg:grid-cols-1 gap-3 lg:gap-4">
                 <a href="{{ route('deals') }}" class="group rounded-2xl bg-coral text-white p-5 flex flex-col justify-between min-h-[8rem] hover:bg-coral-hover">
                     <x-icon name="tag" class="w-7 h-7" />
                     <span>
@@ -30,6 +31,7 @@
                         <span class="text-sm text-white/85 inline-flex items-center gap-1">{{ __('Marked-down prices') }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180 group-hover:translate-x-0.5 transition" /></span>
                     </span>
                 </a>
+                @if($sellLinks)
                 <a href="{{ route('seller.apply') }}" class="group rounded-2xl bg-reef text-white p-5 flex flex-col justify-between min-h-[8rem] hover:bg-reef-night">
                     <x-icon name="store" class="w-7 h-7 text-sun" />
                     <span>
@@ -37,6 +39,7 @@
                         <span class="text-sm text-white/85 inline-flex items-center gap-1">{{ __('Open your shop') }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" /></span>
                     </span>
                 </a>
+                @endif
             </div>
         </section>
 
@@ -117,6 +120,7 @@
             <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white">{{ __('View All Products') }}<x-icon name="arrow-right" class="w-4 h-4 rtl:rotate-180" /></a>
         </div>
 
+        @if($sellLinks)
         <!-- Sell CTA -->
         <section class="rounded-2xl bg-white border border-gray-200 p-6 lg:p-10 flex flex-col lg:flex-row lg:items-center gap-6">
             <span class="w-14 h-14 shrink-0 rounded-2xl bg-sun-soft text-sun-ink flex items-center justify-center"><x-icon name="store" class="w-7 h-7" /></span>
@@ -126,6 +130,7 @@
             </div>
             <a href="{{ route('seller.apply') }}" class="self-start lg:self-auto inline-flex items-center px-6 py-3 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Open your shop') }}</a>
         </section>
+        @endif
     </div>
 </div>
 @endsection

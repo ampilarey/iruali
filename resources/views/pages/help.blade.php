@@ -19,6 +19,11 @@
         ['id' => 'selling', 'icon' => 'store', 'title' => __('Selling on iruali')],
         ['id' => 'contact', 'icon' => 'help', 'title' => __('Contact Us')],
     ];
+    // Selling help comes off the page while new shop applications are hidden (Admin → Sellers)
+    $sellLinks = \App\Support\SellerApplications::linksShown();
+    if (! $sellLinks) {
+        $topics = array_values(array_filter($topics, fn ($topic) => $topic['id'] !== 'selling'));
+    }
 @endphp
 
 @section('content')
@@ -77,11 +82,13 @@
                 <p class="text-gray-700 mt-2">{{ __('You can cancel an order yourself while it is still pending.') }}</p>
             </section>
 
+            @if($sellLinks)
             <section id="selling" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Selling on iruali') }}</h2>
                 <p class="text-gray-700">{{ __('Have a shop? Reach customers on every inhabited island. Applying takes five minutes.') }}</p>
                 <a href="{{ route('seller.apply') }}" class="inline-block mt-4 px-4 py-2 rounded-lg bg-sun text-sun-on text-sm font-semibold">{{ __('Open your shop') }}</a>
             </section>
+            @endif
 
             <section id="contact" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Contact Us') }}</h2>

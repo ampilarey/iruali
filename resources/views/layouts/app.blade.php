@@ -5,6 +5,8 @@
     $announcement = \App\Models\Setting::get('announcement_text');
     $contactEmail = \App\Models\Setting::get('contact_email');
     $contactPhone = \App\Models\Setting::get('contact_phone');
+    // "Sell on iruali" links come off the site while new shop applications are hidden (Admin → Sellers)
+    $sellLinks = \App\Support\SellerApplications::linksShown();
     $navDepartments = $navDepartments ?? collect();
     $cartCount = $cartCount ?? 0;
     $wishlistCount = $wishlistCount ?? 0;
@@ -47,7 +49,7 @@
             <p class="truncate">@if($announcement){{ __($announcement) }}@endif</p>
             <div class="flex items-center gap-5 shrink-0">
                 <a href="{{ route('order.track.form') }}" class="hover:text-white">{{ __('Track Order') }}</a>
-                <a href="{{ route('seller.apply') }}" class="hover:text-white">{{ __('Sell on iruali') }}</a>
+                @if($sellLinks)<a href="{{ route('seller.apply') }}" class="hover:text-white">{{ __('Sell on iruali') }}</a>@endif
                 <a href="{{ route('help') }}" class="hover:text-white">{{ __('Help centre') }}</a>
                 @if($contactPhone)
                     <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="hover:text-white" dir="ltr">{{ $contactPhone }}</a>
@@ -111,7 +113,7 @@
                                     <a href="{{ route('account.rewards') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Rewards') }}</a>
                                     <a href="{{ route('quotes.index') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Quote requests') }}</a>
                                     <a href="{{ route('account.wallet') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wallet') }}</a>
-                                    <a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>
+                                    @if(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) || $sellLinks)<a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>@endif
                                     @if(auth()->user()->isStaff())
                                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
                                     @endif
@@ -249,12 +251,12 @@
                     @auth<a href="{{ route('quotes.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Quote requests') }}</a>@endauth
                     <a href="{{ route('order.track.form') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Track Order') }}</a>
                     @auth
-                        <a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>
+                        @if(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) || $sellLinks)<a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>@endif
                         @if(auth()->user()->isStaff())
                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
                         @endif
                     @else
-                        <a href="{{ route('seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Sell on iruali') }}</a>
+                        @if($sellLinks)<a href="{{ route('seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Sell on iruali') }}</a>@endif
                     @endauth
                     <a href="{{ route('help') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Help centre') }}</a>
                 </div>
@@ -326,7 +328,7 @@
                 </form>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-10 grid grid-cols-2 lg:grid-cols-5 gap-8 text-sm">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-10 grid grid-cols-2 {{ $sellLinks ? 'lg:grid-cols-5' : 'lg:grid-cols-4' }} gap-8 text-sm">
             <div class="col-span-2 lg:col-span-1">
                 <img src="/images/brand/iruali-logo-reversed.svg" alt="iruali" width="141" height="36" class="h-9 w-auto mb-4">
                 <p class="text-white/70 mb-4">{{ __('Shops from every island, in one place. Buy from local sellers across the Maldives, delivered to your island.') }}</p>
@@ -372,11 +374,13 @@
                     <li><a href="{{ route('cart') }}" class="hover:text-white">{{ __('Cart') }}</a></li>
                 </ul>
             </div>
-            <div>
+            @if($sellLinks)
+            <div data-footer-sell>
                 <h3 class="font-semibold mb-3">{{ __('Sell on iruali') }}</h3>
                 <p class="text-white/70 mb-3">{{ __('Reach customers on every inhabited island.') }}</p>
                 <a href="{{ route('seller.apply') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sun text-sun-on font-semibold hover:bg-accent-400">{{ __('Open your shop') }}</a>
             </div>
+            @endif
         </div>
         <div class="border-t border-white/10">
             <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">

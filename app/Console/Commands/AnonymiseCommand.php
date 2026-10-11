@@ -50,6 +50,7 @@ class AnonymiseCommand extends Command
             'OTP rows truncated' => DB::table('otps')->count(),
             'shop owners\' ID card numbers replaced' => DB::table('seller_verifications')->count(),
             'shop staff invitation emails replaced' => DB::table('shop_staff_invitations')->count(),
+            'seller waiting list emails replaced' => DB::table('seller_waitlist')->count(),
             'business details (profiles, orders, quote requests) replaced' => DB::table('business_profiles')->count() + DB::table('orders')->whereNotNull('buyer_business_name')->count() + DB::table('quote_requests')->count(),
             'quote request messages replaced' => DB::table('quote_messages')->count(),
         ];
@@ -104,6 +105,12 @@ class AnonymiseCommand extends Command
         DB::table('newsletter_subscribers')->orderBy('id')->select('id')->chunkById(1000, function ($rows) {
             foreach ($rows as $row) {
                 DB::table('newsletter_subscribers')->where('id', $row->id)->update(['email' => "subscriber{$row->id}@example.test"]);
+            }
+        });
+        // People waiting for shop applications to reopen ("Tell me when you reopen")
+        DB::table('seller_waitlist')->orderBy('id')->select('id')->chunkById(1000, function ($rows) {
+            foreach ($rows as $row) {
+                DB::table('seller_waitlist')->where('id', $row->id)->update(['email' => "waiting{$row->id}@example.test"]);
             }
         });
 

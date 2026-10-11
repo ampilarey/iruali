@@ -138,6 +138,21 @@ rejects or suspends it. Onboarding steps, `/seller/profile` (logo, banner, descr
 notes, "ships to islands"), `/seller/settings/bank` (payout account, verified by an admin) and
 `/seller/settings/notifications`. Seller help guides at `/seller/help/{guide}`.
 
+**Pausing or hiding new shop applications.** **Admin → Sellers → New shop applications**
+(`admin.seller-applications`, admins only; `App\Support\SellerApplications`) has three choices.
+**Open** is the default. **Paused** keeps "Sell on iruali" on the site, but `/seller/apply` shows the
+admins' message (English and Dhivehi, up to 300 characters) instead of the form, with "Tell me when
+you reopen". **Hidden** also takes the "Sell on iruali" links off the top bar, the account and mobile
+menus, the footer, the home page's tile and call to action, and the help page's selling section; the
+address still shows the message. The page answers guests too, so nobody signs up only to find
+applications closed, and while paused or hidden the form is refused on the server. An optional
+reopening day opens applications at the start of that day (Maldives time); the hourly
+`sellers:applications-reopen` then stores "open" again. The waiting list (`seller_waitlist`: one row
+per email, in the visitor's language) gets one email each (`SellerApplicationsReopened`) when
+applications open, by that run or when an admin opens them. Shops already on iruali and applications
+already sent are never affected. Saving is in the audit log (`seller_applications.saved`), and
+`iruali:anonymise` replaces the waiting list's emails.
+
 **Staff.** An owner lets employees into the Seller Centre with their own sign-in under
 **Seller Centre → Staff** (`/seller/staff`, `seller.staff*`, the owner only): invite by email and role
 (a signed link that works for 7 days; with an account they sign in and accept, without one they make
@@ -380,7 +395,8 @@ nightly database backups to local and optional S3/B2 with a monthly restore dril
 (`backup:restore-drill`), queued mail sent every minute by a short-lived worker, expired tokens
 and failed jobs pruned, guest carts cleaned, the daily errors digest (`errors:digest`) and the
 seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts, and the
-late pre-orders check (`preorders:flag-late`).
+late pre-orders check (`preorders:flag-late`), and hourly the reopening of paused shop applications
+on their day (`sellers:applications-reopen`).
 
 **Staging data.** `php artisan iruali:anonymise --force` rewrites personal data on a copy of
 the production database before it is used on the test site.

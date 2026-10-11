@@ -4,26 +4,67 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\SellerWaitlist;
 use App\Models\User;
+use App\Services\SellerWaitlistService;
 use App\Support\CurrentShop;
+use App\Support\SellerApplications;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * "Sell on iruali": the application form, or, while new shop applications are paused or hidden
+ * (App\Support\SellerApplications), the admins' message with "Tell me when you reopen". The page
+ * answers guests too, so nobody signs up only to find applications closed.
+ */
 class ApplicationController extends Controller
 {
     public function create()
     {
         $user = Auth::user();
 
-        if ($user->hasRole('seller')) {
+        if ($user?->hasRole('seller')) {
             return redirect()->route('seller.dashboard');
         }
-        if ($staffOf = $this->staffOf($user)) {
+        if ($user && ($staffOf = $this->staffOf($user))) {
             return $staffOf;
+        }
+        if (! SellerApplications::open()) {
+            return view('seller.applications-closed', [
+                'user' => $user,
+                'message' => SellerApplications::message(),
+                'reopensOn' => SellerApplications::reopensOn(),
+                'onList' => $user?->email && SellerWaitlist::where('email', mb_strtolower($user->email))->waiting()->exists(),
+            ]);
+        }
+        if (! $user) {
+            return redirect()->guest(route('login'));
         }
 
         return view('seller.apply', compact('user'));
+    }
+
+    /**
+     * "Tell me when you reopen": signed-in people are told at their account's email, guests give one.
+     */
+    public function waitlist(Request $request, SellerWaitlistService $waitlist): RedirectResponse
+    {
+        if (SellerApplications::open()) {
+            return redirect()->route('seller.apply');
+        }
+
+        $user = Auth::user();
+        $data = $request->validate([
+            'email' => [$user?->email ? 'nullable' : 'required', 'email', 'max:190'],
+        ], [
+            'email.required' => __('Enter your email so we can tell you when applications reopen.'),
+        ]);
+        $email = $user?->email ?: $data['email'];
+        $waitlist->join($email, $user);
+
+        return redirect()->route('seller.apply')
+            ->with('success', __('Thank you. We will email :email when iruali takes new shops again.', ['email' => $email]));
     }
 
     public function store(Request $request)
@@ -35,6 +76,10 @@ class ApplicationController extends Controller
         }
         if ($staffOf = $this->staffOf($user)) {
             return $staffOf;
+        }
+        if (! SellerApplications::open()) {
+            return redirect()->route('seller.apply')
+                ->with('error', __('iruali is not taking new shops right now, so your application was not sent.'));
         }
 
         $validated = $request->validate([

@@ -262,8 +262,7 @@ class DemoDataService
             $skusBySeller[$shop->id] = $skus[$shop->email] ?? [];
         }
 
-        $admin = User::withTrashed()->where('email', DemoData::ADMIN_EMAIL)->get()
-            ->first(fn (User $user) => $user->email === DemoData::ADMIN_EMAIL);
+        $admin = $this->genericProductsOwner();
         $sellerIds = array_keys($skusBySeller);
         if ($admin) {
             $sellerIds[] = $admin->id;
@@ -283,6 +282,19 @@ class DemoDataService
                 return in_array($product->sku, $skusBySeller[$product->seller_id] ?? [], true);
             })
             ->values();
+    }
+
+    /**
+     * The account the generic demo products are listed under: admin@example.com, or that same account
+     * after its email was changed (DemoData::rememberRenamedAdmin()). Never any other admin.
+     */
+    protected function genericProductsOwner(): ?User
+    {
+        $admin = User::withTrashed()->where('email', DemoData::ADMIN_EMAIL)->get()
+            ->first(fn (User $user) => $user->email === DemoData::ADMIN_EMAIL);
+        $renamedId = (int) Setting::get(DemoData::ADMIN_ID_SETTING, 0);
+
+        return $admin ?? ($renamedId > 0 ? User::withTrashed()->find($renamedId) : null);
     }
 
     /**

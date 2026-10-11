@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\SavedItem;
+use App\Models\Setting;
 use App\Models\StockAlert;
 use App\Models\User;
 use App\Models\Wishlist;
@@ -21,6 +22,7 @@ use App\Support\DemoData;
 use App\Support\FeedToken;
 use Database\Seeders\MarketplaceDemoSeeder;
 use Database\Seeders\RemoveGenericDemoProductsSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
@@ -192,6 +194,39 @@ class DemoDataTest extends TestCase
         $this->assertNotSoftDeleted($ownSample);
         $this->assertTrue($notItsSku->fresh()->is_active);
         $this->assertSame('active', $islandCrafts->fresh()->status);
+    }
+
+    public function test_the_demo_admin_keeps_its_generic_products_after_getting_the_owners_email(): void
+    {
+        $demoAdmin = $this->withRole('admin', ['email' => DemoData::ADMIN_EMAIL]);
+        $generic = Product::factory()->create(['seller_id' => $demoAdmin->id, 'category_id' => $this->category->id, 'sku' => 'IPHONE15PRO']);
+        $otherAdmin = $this->withRole('admin', ['email' => 'staff@iruali.mv']);
+        $otherAdminsLookAlike = Product::factory()->create(['seller_id' => $otherAdmin->id, 'category_id' => $this->category->id, 'sku' => 'MACBOOKAIRM2']);
+
+        // The owner gives the demo admin account their own address (My Account or the console)
+        $demoAdmin->forceFill(['email' => 'admin@iruali.mv'])->save();
+        $this->assertSame($demoAdmin->id, (int) Setting::get(DemoData::ADMIN_ID_SETTING));
+        $otherAdmin->forceFill(['email' => 'team@iruali.mv'])->save();
+        $this->assertSame($demoAdmin->id, (int) Setting::get(DemoData::ADMIN_ID_SETTING), 'other accounts changing email do not move it');
+
+        // Its generic demo products are still sample data; another admin's look-alike never is
+        $this->assertSame(1, $this->demo()->remove()['products']);
+        $this->assertSoftDeleted($generic);
+        $this->assertNotSoftDeleted($otherAdminsLookAlike);
+        $this->demo()->restore();
+        $this->assertNotSoftDeleted($generic);
+    }
+
+    public function test_the_admin_seeder_never_adds_a_default_admin_beside_an_existing_one(): void
+    {
+        // $this->owner is an admin with an address of their own: no admin@example.com with the default password
+        $this->seed(UserSeeder::class);
+        $this->assertNull(User::where('email', DemoData::ADMIN_EMAIL)->first());
+
+        // A site without any admin still gets its first one
+        $this->owner->roles()->detach();
+        $this->seed(UserSeeder::class);
+        $this->assertTrue(User::where('email', DemoData::ADMIN_EMAIL)->sole()->hasRole('admin'));
     }
 
     public function test_restore_puts_back_exactly_what_remove_took_off(): void

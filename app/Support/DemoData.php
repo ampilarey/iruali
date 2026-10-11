@@ -12,12 +12,16 @@ namespace App\Support;
  *   exact SKU under that shop's own account (MarketplaceDemoSeeder);
  * - the early generic demo products (iPhone, MacBook, Nike…), matched by exact SKU or exact English
  *   name, and only when they are listed under the admin@example.com account
- *   (RemoveGenericDemoProductsSeeder).
+ *   (RemoveGenericDemoProductsSeeder), or under that same account after its email was changed to the
+ *   owner's own (remembered by id, see rememberRenamedAdmin()).
  */
 final class DemoData
 {
     /** The account the early generic demo products were listed under. */
     public const ADMIN_EMAIL = 'admin@example.com';
+
+    /** Setting that remembers that account's id once its email has been changed. */
+    public const ADMIN_ID_SETTING = 'sample_data_admin_id';
 
     /** SKUs of the early generic demo products. */
     public const GENERIC_SKUS = [
@@ -122,6 +126,18 @@ final class DemoData
      *
      * @return list<string>
      */
+    /**
+     * When the admin@example.com account gets another email (the owner's own, through My Account or
+     * the console), remember its id, so Admin → Sample data still finds the generic demo products
+     * listed under it. Called whenever a user is updated (AppServiceProvider).
+     */
+    public static function rememberRenamedAdmin(\App\Models\User $user): void
+    {
+        if ($user->wasChanged('email') && $user->getOriginal('email') === self::ADMIN_EMAIL) {
+            \App\Models\Setting::set([self::ADMIN_ID_SETTING => $user->id]);
+        }
+    }
+
     public static function shopEmails(): array
     {
         return array_column(self::SHOPS, 'email');

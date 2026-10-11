@@ -261,8 +261,9 @@ confirm. **Restore sample data** puts back exactly what was removed (products, e
 previous status, anything switched off with the shops, campaign entries). Orders that contain
 sample products keep working (order pages, receipts, payouts). Only the rows listed in
 `App\Support\DemoData`, which the demo seeders also read, are touched (the generic demo products
-under admin@example.com, or under that account after its email was changed: its id is remembered
-in the `sample_data_admin_id` setting, never another admin's); where the seeders never ran
+under the admin@example.com admin, or under that account after its email was changed: its id is
+remembered in the `sample_data_admin_id` setting; never another admin's, nor those of someone who
+later signs up with the freed address); where the seeders never ran
 (production) the page says there is nothing to remove. On the server: `php artisan demo:remove`
 and `php artisan demo:restore` (`--force` skips the question). Both show in the audit log. Bring
 removed sample data back with Restore, not by re-running the demo seeder: it cannot re-create

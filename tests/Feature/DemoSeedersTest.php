@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\MarketplaceDemoSeeder;
 use Database\Seeders\RemoveGenericDemoProductsSeeder;
@@ -26,6 +27,7 @@ class DemoSeedersTest extends TestCase
     public function test_cleanup_only_removes_old_demo_products_owned_by_admin(): void
     {
         $admin = User::factory()->create(['email' => 'admin@example.com']);
+        $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
         $seller = User::factory()->create();
 
         $oldDemo = Product::factory()->create(['seller_id' => $admin->id, 'sku' => 'IPHONE15PRO']);

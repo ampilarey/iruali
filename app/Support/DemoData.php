@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Models\Setting;
+use App\Models\User;
+
 /**
  * The sample (demo) data the test site was filled with, in one place. The demo seeders create it
  * from these lists and Admin → Sample data (App\Services\DemoDataService) removes and restores
@@ -11,9 +14,8 @@ namespace App\Support;
  * - the six demo shops, matched by their exact email, and the products each one lists, matched by
  *   exact SKU under that shop's own account (MarketplaceDemoSeeder);
  * - the early generic demo products (iPhone, MacBook, Nike…), matched by exact SKU or exact English
- *   name, and only when they are listed under the admin@example.com account
- *   (RemoveGenericDemoProductsSeeder), or under that same account after its email was changed to the
- *   owner's own (remembered by id, see rememberRenamedAdmin()).
+ *   name, and only when they are listed under the admin@example.com admin account, or under that same
+ *   account after its email was changed to the owner's own (see genericProductsOwner()).
  */
 final class DemoData
 {
@@ -126,18 +128,6 @@ final class DemoData
      *
      * @return list<string>
      */
-    /**
-     * When the admin@example.com account gets another email (the owner's own, through My Account or
-     * the console), remember its id, so Admin → Sample data still finds the generic demo products
-     * listed under it. Called whenever a user is updated (AppServiceProvider).
-     */
-    public static function rememberRenamedAdmin(\App\Models\User $user): void
-    {
-        if ($user->wasChanged('email') && $user->getOriginal('email') === self::ADMIN_EMAIL) {
-            \App\Models\Setting::set([self::ADMIN_ID_SETTING => $user->id]);
-        }
-    }
-
     public static function shopEmails(): array
     {
         return array_column(self::SHOPS, 'email');
@@ -156,5 +146,32 @@ final class DemoData
         }
 
         return $skus;
+    }
+
+    /**
+     * The account the generic demo products are listed under: the admin@example.com admin, or that
+     * same account after it was given another email (remembered by rememberRenamedAdmin()). Never
+     * another admin, nor someone who later signs up with the freed address.
+     */
+    public static function genericProductsOwner(): ?User
+    {
+        $renamedId = (int) Setting::get(self::ADMIN_ID_SETTING, 0);
+        $renamed = $renamedId > 0 ? User::withTrashed()->find($renamedId) : null;
+
+        // Emails compare without regard to case in MySQL; only the exact address counts
+        return $renamed ?? User::withTrashed()->where('email', self::ADMIN_EMAIL)->get()
+            ->first(fn (User $user) => $user->email === self::ADMIN_EMAIL && $user->isAdmin());
+    }
+
+    /**
+     * When the admin@example.com admin gets another email (the owner's own, through My Account or the
+     * console), remember its id, so Admin → Sample data still finds the generic demo products listed
+     * under it. Called whenever a user is updated (AppServiceProvider).
+     */
+    public static function rememberRenamedAdmin(User $user): void
+    {
+        if ($user->wasChanged('email') && $user->getOriginal('email') === self::ADMIN_EMAIL && $user->isAdmin()) {
+            Setting::set([self::ADMIN_ID_SETTING => $user->id]);
+        }
     }
 }

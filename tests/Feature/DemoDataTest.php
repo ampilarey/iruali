@@ -209,12 +209,27 @@ class DemoDataTest extends TestCase
         $otherAdmin->forceFill(['email' => 'team@iruali.mv'])->save();
         $this->assertSame($demoAdmin->id, (int) Setting::get(DemoData::ADMIN_ID_SETTING), 'other accounts changing email do not move it');
 
-        // Its generic demo products are still sample data; another admin's look-alike never is
+        // Someone signs up with the freed address and lists a look-alike
+        $newcomer = User::factory()->create(['email' => DemoData::ADMIN_EMAIL]);
+        $newcomersLookAlike = Product::factory()->create(['seller_id' => $newcomer->id, 'category_id' => $this->category->id, 'sku' => 'NIKEAIRMAX270']);
+
+        // Its generic demo products are still sample data; other accounts' look-alikes never are
         $this->assertSame(1, $this->demo()->remove()['products']);
         $this->assertSoftDeleted($generic);
         $this->assertNotSoftDeleted($otherAdminsLookAlike);
+        $this->assertNotSoftDeleted($newcomersLookAlike);
         $this->demo()->restore();
         $this->assertNotSoftDeleted($generic);
+
+        // The newcomer is no admin: changing their address does not move it either
+        $newcomer->forceFill(['email' => 'newcomer@example.mv'])->save();
+        $this->assertSame($demoAdmin->id, (int) Setting::get(DemoData::ADMIN_ID_SETTING));
+
+        // Renamed before the id was remembered: the newcomer with the old address still owns no sample data
+        Setting::set([DemoData::ADMIN_ID_SETTING => 0]);
+        $newcomer->forceFill(['email' => DemoData::ADMIN_EMAIL])->save();
+        $this->assertSame(0, $this->demo()->remove()['products']);
+        $this->assertNotSoftDeleted($newcomersLookAlike);
     }
 
     public function test_the_admin_seeder_never_adds_a_default_admin_beside_an_existing_one(): void

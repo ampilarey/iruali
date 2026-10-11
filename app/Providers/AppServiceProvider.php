@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
         // A guest's cart follows them into their account when they sign in
         \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, fn ($event) => app(CartService::class)->mergeGuestCart($event->user));
         // Admin → Sample data keeps finding the generic demo products when admin@example.com is renamed
-        \App\Models\User::updated(fn (\App\Models\User $user) => \App\Support\DemoData::rememberRenamedAdmin($user));
+        User::updated(fn (User $user) => \App\Support\DemoData::rememberRenamedAdmin($user));
 
         // Dhivehi storefront URLs carry a /dv prefix (routes/web.php group + LocalePrefix middleware)
         \App\Support\LocaleUrl::register();

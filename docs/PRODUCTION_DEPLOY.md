@@ -32,6 +32,11 @@ bash ~/deploy-tools/deploy-production.sh main ~/iruali ~/public_html
 SH
 ```
 
+The deploy confirms the new code is live by reading the commit from `/api/health`. If the
+site keeps that private (`HEALTH_DETAIL_TOKEN` set), the script sends the same token from `.env`
+as `X-Health-Token`; with no token it checks that the site answers healthy, warns, and relies on
+the smoke test.
+
 Release tags (below) still work and can come back later: `deploy-production.sh <tag>` or
 `--latest-tag`.
 

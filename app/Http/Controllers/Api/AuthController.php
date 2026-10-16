@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\AuthUserResource;
 use App\Models\User;
+use App\Support\ApiToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends BaseController
 {
@@ -45,25 +47,14 @@ class AuthController extends BaseController
             return $this->sendForbidden('Two-step sign-in is on for this account. Please sign in on the website.');
         }
 
-        $token = $user->createToken('mobile', [
-            'order:read',
-            'cart:write',
-            'wishlist:write',
-            'profile:read',
-            'profile:write',
-        ])->plainTextToken;
+        $abilities = ApiToken::forUser($user);
+        $token = $user->createToken('mobile', $abilities)->plainTextToken;
 
         return $this->sendResponse([
             'user' => new AuthUserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
-            'abilities' => [
-                'order:read',
-                'cart:write',
-                'wishlist:write',
-                'profile:read',
-                'profile:write',
-            ],
+            'abilities' => $abilities,
         ], 'Login successful');
     }
 
@@ -75,7 +66,7 @@ class AuthController extends BaseController
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'phone' => 'nullable|string|max:20',
         ]);
 
@@ -83,7 +74,7 @@ class AuthController extends BaseController
             return $this->sendValidationError($validator->errors());
         }
 
-        $user = User::create([
+        $user = User::forceCreate([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -97,12 +88,14 @@ class AuthController extends BaseController
             $user->roles()->attach($customerRole->id);
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $abilities = ApiToken::forUser($user);
+        $token = $user->createToken('mobile', $abilities)->plainTextToken;
 
         return $this->sendResponse([
             'user' => new AuthUserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
+            'abilities' => $abilities,
         ], 'Registration successful', 201);
     }
 

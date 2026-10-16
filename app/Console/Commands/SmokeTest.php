@@ -142,7 +142,7 @@ class SmokeTest extends Command
         }
 
         $user = User::firstOrNew(['email' => $email]);
-        $user->fill([
+        $user->forceFill([
             'name' => 'Smoke Test',
             'password' => Hash::make($password),
             'is_active' => true,

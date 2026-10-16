@@ -278,7 +278,7 @@ class MultiBuyOffersTest extends TestCase
     {
         $product = $this->productOf($this->shop, 50);
         $this->offerFor($this->shop, [['min_qty' => 2, 'percent' => 10]], [$product]);
-        \Laravel\Sanctum\Sanctum::actingAs($this->customer);
+        \Laravel\Sanctum\Sanctum::actingAs($this->customer, ['*']);
 
         $this->postJson('/api/v1/cart/add', ['product_id' => $product->id, 'quantity' => 2])->assertCreated()
             ->assertJsonPath('data.subtotal', 100)

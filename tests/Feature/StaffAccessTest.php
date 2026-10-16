@@ -179,6 +179,25 @@ class StaffAccessTest extends TestCase
             $this->actingAs($staff)->post(route('admin.orders.refund-wallet', $order))->assertForbidden();
         }
         $this->actingAs($support)->get(route('admin.orders.show', $order))->assertOk()->assertDontSee('Refund to wallet');
+
+        // Confirming a payment and recording a card refund are not support work. Finance records the refund.
+        $payable = Order::factory()->create([
+            'status' => 'pending',
+            'payment_method' => 'bank_transfer',
+            'payment_status' => 'unpaid',
+            'refund_status' => 'due',
+            'refund_amount' => 10,
+            'refund_reason' => 'Cancelled',
+        ]);
+        $this->actingAs($support)->post(route('admin.orders.payment', $payable), ['action' => 'confirm'])->assertForbidden();
+        $this->actingAs($support)->post(route('admin.orders.refunded', $payable), ['refund_reference' => 'R1'])->assertForbidden();
+        $this->actingAs($finance)->post(route('admin.orders.payment', $payable), ['action' => 'confirm'])->assertForbidden();
+        $this->actingAs($support)->get(route('admin.orders.show', $payable))->assertOk()
+            ->assertDontSee('Confirm payment')
+            ->assertDontSee('Mark as refunded');
+        $this->actingAs($finance)->get(route('admin.orders.show', $payable))->assertOk()
+            ->assertDontSee('Confirm payment')
+            ->assertSee('Mark as refunded');
     }
 
     public function test_admin_sees_everything_and_customers_nothing(): void

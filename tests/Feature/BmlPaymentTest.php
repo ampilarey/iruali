@@ -190,17 +190,43 @@ class BmlPaymentTest extends TestCase
         $this->checkout();
         $order = Order::sole();
 
+        $stale = (string) (time() - 3600);
         $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
-            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => '1700000000', 'X-Signature' => 'forged',
+            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => $stale,
+            'X-Signature' => hash('sha256', 'n1'.$stale.'test-key'),
+        ])->assertForbidden();
+
+        $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
+            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => (string) time(), 'X-Signature' => 'forged',
         ])->assertForbidden();
         $this->assertSame('unpaid', $order->fresh()->payment_status);
 
+        $timestamp = (string) time();
         $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
-            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => '1700000000',
-            'X-Signature' => hash('sha256', 'n1'.'1700000000'.'test-key'),
+            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => $timestamp,
+            'X-Signature' => hash('sha256', 'n1'.$timestamp.'test-key'),
         ])->assertOk();
 
         $this->assertSame('paid', $order->fresh()->payment_status);
+    }
+
+    public function test_a_stranger_return_syncs_payment_without_showing_the_order(): void
+    {
+        $this->fakeBml('CONFIRMED');
+        $this->checkout();
+        $order = Order::sole();
+
+        // The checkout request left the payer on the guard and the return flag in the
+        // shared test session. A stranger has neither.
+        $this->actingAsGuest();
+        $this->app['session']->driver()->flush();
+
+        $this->get(route('payments.bml.return', $order).'?transactionId=txn_123')
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('info');
+
+        $this->assertSame('paid', $order->fresh()->payment_status);
+        $this->assertGuest();
     }
 
     public function test_webhook_signed_with_the_portal_secret_is_accepted(): void

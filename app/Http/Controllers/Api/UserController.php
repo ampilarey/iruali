@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends BaseController
 {
@@ -58,7 +60,7 @@ class UserController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
+            'new_password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
         if ($validator->fails()) {
@@ -72,10 +74,16 @@ class UserController extends BaseController
             return $this->sendError('Current password is incorrect');
         }
 
-        // Update password
-        $user->update([
+        $user->forceFill([
             'password' => Hash::make($request->new_password),
-        ]);
+        ])->save();
+
+        $current = $user->currentAccessToken();
+        if ($current instanceof PersonalAccessToken) {
+            $user->tokens()->whereKeyNot($current->id)->delete();
+        } else {
+            $user->tokens()->delete();
+        }
 
         return $this->sendResponse([], 'Password changed successfully');
     }

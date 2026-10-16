@@ -83,7 +83,7 @@ class WishlistPriceDropsTest extends TestCase
 
         $this->actingAs($customer)->post(route('wishlist.add', $plain), ['product_id' => $plain->id])->assertRedirect(route('wishlist'));
         $this->post(route('wishlist.add', $markedDown), ['product_id' => $markedDown->id]);
-        \Laravel\Sanctum\Sanctum::actingAs($customer);
+        \Laravel\Sanctum\Sanctum::actingAs($customer, ['*']);
         $this->postJson('/api/v1/wishlist/add', ['product_id' => $inCampaign->id])->assertOk();
 
         $this->assertSame('200.00', Wishlist::where('product_id', $plain->id)->value('saved_price'));

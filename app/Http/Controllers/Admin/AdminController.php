@@ -84,12 +84,12 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $seller = User::findOrFail($id);
-        $seller->update([
+        $seller->forceFill([
             'status' => 'active',
             'is_seller' => true,
             'seller_approved' => true,
             'seller_approved_at' => now(),
-        ]);
+        ])->save();
         \App\Support\Audit::record('seller.approved', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller approved successfully.');
@@ -104,11 +104,11 @@ class AdminController extends Controller
         if ($sellerRole) {
             $seller->roles()->detach($sellerRole->id);
         }
-        $seller->update([
+        $seller->forceFill([
             'is_seller' => false,
             'seller_approved' => false,
             'seller_approved_at' => null,
-        ]);
+        ])->save();
         \App\Support\Audit::record('seller.rejected', $seller, ['business_name' => $seller->business_name]);
 
         return redirect()->back()->with('success', 'Seller application rejected.');

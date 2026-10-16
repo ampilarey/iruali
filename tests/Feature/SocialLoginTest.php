@@ -316,7 +316,7 @@ class SocialLoginTest extends TestCase
         $this->assertGuest();
 
         $banned->unban();
-        $banned->update(['is_active' => false]);
+        $banned->forceFill(['is_active' => false])->save();
         $this->signInWithGoogle()->assertSessionHasErrors(['social' => 'Your account is currently inactive.']);
         $this->assertGuest();
 

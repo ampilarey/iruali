@@ -384,7 +384,7 @@ class DemoDataTest extends TestCase
         $this->assertDatabaseMissing('cart_items', ['product_id' => $sample->id]);
         $this->assertDatabaseMissing('wishlists', ['product_id' => $sample->id]);
 
-        Sanctum::actingAs($customer);
+        Sanctum::actingAs($customer, ['*']);
         $this->postJson('/api/v1/wishlist/add', ['product_id' => $sample->id])->assertStatus(422);
         $this->getJson('/api/v1/wishlist')->assertOk()->assertJsonPath('data.total_items', 1)->assertJsonPath('data.items.0.product.id', $real->id);
     }

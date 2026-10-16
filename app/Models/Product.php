@@ -413,10 +413,11 @@ class Product extends Model
 
     /**
      * Approved by an admin at some point: the shop may switch it off and on without re-approval.
+     * Visibility (is_active) is separate; an active product that was never approved is not approved.
      */
     public function isApproved(): bool
     {
-        return $this->approved_at !== null || $this->is_active;
+        return $this->approved_at !== null;
     }
 
     // ---- Variants -------------------------------------------------------------------------

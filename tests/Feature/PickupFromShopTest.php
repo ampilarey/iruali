@@ -400,7 +400,7 @@ class PickupFromShopTest extends TestCase
     public function test_the_api_always_delivers(): void
     {
         $this->cartFor($this->customer, [[$this->product($this->pickupShop, 100, 20), 1]]);
-        \Laravel\Sanctum\Sanctum::actingAs($this->customer);
+        \Laravel\Sanctum\Sanctum::actingAs($this->customer, ['*']);
 
         $this->postJson('/api/v1/orders', [
             'shipping_address' => 'H. Blue Villa', 'shipping_city' => 'Malé', 'shipping_state' => 'Kaafu', 'shipping_country' => 'Maldives',

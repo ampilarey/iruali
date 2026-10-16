@@ -151,19 +151,32 @@ app_url() {
   grep -E '^APP_URL=' "$ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"
 }
 
-# Health endpoint must answer and report the running commit, then the smoke test must pass.
+# HEALTH_DETAIL_TOKEN from .env (empty when unset): sent as X-Health-Token, a site that keeps the
+# deploy commit private still tells this script which commit it runs.
+health_token() {
+  grep -E '^HEALTH_DETAIL_TOKEN=' "$ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"
+}
+
+# Health endpoint must answer healthy and, when it reports one, the running commit; then the smoke
+# test must pass. A site that hides the commit (no or another HEALTH_DETAIL_TOKEN) only warns.
 verify_site() {
-  local url expected health
+  local url expected health token
   url="$(app_url)"
   expected="$(git -C "$ROOT" rev-parse --short=7 HEAD)"
   if [[ -z "$url" ]]; then
     say "WARN: APP_URL not set in .env; skipping the health check and smoke test"
     return 0
   fi
+  token="$(health_token)"
   sleep 2
-  health=$(curl -fsS -m 20 "$url/api/health" 2>&1) || { say "health check $url/api/health failed: $health"; return 1; }
+  health=$(curl -fsS -m 20 ${token:+-H "X-Health-Token: $token"} "$url/api/health" 2>&1) || { say "health check $url/api/health failed: $health"; return 1; }
   say "health: $health"
-  echo "$health" | grep -q "\"commit\":\"${expected}" || { say "health reports a different commit than ${expected}"; return 1; }
+  echo "$health" | grep -q '"status":"healthy"' || { say "health does not say healthy"; return 1; }
+  if echo "$health" | grep -q '"commit":'; then
+    echo "$health" | grep -q "\"commit\":\"${expected}" || { say "health reports a different commit than ${expected}"; return 1; }
+  else
+    say "WARN: health does not report the commit (set HEALTH_DETAIL_TOKEN in .env to check it); going on with the smoke test"
+  fi
 
   local smoke=(php artisan iruali:smoke "--base-url=$url")
   if grep -qE '^SMOKE_USER_EMAIL=.+' "$ROOT/.env" 2>/dev/null; then

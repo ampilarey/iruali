@@ -445,4 +445,23 @@ class ShoppingIslandTest extends TestCase
         // On the shop's own island there is nothing to flag
         $this->actingAs($customer)->shoppingFor('gnaviyani-fuvahmulah')->get('/cart')->assertOk()->assertDontSee('data-island-cart-notice', false);
     }
+
+    public function test_villingili_in_gaafu_alif_is_not_greater_male(): void
+    {
+        $south = $this->isl('gaafu-alif-villingili');
+        $delivery = app(\App\Services\DeliveryService::class);
+
+        $this->assertFalse($south->isGreaterMale());
+        $this->assertSame('islands', $delivery->zoneForIsland($south));
+        $this->assertSame('islands', $delivery->zoneFor(null, 'Villingili', 'Gaafu Alif'));
+        $this->assertSame('greater_male', $delivery->zoneFor(null, 'Villingili', 'Kaafu'));
+        $this->assertTrue($this->isl('kaafu-male')->isGreaterMale());
+
+        // A "home island and Greater Malé" shop does not reach it
+        $this->assertFalse(app(ShopCoverage::class)->canDeliverTo($this->addushop, $south));
+        // The island dialog doesn't offer it as a Greater Malé quick pick
+        $islands = collect($this->getJson(route('delivery.island.show'))->assertOk()->json('atolls'))->pluck('islands')->flatten(1);
+        $this->assertFalse($islands->firstWhere('id', $south->id)['greater_male']);
+        $this->assertSame(['Hulhumalé', 'Malé', 'Villimalé'], $islands->where('greater_male', true)->pluck('name_en')->sort()->values()->all());
+    }
 }

@@ -43,26 +43,68 @@
                 .catch(function () { choosing = false; });
         }
 
+        function islandButton(island, group, data, extra) {
+            var b = el('button', 'rounded-lg border border-gray-200 px-2 py-1.5 text-start hover:border-primary hover:bg-primary-50' + (extra ? ' ' + extra : ''));
+            b.type = 'button';
+            b.dataset.search = [island.name_en, island.name_dv, group.atoll, group.atoll_dv].join(' ').toLowerCase();
+            b.appendChild(el('span', 'block font-medium text-dark', island.name));
+            if (data.island && data.island.id === island.id) b.classList.add('border-primary', 'bg-primary-50');
+            b.addEventListener('click', function () { choose(island.id); });
+            return b;
+        }
+
+        // Greater Malé first, as quick picks (most shops are there); then every atoll as a row that
+        // opens to show its islands. The atoll of the current island starts open; searching opens
+        // every atoll with a match.
         function render(data) {
             list.innerHTML = '';
-            (data.atolls || []).forEach(function (group) {
-                var box = el('div', 'mb-3');
+            var groups = data.atolls || [];
+            var male = [];
+            groups.forEach(function (group) {
+                group.islands.forEach(function (island) { if (island.greater_male) male.push({ island: island, group: group }); });
+            });
+            if (male.length) {
+                var quick = el('div', 'mb-3');
+                quick.dataset.quick = '1';
+                quick.appendChild(el('p', 'mb-1 text-xs font-bold uppercase tracking-wide text-gray-500', dialog.dataset.textGreaterMale));
+                var row = el('div', 'grid grid-cols-3 gap-1');
+                male.forEach(function (m) { row.appendChild(islandButton(m.island, m.group, data, 'text-center')); });
+                quick.appendChild(row);
+                list.appendChild(quick);
+            }
+
+            var atolls = el('div', 'divide-y divide-gray-100 rounded-xl border border-gray-200');
+            groups.forEach(function (group) {
+                var box = el('details', 'group');
                 box.dataset.group = '1';
-                box.appendChild(el('p', 'mb-1 text-xs font-bold uppercase tracking-wide text-gray-500', dv && group.atoll_dv ? group.atoll_dv + ' · ' + group.atoll : group.atoll));
-                var grid = el('div', 'grid grid-cols-2 gap-1');
+                var summary = el('summary', 'flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 hover:bg-gray-50 [&::-webkit-details-marker]:hidden');
+                var name = el('span', 'min-w-0');
+                name.appendChild(el('span', 'font-semibold text-dark', dv && group.atoll_dv ? group.atoll_dv : group.atoll));
+                if (dv && group.atoll_dv) name.appendChild(el('span', 'ms-1 text-xs text-gray-500', group.atoll));
+                summary.appendChild(name);
+                var meta = el('span', 'flex shrink-0 items-center gap-2 text-xs text-gray-500');
+                meta.appendChild(el('span', '', String(group.islands.length)));
+                // Points along the reading direction while closed, down when open
+                meta.appendChild(el('span', 'inline-block transition-transform group-open:rotate-90 rtl:group-open:-rotate-90', document.documentElement.dir === 'rtl' ? '‹' : '›'));
+                summary.appendChild(meta);
+                box.appendChild(summary);
+                var grid = el('div', 'grid grid-cols-2 gap-1 px-3 pb-3');
+                var current = false;
                 group.islands.forEach(function (island) {
-                    var b = el('button', 'rounded-lg border border-gray-200 px-2 py-1.5 text-start hover:border-primary hover:bg-primary-50');
-                    b.type = 'button';
-                    b.dataset.search = [island.name_en, island.name_dv, group.atoll, group.atoll_dv].join(' ').toLowerCase();
-                    b.appendChild(el('span', 'block font-medium text-dark', island.name));
-                    if (island.greater_male) b.appendChild(el('span', 'block text-[11px] text-gray-500', dialog.dataset.textGreaterMale));
-                    if (data.island && data.island.id === island.id) b.classList.add('border-primary', 'bg-primary-50');
-                    b.addEventListener('click', function () { choose(island.id); });
-                    grid.appendChild(b);
+                    grid.appendChild(islandButton(island, group, data));
+                    if (data.island && data.island.id === island.id) current = true;
                 });
                 box.appendChild(grid);
-                list.appendChild(box);
+                if (current) { box.open = true; box.dataset.current = '1'; }
+                // One atoll open at a time (unless searching), brought into view when opened
+                box.addEventListener('toggle', function () {
+                    if (!box.open || (search.value || '').trim()) return;
+                    atolls.querySelectorAll('details[open]').forEach(function (other) { if (other !== box) other.open = false; });
+                    box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                });
+                atolls.appendChild(box);
             });
+            list.appendChild(atolls);
             filter();
         }
 
@@ -77,8 +119,12 @@
                     if (hit) visible++;
                 });
                 group.hidden = visible === 0;
+                // Searching opens the atolls with a match; clearing it closes them again
+                group.open = q ? visible > 0 : group.dataset.current === '1';
                 if (visible) any = true;
             });
+            var quick = list.querySelector('[data-quick]');
+            if (quick) quick.hidden = !!q;
             var none = list.querySelector('[data-none]');
             if (!any && !none) { none = el('p', 'text-gray-500', dialog.dataset.textNoMatch); none.dataset.none = '1'; list.appendChild(none); }
             if (none) none.hidden = any;
@@ -91,7 +137,8 @@
                 fetch(dialog.dataset.listUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
                     .then(function (r) { return r.json(); }).then(render).catch(function () { loaded = false; });
             }
-            setTimeout(function () { search.focus(); }, 50);
+            // On a phone the keyboard would cover the list: focus the search only with a mouse
+            if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) setTimeout(function () { search.focus(); }, 50);
         }
 
         // Closing without choosing: everything stays shown, and the dialog does not open by itself again

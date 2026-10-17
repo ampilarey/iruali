@@ -156,5 +156,6 @@ class ErrorTracker
         }
 
         Mail::to($to)->send(new PaymentErrorAlert($event));
+        TeamAlerts::send('payment_error', 'iruali: payment error: '.$event->shortClass().': '.\Illuminate\Support\Str::limit($event->message, 120), route('admin.errors.show', $event));
     }
 }

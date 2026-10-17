@@ -20,7 +20,7 @@ class SmsTestCommand extends Command
     {
         $message = (string) ($this->option('message') ?: 'iruali SMS test: if you can read this, text messages work.');
 
-        $this->line('Driver: '.$sms->driverName().($sms->isLive() ? ' ('.config('sms.http.url').')' : ' (nothing leaves the server; set SMS_DRIVER=http)'));
+        $this->line('Driver: '.$sms->driverName().($sms->isLive() ? ' ('.($sms->driverName() === 'dhiraagu' ? config('sms.dhiraagu.url') : config('sms.http.url')).')' : ' (nothing leaves the server; set SMS_DRIVER=dhiraagu or http)'));
         $result = $sms->send((string) $this->argument('number'), $message, 'test', urgent: true);
 
         $this->line('Status: '.$result->status);

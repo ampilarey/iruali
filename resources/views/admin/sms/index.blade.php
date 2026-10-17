@@ -171,9 +171,9 @@
         {{-- Gateway and a free-text test --}}
         <x-admin.fold title="Gateway and test" body="text-sm space-y-3">
             @if($live)
-                <p class="text-green-800">Driver <code class="rounded bg-gray-100 px-1">{{ $driver }}</code>: messages are sent through <span class="break-all">{{ config('sms.http.url') }}</span>.</p>
+                <p class="text-green-800">Driver <code class="rounded bg-gray-100 px-1">{{ $driver }}</code>: messages are sent through <span class="break-all">{{ $driver === 'dhiraagu' ? 'Dhiraagu Bulk SMS ('.config('sms.dhiraagu.url').')' : config('sms.http.url') }}</span>.</p>
             @else
-                <p class="text-amber-800">Driver <code class="rounded bg-gray-100 px-1">log</code>: nothing is sent. Messages are written to the log and listed here. Set <code>SMS_DRIVER=http</code> with <code>SMS_URL</code>, <code>SMS_METHOD</code>, <code>SMS_AUTH_HEADER</code>, <code>SMS_BODY_TEMPLATE</code>, <code>SMS_SENDER_ID</code> and <code>SMS_SUCCESS_REGEX</code> in <code>.env</code> to connect a Dhiraagu / Ooredoo bulk-SMS account (see config/sms.php).</p>
+                <p class="text-amber-800">Driver <code class="rounded bg-gray-100 px-1">log</code>: nothing is sent. Messages are written to the log and listed here. For Dhiraagu set <code>SMS_DRIVER=dhiraagu</code>, <code>SMS_DHIRAAGU_USERNAME</code> and <code>SMS_DHIRAAGU_PASSWORD</code> in <code>.env</code>; for another gateway set <code>SMS_DRIVER=http</code> with <code>SMS_URL</code>, <code>SMS_METHOD</code>, <code>SMS_AUTH_HEADER</code>, <code>SMS_BODY_TEMPLATE</code>, <code>SMS_SENDER_ID</code> and <code>SMS_SUCCESS_REGEX</code> in <code>.env</code> to connect a Dhiraagu / Ooredoo bulk-SMS account (see config/sms.php).</p>
             @endif
             <form method="POST" action="{{ route('admin.sms.test') }}" class="space-y-3">
                 @csrf
@@ -207,6 +207,7 @@
                         <option value="">All</option>
                         @foreach($types as $key => $type)<option value="{{ $key }}" @selected(($filters['type'] ?? '') === $key)>{{ $type['label'] }}</option>@endforeach
                         <option value="test" @selected(($filters['type'] ?? '') === 'test')>Tests</option>
+                        <option value="team_alert" @selected(($filters['type'] ?? '') === 'team_alert')>Team alerts</option>
                     </select>
                 </div>
                 <div>
@@ -223,7 +224,7 @@
                             <span class="flex flex-wrap items-center gap-2">
                                 <span class="font-medium text-gray-900" dir="ltr">{{ $m->to }}</span>
                                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $m->status_badge }}">{{ $statusLabels[$m->status] ?? $m->status }}</span>
-                                @if($m->type)<span class="text-xs text-gray-500">{{ $types[$m->type]['label'] ?? ($m->type === 'test' ? 'Test' : $m->type) }}</span>@endif
+                                @if($m->type)<span class="text-xs text-gray-500">{{ $types[$m->type]['label'] ?? (['test' => 'Test', 'team_alert' => 'Team alert'][$m->type] ?? $m->type) }}</span>@endif
                             </span>
                             <span class="text-xs text-gray-500">{{ $m->created_at?->format('d M, H:i') }}@if($m->status === 'held' && $m->send_after) · goes {{ $m->send_after->format('d M, H:i') }}@endif</span>
                         </div>

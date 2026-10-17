@@ -55,6 +55,8 @@ class ProductController extends Controller
                 ->with('success', __('Product published. It is live in the shop now.'));
         }
 
+        \App\Support\TeamAlerts::send('product_review', 'iruali: new product to review: '.$product->getTranslation('name', 'en', false).' ('.CurrentShop::get()->shopName().').', route('admin.products'));
+
         return redirect()->route('seller.products.index')
             ->with('success', 'Product submitted. It will be visible in the shop once an admin approves it.');
     }
@@ -88,6 +90,9 @@ class ProductController extends Controller
         // An approved product of a shop that is not trusted: stock now, the rest waits for an admin
         if ($review->needsReview($product)) {
             $change = $review->submitForm($product, $form, $request->user());
+            if ($change) {
+                \App\Support\TeamAlerts::send('product_review', 'iruali: product change to review: '.$product->getTranslation('name', 'en', false).' ('.$product->seller?->shopName().').', route('admin.product-changes.show', $change));
+            }
 
             return redirect()->route('seller.products.index')->with('success', $change
                 ? __('Saved. Your changes are waiting for review; shoppers see the current version until an admin approves them. Stock changes are live now.')

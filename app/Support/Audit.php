@@ -68,6 +68,7 @@ class Audit
         'settings.staff_two_factor' => 'Admin staff two-step sign-in rule changed',
         'sms.settings_saved' => 'SMS switches and limits changed',
         'sms.type_saved' => 'SMS message switched or reworded',
+        'settings.team_alerts' => 'Team alerts changed',
         'shop.staff_action' => 'Change made by shop staff',
         'preorder.stock_arrived' => 'Pre-order stock arrived',
         'preorder.date_moved' => 'Pre-order date moved',

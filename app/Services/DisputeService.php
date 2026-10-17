@@ -245,6 +245,8 @@ class DisputeService
 
     protected function notifyOpened(Dispute $dispute): void
     {
+        \App\Support\TeamAlerts::send('dispute_opened', 'iruali: dispute opened on '.$dispute->order?->order_number.($dispute->seller ? ' ('.$dispute->seller->shopName().')' : '').', '.\App\Support\Money::format($dispute->amount_claimed).' claimed.', route('admin.disputes.show', $dispute));
+
         try {
             if ($seller = $dispute->seller) {
                 $seller->notify(new DisputeOpened($dispute));

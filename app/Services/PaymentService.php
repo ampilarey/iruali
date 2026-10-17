@@ -188,6 +188,7 @@ class PaymentService
             'refund_reason' => $reason,
         ])->save();
         \App\Support\Audit::record('refund.flagged', $order, ['amount' => $amount, 'total_due' => $order->refund_amount, 'reason' => $reason, 'order_number' => $order->order_number]);
+        \App\Support\TeamAlerts::send('refund_due', 'iruali: refund due '.\App\Support\Money::format($amount).' on '.$order->order_number.' ('.$reason.').', route('admin.orders.show', $order));
 
         DB::afterCommit(function () use ($order) {
             try {

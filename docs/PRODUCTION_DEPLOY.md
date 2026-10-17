@@ -233,7 +233,18 @@ does (`SmsGatewayService::sendViaDhiraagu` there): a POST to
 `https://messaging.dhiraagu.com.mv/v1/api/sms` with the number as `9607771234`, the text, and
 `authorizationKey` = base64 of the Dhiraagu Bulk SMS `username:password`
 (`printf '%s' 'username:password' | base64`); a reply with `"transactionStatus": "true"` means
-sent. In `.env`, with `KEY` replaced:
+sent.
+
+The simple way, in `.env` (the driver builds the key itself):
+
+```
+SMS_DRIVER=dhiraagu
+SMS_DHIRAAGU_USERNAME=the-portal-username
+SMS_DHIRAAGU_PASSWORD=the-portal-password
+```
+
+Add `SMS_DHIRAAGU_SENDER=true` with `SMS_SENDER_ID=iruali` only once Dhiraagu has approved the
+sender name. Or, through the generic HTTP driver, with `KEY` replaced:
 
 ```
 SMS_DRIVER=http
@@ -249,6 +260,18 @@ to the template. `{to_plain}` is the number as Dhiraagu wants it; `{to}` keeps t
 `{to_local}` is the seven digits. Then `php artisan config:cache` and
 `php artisan sms:test 7771234` (or Admin → SMS → test send), which prints Dhiraagu's reply:
 `transactionDescription` says why a text was refused; HTTP 401 means the key is wrong.
+
+## Team alerts (Telegram and SMS)
+
+**Admin → Team alerts** sends a short message when something needs a person: new order, bank
+slip to check, refund due, dispute, return, shop application, product to review, payment error,
+failed backup, SMS limit reached. Each staff member ticks what they want by SMS (to the phone on
+their account); the events ticked for the Telegram group are posted there. The contact email keeps
+getting its emails as before.
+
+Telegram: message **@BotFather**, `/newbot`, copy the token into `.env` as
+`TELEGRAM_BOT_TOKEN=...`, `php artisan config:cache`, add the bot to the team group, send any
+message in the group, then Admin → Team alerts → **Find my group** → save → **Send a test**.
 
 ## Staff roles, 2FA and the audit log
 

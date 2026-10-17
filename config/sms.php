@@ -8,7 +8,8 @@
 | Text messages to customers (verification codes, order updates, replies from a shop).
 |
 | driver: "log" writes the message to the log and the sms_messages table without sending
-| anything (the default: nothing is sent until a gateway is configured); "http" calls a
+| anything (the default: nothing is sent until a gateway is configured); "dhiraagu" sends through
+| Dhiraagu Bulk SMS with just the portal's username and password; "http" calls a
 | bulk-SMS style HTTP gateway (Dhiraagu, Ooredoo and resellers all offer one) without a
 | vendor SDK: a URL, a method, an auth header, a body template and a regex that tells a
 | successful reply apart.
@@ -21,6 +22,16 @@ return [
 
     // Shown as the sender when the gateway allows an alphanumeric sender id
     'sender_id' => env('SMS_SENDER_ID', 'iruali'),
+
+    // SMS_DRIVER=dhiraagu: the Dhiraagu Bulk SMS portal login. SMS_DHIRAAGU_SENDER=true sends
+    // SMS_SENDER_ID as the sender name, only once Dhiraagu has approved it for the account.
+    'dhiraagu' => [
+        'username' => env('SMS_DHIRAAGU_USERNAME'),
+        'password' => env('SMS_DHIRAAGU_PASSWORD'),
+        'url' => env('SMS_DHIRAAGU_URL', 'https://messaging.dhiraagu.com.mv/v1/api/sms'),
+        'use_sender' => (bool) env('SMS_DHIRAAGU_SENDER', false),
+        'timeout' => 15,
+    ],
 
     'http' => [
         'url' => env('SMS_URL'),

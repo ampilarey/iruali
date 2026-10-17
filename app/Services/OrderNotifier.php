@@ -27,6 +27,13 @@ class OrderNotifier
             ->whereNotNull('product.seller')
             ->groupBy(fn ($item) => $item->product->seller_id)
             ->each(fn ($items) => $this->send($items->first()->product->seller, new NewSellerOrder($order, $items)));
+
+        if (! $order->user?->isSmokeTest()) {
+            $shops = $order->items->pluck('product.seller_id')->filter()->unique()->count();
+            \App\Support\TeamAlerts::send('new_order', 'iruali: new order '.$order->order_number.', '.\App\Support\Money::format($order->total_amount)
+                .', '.$shops.' '.($shops === 1 ? 'shop' : 'shops').', '.mb_strtolower(\App\Services\PaymentService::methodLabel($order->payment_method))
+                .($order->shipping_city ? ', to '.$order->shipping_city : '').'.', route('admin.orders.show', $order));
+        }
     }
 
     public function statusChanged(Order $order): void

@@ -13,7 +13,8 @@
             'low_stock_threshold' => $v->low_stock_threshold,
             'is_active' => $v->is_active,
             'image_url' => $v->image ? \Illuminate\Support\Facades\Storage::url($v->image) : null,
-            'has_orders' => $v->hasOrderHistory(),
+            'staged_image' => $v->getAttribute('staged_image'), // a new image in an edit waiting for review
+            'has_orders' => $v->exists && $v->hasOrderHistory(),
         ])->values()->all();
     }
     $small = 'block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-500 focus:ring-primary-500';
@@ -93,6 +94,7 @@
                             </td>
                             <td class="px-2 py-2 align-top">
                                 @if(! empty($row['image_url']))<img src="{{ $row['image_url'] }}" alt="" class="mb-1 h-10 w-10 rounded object-cover">@endif
+                                @if(! empty($row['staged_image']))<input type="hidden" name="variants[{{ $i }}][staged_image]" value="{{ $row['staged_image'] }}">@endif
                                 <input type="file" name="variants[{{ $i }}][image]" accept="image/jpeg,image/png,image/gif" class="block w-36 text-xs text-gray-700">
                                 @error("variants.$i.image")<span class="block text-xs text-red-600">{{ $message }}</span>@enderror
                             </td>

@@ -27,4 +27,6 @@
 </ul>
 
 <h2>Going live</h2>
-<p>New listings are checked by iruali before they appear on the storefront (edits to a live product show straight away). They can only be approved once your shop has completed its <a href="{{ route('seller.help.show', 'getting-approved') }}">checklist</a>. You can see which products are still waiting under <a href="{{ route('seller.products.index') }}">Products</a>.</p>
+<p>New listings are checked by iruali before they appear on the storefront. They can only be approved once your shop has completed its <a href="{{ route('seller.help.show', 'getting-approved') }}">checklist</a>. You can see which products are still waiting under <a href="{{ route('seller.products.index') }}">Products</a>.</p>
+<p>Changes to a live product are checked too. When you save, shoppers keep seeing the current version until iruali approves your changes; the product list shows "Edit waiting for review" and the product's form shows your waiting changes, so you can add to them (saving again replaces them) or withdraw them. Stock, the low-stock alert, and hiding or showing a product are never checked: they change at once. The same goes for bulk edit and CSV import. You get an email when your changes are approved, or the reason if they are not.</p>
+<p>Shops iruali has come to trust can be switched to publish without review: their new listings and changes go live at once.</p>

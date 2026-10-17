@@ -9,6 +9,10 @@
                     <h1 class="text-2xl font-bold text-gray-900">Manage Products</h1>
                 </div>
                 <div class="flex items-center space-x-4">
+                    @php $changesWaiting = \App\Models\ProductChangeRequest::pending()->whereHas('product')->count(); @endphp
+                    <a href="{{ route('admin.product-changes') }}" class="border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 px-4 py-2 rounded-lg text-sm font-medium" data-changes-waiting="{{ $changesWaiting }}">
+                        {{ __('Changes waiting') }} ({{ $changesWaiting }})
+                    </a>
                     <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                         Back to Dashboard
                     </a>

@@ -17,6 +17,10 @@ use Illuminate\Support\Str;
  * Rows are matched to the shop's products and variants by SKU. A row with an unknown SKU creates
  * a product (pending approval) or, when it carries variant_attributes, a variant of the product
  * named by product_sku (created from the same row when it is new too).
+ *
+ * On a live (approved) product of a shop that is not trusted, stock and is_active apply at once and
+ * the other changes (names, descriptions, brand, prices, variants' prices and active, new variants)
+ * join the product's edit waiting for review (ProductReviewService::stage()).
  */
 class ProductCsvService
 {
@@ -28,6 +32,8 @@ class ProductCsvService
     public const MAX_ROWS = 2000;
 
     public const UPDATABLE = ['name', 'description', 'price', 'sale_price', 'stock', 'is_active', 'brand'];
+
+    public function __construct(protected ProductReviewService $review) {}
 
     // ---- Export ------------------------------------------------------------------------------
 
@@ -256,11 +262,11 @@ class ProductCsvService
             if ($product) {
                 $result['action'] = 'update';
                 $result['name'] = $product->getTranslation('name', 'en', false);
-                $result['changes'] = $this->productChanges($product, $row, $price, $salePrice, $stock, $active);
+                $result['changes'] = $this->productChanges($product, $row, $price, $salePrice, $stock, $active, $this->review->needsReview($product, $seller));
             } elseif ($variant) {
                 $result['action'] = 'update';
                 $result['name'] = $variant->product->getTranslation('name', 'en', false).' – '.$variant->displayName();
-                $result['changes'] = $this->variantChanges($variant, $price, $stock, $active);
+                $result['changes'] = $this->variantChanges($variant, $price, $stock, $active, $this->review->needsReview($variant->product, $seller));
             } elseif ($this->skuTakenElsewhere($sku, $seller)) {
                 $result['errors'][] = __('This SKU belongs to another shop.');
             } elseif ($attributes !== []) {
@@ -290,6 +296,9 @@ class ProductCsvService
                         $result['action'] = 'create';
                         $result['name'] = ($parent ? $parent->getTranslation('name', 'en', false) : $row['product_name_en']).' – '.implode(' / ', array_values($attributes));
                         $result['changes'] = [__('New variant :variant, price :price, stock :stock', ['variant' => $this->attributesToString($attributes), 'price' => $this->money($price), 'stock' => $stock ?? 0])];
+                        if ($parent && $this->review->needsReview($parent, $seller)) {
+                            $result['changes'][] = __('The product is live: the new variant waits for review before shoppers see it.');
+                        }
                     }
                 }
             } else {
@@ -343,15 +352,20 @@ class ProductCsvService
                 $active = $this->flag($row['is_active']);
 
                 if ($product = $bySku->get($key)) {
-                    $this->updateProduct($product, $row, $price, $salePrice, $stock, $active);
+                    $this->updateProduct($product, $row, $price, $salePrice, $stock, $active, $this->review->needsReview($product, $seller));
                 } elseif ($variant = $variantsBySku->get($key)) {
-                    $this->updateVariant($variant, $price, $stock, $active);
+                    $this->updateVariant($variant, $price, $stock, $active, $this->review->needsReview($variant->product, $seller));
                 } elseif ($attributes !== []) {
                     $parentKey = mb_strtolower((string) $row['product_sku']);
                     $parent = $bySku->get($parentKey);
                     if (! $parent) {
                         $parent = $this->createProduct($seller, $row, $categories, $price, $salePrice, 0, $this->ownImageUrls($row['image_urls'], $ownImages), hasVariants: true, sku: $row['product_sku']);
                         $bySku->put($parentKey, $parent);
+                    }
+                    if ($this->review->needsReview($parent, $seller)) {
+                        $this->stageNewVariant($parent, $row, $attributes, $price, $stock, $active);
+
+                        continue;
                     }
                     $variant = $parent->variants()->create([
                         'attributes' => $attributes,
@@ -376,7 +390,7 @@ class ProductCsvService
 
     // ---- Helpers ----------------------------------------------------------------------------
 
-    protected function productChanges(Product $product, array $row, ?float $price, ?float $salePrice, ?int $stock, ?bool $active): array
+    protected function productChanges(Product $product, array $row, ?float $price, ?float $salePrice, ?int $stock, ?bool $active, bool $reviewed = false): array
     {
         $changes = [];
         if ($row['product_name_en'] !== null && $row['product_name_en'] !== '' && $row['product_name_en'] !== $product->getTranslation('name', 'en', false)) {
@@ -400,6 +414,9 @@ class ProductCsvService
         if ($salePrice !== null && abs($salePrice - (float) $product->sale_price) >= 0.005) {
             $changes[] = __('sale price: :from → :to', ['from' => $product->sale_price !== null ? $this->money($product->sale_price) : '—', 'to' => $this->money($salePrice)]);
         }
+        if ($reviewed && $changes !== []) {
+            $changes[] = __('The product is live: these changes wait for review before shoppers see them (stock and active apply now).');
+        }
         if ($stock !== null && ! $product->has_variants && $stock !== (int) $product->stock_quantity) {
             $changes[] = __('stock: :from → :to', ['from' => $product->stock_quantity, 'to' => $stock]);
         }
@@ -412,24 +429,63 @@ class ProductCsvService
         return $changes ?: [__('No changes')];
     }
 
-    protected function variantChanges(ProductVariant $variant, ?float $price, ?int $stock, ?bool $active): array
+    protected function variantChanges(ProductVariant $variant, ?float $price, ?int $stock, ?bool $active, bool $reviewed = false): array
     {
         $changes = [];
+        $waits = false;
         if ($price !== null && abs($price - $variant->effectivePrice()) >= 0.005) {
             $changes[] = __('price: :from → :to', ['from' => $this->money($variant->effectivePrice()), 'to' => $this->money($price)]);
+            $waits = true;
         }
         if ($stock !== null && $stock !== (int) $variant->stock_quantity) {
             $changes[] = __('stock: :from → :to', ['from' => $variant->stock_quantity, 'to' => $stock]);
         }
         if ($active !== null && $active !== (bool) $variant->is_active) {
             $changes[] = $active ? __('activated') : __('deactivated');
+            $waits = true;
+        }
+        if ($reviewed && $waits) {
+            $changes[] = __('The product is live: price and active changes to a variant wait for review (stock applies now).');
         }
 
         return $changes ?: [__('No changes')];
     }
 
-    protected function updateProduct(Product $product, array $row, ?float $price, ?float $salePrice, ?int $stock, ?bool $active): void
+    protected function updateProduct(Product $product, array $row, ?float $price, ?float $salePrice, ?int $stock, ?bool $active, bool $reviewed = false): void
     {
+        if ($reviewed) {
+            // Stock and hide/show now; names, descriptions, brand and prices join the edit waiting for review
+            if ($stock !== null && ! $product->has_variants) {
+                $product->stock_quantity = $stock;
+            }
+            if ($active !== null) {
+                $product->is_active = $active; // reviewed means approved, so it may be shown
+            }
+            $product->save();
+
+            $this->review->stage($product, function (array $payload) use ($row, $price, $salePrice) {
+                foreach (['product_name_en' => ['name', 'en'], 'product_name_dv' => ['name', 'dv'], 'description_en' => ['description', 'en'], 'description_dv' => ['description', 'dv']] as $column => [$field, $locale]) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $payload['product'][$field][$locale] = $row[$column];
+                        ksort($payload['product'][$field]);
+                    }
+                }
+                if ($row['brand'] !== null && $row['brand'] !== '') {
+                    $payload['product']['brand'] = $row['brand'];
+                }
+                if ($price !== null) {
+                    $payload['product']['price'] = $this->money($price);
+                }
+                if ($salePrice !== null) {
+                    $payload['product']['sale_price'] = $this->money($salePrice);
+                }
+
+                return $payload;
+            }, auth()->user());
+
+            return;
+        }
+
         foreach (['product_name_en' => 'en', 'product_name_dv' => 'dv'] as $column => $locale) {
             if ($row[$column] !== null && $row[$column] !== '') {
                 $product->setTranslation('name', $locale, $row[$column]);
@@ -459,8 +515,33 @@ class ProductCsvService
         $product->save();
     }
 
-    protected function updateVariant(ProductVariant $variant, ?float $price, ?int $stock, ?bool $active): void
+    protected function updateVariant(ProductVariant $variant, ?float $price, ?int $stock, ?bool $active, bool $reviewed = false): void
     {
+        if ($reviewed) {
+            // Stock now; the variant's price and active join the product's edit waiting for review
+            if ($stock !== null) {
+                $variant->stock_quantity = $stock;
+                $variant->save();
+                $variant->product->syncStockFromVariants();
+            }
+            $this->review->stage($variant->product, function (array $payload) use ($variant, $price, $active) {
+                foreach ($payload['variants'] as $i => $row) {
+                    if ((int) ($row['id'] ?? 0) === (int) $variant->id) {
+                        if ($price !== null) {
+                            $payload['variants'][$i]['price'] = $this->money($price);
+                        }
+                        if ($active !== null) {
+                            $payload['variants'][$i]['is_active'] = $active;
+                        }
+                    }
+                }
+
+                return $payload;
+            }, auth()->user());
+
+            return;
+        }
+
         if ($price !== null) {
             $variant->price = $price;
         }
@@ -471,6 +552,36 @@ class ProductCsvService
             $variant->is_active = $active;
         }
         $variant->save();
+    }
+
+    /**
+     * A new variant of a live product of a shop that is not trusted: added to the product's edit
+     * waiting for review (a row with the same SKU there is updated instead).
+     */
+    protected function stageNewVariant(Product $parent, array $row, array $attributes, ?float $price, ?int $stock, ?bool $active): void
+    {
+        $this->review->stage($parent, function (array $payload) use ($row, $attributes, $price, $stock, $active) {
+            $variant = [
+                'id' => null,
+                'attributes' => $attributes,
+                'sku' => (string) $row['sku'],
+                'price' => $price !== null ? $this->money($price) : null,
+                'is_active' => $active ?? true,
+                'image' => null,
+                'stock_quantity' => $stock ?? 0,
+                'low_stock_threshold' => null,
+            ];
+            foreach ($payload['variants'] as $i => $existing) {
+                if (empty($existing['id']) && mb_strtolower((string) $existing['sku']) === mb_strtolower($variant['sku'])) {
+                    $payload['variants'][$i] = $variant;
+
+                    return $payload;
+                }
+            }
+            $payload['variants'][] = $variant;
+
+            return $payload;
+        }, auth()->user());
     }
 
     protected function createProduct(User $seller, array $row, Collection $categories, ?float $price, ?float $salePrice, int $stock, array $images, bool $hasVariants, string $sku): Product
@@ -497,6 +608,7 @@ class ProductCsvService
                 $product->forceFill(['main_image' => Str::after($url, '/storage/')])->save();
             }
         }
+        $this->review->publishIfTrusted($product, $seller); // a trusted shop's new listing goes live at once
 
         return $product;
     }

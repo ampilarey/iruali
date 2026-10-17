@@ -6,20 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Seller\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
-use App\Services\VariantService;
+use App\Models\ProductChangeRequest;
+use App\Services\ProductEditService;
+use App\Services\ProductReviewService;
 use App\Support\CurrentShop;
-use App\Traits\SecureFileUpload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    use SecureFileUpload;
-
     public function index(Request $request)
     {
         $products = CurrentShop::get()->products()
-            ->with(['category', 'variants'])
+            ->with(['category', 'variants', 'pendingChange'])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->q.'%';
                 $q->where(fn ($w) => $w->where('name', 'like', $term)->orWhere('sku', 'like', $term));
@@ -43,55 +41,83 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(ProductRequest $request, VariantService $variants)
+    public function store(ProductRequest $request, ProductEditService $editor, ProductReviewService $review)
     {
-        $product = new Product($request->productAttributes());
+        $product = new Product;
         $product->seller_id = CurrentShop::id();
         $product->is_active = false; // new listings wait for admin approval
-        if ($product->has_variants) {
-            $product->stock_quantity = 0; // set from the variants below
-        }
-        $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
-        $product->forceFill($request->preorderAttributes()); // pre-orders while out of stock
-        $product->forceFill($request->quoteAttributes()); // bulk quotes: the smallest quantity to ask for
-        $product->save();
-
-        $this->storeImage($request, $product);
-        $variants->sync($product, $request->variantRows());
-        $this->saveMultiBuy($request, $product);
+        $editor->apply($product, $editor->formFromRequest($request));
         app(\App\Services\OnboardingService::class)->refresh(CurrentShop::get()->fresh());
+
+        // A trusted shop (an admin turned on auto-approval for it) goes live at once
+        if ($review->publishIfTrusted($product, CurrentShop::get())) {
+            return redirect()->route('seller.products.index')
+                ->with('success', __('Product published. It is live in the shop now.'));
+        }
 
         return redirect()->route('seller.products.index')
             ->with('success', 'Product submitted. It will be visible in the shop once an admin approves it.');
     }
 
-    public function edit(Product $product)
+    public function edit(Product $product, ProductReviewService $review)
     {
         $this->authorizeOwner($product);
 
+        // An edit waiting for review: the form shows it, so saving again builds on it
+        $pending = $product->pendingChange;
+        if ($pending) {
+            ['product' => $draft, 'variants' => $variants] = $review->preview($product, $pending);
+        }
+
         return view('seller.products.form', [
-            'product' => $product,
+            'product' => $draft ?? $product,
             'categories' => $this->categories(),
-            'variants' => $product->variants()->ordered()->get(),
+            'variants' => $variants ?? $product->variants()->ordered()->get(),
             'brandOptions' => \App\Models\Brand::orderBy('name')->pluck('name'),
+            'pendingChange' => $pending,
+            'lastReview' => $pending ? null : $product->changeRequests()->whereIn('status', [ProductChangeRequest::APPROVED, ProductChangeRequest::REJECTED])->latest('reviewed_at')->latest('id')->first(),
         ]);
     }
 
-    public function update(ProductRequest $request, Product $product, VariantService $variants)
+    public function update(ProductRequest $request, Product $product, ProductEditService $editor, ProductReviewService $review)
     {
         $this->authorizeOwner($product);
 
-        $product->forceFill($request->videoAttributes()); // the optional video link, as provider + id
-        $product->forceFill($request->preorderAttributes()); // pre-orders while out of stock (a new date emails the waiting customers)
-        $product->forceFill($request->quoteAttributes()); // bulk quotes: the smallest quantity to ask for
-        $product->update($request->productAttributes());
+        $form = $editor->formFromRequest($request);
 
-        $this->storeImage($request, $product);
-        $variants->sync($product, $request->variantRows());
-        $this->saveMultiBuy($request, $product);
+        // An approved product of a shop that is not trusted: stock now, the rest waits for an admin
+        if ($review->needsReview($product)) {
+            $change = $review->submitForm($product, $form, $request->user());
+
+            return redirect()->route('seller.products.index')->with('success', $change
+                ? __('Saved. Your changes are waiting for review; shoppers see the current version until an admin approves them. Stock changes are live now.')
+                : __('Product updated successfully.'));
+        }
+
+        // Never approved (not public yet), or a trusted shop: straight to the product
+        $editor->apply($product, $form);
+        if ($product->pendingChange) {
+            $review->withdraw($product->pendingChange); // the form showed it and has now been saved over it
+        }
+        $published = $review->publishIfTrusted($product);
 
         return redirect()->route('seller.products.index')
-            ->with('success', 'Product updated successfully.');
+            ->with('success', $published ? __('Product published. It is live in the shop now.') : 'Product updated successfully.');
+    }
+
+    /**
+     * Take back the edit waiting for review: the product stays as shoppers see it now.
+     */
+    public function withdrawChange(Product $product, ProductReviewService $review)
+    {
+        $this->authorizeOwner($product);
+
+        if ($product->pendingChange) {
+            $review->withdraw($product->pendingChange);
+        }
+
+        return redirect()->route('seller.products.edit', $product)
+            ->with('success', __('Your waiting changes were withdrawn. The product stays as shoppers see it now.'));
     }
 
     public function destroy(Product $product)
@@ -112,41 +138,5 @@ class ProductController extends Controller
     protected function categories()
     {
         return Category::where('status', 'active')->orderBy('name')->get();
-    }
-
-    protected function storeImage(Request $request, Product $product): void
-    {
-        if (! $request->hasFile('main_image')) {
-            return;
-        }
-
-        $path = $this->storeFileSecurely($request->file('main_image'), 'products');
-        if (! $path) {
-            return;
-        }
-
-        if ($product->main_image) {
-            $this->deleteFile($product->main_image);
-        }
-
-        $product->forceFill(['main_image' => $path])->save();
-
-        $product->images()->where('is_main', true)->delete();
-        $product->images()->create([
-            'url' => Storage::url($path),
-            'alt_text' => $product->getTranslation('name', 'en', false),
-            'is_main' => true,
-            'sort_order' => 0,
-        ]);
-    }
-
-    /**
-     * The form's "Multi-buy offer" fieldset (forms without it leave the offer alone).
-     */
-    protected function saveMultiBuy(ProductRequest $request, Product $product): void
-    {
-        if ($request->has('multibuy')) {
-            app(\App\Services\MultiBuyService::class)->saveFromForm($product, (array) ($request->validated()['multibuy'] ?? []));
-        }
     }
 }

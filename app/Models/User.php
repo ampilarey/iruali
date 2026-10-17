@@ -90,6 +90,8 @@ class User extends Authenticatable implements HasLocalePreference
         'holiday_mode' => 'boolean',
         'holiday_until' => 'date',
         'holiday_started_at' => 'datetime',
+        'auto_approve_listings' => 'boolean',
+        'auto_approve_listings_at' => 'datetime',
     ];
 
     /**
@@ -638,6 +640,17 @@ class User extends Authenticatable implements HasLocalePreference
     public function hasVerifiedBusiness(): bool
     {
         return $this->businessVerification?->status === SellerVerification::APPROVED;
+    }
+
+    /**
+     * Trusted shop: its new listings and edits go live without an admin's review. Off for every shop
+     * until an admin turns it on (Admin → Sellers → the shop's page; auto_approve_listings is not
+     * mass-assignable), and it only counts while the shop is an approved, non-suspended seller.
+     * It belongs to the owner's account: shop staff act for the shop (CurrentShop).
+     */
+    public function autoApprovesListings(): bool
+    {
+        return (bool) $this->auto_approve_listings && $this->isSeller();
     }
 
     /**

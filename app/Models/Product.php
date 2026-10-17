@@ -592,4 +592,22 @@ class Product extends Model
     {
         return $this->belongsTo(MultiBuyOffer::class, 'multibuy_offer_id');
     }
+
+    // ---- Edits waiting for review (App\Services\ProductReviewService) --------------------
+
+    /** @return HasMany<ProductChangeRequest, $this> */
+    public function changeRequests(): HasMany
+    {
+        return $this->hasMany(ProductChangeRequest::class);
+    }
+
+    /**
+     * The shop's edit waiting for an admin, if any (at most one per product).
+     *
+     * @return HasOne<ProductChangeRequest, $this>
+     */
+    public function pendingChange(): HasOne
+    {
+        return $this->hasOne(ProductChangeRequest::class)->where('status', ProductChangeRequest::PENDING);
+    }
 }

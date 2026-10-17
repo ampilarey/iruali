@@ -68,6 +68,8 @@ class ProductRequest extends FormRequest
             'variants.*.low_stock_threshold' => 'nullable|integer|min:0|max:999999',
             'variants.*.is_active' => 'nullable|boolean',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // An image uploaded with an edit still waiting for review, sent back by the form (ProductReviewService keeps only that edit's own files)
+            'variants.*.staged_image' => 'nullable|string|max:255',
         ] + \App\Services\MultiBuyService::formRules()
           + \App\Services\PreorderService::formRules();
     }

@@ -83,6 +83,9 @@ class ProductBulkToolsTest extends TestCase
 
     public function test_export_round_trips_through_import_with_a_dry_run_then_apply(): void
     {
+        // A trusted shop, so the import writes straight to its live products (changes to a shop that
+        // is not trusted wait for review: ProductChangeReviewTest)
+        $this->shop->forceFill(['auto_approve_listings' => true])->save();
         [$tee, $hoodie, $m, $l] = $this->catalogue();
         $csv = $this->actingAs($this->shop)->get(route('seller.products.export'))->getContent();
 
@@ -157,6 +160,8 @@ class ProductBulkToolsTest extends TestCase
 
     public function test_bulk_edit_changes_prices_and_stock_with_a_confirm_step(): void
     {
+        // A trusted shop, so new prices apply at once (for other shops they wait for review: ProductChangeReviewTest)
+        $this->shop->forceFill(['auto_approve_listings' => true])->save();
         [$tee, $hoodie, $m, $l] = $this->catalogue();
         $tiny = Product::factory()->create(['seller_id' => $this->shop->id, 'sku' => 'TINY', 'price' => 0.01, 'stock_quantity' => 1]);
         $ids = [$tee->id, $hoodie->id, $tiny->id];

@@ -14,6 +14,8 @@ class BulkProductService
 {
     public const ACTIONS = ['price_percent', 'stock_set', 'activate', 'deactivate'];
 
+    public function __construct(protected ProductReviewService $review) {}
+
     /**
      * Price change by a percentage: rounded to 2 dp, never below 0.01.
      */
@@ -30,10 +32,14 @@ class BulkProductService
     public function describe(Collection $products, string $action, ?float $value): array
     {
         return $products->map(function (Product $product) use ($action, $value) {
+            // A live product of a shop that is not trusted: the new price waits for review (from the waiting edit's price, if any)
+            $reviewed = $action === 'price_percent' && $this->review->needsReview($product);
+            $price = $reviewed ? (float) $this->review->draft($product)['product']['price'] : (float) $product->price;
             $note = match ($action) {
-                'price_percent' => $product->has_variants
-                    ? __(':from → :to (and each variant with its own price)', ['from' => number_format((float) $product->price, 2), 'to' => number_format($this->adjustedPrice((float) $product->price, $value), 2)])
-                    : __(':from → :to', ['from' => number_format((float) $product->price, 2), 'to' => number_format($this->adjustedPrice((float) $product->price, $value), 2)]),
+                'price_percent' => ($product->has_variants
+                    ? __(':from → :to (and each variant with its own price)', ['from' => number_format($price, 2), 'to' => number_format($this->adjustedPrice($price, $value), 2)])
+                    : __(':from → :to', ['from' => number_format($price, 2), 'to' => number_format($this->adjustedPrice($price, $value), 2)]))
+                    .($reviewed ? ' '.__('(waits for review; shoppers see the current price until an admin approves it)') : ''),
                 'stock_set' => $product->has_variants
                     ? __('each active variant set to :n', ['n' => (int) $value])
                     : __(':from → :to', ['from' => $product->stock_quantity, 'to' => (int) $value]),
@@ -70,6 +76,22 @@ class BulkProductService
 
     protected function changePrice(Product $product, float $percent): void
     {
+        // A live product of a shop that is not trusted: the new prices join its edit waiting for review
+        if ($this->review->needsReview($product)) {
+            $this->review->stage($product, function (array $payload) use ($percent) {
+                $payload['product']['price'] = number_format($this->adjustedPrice((float) $payload['product']['price'], $percent), 2, '.', '');
+                foreach ($payload['variants'] as $i => $row) {
+                    if ($row['price'] !== null) {
+                        $payload['variants'][$i]['price'] = number_format($this->adjustedPrice((float) $row['price'], $percent), 2, '.', '');
+                    }
+                }
+
+                return $payload;
+            }, auth()->user());
+
+            return;
+        }
+
         $product->update(['price' => $this->adjustedPrice((float) $product->price, $percent)]);
 
         // Variants with their own price move by the same percentage; the others follow the product's price

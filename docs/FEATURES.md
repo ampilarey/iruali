@@ -180,6 +180,44 @@ automatic WebP variants, variants (options, SKU, price, stock), bulk edit
 wait for admin approval before they are public. A daily low-stock email goes to each shop
 (`seller:low-stock-digest`).
 
+**Product approval and edits.** Approval is `products.approved_at`. Every change a shop makes to an
+approved product waits for an admin too (`App\Services\ProductReviewService`): the live listing
+keeps the approved version (it is never hidden for it) and the edit is a `product_change_requests`
+row holding the whole reviewed state asked for (`payload`: product columns, variant rows, multi-buy
+fieldset, main image, plus `staged`, the images uploaded with it). Not reviewed, and applied at
+once: the product's stock and low-stock alert, existing variants' stock and alert level, and the
+shop hiding or showing its own approved product. Everything else on the form is reviewed (names
+and descriptions in both languages, price, compare-at and sale price, category, brand, SKU, weight,
+delivery charge, main image, variants added, removed, renamed, re-priced or switched on/off,
+variant images, video link, pre-order settings, quote minimum, multi-buy offer). A product that was
+never approved is not public, so edits to it apply directly. One pending request per product: a
+new edit replaces it, and the form, bulk edit (price %) and CSV import (names, descriptions, brand,
+prices, variant prices and active, new variants) all build on the waiting one; files the
+replacement drops, and every file of a rejected or withdrawn edit, are deleted. Nothing but stock
+changed: no request (and a waiting edit the form now matches the live product again is withdrawn).
+The Seller Centre shows "Edit waiting for review" in the product list and, on the form, the
+submitted date with Withdraw (`seller.products.changes.withdraw`), with the form prefilled from the
+waiting edit; the last rejection's reason shows there too. Admin → Products → "Changes waiting"
+(`admin.product-changes*`, admin and catalogue staff; an inbox row "Product changes waiting for
+review") lists them oldest first, each with a before → after page (fields, image thumbnails,
+variants table) and Approve or Reject with a reason. Approving applies the payload through
+`ProductEditService`, the code the product form saves with (so `VariantService::sync` and
+`MultiBuyService::saveFromForm`), keeping the live stock; if the product changed since in a way that
+clashes (a variant in the edit deleted, a SKU taken, the category or group gone) nothing is applied
+and the page says why. The shop is emailed either way (`ProductChangeReviewed`, with the reason),
+and both are in the audit log (`product.change_approved` / `product.change_rejected`). A deleted
+product's waiting edit is withdrawn. Admins' own product edits are unaffected.
+
+**Trusted shops.** Off for every shop. An admin (not catalogue, support or finance staff) turns
+"Trusted shop: publish without review" on or off on the shop's page (Admin → Sellers → Performance,
+`admin.sellers.auto-approve`; `users.auto_approve_listings`, `_at`, `_by`, not mass-assignable;
+audited as `seller.auto_approve_on/off`). It counts only while the shop is an approved, active
+seller (`User::autoApprovesListings()`); it belongs to the owner's account, so shop staff act under
+it. A trusted shop's new products (product form, CSV import, API) go live at once with `approved_at`
+set and an audit entry `product.auto_approved` by the shop (still not while the shop's checklist is
+incomplete), saving a product it never had approved publishes it, and its edits apply directly with
+no request.
+
 **Pre-orders.** Stock reaches the islands by ship, so a shop can take orders for what is coming:
 the product form's "Pre-order" fieldset switches it on with the expected ship date (after today,
 within a year), the most units it takes (counted across the product's options) and an optional note
@@ -219,15 +257,17 @@ delivered and the order paid; see `MARKETPLACE.md`.
 
 Staff roles are **admin**, **support**, **finance** and **catalogue** (`config/staff.php`); two-step
 sign-in is required for all of them. Catalogue staff look after brand pages (Admin → Brands: names,
-logo, banner, descriptions, merging, authorised sellers), approve new products and run campaigns,
+logo, banner, descriptions, merging, authorised sellers), approve new products and shops' changes
+to live products, and run campaigns,
 and open nothing about orders, money, people or settings. A shop's owner or someone on a shop's staff
 cannot be given a staff role (they would be approving their own shop's products). `/admin/dashboard` has the key numbers and the system-status panel;
 `/admin/inbox` lists everything waiting for a person (shops to approve, products to review,
-refunds due, open returns, failed payments, low stock on best sellers, unresolved errors, new
+product changes to review, refunds due, open returns, failed payments, low stock on best sellers, unresolved errors, new
 brands to check).
 
 **Marketplace management.** `/admin/sellers` (approve, reject, suspend, commission rate, bank
-verification, performance page), `/admin/products` (approve), `/admin/brands` (check new
+verification, performance page with the trusted-shop switch), `/admin/products` (approve; "Changes
+waiting" for edits to live products), `/admin/brands` (check new
 brands, fix names and web addresses, add a logo and an English/Dhivehi description, merge
 duplicates, delete unused ones; old names and addresses keep working), `/admin/users` (roles),
 `/admin/reviews` and `/admin/questions` (moderation), `/admin/vouchers`, `/admin/newsletter`,

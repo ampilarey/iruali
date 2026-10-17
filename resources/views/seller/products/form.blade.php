@@ -20,6 +20,8 @@
             </div>
         @endif
 
+        @include('seller.products._review_status', ['product' => $product, 'pendingChange' => $pendingChange ?? null, 'lastReview' => $lastReview ?? null])
+
         <form method="POST" enctype="multipart/form-data"
               action="{{ $editing ? route('seller.products.update', $product) : route('seller.products.store') }}"
               class="space-y-6 rounded-lg bg-white p-6 shadow">
@@ -111,6 +113,9 @@
                 <label for="main_image" class="block text-sm font-medium text-gray-700">Main image</label>
                 @if($product->mainImage)
                     <img src="{{ $product->mainImage->url }}" alt="" class="mt-2 h-24 w-24 rounded-lg object-cover">
+                    @if(! empty($pendingChange) && ($pendingChange->payload['main_image'] ?? null) && in_array($pendingChange->payload['main_image'], $pendingChange->stagedFiles(), true))
+                        <p class="mt-1 text-xs text-amber-700">{{ __('New image, waiting for review.') }}</p>
+                    @endif
                 @endif
                 <input id="main_image" name="main_image" type="file" accept="image/jpeg,image/png,image/gif" class="mt-2 block w-full text-sm text-gray-700">
                 <p class="mt-1 text-xs text-gray-500">JPEG, PNG or GIF, up to 2 MB.</p>

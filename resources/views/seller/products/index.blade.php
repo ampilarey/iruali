@@ -74,6 +74,9 @@
                                     @else
                                         <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">Awaiting approval</span>
                                     @endif
+                                    @if($product->pendingChange)
+                                        <span class="mt-1 block w-fit rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800" data-edit-waiting>{{ __('Edit waiting for review') }}</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-right text-sm whitespace-nowrap">
                                     <a href="{{ route('seller.products.edit', $product) }}" class="font-medium text-primary-600 hover:text-primary-700">Edit</a>

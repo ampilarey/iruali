@@ -230,6 +230,7 @@ class ProductController extends BaseController
         $data['approved_at'] = null;
 
         $product = Product::create($data);
+        app(\App\Services\ProductReviewService::class)->publishIfTrusted($product); // a trusted shop's listing goes live at once
 
         return $this->sendResponse(new ProductResource($product), 'Product created successfully', 201);
     }

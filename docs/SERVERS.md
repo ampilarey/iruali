@@ -55,7 +55,7 @@ tags come back. Claude Code sessions cannot push tags; the owner would create th
 | SMS | Dhiraagu, same API and login as Akuru (`PRODUCTION_DEPLOY.md` → SMS); set with `smssetup` |
 | BML | **not set yet**: card payment is off until the BML keys are added. Bank transfer and cash on delivery can be switched on meanwhile in Admin → Settings → Payment methods |
 
-Admin: `admin@iruali.mv`, two-step sign-in required for all staff unless switched off in Admin → Settings ("Staff must use two-step sign-in").
+Admin: `admin@iruali.mv`, two-step sign-in required for all staff unless switched off in Admin → Settings ("Staff must use two-step sign-in"). Locked out of /admin by it: `php artisan staff:two-factor off` on the server (`on` puts it back).
 
 Scheduler (crontab of `iruali`):
 ```

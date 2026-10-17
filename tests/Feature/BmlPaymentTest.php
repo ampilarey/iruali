@@ -286,7 +286,7 @@ class BmlPaymentTest extends TestCase
         $this->checkout('bank_transfer')->assertSessionHasErrors('payment_method');
 
         config(['services.bml.api_key' => null]);
-        $this->get('/checkout')->assertSee('Card payment is not available right now')->assertDontSee('name="payment_method"', false);
+        $this->get('/checkout')->assertSee('Payment is not available right now')->assertDontSee('name="payment_method"', false);
         $this->checkout('bml')->assertSessionHasErrors('payment_method');
         $this->assertSame(0, Order::count());
     }

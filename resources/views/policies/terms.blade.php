@@ -28,7 +28,17 @@
     <li>Card payments are processed securely by <strong>Bank of Maldives (BML)</strong> through BML Connect. We accept <strong>Visa, Mastercard, American Express and Maestro</strong>.</li>
     <li>The merchant outlet is located in the <strong>{{ Company::country() }}</strong>.</li>
     <li>Card details are entered only on BML's secure payment page. {{ $name }} does not store, view or process your card number, expiry date or security code.</li>
-    <li>Card payment is the only payment method. Orders are paid in full when placed; we do not accept cash on delivery or bank transfer.</li>
+    @if(\App\Services\ManualPaymentService::transferEnabled() || \App\Services\ManualPaymentService::codEnabled())
+        <li>Card payment is the main payment method; card orders are paid in full when placed.</li>
+        @if(\App\Services\ManualPaymentService::transferEnabled())
+            <li><strong>Bank transfer:</strong> transfer the order total to the account shown after you order, with the order number as the reference, and upload the transfer slip within {{ \App\Services\ManualPaymentService::payWithinHours() }} hours, or the order is cancelled. The shops send your order once we have confirmed the payment.</li>
+        @endif
+        @if(\App\Services\ManualPaymentService::codEnabled())
+            <li><strong>Cash on delivery</strong> (orders from one shop): pay the full amount in cash when the order is handed to you.</li>
+        @endif
+    @else
+        <li>Card payment is the only payment method. Orders are paid in full when placed; we do not accept cash on delivery or bank transfer.</li>
+    @endif
 </ul>
 
 {{-- BML requirement 8: delivery policy --}}

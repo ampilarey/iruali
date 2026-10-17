@@ -82,6 +82,66 @@
                 </div>
             </section>
 
+            <section class="rounded-lg bg-white p-6 shadow" data-payment-methods>
+                @php $bmlReady = app(\App\Services\BmlConnect::class)->enabled(); $box = 'rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-3'; @endphp
+                <h2 class="text-lg font-semibold text-gray-900">Payment methods</h2>
+                <p class="mt-1 text-sm text-gray-500">What customers can choose at checkout. Bank transfer and cash on delivery are for when card payment is not available (for example while the BML gateway has a problem). Orders paid these ways stay unpaid until you confirm the money on the order page; shops' earnings on them are paid only after that.</p>
+                <div class="mt-4 space-y-3">
+                    <div class="{{ $box }}">
+                        <input type="hidden" name="payment_card_enabled" value="0">
+                        <label class="flex items-start gap-3 text-sm text-gray-800">
+                            <input type="checkbox" name="payment_card_enabled" value="1" @checked(old('payment_card_enabled', $settings['payment_card_enabled'] ?? 1)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                            <span><span class="font-medium">Card payment (BML)</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">{{ $bmlReady ? 'BML is set up.' : 'BML is not set up yet, so card payment is not offered even when this is ticked.' }} Untick to stop taking cards for a while.</span></span>
+                        </label>
+                    </div>
+
+                    <div class="{{ $box }}">
+                        <input type="hidden" name="payment_transfer_enabled" value="0">
+                        <label class="flex items-start gap-3 text-sm text-gray-800">
+                            <input type="checkbox" name="payment_transfer_enabled" value="1" @checked(old('payment_transfer_enabled', $settings['payment_transfer_enabled'] ?? 0)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                            <span><span class="font-medium">Bank transfer</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">The customer transfers to this account with the order number as the reference and uploads the slip. You confirm the payment on the order page.</span></span>
+                        </label>
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div><label for="transfer_bank_name" class="block text-xs font-medium text-gray-700">Bank</label>
+                                <input id="transfer_bank_name" name="transfer_bank_name" maxlength="100" class="{{ $field }}" value="{{ old('transfer_bank_name', $settings['transfer_bank_name'] ?? '') }}"></div>
+                            <div><label for="transfer_account_name" class="block text-xs font-medium text-gray-700">Account name</label>
+                                <input id="transfer_account_name" name="transfer_account_name" maxlength="150" class="{{ $field }}" value="{{ old('transfer_account_name', $settings['transfer_account_name'] ?? '') }}"></div>
+                            <div><label for="transfer_account_number" class="block text-xs font-medium text-gray-700">Account number</label>
+                                <input id="transfer_account_number" name="transfer_account_number" maxlength="40" dir="ltr" class="{{ $field }}" value="{{ old('transfer_account_number', $settings['transfer_account_number'] ?? '') }}">
+                                @error('transfer_account_number')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div class="sm:col-span-2"><label for="transfer_note" class="block text-xs font-medium text-gray-700">Note for customers (optional)</label>
+                                <input id="transfer_note" name="transfer_note" maxlength="300" class="{{ $field }}" value="{{ old('transfer_note', $settings['transfer_note'] ?? '') }}" placeholder="e.g. Transfers from other banks can take a day."></div>
+                            <div><label for="transfer_pay_within_hours" class="block text-xs font-medium text-gray-700">Cancel if no slip after (hours)</label>
+                                <input id="transfer_pay_within_hours" name="transfer_pay_within_hours" type="number" min="1" max="168" class="{{ $field }}" value="{{ old('transfer_pay_within_hours', $settings['transfer_pay_within_hours'] ?? 24) }}"></div>
+                        </div>
+                    </div>
+
+                    <div class="{{ $box }}">
+                        <input type="hidden" name="payment_cod_enabled" value="0">
+                        <label class="flex items-start gap-3 text-sm text-gray-800">
+                            <input type="checkbox" name="payment_cod_enabled" value="1" @checked(old('payment_cod_enabled', $settings['payment_cod_enabled'] ?? 0)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                            <span><span class="font-medium">Cash on delivery</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">For orders from one shop, without pre-orders. The shop is told to collect the cash; press "Cash received" on the order once the money is with you.</span></span>
+                        </label>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div><label for="cod_max_amount" class="block text-xs font-medium text-gray-700">Largest order (MVR, 0 = no limit)</label>
+                                <input id="cod_max_amount" name="cod_max_amount" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('cod_max_amount', $settings['cod_max_amount'] ?? 0) }}"></div>
+                            <div class="flex items-end">
+                                <input type="hidden" name="cod_greater_male_only" value="0">
+                                <label class="flex items-center gap-2 text-sm text-gray-800 pb-2">
+                                    <input type="checkbox" name="cod_greater_male_only" value="1" @checked(old('cod_greater_male_only', $settings['cod_greater_male_only'] ?? 0)) class="rounded text-primary-600 focus:ring-primary-500">
+                                    Greater Malé deliveries only
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="rounded-lg bg-white p-6 shadow">
                 <h2 class="text-lg font-semibold text-gray-900">Loyalty &amp; referrals</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-3">

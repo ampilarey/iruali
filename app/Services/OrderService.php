@@ -108,6 +108,12 @@ class OrderService
             $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null, $shippingData['shipping_state'] ?? null);
             $shippingData = $delivery->prepareOrder($cart, $shippingData, (float) $discounts['final_total']);
 
+            // Cash on delivery: one shop, no pre-orders, within the admins' limits (ManualPaymentService)
+            if (($shippingData['payment_method'] ?? null) === ManualPaymentService::COD
+                && ($problem = app(ManualPaymentService::class)->codProblem($cart, (float) $discounts['final_total'] + (float) $shippingData['shipping_amount'], $shippingData['delivery_area'] ?? null))) {
+                throw new \RuntimeException($problem);
+            }
+
             // Create order
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
 

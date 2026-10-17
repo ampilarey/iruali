@@ -147,6 +147,7 @@
                 @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
                     <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
                 @endif
+                @include('orders._manual_payment', ['order' => $order, 'slipAction' => \Illuminate\Support\Facades\URL::signedRoute('guest.orders.payment-slip', ['order' => $order->getKey(), 'token' => (string) $order->guest_token])])
 
                 <a href="{{ $order->guestUrl('receipt') }}" target="_blank" rel="noopener" class="mt-6 w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-50">{{ __('View / print receipt') }}</a>
                 @include('tax.partials.order-documents', ['order' => $order])

@@ -53,7 +53,7 @@ tags come back. Claude Code sessions cannot push tags; the owner would create th
 | `ALERTS_EMAIL` | `admin@iruali.mv` |
 | `HEALTH_DETAIL_TOKEN` | random; lets the deploy check the commit in `/api/health` |
 | SMS | Dhiraagu, same API and login as Akuru (`PRODUCTION_DEPLOY.md` → SMS); set with `smssetup` |
-| BML | **not set yet**: card payment (the only payment method) is off until the BML keys are added |
+| BML | **not set yet**: card payment is off until the BML keys are added. Bank transfer and cash on delivery can be switched on meanwhile in Admin → Settings → Payment methods |
 
 Admin: `admin@iruali.mv`, two-step sign-in required for all staff.
 

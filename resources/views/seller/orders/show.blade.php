@@ -69,6 +69,9 @@
                 <p class="mt-2 text-xs text-gray-600">Payment: {{ strtolower(\App\Services\PaymentService::methodLabel($order->payment_method)) }} ·
                     <span class="rounded-full px-2 py-0.5 font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
                 </p>
+                @if($paymentNote = \App\Services\ManualPaymentService::shopNote($order))
+                    <p class="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900" data-manual-payment-note>{{ $paymentNote }}</p>
+                @endif
                 <div class="mt-4 space-y-2">
                     @if($order->status === 'cancelled')
                         <p class="text-sm text-gray-600">This order was cancelled. Don't send these items.</p>

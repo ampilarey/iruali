@@ -51,6 +51,7 @@ return [
             'admin.payouts', 'admin.payouts.*',
             'admin.sellers.commission',
             'admin.orders', 'admin.orders.show', 'admin.orders.refunded', 'admin.orders.bml-sync',
+            'admin.orders.confirm-payment', 'admin.orders.payment-slip', // bank transfers and cash on delivery
             'admin.returns', 'admin.returns.show', 'admin.returns.refunded',
             'admin.analytics',
             'admin.errors', 'admin.errors.show',

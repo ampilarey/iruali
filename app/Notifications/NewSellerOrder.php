@@ -54,6 +54,10 @@ class NewSellerOrder extends Notification implements ShouldQueue
         foreach (app(\App\Services\PreorderService::class)->shopNotes($this->order, $notifiable->id ?? null) as $note) {
             $mail->line($note); // pre-order items wait for their stock
         }
+        // Bank transfer: wait for iruali to confirm it; cash on delivery: collect it
+        if ($note = \App\Services\ManualPaymentService::shopNote($this->order)) {
+            $mail->line($note);
+        }
 
         return $mail->line(__('Deliver to: :place', ['place' => trim($this->order->shipping_city.', '.$this->order->shipping_state, ', ')]))
             ->action(__('Open in Seller Centre'), route('seller.orders.show', $this->order));

@@ -145,10 +145,12 @@
                         $paymentMethods = app(\App\Services\PaymentService::class)->methods();
                         $paymentHelp = [
                             'bml' => __('Pay now with Visa, Mastercard, American Express or Maestro on Bank of Maldives\' secure payment page.'),
+                            \App\Services\ManualPaymentService::TRANSFER => __('Transfer to our bank account after placing the order, then upload the transfer slip. The shops send your order once the payment is confirmed.'),
+                            \App\Services\ManualPaymentService::COD => __('Pay in cash when your order arrives. For orders from one shop.'),
                         ];
                     @endphp
                     @if($paymentMethods === [])
-                        <p class="rounded-xl border border-sun bg-sun-soft px-4 py-3 text-sm text-sun-ink">{{ __('Card payment is not available right now, so orders can\'t be placed. Please try again later.') }}</p>
+                        <p class="rounded-xl border border-sun bg-sun-soft px-4 py-3 text-sm text-sun-ink">{{ __('Payment is not available right now, so orders can\'t be placed. Please try again later.') }}</p>
                     @endif
                     <div class="space-y-3">
                         @foreach($paymentMethods as $method => $label)

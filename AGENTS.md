@@ -4,6 +4,11 @@
 
 This is a **Laravel 12 (PHP 8.2+) multi-vendor e-commerce app** ("Iruali") with a Vite 6 + Tailwind 4 frontend. There is a single web service plus its supporting datastores.
 
+### Servers and deploys (read first)
+- **`docs/SERVERS.md`** is the real setup: test.iruali.mv auto-deploys from `main`; production iruali.mv is deployed by hand with `bash ~/deploy-live.sh` (newest `main`, no release tags for now), with health check, smoke test and automatic rollback. It lists folders, the production `.env` settings, cron, and the rules learned the hard way.
+- Work on a branch and open a PR; never push to `main`. A change to `/api/health`, the smoke test or `scripts/deploy-*.sh` must keep `scripts/deploy-lib.sh` `verify_site` working (CI does not run the deploy scripts).
+- Never `db:seed` production, never put secrets in commands or docs, read settings with `config()` (not `env()` in `bootstrap/app.php`).
+
 ### Services & how to run them
 - **Web app (Laravel):** `php artisan serve --host=0.0.0.0 --port=8000`. Serves the storefront at `http://127.0.0.1:8000` (homepage lists seeded products; `/login` for auth; admin dashboard under `/admin`).
 - **Frontend assets (Vite dev server):** `npm run dev` (HMR on port 5173). The Blade layouts use `@vite(...)`, so for local browsing either run `npm run dev` or `npm run build` first, otherwise pages that reference the Vite manifest will error. Do **not** run `npm run dev` and `serve` in a way that blocks; run them in the background (e.g. tmux).

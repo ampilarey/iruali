@@ -127,6 +127,34 @@
                         </div>
                         <a href="{{ route('profile.2fa.setup') }}" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ $user->isTwoFactorEnabled() ? __('Manage') : __('Turn on') }}</a>
                     </div>
+
+                    @php
+                        $accounts = app(\App\Services\CustomerAccountService::class);
+                        $deleteBlocked = $accounts->notACustomer($user) ? __('Shop and staff accounts are closed by the iruali team. Please contact us.') : $accounts->eraseProblem($user);
+                    @endphp
+                    <details class="border-t border-gray-100 pt-5" id="delete-account" @if($errors->deleteAccount->any()) open @endif>
+                        <summary class="cursor-pointer font-medium text-gray-900">{{ __('Delete my account') }}</summary>
+                        <div class="mt-3 max-w-md space-y-3 text-sm">
+                            <p class="text-gray-600">{{ __('This removes your name, email, phone, addresses, saved lists and points. Your past orders stay in our records without your details, as the law requires. It cannot be undone.') }}</p>
+                            @if($deleteBlocked)
+                                <p class="rounded-md bg-amber-50 px-3 py-2 text-amber-800">{{ $deleteBlocked }}</p>
+                            @else
+                                <form method="POST" action="{{ route('account.delete') }}" class="space-y-3" data-delete-account>
+                                    @csrf @method('DELETE')
+                                    @if($user->hasPassword() && ! $freshCode)
+                                        <div>
+                                            <label for="delete_password" class="block text-sm text-gray-700">{{ __('Your password') }}</label>
+                                            <input id="delete_password" name="password" type="password" autocomplete="current-password" required class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                                            @error('password', 'deleteAccount')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                        </div>
+                                    @endif
+                                    <label class="flex items-start gap-2"><input type="checkbox" name="confirm" value="1" required class="mt-1"> <span>{{ __('Yes, delete my account and my personal data') }}</span></label>
+                                    @error('confirm', 'deleteAccount')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
+                                    <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">{{ __('Delete my account') }}</button>
+                                </form>
+                            @endif
+                        </div>
+                    </details>
                 </section>
             </div>
         </div>

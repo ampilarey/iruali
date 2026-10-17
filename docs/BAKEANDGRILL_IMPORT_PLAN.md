@@ -43,12 +43,12 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
    B&G: `admin/loyalty/*`, `loyalty/hold*`, `app:reconcile-loyalty-balances`.
 9. ✅ **Birthday offer** (done: birthday in My Account, `marketing:birthday-offers`): optional birthday on the profile; a single-use voucher by email/SMS that week.
    B&G: `marketing:send-birthday-offers`.
-10. **Customer page for staff**: everything about one customer (orders, returns, disputes, messages,
+10. ✅ **Customer page for staff** (done: Admin → Users → a customer, with search by name, email or phone; merge, erase and phone change are for admins): everything about one customer (orders, returns, disputes, messages,
     points, wallet, quotes), tags, private notes, merge duplicate accounts, change phone.
     B&G: `routes/domains/admin_customers.php`.
-11. **Customer reports**: lifetime value, repeat rate, cohorts, top customers, with CSV.
+11. ✅ **Customer reports** (done: Admin → Customer report, CSV download): lifetime value, repeat rate, cohorts, top customers, with CSV.
     B&G: `reports/*` (LTV, cohorts, retention).
-12. **Privacy**: staff can erase a customer's personal data (orders kept, names removed);
+12. ✅ **Privacy** (done: erase on the customer page; My Account → Security → Delete my account, blocked while an order, refund or wallet credit is open): staff can erase a customer's personal data (orders kept, names removed);
     customers can ask to delete their account from My Account. B&G: `CustomerErasureService`.
 13. **Account safety**: "Sign out everywhere"; after repeated wrong passwords a staff account is
     locked for a while and the owner is told; an admin can reset another staff member's two-step

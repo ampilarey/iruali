@@ -49,7 +49,8 @@ class AdminNav
                 ['admin.questions', 'Questions', 'help'],
             ],
             'Customers & marketing' => [
-                ['admin.users', 'Users', 'user'],
+                ['admin.users', 'Users', 'user', ['admin.customers.*']],
+                ['admin.customer-report', 'Customer report', 'columns'],
                 ['admin.campaigns.index', 'Campaigns', 'squares'],
                 ['admin.vouchers.index', 'Vouchers', 'tag'],
                 ['admin.newsletter', 'Newsletter', 'mail', ['admin.newsletter-issues.*']],

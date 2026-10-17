@@ -134,9 +134,19 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $users = User::with('roles')->paginate(10);
+        // Search by name, email or phone (spaces and dashes in the phone ignored)
+        $search = trim((string) request('q'));
+        $users = User::with('roles')
+            ->when($search !== '', function ($query) use ($search) {
+                $digits = preg_replace('/[^0-9]/', '', $search);
+                $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")
+                    ->when(strlen($digits) >= 3, fn ($q) => $q->orWhereRaw("REPLACE(REPLACE(phone, ' ', ''), '-', '') like ?", ["%{$digits}%"])));
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users', 'search'));
     }
 
     public function products()

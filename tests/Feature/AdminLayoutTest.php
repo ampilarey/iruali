@@ -64,4 +64,10 @@ class AdminLayoutTest extends TestCase
             ->get(route('admin.settings'))->assertOk();
         $this->assertMatchesRegularExpression('/<details[^>]*data-fold="payment-methods"[^>]*\bopen\b/', $page->getContent());
     }
+
+    public function test_the_menu_links_to_the_staff_member_s_own_two_step_sign_in(): void
+    {
+        $this->actingAs($this->staff('admin'))->get(route('admin.dashboard'))->assertOk()
+            ->assertSee('data-admin-2fa-link', false)->assertSee(route('profile.2fa.setup'), false);
+    }
 }

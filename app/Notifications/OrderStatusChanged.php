@@ -65,6 +65,10 @@ class OrderStatusChanged extends Notification implements ShouldQueue
             }
         }
 
+        if ($this->order->status === 'delivered') {
+            $mail->line(new \Illuminate\Support\HtmlString(e(__('How did it go?')).' <a href="'.e($this->order->feedbackUrl()).'">'.e(__('Rate your order')).'</a>'));
+        }
+
         return $mail->action(__('View your order'), $this->order->customerUrl());
     }
 

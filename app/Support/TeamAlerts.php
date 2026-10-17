@@ -22,6 +22,7 @@ class TeamAlerts
         'new_order' => ['New order', 'Any order is placed (card orders before payment, too).'],
         'bank_slip' => ['Bank slip to check', 'A customer uploads a bank-transfer slip.'],
         'refund_due' => ['Refund due', 'A refund needs to be sent (cancelled paid order, approved return).'],
+        'complaint' => ['Complaint or low rating', 'Someone sends the complaint form, or rates an order 1 or 2 out of 5.'],
         'dispute_opened' => ['Dispute opened', 'A customer opens a dispute about a shop.'],
         'return_requested' => ['Return requested', 'A customer asks to return items.'],
         'shop_application' => ['New shop application', 'Someone applies to sell on iruali.'],

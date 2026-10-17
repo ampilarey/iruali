@@ -54,7 +54,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
     locked for a while and the owner is told; an admin can reset another staff member's two-step
     sign-in; `staff:create`, `staff:list` commands. B&G: `auth/logout-everywhere`,
     `ClearStaffLoginThrottleCommand.php`, `DELETE admin/staff/{id}/two-factor`.
-14. **Feedback and complaints**: rate the order from the delivered email or order page; a public
+14. ✅ **Feedback and complaints** (done: signed rating link in the delivered email and on the order page; footer → Make a complaint with photos; Admin → Complaints; `complaints:remind` daily, `complaints:weekly-summary` Mondays): rate the order from the delivered email or order page; a public
     complaint form (with photos) and admin complaints list with status, notes, a weekly summary
     and reminders for old ones. B&G: `routes/domains/complaints.php`, `receipts/{token}/feedback`.
 

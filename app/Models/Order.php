@@ -228,6 +228,20 @@ class Order extends Model
         return $this->isGuest() && $this->guest_token ? $this->guestUrl() : route('orders.show', $this);
     }
 
+    /**
+     * The signed "rate your order" link (delivered email, order page); works without signing in.
+     */
+    public function feedbackUrl(): string
+    {
+        return \Illuminate\Support\Facades\URL::temporarySignedRoute('orders.feedback', now()->addDays(60), ['order' => $this->getKey()]);
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<OrderFeedback, $this> */
+    public function feedback(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(OrderFeedback::class);
+    }
+
     public function customerReceiptUrl(): string
     {
         return $this->isGuest() && $this->guest_token ? $this->guestUrl('receipt') : route('orders.receipt', $this);

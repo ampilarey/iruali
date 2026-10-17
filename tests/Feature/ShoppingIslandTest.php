@@ -392,4 +392,12 @@ class ShoppingIslandTest extends TestCase
         $this->shoppingFor('seenu-hithadhoo')->withSession(['locale' => 'dv'])->get('/dv/products')->assertOk()
             ->assertSee('ޑެލިވަރީ ކުރާނީ')->assertSee('ހިތަދޫ');
     }
+
+    public function test_pages_let_the_site_itself_ask_for_the_location(): void
+    {
+        // "Use my location" needs geolocation for this origin; frames from elsewhere still get none
+        $policy = (string) $this->get('/')->headers->get('Permissions-Policy');
+        $this->assertStringContainsString('geolocation=(self)', $policy);
+        $this->assertStringContainsString('camera=()', $policy);
+    }
 }

@@ -11,7 +11,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $cards = fn () => Product::query()->active()->inStock()
+        // "Delivering to <island>": every row shows what reaches the island (or only its own shops)
+        $shopping = app(\App\Services\ShoppingIsland::class);
+        $coverage = app(\App\Services\ShopCoverage::class);
+        $island = $shopping->filterIsland();
+        $view = $shopping->view();
+
+        $cards = fn () => $coverage->apply(Product::query(), $island, $view)->active()->inStock()
             ->with(['category', 'mainImage', 'seller', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating');
@@ -33,6 +39,8 @@ class HomeController extends Controller
 
         $shops = User::query()
             ->where('is_seller', true)->where('seller_approved', true)
+            ->when($island && $view === \App\Services\ShoppingIsland::VIEW_LOCAL, fn ($q) => $q->where('home_island_id', $island->id))
+            ->when($island && $view === \App\Services\ShoppingIsland::VIEW_DELIVERS, fn ($q) => $q->whereNotIn('id', $coverage->blockedSellerIds($island)))
             ->withCount(['products' => fn ($q) => $q->active()])
             ->whereHas('products', fn ($q) => $q->active())
             ->orderByDesc('products_count')
@@ -47,6 +55,10 @@ class HomeController extends Controller
         // Shop by brand: the brands people buy most, then the ones with the most products
         $brands = app(\App\Services\BrandService::class)->popular(12);
 
-        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns'));
+        // "Shops on <island>": the shops based on the chosen island, when there are any
+        $chosen = $shopping->island();
+        $localShops = $chosen ? $coverage->localShops($chosen) : collect();
+
+        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns', 'chosen', 'localShops'));
     }
 }

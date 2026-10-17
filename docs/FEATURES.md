@@ -16,6 +16,40 @@ alerts, related products), `/categories` and `/categories/{slug}` the department
 department picker in the header narrows it. `/compare` holds up to a few products side by side.
 `sitemap.xml` and `robots.txt` are generated from the database (`SitemapController`).
 
+**Delivering to an island.** Customers choose the island they shop for; nothing is ever gated.
+With no island chosen (first visit, search engines) every listing shows everything, with a small
+"Choose your island" line in the header; a first visit also opens "Where should we deliver?" (an
+island list loaded from `GET /delivery/island`, searchable in English and Dhivehi, grouped by atoll
+north to south, plus "Use my location": the browser's position goes to `delivery.island.locate`,
+which picks the nearest switched-on island by haversine distance, within 120 km). Closing it
+(`delivery.island.dismiss`) keeps everything shown and stops asking. Once chosen, the header reads
+"Delivering to: <island> (change)" on every storefront page, next to a three-way view switch
+(`delivery.island.view`): **Delivers to <island>** (default: products whose shop delivers there,
+from Malé shops that deliver everywhere to local shops), **Only shops on <island>** (shops whose
+home island it is) and **Show everything** (all listings; items that can't be delivered carry
+"Doesn't deliver to <island>"). The island and view are kept in the session, a one-year cookie
+and, for signed-in customers, on the account (`users.shopping_island_id`, `shopping_view`); with
+none of those the default address's island counts. `App\Services\ShoppingIsland` holds the choice,
+`App\Services\ShopCoverage::apply()` narrows every listing (home page rows and shops, `/products`,
+`/shop`, departments, deals, search and suggestions, brand pages, campaign pages, "related" and
+"bought together"); a shop's own page always lists all its products, and the wishlist, compare,
+recently viewed and the shop page label rather than hide. The home page adds "Shops on <island>"
+when shops are based there; an island without shops shows "No shops on <island> yet. These shops
+deliver to you" (and, in "Only shops on", one click back to "Delivers to"). The product page's
+delivery box quotes the same island and says "Delivers to" / "Doesn't deliver to"; checkout's new
+address starts at it. Checkout shows a notice on each shop that can't reach the delivery island
+(collect from the shop if it offers pickup, or remove its items), and `DeliveryService::
+prepareOrder()` refuses the order on the server; a gift goes to the gift's address, so its island
+decides. Sitemap, merchant feeds, JSON-LD and robots are unaffected. JSON for the phone app:
+`GET /api/v1/islands`, `GET /api/v1/islands/nearest?lat=&lng=`, `GET|PUT /api/v1/user/shopping-island`
+(`island_id`, `view`), and `island_id` / `view` on `GET /api/v1/products`. The islands themselves
+(207 inhabited islands from `database/data/islands.json`: names and atolls in English and
+Dhivehi, map positions, the prayer-times dataset's id) are loaded by a migration
+(`App\Support\IslandList::load()`, also run by `IslandSeeder`; safe to run again; existing rows
+are matched by English name so addresses keep their ids, and the old "Addu City" row is switched
+off unless something points at it). Delivery fees per shop come in a later change; fees, earnings,
+GST and refunds are as before.
+
 **Brands.** `/brands` (`brands.index`) lists every brand with something on sale, A to Z with a
 filter box, plus the most popular brands once the list is long; the menu, the footer and a "Shop by
 brand" row on the home page link to it. `/brands/{slug}` (`brands.show`) shows one brand: its logo
@@ -137,6 +171,19 @@ by admins at `/admin/legal`. Newsletter sign-up at `POST /newsletter` with an un
 rejects or suspends it. Onboarding steps, `/seller/profile` (logo, banner, description, delivery
 notes, "ships to islands"), `/seller/settings/bank` (payout account, verified by an admin) and
 `/seller/settings/notifications`. Seller help guides at `/seller/help/{guide}`.
+
+**Home island and delivery area.** Every shop has a home island (picked from the islands list on
+`/seller/profile`, required on the shop application `seller.apply`, a step on the onboarding
+checklist, and asked on the dashboard of shops from before) and one of three delivery types:
+**All islands** (the usual Malé shop sending by boat, ferry or cargo; the default, so existing
+shops keep today's behaviour), **My island and Greater Malé** (an island shop sending to Malé,
+Hulhumalé and Villimalé) or **My island only**; the last two can tick their whole atoll and extra
+islands (`shop_delivery_islands`). Existing shops were given a home island from their typed island
+and atoll where it matched the list; those that had unticked "I ship to other islands" became
+"My island and Greater Malé". `App\Services\ShopCoverage::canDeliverTo()` is the one rule used by
+listings, labels and checkout; pickup from the shop is open to everyone whatever the coverage. The
+shop page shows "Based in <island>, <atoll> · Delivers to: …". The fields are not mass-assignable
+(saved with `ShopCoverage::save()`).
 
 **Pausing or hiding new shop applications.** **Admin → Sellers → New shop applications**
 (`admin.seller-applications`, admins only; `App\Support\SellerApplications`) has three choices.
@@ -272,6 +319,12 @@ brands, fix names and web addresses, add a logo and an English/Dhivehi descripti
 duplicates, delete unused ones; old names and addresses keep working), `/admin/users` (roles),
 `/admin/reviews` and `/admin/questions` (moderation), `/admin/vouchers`, `/admin/newsletter`,
 `/admin/settings` (site settings, delivery fees, commission default) and `/admin/legal`.
+`/admin/islands` (`admin.islands`, admins) lists every island with its atoll in both languages, the
+shops based there and the shops delivering there, and switches islands on and off
+(`admin.islands.toggle`, audited as `island.activated` / `island.deactivated`); switched-off islands
+leave every picker, while addresses and orders on them are untouched. Admin → Sellers → a shop's
+page edits its home island and delivery area (`admin.sellers.coverage`, audited as
+`seller.coverage`); the sellers list shows each shop's home island and type.
 
 **Newsletter.** `/admin/newsletter` lists the footer subscribers (who confirm by email first) and
 the newsletters. "Write a newsletter" (`admin.newsletter-issues.*`, admins only): subject and text

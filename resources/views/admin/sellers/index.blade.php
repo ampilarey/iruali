@@ -55,6 +55,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div>{{ $seller->email }}</div>
                                     <div class="text-xs text-gray-500">{{ collect([$seller->phone, $seller->city, $seller->state])->filter()->join(' · ') }}</div>
+                                    <div class="text-xs text-gray-500" data-seller-coverage>{{ __('Home island') }}: {{ $seller->homeIsland?->localized_name ?? __('not set yet') }} · {{ \App\Services\ShopCoverage::options()[$seller->deliveryCoverage()]['label'] }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($seller->status === 'suspended')

@@ -2,38 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Island;
+use App\Support\IslandList;
 use Illuminate\Database\Seeder;
 
+/**
+ * The inhabited islands from database/data/islands.json. A migration already loads them on every
+ * database; this only tops up a local or test database (running it again changes nothing).
+ */
 class IslandSeeder extends Seeder
 {
     public function run()
     {
-        $islands = [
-            [
-                'name' => ['en' => 'Malé', 'dv' => 'މާލެ'],
-                'atoll' => 'Kaafu',
-                'is_active' => true,
-            ],
-            [
-                'name' => ['en' => 'Hulhumalé', 'dv' => 'ހުޅުމާލެ'],
-                'atoll' => 'Kaafu',
-                'is_active' => true,
-            ],
-            [
-                'name' => ['en' => 'Addu City', 'dv' => 'އައްޑޫ'],
-                'atoll' => 'Seenu',
-                'is_active' => true,
-            ],
-            [
-                'name' => ['en' => 'Fuvahmulah', 'dv' => 'ފުވައްމުލައް'],
-                'atoll' => 'Gnaviyani',
-                'is_active' => true,
-            ],
-        ];
-
-        foreach ($islands as $island) {
-            Island::create($island);
-        }
+        IslandList::load();
     }
 }

@@ -76,6 +76,13 @@ class CatalogService
         $r = $this->request;
         $query = Product::query()->active();
 
+        // "Delivering to <island>": what reaches the island, or only its own shops. A shop's own
+        // page always shows all its products (labelled when they can't be delivered there).
+        if (! isset($this->locked['seller'])) {
+            $shopping = app(ShoppingIsland::class);
+            app(ShopCoverage::class)->apply($query, $shopping->filterIsland(), $shopping->view());
+        }
+
         if (($q = trim((string) $r->query('q', ''))) !== '') {
             // Names and descriptions are JSON (one value per language); JSON compares case-sensitively on MySQL.
             $like = '%'.mb_strtolower(str_replace(['%', '_'], ['\%', '\_'], $q)).'%';

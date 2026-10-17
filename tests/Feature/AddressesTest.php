@@ -120,7 +120,11 @@ class AddressesTest extends TestCase
         $this->assertSame('islands', $delivery->zoneForIsland($hithadhoo));
         $this->assertSame('greater_male', $delivery->zoneForIsland(null, 'Hulhumalé'));
         $this->assertSame('islands', $delivery->zoneForIsland(null, 'Thinadhoo'));
-        $this->assertSame(['Kaafu', 'Seenu'], $delivery->islandsByAtoll()->keys()->all());
+        // Every atoll in the islands list (loaded by a migration), alphabetically
+        $atolls = $delivery->islandsByAtoll()->keys()->all();
+        $this->assertContains('Kaafu', $atolls);
+        $this->assertContains('Seenu', $atolls);
+        $this->assertSame($atolls, collect($atolls)->sort()->values()->all());
 
         // Picking an island from the list stores its name and atoll, whatever was typed
         $this->actingAs($this->customer)->post('/account/addresses', $this->fields(['island_id' => $male->id, 'island' => 'typed', 'atoll' => 'typed']))->assertRedirect();

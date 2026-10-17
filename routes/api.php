@@ -51,6 +51,10 @@ Route::prefix('v1')->group(function () {
     // Search
     Route::get('/search', [SearchController::class, 'search']);
 
+    // Islands: the list, the nearest one to a position ("Use my location")
+    Route::get('/islands', [\App\Http\Controllers\Api\IslandController::class, 'index']);
+    Route::get('/islands/nearest', [\App\Http\Controllers\Api\IslandController::class, 'nearest'])->middleware('throttle:30,1');
+
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {
 
@@ -58,9 +62,11 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware('abilities:'.ApiToken::PROFILE_READ)->group(function () {
             Route::get('/user', [UserController::class, 'profile']);
+            Route::get('/user/shopping-island', [\App\Http\Controllers\Api\IslandController::class, 'show']);
         });
         Route::middleware('abilities:'.ApiToken::PROFILE_WRITE)->group(function () {
             Route::put('/user', [UserController::class, 'updateProfile']);
+            Route::put('/user/shopping-island', [\App\Http\Controllers\Api\IslandController::class, 'update']);
             Route::post('/user/change-password', [UserController::class, 'changePassword']);
         });
 

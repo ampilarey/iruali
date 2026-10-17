@@ -47,6 +47,7 @@
                             {{ $item->product->name }}
                         </a>
                     </h3>
+                    @include('products._island_label', ['product' => $item->product, 'class' => 'mb-2'])
                     <p class="text-sm text-gray-600 mb-4">{{ Str::limit($item->product->description, 80) }}</p>
                     @if($drop = $item->savedPriceDrop())
                         <p class="-mt-2 mb-3 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-800" data-price-drop>

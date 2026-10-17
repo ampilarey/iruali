@@ -49,7 +49,7 @@ class SellerApplicationsPauseTest extends TestCase
     {
         return $this->actingAs($user)->post(route('seller.apply.store'), [
             'business_name' => 'Coral Crafts', 'business_description' => 'Handmade lacquer boxes and coconut crafts from Thulhaadhoo.',
-            'phone' => '7771234', 'address' => 'Majeedhee Magu', 'city' => 'Malé', 'agree_seller_terms' => '1',
+            'phone' => '7771234', 'address' => 'Majeedhee Magu', 'home_island_id' => \App\Models\Island::where('code', 'kaafu-male')->value('id'), 'delivery_coverage' => 'all', 'agree_seller_terms' => '1',
         ]);
     }
 

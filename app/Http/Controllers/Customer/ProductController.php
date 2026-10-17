@@ -24,7 +24,7 @@ class ProductController extends Controller
         abort_unless($product->is_active, 404);
 
         $product->load([
-            'category.parent', 'images', 'variants', 'seller', 'brandModel',
+            'category.parent', 'images', 'variants', 'seller.homeIsland', 'brandModel',
             'reviews' => fn ($q) => $q->where('is_approved', true)->with(['user', 'photos', 'replier'])->orderByDesc('helpful_count')->latest(),
         ]);
         $product->reviews->each->setRelation('product', $product); // replies are signed with the product's shop
@@ -37,8 +37,11 @@ class ProductController extends Controller
             ? $cards(Product::query())->where('seller_id', $product->seller_id)->whereKeyNot($product->id)->inStock()->latest()->take(8)->get()
             : collect();
 
-        // Other shops' products in the same department (this shop's are already in the row above).
-        $relatedProducts = $cards(Product::query())
+        // Other shops' products in the same department (this shop's are already in the row above),
+        // narrowed like every listing to what reaches the customer's island
+        $shopping = app(\App\Services\ShoppingIsland::class);
+        $reaching = fn () => app(\App\Services\ShopCoverage::class)->apply(Product::query(), $shopping->filterIsland(), $shopping->view());
+        $relatedProducts = $cards($reaching())
             ->where('category_id', $product->category_id)
             ->whereKeyNot($product->id)
             ->whereNotIn('id', $moreFromSeller->pluck('id'))
@@ -56,7 +59,7 @@ class ProductController extends Controller
             ->orderByDesc('together')
             ->take(10)
             ->pluck('product_id');
-        $boughtTogether = $boughtTogetherIds->isEmpty() ? collect() : $cards(Product::query())->whereIn('id', $boughtTogetherIds)->inStock()->get()
+        $boughtTogether = $boughtTogetherIds->isEmpty() ? collect() : $cards($reaching())->whereIn('id', $boughtTogetherIds)->inStock()->get()
             ->sortBy(fn ($p) => $boughtTogetherIds->search($p->id))->take(3)->values();
 
         $reviews = $product->reviews;

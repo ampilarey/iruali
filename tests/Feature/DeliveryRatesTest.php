@@ -284,7 +284,7 @@ class DeliveryRatesTest extends TestCase
         $this->cartFor($customer, [[$product, 1]]);
 
         $this->withSession(['locale' => 'dv'])->get('/dv/products/'.$product->slug)->assertOk()
-            ->assertSee('Malé އަށް ޑެލިވަރީ')
+            ->assertSee('މާލެ އަށް ޑެލިވަރީ') // the listed Malé, with its Dhivehi name
             ->assertSee('ލިބޭނެ ދުވަސް:')
             ->assertSee('ޑެލިވަރީ ފީއެއް ނުދައްކައި');
 

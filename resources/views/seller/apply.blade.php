@@ -60,19 +60,16 @@
                             <label for="phone" class="block text-sm font-medium text-gray-700">{{ __('Phone *') }}</label>
                             <input id="phone" name="phone" type="tel" required class="{{ $field }}" value="{{ old('phone', $user->phone) }}" placeholder="{{ __('7XX XXXX') }}">
                         </div>
-                        <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700">{{ __('Island / city *') }}</label>
-                            <input id="city" name="city" required class="{{ $field }}" value="{{ old('city', $user->city) }}" placeholder="{{ __('e.g. Malé') }}">
-                        </div>
                         <div class="sm:col-span-2">
                             <label for="address" class="block text-sm font-medium text-gray-700">{{ __('Address *') }}</label>
                             <input id="address" name="address" required class="{{ $field }}" value="{{ old('address', $user->address) }}">
                         </div>
-                        <div>
-                            <label for="state" class="block text-sm font-medium text-gray-700">{{ __('Atoll') }}</label>
-                            <input id="state" name="state" class="{{ $field }}" value="{{ old('state', $user->state) }}" placeholder="{{ __('e.g. Kaafu') }}">
-                        </div>
                     </div>
+                </section>
+
+                <section class="space-y-4 border-t border-gray-100 pt-6" id="delivery">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Your island and delivery area') }}</h2>
+                    @include('seller.partials.coverage-fields', ['shop' => null, 'islandsByAtoll' => $islandsByAtoll, 'homeRequired' => true, 'prefix' => 'apply'])
                 </section>
 
                 @include('seller.verification._apply')

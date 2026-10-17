@@ -162,7 +162,11 @@ class BulkQuoteRequestsTest extends TestCase
         $medium = ProductVariant::factory()->for($hoodie)->create(['attributes' => ['Size' => 'M'], 'stock_quantity' => 80, 'is_active' => true]);
         $retired = ProductVariant::factory()->for($hoodie)->create(['attributes' => ['Size' => 'XL'], 'stock_quantity' => 5, 'is_active' => false]);
 
-        $this->actingAs($customer)->get(route('quotes.create', ['product' => $hoodie->id]))->assertOk()->assertSee('name="product_variant_id"', false)->assertDontSee('value="'.$retired->id.'"', false);
+        $page = $this->actingAs($customer)->get(route('quotes.create', ['product' => $hoodie->id]))->assertOk()->assertSee('name="product_variant_id"', false);
+        // Only the option list for the variant (the island list has numbered options too)
+        preg_match('/<select id="quote-variant".*?<\/select>/s', $page->getContent(), $variantSelect);
+        $this->assertStringNotContainsString('value="'.$retired->id.'"', $variantSelect[0]);
+        $this->assertStringContainsString('value="'.$medium->id.'"', $variantSelect[0]);
 
         $this->sendRequest($customer, $hoodie)->assertSessionHasErrors('product_variant_id');
         $this->sendRequest($customer, $hoodie, ['product_variant_id' => $retired->id])->assertSessionHasErrors('product_variant_id');

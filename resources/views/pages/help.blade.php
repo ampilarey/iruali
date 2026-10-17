@@ -68,6 +68,9 @@
                     </tbody>
                 </table>
                 <p class="text-gray-700 mt-3">{{ __('Sellers ship by boat and air to islands across every atoll. Delivery times depend on the ferry and flight schedule to your island.') }}</p>
+                <h3 class="font-semibold mt-4">{{ __('Choosing your island') }}</h3>
+                <p class="text-gray-700 mt-1">{{ __('Use "Delivering to" at the top of every page to choose the island you shop for, or "Use my location" to find it. You then see what can be delivered there: shops in Malé that send everywhere, and shops on your own island. Sending a gift to family? Change the island first.') }}</p>
+                <p class="text-gray-700 mt-2">{{ __('Next to it you can switch to "Only shops on your island" to buy from local sellers, or "Show everything". Items a shop cannot deliver to your island are then marked "Doesn\'t deliver to" your island; you can still collect them if the shop offers pickup. Until you choose an island, everything is shown.') }}</p>
             </section>
 
             <section id="payment" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">

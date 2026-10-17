@@ -16,7 +16,9 @@
             'pickup' => $shop['pickup'] !== null,
             'surcharge' => $shop['surcharge'],
             'estimates' => $shop['estimates'],
+            'reach' => $shop['reach'],
         ])->values(),
+        'addressIslands' => (object) $deliveryCheckout['addressIslands'],
     ];
 @endphp
 <script type="application/json" id="delivery-config">@json($deliveryConfig)</script>
@@ -53,6 +55,21 @@
                 if (card && card.value && cfg.addressAreas[card.value]) return cfg.addressAreas[card.value];
                 return checked('delivery_zone') === 'greater_male' ? 'greater_male' : atollArea(atoll);
             };
+
+            // The delivery island: the saved address card's, else the island picked (or typed) for a new address
+            function destination() {
+                var card = form.querySelector('input[name="address_id"]:checked');
+                if (card && card.value && cfg.addressIslands[card.value]) {
+                    var a = cfg.addressIslands[card.value];
+                    return { id: a.id ? parseInt(a.id, 10) : null, name: a.name || '', known: !!(a.id || a.name) };
+                }
+                if (islandSelect && islandSelect.value) {
+                    return { id: parseInt(islandSelect.value, 10), name: islandSelect.options[islandSelect.selectedIndex].textContent.trim(), known: true };
+                }
+                var typed = form.querySelector('[data-island-text]');
+                var name = typed ? typed.value.trim() : '';
+                return { id: null, name: name, known: name !== '' };
+            }
 
             function toggleAddress(allPickup) {
                 if (pickupContact) {
@@ -95,6 +112,17 @@
                     form.querySelectorAll('[data-shop="' + shop.key + '"] [data-shop-estimate]').forEach(function (el) { el.textContent = shop.estimates[current] || ''; });
                 });
 
+                // Shops that don't reach the delivery island: show their notice (the server refuses the order too)
+                var dest = destination();
+                cfg.shops.forEach(function (shop) {
+                    var box = form.querySelector('[data-shop="' + shop.key + '"] [data-shop-blocked]');
+                    if (!box || !shop.reach) return;
+                    var blocked = methodOf(shop) === 'deliver' && dest.known && (dest.id ? shop.reach.indexOf(dest.id) === -1 : true);
+                    box.classList.toggle('hidden', !blocked);
+                    var text = box.querySelector('[data-shop-blocked-text]');
+                    if (text && blocked) text.textContent = box.dataset.template.split(':island').join(dest.name);
+                });
+
                 var toggle = function (selector, show) { var el = form.querySelector(selector); if (el) el.classList.toggle('hidden', !show); return el; };
                 toggle('[data-delivery-zones]', anyDelivered);
                 var note = toggle('[data-area-note]', anyDelivered);
@@ -122,6 +150,8 @@
             });
             form.addEventListener('island:change', function (e) { readAtoll(); if (e.detail && e.detail.id) atoll = e.detail.atoll || atoll; update(); });
             if (atollText) atollText.addEventListener('input', function () { readAtoll(); update(); });
+            var islandText = form.querySelector('[data-island-text]');
+            if (islandText) islandText.addEventListener('input', update);
             update();
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

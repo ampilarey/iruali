@@ -40,7 +40,8 @@ class SearchController extends Controller
 
         $like = '%'.mb_strtolower(str_replace(['%', '_'], ['\%', '\_'], $q)).'%';
 
-        $products = Product::query()->active()
+        $shopping = app(\App\Services\ShoppingIsland::class);
+        $products = app(\App\Services\ShopCoverage::class)->apply(Product::query(), $shopping->filterIsland(), $shopping->view())->active()
             ->with('mainImage')
             ->where('search_text', 'like', $like)
             ->orderByRaw('CASE WHEN stock_quantity > 0 THEN 0 ELSE 1 END')

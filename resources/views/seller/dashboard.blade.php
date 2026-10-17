@@ -15,6 +15,14 @@
             </div>
         @endif
 
+        @if(! $onboarding && ! \App\Support\CurrentShop::get()->home_island_id)
+            {{-- Shops from before home islands: ask once where they are and where they deliver --}}
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" data-home-island-notice>
+                {{ __('Customers now choose the island they shop for. Tell us your home island and where you deliver, so the right customers see your products.') }}
+                <a href="{{ route('seller.profile') }}#delivery" class="ms-1 font-semibold underline">{{ __('Set your delivery area') }}</a>
+            </div>
+        @endif
+
         @if($onboarding)
             @php $done = collect($onboarding)->where('done', true)->count(); $all = count($onboarding); @endphp
             <div class="rounded-lg border border-primary-100 bg-white p-5 shadow" data-onboarding>

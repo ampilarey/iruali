@@ -18,8 +18,9 @@ class SellerApplicationTest extends TestCase
             'business_description' => 'Handmade coir rope, woven mats and lacquer work from Thulhaadhoo.',
             'phone' => '7771234',
             'address' => 'M. Blue House',
-            'city' => 'Male',
-            'state' => 'Kaafu',
+            // The home island comes from the islands list (the typed island and atoll fields went)
+            'home_island_id' => \App\Models\Island::where('code', 'kaafu-male')->value('id'),
+            'delivery_coverage' => 'all',
             'agree_seller_terms' => '1',
         ], $overrides);
     }

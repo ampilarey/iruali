@@ -42,7 +42,9 @@ class ApplicationController extends Controller
             return redirect()->guest(route('login'));
         }
 
-        return view('seller.apply', compact('user'));
+        $islandsByAtoll = app(\App\Services\DeliveryService::class)->islandsByAtoll();
+
+        return view('seller.apply', compact('user', 'islandsByAtoll'));
     }
 
     /**
@@ -87,10 +89,8 @@ class ApplicationController extends Controller
             'business_description' => 'required|string|min:20|max:2000',
             'phone' => 'required|string|max:20|unique:users,phone,'.$user->id,
             'address' => 'required|string|max:500',
-            'city' => 'required|string|max:100',
-            'state' => 'nullable|string|max:100',
             'agree_seller_terms' => 'accepted',
-        ], [
+        ] + \App\Services\ShopCoverage::rules(true), \App\Services\ShopCoverage::messages() + [
             'agree_seller_terms.accepted' => 'You must agree to the seller terms.',
             'business_description.min' => 'Please tell us a little more about what you sell (at least 20 characters).',
         ]);
@@ -98,20 +98,23 @@ class ApplicationController extends Controller
         $verification = app(\App\Services\SellerVerificationService::class)->validateApplication($request);
 
         $role = Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller']);
+        // The home island picked from the list also fills the old free-text island and atoll
+        $home = \App\Models\Island::findOrFail((int) $validated['home_island_id']);
 
         $user->forceFill([
             'business_name' => $validated['business_name'],
             'business_description' => $validated['business_description'],
             'phone' => $validated['phone'],
             'address' => $validated['address'],
-            'city' => $validated['city'],
-            'state' => $validated['state'] ?? $user->state,
+            'city' => $home->englishName(),
+            'state' => $home->atoll ?: $user->state,
             'is_seller' => true,
             'seller_approved' => false,
             'seller_approved_at' => null,
             'seller_applied_at' => now(),
         ])->save();
 
+        app(\App\Services\ShopCoverage::class)->save($user, $validated);
         $user->roles()->syncWithoutDetaching([$role->id]);
         if ($verification) {
             app(\App\Services\SellerVerificationService::class)->submit($user, $verification);

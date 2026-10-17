@@ -56,6 +56,7 @@ class OrderController extends Controller
             'shipping_country' => $request->shipping_country,
             'shipping_phone' => $request->shipping_phone,
             'delivery_zone' => $request->delivery_zone,
+            'island_id' => $request->filled('island_id') ? (int) $request->input('island_id') : null,
             'payment_method' => $request->payment_method,
             'use_wallet' => $request->boolean('use_wallet'),
         ];

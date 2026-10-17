@@ -32,6 +32,7 @@ class ShopController extends Controller
     public function seller(Request $request, User $seller, CatalogService $catalog)
     {
         abort_unless($seller->isSeller(), 404);
+        $seller->loadMissing(['homeIsland', 'deliveryIslands']);
 
         return view('catalog.index', $catalog->listing($request, ['seller' => $seller]) + [
             'title' => $seller->business_name ?: $seller->name,

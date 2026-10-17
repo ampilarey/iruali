@@ -199,7 +199,7 @@ class BusinessVerificationTest extends TestCase
         $application = [
             'business_name' => 'Island Crafts',
             'business_description' => 'Handmade coir rope, woven mats and lacquer work from Thulhaadhoo.',
-            'phone' => '7771234', 'address' => 'M. Blue House', 'city' => 'Male', 'state' => 'Kaafu',
+            'phone' => '7771234', 'address' => 'M. Blue House', 'home_island_id' => \App\Models\Island::where('code', 'kaafu-male')->value('id'), 'delivery_coverage' => 'all',
             'agree_seller_terms' => '1',
         ];
 

@@ -67,6 +67,9 @@
                 </button>
             </div>
         </form>
+        <a href="{{ route('login.code') }}" class="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50" data-login-code-link>
+            <x-icon name="phone" class="h-4 w-4" />{{ __('Sign in with a code instead (no password)') }}
+        </a>
         @include('auth._social')
     </div>
 </div>

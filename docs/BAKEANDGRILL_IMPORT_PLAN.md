@@ -24,7 +24,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
    slip uploaded, refund due, dispute opened, new shop application, product waiting for review,
    payment error, backup or scheduler failure. A Telegram bot posting new orders to a group.
    B&G: `backend/app/Domains/Telegram/*`, `admin/staff/{userId}/notification-prefs`.
-4. **Sign in with an SMS code** (no password), and "forgot password" by SMS code, for customers
+4. ✅ **Sign in with an SMS code** (done: /login/code, `CodeLoginController`; a new password without the old one for 15 minutes after) (no password), and "forgot password" by SMS code, for customers
    with a verified phone. Sign-in code by email as a fallback. Throttled per phone and per IP.
    B&G: `CustomerAuthController` (`auth/customer/otp/*`, `check-phone`), `CustomerOtpService.php`.
 5. **Payment link** for an unpaid order (card, or the bank-transfer details), sent by SMS or

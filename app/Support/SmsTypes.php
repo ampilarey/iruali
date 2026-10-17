@@ -46,6 +46,11 @@ class SmsTypes
                 'text' => 'iruali: your verification code is :code. It expires in 10 minutes.',
                 'data' => ['code' => '482913'], 'required' => ['code'],
             ],
+            'login_code' => [
+                'group' => 'account', 'label' => 'Sign-in code', 'urgent' => true,
+                'text' => 'iruali: your sign-in code is :code. It expires in 10 minutes. Never share it with anyone.',
+                'data' => ['code' => '615204'], 'required' => ['code'],
+            ],
             'order_placed' => [
                 'group' => 'orders', 'label' => 'Order placed',
                 'text' => 'iruali: we have your order :number (:amount). We will text you when it is on its way.',

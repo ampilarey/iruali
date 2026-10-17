@@ -269,6 +269,22 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * Check if phone is verified.
      */
+    /**
+     * The account with this verified mobile number (any way it was typed), or null.
+     */
+    public static function findByVerifiedPhone(?string $phone): ?self
+    {
+        $normalized = \App\Services\Sms\PhoneNumber::normalize($phone);
+        if (! $normalized) {
+            return null;
+        }
+
+        return self::whereNotNull('phone_verified_at')
+            ->whereRaw("REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE ?", ['%'.substr($normalized, -7)])
+            ->get()
+            ->first(fn (self $user) => \App\Services\Sms\PhoneNumber::normalize($user->phone) === $normalized);
+    }
+
     public function isPhoneVerified(): bool
     {
         return ! is_null($this->phone_verified_at);

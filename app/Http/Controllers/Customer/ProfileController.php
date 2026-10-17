@@ -61,8 +61,10 @@ class ProfileController extends Controller
 
     public function updatePassword(Request $request)
     {
+        // Signed in with a code a moment ago (the "forgot password" route by SMS): no old password needed
+        $fresh = CodeLoginController::recentlySignedInWithCode($request);
         $request->validate([
-            'current_password' => 'required|current_password',
+            'current_password' => $fresh ? 'nullable' : 'required|current_password',
             'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
@@ -70,6 +72,7 @@ class ProfileController extends Controller
         $user->forceFill(['password' => Hash::make($request->password)])->save();
         $user->tokens()->delete();
         Auth::logoutOtherDevices($request->password);
+        $request->session()->forget('code_signed_in_at');
 
         NotificationService::success(__('Your password has been changed.'));
 

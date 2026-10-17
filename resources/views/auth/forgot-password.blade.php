@@ -23,6 +23,7 @@
                 @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <button type="submit" class="w-full flex justify-center py-2 px-4 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ __('Email me a reset link') }}</button>
+            <p class="text-center text-sm text-gray-600">{{ __('In a hurry?') }} <a href="{{ route('login.code') }}" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Sign in with a code by SMS or email') }}</a> {{ __('and set a new password in My Account.') }}</p>
             <p class="text-center text-sm text-gray-600"><a href="{{ route('login') }}" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Back to sign in') }}</a></p>
         </form>
     </div>

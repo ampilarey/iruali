@@ -7,7 +7,7 @@
 @section('content')
 <div class="bg-gray-50">
     <div class="max-w-5xl mx-auto px-4 lg:px-6 py-8 lg:py-12">
-        <div class="grid lg:grid-cols-2 gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <div>
                 <div class="rounded-2xl bg-primary text-white p-8 min-h-[14rem] flex flex-col justify-end relative overflow-hidden">
                     <x-icon name="gift" class="absolute -top-4 -end-4 w-40 h-40 opacity-20" />

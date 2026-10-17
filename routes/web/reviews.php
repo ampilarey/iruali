@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews');
-    Route::post('/reviews/{review}/reply', [ReviewController::class, 'reply'])->name('reviews.reply')->middleware('throttle:30,1');
+    Route::post('/reviews/{review}/reply', [ReviewController::class, 'reply'])->name('reviews.reply')->middleware('throttle:30,1,reviews.reply');
 });
 
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {

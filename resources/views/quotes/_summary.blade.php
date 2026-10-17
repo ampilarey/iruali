@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <dl class="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+    <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
         <div><dt class="text-gray-500">{{ __('Quantity asked for') }}</dt><dd class="font-semibold text-dark" dir="ltr">{{ $quote->quantity }}</dd></div>
         <div><dt class="text-gray-500">{{ __('Deliver to') }}</dt><dd class="text-dark">{{ $quote->deliveryPlace() }}</dd></div>
         <div><dt class="text-gray-500">{{ __('Needed by') }}</dt><dd class="text-dark">{{ $quote->needed_by ? $quote->needed_by->translatedFormat('j M Y') : __('No date given') }}</dd></div>

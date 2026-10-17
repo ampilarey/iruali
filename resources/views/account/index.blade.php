@@ -45,7 +45,7 @@
                         <h2 class="text-xl font-semibold text-dark">{{ __('Profile Information') }}</h2>
                         <a href="{{ route('account.edit') }}" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
                     </div>
-                    <dl class="grid gap-4 sm:grid-cols-2 text-sm">
+                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
                         <div><dt class="text-gray-500">{{ __('Name') }}</dt><dd class="text-gray-900">{{ $user->name }}</dd></div>
                         <div><dt class="text-gray-500">{{ __('Email') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->email }}</dd></div>
                         <div><dt class="text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->phone ?: __('Not added') }}@if($user->phone && $user->isPhoneVerified()) <span class="text-xs text-green-700">({{ __('verified') }})</span>@endif</dd></div>

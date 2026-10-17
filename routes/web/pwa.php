@@ -13,6 +13,6 @@ use Illuminate\Support\Facades\Route;
 Route::view('/offline', 'pages.offline')->name('offline');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/account/push', [PushSubscriptionController::class, 'store'])->name('account.push.store')->middleware('throttle:20,1');
-    Route::delete('/account/push', [PushSubscriptionController::class, 'destroy'])->name('account.push.destroy')->middleware('throttle:20,1');
+    Route::post('/account/push', [PushSubscriptionController::class, 'store'])->name('account.push.store')->middleware('throttle:20,1,account.push.store');
+    Route::delete('/account/push', [PushSubscriptionController::class, 'destroy'])->name('account.push.destroy')->middleware('throttle:20,1,account.push.destroy');
 });

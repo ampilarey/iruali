@@ -50,4 +50,18 @@ class AdminLayoutTest extends TestCase
             ->assertDontSee('data-nav="admin.orders"', false)->assertDontSee('data-nav="admin.settings"', false)
             ->assertDontSee('>Money<', false);
     }
+
+    public function test_page_sections_fold_to_their_headings_and_open_on_errors(): void
+    {
+        $admin = $this->staff('admin');
+
+        $page = $this->actingAs($admin)->get(route('admin.settings'))->assertOk();
+        $page->assertSee('data-fold="payment-methods"', false);
+        $this->assertDoesNotMatchRegularExpression('/<details[^>]*data-fold="payment-methods"[^>]*\bopen\b/', $page->getContent());
+
+        // A form sent back with errors shows every section, so the error is in view
+        $page = $this->withSession(['errors' => (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag(['contact_email' => 'Bad email']))])
+            ->get(route('admin.settings'))->assertOk();
+        $this->assertMatchesRegularExpression('/<details[^>]*data-fold="payment-methods"[^>]*\bopen\b/', $page->getContent());
+    }
 }

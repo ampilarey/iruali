@@ -7,7 +7,7 @@
     @include('seller.partials.header', ['title' => 'Earnings'])
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-lg bg-white p-5 shadow">
                 <p class="text-sm text-gray-500">Ready for payout</p>
                 <p class="mt-1 text-2xl font-bold text-green-700">{{ Money::format($balances['available']) }}</p>
@@ -38,7 +38,7 @@
             <p class="text-sm text-gray-600">{{ __('Payouts go to') }} {{ $user->bankAccount->account_name }} · {{ $user->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $user->bankAccount->maskedNumber() }}</span>.</p>
         @endif
 
-        <div class="grid gap-6 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 overflow-hidden rounded-lg bg-white shadow">
                 <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">Earnings by order</h2></div>
                 <div class="overflow-x-auto">

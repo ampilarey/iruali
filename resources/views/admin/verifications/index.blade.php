@@ -38,12 +38,12 @@
                     <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $statusStyles[$verification->status] ?? 'bg-gray-100 text-gray-700' }}">{{ $statusLabels[$verification->status] ?? $verification->status }}</span>
                 </div>
 
-                <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                     <div><dt class="text-gray-500">{{ __('Business registration number') }}</dt><dd class="font-mono font-semibold text-gray-900" dir="ltr">{{ $verification->business_registration_number }}</dd></div>
                     <div><dt class="text-gray-500">{{ __('Owner\'s national ID card number') }}</dt><dd class="font-mono font-semibold text-gray-900" dir="ltr">{{ $verification->nationalIdNumber() ?? __('Cannot be read') }}</dd></div>
                 </dl>
 
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     @foreach($documents as $document => $label)
                         @php $url = route('admin.verifications.document', [$verification, $document]); @endphp
                         <figure class="rounded-lg border border-gray-200 p-3" data-document="{{ $document }}">

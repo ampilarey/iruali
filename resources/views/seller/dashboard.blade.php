@@ -34,7 +34,7 @@
                     @if(\Illuminate\Support\Facades\Route::has('seller.help.show'))<a href="{{ route('seller.help.show', 'getting-approved') }}" class="text-sm font-medium text-primary-600 hover:underline">{{ __('How approval works') }}</a>@endif
                 </div>
                 <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100"><div class="h-2 rounded-full bg-primary-500" style="width: {{ $all ? round($done / $all * 100) : 0 }}%"></div></div>
-                <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+                <ul class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                     @foreach($onboarding as $item)
                         <li class="flex items-start gap-2 text-sm">
                             <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $item['done'] ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400' }}">{{ $item['done'] ? '✓' : '·' }}</span>
@@ -64,7 +64,7 @@
             @endforeach
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="rounded-lg bg-white shadow">
                 <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
                     <h2 class="text-lg font-semibold text-gray-900">Recent orders</h2>

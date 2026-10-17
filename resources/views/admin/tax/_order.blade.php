@@ -5,8 +5,7 @@
     $canOpenInvoices = \App\Support\StaffAccess::can('admin.orders.invoice');
 @endphp
 @unless($giftCardOrder)
-    <div class="rounded-lg bg-white p-5 shadow text-sm" data-order-tax>
-        <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">{{ __('Invoices and GST') }}</h2>
+    <x-admin.fold :title="__('Invoices and GST')" body="text-sm" data-order-tax>
         @if($order->buyer_business_name)
             <div class="mt-2">
                 <p class="text-xs text-gray-500">{{ __('Buying for a business') }}</p>
@@ -35,5 +34,5 @@
                 </li>
             @endforeach
         </ul>
-    </div>
+    </x-admin.fold>
 @endunless

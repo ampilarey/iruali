@@ -15,7 +15,7 @@
 <div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'New shop applications', 'back' => route('admin.sellers')])
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <form method="POST" action="{{ route('admin.seller-applications.update') }}" class="lg:col-span-2 space-y-5 rounded-lg bg-white p-6 shadow">
             @csrf
             @method('PUT')
@@ -40,7 +40,7 @@
                 <p id="until-hint" class="mt-1 text-xs text-gray-500">When paused or hidden, applications open again at the start of this day (Maldives time) and everyone on the waiting list gets an email. Leave it empty to reopen them yourself.</p>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="seller_applications_message_en" class="block text-sm font-medium text-gray-700">Message (English)</label>
                     <textarea id="seller_applications_message_en" name="seller_applications_message_en" rows="3" maxlength="300" class="{{ $field }}" placeholder="We are getting our first shops ready and will take new ones again soon.">{{ old('seller_applications_message_en', $messageEn) }}</textarea>

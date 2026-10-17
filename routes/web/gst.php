@@ -26,7 +26,7 @@ Route::get('/orders/guest/{order}/{token}/invoices/{part}', [TaxInvoiceControlle
 // Shops: tax details, their invoice for each paid order, iruali's commission invoice for each payout
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/settings/tax', [TaxSettingsController::class, 'edit'])->name('settings.tax');
-    Route::put('/settings/tax', [TaxSettingsController::class, 'update'])->name('settings.tax.update')->middleware('throttle:10,1');
+    Route::put('/settings/tax', [TaxSettingsController::class, 'update'])->name('settings.tax.update')->middleware('throttle:10,1,settings.tax.update');
     Route::get('/orders/{order}/invoice', [TaxInvoiceController::class, 'seller'])->name('orders.invoice');
     Route::get('/payouts/{payout}/invoice', [TaxInvoiceController::class, 'sellerCommission'])->name('payouts.invoice');
 });

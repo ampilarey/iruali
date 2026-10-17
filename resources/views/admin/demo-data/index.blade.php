@@ -13,7 +13,7 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <p class="text-sm text-gray-600">{{ __('The test site was filled with sample shops and products so there was something to click on. When the real shops are ready, take the sample data off the site here. Nothing is deleted for good: Restore puts it back.') }}</p>
 
-        <dl class="grid gap-4 sm:grid-cols-3">
+        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div class="rounded-lg bg-white p-4 shadow">
                 <dt class="text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Demo shops') }}</dt>
                 <dd class="mt-1 text-2xl font-semibold text-gray-900 tabular-nums" data-count="shops">{{ $status['shops'] }}</dd>
@@ -38,8 +38,7 @@
                 @endif
             </div>
         @else
-            <section class="rounded-lg bg-white p-6 shadow" aria-labelledby="remove-heading">
-                <h2 id="remove-heading" class="text-lg font-semibold text-gray-900">{{ __('Remove sample data') }}</h2>
+            <x-admin.fold :title="__('Remove sample data')" aria-labelledby="remove-heading">
                 <p class="mt-1 text-sm text-gray-600">{{ __('What happens when you remove it:') }}</p>
                 <ul class="mt-2 list-disc space-y-1.5 ps-5 text-sm text-gray-700">
                     <li>{{ trans_choice(':count sample product is taken off the site (hidden, not deleted for good).|:count sample products are taken off the site (hidden, not deleted for good).', $status['products_live'], ['count' => $status['products_live']]) }}</li>
@@ -67,12 +66,11 @@
                     </div>
                     <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">{{ __('Remove sample data') }}</button>
                 </form>
-            </section>
+            </x-admin.fold>
         @endif
 
         @if($status['can_restore'])
-            <section class="rounded-lg bg-white p-6 shadow" aria-labelledby="restore-heading">
-                <h2 id="restore-heading" class="text-lg font-semibold text-gray-900">{{ __('Restore sample data') }}</h2>
+            <x-admin.fold :title="__('Restore sample data')" aria-labelledby="restore-heading">
                 @if($status['removed_at'])
                     <p class="mt-1 text-sm text-gray-600">{{ __('The sample data was removed on :date.', ['date' => \Illuminate\Support\Carbon::parse($status['removed_at'])->format('d M Y H:i')]) }}</p>
                 @endif
@@ -82,7 +80,7 @@
                     @csrf
                     <button type="submit" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ __('Restore sample data') }}</button>
                 </form>
-            </section>
+            </x-admin.fold>
         @endif
 
         @if($removedElsewhere > 0)

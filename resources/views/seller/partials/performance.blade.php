@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<div class="grid gap-6 lg:grid-cols-2">
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <div class="rounded-lg bg-white p-5 shadow">
         <h2 class="text-lg font-semibold text-gray-900">{{ __('Sales by week, last 12 weeks') }}</h2>
         <div class="mt-6 flex h-40 items-end gap-1" data-chart="weekly">

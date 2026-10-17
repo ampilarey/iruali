@@ -1,6 +1,5 @@
 {{-- Admin → Brands → edit: shops iruali has confirmed as authorised sellers of this brand (BrandSellerController) --}}
-<section id="authorised-sellers" class="rounded-lg bg-white p-6 shadow text-sm scroll-mt-6">
-    <h2 class="text-base font-semibold text-gray-900">{{ __('Authorised sellers') }}</h2>
+<x-admin.fold :title="__('Authorised sellers')" class="scroll-mt-6" body="text-sm" id="authorised-sellers">
     <p class="mt-1 text-gray-600">{{ __('Shops iruali has confirmed may sell :brand. Their :brand products show an "Authorised seller" badge, and they come first on the brand page.', ['brand' => $brand->name]) }}</p>
 
     @if($authorisedSellers->isEmpty())
@@ -73,4 +72,4 @@
             </ul>
         @endif
     @endif
-</section>
+</x-admin.fold>

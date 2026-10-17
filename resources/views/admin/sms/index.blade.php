@@ -4,21 +4,20 @@
 <div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'SMS'])
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="space-y-6">
-            <div class="rounded-lg bg-white p-5 shadow text-sm space-y-2">
-                <h2 class="font-semibold text-gray-900">Gateway</h2>
+            <x-admin.fold title="Gateway" body="text-sm space-y-2">
                 @if($live)
                     <p class="text-green-800">Driver <code class="rounded bg-gray-100 px-1">{{ $driver }}</code>: messages are sent through <span class="break-all">{{ config('sms.http.url') }}</span>.</p>
                 @else
                     <p class="text-amber-800">Driver <code class="rounded bg-gray-100 px-1">log</code>: nothing is sent. Messages are written to the log and listed here. Set <code>SMS_DRIVER=http</code> with <code>SMS_URL</code>, <code>SMS_METHOD</code>, <code>SMS_AUTH_HEADER</code>, <code>SMS_BODY_TEMPLATE</code>, <code>SMS_SENDER_ID</code> and <code>SMS_SUCCESS_REGEX</code> in <code>.env</code> to connect a Dhiraagu / Ooredoo bulk-SMS account.</p>
                 @endif
                 <p class="text-xs text-gray-500">Last 30 days: {{ $counts['sent'] ?? 0 }} sent · {{ $counts['failed'] ?? 0 }} failed · {{ $counts['invalid'] ?? 0 }} invalid numbers · {{ $counts['logged'] ?? 0 }} logged only</p>
-            </div>
+            </x-admin.fold>
 
-            <form method="POST" action="{{ route('admin.sms.test') }}" class="rounded-lg bg-white p-5 shadow text-sm space-y-3">
+            <form method="POST" action="{{ route('admin.sms.test') }}">
+                <x-admin.fold title="Send a test SMS" body="text-sm space-y-3">
                 @csrf
-                <h2 class="font-semibold text-gray-900">Send a test SMS</h2>
                 <div>
                     <label for="to" class="block font-medium text-gray-700">Mobile number</label>
                     <input id="to" name="to" value="{{ old('to') }}" required dir="ltr" placeholder="777 1234" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
@@ -30,11 +29,11 @@
                     @error('message')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
                 </div>
                 <button class="w-full rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700">Send test</button>
+                </x-admin.fold>
             </form>
         </div>
 
-        <div class="lg:col-span-2 overflow-hidden rounded-lg bg-white shadow">
-            <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">Recent messages</h2></div>
+        <x-admin.fold title="Recent messages" class="lg:col-span-2" flush :open="true">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
@@ -56,7 +55,7 @@
                 </table>
             </div>
             <div class="px-4 py-3">{{ $messages->links() }}</div>
-        </div>
+        </x-admin.fold>
     </div>
 </div>
 @endsection

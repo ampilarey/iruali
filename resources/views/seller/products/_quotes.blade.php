@@ -2,7 +2,7 @@
 @php $quoteDefault = \App\Services\QuoteService::DEFAULT_MIN_QUANTITY; @endphp
 <fieldset class="rounded-lg border border-gray-200 p-4" data-quote-settings>
     <legend class="px-1 text-sm font-medium text-gray-700">{{ __('Bulk quotes') }}</legend>
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
             <label for="quote_min_quantity" class="block text-sm font-medium text-gray-700">{{ __('Smallest quantity for a quote') }}</label>
             <input id="quote_min_quantity" name="quote_min_quantity" type="number" min="2" max="{{ \App\Services\QuoteService::MAX_QUANTITY }}" step="1" dir="ltr" placeholder="{{ $quoteDefault }}"

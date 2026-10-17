@@ -1,6 +1,6 @@
 {{-- Delivery details of one shop part (courier, tracking, boat/flight, expected date). Needs $part. --}}
 @if($part->hasTrackingDetails() || $part->tracking_note || $part->out_for_delivery_at)
-    <dl class="grid gap-x-4 gap-y-1 text-sm sm:grid-cols-2">
+    <dl class="grid grid-cols-1 gap-x-4 gap-y-1 text-sm sm:grid-cols-2">
         @if($part->courier || $part->tracking_number)
             <div>
                 <dt class="text-xs text-gray-500">{{ __('Courier') }}</dt>

@@ -45,7 +45,7 @@
                     <input type="checkbox" name="pickup_enabled" value="1" @checked(old('pickup_enabled', $setting->pickup_enabled)) class="mt-0.5 h-5 w-5 rounded border-gray-300 text-primary-600">
                     <span class="font-medium text-gray-900">{{ __('Offer pickup from my shop') }}</span>
                 </label>
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="pickup_address" class="block text-sm font-medium text-gray-700">{{ __('Pickup address') }}</label>
                         <input id="pickup_address" name="pickup_address" maxlength="255" class="{{ $field }}" value="{{ old('pickup_address', $setting->pickup_address) }}" placeholder="{{ __('e.g. H. Coral Villa, Majeedhee Magu, ground floor') }}">
@@ -83,7 +83,7 @@
                         <input type="checkbox" name="own_fees" value="1" @checked(old('own_fees', $setting->own_fees)) class="mt-0.5 h-5 w-5 rounded border-gray-300 text-primary-600">
                         <span class="font-medium text-gray-900">{{ __('I deliver my orders myself, at my own fees') }}</span>
                     </label>
-                    <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                             <label for="fee_local" class="block text-sm font-medium text-gray-700">{{ $homeIsland ? __('To :island (your island)', ['island' => $homeIsland->localized_name]) : __('To your own island') }}</label>
                             <input id="fee_local" name="fee_local" type="number" min="0" max="{{ $maxFee }}" step="0.01" class="{{ $field }}" value="{{ old('fee_local', $setting->fee_local) }}" placeholder="{{ __('Same as its area') }}" @disabled(! $homeIsland)>

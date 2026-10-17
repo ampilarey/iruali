@@ -18,8 +18,10 @@
 
         @include('seller.partials.performance', ['report' => $report])
 
-        <div class="overflow-hidden rounded-lg bg-white shadow">
-            <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">{{ __('Late shipments') }}</h2><p class="text-xs text-gray-500">{{ __('Paid orders not shipped within :n days of payment, last :days days.', ['n' => $report['late_days'], 'days' => $report['window_days']]) }}</p></div>
+        <x-admin.fold :title="__('Late shipments')" flush :open="true">
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
+                <p class="text-xs text-gray-500">{{ __('Paid orders not shipped within :n days of payment, last :days days.', ['n' => $report['late_days'], 'days' => $report['window_days']]) }}</p>
+            </div>
             <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
                     <tr><th class="px-4 py-2 text-start">{{ __('Order') }}</th><th class="px-4 py-2 text-start">{{ __('Paid') }}</th><th class="px-4 py-2 text-start">{{ __('Shipped') }}</th><th class="px-4 py-2 text-start">{{ __('Status') }}</th><th class="px-4 py-2 text-end">{{ __('Days late') }}</th></tr>
@@ -39,7 +41,7 @@
                     @endforelse
                 </tbody>
             </table></div>
-        </div>
+        </x-admin.fold>
     </div>
 </div>
 @endsection

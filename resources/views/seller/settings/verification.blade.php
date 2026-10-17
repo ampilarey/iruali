@@ -34,7 +34,7 @@
             @endif
 
             @if($verification)
-                <dl class="mt-4 grid gap-x-6 gap-y-2 border-t border-gray-100 pt-4 sm:grid-cols-2">
+                <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 border-t border-gray-100 pt-4 sm:grid-cols-2">
                     <div><dt class="text-gray-500">{{ __('Business registration number') }}</dt><dd class="font-medium text-gray-900" dir="ltr">{{ $verification->business_registration_number }}</dd></div>
                     <div><dt class="text-gray-500">{{ __('Owner\'s national ID card number') }}</dt><dd class="font-medium text-gray-900" dir="ltr">{{ $verification->maskedNationalId() }}</dd></div>
                     <div><dt class="text-gray-500">{{ __('Business registration certificate') }}</dt><dd><a href="{{ route('seller.settings.verification.document', 'certificate') }}" target="_blank" rel="noopener" class="font-medium text-primary-700 hover:underline">{{ __('View the file we have') }}</a></dd></div>

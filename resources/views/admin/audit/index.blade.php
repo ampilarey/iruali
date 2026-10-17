@@ -6,31 +6,31 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <form method="GET" action="{{ route('admin.audit') }}" class="flex flex-wrap items-end gap-3 rounded-lg bg-white p-4 shadow text-sm">
-            <label class="block">
+            <label class="block min-w-0 max-w-full">
                 <span class="text-xs font-medium uppercase tracking-wider text-gray-500">Action</span>
-                <select name="action" class="mt-1 block rounded-lg border-gray-300">
+                <select name="action" class="mt-1 block w-full max-w-full rounded-lg border-gray-300">
                     <option value="">All actions</option>
                     @foreach($actions as $key => $label)
                         <option value="{{ $key }}" @selected(($filters['action'] ?? '') === $key)>{{ $label }}</option>
                     @endforeach
                 </select>
             </label>
-            <label class="block">
+            <label class="block min-w-0 max-w-full">
                 <span class="text-xs font-medium uppercase tracking-wider text-gray-500">User</span>
-                <select name="user" class="mt-1 block rounded-lg border-gray-300">
+                <select name="user" class="mt-1 block w-full max-w-full rounded-lg border-gray-300">
                     <option value="">Anyone</option>
                     @foreach($actors as $actor)
                         <option value="{{ $actor->id }}" @selected((int) ($filters['user'] ?? 0) === $actor->id)>{{ $actor->name }}</option>
                     @endforeach
                 </select>
             </label>
-            <label class="block">
+            <label class="block min-w-0 max-w-full">
                 <span class="text-xs font-medium uppercase tracking-wider text-gray-500">From</span>
-                <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="mt-1 block rounded-lg border-gray-300">
+                <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="mt-1 block w-full max-w-full rounded-lg border-gray-300">
             </label>
-            <label class="block">
+            <label class="block min-w-0 max-w-full">
                 <span class="text-xs font-medium uppercase tracking-wider text-gray-500">To</span>
-                <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="mt-1 block rounded-lg border-gray-300">
+                <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="mt-1 block w-full max-w-full rounded-lg border-gray-300">
             </label>
             <button type="submit" class="rounded-lg bg-primary-600 px-4 py-2 font-medium text-white hover:bg-primary-700">Filter</button>
             <a href="{{ route('admin.audit') }}" class="text-gray-600 hover:underline">Clear</a>

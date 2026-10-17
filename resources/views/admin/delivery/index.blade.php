@@ -31,8 +31,7 @@
             </div>
         @endif
 
-        <section class="rounded-lg bg-white p-6 shadow">
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('Delivery rates by area') }}</h2>
+        <x-admin.fold :title="__('Delivery rates by area')">
             <p class="mt-1 text-sm text-gray-500">{{ __('The fee is charged once per order for the parts that are delivered (nothing when everything is picked up), plus any bulky-item charges. Transit days are the days on the way after the shop sends the order; the shop\'s own dispatch days are added for the estimates customers see.') }}</p>
             <p class="mt-1 text-sm text-gray-500">{{ __('Greater Malé is Malé, Hulhumalé and Villimalé. An atoll left without a fee is charged the other islands\' fee; an atoll left without days uses the other islands\' days. The atolls come from the islands list.') }}</p>
 
@@ -86,10 +85,9 @@
                 <input id="free_delivery_over" name="free_delivery_over" type="number" min="0" step="0.01" required class="{{ $field }}" value="{{ old('free_delivery_over', $freeDeliveryOver) }}">
                 <p class="mt-1 text-xs text-gray-500">{{ __('Checked against the order\'s goods after discounts. 0 always charges delivery. Bulky-item charges are never waived.') }}</p>
             </div>
-        </section>
+        </x-admin.fold>
 
-        <section class="rounded-lg bg-white p-6 shadow" data-shop-fees>
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('Shops\' own delivery fees') }}</h2>
+        <x-admin.fold :title="__('Shops\' own delivery fees')" data-shop-fees>
             <p class="mt-1 text-sm text-gray-500">{{ __('A shop can deliver its orders itself and set its own fees: to its home island, to Greater Malé and to other islands. It is paid its fee and bulky-item charges with its earnings, with no commission on them, and they are on its invoice. The fees above apply to every other shop; iruali charges them once per order and keeps them.') }}</p>
             <p class="mt-2 text-sm text-gray-700">{{ trans_choice(':count shop has set its own fees.|:count shops have set their own fees.', $shopsWithOwnFees, ['count' => $shopsWithOwnFees]) }}</p>
 
@@ -106,10 +104,9 @@
                 <p class="mt-1 text-xs text-gray-500">{{ __('For one delivery, to any island. Lowering it also caps the fees shops have already saved.') }}</p>
                 @error('shop_delivery_fee_max')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
             </div>
-        </section>
+        </x-admin.fold>
 
-        <section class="rounded-lg bg-white p-6 shadow">
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('Malé delivery time slots') }}</h2>
+        <x-admin.fold :title="__('Malé delivery time slots')">
             <p class="mt-1 text-sm text-gray-500">{{ __('When this is on, customers whose order is delivered to Greater Malé can pick a time slot at checkout. "Any time" stays the default. Full and too-late slots are shown but cannot be chosen.') }}</p>
 
             <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
@@ -118,7 +115,7 @@
                 <span class="font-medium text-gray-900">{{ __('Offer delivery time slots in Greater Malé') }}</span>
             </label>
 
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="delivery_slots" class="block text-sm font-medium text-gray-700">{{ __('Time slots (one per line)') }}</label>
                     <textarea id="delivery_slots" name="delivery_slots" rows="5" dir="ltr" class="{{ $field }} font-mono">{{ old('delivery_slots', $slotList) }}</textarea>
@@ -162,7 +159,7 @@
                     </div>
                 </div>
             @endif
-        </section>
+        </x-admin.fold>
 
         <div class="flex items-center justify-between gap-3">
             <p class="text-xs text-gray-500">{{ __('Changes are recorded in the audit log.') }}</p>

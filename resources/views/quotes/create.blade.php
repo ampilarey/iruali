@@ -61,7 +61,7 @@
                         @error('product_variant_id')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                     </div>
                 @endif
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="quote-quantity" class="block text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
                         <input id="quote-quantity" name="quantity" type="number" inputmode="numeric" required min="{{ $minimum }}" max="{{ \App\Services\QuoteService::MAX_QUANTITY }}" step="1" dir="ltr" value="{{ old('quantity', $minimum) }}" class="{{ $field }}">

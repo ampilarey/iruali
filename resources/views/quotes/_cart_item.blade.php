@@ -9,7 +9,7 @@
     <a href="{{ route('products.show', $quoteProduct) }}" class="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-primary-50">
         <img src="{{ $quoteProduct->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $quoteProduct->name }}" class="w-full h-full object-cover">
     </a>
-    <div class="flex-1 min-w-0 grid sm:grid-cols-[1fr_auto] gap-x-4 gap-y-2">
+    <div class="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-x-4 gap-y-2">
         <div class="min-w-0">
             <a href="{{ route('products.show', $quoteProduct) }}" class="font-semibold text-dark leading-snug hover:text-primary hover:underline line-clamp-2">{{ $quoteProduct->name }}</a>
             @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->displayNameWithKeys() }}@if($item->variant->sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant->sku }})</span>@endif</p>@endif

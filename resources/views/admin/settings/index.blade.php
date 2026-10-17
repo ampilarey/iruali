@@ -30,19 +30,18 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6">
+        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-3">
             @csrf
             @method('PUT')
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Storefront</h2>
+            <x-admin.fold title="Storefront">
                 <div class="mt-4 space-y-4">
                     <div>
                         <label for="announcement_text" class="block text-sm font-medium text-gray-700">Announcement bar</label>
                         <input id="announcement_text" name="announcement_text" class="{{ $field }}" value="{{ old('announcement_text', $settings['announcement_text']) }}">
                         <p class="mt-1 text-xs text-gray-500">Shown at the top of every page. Leave empty to hide the bar.</p>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label for="contact_email" class="block text-sm font-medium text-gray-700">Contact email</label>
                             <input id="contact_email" name="contact_email" type="email" class="{{ $field }}" value="{{ old('contact_email', $settings['contact_email']) }}">
@@ -89,11 +88,10 @@
                         </label>
                     </div>
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow" data-payment-methods>
+            <x-admin.fold title="Payment methods" data-payment-methods>
                 @php $bmlReady = app(\App\Services\BmlConnect::class)->enabled(); $box = 'rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-3'; @endphp
-                <h2 class="text-lg font-semibold text-gray-900">Payment methods</h2>
                 <p class="mt-1 text-sm text-gray-500">What customers can choose at checkout. Bank transfer and cash on delivery are for when card payment is not available (for example while the BML gateway has a problem). Orders paid these ways stay unpaid until you confirm the money on the order page; shops' earnings on them are paid only after that.</p>
                 <div class="mt-4 space-y-3">
                     <div class="{{ $box }}">
@@ -112,7 +110,7 @@
                             <span><span class="font-medium">Bank transfer</span>
                                 <span class="block text-xs text-gray-500 mt-0.5">The customer transfers to this account with the order number as the reference and uploads the slip. You confirm the payment on the order page.</span></span>
                         </label>
-                        <div class="grid gap-3 sm:grid-cols-3">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div><label for="transfer_bank_name" class="block text-xs font-medium text-gray-700">Bank</label>
                                 <input id="transfer_bank_name" name="transfer_bank_name" maxlength="100" class="{{ $field }}" value="{{ old('transfer_bank_name', $settings['transfer_bank_name'] ?? '') }}"></div>
                             <div><label for="transfer_account_name" class="block text-xs font-medium text-gray-700">Account name</label>
@@ -121,7 +119,7 @@
                                 <input id="transfer_account_number" name="transfer_account_number" maxlength="40" dir="ltr" class="{{ $field }}" value="{{ old('transfer_account_number', $settings['transfer_account_number'] ?? '') }}">
                                 @error('transfer_account_number')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
                         </div>
-                        <div class="grid gap-3 sm:grid-cols-3">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div class="sm:col-span-2"><label for="transfer_note" class="block text-xs font-medium text-gray-700">Note for customers (optional)</label>
                                 <input id="transfer_note" name="transfer_note" maxlength="300" class="{{ $field }}" value="{{ old('transfer_note', $settings['transfer_note'] ?? '') }}" placeholder="e.g. Transfers from other banks can take a day."></div>
                             <div><label for="transfer_pay_within_hours" class="block text-xs font-medium text-gray-700">Cancel if no slip after (hours)</label>
@@ -136,7 +134,7 @@
                             <span><span class="font-medium">Cash on delivery</span>
                                 <span class="block text-xs text-gray-500 mt-0.5">For orders from one shop, without pre-orders. The shop is told to collect the cash; press "Cash received" on the order once the money is with you.</span></span>
                         </label>
-                        <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div><label for="cod_max_amount" class="block text-xs font-medium text-gray-700">Largest order (MVR, 0 = no limit)</label>
                                 <input id="cod_max_amount" name="cod_max_amount" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('cod_max_amount', $settings['cod_max_amount'] ?? 0) }}"></div>
                             <div class="flex items-end">
@@ -149,11 +147,10 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Loyalty &amp; referrals</h2>
-                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+            <x-admin.fold title="Loyalty & referrals">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
                         <label for="loyalty_spend_per_point" class="block text-sm font-medium text-gray-700">MVR spent per point</label>
                         <input id="loyalty_spend_per_point" name="loyalty_spend_per_point" type="number" min="1" step="0.01" required class="{{ $field }}" value="{{ old('loyalty_spend_per_point', $settings['loyalty_spend_per_point']) }}">
@@ -173,11 +170,10 @@
                     <p class="mt-1 text-xs text-gray-500">0 = never. Oldest points go first; customers are emailed a month before. Needs the scheduler cron. Report under <a href="{{ route('admin.rewards') }}" class="underline">Rewards</a>.</p>
                 </div>
                 <p class="mt-2 text-xs text-gray-500">Referral rewards are paid once, when a referred customer places their first order.</p>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Abandoned cart emails</h2>
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <x-admin.fold title="Abandoned cart emails">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <label class="flex items-start gap-3 text-sm text-gray-700">
                         <input type="hidden" name="abandoned_cart_emails_enabled" value="0">
                         <input type="checkbox" name="abandoned_cart_emails_enabled" value="1" @checked(old('abandoned_cart_emails_enabled', $settings['abandoned_cart_emails_enabled'] ?? 1)) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
@@ -189,11 +185,10 @@
                         <p class="mt-1 text-xs text-gray-500">0 sends no voucher. Otherwise the second email carries a single-use code for that customer, valid 7 days.</p>
                     </div>
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Delivery fees (MVR)</h2>
-                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+            <x-admin.fold title="Delivery fees (MVR)">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
                         <label for="delivery_fee_greater_male" class="block text-sm font-medium text-gray-700">Greater Malé</label>
                         <input id="delivery_fee_greater_male" name="delivery_fee_greater_male" type="number" min="0" step="0.01" required class="{{ $field }}" value="{{ old('delivery_fee_greater_male', $settings['delivery_fee_greater_male']) }}">
@@ -209,11 +204,10 @@
                 </div>
                 <p class="mt-2 text-xs text-gray-500">Greater Malé is Malé, Hulhumalé and Villimalé. Set "Free delivery over" to 0 to always charge delivery. Checked against the order total after discounts.</p>
                 @if(Route::has('admin.delivery'))<p class="mt-1 text-xs text-gray-500"><a href="{{ route('admin.delivery') }}" class="font-medium text-primary-700 underline">{{ __('Fees for each atoll, delivery estimates and Malé time slots') }}</a></p>@endif
-            </section>
+            </x-admin.fold>
 
             @php $missing = \App\Support\Company::missing(); @endphp
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Business details</h2>
+            <x-admin.fold title="Business details">
                 <p class="mt-1 text-sm text-gray-500">Shown on the About &amp; Contact page, the policies, the footer and at checkout. Bank of Maldives checks these before approving card payments.</p>
                 @if($missing)
                     <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -221,7 +215,7 @@
                         <ul class="mt-1 list-disc ps-5">@foreach($missing as $label)<li>{{ $label }}</li>@endforeach</ul>
                     </div>
                 @endif
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="company_legal_name" class="block text-sm font-medium text-gray-700">Registered business name</label>
                         <input id="company_legal_name" name="company_legal_name" class="{{ $field }}" value="{{ old('company_legal_name', $settings['company_legal_name']) }}">
@@ -252,11 +246,10 @@
                     </div>
                 </div>
                 <p class="mt-3 text-xs text-gray-500">Customer service email and phone are set under Contact above. Write the phone with the country code, e.g. +960 777 1234.</p>
-            </section>
+            </x-admin.fold>
 
             @php $bml = app(\App\Services\BmlConnect::class); @endphp
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Payments</h2>
+            <x-admin.fold title="Payments">
                 <div class="mt-3 rounded-lg border px-4 py-3 text-sm {{ $bml->enabled() ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-800' }}">
                     @if($bml->enabled())
                         <p class="font-semibold">BML card payments are on{{ $bml->isSandbox() ? ' (sandbox: test cards only, no real money)' : '' }}.</p>
@@ -271,12 +264,11 @@
                     <input id="default_commission_rate" name="default_commission_rate" type="number" step="0.01" min="0" max="100" class="{{ $field }}" value="{{ old('default_commission_rate', $settings['default_commission_rate']) }}">
                     <p class="mt-1 text-xs text-gray-500">What iruali keeps from each shop's item sales. Set a different rate per shop under Shop payouts. Changes apply to new orders.</p>
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('Marketplace / seller terms') }}</h2>
+            <x-admin.fold :title="__('Marketplace / seller terms')">
                 <p class="mt-1 text-sm text-gray-500">{{ __('Shown to shops on the Seller Terms page and in the Seller Centre, and used to flag late shipments. The commission rate is under Payments above.') }}</p>
-                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
                         <label for="payout_schedule" class="block text-sm font-medium text-gray-700">{{ __('Payout schedule') }}</label>
                         <select id="payout_schedule" name="payout_schedule" class="{{ $field }}">
@@ -297,13 +289,12 @@
                     </div>
                 </div>
                 <p class="mt-3 text-xs text-gray-500">{{ __('The return window is under Business details above. The Seller Terms page fills in these values through placeholders; edit its wording under Legal pages.') }}</p>
-            </section>
+            </x-admin.fold>
 
             @php $analyticsProvider = old('analytics_provider', $settings['analytics_provider'] ?? 'none'); @endphp
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Site analytics</h2>
+            <x-admin.fold title="Site analytics">
                 <p class="mt-1 text-sm text-gray-500">Visitor statistics. The tag is added to storefront pages only (never admin or Seller Centre), and never for browsers that send Do Not Track. The shopping funnel under Analytics works without any provider.</p>
-                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
                         <label for="analytics_provider" class="block text-sm font-medium text-gray-700">Provider</label>
                         <select id="analytics_provider" name="analytics_provider" class="{{ $field }}">
@@ -323,12 +314,11 @@
                         @error('analytics_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Social profiles</h2>
+            <x-admin.fold title="Social profiles">
                 <p class="mt-1 text-sm text-gray-500">Linked from the site's structured data (Organization "sameAs") so search engines connect the profiles to iruali. Full URLs.</p>
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     @foreach(['social_facebook' => 'Facebook', 'social_instagram' => 'Instagram', 'social_tiktok' => 'TikTok', 'social_x' => 'X (Twitter)'] as $key => $label)
                         <div>
                             <label for="{{ $key }}" class="block text-sm font-medium text-gray-700">{{ $label }}</label>
@@ -337,10 +327,9 @@
                         </div>
                     @endforeach
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Product feeds</h2>
+            <x-admin.fold title="Product feeds">
                 <p class="mt-1 text-sm text-gray-500">Give these URLs to Google Merchant Center and Facebook Commerce Manager (catalogue → data feed, scheduled fetch). They list every active product (one item per variant) and refresh hourly. The token keeps scrapers out; don't share it publicly.</p>
                 <dl class="mt-4 space-y-3 text-sm">
                     <div>
@@ -352,7 +341,7 @@
                         <dd><code class="block break-all rounded bg-gray-50 px-3 py-2 text-xs text-gray-800" dir="ltr">{{ \App\Support\FeedToken::url('feeds.facebook-catalog') }}</code></dd>
                     </div>
                 </dl>
-            </section>
+            </x-admin.fold>
 
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
@@ -360,11 +349,10 @@
         </form>
 
         @if(Route::has('admin.sample-data'))
-            <section class="mt-6 rounded-lg bg-white p-6 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('Sample data') }}</h2>
+            <x-admin.fold :title="__('Sample data')" class="mt-3">
                 <p class="mt-1 text-sm text-gray-500">{{ __('Take the demo shops and sample products off the site before launch, or bring them back.') }}</p>
                 <a href="{{ route('admin.sample-data') }}" class="mt-3 inline-block text-sm font-medium text-primary-700 hover:underline">{{ __('Open sample data') }}</a>
-            </section>
+            </x-admin.fold>
         @endif
     </div>
 </div>

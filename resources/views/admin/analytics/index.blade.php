@@ -38,9 +38,8 @@
             @endforeach
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-3">
-            <div class="rounded-lg bg-white p-5 shadow lg:col-span-2">
-                <h2 class="text-lg font-semibold text-gray-900">Revenue, last 12 months</h2>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <x-admin.fold title="Revenue, last 12 months" class="lg:col-span-2" :open="true">
                 <div class="mt-6 flex h-48 items-end gap-2">
                     @foreach($months as $month => $row)
                         <div class="flex h-full flex-1 flex-col justify-end" title="{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M Y') }}: {{ \App\Support\Money::format($row['revenue']) }} · {{ $row['users'] }} new users">
@@ -53,10 +52,9 @@
                         <span class="flex-1 text-center text-[10px] text-gray-500">{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M') }}</span>
                     @endforeach
                 </div>
-            </div>
+            </x-admin.fold>
 
-            <div class="rounded-lg bg-white p-5 shadow">
-                <h2 class="text-lg font-semibold text-gray-900">Orders by status</h2>
+            <x-admin.fold title="Orders by status">
                 <ul class="mt-4 space-y-3">
                     @forelse($ordersByStatus as $status => $count)
                         <li>
@@ -72,17 +70,16 @@
                         <li class="text-sm text-gray-500">No orders yet.</li>
                     @endforelse
                 </ul>
-            </div>
+            </x-admin.fold>
         </div>
 
         @php
             $funnelSteps = ['view_product' => 'Viewed a product', 'add_to_cart' => 'Added to cart', 'begin_checkout' => 'Started checkout', 'order_paid' => 'Paid'];
             $funnelMax = max($funnel['30']['view_product']['count'] ?? 0, 1);
         @endphp
-        <div class="grid gap-6 lg:grid-cols-2" id="funnel">
-            <div class="overflow-hidden rounded-lg bg-white shadow">
-                <div class="border-b border-gray-100 px-5 py-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Funnel</h2>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2" id="funnel">
+            <x-admin.fold title="Funnel" flush>
+                <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                     <p class="mt-1 text-xs text-gray-500">Visitors who reached each step (first-party, anonymised; no cookies or third parties). Conversion is from the step before.</p>
                 </div>
                 <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
@@ -109,11 +106,10 @@
                         @endforeach
                     </tbody>
                 </table></div>
-            </div>
+            </x-admin.fold>
 
-            <div class="overflow-hidden rounded-lg bg-white shadow">
-                <div class="border-b border-gray-100 px-5 py-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Best converting products</h2>
+            <x-admin.fold title="Best converting products" flush>
+                <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                     <p class="mt-1 text-xs text-gray-500">Added to cart → paid, last 30 days.</p>
                 </div>
                 <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
@@ -138,15 +134,12 @@
                         @endforelse
                     </tbody>
                 </table></div>
-            </div>
+            </x-admin.fold>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             @foreach([['Top products', $topProducts, 'Product'], ['Top sellers', $topSellers, 'Seller']] as [$title, $rows, $col])
-                <div class="overflow-hidden rounded-lg bg-white shadow">
-                    <div class="border-b border-gray-100 px-5 py-4">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ $title }}</h2>
-                    </div>
+                <x-admin.fold :title="$title" flush>
                     <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -167,15 +160,14 @@
                             @endforelse
                         </tbody>
                     </table></div>
-                </div>
+                </x-admin.fold>
             @endforeach
         </div>
 
         {{-- Sales by brand (AdminController::brandSales): the brand links to its admin page for staff who may open it --}}
         @php $canEditBrands = \App\Support\StaffAccess::can('admin.brands.edit'); @endphp
-        <div class="overflow-hidden rounded-lg bg-white shadow" id="top-brands">
-            <div class="border-b border-gray-100 px-5 py-4">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('Top brands') }}</h2>
+        <x-admin.fold :title="__('Top brands')" flush id="top-brands">
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                 <p class="mt-1 text-xs text-gray-500">{{ __('Last 30 days, counting orders the same way as top products and sellers: every order that is not cancelled. Share is of all branded sales.') }}</p>
             </div>
             <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
@@ -223,7 +215,7 @@
                     @endif
                 </tbody>
             </table></div>
-        </div>
+        </x-admin.fold>
     </div>
 </div>
 @endsection

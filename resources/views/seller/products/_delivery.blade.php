@@ -2,7 +2,7 @@
      delivered (not for pickups) and free delivery does not waive it. Needs $product and $field. --}}
 <fieldset class="rounded-lg border border-gray-200 p-4">
     <legend class="px-1 text-sm font-medium text-gray-700">{{ __('Delivery') }}</legend>
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
             <label for="delivery_surcharge" class="block text-sm font-medium text-gray-700">{{ __('Extra delivery charge per item (MVR)') }}</label>
             <input id="delivery_surcharge" name="delivery_surcharge" type="number" step="0.01" min="0" max="99999.99" class="{{ $field }}" value="{{ old('delivery_surcharge', $product->delivery_surcharge ?? 0) }}" aria-describedby="delivery_surcharge-hint">

@@ -34,7 +34,7 @@
                     <h2 class="text-xl font-semibold text-dark">{{ __('Invite friends, earn points') }}</h2>
                     <p class="mt-1 text-sm text-gray-600">{{ __('Share your link. When a friend signs up and pays for their first order, you get :referrer points and they get :referee.', ['referrer' => (int) \App\Models\Setting::get('referral_referrer_points'), 'referee' => (int) \App\Models\Setting::get('referral_referee_points')]) }}</p>
 
-                    <dl class="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
+                    <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
                         <div>
                             <dt class="text-gray-500">{{ __('Your referral code') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-bold tracking-widest text-dark" dir="ltr">{{ $user->referral_code }}</dd>

@@ -37,7 +37,7 @@
             <h2 class="text-base font-semibold text-gray-900">{{ $account ? __('Change bank account') : __('Add bank account') }}</h2>
             <p class="text-sm text-gray-500">{{ __('The account must be in the Maldives and in MVR. Use the exact name on the account.') }}</p>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="bank" class="block text-sm font-medium text-gray-700">{{ __('Bank') }} *</label>
                     <select id="bank" name="bank" required class="{{ $field }}" data-bank-select>

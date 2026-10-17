@@ -20,6 +20,8 @@ This is a **Laravel 12 (PHP 8.2+) multi-vendor e-commerce app** ("Iruali") with 
 - Runtime dirs `storage/framework/{cache,sessions,views}` and `storage/app/public` are not tracked and are created during setup. Run `php artisan storage:link` after they exist.
 - **Dev database is SQLite** at `database/database.sqlite` (gitignored). Recreate with `touch database/database.sqlite` then `php artisan migrate --seed`. Seeders create an admin user `admin@example.com` / `password` plus sample categories/products/islands.
 
+- **Rate limits:** write `throttle:N,M,name` with a name of its own. A bare `throttle:N,M` shares one counter per visitor across every throttled route (search suggestions once used up the sign-in attempts); `RateLimitTest` fails on a bare one.
+
 ### Tests
 - Run with `php artisan test` or `./vendor/bin/phpunit`.
 - **`phpunit.xml` hardcodes MySQL** (`DB_CONNECTION=mysql`, `DB_DATABASE=iruali_test`, user `root`, empty password, host defaults to `127.0.0.1`) — it does **not** use the SQLite dev DB. A local MariaDB server with an empty-password root and an `iruali_test` database must be running for the suite to connect. MariaDB has no systemd here; start it with `sudo mysqld_safe &` (data dir `/var/lib/mysql` is already initialized).

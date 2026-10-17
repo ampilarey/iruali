@@ -30,8 +30,7 @@
         @include('quotes._thread', ['quote' => $quote, 'role' => 'admin', 'action' => route('admin.quotes.messages', $quote)])
 
         @if($quote->hasStatus(\App\Enums\QuoteStatus::New, \App\Enums\QuoteStatus::Quoted, \App\Enums\QuoteStatus::Accepted))
-            <section class="rounded-lg bg-white p-5 shadow" data-quote-close>
-                <h2 class="text-base font-semibold text-gray-900">{{ __('Close this request') }}</h2>
+            <x-admin.fold :title="__('Close this request')" data-quote-close>
                 <p class="text-sm text-gray-600">{{ __('For a shop that cannot be reached or a quote made by mistake. The customer and the shop are emailed the reason, and a quote in the customer\'s cart comes out of it.') }}</p>
                 <form method="POST" action="{{ route('admin.quotes.close', $quote) }}" class="mt-3 space-y-2" onsubmit="return confirm('{{ __('Close this request?') }}')">
                     @csrf
@@ -40,7 +39,7 @@
                     @error('reason')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
                     <button type="submit" class="rounded-lg border border-red-300 px-4 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">{{ __('Close request') }}</button>
                 </form>
-            </section>
+            </x-admin.fold>
         @endif
     </div>
 </div>

@@ -27,7 +27,7 @@
                     <label for="address" class="block text-sm text-gray-700">{{ __('House / street') }}</label>
                     <input id="address" name="address" autocomplete="address-line1" value="{{ old('address', $user->address) }}" class="{{ $f }}">
                 </div>
-                <div class="grid gap-3 sm:grid-cols-3">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div><label for="city" class="block text-sm text-gray-700">{{ __('Island') }}</label><input id="city" name="city" autocomplete="address-level2" value="{{ old('city', $user->city) }}" class="{{ $f }}"></div>
                     <div><label for="state" class="block text-sm text-gray-700">{{ __('Atoll') }}</label><input id="state" name="state" autocomplete="address-level1" value="{{ old('state', $user->state) }}" class="{{ $f }}"></div>
                     <div><label for="postal_code" class="block text-sm text-gray-700">{{ __('Postal code') }}</label><input id="postal_code" name="postal_code" autocomplete="postal-code" dir="ltr" value="{{ old('postal_code', $user->postal_code) }}" class="{{ $f }}"></div>

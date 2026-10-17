@@ -26,16 +26,16 @@ use Illuminate\Support\Facades\Route;
 // BML Connect payment webhooks (signed by BML, checked in the controller)
 Route::post('/payments/bml/webhook', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'webhook'])
     ->name('payments.bml.webhook')
-    ->middleware('throttle:120,1');
+    ->middleware('throttle:120,1,api.api-29');
 
 // Public routes
 Route::prefix('v1')->group(function () {
 
     // Authentication routes
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,api.post-login');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1,api.post-register');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1,api.post-forgot-password');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1,api.post-reset-password');
 
     // Public product routes (static paths go before /products/{product}, or they are
     // swallowed by the model binding and 404)
@@ -53,7 +53,7 @@ Route::prefix('v1')->group(function () {
 
     // Islands: the list, the nearest one to a position ("Use my location")
     Route::get('/islands', [\App\Http\Controllers\Api\IslandController::class, 'index']);
-    Route::get('/islands/nearest', [\App\Http\Controllers\Api\IslandController::class, 'nearest'])->middleware('throttle:30,1');
+    Route::get('/islands/nearest', [\App\Http\Controllers\Api\IslandController::class, 'nearest'])->middleware('throttle:30,1,api.get-islands-nearest');
 
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {
@@ -128,4 +128,4 @@ Route::get('/health', function () {
 // TEST-only immediate deploy trigger (GitHub Actions → cPanel). Disabled when
 // TEST_DEPLOY_WEBHOOK_SECRET is unset; always 404 on non-test hosts.
 Route::post('/deploy/test-pull', TestDeployWebhookController::class)
-    ->middleware('throttle:10,1');
+    ->middleware('throttle:10,1,api.api-131');

@@ -20,7 +20,7 @@
         @endif
         @include('sellers._holiday_label', ['seller' => $seller, 'class' => 'absolute bottom-2 start-2'])
     </a>
-    <div class="flex-1 min-w-0 grid sm:grid-cols-[1fr_13rem] gap-3 sm:gap-6">
+    <div class="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_13rem] gap-3 sm:gap-6">
         <div class="min-w-0">
             @if($brandLabel)<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $brandLabel }}</p>@endif
             <h3 class="font-semibold text-dark leading-snug line-clamp-2"><a href="{{ $url }}" class="hover:text-primary hover:underline">{{ $product->name }}</a></h3>

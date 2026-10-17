@@ -5,7 +5,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-6 pt-4 lg:pt-6 pb-10 space-y-8 lg:space-y-12">
 
         <!-- Hero + side promos -->
-        <section class="grid lg:grid-cols-3 gap-3 lg:gap-4">
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
             @if(($heroCampaign ?? null))
             <div class="lg:col-span-2">@include('campaigns._banner', ['campaign' => $heroCampaign, 'size' => 'hero'])</div>
             @else
@@ -84,7 +84,7 @@
         @if(($localShops ?? collect())->isNotEmpty())
             <section data-local-shops>
                 <h2 class="font-display text-xl lg:text-2xl font-bold text-dark mb-3">{{ __('Shops on :island', ['island' => $chosen->localized_name]) }}</h2>
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-4">
                     @foreach($localShops as $shop)
                         @php $shopName = $shop->business_name ?: $shop->name; @endphp
                         <a href="{{ route('sellers.show', $shop) }}" class="group bg-white border border-gray-200 rounded-xl p-3 lg:p-4 flex items-center gap-3 hover:border-primary hover:shadow-sm">
@@ -103,7 +103,7 @@
         @if($shops->isNotEmpty())
             <section>
                 <h2 class="font-display text-xl lg:text-2xl font-bold text-dark mb-3">{{ __('Shops on iruali') }}</h2>
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-4">
                     @foreach($shops as $shop)
                         @php $shopName = $shop->business_name ?: $shop->name; @endphp
                         <a href="{{ route('sellers.show', $shop) }}" class="group bg-white border border-gray-200 rounded-xl p-3 lg:p-4 flex items-center gap-3 hover:border-primary hover:shadow-sm">

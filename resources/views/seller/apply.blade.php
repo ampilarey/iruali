@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <aside class="space-y-4 lg:order-last">
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">{{ __('How it works') }}</h2>
@@ -55,7 +55,7 @@
 
                 <section class="space-y-4 border-t border-gray-100 pt-6">
                     <h2 class="text-lg font-semibold text-gray-900">Contact &amp; pickup location</h2>
-                    <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label for="phone" class="block text-sm font-medium text-gray-700">{{ __('Phone *') }}</label>
                             <input id="phone" name="phone" type="tel" required class="{{ $field }}" value="{{ old('phone', $user->phone) }}" placeholder="{{ __('7XX XXXX') }}">

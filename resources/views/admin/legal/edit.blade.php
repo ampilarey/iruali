@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.legal.update') }}" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <form method="POST" action="{{ route('admin.legal.update') }}" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-3">
         @csrf
         @method('PUT')
         @if(session('success'))
@@ -32,17 +32,18 @@
         </section>
 
         @foreach($pages as $key => [$label, $route])
-            <section class="rounded-lg bg-white p-6 shadow">
-                <div class="flex items-center justify-between gap-3">
-                    <label for="legal_{{ $key }}_body" class="text-lg font-semibold text-gray-900">{{ $label }}</label>
+            <x-admin.fold :title="$label" :id="'legal-'.$key">
+                <x-slot:badge><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $values["legal_{$key}_body"] !== '' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600' }}">{{ $values["legal_{$key}_body"] !== '' ? 'Own text' : 'Built-in' }}</span></x-slot:badge>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-xs {{ $values["legal_{$key}_body"] !== '' ? 'text-amber-700 font-semibold' : 'text-gray-500' }}">{{ $values["legal_{$key}_body"] !== '' ? 'Using your own text.' : 'Using iruali\'s built-in text.' }}</p>
                     <a href="{{ route($route) }}" target="_blank" rel="noopener" class="text-sm font-medium text-primary-700 hover:underline">View page ↗</a>
                 </div>
-                <p class="mt-1 text-xs {{ $values["legal_{$key}_body"] !== '' ? 'text-amber-700 font-semibold' : 'text-gray-500' }}">{{ $values["legal_{$key}_body"] !== '' ? 'Using your own text.' : 'Using iruali\'s built-in text.' }}</p>
+                <label for="legal_{{ $key }}_body" class="sr-only">{{ $label }}</label>
                 @if($key === 'seller_terms')
                     <div class="mt-2 rounded-lg border border-primary-100 bg-primary-50 px-4 py-3 text-xs text-gray-700">
                         <p class="font-semibold text-gray-900">{{ __('Placeholders') }}</p>
                         <p class="mt-1">{{ __('Write these anywhere in the text (built-in or your own) and the current value from Settings is filled in when the page is shown, in both languages:') }}</p>
-                        <ul class="mt-2 grid gap-1 sm:grid-cols-2">
+                        <ul class="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
                             @foreach(\App\Support\SellerTerms::descriptions() as $placeholder => $meaning)
                                 <li><code class="rounded bg-white px-1 py-0.5 font-mono text-primary-700">{{ $placeholder }}</code> — {{ $meaning }} <span class="text-gray-500">({{ __('now') }}: {{ \App\Support\SellerTerms::placeholders()[$placeholder] }})</span></li>
                             @endforeach
@@ -51,7 +52,7 @@
                     </div>
                 @endif
                 <textarea id="legal_{{ $key }}_body" name="legal_{{ $key }}_body" rows="{{ $values["legal_{$key}_body"] !== '' ? 16 : 4 }}" placeholder="Leave empty to use the built-in {{ strtolower($label) }}." class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono">{{ old("legal_{$key}_body", $values["legal_{$key}_body"]) }}</textarea>
-            </section>
+            </x-admin.fold>
         @endforeach
 
         <div class="flex justify-end">

@@ -8,8 +8,7 @@
 
     <form method="POST" action="{{ route('admin.payouts.store', $seller) }}" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" data-payout>
         @csrf
-        <div class="rounded-lg bg-white p-5 shadow text-sm">
-            <h2 class="font-semibold text-gray-900">Pay to</h2>
+        <x-admin.fold title="Pay to" body="text-sm" :open="true">
             @if($seller->bankAccount)
                 <p class="mt-1">{{ $seller->bankAccount->account_name }} · {{ $seller->bankAccount->bankName() }} · <span class="font-mono" dir="ltr">{{ $seller->bankAccount->account_number }}</span>
                     <span class="ms-2 rounded-full px-2 py-0.5 text-xs font-medium {{ $seller->bankAccount->isVerified() ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">{{ $seller->bankAccount->isVerified() ? __('Verified') : __('Not verified') }}</span>
@@ -18,11 +17,10 @@
             @else
                 <p class="mt-1 text-amber-700">{{ $blocked }} {{ __('Ask the shop to add it under Seller Centre → Settings → Bank account.') }}</p>
             @endif
-        </div>
+        </x-admin.fold>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow">
-            <div class="border-b border-gray-100 px-5 py-4">
-                <h2 class="text-lg font-semibold text-gray-900">Orders ready for payout</h2>
+        <x-admin.fold title="Orders ready for payout" flush :open="true">
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                 <p class="text-sm text-gray-500">Untick any order you want to hold back (for example, a return in progress).</p>
             </div>
             <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -55,10 +53,10 @@
                 </div>
             @endif
             <div class="flex justify-end border-t border-gray-100 px-5 py-3 text-base font-semibold" data-adjustments="{{ $adjustments->sum('amount') }}">Total: <span class="ms-2" data-payout-total>{{ Money::format($parts->sum('seller_earnings') + $adjustments->sum('amount')) }}</span></div>
-        </div>
+        </x-admin.fold>
 
         @if($parts->isNotEmpty() && ! $blocked)
-            <div class="rounded-lg bg-white p-5 shadow grid gap-4 sm:grid-cols-2">
+            <div class="rounded-lg bg-white p-5 shadow grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="reference" class="block text-sm font-medium text-gray-700">Bank transfer reference *</label>
                     <input id="reference" name="reference" required maxlength="100" value="{{ old('reference') }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">

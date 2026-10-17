@@ -33,7 +33,7 @@
                 @endif
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="business_name" class="block text-sm font-medium text-gray-700">Shop name *</label>
                     <input id="business_name" name="business_name" required class="{{ $field }}" value="{{ old('business_name', $user->business_name ?: $user->name) }}">
@@ -79,7 +79,7 @@
             <div id="branding" class="border-t border-gray-100 pt-4">
                 <h2 class="text-base font-semibold text-gray-900">{{ __('Shop logo and banner') }}</h2>
                 <p class="text-sm text-gray-500">{{ __('The logo is shown next to your shop name; the banner across the top of your shop page. JPEG, PNG or WebP.') }}</p>
-                <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="shop_logo" class="block text-sm font-medium text-gray-700">{{ __('Shop logo') }} <span class="font-normal text-gray-500">({{ __('square, up to 2 MB') }})</span></label>
                         @if($user->shop_logo)<img src="{{ \Illuminate\Support\Facades\Storage::url($user->shop_logo) }}" alt="" class="mt-1 h-16 w-16 rounded-lg object-cover border border-gray-200">@endif

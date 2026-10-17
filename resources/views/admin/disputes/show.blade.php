@@ -6,9 +6,9 @@
 <div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'Dispute #'.$dispute->id.' on order #'.$order->order_number, 'back' => route('admin.disputes')])
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6">
-            <div class="rounded-lg bg-white p-5 shadow grid gap-3 sm:grid-cols-2 text-sm">
+            <div class="rounded-lg bg-white p-5 shadow grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
                 <div><p class="text-gray-500">Status</p><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $dispute->status_badge }}">{{ $dispute->statusLabel() }}</span></div>
                 <div><p class="text-gray-500">Opened</p><p>{{ $dispute->opened_at->format('d M Y, H:i') }}</p></div>
                 <div><p class="text-gray-500">Type</p><p class="font-medium">{{ \App\Models\Dispute::TYPES[$dispute->type] ?? $dispute->type }}</p></div>
@@ -55,15 +55,16 @@
                     <button class="w-full rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700" onclick="return confirm('Decide this dispute? Both sides are told at once.')">Record decision</button>
                 </form>
 
-                <form method="POST" action="{{ route('admin.disputes.request-info', $dispute) }}" class="rounded-lg bg-white p-5 shadow space-y-3 text-sm">
+                <form method="POST" action="{{ route('admin.disputes.request-info', $dispute) }}">
+                    <x-admin.fold title="Ask for more information" body="space-y-3 text-sm">
                     @csrf
-                    <h2 class="font-semibold text-gray-900">Ask for more information</h2>
                     <select name="from" class="w-full rounded-lg border border-gray-300 px-3 py-2">
                         <option value="customer">Ask the customer</option>
                         <option value="seller">Ask the shop</option>
                     </select>
                     <textarea name="note" rows="2" maxlength="2000" required placeholder="Your question goes into the conversation as iruali support." class="w-full rounded-lg border border-gray-300 px-3 py-2"></textarea>
                     <button class="w-full rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50">Post question</button>
+                    </x-admin.fold>
                 </form>
             @else
                 <div class="rounded-lg bg-white p-5 shadow text-sm text-gray-600">This dispute is decided. @if($dispute->amount_resolved > 0)The refund is tracked on the <a href="{{ route('admin.orders.show', $order) }}" class="text-primary-700 hover:underline">order</a> (send it through BML and record the reference there).@endif</div>

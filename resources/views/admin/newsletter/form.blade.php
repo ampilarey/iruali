@@ -21,12 +21,11 @@
             @csrf
             @if($editing) @method('PUT') @endif
 
-            <section class="rounded-lg bg-white p-6 shadow space-y-4">
+            <x-admin.fold title="Subject and opening text" body="space-y-4" :open="! $editing">
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900">Subject and opening text</h2>
                     <p class="text-sm text-gray-500">Each reader gets the newsletter in the language they chose. Both languages are needed before it can be sent; a draft can be saved with English only. Leave a blank line between paragraphs.</p>
                 </div>
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="subject_en" class="block text-sm font-medium text-gray-700">Subject (English) *</label>
                         <input id="subject_en" name="subject_en" required maxlength="150" class="{{ $field }}" value="{{ old('subject_en', $issue->subject_en) }}">
@@ -44,11 +43,10 @@
                         <textarea id="intro_dv" name="intro_dv" maxlength="5000" rows="8" dir="rtl" class="{{ $field }}">{{ old('intro_dv', $issue->intro_dv) }}</textarea>
                     </div>
                 </div>
-            </section>
+            </x-admin.fold>
 
-            <section class="rounded-lg bg-white p-6 shadow space-y-4">
+            <x-admin.fold title="Sections added after the text" body="space-y-4" :open="! $editing">
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900">Sections added after the text</h2>
                     <p class="text-sm text-gray-500">Picked by the site when you press Send: products on show and in stock, up to {{ \App\Services\NewsletterService::SECTION_PRODUCTS }} in each section, none listed twice.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
@@ -81,7 +79,7 @@
                     <input type="checkbox" name="brands" value="1" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" @checked(old('brands', $issue->wantsBrands()))>
                     Featured brands (the brands people buy most)
                 </label>
-            </section>
+            </x-admin.fold>
 
             <div class="flex flex-wrap items-center justify-end gap-3">
                 <a href="{{ $editing ? route('admin.newsletter-issues.show', $issue) : route('admin.newsletter') }}" class="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</a>

@@ -36,7 +36,7 @@
                     {{ trans_choice(':count item in your cart can\'t be delivered to :island. Collect it from the shop if it offers pickup, remove it, or change the island you\'re delivering to.|:count items in your cart can\'t be delivered to :island. Collect them from the shop if it offers pickup, remove them, or change the island you\'re delivering to.', $undeliverable->count(), ['count' => $undeliverable->count(), 'island' => $deliveryIsland->localized_name]) }}
                 </div>
             @endif
-            <div class="grid lg:grid-cols-[1fr_22rem] gap-5 lg:gap-6 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_22rem] gap-5 lg:gap-6 items-start">
                 <section class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-200" aria-label="{{ __('Items in your cart') }}">
                     @foreach($items as $item)
                         @if($item->quote_request_id) @include('quotes._cart_item', ['item' => $item]) @continue @endif
@@ -45,7 +45,7 @@
                             <a href="{{ route('products.show', $product) }}" class="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-primary-50">
                                 <img src="{{ $product->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                             </a>
-                            <div class="flex-1 min-w-0 grid sm:grid-cols-[1fr_auto] gap-x-4 gap-y-2">
+                            <div class="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-x-4 gap-y-2">
                                 <div class="min-w-0">
                                     <a href="{{ route('products.show', $product) }}" class="font-semibold text-dark leading-snug hover:text-primary hover:underline line-clamp-2">{{ $product->name }}</a>
                                     @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->displayNameWithKeys() }}@if($item->variant->sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant->sku }})</span>@endif</p>@endif
@@ -166,7 +166,7 @@
         @if($saved->isNotEmpty())
             <section class="mt-8">
                 <h2 class="font-display text-xl font-bold text-dark mb-3">{{ __('Saved for later') }} <span class="text-gray-500 font-sans font-normal text-base">({{ $saved->count() }})</span></h2>
-                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     @foreach($saved as $s)
                         <div class="bg-white border border-gray-200 rounded-xl p-3 flex gap-3">
                             <a href="{{ route('products.show', $s->product) }}" class="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-primary-50"><img src="{{ $s->product->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $s->product->name }}" class="w-full h-full object-cover"></a>

@@ -17,18 +17,18 @@ use Illuminate\Support\Facades\Route;
 
 // Shoppers: "Delivering to <island>" (listings, the product page's quote, checkout) and the view
 // switch; JSON for the picker's script and the phone app
-Route::get('/delivery/island', [DeliveryIslandController::class, 'show'])->name('delivery.island.show')->middleware('throttle:60,1');
-Route::post('/delivery/island', [DeliveryIslandController::class, 'store'])->name('delivery.island')->middleware('throttle:30,1');
-Route::post('/delivery/island/locate', [DeliveryIslandController::class, 'locate'])->name('delivery.island.locate')->middleware('throttle:20,1');
-Route::post('/delivery/island/view', [DeliveryIslandController::class, 'view'])->name('delivery.island.view')->middleware('throttle:30,1');
-Route::post('/delivery/island/dismiss', [DeliveryIslandController::class, 'dismiss'])->name('delivery.island.dismiss')->middleware('throttle:30,1');
+Route::get('/delivery/island', [DeliveryIslandController::class, 'show'])->name('delivery.island.show')->middleware('throttle:60,1,delivery.island.show');
+Route::post('/delivery/island', [DeliveryIslandController::class, 'store'])->name('delivery.island')->middleware('throttle:30,1,delivery.island');
+Route::post('/delivery/island/locate', [DeliveryIslandController::class, 'locate'])->name('delivery.island.locate')->middleware('throttle:20,1,delivery.island.locate');
+Route::post('/delivery/island/view', [DeliveryIslandController::class, 'view'])->name('delivery.island.view')->middleware('throttle:30,1,delivery.island.view');
+Route::post('/delivery/island/dismiss', [DeliveryIslandController::class, 'dismiss'])->name('delivery.island.dismiss')->middleware('throttle:30,1,delivery.island.dismiss');
 
 // Shops: delivery & pickup settings, their own parts' pickup and packing slip
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/settings/delivery', [DeliverySettingsController::class, 'edit'])->name('settings.delivery');
     Route::put('/settings/delivery', [DeliverySettingsController::class, 'update'])->name('settings.delivery.update');
-    Route::post('/orders/{order}/pickup/ready', [OrderDeliveryController::class, 'readyForPickup'])->name('orders.pickup.ready')->middleware('throttle:10,1');
-    Route::post('/orders/{order}/pickup/collected', [OrderDeliveryController::class, 'confirmPickup'])->name('orders.pickup.collected')->middleware('throttle:10,1');
+    Route::post('/orders/{order}/pickup/ready', [OrderDeliveryController::class, 'readyForPickup'])->name('orders.pickup.ready')->middleware('throttle:10,1,orders.pickup.ready');
+    Route::post('/orders/{order}/pickup/collected', [OrderDeliveryController::class, 'confirmPickup'])->name('orders.pickup.collected')->middleware('throttle:10,1,orders.pickup.collected');
     Route::get('/orders/{order}/packing-slip', [OrderDeliveryController::class, 'packingSlip'])->name('orders.packing-slip');
 });
 

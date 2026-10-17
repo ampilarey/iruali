@@ -122,7 +122,7 @@
                 <h2 class="text-base font-semibold text-gray-900">{{ __('Invite someone') }}</h2>
                 <p class="text-sm text-gray-500">{{ __('They get an email with a link that works for :days days. With an iruali account they sign in with it; without one they make one. An account can work for one shop only, and shop owners cannot join another shop\'s staff.', ['days' => (int) config('shop_staff.invitation_days', 7)]) }}</p>
             </div>
-            <form method="POST" action="{{ route('seller.staff.invite') }}" class="grid gap-4 sm:grid-cols-3">
+            <form method="POST" action="{{ route('seller.staff.invite') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 @csrf
                 <div class="sm:col-span-2">
                     <label for="email" class="block text-sm font-medium text-gray-700">{{ __('Email') }}</label>

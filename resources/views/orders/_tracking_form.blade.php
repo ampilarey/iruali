@@ -1,6 +1,6 @@
 {{-- Inputs for a part's delivery details (used in the "mark as sent" and "edit details" forms). Needs $part; optional $compact. --}}
 @php $v = fn ($field) => old($field, $part->{$field} instanceof \Carbon\CarbonInterface ? $part->{$field}->toDateString() : $part->{$field}); @endphp
-<div class="grid gap-2 sm:grid-cols-2 text-xs">
+<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 text-xs">
     <div class="sm:col-span-2 font-medium text-gray-600">Courier delivery (Malé area or parcel service)</div>
     <div>
         <label for="courier-{{ $part->id }}" class="block text-gray-600">Courier</label>

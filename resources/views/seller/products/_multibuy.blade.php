@@ -23,7 +23,7 @@
         @endfor
     </div>
 
-    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
             <label for="multibuy-group" class="block text-sm font-medium text-gray-700">{{ __('Mix and match') }}</label>
             <select id="multibuy-group" name="multibuy[group]" class="mt-1 block w-full {{ $multibuyField }}" data-multibuy-group>

@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/gift-cards', [GiftCardController::class, 'index'])->name('gift-cards');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/gift-cards', [GiftCardController::class, 'store'])->name('gift-cards.store')->middleware('throttle:10,1');
+    Route::post('/gift-cards', [GiftCardController::class, 'store'])->name('gift-cards.store')->middleware('throttle:10,1,gift-cards.store');
     Route::get('/account/wallet', [WalletController::class, 'index'])->name('account.wallet');
-    Route::post('/account/wallet/redeem', [WalletController::class, 'redeem'])->name('account.wallet.redeem')->middleware('throttle:10,1');
+    Route::post('/account/wallet/redeem', [WalletController::class, 'redeem'])->name('account.wallet.redeem')->middleware('throttle:10,1,account.wallet.redeem');
 });
 
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {

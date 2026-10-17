@@ -2,7 +2,7 @@
 @if($quote->unit_price !== null && $quote->quoted_at)
     <section class="rounded-xl border border-primary-200 bg-primary-50 p-5 text-sm" data-quote-offer>
         <h2 class="font-semibold text-dark">{{ ($viewer ?? 'customer') === 'seller' ? __('Your quote') : __('The shop\'s quote') }}</h2>
-        <dl class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-3">
+        <dl class="mt-3 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3">
             <div><dt class="text-gray-600">{{ __('Unit price') }}</dt><dd class="text-lg font-bold text-dark" dir="ltr">{{ \App\Support\Money::format($quote->unit_price) }}</dd>
                 @if($saving = $quote->savingPercent())<dd class="text-xs font-semibold text-success">{{ __(':percent% under the listed :price', ['percent' => $saving, 'price' => \App\Support\Money::format($quote->list_price)]) }}</dd>@endif
             </div>

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/staff', [ShopStaffController::class, 'index'])->name('staff');
-    Route::post('/staff/invitations', [ShopStaffController::class, 'invite'])->name('staff.invite')->middleware('throttle:10,1');
+    Route::post('/staff/invitations', [ShopStaffController::class, 'invite'])->name('staff.invite')->middleware('throttle:10,1,staff.invite');
     Route::delete('/staff/invitations/{invitation}', [ShopStaffController::class, 'revoke'])->name('staff.invitations.revoke')->whereNumber('invitation');
     Route::put('/staff/settings', [ShopStaffController::class, 'settings'])->name('staff.settings');
     Route::put('/staff/{member}', [ShopStaffController::class, 'update'])->name('staff.update')->whereNumber('member');
@@ -25,5 +25,5 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
 // The emailed link (signed): it opens for anyone, signed in or not, and the same address accepts it
 Route::middleware('signed')->group(function () {
     Route::get('/shop-invitations/{invitation}/{token}', [ShopInvitationController::class, 'show'])->name('shop-invitations.show')->whereNumber('invitation');
-    Route::post('/shop-invitations/{invitation}/{token}', [ShopInvitationController::class, 'accept'])->name('shop-invitations.accept')->whereNumber('invitation')->middleware('throttle:10,1');
+    Route::post('/shop-invitations/{invitation}/{token}', [ShopInvitationController::class, 'accept'])->name('shop-invitations.accept')->whereNumber('invitation')->middleware('throttle:10,1,shop-invitations.accept');
 });

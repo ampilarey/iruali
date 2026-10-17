@@ -7,7 +7,7 @@
     @include('admin.payouts._header', ['title' => 'Payout #'.$payout->id, 'back' => route('admin.payouts')])
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div class="rounded-lg bg-white p-5 shadow grid gap-3 sm:grid-cols-2 text-sm">
+        <div class="rounded-lg bg-white p-5 shadow grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
             <div><p class="text-gray-500">Shop</p><p class="font-semibold text-gray-900">{{ $payout->seller?->business_name ?: $payout->seller?->name }}</p></div>
             <div><p class="text-gray-500">Amount</p><p class="text-2xl font-bold text-gray-900">{{ Money::format($payout->amount) }}</p></div>
             <div><p class="text-gray-500">Paid</p><p>@if($payout->isPaid()){{ $payout->paid_at?->format('d M Y, H:i') }}@else<span class="text-amber-700">{{ __('Waiting in batch') }} @if($payout->batch)<a href="{{ route('admin.payout-batches.show', $payout->batch) }}" class="font-medium text-primary-700 hover:underline">{{ $payout->batch->reference }}</a>@endif</span>@endif @if($payout->creator) by {{ $payout->creator->name }}@endif</p></div>

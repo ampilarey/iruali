@@ -18,7 +18,7 @@
                 </div>
 
                 @if($shop['pickup'])
-                    <div class="mt-3 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="{{ __('How to get the items from :shop', ['shop' => $shop['name']]) }}">
+                    <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup" aria-label="{{ __('How to get the items from :shop', ['shop' => $shop['name']]) }}">
                         <label class="flex items-start gap-3 rounded-lg border border-gray-200 px-3 py-2.5 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
                             <input type="radio" name="fulfilment[{{ $shop['key'] }}]" value="deliver" @checked($shop['method'] === 'deliver') class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500">
                             <span class="text-sm">

@@ -69,7 +69,7 @@
                     <input id="discount_percent" name="discount_percent" type="number" step="0.01" min="{{ $campaign->minimumDiscount() }}" max="90" required class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500" value="{{ old('discount_percent', $pct(max($campaign->minimumDiscount(), 10))) }}">
                     <p class="mt-1 text-xs text-gray-500">{{ __('Applies to every product you tick below.') }}</p>
                 </div>
-                <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach($products as $product)
                         <label class="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2 text-sm has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
                             <input type="checkbox" name="products[]" value="{{ $product->id }}" @checked(in_array($product->id, old('products', []))) class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">

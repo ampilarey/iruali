@@ -30,7 +30,7 @@
                 @method('PUT')
             @endif
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="name_en" class="block text-sm font-medium text-gray-700">Name (English) *</label>
                     <input id="name_en" name="name_en" required class="{{ $field }}"
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-3">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
                     <label for="sku" class="block text-sm font-medium text-gray-700">SKU *</label>
                     <input id="sku" name="sku" required class="{{ $field }}" value="{{ old('sku', $product->sku) }}">

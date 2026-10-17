@@ -14,8 +14,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller/products')->name('sel
     Route::get('/export.csv', [ProductImportController::class, 'export'])->name('export');
     Route::get('/import', [ProductImportController::class, 'form'])->name('import');
     Route::get('/import/sample.csv', [ProductImportController::class, 'sample'])->name('import.sample');
-    Route::post('/import/preview', [ProductImportController::class, 'preview'])->name('import.preview')->middleware('throttle:20,1');
-    Route::post('/import/apply', [ProductImportController::class, 'apply'])->name('import.apply')->middleware('throttle:20,1');
+    Route::post('/import/preview', [ProductImportController::class, 'preview'])->name('import.preview')->middleware('throttle:20,1,import.preview');
+    Route::post('/import/apply', [ProductImportController::class, 'apply'])->name('import.apply')->middleware('throttle:20,1,import.apply');
 
     Route::post('/bulk', [BulkProductController::class, 'confirm'])->name('bulk');
     Route::post('/bulk/apply', [BulkProductController::class, 'apply'])->name('bulk.apply');

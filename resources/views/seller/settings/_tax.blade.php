@@ -25,7 +25,7 @@
         </div>
     </fieldset>
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
             <label for="tin" class="block text-sm font-medium text-gray-700">{{ __('GST TIN') }}</label>
             <input id="tin" name="tin" maxlength="30" dir="ltr" autocomplete="off" placeholder="1012345GST501" class="{{ $taxField }}" value="{{ old('tin', $profile?->tin) }}">

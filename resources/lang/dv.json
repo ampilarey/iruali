@@ -2814,5 +2814,22 @@
     "Your order :number is waiting for payment of :amount.": "ތިބާގެ އޯޑަރު :number، :amount ދެއްކުމަށް މަޑުކުރަނީ.",
     "Use the button to pay by card or bank transfer. No sign-in needed. The link works for 48 hours.": "ކާޑުން ނުވަތަ ބޭންކް ޓްރާންސްފަރަކުން ދެއްކުމަށް ބަޓަން ބޭނުންކުރައްވާ. ސައިން އިން ކުރަން ނުޖެހޭ. ލިންކު 48 ގަޑިއިރު ވަންދެން ބޭނުންކުރެވޭނެ.",
     "If you have already paid, you can ignore this email.": "ތިބާ މިހާރުވެސް ފައިސާ ދައްކާފައިވާނަމަ، މި އީމެއިލަށް ސަމާލުކަން ނުދެއްވިޔަސް ރަނގަޅު.",
-    "iruali: to pay :amount for order :number, open :url (works for 48 hours).": "iruali: :number އޯޑަރަށް :amount ދެއްކުމަށް :url ހުޅުއްވާ (48 ގަޑިއިރު ވަންދެން)."
+    "iruali: to pay :amount for order :number, open :url (works for 48 hours).": "iruali: :number އޯޑަރަށް :amount ދެއްކުމަށް :url ހުޅުއްވާ (48 ގަޑިއިރު ވަންދެން).",
+    "Birthday (optional)": "އުފަންދުވަސް (އިޚްތިޔާރީ)",
+    "Tell us and we may send you a little gift on your birthday.": "އަހަރެމެންނަށް ބުނެދީފިނަމަ ތިބާގެ އުފަންދުވަހު ކުޑަ ހަދިޔާއެއް ފޮނުވިދާނެ.",
+    "Your tier: :tier": "ތިބާގެ ލެވެލް: :tier",
+    "You earn :times times the points.": "ތިބާއަށް ޕޮއިންޓް ލިބެނީ :times ގުނަ.",
+    "Spend :amount more within 12 months to reach :tier.": ":tier އަށް ދިއުމަށް 12 މަސް ތެރޭ :amount އިތުރަށް ޚަރަދުކުރައްވާ.",
+    "You are at the top tier. Thank you!": "ތިބާ މިވަނީ އެންމެ މަތީ ލެވެލްގައި. ޝުކުރިއްޔާ!",
+    "Happy birthday from iruali!": "iruali ގެ ފަރާތުން އުފަންދުވަހުގެ މަރުޙަބާ!",
+    "Happy birthday, :name!": ":name، އުފަންދުވަހުގެ މަރުޙަބާ!",
+    "Here is :percent% off your next order, as a small gift from us.": "އަހަރެމެންގެ ކުޑަ ހަދިޔާއެއްގެ ގޮތުން، ތިބާގެ ދެން ކުރާ އޯޑަރަށް :percent% ލުއި.",
+    "Your code: :code (until :date)": "ތިބާގެ ކޯޑު: :code (:date އާ ހަމައަށް)",
+    "You are now :tier on iruali": "ތިބާ މިހާރު iruali ގައި :tier",
+    "Thank you for shopping with us. You have moved up to :tier.": "އަހަރެމެންގެ ކިބައިން ވިޔަފާރިކުރެއްވީތީ ޝުކުރިއްޔާ. ތިބާ :tier އަށް މައްޗަށް ދިޔައީ.",
+    "From now on you earn :times times the points on every order.": "މިހާރުން ފެށިގެން ކޮންމެ އޯޑަރަކަށް ތިބާއަށް :times ގުނަ ޕޮއިންޓް ލިބޭނެ.",
+    "See your rewards": "ތިބާގެ ރިވޯޑްސް ބައްލަވާ",
+    "Reef": "ފަރު",
+    "Lagoon": "ފަޅު",
+    "iruali: happy birthday! :percent% off your next order with code :code, until :date.": "iruali: އުފަންދުވަހުގެ މަރުޙަބާ! :code ކޯޑާއެކު ދެން ކުރާ އޯޑަރަށް :percent% ލުއި، :date އާ ހަމައަށް."
 }

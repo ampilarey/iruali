@@ -35,13 +35,13 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 
 ## Phase 2: customers, loyalty and accounts
 
-7. **Loyalty tiers** (e.g. Reef, Lagoon, Atoll) by spend in the last 12 months, shown on the
+7. ✅ **Loyalty tiers** (done: Reef / Lagoon / Atoll, `App\Support\LoyaltyTiers`, `rewards:refresh-tiers`) (e.g. Reef, Lagoon, Atoll) by spend in the last 12 months, shown on the
    rewards page with progress, earning extra points per tier; a message when someone moves up.
    B&G: `LoyaltyTierService.php`, `admin/loyalty/tiers`, `marketing:send-tier-milestones`.
-8. **Points tools**: admin adjusts a customer's points with a reason; points held at checkout until
+8. ✅ **Points tools** (done: Admin → Rewards → Adjust; points are taken at checkout and returned on cancel; `rewards:check-balances` nightly): admin adjusts a customer's points with a reason; points held at checkout until
    the order is paid or cancelled; nightly check that balances match the ledger.
    B&G: `admin/loyalty/*`, `loyalty/hold*`, `app:reconcile-loyalty-balances`.
-9. **Birthday offer**: optional birthday on the profile; a single-use voucher by email/SMS that week.
+9. ✅ **Birthday offer** (done: birthday in My Account, `marketing:birthday-offers`): optional birthday on the profile; a single-use voucher by email/SMS that week.
    B&G: `marketing:send-birthday-offers`.
 10. **Customer page for staff**: everything about one customer (orders, returns, disputes, messages,
     points, wallet, quotes), tags, private notes, merge duplicate accounts, change phone.

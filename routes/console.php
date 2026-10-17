@@ -52,6 +52,12 @@ Schedule::command('queue:prune-failed --hours=168')->daily();
 // Yesterday's errors (new ones and the most frequent), mailed only when there is something to say
 Schedule::command('errors:digest')->dailyAt('07:00')->timezone('Indian/Maldives');
 
+// Loyalty: tiers follow the last 12 months of spending, balances must match the points ledger, and
+// birthday vouchers go out in the morning (each only when switched on in Admin → Settings)
+Schedule::command('rewards:refresh-tiers')->dailyAt('02:30')->timezone('Indian/Maldives')->withoutOverlapping();
+Schedule::command('rewards:check-balances')->dailyAt('02:45')->timezone('Indian/Maldives')->withoutOverlapping();
+Schedule::command('marketing:birthday-offers')->dailyAt('09:30')->timezone('Indian/Maldives')->withoutOverlapping();
+
 // Open card payments are checked with BML, in case both the return and the webhook were lost
 Schedule::command('payments:reconcile-bml')->everyFiveMinutes()->withoutOverlapping()->name('payments-reconcile-bml');
 

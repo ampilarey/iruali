@@ -42,6 +42,7 @@ class ProfileController extends Controller
             'state' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:20',
             'preferred_language' => ['nullable', Rule::in(['en', 'dv'])],
+            'birth_date' => ['nullable', 'date', 'before:today', 'after:1900-01-01'],
         ], ['phone.regex' => __('Enter a phone number with digits only, e.g. 777 1234.')]);
 
         $data['phone'] = filled($data['phone'] ?? null) ? preg_replace('/\s+/', '', $data['phone']) : null;

@@ -70,6 +70,8 @@ class Audit
         'sms.type_saved' => 'SMS message switched or reworded',
         'settings.team_alerts' => 'Team alerts changed',
         'payment.link_sent' => 'Payment link sent to the customer',
+        'points.adjusted' => 'Loyalty points adjusted by hand',
+        'points.balance_fixed' => 'Points balance set back to the ledger',
         'payment.method_switched' => 'Customer changed how they pay (payment link)',
         'shop.staff_action' => 'Change made by shop staff',
         'preorder.stock_arrived' => 'Pre-order stock arrived',

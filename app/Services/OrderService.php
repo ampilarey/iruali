@@ -98,7 +98,7 @@ class OrderService
                 $discounts['total_discount'] = $discounts['shop']['amount'] + $discounts['voucher']['amount'] + $redeem;
                 $discounts['final_total'] = max(0, $cart->total - $discounts['total_discount']);
             }
-            $loyaltyPointsEarned = $user ? $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total']) : 0;
+            $loyaltyPointsEarned = $user ? $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total'], $user) : 0;
 
             // Delivery fee by area (points are earned on goods only, not delivery): the area's fee once
             // for the shop parts that are delivered (none when everything is picked up) plus their
@@ -327,6 +327,15 @@ class OrderService
         }
 
         $this->discountService->processReferralRewards($user, $order);
+
+        // Moved up a loyalty tier with this order: tell them once
+        if (\App\Support\LoyaltyTiers::enabled() && \App\Support\LoyaltyTiers::refresh($user)) {
+            try {
+                $user->notify(new \App\Notifications\TierUpgraded($user->loyalty_tier));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
     }
 
     /**

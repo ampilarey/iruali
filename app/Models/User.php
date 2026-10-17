@@ -86,6 +86,7 @@ class User extends Authenticatable implements HasLocalePreference
         'onboarding_completed_at' => 'datetime',
         'notification_preferences' => 'array',
         'team_alerts' => 'array',
+        'birth_date' => 'date',
         'wallet_balance' => 'decimal:2',
         'is_smoke_test' => 'boolean',
         'holiday_mode' => 'boolean',

@@ -27,6 +27,28 @@
     </div>
     <p class="text-xs text-gray-500">Also: {{ number_format($totals['refunded']) }} points returned on cancelled orders, {{ number_format($totals['adjustments']) }} from adjustments and opening balances.</p>
 
+    @if(session('success'))<div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>@endif
+    @if(auth()->user()->hasRole('admin'))
+        <form method="POST" action="{{ route('admin.rewards.adjust') }}">
+            @csrf
+            <x-admin.fold title="Adjust a customer's points" body="space-y-3 text-sm" :open="$errors->any()" id="points-adjust">
+                <p class="text-xs text-gray-500">Give points (a goodwill gesture) or take them back (a mistake). The customer's ledger shows the reason; the audit log records who did it.</p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div><label for="adj-email" class="block text-xs font-medium text-gray-700">Customer's email</label>
+                        <input id="adj-email" name="email" type="email" required value="{{ old('email') }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        @error('email')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror</div>
+                    <div><label for="adj-points" class="block text-xs font-medium text-gray-700">Points (minus to take away)</label>
+                        <input id="adj-points" name="points" type="number" required value="{{ old('points') }}" placeholder="100 or -50" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        @error('points')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror</div>
+                    <div><label for="adj-reason" class="block text-xs font-medium text-gray-700">Reason</label>
+                        <input id="adj-reason" name="reason" required maxlength="200" value="{{ old('reason') }}" placeholder="Sorry for the late delivery" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        @error('reason')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror</div>
+                </div>
+                <button class="rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700">Save</button>
+            </x-admin.fold>
+        </form>
+    @endif
+
     <x-admin.fold title="Top referrers" :open="true">
         <table class="w-full text-sm">
             <thead><tr class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500"><th class="p-3 text-start">Customer</th><th class="p-3 text-start">Code</th><th class="p-3 text-end">Signed up</th><th class="p-3 text-end">Rewarded</th><th class="p-3 text-end">Points earned</th></tr></thead>

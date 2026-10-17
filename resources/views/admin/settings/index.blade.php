@@ -170,6 +170,41 @@
                     <p class="mt-1 text-xs text-gray-500">0 = never. Oldest points go first; customers are emailed a month before. Needs the scheduler cron. Report under <a href="{{ route('admin.rewards') }}" class="underline">Rewards</a>.</p>
                 </div>
                 <p class="mt-2 text-xs text-gray-500">Referral rewards are paid once, when a referred customer places their first order.</p>
+
+                <div class="mt-5 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-3" data-loyalty-tiers>
+                    <input type="hidden" name="loyalty_tiers_enabled" value="0">
+                    <label class="flex items-start gap-3 text-sm text-gray-800">
+                        <input type="checkbox" name="loyalty_tiers_enabled" value="1" @checked(old('loyalty_tiers_enabled', $settings['loyalty_tiers_enabled'] ?? 1)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                        <span><span class="font-medium">Loyalty tiers</span>
+                            <span class="block text-xs text-gray-500 mt-0.5">Reef for everyone; Lagoon and Atoll by what a customer spent in the last 12 months, earning more points per MVR. Customers are emailed when they move up; tiers go down quietly as old orders pass a year.</span></span>
+                    </label>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div><label for="loyalty_tier_lagoon_min" class="block text-xs font-medium text-gray-700">Lagoon from (MVR in 12 months)</label>
+                            <input id="loyalty_tier_lagoon_min" name="loyalty_tier_lagoon_min" type="number" min="1" step="1" class="{{ $field }}" value="{{ old('loyalty_tier_lagoon_min', $settings['loyalty_tier_lagoon_min'] ?? 5000) }}"></div>
+                        <div><label for="loyalty_tier_lagoon_multiplier" class="block text-xs font-medium text-gray-700">Lagoon points × </label>
+                            <input id="loyalty_tier_lagoon_multiplier" name="loyalty_tier_lagoon_multiplier" type="number" min="1" max="5" step="0.05" class="{{ $field }}" value="{{ old('loyalty_tier_lagoon_multiplier', $settings['loyalty_tier_lagoon_multiplier'] ?? 1.25) }}"></div>
+                        <div><label for="loyalty_tier_atoll_min" class="block text-xs font-medium text-gray-700">Atoll from (MVR in 12 months)</label>
+                            <input id="loyalty_tier_atoll_min" name="loyalty_tier_atoll_min" type="number" min="1" step="1" class="{{ $field }}" value="{{ old('loyalty_tier_atoll_min', $settings['loyalty_tier_atoll_min'] ?? 15000) }}"></div>
+                        <div><label for="loyalty_tier_atoll_multiplier" class="block text-xs font-medium text-gray-700">Atoll points ×</label>
+                            <input id="loyalty_tier_atoll_multiplier" name="loyalty_tier_atoll_multiplier" type="number" min="1" max="5" step="0.05" class="{{ $field }}" value="{{ old('loyalty_tier_atoll_multiplier', $settings['loyalty_tier_atoll_multiplier'] ?? 1.5) }}"></div>
+                    </div>
+                    @error('loyalty_tier_atoll_min')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-3" data-birthday-offer>
+                    <input type="hidden" name="birthday_offer_enabled" value="0">
+                    <label class="flex items-start gap-3 text-sm text-gray-800">
+                        <input type="checkbox" name="birthday_offer_enabled" value="1" @checked(old('birthday_offer_enabled', $settings['birthday_offer_enabled'] ?? 0)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                        <span><span class="font-medium">Birthday offer</span>
+                            <span class="block text-xs text-gray-500 mt-0.5">Customers who give their birthday in My Account get a single-use discount code on the day (by email, and SMS if they chose it for offers), once a year. Not sent to customers who turned off offers.</span></span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label for="birthday_offer_percent" class="block text-xs font-medium text-gray-700">Discount (%)</label>
+                            <input id="birthday_offer_percent" name="birthday_offer_percent" type="number" min="1" max="100" class="{{ $field }}" value="{{ old('birthday_offer_percent', $settings['birthday_offer_percent'] ?? 10) }}"></div>
+                        <div><label for="birthday_offer_days" class="block text-xs font-medium text-gray-700">Valid for (days)</label>
+                            <input id="birthday_offer_days" name="birthday_offer_days" type="number" min="1" max="60" class="{{ $field }}" value="{{ old('birthday_offer_days', $settings['birthday_offer_days'] ?? 7) }}"></div>
+                    </div>
+                </div>
             </x-admin.fold>
 
             <x-admin.fold title="Abandoned cart emails">

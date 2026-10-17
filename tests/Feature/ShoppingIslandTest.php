@@ -400,4 +400,12 @@ class ShoppingIslandTest extends TestCase
         $this->assertStringContainsString('geolocation=(self)', $policy);
         $this->assertStringContainsString('camera=()', $policy);
     }
+
+    public function test_the_island_question_opens_by_itself_only_on_shopping_pages(): void
+    {
+        $this->get('/')->assertSee('data-auto-open', false);
+        // Never over the sign-in form, checkout or payment: the person came to do something else
+        $this->get('/login')->assertDontSee('data-auto-open', false);
+        $this->get('/register')->assertDontSee('data-auto-open', false);
+    }
 }

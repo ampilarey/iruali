@@ -10,12 +10,24 @@ const EMAIL = process.env.BROWSER_TEST_EMAIL || 'browser@iruali.test';
 const PASSWORD = process.env.BROWSER_TEST_PASSWORD || 'browser-pass-123';
 const SEARCH = process.env.BROWSER_TEST_SEARCH || 'Coir rope';
 
+// A first visit asks "Where should we deliver?" on shopping pages; this test shops everywhere
+async function closeIslandQuestion(page: Page) {
+    const dialog = page.locator('dialog[data-island-dialog][open]');
+    // It opens a moment after the page loads (resources/js/shopping-island.js)
+    const opened = await dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false);
+    if (opened) {
+        await dialog.getByRole('button', { name: /not now/i }).click();
+        await expect(dialog).toHaveCount(0);
+    }
+}
+
 async function signIn(page: Page) {
     await page.goto('/login');
     await page.locator('#email').fill(EMAIL);
     await page.locator('#password').fill(PASSWORD);
     await page.locator('form[action$="/login"] button[type="submit"]').click();
     await expect(page).not.toHaveURL(/\/login$/);
+    await closeIslandQuestion(page);
 }
 
 test.describe('checkout', () => {

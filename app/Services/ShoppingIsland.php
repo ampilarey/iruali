@@ -132,10 +132,17 @@ class ShoppingIsland
         Cookie::queue(Cookie::make(self::COOKIE_PROMPT, '1', self::COOKIE_MINUTES));
     }
 
-    /** Ask "Where should we deliver?": nothing chosen yet and the question not closed before. */
+    /** Shopping pages where "Where should we deliver?" may open by itself (never sign-in, account, checkout or payment). */
+    public const PROMPT_ROUTES = [
+        'home', 'products.index', 'products.show', 'categories.index', 'categories.show', 'search', 'deals',
+        'brands.index', 'brands.show', 'campaigns.index', 'campaigns.show', 'sellers.show', 'shop',
+    ];
+
+    /** Ask "Where should we deliver?": a shopping page, nothing chosen yet and the question not closed before. */
     public function shouldPrompt(): bool
     {
-        return $this->island() === null && ! session(self::COOKIE_PROMPT) && ! request()->cookie(self::COOKIE_PROMPT);
+        return request()->routeIs(...self::PROMPT_ROUTES)
+            && $this->island() === null && ! session(self::COOKIE_PROMPT) && ! request()->cookie(self::COOKIE_PROMPT);
     }
 
     /**

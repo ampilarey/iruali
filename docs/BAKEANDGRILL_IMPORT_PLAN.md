@@ -29,7 +29,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
    B&G: `CustomerAuthController` (`auth/customer/otp/*`, `check-phone`), `CustomerOtpService.php`.
 5. ✅ **Payment link** (done: admin order → Payment → Send payment link; `/pay/{order}` signed for 48 hours, `App\Support\PayLink`) for an unpaid order (card, or the bank-transfer details), sent by SMS or
    email from the admin order page; a public pay page. B&G: `orders/{id}/send-pay-link`, `/pay/{token}`.
-6. **BML reconcile job**: every few minutes, ask BML about card payments still pending, so a
+6. ✅ **BML reconcile job** (done: `payments:reconcile-bml` every 5 minutes; late money for a cancelled order was already flagged as a refund due with alerts): every few minutes, ask BML about card payments still pending, so a
    payment whose return and webhook were both lost is still recorded. Alert when money arrives
    for a cancelled order. B&G: `payments:reconcile-pending-bml`, `LatePaymentService.php`.
 

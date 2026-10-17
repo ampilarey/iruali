@@ -109,30 +109,9 @@ class BmlConnect
             return false;
         }
 
-        if (! $this->timestampIsFresh($timestamp)) {
-            return false;
-        }
-
         $expected = hash('sha256', $nonce.$timestamp.config('services.bml.api_key'));
 
         return hash_equals($expected, strtolower($signature));
-    }
-
-    /**
-     * Reject a captured v2 signature. BML sends seconds or milliseconds.
-     */
-    public function timestampIsFresh(string $timestamp, int $windowSeconds = 300): bool
-    {
-        if (! ctype_digit($timestamp)) {
-            return false;
-        }
-
-        $ts = (int) $timestamp;
-        if ($ts > 10_000_000_000) {
-            $ts = intdiv($ts, 1000);
-        }
-
-        return abs(time() - $ts) <= $windowSeconds;
     }
 
     /**

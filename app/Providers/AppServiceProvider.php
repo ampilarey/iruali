@@ -37,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
+        // Proxies allowed to set X-Forwarded-* (the headers are chosen in bootstrap/app.php)
+        $trusted = (string) config('app.trusted_proxies', '127.0.0.1');
+        \Illuminate\Http\Middleware\TrustProxies::at($trusted === '*' ? '*' : array_values(array_filter(array_map('trim', explode(',', $trusted)))));
+
         // API: 60 requests a minute per user (or per IP when signed out); sign-in routes are tighter in routes/api.php
         \Illuminate\Support\Facades\RateLimiter::for('api', fn (\Illuminate\Http\Request $request) => \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
 

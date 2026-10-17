@@ -18,6 +18,7 @@ use App\Services\OrderService;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -141,6 +142,16 @@ class GuestCheckoutTest extends TestCase
         app(PaymentService::class)->confirm($order->fresh());
         $this->assertSame('paid', $order->fresh()->payment_status);
         Notification::assertSentOnDemand(PaymentUpdated::class);
+
+        // BML brings the guest back to a link with their code in the path (BML adds ?transactionId=),
+        // so finishing the payment in another browser, with no session, still ends on the order
+        $returnUrl = route('payments.bml.return', ['order' => $order, 'token' => $order->guest_token]);
+        Http::assertSent(fn ($request) => ($request['redirectUrl'] ?? null) === $returnUrl);
+        $this->app['session']->driver()->flush();
+        $this->get($returnUrl.'?transactionId=txn_test')->assertRedirect($order->guestUrl());
+        $this->app['session']->driver()->flush();
+        $this->get(route('payments.bml.return', ['order' => $order, 'token' => str_repeat('x', 40)]).'?transactionId=txn_test')
+            ->assertRedirect(route('login'));
     }
 
     public function test_guest_order_pages_need_the_signed_link_with_the_right_token(): void

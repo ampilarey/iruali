@@ -102,6 +102,9 @@ return [
     // Optional. When set, GET /api/health includes the deploy commit only if the request sends this as X-Health-Token.
     'health_detail_token' => env('HEALTH_DETAIL_TOKEN'),
 
+    // Proxies allowed to set X-Forwarded-* (comma list, or * behind a proxy the app is never reached past)
+    'trusted_proxies' => env('TRUSTED_PROXIES', '127.0.0.1'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

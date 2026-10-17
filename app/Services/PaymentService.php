@@ -72,7 +72,9 @@ class PaymentService
             'currency' => $transaction->currency,
             'localId' => $localId,
             'customerReference' => 'iruali '.$order->order_number,
-            'redirectUrl' => route('payments.bml.return', $order),
+            // A guest's code rides in the path (BML appends its own ?transactionId=...), so a guest who
+            // finishes paying in another browser still gets back to the order
+            'redirectUrl' => route('payments.bml.return', array_filter(['order' => $order, 'token' => $order->guest_token])),
             'webhook' => route('payments.bml.webhook'),
             'paymentPortalExperience' => $this->bml()->portalExperience(),
         ]);
@@ -101,7 +103,7 @@ class PaymentService
             return true;
         }
 
-        $token = (string) $request->query('token', '');
+        $token = (string) ($request->route('token') ?? $request->query('token', ''));
         if ($order->guest_token && $token !== '' && hash_equals((string) $order->guest_token, $token)) {
             return true;
         }

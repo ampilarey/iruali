@@ -30,9 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
         ]);
-        $trusted = env('TRUSTED_PROXIES', '127.0.0.1');
+        // Which proxies: config('app.trusted_proxies'), set in AppServiceProvider::boot once .env is
+        // loaded (this callback runs before it is, so env() here would always see the default)
         $middleware->trustProxies(
-            at: $trusted === '*' ? '*' : array_values(array_filter(array_map('trim', explode(',', (string) $trusted)))),
             headers: Request::HEADER_X_FORWARDED_FOR
                 | Request::HEADER_X_FORWARDED_HOST
                 | Request::HEADER_X_FORWARDED_PORT

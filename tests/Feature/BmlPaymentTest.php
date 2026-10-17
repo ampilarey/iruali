@@ -190,18 +190,14 @@ class BmlPaymentTest extends TestCase
         $this->checkout();
         $order = Order::sole();
 
-        $stale = (string) (time() - 3600);
-        $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
-            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => $stale,
-            'X-Signature' => hash('sha256', 'n1'.$stale.'test-key'),
-        ])->assertForbidden();
-
         $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
             'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => (string) time(), 'X-Signature' => 'forged',
         ])->assertForbidden();
         $this->assertSame('unpaid', $order->fresh()->payment_status);
 
-        $timestamp = (string) time();
+        // Only the signature counts, as in Akuru's live BML setup: BML does not document the
+        // timestamp's format, and a late retry must still get through (the API is asked anyway)
+        $timestamp = now()->subHour()->toIso8601String();
         $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
             'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => $timestamp,
             'X-Signature' => hash('sha256', 'n1'.$timestamp.'test-key'),

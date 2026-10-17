@@ -53,6 +53,11 @@
                     </div>
                 @endif
 
+                @if($shop['own'])
+                    {{-- The shop delivers itself at its own fee (the script updates it with the island) --}}
+                    <p class="mt-1 text-xs text-gray-600" data-shop-fee-line>{{ __('Delivered by :shop', ['shop' => $shop['name']]) }}: <span class="font-medium" dir="ltr" data-shop-fee>{{ $shop['fee'] > 0 ? \App\Support\Money::format($shop['fee']) : __('Free') }}</span>@if($shop['own']['free_over']) · {{ __('free over :amount of its items', ['amount' => \App\Support\Money::format($shop['own']['free_over'])]) }}@endif</p>
+                @endif
+
                 @if($shop['surcharge'] > 0)
                     <p class="mt-1 text-xs text-gray-600">{{ __('Bulky items: :amount extra delivery charge when delivered.', ['amount' => \App\Support\Money::format($shop['surcharge'])]) }}</p>
                 @endif

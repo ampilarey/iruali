@@ -27,8 +27,11 @@
         @if($box['surcharge'] > 0)
             <p class="text-gray-700">{{ __('Plus :amount delivery per item (bulky item), even with free delivery.', ['amount' => \App\Support\Money::format($box['surcharge'])]) }}</p>
         @endif
+        @if($box['ownFees'])
+            <p class="text-gray-700" data-shop-delivers>{{ __('The shop delivers this itself, at its own fee.') }}</p>
+        @endif
         @if($box['freeOver'] > 0)
-            <p class="text-success font-medium">{{ __('Free delivery on orders over :amount', ['amount' => \App\Support\Money::format($box['freeOver'])]) }}</p>
+            <p class="text-success font-medium">{{ $box['ownFees'] ? __('Free delivery when your items from this shop come to :amount', ['amount' => \App\Support\Money::format($box['freeOver'])]) : __('Free delivery on orders over :amount', ['amount' => \App\Support\Money::format($box['freeOver'])]) }}</p>
         @endif
         @if($box['pickup'])
             <p class="text-gray-700 flex items-start gap-1.5"><x-icon name="store" class="w-4 h-4 mt-0.5 shrink-0 text-primary" /><span>{{ __('Or pick it up from the shop in :island, with no delivery fee.', ['island' => $box['pickup']['island']]) }}</span></p>

@@ -8,23 +8,32 @@ use Illuminate\Support\Collection;
 
 /**
  * A shop's delivery settings (Seller Centre → Settings → Delivery & pickup): how many days it
- * usually takes to send an order, and whether customers may collect from the shop instead.
- * A shop that never saved the page gets the defaults (ships within 1 day, no pickup).
+ * usually takes to send an order, whether customers may collect from the shop instead, and its
+ * own delivery fees (own_fees: to its home island, Greater Malé and other islands, free over an
+ * amount). A shop that never saved the page gets the defaults (ships within 1 day, no pickup,
+ * iruali's delivery fees).
  */
 class SellerDeliverySetting extends Model
 {
     public const DEFAULT_SHIPS_WITHIN_DAYS = 1;
 
-    protected $fillable = ['seller_id', 'ships_within_days', 'pickup_enabled', 'pickup_address', 'pickup_island_id', 'pickup_hours'];
+    protected $fillable = ['seller_id', 'ships_within_days', 'pickup_enabled', 'pickup_address', 'pickup_island_id', 'pickup_hours',
+        'own_fees', 'fee_local', 'fee_greater_male', 'fee_islands', 'free_over'];
 
     protected $attributes = [
         'ships_within_days' => self::DEFAULT_SHIPS_WITHIN_DAYS,
         'pickup_enabled' => false,
+        'own_fees' => false,
     ];
 
     protected $casts = [
         'ships_within_days' => 'integer',
         'pickup_enabled' => 'boolean',
+        'own_fees' => 'boolean',
+        'fee_local' => 'decimal:2',
+        'fee_greater_male' => 'decimal:2',
+        'fee_islands' => 'decimal:2',
+        'free_over' => 'decimal:2',
     ];
 
     /** @return BelongsTo<User, $this> */
@@ -98,5 +107,52 @@ class SellerDeliverySetting extends Model
         $name = $island->getTranslation('name', 'en', false) ?: $island->getTranslation('name', config('app.fallback_locale'), false);
 
         return trim($name.($island->atoll ? ', '.$island->atoll : ''));
+    }
+
+    /**
+     * Admin → Delivery lets shops set their own delivery fees.
+     */
+    public static function ownFeesAllowed(): bool
+    {
+        return filter_var(Setting::get('shop_own_fees_enabled'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * The most a shop may charge for one delivery (Admin → Delivery).
+     */
+    public static function maxFee(): float
+    {
+        return max(0, (float) Setting::get('shop_delivery_fee_max'));
+    }
+
+    /**
+     * The shop delivers its own parts at its own fees (and keeps them), while iruali allows it.
+     */
+    public function hasOwnFees(): bool
+    {
+        return (bool) $this->own_fees && $this->fee_greater_male !== null && $this->fee_islands !== null && self::ownFeesAllowed();
+    }
+
+    /**
+     * The shop's own fee for a delivery to the area (DeliveryService::AREA_GREATER_MALE or any
+     * other), to its home island when $toHomeIsland (the local fee, when set), for this many
+     * MVR of its items: 0 from its free-delivery amount, never above iruali's limit. Null when the
+     * shop uses iruali's fees.
+     */
+    public function ownFee(string $area, bool $toHomeIsland, float $itemsTotal): ?float
+    {
+        if (! $this->hasOwnFees()) {
+            return null;
+        }
+        if ($this->free_over !== null && (float) $this->free_over > 0 && $itemsTotal >= (float) $this->free_over) {
+            return 0.0;
+        }
+        $fee = match (true) {
+            $toHomeIsland && $this->fee_local !== null => (float) $this->fee_local,
+            $area === \App\Services\DeliveryService::AREA_GREATER_MALE => (float) $this->fee_greater_male,
+            default => (float) $this->fee_islands,
+        };
+
+        return round(min($fee, self::maxFee()), 2);
     }
 }

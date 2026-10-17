@@ -32,6 +32,8 @@ class SellerOrder extends Model
         'commission_amount' => 'decimal:2',
         'seller_earnings' => 'decimal:2',
         'delivery_surcharge' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
+        'delivery_fee_to_shop' => 'boolean',
         'pickup_code_attempts' => 'integer',
         'pickup_ready_at' => 'datetime',
         'pickup_collected_at' => 'datetime',
@@ -231,6 +233,33 @@ class SellerOrder extends Model
     public function taxableGoodsTotal(): float
     {
         return $this->netSubtotal();
+    }
+
+    /**
+     * What the shop charged for delivering this part itself (its own fee and its bulky-item
+     * charges), paid to it with its earnings. 0 when iruali's delivery fee applied (iruali keeps it).
+     */
+    public function shopDeliveryCharge(): float
+    {
+        return $this->delivery_fee_to_shop ? round((float) $this->delivery_fee + (float) $this->delivery_surcharge, 2) : 0.0;
+    }
+
+    /**
+     * The shop's own delivery in a refund of $refund on this part, where up to $goodsCap of it is
+     * for the items: what is left over, up to the shop's delivery charge (the rest is iruali's).
+     */
+    public function deliveryRefundShare(float $refund, float $goodsCap): float
+    {
+        return round(min(max(0, $refund - $goodsCap), $this->shopDeliveryCharge()), 2);
+    }
+
+    /**
+     * What the shop's GST is worked out on: its goods after its discounts, plus its own delivery
+     * charge. The shop's invoice total.
+     */
+    public function taxableTotal(): float
+    {
+        return round($this->taxableGoodsTotal() + $this->shopDeliveryCharge(), 2);
     }
 
     // ---- Pre-orders -----------------------------------------------------------------------

@@ -90,14 +90,17 @@ class DisputeService
 
     /**
      * The most a customer can claim on this part: its items as paid for (after the shop's own
-     * discounts), plus delivery when it is the only shop, less what has already been refunded on it
+     * discounts), plus delivery (the shop's own charge when it delivered the part itself, else the
+     * order's delivery fee when it is the only shop), less what has already been refunded on it
      * through returns or earlier disputes.
      */
     public function maxClaim(SellerOrder $part): float
     {
         $order = $part->order;
         $cap = $part->netSubtotal();
-        if ($order->sellerOrders()->count() === 1) {
+        if ($part->delivery_fee_to_shop) {
+            $cap += $part->shopDeliveryCharge();
+        } elseif ($order->sellerOrders()->count() === 1) {
             $cap += (float) $order->shipping_amount;
         }
         $cap -= (float) $part->returnRequests()->whereIn('status', ['approved', 'refunded'])->sum('refund_amount');
@@ -206,6 +209,8 @@ class DisputeService
                     // The shop gives back its share of the refunded items (iruali forgoes its commission on them)
                     $base = min($refund, $part->netSubtotal());
                     $shopShare = round($base * (1 - (float) $part->commission_rate / 100), 2);
+                    // and its own delivery charge refunded beyond the items
+                    $shopShare = round($shopShare + $part->deliveryRefundShare($refund, $part->netSubtotal()), 2);
                     if ($shopShare > 0) {
                         SellerAdjustment::create([
                             'seller_id' => $part->seller_id,

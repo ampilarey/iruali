@@ -131,6 +131,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/account/edit', [\App\Http\Controllers\Customer\ProfileController::class, 'edit'])->name('account.edit');
         Route::put('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('account.update');
         Route::put('/account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('account.password')->middleware('throttle:5,1,account.password');
+        Route::post('/account/sign-out-everywhere', [\App\Http\Controllers\Customer\ProfileController::class, 'signOutEverywhere'])->name('account.sign-out-everywhere')->middleware('throttle:5,1,account.sign-out-everywhere');
         // Cart routes
         // Wishlist routes
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');

@@ -50,7 +50,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
     B&G: `reports/*` (LTV, cohorts, retention).
 12. ✅ **Privacy** (done: erase on the customer page; My Account → Security → Delete my account, blocked while an order, refund or wallet credit is open): staff can erase a customer's personal data (orders kept, names removed);
     customers can ask to delete their account from My Account. B&G: `CustomerErasureService`.
-13. **Account safety**: "Sign out everywhere"; after repeated wrong passwords a staff account is
+13. ✅ **Account safety** (done: My Account → Security → Sign out everywhere; staff locked 30 minutes after 5 wrong tries with an email and team alert; Admin → Users → Unlock / Reset two-step sign-in; `staff:create`, `staff:list`, `staff:unlock`): "Sign out everywhere"; after repeated wrong passwords a staff account is
     locked for a while and the owner is told; an admin can reset another staff member's two-step
     sign-in; `staff:create`, `staff:list` commands. B&G: `auth/logout-everywhere`,
     `ClearStaffLoginThrottleCommand.php`, `DELETE admin/staff/{id}/two-factor`.

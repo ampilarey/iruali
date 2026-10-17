@@ -11,6 +11,7 @@ use App\Notifications\VerifyEmailCode;
 use App\Notifications\VerifyPhoneCode;
 use App\Services\NotificationService;
 use App\Services\Sms\SmsManager;
+use App\Support\StaffLockout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -85,7 +86,17 @@ class AuthController extends Controller
 
         $remember = $request->boolean('remember');
 
+        // Staff accounts lock for a while after repeated wrong tries (StaffLockout)
+        $account = User::where('email', $request->input('email'))->first();
+        if ($account && ($until = StaffLockout::lockedUntil($account))) {
+            return back()->withInput($request->only('email', 'remember'))->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
+        }
+
         if (! Auth::attempt($request->only('email', 'password'), $remember)) {
+            if ($account) {
+                StaffLockout::failed($account, $request->ip());
+            }
+
             return back()->withInput($request->only('email', 'remember'))->withErrors(['email' => __('auth.failed')]);
         }
 
@@ -105,6 +116,7 @@ class AuthController extends Controller
             return redirect()->route('2fa.show');
         }
 
+        StaffLockout::succeeded($user);
         $request->session()->regenerate();
         $user->updateLoginTracking($request->ip());
         NotificationService::loginSuccess();
@@ -134,13 +146,22 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
+        if ($until = StaffLockout::lockedUntil($user)) {
+            session()->forget(['2fa_user_id', '2fa_remember']);
+
+            return redirect()->route('login')->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
+        }
+
         $code = strtoupper(trim($request->code));
         $valid = $user->useRecoveryCode($code)
             || (ctype_digit($code) && strlen($code) === 6 && $this->google2fa->verifyKey(decrypt($user->two_factor_secret), $code));
 
         if (! $valid) {
+            StaffLockout::failed($user, $request->ip());
+
             return back()->withErrors(['code' => __('auth.invalid_2fa_code')]);
         }
+        StaffLockout::succeeded($user);
 
         $remember = (bool) session('2fa_remember', false);
         session()->forget(['2fa_user_id', '2fa_remember']);

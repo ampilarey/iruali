@@ -23,4 +23,6 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::get('/inbox', [\App\Http\Controllers\Admin\InboxController::class, 'index'])->name('inbox');
 
     Route::post('/users/{user}/role', [StaffRoleController::class, 'update'])->name('users.role');
+    Route::delete('/users/{user}/two-factor', [StaffRoleController::class, 'resetTwoFactor'])->name('users.two-factor');
+    Route::post('/users/{user}/unlock', [StaffRoleController::class, 'unlock'])->name('users.unlock');
 });

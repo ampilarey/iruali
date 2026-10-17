@@ -29,6 +29,7 @@ class TeamAlerts
         'payment_error' => ['Payment error', 'Something in the card payment code fails.'],
         'backup_failed' => ['Backup failed', 'The nightly backup did not complete.'],
         'sms_limit' => ['SMS limit reached', 'The monthly SMS limit stops order updates.'],
+        'staff_locked' => ['Staff account locked', 'A staff account is locked after repeated wrong passwords or codes.'],
     ];
 
     /**

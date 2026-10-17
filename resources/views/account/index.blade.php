@@ -128,6 +128,15 @@
                         <a href="{{ route('profile.2fa.setup') }}" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ $user->isTwoFactorEnabled() ? __('Manage') : __('Turn on') }}</a>
                     </div>
 
+                    <form method="POST" action="{{ route('account.sign-out-everywhere') }}" class="border-t border-gray-100 pt-5 flex flex-wrap items-center justify-between gap-3" data-sign-out-everywhere>
+                        @csrf
+                        <div>
+                            <h3 class="font-medium text-gray-900">{{ __('Sign out everywhere') }}</h3>
+                            <p class="text-sm text-gray-600">{{ __('Lost a phone or used a shared computer? Sign out on every other device. You stay signed in here.') }}</p>
+                        </div>
+                        <button type="submit" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Sign out everywhere') }}</button>
+                    </form>
+
                     @php
                         $accounts = app(\App\Services\CustomerAccountService::class);
                         $deleteBlocked = $accounts->notACustomer($user) ? __('Shop and staff accounts are closed by the iruali team. Please contact us.') : $accounts->eraseProblem($user);

@@ -17,6 +17,8 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
+        @if(session('success'))<div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>@endif
+        @if(session('error'))<div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('error') }}</div>@endif
         <form method="GET" action="{{ route('admin.users') }}" class="mb-4 flex gap-2" role="search">
             <label for="user-search" class="sr-only">Search users</label>
             <input id="user-search" type="search" name="q" value="{{ $search ?? '' }}" placeholder="Name, email or phone" class="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm">
@@ -90,6 +92,16 @@
                                         </form>
                                     @elseif($user->hasRole('admin'))
                                         <span class="text-gray-400">Admin</span>
+                                    @endif
+                                    @if(\App\Support\StaffAccess::can('admin.users.two-factor') && $user->isStaff() && $user->id !== auth()->id())
+                                        <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                            @if($lockedUntil = \App\Support\StaffLockout::lockedUntil($user))
+                                                <form method="POST" action="{{ route('admin.users.unlock', $user) }}">@csrf<button class="rounded border border-red-300 px-2 py-1 text-red-700 hover:bg-red-50" title="Locked until {{ $lockedUntil->format('H:i') }}">Unlock</button></form>
+                                            @endif
+                                            @if($user->isTwoFactorEnabled())
+                                                <form method="POST" action="{{ route('admin.users.two-factor', $user) }}" onsubmit="return confirm('Turn off two-step sign-in for {{ e($user->name) }}? They set it up again at their next sign-in.')">@csrf @method('DELETE')<button class="rounded border border-gray-300 px-2 py-1 text-gray-700 hover:bg-gray-50">Reset two-step sign-in</button></form>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

@@ -10,7 +10,9 @@ use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use PragmaRX\Google2FA\Google2FA;
@@ -78,6 +80,25 @@ class ProfileController extends Controller
         NotificationService::success(__('Your password has been changed.'));
 
         return redirect()->route('account');
+    }
+
+    /**
+     * Sign out on every other phone and computer (a lost phone, a shared computer): their sessions,
+     * "remember me" cookies and app tokens stop working. This device stays signed in.
+     */
+    public function signOutEverywhere(Request $request)
+    {
+        $user = $request->user();
+        if (config('session.driver') === 'database') {
+            DB::table(config('session.table', 'sessions'))->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();
+        }
+        $user->forceFill(['remember_token' => Str::random(60)])->save();
+        $user->tokens()->delete();
+        \App\Support\Audit::record('account.signed_out_everywhere', $user, ['ip' => $request->ip()]);
+
+        NotificationService::success(__('You have been signed out on every other device.'));
+
+        return redirect()->to(route('account').'#security');
     }
 
     /**

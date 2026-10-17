@@ -2840,5 +2840,9 @@
     "Delete my account": "އަހަރެންގެ އެކައުންޓް ފޮހެލާ",
     "This removes your name, email, phone, addresses, saved lists and points. Your past orders stay in our records without your details, as the law requires. It cannot be undone.": "މިއިން ތިބާގެ ނަން، އީމެއިލް، ފޯނު، އެޑްރެސްތައް، ސޭވްކުރި ލިސްޓްތަކާއި ޕޮއިންޓްތައް ފޮހެވޭނެ. ޤާނޫނުގައި ބުނާ ގޮތަށް ކުރީގެ އޯޑަރުތައް ތިބާގެ މަޢުލޫމާތު ނެތި ރެކޯޑުގައި ބާކީ ހުންނާނެ. މިކަން އަނބުރާ ނުބަދަލުކުރެވޭނެ.",
     "Your password": "ތިބާގެ ޕާސްވޯޑް",
-    "Yes, delete my account and my personal data": "އާދެ، އަހަރެންގެ އެކައުންޓާއި ޒާތީ މަޢުލޫމާތު ފޮހެލާ"
+    "Yes, delete my account and my personal data": "އާދެ، އަހަރެންގެ އެކައުންޓާއި ޒާތީ މަޢުލޫމާތު ފޮހެލާ",
+    "Too many wrong tries. This account is locked until :time.": "ގިނަ ފަހަރު ނުބައިކޮށް ޖެހުމުން މި އެކައުންޓް :time އާ ހަމައަށް ބަންދުކުރެވިފައި.",
+    "You have been signed out on every other device.": "އެހެން ހުރިހާ ޑިވައިސްއަކުން ސައިން އައުޓް ކުރެވިއްޖެ.",
+    "Sign out everywhere": "ހުރިހާ ތަނަކުން ސައިން އައުޓް",
+    "Lost a phone or used a shared computer? Sign out on every other device. You stay signed in here.": "ފޯނެއް ގެއްލުނީ ނުވަތަ އެހެން މީހުންގެ ކޮމްޕިއުޓަރެއް ބޭނުންކުރީ؟ އެހެން ހުރިހާ ޑިވައިސްއަކުން ސައިން އައުޓް ކުރޭ. މިތަނުން ސައިން އިން ވެފައި ހުންނާނެ."
 }

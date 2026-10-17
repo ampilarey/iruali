@@ -95,6 +95,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,post-login');
+        // Sign in with a code by SMS or email instead of a password (also the "forgot password" route by SMS)
+        Route::get('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'show'])->name('login.code');
+        Route::post('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'send'])->name('login.code.send')->middleware('throttle:5,1,login.code.send');
+        Route::post('/login/code/verify', [\App\Http\Controllers\Customer\CodeLoginController::class, 'verify'])->name('login.code.verify')->middleware('throttle:10,1,login.code.verify');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1,post-register');
         // Password reset

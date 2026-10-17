@@ -23,6 +23,7 @@ container and the test database.
 
 ## Deploying and running it
 
+- **[SERVERS.md](SERVERS.md)** — the real servers today: folders, how test and production deploy (`bash ~/deploy-live.sh`), production settings, cron, and rules learned the hard way. Start here.
 - **[PRODUCTION_DEPLOY.md](PRODUCTION_DEPLOY.md)** — releases (`scripts/release.sh`), the
   production deploy from a tag (`scripts/deploy-production.sh`), rollback
   (`scripts/rollback-production.sh`), the first-deploy walk-through, and what must run on the

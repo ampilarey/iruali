@@ -3,7 +3,7 @@
 @php use App\Support\Money; $order = $return->order; $part = $return->sellerOrder; @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'Return on order #'.$order->order_number, 'back' => route('admin.returns')])
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">

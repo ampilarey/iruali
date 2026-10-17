@@ -3,7 +3,7 @@
 @php use App\Support\Money; $shop = $seller->business_name ?: $seller->name; @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'Pay out '.$shop, 'back' => route('admin.payouts')])
 
     <form method="POST" action="{{ route('admin.payouts.store', $seller) }}" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" data-payout>

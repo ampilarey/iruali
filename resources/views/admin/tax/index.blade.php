@@ -7,7 +7,7 @@
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => __('Tax (GST)')])
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

@@ -11,7 +11,7 @@
 @section('content')
 <div class="max-w-5xl mx-auto py-8 px-4 space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold">{{ $editing ? 'Edit campaign: '.$campaign->name : 'New campaign' }}</h1>
+        <h1 class="text-xl font-bold lg:text-2xl">{{ $editing ? 'Edit campaign: '.$campaign->name : 'New campaign' }}</h1>
         <div class="flex gap-2">
             @if($editing && $campaign->isJoinable())
                 <a href="{{ route('campaigns.show', $campaign) }}" target="_blank" class="bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">View page</a>

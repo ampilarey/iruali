@@ -4,7 +4,7 @@
 
 @section('content')
 @php $field = 'mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500'; @endphp
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => $brand->name, 'back' => route('admin.brands')])
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">

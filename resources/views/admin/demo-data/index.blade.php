@@ -7,7 +7,7 @@
     $field = 'mt-1 block w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500';
     $removedElsewhere = max(0, $status['products_removed'] - $status['restorable_products']);
 @endphp
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => __('Sample data'), 'back' => route('admin.settings')])
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

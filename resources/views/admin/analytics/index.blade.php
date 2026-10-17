@@ -9,12 +9,12 @@
     ];
     $totalOrders = max($ordersByStatus->sum(), 1);
 @endphp
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 py-3 lg:py-4">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">Analytics</h1>
+                    <h1 class="text-xl font-bold text-gray-900 lg:text-2xl">Analytics</h1>
                 </div>
                 <div class="flex items-center">
                 </div>

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-lg mx-auto py-8">
-    <h1 class="text-2xl font-bold mb-6">Create Voucher</h1>
+    <h1 class="text-xl font-bold lg:text-2xl mb-6">Create Voucher</h1>
     <form action="{{ route('admin.vouchers.store') }}" method="POST">
         @csrf
         <div class="mb-4">

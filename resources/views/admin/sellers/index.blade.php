@@ -4,9 +4,9 @@
 <div class="min-h-screen bg-gray-100">
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 py-3 lg:py-4">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">Manage Sellers</h1>
+                    <h1 class="text-xl font-bold text-gray-900 lg:text-2xl">Manage Sellers</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     @php $applications = \App\Support\SellerApplications::status(); @endphp
@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
         @if(session('success'))
             <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
         @endif

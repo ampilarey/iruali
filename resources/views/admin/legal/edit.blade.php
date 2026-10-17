@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     <div class="bg-white shadow">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 py-4">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 py-3 lg:py-4">
             <div>
                 <p class="text-xs font-medium uppercase tracking-wider text-primary-600">Content</p>
-                <h1 class="text-2xl font-bold text-gray-900">Legal pages</h1>
+                <h1 class="text-xl font-bold text-gray-900 lg:text-2xl">Legal pages</h1>
             </div>
         </div>
     </div>

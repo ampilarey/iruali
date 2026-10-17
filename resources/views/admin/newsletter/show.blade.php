@@ -14,7 +14,7 @@
 @section('title', 'Newsletter: '.$issue->subject_en)
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.moderation._header', ['title' => 'Newsletter'])
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">

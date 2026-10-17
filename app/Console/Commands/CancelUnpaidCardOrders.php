@@ -23,10 +23,10 @@ class CancelUnpaidCardOrders extends Command
         $cutoff = now()->subHours(max(1, (int) $this->option('hours')));
         $cancelled = 0;
 
-        Order::where('payment_method', 'bml')
+        \App\Support\PayLink::withoutLiveLink(Order::where('payment_method', 'bml')
             ->where('payment_status', '!=', 'paid')
             ->where('status', 'pending')
-            ->where('created_at', '<', $cutoff)
+            ->where('created_at', '<', $cutoff))
             ->with('paymentTransactions')
             ->each(function (Order $order) use ($payments, $orders, &$cancelled) {
                 foreach ($order->paymentTransactions->whereNotNull('transaction_id') as $transaction) {

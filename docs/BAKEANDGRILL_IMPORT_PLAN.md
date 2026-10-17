@@ -27,7 +27,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 4. ✅ **Sign in with an SMS code** (done: /login/code, `CodeLoginController`; a new password without the old one for 15 minutes after) (no password), and "forgot password" by SMS code, for customers
    with a verified phone. Sign-in code by email as a fallback. Throttled per phone and per IP.
    B&G: `CustomerAuthController` (`auth/customer/otp/*`, `check-phone`), `CustomerOtpService.php`.
-5. **Payment link** for an unpaid order (card, or the bank-transfer details), sent by SMS or
+5. ✅ **Payment link** (done: admin order → Payment → Send payment link; `/pay/{order}` signed for 48 hours, `App\Support\PayLink`) for an unpaid order (card, or the bank-transfer details), sent by SMS or
    email from the admin order page; a public pay page. B&G: `orders/{id}/send-pay-link`, `/pay/{token}`.
 6. **BML reconcile job**: every few minutes, ask BML about card payments still pending, so a
    payment whose return and webhook were both lost is still recorded. Alert when money arrives

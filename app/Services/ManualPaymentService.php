@@ -225,11 +225,11 @@ class ManualPaymentService
     public function cancelUnpaidTransfers(): int
     {
         $cancelled = 0;
-        Order::where('payment_method', self::TRANSFER)
+        \App\Support\PayLink::withoutLiveLink(Order::where('payment_method', self::TRANSFER)
             ->where('payment_status', '!=', 'paid')
             ->where('status', 'pending')
             ->whereNull('payment_slip_uploaded_at')
-            ->where('created_at', '<', now()->subHours(self::payWithinHours()))
+            ->where('created_at', '<', now()->subHours(self::payWithinHours())))
             ->each(function (Order $order) use (&$cancelled) {
                 if (app(OrderService::class)->updateOrderStatus($order, 'cancelled')) {
                     $cancelled++;

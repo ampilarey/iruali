@@ -726,7 +726,10 @@ class DeliveryService
             'freeOver' => $ownFee !== null ? (float) ($setting->free_over ?? 0) : (float) Setting::get('free_delivery_over'),
             'ownFees' => $ownFee !== null,
             'surcharge' => (float) $product->delivery_surcharge,
-            'arrival' => $this->arrivalText($days, $destination['area']),
+            // "Coming soon": counted from its launch day, and none without one
+            'arrival' => $product->isComingSoon()
+                ? ($product->available_on ? $this->arrivalText($days, $destination['area'], $product->available_on) : null)
+                : $this->arrivalText($days, $destination['area']),
             'shipsWithinDays' => $days,
             'pickup' => $setting->offersPickup() ? ['address' => (string) $setting->pickup_address, 'island' => $setting->pickupIslandName(), 'hours' => (string) $setting->pickup_hours] : null,
             'islandsByAtoll' => $this->islandsByAtoll($islands),

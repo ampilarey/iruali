@@ -137,6 +137,18 @@
                                 <input type="checkbox" name="in_stock" value="1" class="rounded text-primary focus:ring-primary" @checked(request()->boolean('in_stock')) data-autosubmit>
                                 <span class="flex-1">{{ __('In stock only') }}</span><span class="text-xs text-gray-500">{{ $facets['in_stock_count'] }}</span>
                             </label>
+                            @if($facets['preorder_count'] > 0 || request()->boolean('preorder'))
+                                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                                    <input type="checkbox" name="preorder" value="1" class="rounded text-primary focus:ring-primary" @checked(request()->boolean('preorder')) data-autosubmit>
+                                    <span class="flex-1">{{ __('Pre-order') }}</span><span class="text-xs text-gray-500">{{ $facets['preorder_count'] }}</span>
+                                </label>
+                            @endif
+                            @if($facets['coming_soon_count'] > 0 || request()->boolean('coming_soon'))
+                                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                                    <input type="checkbox" name="coming_soon" value="1" class="rounded text-primary focus:ring-primary" @checked(request()->boolean('coming_soon')) data-autosubmit>
+                                    <span class="flex-1">{{ __('Coming soon') }}</span><span class="text-xs text-gray-500">{{ $facets['coming_soon_count'] }}</span>
+                                </label>
+                            @endif
                             @unless($facets['deals_locked'])
                                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                                     <input type="checkbox" name="deals" value="1" class="rounded text-primary focus:ring-primary" @checked(request()->boolean('deals')) data-autosubmit>

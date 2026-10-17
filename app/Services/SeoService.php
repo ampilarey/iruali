@@ -293,8 +293,14 @@ class SeoService
             $schema['brand'] = ['@type' => 'Brand', 'name' => $product->brand];
         }
 
-        // Sold out but open for pre-orders: on pre-order, from the date it is expected to ship
-        if ($product->preorder_ship_date && app(PreorderService::class)->isPreorderable($product)) {
+        // "Coming soon": not on sale yet, from its launch day when it has one
+        if ($product->isComingSoon()) {
+            $schema['offers']['availability'] = 'https://schema.org/OutOfStock';
+            if ($product->available_on) {
+                $schema['offers']['availabilityStarts'] = $product->available_on->toDateString();
+            }
+        } elseif ($product->preorder_ship_date && app(PreorderService::class)->isPreorderable($product)) {
+            // Sold out but open for pre-orders: on pre-order, from the date it is expected to ship
             $schema['offers']['availability'] = 'https://schema.org/PreOrder';
             $schema['offers']['availabilityStarts'] = $product->preorder_ship_date->toDateString();
         }

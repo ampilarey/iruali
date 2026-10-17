@@ -106,6 +106,10 @@ class CartService
         if ($product->seller?->isOnHoliday()) {
             throw new \App\Exceptions\ShopOnHolidayException($product);
         }
+        // Listed before it goes on sale: nothing can be ordered yet (ComingSoonService)
+        if ($product->isComingSoon()) {
+            throw new \App\Exceptions\ProductComingSoonException($product);
+        }
         $variant = $variantId ? ProductVariant::where('product_id', $product->id)->findOrFail($variantId) : null;
 
         // Check if product (and variant) is already in cart

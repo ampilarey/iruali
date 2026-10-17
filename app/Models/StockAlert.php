@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockAlert extends Model
 {
-    protected $fillable = ['product_id', 'product_variant_id', 'user_id', 'email', 'locale', 'notified_at'];
+    protected $fillable = ['product_id', 'product_variant_id', 'user_id', 'email', 'locale', 'for_launch', 'notified_at'];
 
-    protected $casts = ['notified_at' => 'datetime'];
+    protected $casts = ['notified_at' => 'datetime', 'for_launch' => 'boolean'];
 
     /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo

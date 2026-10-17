@@ -137,6 +137,14 @@
             <x-product-row :title="__('New arrivals')" :products="$newArrivals" :link="route('shop', ['sort' => 'newest'])" />
         @endif
 
+        @if($preorders->isNotEmpty())
+            <x-product-row :title="__('Pre-order now')" :products="$preorders" :link="route('shop', ['preorder' => 1])" />
+        @endif
+
+        @if($comingSoon->isNotEmpty())
+            <x-product-row :title="__('Coming soon')" :products="$comingSoon" :link="route('shop', ['coming_soon' => 1])" />
+        @endif
+
         <div class="text-center">
             <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white">{{ __('View All Products') }}<x-icon name="arrow-right" class="w-4 h-4 rtl:rotate-180" /></a>
         </div>

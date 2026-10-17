@@ -121,7 +121,15 @@ class CatalogService
         }
 
         if ($except !== 'in_stock' && $r->boolean('in_stock')) {
-            $query->inStock();
+            $query->inStock()->notComingSoon();
+        }
+
+        // Out of stock but open for pre-orders now / listed before going on sale
+        if ($except !== 'preorder' && $r->boolean('preorder')) {
+            $query->preorderable();
+        }
+        if ($except !== 'coming_soon' && $r->boolean('coming_soon')) {
+            $query->comingSoon();
         }
 
         if ($except !== 'rating' && in_array((int) $r->query('rating'), [3, 4], true)) {
@@ -188,7 +196,9 @@ class CatalogService
             'price_min' => (int) floor((float) ($prices->min ?? 0)),
             'price_max' => (int) ceil((float) ($prices->max ?? 0)),
             'deals_count' => $this->filtered('deals')->onSale()->count(),
-            'in_stock_count' => $this->filtered('in_stock')->inStock()->count(),
+            'in_stock_count' => $this->filtered('in_stock')->inStock()->notComingSoon()->count(),
+            'preorder_count' => $this->filtered('preorder')->preorderable()->count(),
+            'coming_soon_count' => $this->filtered('coming_soon')->comingSoon()->count(),
             'category_locked' => isset($this->locked['category']),
             'deals_locked' => ! empty($this->locked['deals']),
         ];
@@ -226,6 +236,12 @@ class CatalogService
         }
         if ($r->boolean('in_stock')) {
             $chips->push(['label' => __('In stock'), 'url' => $this->urlWithout('in_stock')]);
+        }
+        if ($r->boolean('preorder')) {
+            $chips->push(['label' => __('Pre-order'), 'url' => $this->urlWithout('preorder')]);
+        }
+        if ($r->boolean('coming_soon')) {
+            $chips->push(['label' => __('Coming soon'), 'url' => $this->urlWithout('coming_soon')]);
         }
         if (in_array((int) $r->query('rating'), [3, 4], true)) {
             $chips->push(['label' => __(':stars stars & up', ['stars' => (int) $r->query('rating')]), 'url' => $this->urlWithout('rating')]);

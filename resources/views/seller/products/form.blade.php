@@ -105,6 +105,7 @@
                 </div>
             </div>
 
+            @include('seller.products._coming_soon', ['product' => $product])
             @include('seller.products._preorder', ['product' => $product])
 
             @include('seller.products._delivery', ['product' => $product])

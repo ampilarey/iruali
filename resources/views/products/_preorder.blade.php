@@ -8,6 +8,9 @@
             <p class="mt-1 ps-6 text-gray-700" dir="auto">{{ $preorder['note'] }}</p>
         @endif
         <p class="mt-1 ps-6 text-xs text-gray-600">{{ __('You pay now and the shop sends it when the stock arrives. You can cancel for a full refund until it is sent.') }}</p>
+        @if($preorder['closes'] ?? null)
+            <p class="mt-1 ps-6 text-xs font-semibold text-dark" data-preorder-closes>{{ $preorder['closes']->isToday() ? __('Last day to pre-order: today') : __('Pre-order by :date', ['date' => $preorder['closes']->translatedFormat('j M')]) }}</p>
+        @endif
         @if($preorder['left'] <= 5)
             <p class="mt-1 ps-6 text-xs font-semibold text-sun-ink">{{ __('Only :count left to pre-order', ['count' => $preorder['left']]) }}</p>
         @endif

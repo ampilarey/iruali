@@ -82,6 +82,10 @@ class Product extends Model
         'preorder_enabled' => 'boolean',
         'preorder_ship_date' => 'date',
         'preorder_limit' => 'integer',
+        'preorder_closes_on' => 'date',
+        // Listed before it goes on sale (App\Services\ComingSoonService)
+        'coming_soon' => 'boolean',
+        'available_on' => 'date',
     ];
 
     /** @return BelongsTo<Category, $this> */
@@ -228,6 +232,47 @@ class Product extends Model
         return $query->where('stock_quantity', '>', 0);
     }
 
+    /**
+     * Listed but not on sale yet: "coming soon" and its launch day (if any) still ahead.
+     */
+    public function isComingSoon(): bool
+    {
+        return (bool) $this->coming_soon && ($this->available_on === null || $this->available_on->isAfter(today()));
+    }
+
+    /** Products that are "coming soon" now (isComingSoon()). */
+    public function scopeComingSoon($query)
+    {
+        return $query->where('products.coming_soon', true)
+            ->where(fn ($q) => $q->whereNull('products.available_on')->orWhereDate('products.available_on', '>', today()));
+    }
+
+    /** Products that can be bought now, as far as "coming soon" goes. */
+    public function scopeNotComingSoon($query)
+    {
+        return $query->where(fn ($q) => $q->where('products.coming_soon', false)
+            ->orWhereDate('products.available_on', '<=', today()));
+    }
+
+    /**
+     * Out of stock and open for pre-orders now, with units left (PreorderService::isPreorderable()
+     * in SQL, for listings): switched on, the expected date today or later, pre-orders not closed,
+     * not "coming soon", and fewer units waiting than the shop's limit.
+     */
+    public function scopePreorderable($query)
+    {
+        $waiting = '(SELECT COALESCE(SUM(oi.quantity - oi.preorder_allocated_quantity), 0) FROM order_items oi'
+            .' JOIN orders o ON o.id = oi.order_id WHERE oi.product_id = products.id AND oi.is_preorder = 1'
+            .' AND oi.preorder_allocated_at IS NULL AND o.status <> \'cancelled\' AND o.deleted_at IS NULL)';
+
+        return $query->where('products.preorder_enabled', true)
+            ->where('products.stock_quantity', '<=', 0)
+            ->whereDate('products.preorder_ship_date', '>=', today())
+            ->where(fn ($q) => $q->whereNull('products.preorder_closes_on')->orWhereDate('products.preorder_closes_on', '>=', today()))
+            ->notComingSoon()
+            ->whereRaw('products.preorder_limit > '.$waiting);
+    }
+
     public function scopePending($query)
     {
         return $query->where('is_active', false);
@@ -358,8 +403,13 @@ class Product extends Model
         });
 
         static::updated(function ($product) {
-            if ($product->wasChanged('stock_quantity') && (int) $product->getOriginal('stock_quantity') <= 0 && (int) $product->stock_quantity > 0 && $product->is_active) {
+            // Not while it is still "coming soon": nobody can buy it yet
+            if ($product->wasChanged('stock_quantity') && (int) $product->getOriginal('stock_quantity') <= 0 && (int) $product->stock_quantity > 0 && $product->is_active && ! $product->isComingSoon()) {
                 app(\App\Services\StockAlertService::class)->productRestocked($product);
+            }
+            // Gone on sale (the shop switched "coming soon" off): tell those who asked
+            if ($product->wasChanged('coming_soon') && ! $product->coming_soon && $product->getOriginal('coming_soon')) {
+                app(\App\Services\ComingSoonService::class)->launched($product);
             }
         });
 

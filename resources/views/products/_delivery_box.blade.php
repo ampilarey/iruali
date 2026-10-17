@@ -22,7 +22,9 @@
             @if($box['delivers'] === true)
                 <p class="font-medium text-success" data-island-label="yes">{{ __('Delivers to :island', ['island' => $destination['label']]) }}</p>
             @endif
-            <p class="text-gray-700">{{ $box['arrival'] }}</p>
+            @if($box['arrival'])
+                <p class="text-gray-700">{{ $box['arrival'] }}</p>
+            @endif
         @endif
         @if($box['surcharge'] > 0)
             <p class="text-gray-700">{{ __('Plus :amount delivery per item (bulky item), even with free delivery.', ['amount' => \App\Support\Money::format($box['surcharge'])]) }}</p>

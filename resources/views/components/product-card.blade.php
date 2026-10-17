@@ -38,7 +38,7 @@
         </div>
         <div class="sm:border-s sm:border-gray-100 sm:ps-5 flex flex-col">
             <x-price :product="$product" size="lg" />
-            <x-stock :quantity="$stock" class="mt-1" />
+            <x-stock :quantity="$stock" :product="$product" class="mt-1" />
             <div class="mt-3 sm:mt-auto flex gap-2">
                 <x-add-to-cart :product="$product" class="flex-1" />
                 <x-wishlist-button :product="$product" />
@@ -77,7 +77,7 @@
         <div class="mt-auto pt-2">
             @if($product->deal_ends_at && ! $compact)<x-deal-countdown :ends="$product->deal_ends_at" compact class="mb-1" />@endif
             <x-price :product="$product" />
-            <x-stock :quantity="$stock" class="mt-0.5" />
+            <x-stock :quantity="$stock" :product="$product" class="mt-0.5" />
             @unless($compact)
                 <x-add-to-cart :product="$product" class="w-full mt-2.5" small />
                 <x-compare-toggle :product="$product" class="mt-2" />

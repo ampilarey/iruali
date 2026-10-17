@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @php
     $previewLang = request()->query('lang') === 'dv' ? 'dv' : 'en';

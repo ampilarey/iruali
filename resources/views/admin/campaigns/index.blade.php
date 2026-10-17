@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Campaigns')
 
@@ -10,7 +10,6 @@
             <p class="text-sm text-gray-500">Sales and events: a banner on the home page, a landing page, and discounted products from shops.</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Back to Dashboard</a>
             <a href="{{ route('admin.campaigns.create') }}" class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700">+ New campaign</a>
         </div>
     </div>

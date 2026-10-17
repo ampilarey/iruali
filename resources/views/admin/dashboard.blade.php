@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 
@@ -6,22 +6,13 @@
     <!-- Header -->
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div class="flex items-center">
                     <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-gray-700">Welcome, {{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                            Logout
-                        </button>
-                    </form>
-                </div>
+                <span class="text-sm text-gray-600">Welcome, {{ Auth::user()->name }}</span>
             </div>
         </div>
-        @include('admin.partials.nav')
     </div>
 
     <!-- Main Content -->

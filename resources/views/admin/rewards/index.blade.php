@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Rewards report')
 
@@ -9,7 +9,6 @@
             <h1 class="text-2xl font-bold">Rewards report</h1>
             <p class="text-sm text-gray-500">Loyalty points issued, redeemed and expired, and the customers who refer the most. Point values are set under Settings.</p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Back to Dashboard</a>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -5,7 +5,6 @@
                 <p class="text-xs font-medium uppercase tracking-wider text-primary-600">Moderation</p>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $title }}</h1>
             </div>
-            <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Back to Dashboard</a>
         </div>
         <nav class="flex gap-1 overflow-x-auto -mb-px">
             @foreach(['admin.reviews' => 'Reviews', 'admin.questions' => 'Questions', 'admin.newsletter' => 'Newsletter'] as $route => $label)

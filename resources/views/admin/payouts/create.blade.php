@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @php use App\Support\Money; $shop = $seller->business_name ?: $seller->name; @endphp
 

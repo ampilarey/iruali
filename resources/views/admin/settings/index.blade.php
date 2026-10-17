@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @php $field = 'mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500'; @endphp
 
@@ -6,12 +6,11 @@
 <div class="min-h-screen bg-gray-100 pb-12">
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div class="flex items-center">
                     <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
                 </div>
                 <div class="flex items-center">
-                    <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Back to Dashboard</a>
                 </div>
             </div>
         </div>

@@ -156,16 +156,18 @@
                             @endif
                         </div>
                     @endif
-                    @if($order->refund_status === 'due')
+                            @if($order->refund_status === 'due')
                         <div class="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm space-y-2">
                             <p class="font-semibold text-red-800">Refund due: {{ \App\Support\Money::format($order->refund_amount) }}</p>
                             <p class="text-red-700">{{ $order->refund_reason }}. Refund it in the BML merchant portal (Transactions → {{ $order->order_number }} → Refund), then record the reference here.</p>
+                            @if(\App\Support\StaffAccess::can('admin.orders.refunded'))
                             <form method="POST" action="{{ route('admin.orders.refunded', $order) }}" class="flex flex-wrap gap-2">
                                 @csrf
                                 <label for="refund_reference" class="sr-only">Refund reference</label>
                                 <input id="refund_reference" name="refund_reference" required maxlength="100" placeholder="Refund reference" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
                                 <button class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">Mark as refunded</button>
                             </form>
+                            @endif
                             @if($order->user && auth()->user()->hasRole('admin')) {{-- store credit is for admins only (routes/web/wallet.php) --}}
                                 <form method="POST" action="{{ route('admin.orders.refund-wallet', $order) }}" class="border-t border-red-200 pt-2" onsubmit="return confirm('Credit {{ \App\Support\Money::format($order->refund_amount) }} to the customer\'s wallet instead of refunding the card?')">
                                     @csrf
@@ -177,7 +179,7 @@
                     @elseif($order->refund_status === 'refunded')
                         <p class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-800">Refunded {{ \App\Support\Money::format($order->refund_amount) }} on {{ $order->refunded_at?->format('d M Y') }} · ref {{ $order->refund_reference }} ({{ $order->refund_reason }})</p>
                     @endif
-                    @if($order->payment_status !== 'paid' && $order->payment_method !== 'bml')
+                    @if($order->payment_status !== 'paid' && $order->payment_method !== 'bml' && \App\Support\StaffAccess::can('admin.orders.payment'))
                         <div class="mt-3 flex flex-wrap gap-2">
                             <form method="POST" action="{{ route('admin.orders.payment', $order) }}">
                                 @csrf

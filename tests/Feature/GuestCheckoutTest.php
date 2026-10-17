@@ -181,7 +181,7 @@ class GuestCheckoutTest extends TestCase
         $this->actingAs($admin)->get('/admin/orders/'.$order->id)->assertOk()->assertSee('Guest')->assertSee('visitor@example.com');
         $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
         $seller = $product->seller;
-        $seller->update(['is_seller' => true, 'seller_approved' => true]);
+        $seller->forceFill(['is_seller' => true, 'seller_approved' => true])->save();
         $seller->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
         $this->actingAs($seller)->get('/seller/orders')->assertOk()->assertSee('Mariyam')->assertSee('Guest');
         $this->actingAs($seller)->get('/seller/orders/'.$order->id)->assertOk()->assertSee('visitor@example.com');

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\TestDeployWebhookController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Support\ApiToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,60 +54,69 @@ Route::prefix('v1')->group(function () {
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {
 
-        // User profile
-        Route::get('/user', [UserController::class, 'profile']);
-        Route::put('/user', [UserController::class, 'updateProfile']);
-        Route::post('/user/change-password', [UserController::class, 'changePassword']);
         Route::post('/logout', [AuthController::class, 'logout']);
 
-        // Cart routes
-        Route::get('/cart', [CartController::class, 'index']);
-        Route::post('/cart/add', [CartController::class, 'add']);
-        Route::put('/cart/update/{item}', [CartController::class, 'update']);
-        Route::delete('/cart/remove/{item}', [CartController::class, 'remove']);
-        Route::post('/cart/clear', [CartController::class, 'clear']);
-        Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher']);
-        Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher']);
+        Route::middleware('abilities:'.ApiToken::PROFILE_READ)->group(function () {
+            Route::get('/user', [UserController::class, 'profile']);
+        });
+        Route::middleware('abilities:'.ApiToken::PROFILE_WRITE)->group(function () {
+            Route::put('/user', [UserController::class, 'updateProfile']);
+            Route::post('/user/change-password', [UserController::class, 'changePassword']);
+        });
 
-        // Wishlist routes
-        Route::get('/wishlist', [WishlistController::class, 'index']);
-        Route::post('/wishlist/add', [WishlistController::class, 'add']);
-        Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove']);
-        Route::post('/wishlist/clear', [WishlistController::class, 'clear']);
+        Route::middleware('abilities:'.ApiToken::CART_WRITE)->group(function () {
+            Route::get('/cart', [CartController::class, 'index']);
+            Route::post('/cart/add', [CartController::class, 'add']);
+            Route::put('/cart/update/{item}', [CartController::class, 'update']);
+            Route::delete('/cart/remove/{item}', [CartController::class, 'remove']);
+            Route::post('/cart/clear', [CartController::class, 'clear']);
+            Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher']);
+            Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher']);
+        });
 
-        // Order routes
-        Route::get('/orders', [OrderController::class, 'index']);
-        Route::get('/orders/{order}', [OrderController::class, 'show']);
-        Route::post('/orders', [OrderController::class, 'store']);
-        Route::get('/orders/{order}/track', [OrderController::class, 'track']);
+        Route::middleware('abilities:'.ApiToken::WISHLIST_WRITE)->group(function () {
+            Route::get('/wishlist', [WishlistController::class, 'index']);
+            Route::post('/wishlist/add', [WishlistController::class, 'add']);
+            Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove']);
+            Route::post('/wishlist/clear', [WishlistController::class, 'clear']);
+        });
 
-        // Checkout routes
-        Route::post('/checkout/redeem-points', [OrderController::class, 'redeemPoints']);
-        Route::post('/checkout/remove-points', [OrderController::class, 'removePoints']);
+        Route::middleware('abilities:'.ApiToken::ORDER_READ)->group(function () {
+            Route::get('/orders', [OrderController::class, 'index']);
+            Route::get('/orders/{order}', [OrderController::class, 'show']);
+            Route::get('/orders/{order}/track', [OrderController::class, 'track']);
+        });
+        Route::middleware('abilities:'.ApiToken::ORDER_WRITE)->group(function () {
+            Route::post('/orders', [OrderController::class, 'store']);
+            Route::post('/checkout/redeem-points', [OrderController::class, 'redeemPoints']);
+            Route::post('/checkout/remove-points', [OrderController::class, 'removePoints']);
+        });
 
-        // Product creation (for tests and admin)
-        Route::post('/products', [ProductController::class, 'store']);
+        Route::post('/products', [ProductController::class, 'store'])->middleware('abilities:'.ApiToken::PRODUCTS_WRITE);
     });
 });
 
 // Health check endpoint
 Route::get('/health', function () {
-    // Written by scripts/write-deploy-stamp.sh on every deploy (test and production).
-    $stamp = null;
-    $stampPath = storage_path('app/deploy-stamp.json');
-    if (is_file($stampPath)) {
-        $stamp = json_decode((string) file_get_contents($stampPath), true);
-    }
-
-    return response()->json([
+    $payload = [
         'status' => 'healthy',
         'timestamp' => now(),
         'version' => '1.0.0',
-        'commit' => $stamp['commit_short'] ?? 'unknown',
-        'branch' => $stamp['branch'] ?? null,
-        'tag' => ($stamp['tag'] ?? '') !== '' ? $stamp['tag'] : null,
-        'deployed_at' => $stamp['deployed_at'] ?? null,
-    ]);
+    ];
+
+    // The deploy stamp is for operators. The public body does not include the commit.
+    $token = (string) config('app.health_detail_token');
+    $provided = (string) request()->header('X-Health-Token', '');
+    if ($token !== '' && $provided !== '' && hash_equals($token, $provided)) {
+        $stampPath = storage_path('app/deploy-stamp.json');
+        $stamp = is_file($stampPath) ? json_decode((string) file_get_contents($stampPath), true) : null;
+        $payload['commit'] = is_array($stamp) ? ($stamp['commit_short'] ?? 'unknown') : 'unknown';
+        $payload['branch'] = is_array($stamp) ? ($stamp['branch'] ?? null) : null;
+        $payload['tag'] = is_array($stamp) && ($stamp['tag'] ?? '') !== '' ? $stamp['tag'] : null;
+        $payload['deployed_at'] = is_array($stamp) ? ($stamp['deployed_at'] ?? null) : null;
+    }
+
+    return response()->json($payload);
 });
 
 // TEST-only immediate deploy trigger (GitHub Actions → cPanel). Disabled when

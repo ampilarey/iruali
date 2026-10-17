@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -26,7 +27,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'staff' => \App\Http\Middleware\StaffAccess::class,      // admin area: role → allowed routes (config/staff.php)
             'staff.2fa' => \App\Http\Middleware\RequireTwoFactor::class, // staff must have two-step sign-in on
+            'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+            'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
         ]);
+        $trusted = env('TRUSTED_PROXIES', '127.0.0.1');
+        $middleware->trustProxies(
+            at: $trusted === '*' ? '*' : array_values(array_filter(array_map('trim', explode(',', (string) $trusted)))),
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_AWS_ELB,
+        );
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         // /dv/... storefront URLs: runs before routing (see the middleware)
         $middleware->append(\App\Http\Middleware\LocalePrefix::class);

@@ -41,7 +41,6 @@ class StoreProductRequest extends TranslatableRequest
             'weight' => 'nullable|numeric|min:0|max:999.99',
             'dimensions' => 'nullable|string|max:255',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_featured' => 'boolean',
             'requires_shipping' => 'boolean',
             'is_digital' => 'boolean',
             'island_stock' => 'nullable|array',
@@ -106,7 +105,6 @@ class StoreProductRequest extends TranslatableRequest
     {
         // Ensure boolean fields are properly cast
         $this->merge([
-            'is_featured' => $this->boolean('is_featured'),
             'requires_shipping' => $this->boolean('requires_shipping'),
             'is_digital' => $this->boolean('is_digital'),
         ]);

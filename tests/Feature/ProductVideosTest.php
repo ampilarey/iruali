@@ -21,7 +21,7 @@ class ProductVideosTest extends TestCase
 {
     use RefreshDatabase;
 
-    public const CSP = "frame-src 'self' https://www.youtube-nocookie.com https://www.tiktok.com https://www.instagram.com https://www.facebook.com";
+    public const FRAME_SRC = "frame-src 'self' https://www.youtube-nocookie.com https://www.tiktok.com https://www.instagram.com https://www.facebook.com";
 
     public static function links(): array
     {
@@ -191,11 +191,24 @@ class ProductVideosTest extends TestCase
 
     public function test_the_csp_allows_exactly_the_video_providers_to_be_framed(): void
     {
-        $this->assertSame(self::CSP, SecurityHeaders::contentSecurityPolicy());
-        $this->get('/')->assertOk()->assertHeader('Content-Security-Policy', self::CSP);
+        $policy = SecurityHeaders::contentSecurityPolicy('test-nonce');
+        $this->assertStringContainsString(self::FRAME_SRC, $policy);
+        $this->assertStringContainsString("script-src 'self' 'nonce-test-nonce' https://plausible.io https://www.googletagmanager.com https://www.google-analytics.com", $policy);
+        $this->assertStringContainsString("script-src-attr 'unsafe-inline'", $policy);
+
+        $home = $this->get('/')->assertOk();
+        $header = (string) $home->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString(self::FRAME_SRC, $header);
+        $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-([^']+)'/", $header);
+        preg_match("/'nonce-([^']+)'/", $header, $nonce);
+        $this->assertNotSame('', $nonce[1] ?? '');
+        $home->assertSee('nonce="'.$nonce[1].'"', false);
 
         $product = Product::factory()->create(['is_active' => true, 'video_provider' => 'instagram_reel', 'video_id' => 'C1a2b3c4D5e']);
-        $this->get(route('products.show', $product))->assertHeader('Content-Security-Policy', self::CSP);
+        $show = $this->get(route('products.show', $product));
+        $showHeader = (string) $show->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString(self::FRAME_SRC, $showHeader);
+        $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-/", $showHeader);
 
         // Every player the page can create is on that list
         foreach (array_keys(ProductVideo::PROVIDERS) as $provider) {

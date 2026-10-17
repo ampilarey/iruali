@@ -49,7 +49,7 @@ class ProfileController extends Controller
             $data['phone_verified_at'] = null;
         }
 
-        $user->fill($data)->save();
+        $user->forceFill($data)->save();
         if ($data['preferred_language'] ?? null) {
             session(['locale' => $data['preferred_language']]);
         }

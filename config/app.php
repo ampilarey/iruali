@@ -99,6 +99,9 @@ return [
 
     'key' => env('APP_KEY'),
 
+    // Optional. When set, GET /api/health includes the deploy commit only if the request sends this as X-Health-Token.
+    'health_detail_token' => env('HEALTH_DETAIL_TOKEN'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

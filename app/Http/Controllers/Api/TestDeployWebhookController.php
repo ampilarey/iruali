@@ -46,7 +46,7 @@ class TestDeployWebhookController extends Controller
         } catch (\Throwable $e) {
             Log::error('TEST deploy webhook failed', ['error' => $e->getMessage()]);
 
-            return response()->json(['message' => 'Deploy trigger failed', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Deploy trigger failed'], 500);
         }
 
         if (! $result['ok']) {

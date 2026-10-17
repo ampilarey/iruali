@@ -32,28 +32,26 @@ class MarketplaceDemoSeeder extends Seeder
         }
 
         foreach ($this->sellers() as $sellerData) {
-            $seller = User::updateOrCreate(
-                ['email' => $sellerData['email']],
-                [
-                    'name' => $sellerData['owner'],
-                    'business_name' => $sellerData['shop'],
-                    'business_description' => $sellerData['about'],
-                    'city' => $sellerData['island'],
-                    'state' => $sellerData['atoll'],
-                    'country' => 'Maldives',
-                    'phone' => $sellerData['phone'],
-                    'password' => Hash::make('password'),
-                    'status' => 'active',
-                    'is_active' => true,
-                    'email_verified' => true,
-                    'phone_verified' => true,
-                    'is_seller' => true,
-                    'seller_approved' => true,
-                    'seller_approved_at' => now(),
-                    'seller_applied_at' => now()->subWeeks(3),
-                    'onboarding_completed_at' => now(),
-                ]
-            );
+            $seller = User::firstOrNew(['email' => $sellerData['email']]);
+            $seller->forceFill([
+                'name' => $sellerData['owner'],
+                'business_name' => $sellerData['shop'],
+                'business_description' => $sellerData['about'],
+                'city' => $sellerData['island'],
+                'state' => $sellerData['atoll'],
+                'country' => 'Maldives',
+                'phone' => $sellerData['phone'],
+                'password' => Hash::make('password'),
+                'status' => 'active',
+                'is_active' => true,
+                'email_verified' => true,
+                'phone_verified' => true,
+                'is_seller' => true,
+                'seller_approved' => true,
+                'seller_approved_at' => now(),
+                'seller_applied_at' => now()->subWeeks(3),
+                'onboarding_completed_at' => now(),
+            ])->save();
             $seller->roles()->syncWithoutDetaching([$sellerRole->id]);
 
             foreach ($sellerData['products'] as $p) {

@@ -53,6 +53,10 @@ class PaymentService
      */
     public function startBmlPayment(Order $order): string
     {
+        // The browser that started the payment may be sent back to the order. Anyone else who
+        // guesses the return URL is not.
+        session()->put(self::returnSessionKey($order), true);
+
         $attempt = $order->paymentTransactions()->count() + 1;
         $localId = BmlConnect::localId($order->order_number.'P'.$attempt);
 
@@ -81,6 +85,28 @@ class PaymentService
         ]);
 
         return $remote['url'];
+    }
+
+    public static function returnSessionKey(Order $order): string
+    {
+        return 'bml_return.'.$order->getKey();
+    }
+
+    /**
+     * The customer coming back from BML, or the account that owns the order. Not an id guess.
+     */
+    public function visitorMaySeeReturn(\Illuminate\Http\Request $request, Order $order): bool
+    {
+        if ($request->user() && (int) $order->user_id === (int) $request->user()->id) {
+            return true;
+        }
+
+        $token = (string) $request->query('token', '');
+        if ($order->guest_token && $token !== '' && hash_equals((string) $order->guest_token, $token)) {
+            return true;
+        }
+
+        return (bool) $request->session()->get(self::returnSessionKey($order));
     }
 
     /**

@@ -216,7 +216,8 @@ class SocialLoginService
         } while (User::where('referral_code', $code)->exists());
 
         return DB::transaction(function () use ($profile, $email, $referrer, $code) {
-            $user = new User([
+            $user = new User;
+            $user->forceFill([
                 'name' => $profile->name ?: Str::before($email, '@'),
                 'email' => $email,
                 'password' => Hash::make(Str::random(64)),
@@ -225,8 +226,8 @@ class SocialLoginService
                 'referred_by' => $referrer?->id,
                 'preferred_language' => app()->getLocale(),
                 'email_verified_at' => $profile->emailVerified ? now() : null,
-            ]);
-            $user->forceFill(['has_password' => false])->save();
+                'has_password' => false,
+            ])->save();
             $user->roles()->attach(Role::firstOrCreate(['name' => 'customer'], ['display_name' => 'Customer'])->id);
             $this->link($user, $profile);
 

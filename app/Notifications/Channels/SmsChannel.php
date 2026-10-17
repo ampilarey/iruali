@@ -6,7 +6,8 @@ use App\Services\Sms\SmsManager;
 use Illuminate\Notifications\Notification;
 
 /**
- * The "sms" notification channel: a notification implements toSms($notifiable): string and
+ * The "sms" notification channel: a notification implements toSms($notifiable), returning an
+ * SmsText (App\Support\SmsTypes::render, which carries the type) or a plain string, and
  * the notifiable gives its number (routeNotificationForSms() or a phone attribute).
  */
 class SmsChannel
@@ -24,11 +25,11 @@ class SmsChannel
             : null;
         $to = $to ?: ($notifiable->phone ?? null);
 
-        $message = (string) $notification->toSms($notifiable);
-        if (! $to || trim($message) === '') {
-            return;
+        $message = $notification->toSms($notifiable);
+        if (! $to || trim((string) $message) === '') {
+            return; // no number, or the type is switched off in Admin → SMS
         }
 
-        $this->sms->send($to, $message);
+        $this->sms->send($to, $message instanceof \App\Services\Sms\SmsText ? $message : (string) $message);
     }
 }

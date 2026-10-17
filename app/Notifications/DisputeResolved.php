@@ -4,7 +4,9 @@ namespace App\Notifications;
 
 use App\Models\Dispute;
 use App\Models\User;
+use App\Services\Sms\SmsText;
 use App\Support\Money;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -46,15 +48,13 @@ class DisputeResolved extends Notification implements ShouldQueue
         return $mail->action(__('View your order'), $isShop ? route('seller.orders.show', $order) : route('orders.show', $order));
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
         $dispute = $this->dispute;
-        $number = $dispute->order->order_number;
 
-        return match ($dispute->status) {
-            'resolved_refund', 'resolved_partial' => __('iruali: your dispute on order :number is resolved. A refund of :amount is on its way.', ['number' => $number, 'amount' => Money::format($dispute->amount_resolved)]),
-            default => __('iruali: your dispute on order :number was reviewed and not upheld. See the order page for the reason.', ['number' => $number]),
-        };
+        return in_array($dispute->status, ['resolved_refund', 'resolved_partial'], true)
+            ? SmsTypes::render('dispute_refund', ['number' => $dispute->order->order_number, 'amount' => Money::format($dispute->amount_resolved)])
+            : SmsTypes::render('dispute_rejected', ['number' => $dispute->order->order_number]);
     }
 
     protected function outcomeLine(bool $isShop): string

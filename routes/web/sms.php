@@ -14,8 +14,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/notifications', [NotificationPreferencesController::class, 'update'])->name('account.notifications.update');
 });
 
-// Admin → SMS: the log of text messages and a test send
+// Admin → SMS: the control centre (all SMS on/off, monthly limit, quiet hours, each message's
+// switch and wording, previews and tests) and the log
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/sms', [SmsController::class, 'index'])->name('sms');
     Route::post('/sms/test', [SmsController::class, 'test'])->name('sms.test')->middleware('throttle:10,1,sms.test');
+    Route::put('/sms/settings', [SmsController::class, 'updateSettings'])->name('sms.settings');
+    Route::put('/sms/types/{type}', [SmsController::class, 'updateType'])->name('sms.types.update')->where('type', '[a-z_]+');
+    Route::post('/sms/types/{type}/test', [SmsController::class, 'testType'])->name('sms.types.test')->where('type', '[a-z_]+')->middleware('throttle:10,1,sms.types.test');
+    Route::get('/sms/export', [SmsController::class, 'export'])->name('sms.export');
+    Route::post('/sms/messages/{message}/resend', [SmsController::class, 'resend'])->name('sms.resend')->middleware('throttle:20,1,sms.resend');
 });

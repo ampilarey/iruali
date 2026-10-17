@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\Models\QuoteMessage;
 use App\Models\User;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -50,9 +52,9 @@ class QuoteMessageReceived extends Notification implements ShouldQueue
             ->line(__('You get at most one of these emails every :minutes minutes per request; the page shows all the messages.', ['minutes' => \App\Services\QuoteService::NOTIFY_EVERY_MINUTES]));
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: new message from :sender about :label. Reply at :url', [
+        return SmsTypes::render('quote_message', [
             'sender' => $this->message->senderName(),
             'label' => $this->message->quoteRequest->label(),
             'url' => $this->urlFor($notifiable),

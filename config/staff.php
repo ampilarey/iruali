@@ -40,7 +40,8 @@ return [
             'admin.disputes', 'admin.disputes.*',
             'admin.quotes', 'admin.quotes.*', // bulk quotes: follow up shops, write in a request, close it
             'admin.messages', 'admin.messages.*',
-            'admin.sms', 'admin.sms.*',
+            // SMS log, test sends and resends; the switches, limit and wordings are for admins
+            'admin.sms', 'admin.sms.test', 'admin.sms.export', 'admin.sms.resend', 'admin.sms.types.test',
             'admin.preorders', // late pre-orders (inbox row)
         ],
 

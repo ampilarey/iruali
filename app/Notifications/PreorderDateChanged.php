@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 use App\Services\PreorderService;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -60,9 +62,9 @@ class PreorderDateChanged extends Notification implements ShouldQueue
         return $mail->action(__('View your order'), $this->order->customerUrl());
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: your pre-order (order :number) now ships around :date. To cancel for a full refund, see your order.', ['number' => $this->order->order_number, 'date' => $this->date($this->newDate)]);
+        return SmsTypes::render('preorder_date_changed', ['number' => $this->order->order_number, 'date' => $this->date($this->newDate)]);
     }
 
     protected function date(string $date): string

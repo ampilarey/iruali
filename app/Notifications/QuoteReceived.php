@@ -5,7 +5,9 @@ namespace App\Notifications;
 use App\Models\QuoteRequest;
 use App\Models\User;
 use App\Services\QuoteService;
+use App\Services\Sms\SmsText;
 use App\Support\Money;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -51,9 +53,9 @@ class QuoteReceived extends Notification implements ShouldQueue
         return $mail->action(__('See the quote'), route('quotes.show', $quote));
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: :shop sent you a quote for :product: :total, until :date. :url', [
+        return SmsTypes::render('quote_received', [
             'shop' => $this->quote->shopName(),
             'product' => Str::limit($this->quote->displayName(), 40),
             'total' => Money::format($this->quote->lineTotal()),

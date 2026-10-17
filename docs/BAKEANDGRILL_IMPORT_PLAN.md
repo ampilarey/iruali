@@ -11,7 +11,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 
 ## Phase 1: before SMS goes live
 
-1. **SMS control centre.** One registry of every SMS iruali sends (today's `toSms()` texts become
+1. ✅ **SMS control centre** (done: Admin → SMS, `App\Support\SmsTypes`, `sms:release-held`, `sms:prune`). One registry of every SMS iruali sends (today's `toSms()` texts become
    default templates). Admin → SMS shows each type with on/off, an editable template with
    placeholders (English and Dhivehi), preview, "send me a test", who receives it. Plus a monthly
    budget cap, quiet hours (non-urgent SMS wait until morning), and one switch that stops all SMS.

@@ -17,6 +17,11 @@ class Setting extends Model
         'announcement_text' => 'Shop local sellers from every island, delivered across the Maldives.',
         // The Dhivehi side of the site (language button, /dv pages, Dhivehi emails); off: English only
         'dhivehi_enabled' => 1,
+        // SMS control centre (Admin → SMS): all SMS on/off, monthly limit (0: none), quiet hours "HH:MM"
+        'sms_enabled' => 1,
+        'sms_monthly_limit' => 0,
+        'sms_quiet_from' => '',
+        'sms_quiet_until' => '',
         // Admin staff must use two-step sign-in before opening /admin (also needs STAFF_REQUIRE_2FA on)
         'staff_require_two_factor' => 1,
         'contact_email' => '',

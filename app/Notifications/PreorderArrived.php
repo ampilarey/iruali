@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -60,9 +62,9 @@ class PreorderArrived extends Notification implements ShouldQueue
             ->action(__('View your order'), $this->order->customerUrl());
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: the stock for your pre-order (order :number) has arrived. The shop will send it soon.', ['number' => $this->order->order_number]);
+        return SmsTypes::render('preorder_arrived', ['number' => $this->order->order_number]);
     }
 
     /**

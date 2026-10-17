@@ -21,7 +21,7 @@ class SmsTestCommand extends Command
         $message = (string) ($this->option('message') ?: 'iruali SMS test: if you can read this, text messages work.');
 
         $this->line('Driver: '.$sms->driverName().($sms->isLive() ? ' ('.config('sms.http.url').')' : ' (nothing leaves the server; set SMS_DRIVER=http)'));
-        $result = $sms->send((string) $this->argument('number'), $message);
+        $result = $sms->send((string) $this->argument('number'), $message, 'test', urgent: true);
 
         $this->line('Status: '.$result->status);
         if (filled($result->providerResponse)) {

@@ -52,6 +52,10 @@ Schedule::command('queue:prune-failed --hours=168')->daily();
 // Yesterday's errors (new ones and the most frequent), mailed only when there is something to say
 Schedule::command('errors:digest')->dailyAt('07:00')->timezone('Indian/Maldives');
 
+// SMS held back by quiet hours (Admin → SMS) go out when they end; the SMS log keeps 180 days
+Schedule::command('sms:release-held')->everyMinute()->withoutOverlapping()->name('sms-release-held');
+Schedule::command('sms:prune')->dailyAt('03:15')->timezone('Indian/Maldives');
+
 // The ready check (php artisan iruali:ready, admin dashboard) uses this to prove the cron is running
 Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler.heartbeat', now()->toIso8601String()))->everyMinute()->name('heartbeat');
 

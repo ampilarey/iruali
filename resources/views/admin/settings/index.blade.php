@@ -59,6 +59,16 @@
                         </div>
                     </div>
                     <p class="text-xs text-gray-500">Used by the “Contact Us” links. The WhatsApp number adds “Chat on WhatsApp” buttons to the help centre and product pages.</p>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3" data-dhivehi-setting>
+                        <input type="hidden" name="dhivehi_enabled" value="0">
+                        <label class="flex items-start gap-3 text-sm text-gray-800">
+                            <input type="checkbox" name="dhivehi_enabled" value="1" @checked(old('dhivehi_enabled', $settings['dhivehi_enabled'] ?? 1)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                            <span>
+                                <span class="font-medium">Dhivehi (ދިވެހި) on the site</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">Off: the site is English only. The language button goes, Dhivehi page links (/dv/...) open the English page, emails go out in English and search engines stop listing the Dhivehi pages. All Dhivehi text you have entered is kept, so switching it back on brings it all back.</span>
+                            </span>
+                        </label>
+                    </div>
                     <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <input type="hidden" name="guest_checkout_enabled" value="0">
                         <label class="flex items-start gap-3 text-sm text-gray-800">

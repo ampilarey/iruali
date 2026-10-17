@@ -173,7 +173,7 @@ class NewsletterService
      */
     public function sendTest(NewsletterIssue $issue, User $to, string $locale): void
     {
-        Mail::to($to->email)->locale($locale)->send($this->mail($issue, $to->name, ['route' => 'marketing.unsubscribe', 'params' => ['user' => (int) $to->id]], true));
+        Mail::to($to->email)->locale(LocalizationService::usable($locale))->send($this->mail($issue, $to->name, ['route' => 'marketing.unsubscribe', 'params' => ['user' => (int) $to->id]], true));
         $issue->forceFill(['test_sent_at' => now()])->save();
     }
 
@@ -289,7 +289,7 @@ class NewsletterService
             }
 
             try {
-                Mail::to($delivery->email)->locale($delivery->locale)->send(new NewsletterMail($issue, $sections, $name, $unsubscribe));
+                Mail::to($delivery->email)->locale(LocalizationService::usable($delivery->locale))->send(new NewsletterMail($issue, $sections, $name, $unsubscribe));
                 $delivery->forceFill(['status' => 'sent', 'sent_at' => now(), 'error' => null])->save();
             } catch (Throwable $e) {
                 report($e);

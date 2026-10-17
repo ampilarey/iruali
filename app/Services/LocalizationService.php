@@ -23,11 +23,31 @@ class LocalizationService
     }
 
     /**
-     * Get available locales
+     * The languages the site offers now: English, and Dhivehi unless an admin switched it off
+     * (Admin → Settings). Off, everything is English: the language button goes, /dv pages send
+     * visitors to the English page, and emails go out in English. Dhivehi text stays stored.
      */
     public static function getAvailableLocales(): array
     {
-        return ['en', 'dv'];
+        return self::dhivehiEnabled() ? ['en', 'dv'] : ['en'];
+    }
+
+    public static function dhivehiEnabled(): bool
+    {
+        return filter_var(\App\Models\Setting::get('dhivehi_enabled', 1), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * The language to use for something stored with a language (an email to send): itself while the
+     * site offers it, else English. Null stays null.
+     */
+    public static function usable(?string $locale): ?string
+    {
+        if ($locale === null || $locale === '') {
+            return $locale;
+        }
+
+        return in_array($locale, self::getAvailableLocales(), true) ? $locale : self::getFallbackLocale();
     }
 
     /**

@@ -26,18 +26,39 @@ class HealthEndpointTest extends TestCase
 
     protected ?string $backup = null;
 
-    public function test_health_reports_unknown_commit_without_stamp(): void
+    public function test_health_hides_the_commit_from_the_public(): void
     {
         @unlink($this->stamp);
+        config(['app.health_detail_token' => 'operator-token']);
 
         $this->getJson('/api/health')
             ->assertOk()
             ->assertJsonPath('status', 'healthy')
-            ->assertJsonPath('commit', 'unknown');
+            ->assertJsonMissingPath('commit')
+            ->assertJsonMissingPath('branch');
+
+        $this->getJson('/api/health', ['X-Health-Token' => 'wrong'])
+            ->assertOk()
+            ->assertJsonMissingPath('commit');
+    }
+
+    public function test_health_reports_unknown_commit_with_the_operator_token_and_no_stamp(): void
+    {
+        @unlink($this->stamp);
+        config(['app.health_detail_token' => 'operator-token']);
+
+        $this->getJson('/api/health', ['X-Health-Token' => 'operator-token'])
+            ->assertOk()
+            ->assertJsonPath('status', 'healthy')
+            ->assertJsonPath('commit', 'unknown')
+            ->assertJsonPath('branch', null)
+            ->assertJsonPath('tag', null)
+            ->assertJsonPath('deployed_at', null);
     }
 
     public function test_health_reports_deployed_commit_from_stamp(): void
     {
+        config(['app.health_detail_token' => 'operator-token']);
         file_put_contents($this->stamp, json_encode([
             'commit' => str_repeat('a', 40),
             'commit_short' => 'aaaaaaa',
@@ -45,7 +66,7 @@ class HealthEndpointTest extends TestCase
             'deployed_at' => '2026-09-24T17:00:00Z',
         ]));
 
-        $this->getJson('/api/health')
+        $this->getJson('/api/health', ['X-Health-Token' => 'operator-token'])
             ->assertOk()
             ->assertJsonPath('commit', 'aaaaaaa')
             ->assertJsonPath('branch', 'main')
@@ -55,6 +76,7 @@ class HealthEndpointTest extends TestCase
 
     public function test_health_reports_the_release_tag_on_production(): void
     {
+        config(['app.health_detail_token' => 'operator-token']);
         file_put_contents($this->stamp, json_encode([
             'commit' => str_repeat('b', 40),
             'commit_short' => 'bbbbbbb',
@@ -63,7 +85,7 @@ class HealthEndpointTest extends TestCase
             'deployed_at' => '2026-10-01T09:00:00Z',
         ]));
 
-        $this->getJson('/api/health')
+        $this->getJson('/api/health', ['X-Health-Token' => 'operator-token'])
             ->assertOk()
             ->assertJsonPath('commit', 'bbbbbbb')
             ->assertJsonPath('tag', 'v2026.10.01');

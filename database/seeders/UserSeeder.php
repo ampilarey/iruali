@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         }
 
         if (! $admin) {
-            $admin = User::create([
+            $admin = User::forceCreate([
                 'name' => 'Admin User',
                 'email' => $email,
                 'password' => Hash::make($password),

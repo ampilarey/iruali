@@ -191,7 +191,7 @@ class ShopStaffService
             $code = strtoupper(Str::random(8));
         } while (User::where('referral_code', $code)->exists());
 
-        $user = User::create([
+        $user = User::forceCreate([
             'name' => $name,
             'email' => ShopStaffInvitation::normalizeEmail((string) $invitation->email),
             'password' => Hash::make($password),

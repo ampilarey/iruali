@@ -154,7 +154,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     });
 
     // BML sends the customer back here after the payment page (their session may have expired, so no auth)
-    Route::get('/payments/bml/return/{order}', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'return'])->name('payments.bml.return')->middleware('throttle:30,1');
+    Route::get('/payments/bml/return/{order}/{token?}', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'return'])->name('payments.bml.return')->middleware('throttle:30,1');
 
     // Public order tracking
     Route::get('track', [OrderTrackingController::class, 'form'])->name('order.track.form');

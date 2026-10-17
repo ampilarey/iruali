@@ -37,9 +37,6 @@ class User extends Authenticatable implements HasLocalePreference
         'date_of_birth',
         'gender',
         'profile_picture',
-        'is_seller',
-        'seller_approved',
-        'seller_approved_at',
         'business_name',
         'business_description',
         'seller_applied_at',
@@ -47,22 +44,8 @@ class User extends Authenticatable implements HasLocalePreference
         'payout_account_name',
         'payout_account_number',
         'preferred_language',
-        'email_verified_at',
-        'phone_verified_at',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'two_factor_enabled',
-        'last_login_at',
-        'last_login_ip',
-        'login_count',
-        'is_active',
-        'banned_until',
-        'banned_reason',
-        'loyalty_points',
-        'referral_code', 'referred_by', 'referral_rewarded_at',
         'shop_logo', 'shop_banner', 'delivery_notes', 'ships_to_islands', 'onboarding_completed_at',
         'notification_preferences',
-        'is_smoke_test',
     ];
 
     /**
@@ -289,11 +272,11 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function enableTwoFactor(): void
     {
-        $this->update([
+        $this->forceFill([
             'two_factor_enabled' => true,
             'two_factor_secret' => encrypt(random_bytes(32)),
             'two_factor_recovery_codes' => encrypt(json_encode($this->generateRecoveryCodes())),
-        ]);
+        ])->save();
     }
 
     /**
@@ -301,11 +284,11 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function disableTwoFactor(): void
     {
-        $this->update([
+        $this->forceFill([
             'two_factor_enabled' => false,
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
-        ]);
+        ])->save();
     }
 
     /**
@@ -361,11 +344,11 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function updateLoginTracking(string $ip): void
     {
-        $this->update([
+        $this->forceFill([
             'last_login_at' => now(),
             'last_login_ip' => $ip,
             'login_count' => $this->login_count + 1,
-        ]);
+        ])->save();
     }
 
     /**
@@ -373,10 +356,10 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function ban(string $reason, ?\DateTime $until = null): void
     {
-        $this->update([
+        $this->forceFill([
             'banned_until' => $until ?? now()->addYear(),
             'banned_reason' => $reason,
-        ]);
+        ])->save();
     }
 
     /**
@@ -384,10 +367,10 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function unban(): void
     {
-        $this->update([
+        $this->forceFill([
             'banned_until' => null,
             'banned_reason' => null,
-        ]);
+        ])->save();
     }
 
     /** @return BelongsTo<User, $this> */

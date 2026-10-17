@@ -53,6 +53,11 @@ class BmlPaymentController extends Controller
             }
         }
 
+        if (! $payments->visitorMaySeeReturn($request, $order)) {
+            // Signed-in customers come back here after signing in (another browser, an expired session)
+            return redirect()->guest(route('login'))->with('info', __('If you just paid, sign in to see your order.'));
+        }
+
         if ($transaction?->isConfirmed()) {
             NotificationService::success(__('Payment received. Thank you!'));
         } elseif ($transaction?->hasFailed()) {

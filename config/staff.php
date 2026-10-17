@@ -28,7 +28,10 @@ return [
         'support' => [
             'admin.dashboard',
             'admin.inbox',
-            'admin.orders', 'admin.orders.*',
+            // Orders, but not money: confirming a payment or recording a refund is finance/admin.
+            'admin.orders', 'admin.orders.show', 'admin.orders.status', 'admin.orders.parts.status',
+            'admin.orders.bml-sync', 'admin.orders.messages.store', 'admin.orders.invoice',
+            'admin.orders.parts.tracking', 'admin.orders.parts.collected', 'admin.orders.parts.packing-slip',
             'admin.returns', 'admin.returns.*',
             'admin.reviews', 'admin.reviews.*',
             'admin.questions', 'admin.questions.*',

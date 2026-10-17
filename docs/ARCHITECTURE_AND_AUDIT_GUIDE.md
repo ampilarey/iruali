@@ -103,6 +103,8 @@ A React Native or Flutter app can be added later by consuming the existing `/api
 
 ## 3. Phase 1 — Full Audit Findings
 
+The tables in this section are the original notes. They are not a current work list. The summary table in section 1 records what was fixed. Trust that table and the code.
+
 ### 3.1 Route Structure
 
 **File:** `routes/web.php`

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\LocalizationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -180,16 +181,16 @@ class LocalizationTest extends TestCase
     #[Test]
     public function translatable_request_validation_works()
     {
-        $response = $this->actingAs($this->admin)
-            ->postJson('/api/v1/products', [
-                'name' => [
-                    'en' => 'Test Product',
-                    // Missing Dhivehi translation
-                ],
-                'sku' => 'TEST-001',
-                'category_id' => Category::factory()->create()->id,
-                'price' => 100,
-            ]);
+        Sanctum::actingAs($this->admin, ['*']);
+        $response = $this->postJson('/api/v1/products', [
+            'name' => [
+                'en' => 'Test Product',
+                // Missing Dhivehi translation
+            ],
+            'sku' => 'TEST-001',
+            'category_id' => Category::factory()->create()->id,
+            'price' => 100,
+        ]);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name.dv']);
@@ -198,16 +199,16 @@ class LocalizationTest extends TestCase
     #[Test]
     public function at_least_one_translation_is_required()
     {
-        $response = $this->actingAs($this->admin)
-            ->postJson('/api/v1/products', [
-                'name' => [
-                    'en' => '',
-                    'dv' => '',
-                ],
-                'sku' => 'TEST-001',
-                'category_id' => Category::factory()->create()->id,
-                'price' => 100,
-            ]);
+        Sanctum::actingAs($this->admin, ['*']);
+        $response = $this->postJson('/api/v1/products', [
+            'name' => [
+                'en' => '',
+                'dv' => '',
+            ],
+            'sku' => 'TEST-001',
+            'category_id' => Category::factory()->create()->id,
+            'price' => 100,
+        ]);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name']);

@@ -8,7 +8,9 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\OrderService;
+use App\Support\ApiToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class SecurityHardeningTest extends TestCase
@@ -108,5 +110,58 @@ class SecurityHardeningTest extends TestCase
 
         $this->assertMatchesRegularExpression('/^ORD-[A-Z0-9]{10}$/', $a);
         $this->assertNotSame(substr($a, 0, 10), substr($b, 0, 10));
+    }
+
+    public function test_privileged_user_columns_are_not_mass_assignable(): void
+    {
+        $user = User::factory()->create(['name' => 'Amina']);
+
+        $user->fill([
+            'name' => 'Amina Updated',
+            'is_seller' => true,
+            'seller_approved' => true,
+            'is_active' => false,
+            'loyalty_points' => 5000,
+            'is_smoke_test' => true,
+            'email_verified_at' => null,
+        ])->save();
+
+        $user->refresh();
+
+        $this->assertSame('Amina Updated', $user->name);
+        $this->assertFalse($user->is_seller);
+        $this->assertFalse((bool) $user->seller_approved);
+        $this->assertTrue($user->is_active);
+        $this->assertSame(0, (int) $user->loyalty_points);
+        $this->assertFalse($user->isSmokeTest());
+        $this->assertNotNull($user->email_verified_at);
+    }
+
+    public function test_an_api_token_without_cart_write_cannot_change_the_cart(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create(['is_active' => true, 'stock_quantity' => 5, 'price' => 20]);
+        Sanctum::actingAs($user, [ApiToken::PROFILE_READ]);
+
+        $this->postJson('/api/v1/cart/add', ['product_id' => $product->id, 'quantity' => 1])
+            ->assertForbidden();
+    }
+
+    public function test_trusted_proxies_come_from_the_setting(): void
+    {
+        // TRUSTED_PROXIES → config('app.trusted_proxies'), applied as the app boots
+        config(['app.trusted_proxies' => '10.9.9.9']);
+        \App\Providers\AppServiceProvider::trustProxies();
+        try {
+            \Illuminate\Support\Facades\Route::get('/_ip-probe', fn () => request()->ip());
+
+            // Through the trusted proxy, the visitor's address is used
+            $this->call('GET', '/_ip-probe', [], [], [], ['REMOTE_ADDR' => '10.9.9.9', 'HTTP_X_FORWARDED_FOR' => '203.0.113.5'])->assertSee('203.0.113.5');
+            // From anywhere else the header is ignored
+            $this->call('GET', '/_ip-probe', [], [], [], ['REMOTE_ADDR' => '10.1.1.1', 'HTTP_X_FORWARDED_FOR' => '203.0.113.5'])->assertSee('10.1.1.1');
+        } finally {
+            config(['app.trusted_proxies' => '127.0.0.1']);
+            \App\Providers\AppServiceProvider::trustProxies();
+        }
     }
 }

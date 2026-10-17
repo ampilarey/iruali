@@ -222,8 +222,12 @@ class ProductController extends BaseController
     {
         $data = $request->validated();
 
-        // Set the seller_id to the authenticated user
+        // Sellers cannot feature or publish their own listings. An admin approves them.
+        unset($data['is_featured'], $data['is_active'], $data['approved_at']);
         $data['seller_id'] = auth()->id();
+        $data['is_active'] = false;
+        $data['is_featured'] = false;
+        $data['approved_at'] = null;
 
         $product = Product::create($data);
 

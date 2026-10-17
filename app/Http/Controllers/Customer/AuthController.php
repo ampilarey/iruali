@@ -50,7 +50,7 @@ class AuthController extends Controller
             $code = strtoupper(Str::random(8));
         } while (User::where('referral_code', $code)->exists());
 
-        $user = User::create([
+        $user = User::forceCreate([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->filled('phone') ? preg_replace('/\s+/', '', $request->phone) : null,

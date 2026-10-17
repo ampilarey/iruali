@@ -53,6 +53,10 @@ class PaymentService
      */
     public function startBmlPayment(Order $order): string
     {
+        // The browser that started the payment may be sent back to the order. Anyone else who
+        // guesses the return URL is not.
+        session()->put(self::returnSessionKey($order), true);
+
         $attempt = $order->paymentTransactions()->count() + 1;
         $localId = BmlConnect::localId($order->order_number.'P'.$attempt);
 
@@ -68,7 +72,9 @@ class PaymentService
             'currency' => $transaction->currency,
             'localId' => $localId,
             'customerReference' => 'iruali '.$order->order_number,
-            'redirectUrl' => route('payments.bml.return', $order),
+            // A guest's code rides in the path (BML appends its own ?transactionId=...), so a guest who
+            // finishes paying in another browser still gets back to the order
+            'redirectUrl' => route('payments.bml.return', array_filter(['order' => $order, 'token' => $order->guest_token])),
             'webhook' => route('payments.bml.webhook'),
             'paymentPortalExperience' => $this->bml()->portalExperience(),
         ]);
@@ -81,6 +87,28 @@ class PaymentService
         ]);
 
         return $remote['url'];
+    }
+
+    public static function returnSessionKey(Order $order): string
+    {
+        return 'bml_return.'.$order->getKey();
+    }
+
+    /**
+     * The customer coming back from BML, or the account that owns the order. Not an id guess.
+     */
+    public function visitorMaySeeReturn(\Illuminate\Http\Request $request, Order $order): bool
+    {
+        if ($request->user() && (int) $order->user_id === (int) $request->user()->id) {
+            return true;
+        }
+
+        $token = (string) ($request->route('token') ?? $request->query('token', ''));
+        if ($order->guest_token && $token !== '' && hash_equals((string) $order->guest_token, $token)) {
+            return true;
+        }
+
+        return (bool) $request->session()->get(self::returnSessionKey($order));
     }
 
     /**

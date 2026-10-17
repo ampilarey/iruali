@@ -191,16 +191,38 @@ class BmlPaymentTest extends TestCase
         $order = Order::sole();
 
         $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
-            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => '1700000000', 'X-Signature' => 'forged',
+            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => (string) time(), 'X-Signature' => 'forged',
         ])->assertForbidden();
         $this->assertSame('unpaid', $order->fresh()->payment_status);
 
+        // Only the signature counts, as in Akuru's live BML setup: BML does not document the
+        // timestamp's format, and a late retry must still get through (the API is asked anyway)
+        $timestamp = now()->subHour()->toIso8601String();
         $this->postJson(route('payments.bml.webhook'), ['transactionId' => 'txn_123', 'state' => 'CONFIRMED'], [
-            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => '1700000000',
-            'X-Signature' => hash('sha256', 'n1'.'1700000000'.'test-key'),
+            'X-Signature-Nonce' => 'n1', 'X-Signature-Timestamp' => $timestamp,
+            'X-Signature' => hash('sha256', 'n1'.$timestamp.'test-key'),
         ])->assertOk();
 
         $this->assertSame('paid', $order->fresh()->payment_status);
+    }
+
+    public function test_a_stranger_return_syncs_payment_without_showing_the_order(): void
+    {
+        $this->fakeBml('CONFIRMED');
+        $this->checkout();
+        $order = Order::sole();
+
+        // The checkout request left the payer on the guard and the return flag in the
+        // shared test session. A stranger has neither.
+        $this->actingAsGuest();
+        $this->app['session']->driver()->flush();
+
+        $this->get(route('payments.bml.return', $order).'?transactionId=txn_123')
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('info');
+
+        $this->assertSame('paid', $order->fresh()->payment_status);
+        $this->assertGuest();
     }
 
     public function test_webhook_signed_with_the_portal_secret_is_accepted(): void

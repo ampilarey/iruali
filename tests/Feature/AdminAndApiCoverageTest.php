@@ -203,7 +203,7 @@ class AdminAndApiCoverageTest extends TestCase
     public function test_api_creates_an_order_from_the_cart_with_card_payment(): void
     {
         $product = $this->fillCart($this->customer, 2);
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
 
         $response = $this->postJson('/api/v1/orders', $this->shipping())
             ->assertCreated()
@@ -225,7 +225,7 @@ class AdminAndApiCoverageTest extends TestCase
 
     public function test_api_order_needs_a_filled_cart_and_a_real_payment_method(): void
     {
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
 
         $this->postJson('/api/v1/orders', $this->shipping())
             ->assertStatus(400)
@@ -245,11 +245,11 @@ class AdminAndApiCoverageTest extends TestCase
     {
         $order = Order::factory()->create(['user_id' => $this->customer->id]);
 
-        Sanctum::actingAs(User::factory()->create());
+        Sanctum::actingAs(User::factory()->create(), ['*']);
         $this->getJson("/api/v1/orders/{$order->id}")->assertForbidden()->assertJsonPath('success', false);
         $this->getJson("/api/v1/orders/{$order->id}/track")->assertForbidden();
 
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
         $this->getJson("/api/v1/orders/{$order->id}")->assertOk()->assertJsonPath('data.id', $order->id);
 
         $this->app['auth']->forgetGuards();
@@ -263,7 +263,7 @@ class AdminAndApiCoverageTest extends TestCase
     public function test_api_wishlist_add_list_and_remove(): void
     {
         $product = Product::factory()->create();
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
 
         $this->getJson('/api/v1/wishlist')->assertOk()->assertJsonPath('data.total_items', 0);
 
@@ -365,7 +365,7 @@ class AdminAndApiCoverageTest extends TestCase
     public function test_api_points_endpoints_apply_and_clear_a_discount_on_the_cart(): void
     {
         $this->customer->forceFill(['loyalty_points' => 150])->save();
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
 
         $this->postJson('/api/v1/checkout/redeem-points', ['points' => 50])
             ->assertStatus(400)->assertJsonPath('message', 'Your cart is empty.');

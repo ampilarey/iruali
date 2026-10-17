@@ -186,7 +186,7 @@ class ShopHolidayTest extends TestCase
         $this->assertSame(0, CartItem::where('product_id', $product->id)->count());
 
         // API: a JSON error in the usual shape
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
         $this->postJson('/api/v1/cart/add', ['product_id' => $product->id, 'quantity' => 1])
             ->assertStatus(422)
             ->assertJsonPath('success', false)
@@ -220,7 +220,7 @@ class ShopHolidayTest extends TestCase
         $result = app(OrderService::class)->createOrderFromCart($this->customer, $this->shipping());
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('Island Crafts is on holiday', $result['message']);
-        Sanctum::actingAs($this->customer);
+        Sanctum::actingAs($this->customer, ['*']);
         $this->postJson('/api/v1/orders', $this->shipping())->assertStatus(400)->assertJsonPath('success', false);
         $this->assertSame(0, Order::count());
         $this->assertSame(5, $product->fresh()->stock_quantity);

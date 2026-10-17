@@ -96,7 +96,7 @@ final class SmokeChecks
             $json = $r->json();
 
             return is_array($json) && ($json['status'] ?? null) === 'healthy'
-                ? [self::PASS, 'commit '.($json['commit'] ?? 'unknown')]
+                ? [self::PASS, isset($json['commit']) ? 'commit '.$json['commit'] : 'healthy']
                 : 'body is not {"status":"healthy"}';
         });
 

@@ -162,6 +162,7 @@
                         </div>
                     @endif
                     @include('admin.orders._manual_payment', ['order' => $order])
+                    @include('admin.orders._payment_link', ['order' => $order])
                             @if($order->refund_status === 'due')
                         <div class="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm space-y-2">
                             <p class="font-semibold text-red-800">Refund due: {{ \App\Support\Money::format($order->refund_amount) }}</p>

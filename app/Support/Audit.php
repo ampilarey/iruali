@@ -69,6 +69,8 @@ class Audit
         'sms.settings_saved' => 'SMS switches and limits changed',
         'sms.type_saved' => 'SMS message switched or reworded',
         'settings.team_alerts' => 'Team alerts changed',
+        'payment.link_sent' => 'Payment link sent to the customer',
+        'payment.method_switched' => 'Customer changed how they pay (payment link)',
         'shop.staff_action' => 'Change made by shop staff',
         'preorder.stock_arrived' => 'Pre-order stock arrived',
         'preorder.date_moved' => 'Pre-order date moved',

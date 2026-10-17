@@ -51,6 +51,11 @@ class SmsTypes
                 'text' => 'iruali: your sign-in code is :code. It expires in 10 minutes. Never share it with anyone.',
                 'data' => ['code' => '615204'], 'required' => ['code'],
             ],
+            'payment_link' => [
+                'group' => 'orders', 'label' => 'Payment link',
+                'text' => 'iruali: to pay :amount for order :number, open :url (works for 48 hours).',
+                'data' => ['number' => 'ORD-7K2M9QX', 'amount' => 'MVR 450.00', 'url' => 'https://iruali.mv/pay/123?signature=…'], 'required' => ['url'],
+            ],
             'order_placed' => [
                 'group' => 'orders', 'label' => 'Order placed',
                 'text' => 'iruali: we have your order :number (:amount). We will text you when it is on its way.',

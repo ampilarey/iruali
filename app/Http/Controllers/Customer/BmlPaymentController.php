@@ -53,18 +53,21 @@ class BmlPaymentController extends Controller
             }
         }
 
+        // Paid through a payment link without signing in: back to that page
+        $payLink = (string) $request->session()->get('paylink.'.$order->getKey(), '');
+        $owner = $request->user() && (int) $order->user_id === (int) $request->user()->id;
+        if ($payLink !== '' && ! $owner) {
+            $this->flashResult($transaction);
+
+            return redirect()->to($payLink);
+        }
+
         if (! $payments->visitorMaySeeReturn($request, $order)) {
             // Signed-in customers come back here after signing in (another browser, an expired session)
             return redirect()->guest(route('login'))->with('info', __('If you just paid, sign in to see your order.'));
         }
 
-        if ($transaction?->isConfirmed()) {
-            NotificationService::success(__('Payment received. Thank you!'));
-        } elseif ($transaction?->hasFailed()) {
-            NotificationService::error(__('The payment was not completed. You can try again from this page.'));
-        } else {
-            NotificationService::info(__('We are waiting for the bank to confirm your payment. This page will show it once it does.'));
-        }
+        $this->flashResult($transaction);
 
         // A guest's order page is its signed link (there is no account to sign in to)
         return redirect()->to($order->customerUrl());
@@ -91,5 +94,16 @@ class BmlPaymentController extends Controller
         }
 
         return response()->json(['ok' => true]);
+    }
+
+    protected function flashResult(?\App\Models\PaymentTransaction $transaction): void
+    {
+        if ($transaction?->isConfirmed()) {
+            NotificationService::success(__('Payment received. Thank you!'));
+        } elseif ($transaction?->hasFailed()) {
+            NotificationService::error(__('The payment was not completed. You can try again from this page.'));
+        } else {
+            NotificationService::info(__('We are waiting for the bank to confirm your payment. This page will show it once it does.'));
+        }
     }
 }

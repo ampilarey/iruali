@@ -246,6 +246,30 @@ class StaffAccessTest extends TestCase
         $this->actingAs($support)->get('/admin/dashboard')->assertRedirect(route('profile.2fa.setup'));
     }
 
+    public function test_staff_cannot_turn_their_code_off_while_it_is_required_and_the_server_command_switches_it(): void
+    {
+        config(['staff.require_two_factor' => true]);
+        $admin = User::factory()->create(['password' => bcrypt('secret-pass-123')]);
+        $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+        $admin->forceFill(['two_factor_enabled' => true, 'two_factor_secret' => encrypt('secret')])->save();
+
+        // Turning it off now would lock them out of /admin, where the switch is
+        $this->actingAs($admin)->post(route('profile.2fa.disable'), ['current_password' => 'secret-pass-123'])->assertSessionHasErrors('current_password');
+        $this->assertTrue($admin->fresh()->isTwoFactorEnabled());
+
+        // An admin locked out already switches the rule from the server
+        $this->artisan('staff:two-factor off')->expectsOutputToContain('optional for staff')->assertSuccessful();
+        $this->assertFalse(\App\Http\Middleware\RequireTwoFactor::required());
+        $this->assertTrue(\App\Models\AuditLog::where('action', 'settings.staff_two_factor')->exists());
+
+        $this->actingAs($admin->fresh())->post(route('profile.2fa.disable'), ['current_password' => 'secret-pass-123'])->assertSessionHasNoErrors();
+        $this->assertFalse($admin->fresh()->isTwoFactorEnabled());
+        $this->actingAs($admin->fresh())->get('/admin/dashboard')->assertOk();
+
+        $this->artisan('staff:two-factor on')->expectsOutputToContain('must use')->assertSuccessful();
+        $this->artisan('staff:two-factor maybe')->assertFailed();
+    }
+
     public function test_admin_can_make_a_user_support_or_finance_and_it_is_audited(): void
     {
         $admin = $this->staff('admin');

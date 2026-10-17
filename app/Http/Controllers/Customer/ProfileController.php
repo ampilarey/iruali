@@ -124,6 +124,12 @@ class ProfileController extends Controller
     {
         $request->validate(['current_password' => 'required|current_password']);
 
+        // Staff turning it off while the site requires it would lock themselves out of /admin
+        // (RequireTwoFactor sends them back to set it up, and the switch is in Admin → Settings)
+        if ($request->user()->isStaff() && \App\Http\Middleware\RequireTwoFactor::required()) {
+            return back()->withErrors(['current_password' => __('Staff must use two-step sign-in on this site, so it can\'t be turned off. An admin can make it optional first in Admin → Settings → Storefront ("Staff must use two-step sign-in").')]);
+        }
+
         $request->user()->disableTwoFactor();
         NotificationService::twoFactorDisabled();
 

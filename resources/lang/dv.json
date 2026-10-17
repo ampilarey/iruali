@@ -2769,5 +2769,6 @@
     "The slip must be a photo (JPG, PNG, WebP) or a PDF.": "ސްލިޕަކީ ފޮޓޯއެއް (JPG, PNG, WebP) ނުވަތަ PDF އަކަށް ވާންވާނެ.",
     "The slip must be smaller than 8 MB.": "ސްލިޕް 8 MB އަށްވުރެ ކުޑަ ވާންވާނެ.",
     "We could not take that file. Please upload a photo or PDF of the slip.": "އެ ފައިލް ނުނެގުނު. ސްލިޕްގެ ފޮޓޯއެއް ނުވަތަ PDF އެއް ފޮނުއްވާ.",
-    "Thank you. We will check your transfer and confirm your order soon.": "ޝުކުރިއްޔާ. ޓްރާންސްފަރ ބަލައި އަވަހަށް އޯޑަރ ކަށަވަރުކޮށްދޭނަން."
+    "Thank you. We will check your transfer and confirm your order soon.": "ޝުކުރިއްޔާ. ޓްރާންސްފަރ ބަލައި އަވަހަށް އޯޑަރ ކަށަވަރުކޮށްދޭނަން.",
+    "Staff must use two-step sign-in on this site, so it can't be turned off. An admin can make it optional first in Admin → Settings → Storefront (\"Staff must use two-step sign-in\").": "މި ސައިޓުގައި މުވައްޒަފުން ދެ ފިޔަވަޅުން ސައިން އިން ބޭނުންކުރަން ޖެހޭތީ، މިއީ އޮފް ކުރެވޭނެ ކަމެއް ނޫން. ފުރަތަމަ އެޑްމިނަކަށް Admin → Settings → Storefront (\"Staff must use two-step sign-in\") އިން މިކަން އިޚްތިޔާރީ ކުރެވިދާނެ."
 }

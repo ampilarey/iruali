@@ -263,7 +263,8 @@ to the template. `{to_plain}` is the number as Dhiraagu wants it; `{to}` keeps t
 - Every staff member must have **two-step sign-in** on (`STAFF_REQUIRE_2FA`, default true);
   without it, `/admin` redirects to My Account → Security. Admins can make it optional in
   **Admin → Settings → "Staff must use two-step sign-in"** (audited); staff who already use it
-  are still asked for the code until they turn it off in My Account → Security. Set
+  are still asked for the code until they turn it off in My Account → Security (refused while it is
+  required, so nobody locks themselves out). From the server: `php artisan staff:two-factor off|on`. Set
   `STAFF_REQUIRE_2FA=false` only on a development machine.
 - **Audit log** at **Admin → Audit log** (`/admin/audit`, admin + finance): order status
   changes and cancellations, refunds flagged/recorded, payouts, seller approve/reject/suspend,

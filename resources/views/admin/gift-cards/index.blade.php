@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Gift cards')
 
@@ -9,7 +9,6 @@
             <h1 class="text-2xl font-bold">Gift cards</h1>
             <p class="text-sm text-gray-500">Outstanding balance on active cards: {{ \App\Support\Money::format($outstanding) }}.</p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Back to Dashboard</a>
     </div>
 
     @if(session('success'))<div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>@endif

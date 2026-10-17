@@ -203,12 +203,13 @@ class DiscountService
     /**
      * Calculate loyalty points to be earned
      */
-    public function calculateLoyaltyPointsEarned(float $orderTotal): int
+    public function calculateLoyaltyPointsEarned(float $orderTotal, ?\App\Models\User $user = null): int
     {
-        // 1 point per N MVR spent after all discounts (N is configurable, default 100)
+        // 1 point per N MVR spent after all discounts (N is configurable, default 100), times the
+        // customer's loyalty tier (App\Support\LoyaltyTiers)
         $spendPerPoint = max(1, (float) Setting::get('loyalty_spend_per_point'));
 
-        return (int) floor($orderTotal / $spendPerPoint);
+        return (int) floor($orderTotal / $spendPerPoint * \App\Support\LoyaltyTiers::multiplier($user));
     }
 
     /**

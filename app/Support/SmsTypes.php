@@ -27,6 +27,7 @@ class SmsTypes
         'messages' => 'Messages',
         'quotes' => 'Bulk quotes',
         'disputes' => 'Disputes',
+        'marketing' => 'Offers',
     ];
 
     /**
@@ -130,6 +131,11 @@ class SmsTypes
                 'group' => 'quotes', 'label' => 'Quote request declined',
                 'text' => 'iruali: your quote request #:number for :product was declined. :url',
                 'data' => ['number' => '12', 'product' => 'Coir rope, 10 m', 'url' => 'https://iruali.mv/quotes/12'],
+            ],
+            'birthday_offer' => [
+                'group' => 'marketing', 'label' => 'Birthday offer',
+                'text' => 'iruali: happy birthday! :percent% off your next order with code :code, until :date.',
+                'data' => ['percent' => '10', 'code' => 'BDAY-7Q2K', 'date' => '24 Oct'], 'required' => ['code'],
             ],
             'dispute_refund' => [
                 'group' => 'disputes', 'label' => 'Dispute decided: refund',

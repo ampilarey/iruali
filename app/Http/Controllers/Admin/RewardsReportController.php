@@ -42,4 +42,26 @@ class RewardsReportController extends Controller
 
         return view('admin.rewards.index', compact('totals', 'topReferrers', 'referralPoints', 'recent'));
     }
+
+    /**
+     * Give or take points by hand (a goodwill gesture, a correction), with a reason, audited.
+     */
+    public function adjust(\Illuminate\Http\Request $request, \App\Services\PointsService $points)
+    {
+        $data = $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'points' => 'required|integer|between:-100000,100000|not_in:0',
+            'reason' => 'required|string|max:200',
+        ], ['email.exists' => 'No account has that email.']);
+
+        $user = User::where('email', $data['email'])->firstOrFail();
+        if ((int) $user->loyalty_points + (int) $data['points'] < 0) {
+            return back()->withInput()->withErrors(['points' => 'That would take the balance below zero (it is '.(int) $user->loyalty_points.').']);
+        }
+
+        $points->record($user, (int) $data['points'], 'adjustment', null, $data['reason']);
+        \App\Support\Audit::record('points.adjusted', $user, ['points' => (int) $data['points'], 'reason' => $data['reason']]);
+
+        return back()->with('success', ($data['points'] > 0 ? 'Gave ' : 'Took ').abs((int) $data['points']).' points '.($data['points'] > 0 ? 'to ' : 'from ').$user->name.'. New balance: '.(int) $user->fresh()->loyalty_points.'.');
+    }
 }

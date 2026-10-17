@@ -24,6 +24,15 @@ class Setting extends Model
         'sms_quiet_until' => '',
         // Team alerts (Admin → Team alerts): the Telegram group's chat id and the events posted there
         'telegram_chat_id' => '',
+        // Loyalty tiers by 12-month spend (App\Support\LoyaltyTiers) and the birthday offer
+        'loyalty_tiers_enabled' => 1,
+        'loyalty_tier_lagoon_min' => 5000,
+        'loyalty_tier_lagoon_multiplier' => 1.25,
+        'loyalty_tier_atoll_min' => 15000,
+        'loyalty_tier_atoll_multiplier' => 1.5,
+        'birthday_offer_enabled' => 0,
+        'birthday_offer_percent' => 10,
+        'birthday_offer_days' => 7,
         'telegram_events' => 'new_order,bank_slip,refund_due,dispute_opened,return_requested,shop_application,payment_error,backup_failed,sms_limit',
         // Admin staff must use two-step sign-in before opening /admin (also needs STAFF_REQUIRE_2FA on)
         'staff_require_two_factor' => 1,

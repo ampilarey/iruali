@@ -21,6 +21,12 @@
                 <p class="mt-1 text-xs text-gray-500">{{ __('The shop or courier calls this number to arrange delivery.') }}</p>
                 @error('phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
+            <div>
+                <label for="birth_date" class="block text-sm font-medium text-gray-700">{{ __('Birthday (optional)') }}</label>
+                <input id="birth_date" name="birth_date" type="date" dir="ltr" max="{{ now()->subDay()->toDateString() }}" value="{{ old('birth_date', $user->birth_date?->toDateString()) }}" class="{{ $f }} @error('birth_date') border-red-500 @enderror">
+                <p class="mt-1 text-xs text-gray-500">{{ __('Tell us and we may send you a little gift on your birthday.') }}</p>
+                @error('birth_date')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
             <fieldset class="space-y-3">
                 <legend class="text-sm font-medium text-gray-700">{{ __('Delivery address') }}</legend>
                 <div>

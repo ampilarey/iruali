@@ -22,6 +22,7 @@ Route::get('/r/{code}', [\App\Http\Controllers\Customer\RewardsController::class
 
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/rewards', [\App\Http\Controllers\Admin\RewardsReportController::class, 'index'])->name('rewards');
+    Route::post('/rewards/adjust', [\App\Http\Controllers\Admin\RewardsReportController::class, 'adjust'])->name('rewards.adjust'); // admins only (config/staff.php)
 });
 
 // Campaign landing pages (sales and events)

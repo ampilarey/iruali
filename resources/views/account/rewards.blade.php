@@ -13,6 +13,19 @@
                     <p class="text-sm text-gray-500">{{ __('Loyalty Points') }}</p>
                     <p class="text-4xl font-bold text-dark" dir="ltr">{{ max(0, (int) $user->loyalty_points) }}</p>
                     <p class="mt-1 text-xs text-gray-500">{{ __('Each point is worth MVR 1 at checkout.') }}</p>
+                    @if(\App\Support\LoyaltyTiers::enabled())
+                        @php $tierKey = \App\Support\LoyaltyTiers::current($user); $tier = \App\Support\LoyaltyTiers::all()[$tierKey]; $nextTier = \App\Support\LoyaltyTiers::next($user); @endphp
+                        <div class="mt-4 rounded-lg bg-primary-50 px-3 py-3" data-loyalty-tier="{{ $tierKey }}">
+                            <p class="text-sm font-semibold text-primary-800">{{ __('Your tier: :tier', ['tier' => $tier['name']]) }}</p>
+                            @if($tier['multiplier'] > 1)<p class="text-xs text-primary-700">{{ __('You earn :times times the points.', ['times' => rtrim(rtrim(number_format($tier['multiplier'], 2), '0'), '.')]) }}</p>@endif
+                            @if($nextTier)
+                                <div class="mt-2 h-1.5 rounded-full bg-white"><div class="h-1.5 rounded-full bg-primary" style="width: {{ round($nextTier['progress'] * 100) }}%"></div></div>
+                                <p class="mt-1 text-xs text-gray-600">{{ __('Spend :amount more within 12 months to reach :tier.', ['amount' => \App\Support\Money::format($nextTier['needed']), 'tier' => $nextTier['name']]) }}</p>
+                            @else
+                                <p class="mt-1 text-xs text-gray-600">{{ __('You are at the top tier. Thank you!') }}</p>
+                            @endif
+                        </div>
+                    @endif
                     @if($expiringSoon > 0)
                         <p class="mt-3 rounded-lg bg-sun-soft px-3 py-2 text-xs text-sun-ink">{{ __(':points points expire within a month. Use them soon!', ['points' => $expiringSoon]) }}</p>
                     @elseif($expiryMonths > 0)

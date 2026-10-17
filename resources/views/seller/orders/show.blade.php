@@ -111,6 +111,7 @@
                     <div class="flex justify-between"><dt class="text-gray-600">Your items</dt><dd>{{ \App\Support\Money::format($part->subtotal) }}</dd></div>
                     @if((float) $part->shop_discount > 0)<div class="flex justify-between"><dt class="text-gray-600">{{ __('Your discounts (multi-buy, codes)') }}</dt><dd>&minus;{{ \App\Support\Money::format($part->shop_discount) }}</dd></div>@endif
                     <div class="flex justify-between"><dt class="text-gray-600">Commission ({{ rtrim(rtrim(number_format((float) $part->commission_rate, 2), '0'), '.') }}%)</dt><dd>&minus;{{ \App\Support\Money::format($part->commission_amount) }}</dd></div>
+                    @if($part->shopDeliveryCharge() > 0)<div class="flex justify-between" data-shop-delivery><dt class="text-gray-600">{{ __('Your delivery fee (no commission)') }}</dt><dd>{{ \App\Support\Money::format($part->shopDeliveryCharge()) }}</dd></div>@endif
                     <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-100 pt-1"><dt>You earn</dt><dd>{{ \App\Support\Money::format($part->seller_earnings) }}</dd></div>
                 </dl>
                 <p class="mt-2 text-xs text-gray-500">{{ ['pending' => 'Payable once your part is delivered and the customer has paid.', 'available' => 'Ready for the next payout.', 'paid_out' => 'Paid to you.', 'cancelled' => 'Cancelled: nothing is payable.'][$part->earningsState()] }}</p>

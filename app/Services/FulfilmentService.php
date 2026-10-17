@@ -56,8 +56,9 @@ class FulfilmentService
         $part->shop_discount = round($items->sum(fn ($i) => $i->shopDiscount()), 2);
         $net = round($subtotal - (float) $part->shop_discount, 2);
 
+        // Commission is on the goods only: a shop delivering its own part also gets its delivery charge
         $commission = round($net * (float) $part->commission_rate / 100, 2);
-        $part->fill(['subtotal' => $subtotal, 'commission_amount' => $commission, 'seller_earnings' => round($net - $commission, 2)])->save();
+        $part->fill(['subtotal' => $subtotal, 'commission_amount' => $commission, 'seller_earnings' => round($net - $commission + $part->shopDeliveryCharge(), 2)])->save();
 
         app(GstService::class)->capturePart($part, $order); // GST as it is when the order is placed
 
@@ -235,7 +236,10 @@ class FulfilmentService
     /**
      * Record how each shop part reaches the customer, as worked out by DeliveryService::prepareOrder().
      *
-     * @param  array<int, array{method: string, surcharge: float, pickup_address: ?string, pickup_island: ?string, pickup_hours: ?string}>  $choices  keyed by seller id (0 for none)
+     * A shop delivering its part at its own fee gets that fee and its bulky-item charges with its
+     * earnings (the part is refreshed so they, and its GST, include them).
+     *
+     * @param  array<int, array{method: string, surcharge: float, pickup_address: ?string, pickup_island: ?string, pickup_hours: ?string, fee?: float, to_shop?: bool}>  $choices  keyed by seller id (0 for none)
      */
     public function applyDeliveryMethods(Order $order, array $choices): void
     {
@@ -251,7 +255,13 @@ class FulfilmentService
                 'pickup_address' => $choice['pickup_address'],
                 'pickup_island' => $choice['pickup_island'],
                 'pickup_hours' => $choice['pickup_hours'],
+                'delivery_fee' => $choice['fee'] ?? 0,
+                'delivery_fee_to_shop' => (bool) ($choice['to_shop'] ?? false),
             ])->save();
+
+            if ($part->delivery_fee_to_shop) {
+                $this->refreshPart($order, $part->seller_id);
+            }
         }
     }
 

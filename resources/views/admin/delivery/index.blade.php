@@ -90,6 +90,26 @@
             </div>
         </section>
 
+        <section class="rounded-lg bg-white p-6 shadow" data-shop-fees>
+            <h2 class="text-lg font-semibold text-gray-900">{{ __('Shops\' own delivery fees') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ __('A shop can deliver its orders itself and set its own fees: to its home island, to Greater Malé and to other islands. It is paid its fee and bulky-item charges with its earnings, with no commission on them, and they are on its invoice. The fees above apply to every other shop; iruali charges them once per order and keeps them.') }}</p>
+            <p class="mt-2 text-sm text-gray-700">{{ trans_choice(':count shop has set its own fees.|:count shops have set their own fees.', $shopsWithOwnFees, ['count' => $shopsWithOwnFees]) }}</p>
+
+            <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
+                <input type="hidden" name="shop_own_fees_enabled" value="0">
+                <input type="checkbox" name="shop_own_fees_enabled" value="1" @checked(old('shop_own_fees_enabled', $shopOwnFees)) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                <span><span class="font-medium text-gray-900">{{ __('Let shops set their own delivery fees') }}</span>
+                    <span class="block text-xs text-gray-500">{{ __('When this is off, every shop uses the fees above, and shops\' own fees are kept but not charged.') }}</span></span>
+            </label>
+
+            <div class="mt-4 max-w-xs">
+                <label for="shop_delivery_fee_max" class="block text-sm font-medium text-gray-700">{{ __('Highest fee a shop may charge (MVR)') }}</label>
+                <input id="shop_delivery_fee_max" name="shop_delivery_fee_max" type="number" min="0" step="0.01" required class="{{ $field }}" value="{{ old('shop_delivery_fee_max', $shopFeeMax) }}">
+                <p class="mt-1 text-xs text-gray-500">{{ __('For one delivery, to any island. Lowering it also caps the fees shops have already saved.') }}</p>
+                @error('shop_delivery_fee_max')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+            </div>
+        </section>
+
         <section class="rounded-lg bg-white p-6 shadow">
             <h2 class="text-lg font-semibold text-gray-900">{{ __('Malé delivery time slots') }}</h2>
             <p class="mt-1 text-sm text-gray-500">{{ __('When this is on, customers whose order is delivered to Greater Malé can pick a time slot at checkout. "Any time" stays the default. Full and too-late slots are shown but cannot be chosen.') }}</p>

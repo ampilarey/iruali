@@ -15,6 +15,8 @@
             'key' => $shop['key'],
             'pickup' => $shop['pickup'] !== null,
             'surcharge' => $shop['surcharge'],
+            'itemsTotal' => $shop['items_total'],
+            'own' => $shop['own'],
             'estimates' => $shop['estimates'],
             'reach' => $shop['reach'],
         ])->values(),
@@ -89,15 +91,36 @@
                 }
             }
 
+            // A shop's own fee to the area and island (null: iruali's fee applies), as DeliveryService::shopFee()
+            function shopFee(shop, areaKey, dest) {
+                var own = shop.own;
+                if (!own) return null;
+                if (own.free_over && shop.itemsTotal >= own.free_over) return 0;
+                if (own.local !== null && own.home && dest.id === own.home) return own.local;
+                return areaKey === 'greater_male' ? own.greater_male : own.islands;
+            }
+
+            // The delivery fees for an area, before bulky-item charges: each delivering shop's own fee,
+            // plus iruali's area fee once when any other shop delivers
+            function feesFor(delivered, areaKey, dest) {
+                var total = 0, iruali = false;
+                delivered.forEach(function (shop) {
+                    var own = shopFee(shop, areaKey, dest);
+                    if (own === null) iruali = true; else total += own;
+                });
+                return total + (iruali ? (cfg.areaFees[areaKey] || 0) : 0);
+            }
+
             function update() {
                 var delivered = cfg.shops.filter(function (shop) { return methodOf(shop) === 'deliver'; });
                 var anyDelivered = delivered.length > 0;
                 var surcharge = delivered.reduce(function (sum, shop) { return sum + shop.surcharge; }, 0);
                 var current = area();
                 var islandsSide = current === 'greater_male' ? atollArea(atoll) : current;
+                var dest = destination();
                 var fees = {
-                    greater_male: anyDelivered ? (cfg.areaFees.greater_male || 0) + surcharge : 0,
-                    islands: anyDelivered ? (cfg.areaFees[islandsSide] || 0) + surcharge : 0
+                    greater_male: anyDelivered ? feesFor(delivered, 'greater_male', dest) + surcharge : 0,
+                    islands: anyDelivered ? feesFor(delivered, islandsSide, dest) + surcharge : 0
                 };
 
                 zoneRadios.forEach(function (radio) {
@@ -112,8 +135,14 @@
                     form.querySelectorAll('[data-shop="' + shop.key + '"] [data-shop-estimate]').forEach(function (el) { el.textContent = shop.estimates[current] || ''; });
                 });
 
+                cfg.shops.forEach(function (shop) {
+                    var feeEl = form.querySelector('[data-shop="' + shop.key + '"] [data-shop-fee]');
+                    if (feeEl) feeEl.textContent = fmt(shopFee(shop, current, dest) || 0);
+                    var feeLine = form.querySelector('[data-shop="' + shop.key + '"] [data-shop-fee-line]');
+                    if (feeLine) feeLine.classList.toggle('hidden', methodOf(shop) !== 'deliver');
+                });
+
                 // Shops that don't reach the delivery island: show their notice (the server refuses the order too)
-                var dest = destination();
                 cfg.shops.forEach(function (shop) {
                     var box = form.querySelector('[data-shop="' + shop.key + '"] [data-shop-blocked]');
                     if (!box || !shop.reach) return;
@@ -126,7 +155,7 @@
                 var toggle = function (selector, show) { var el = form.querySelector(selector); if (el) el.classList.toggle('hidden', !show); return el; };
                 toggle('[data-delivery-zones]', anyDelivered);
                 var note = toggle('[data-area-note]', anyDelivered);
-                if (note) note.textContent = cfg.areaNote.replace(':area', cfg.areaLabels[current] || current).replace(':fee', fmt(anyDelivered ? (cfg.areaFees[current] || 0) : 0));
+                if (note) note.textContent = cfg.areaNote.replace(':area', cfg.areaLabels[current] || current).replace(':fee', fmt(anyDelivered ? feesFor(delivered, current, dest) : 0));
                 var surchargeNote = toggle('[data-surcharge-note]', anyDelivered && surcharge > 0);
                 if (surchargeNote) surchargeNote.textContent = cfg.surchargeNote.replace(':amount', fmt(surcharge));
                 toggle('[data-all-pickup-note]', !anyDelivered);

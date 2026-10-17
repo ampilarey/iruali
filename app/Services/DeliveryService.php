@@ -19,8 +19,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Delivery fees by area (Admin → Delivery: Greater Malé, each atoll, other islands), delivery
- * estimates, bulky-item charges, pickup from the shop and gifts at checkout.
+ * Delivery fees by area (Admin → Delivery: Greater Malé, each atoll, other islands), shops' own
+ * delivery fees, delivery estimates, bulky-item charges, pickup from the shop and gifts at checkout.
+ *
+ * Who is paid for delivery: a shop with its own fees (SellerDeliverySetting::hasOwnFees) delivers
+ * its part itself and gets its fee and bulky-item charges with its earnings. iruali's area fee is
+ * charged once per order when any other shop's part is delivered, and iruali keeps it and those
+ * shops' bulky-item charges (Order::delivery_fee_shops is the shops' share of shipping_amount).
  */
 class DeliveryService
 {
@@ -305,12 +310,13 @@ class DeliveryService
 
     /**
      * The cart's items by shop, keyed by seller id (0 for none). Each shop is an array with
-     * seller_id, name, items (its cart items), units, surcharge (the bulky-item charges for all
-     * its items) and setting (its SellerDeliverySetting).
+     * seller_id, name, seller (its User, if any), items (its cart items), units, items_total (MVR,
+     * for its own free-delivery amount), surcharge (the bulky-item charges for all its items) and
+     * setting (its SellerDeliverySetting).
      */
     public function cartShops(Cart $cart): Collection
     {
-        $cart->loadMissing('items.product.seller');
+        $cart->loadMissing(['items.product.seller', 'items.variant']);
         $groups = $cart->items->filter(fn (CartItem $item) => $item->product !== null)
             ->groupBy(fn (CartItem $item) => (int) ($item->product->seller_id ?? 0));
         $settings = SellerDeliverySetting::forSellers($groups->keys());
@@ -321,8 +327,10 @@ class DeliveryService
             return [
                 'seller_id' => $sellerId ?: null,
                 'name' => $seller ? $seller->shopName() : 'iruali',
+                'seller' => $seller,
                 'items' => $items->values(),
                 'units' => (int) $items->sum('quantity'),
+                'items_total' => round((float) $items->sum(fn (CartItem $item) => (float) $item->unit_price * (int) $item->quantity), 2),
                 'surcharge' => round((float) $items->sum(fn (CartItem $item) => (float) $item->product->delivery_surcharge * (int) $item->quantity), 2),
                 'setting' => $settings[$sellerId] ?? new SellerDeliverySetting,
             ];
@@ -330,13 +338,29 @@ class DeliveryService
     }
 
     /**
-     * Work out the order's delivery from the checkout choices: deliver or collect per shop (only
-     * from shops that offer it), the area's fee once when anything is delivered (none when all is
-     * collected, no address needed then), the delivered items' extra charges (never waived), the
-     * Malé time slot (re-checked and held under a lock) and the gift details.
+     * A shop's own fee for delivering its part to the area and island (its local fee when the
+     * island is its home island), or null when it uses iruali's fees.
      *
-     * Adds to the shipping data: shipping_amount, delivery_area, delivery_surcharge, the slot,
-     * the gift fields and fulfilment_parts (per shop, for applyToOrder()).
+     * @param  array<string, mixed>  $shop  one of cartShops()
+     */
+    public function shopFee(array $shop, string $area, ?Island $island): ?float
+    {
+        $seller = $shop['seller'] ?? null;
+        $home = $island !== null && $seller instanceof User && $seller->home_island_id !== null && (int) $seller->home_island_id === (int) $island->id;
+
+        return $shop['setting']->ownFee($area, $home, (float) ($shop['items_total'] ?? 0));
+    }
+
+    /**
+     * Work out the order's delivery from the checkout choices: deliver or collect per shop (only
+     * from shops that offer it), each delivered shop's own fee, iruali's area fee once when any
+     * other shop's part is delivered (none when all is collected, no address needed then), the
+     * delivered items' extra charges (never waived), the Malé time slot (re-checked and held under
+     * a lock) and the gift details.
+     *
+     * Adds to the shipping data: shipping_amount, delivery_fee_shops (the shops' share of it),
+     * delivery_area, delivery_surcharge, the slot, the gift fields and fulfilment_parts (per shop,
+     * for applyToOrder()).
      *
      * @param  array<string, mixed>  $shippingData
      * @return array<string, mixed>
@@ -356,6 +380,8 @@ class DeliveryService
                 'pickup_address' => $pickup ? $setting->pickup_address : null,
                 'pickup_island' => $pickup ? $setting->pickupIslandForOrder() : null,
                 'pickup_hours' => $pickup ? $setting->pickup_hours : null,
+                'fee' => 0.0,
+                'to_shop' => false,
             ];
         }
 
@@ -364,6 +390,7 @@ class DeliveryService
 
         // A shop's items can only be delivered to an island it reaches (a gift goes to the gift's
         // address, so its island decides); otherwise collect them or take them out of the cart
+        $island = null;
         if ($delivered) {
             $island = $this->islandFor($shippingData);
             foreach ($parts as $sellerId => $part) {
@@ -378,7 +405,19 @@ class DeliveryService
 
         if ($delivered) {
             $area = $this->areaFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_state'] ?? null);
-            $base = $this->areaFeeFor($area, $goodsTotal);
+
+            // Shops with their own fees charge (and keep) them; iruali's fee once for the others
+            $irualiDelivers = false;
+            foreach ($parts as $sellerId => $part) {
+                if ($part['method'] !== SellerOrder::METHOD_DELIVER) {
+                    continue;
+                }
+                $own = $this->shopFee($shops[$sellerId], $area, $island);
+                $parts[$sellerId]['fee'] = round($own ?? 0.0, 2);
+                $parts[$sellerId]['to_shop'] = $own !== null;
+                $irualiDelivers = $irualiDelivers || $own === null;
+            }
+            $base = $irualiDelivers ? $this->areaFeeFor($area, $goodsTotal) : 0.0;
         } else {
             // Everything is collected: no delivery fee, and no address needed (the phone still is)
             $area = null;
@@ -392,9 +431,11 @@ class DeliveryService
             }
         }
 
+        $shopsShare = round((float) collect($parts)->where('to_shop', true)->sum(fn (array $part) => $part['fee'] + $part['surcharge']), 2);
         $shippingData['delivery_area'] = $area;
         $shippingData['delivery_surcharge'] = $surcharge;
-        $shippingData['shipping_amount'] = round($base + $surcharge, 2);
+        $shippingData['delivery_fee_shops'] = $shopsShare;
+        $shippingData['shipping_amount'] = round($base + (float) collect($parts)->sum('fee') + $surcharge, 2);
         $shippingData['fulfilment_parts'] = $parts;
 
         // A Malé time slot only applies to a delivery to Greater Malé while slots are on
@@ -527,7 +568,7 @@ class DeliveryService
         }
 
         $coverage = app(ShopCoverage::class);
-        $shops = $this->cartShops($cart)->map(function (array $shop, int $sellerId) use ($choices, $areas, $coverage, $activeIslands, $initialIsland) {
+        $shops = $this->cartShops($cart)->map(function (array $shop, int $sellerId) use ($choices, $areas, $coverage, $activeIslands, $initialIsland, $area) {
             $setting = $shop['setting'];
             $days = $setting->shipsWithinDays();
             $seller = $shop['items']->first()?->product?->seller;
@@ -541,6 +582,16 @@ class DeliveryService
                 'name' => $shop['name'],
                 'units' => $shop['units'],
                 'surcharge' => $shop['surcharge'],
+                'items_total' => $shop['items_total'],
+                // The shop's own delivery fees, for the page's script (null: iruali's fees)
+                'own' => $setting->hasOwnFees() ? [
+                    'home' => $seller instanceof User && $seller->home_island_id ? (int) $seller->home_island_id : null,
+                    'local' => $setting->fee_local === null ? null : min((float) $setting->fee_local, SellerDeliverySetting::maxFee()),
+                    'greater_male' => min((float) $setting->fee_greater_male, SellerDeliverySetting::maxFee()),
+                    'islands' => min((float) $setting->fee_islands, SellerDeliverySetting::maxFee()),
+                    'free_over' => $setting->free_over === null || (float) $setting->free_over <= 0 ? null : (float) $setting->free_over,
+                ] : null,
+                'fee' => $this->shopFee($shop, $area, $initialIsland),
                 'pickup' => $setting->offersPickup() ? [
                     'address' => (string) $setting->pickup_address,
                     'island' => $setting->pickupIslandName(),
@@ -559,6 +610,22 @@ class DeliveryService
         $delivered = $shops->contains('method', SellerOrder::METHOD_DELIVER);
         $surcharge = round((float) $shops->where('method', SellerOrder::METHOD_DELIVER)->sum('surcharge'), 2);
 
+        // The delivery fees (before bulky-item charges) for an area: each delivering shop's own fee,
+        // plus iruali's area fee once when any other shop delivers
+        $cartShops = $this->cartShops($cart);
+        $feesFor = function (string $key) use ($shops, $cartShops, $areaFees, $initialIsland): float {
+            $total = 0.0;
+            $iruali = false;
+            foreach ($shops->where('method', SellerOrder::METHOD_DELIVER) as $shop) {
+                $own = $this->shopFee($cartShops[(int) $shop['key']], $key, $initialIsland);
+                $total += $own ?? 0.0;
+                $iruali = $iruali || $own === null;
+            }
+
+            return round($total + ($iruali ? (float) ($areaFees[$key] ?? 0) : 0.0), 2);
+        };
+        $islandsArea = $area === self::AREA_GREATER_MALE ? self::AREA_ISLANDS : $area;
+
         // The atolls with their own rate, and the area of each saved address, for the page's script
         $atollAreas = collect(array_keys($areas))->reject(fn ($key) => in_array($key, [self::AREA_GREATER_MALE, self::AREA_ISLANDS], true))
             ->filter(fn ($key) => array_key_exists($key, $this->rateTable()))
@@ -576,7 +643,14 @@ class DeliveryService
             'freeOver' => (float) Setting::get('free_delivery_over'),
             'delivered' => $delivered,
             'surcharge' => $surcharge,
-            'fee' => $delivered ? round(($areaFees[$area] ?? 0) + $surcharge, 2) : 0.0,
+            'fee' => $delivered ? round($feesFor($area) + $surcharge, 2) : 0.0,
+            'deliveryFees' => $delivered ? $feesFor($area) : 0.0,
+            // What each delivery-area radio costs as the page opens (the script keeps them up to date)
+            'zoneFees' => [
+                self::AREA_GREATER_MALE => $delivered ? round($feesFor(self::AREA_GREATER_MALE) + $surcharge, 2) : 0.0,
+                self::AREA_ISLANDS => $delivered ? round($feesFor($islandsArea) + $surcharge, 2) : 0.0,
+            ],
+            'islandsArea' => $islandsArea,
             'atollAreas' => $atollAreas,
             'addressAreas' => $addressAreas,
             'slotsEnabled' => $slotsEnabled,
@@ -634,18 +708,24 @@ class DeliveryService
         $destination = $this->destination($user, $islands);
         $setting = SellerDeliverySetting::for($product->seller_id);
         $days = $setting->shipsWithinDays();
+        $chosen = app(ShoppingIsland::class)->island();
+
+        // A shop with its own fees quotes them (before its free-delivery amount: one item rarely reaches it)
+        $toHome = $chosen !== null && $product->seller?->home_island_id !== null && (int) $product->seller->home_island_id === (int) $chosen->id;
+        $ownFee = $setting->ownFee($destination['area'], $toHome, 0.0);
 
         return [
             'destination' => $destination,
-            'fee' => $this->areaFee($destination['area']),
-            'freeOver' => (float) Setting::get('free_delivery_over'),
+            'fee' => $ownFee ?? $this->areaFee($destination['area']),
+            'freeOver' => $ownFee !== null ? (float) ($setting->free_over ?? 0) : (float) Setting::get('free_delivery_over'),
+            'ownFees' => $ownFee !== null,
             'surcharge' => (float) $product->delivery_surcharge,
             'arrival' => $this->arrivalText($days, $destination['area']),
             'shipsWithinDays' => $days,
             'pickup' => $setting->offersPickup() ? ['address' => (string) $setting->pickup_address, 'island' => $setting->pickupIslandName(), 'hours' => (string) $setting->pickup_hours] : null,
             'islandsByAtoll' => $this->islandsByAtoll($islands),
             // Whether this product's shop reaches the island (null: no island chosen, nothing to say)
-            'delivers' => ($chosen = app(ShoppingIsland::class)->island()) ? app(ShopCoverage::class)->deliversProduct($product, $chosen) : null,
+            'delivers' => $chosen ? app(ShopCoverage::class)->deliversProduct($product, $chosen) : null,
         ];
     }
 }

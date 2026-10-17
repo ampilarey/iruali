@@ -18,14 +18,33 @@ one checkout; each shop handles its own part.
   order brings every part along.
 - **Cancelling** is done on the whole order (customer while pending, or admin). It is blocked once any shop
   has sent its part; after that, handle it as a return.
-- Delivery is still one fee per order, charged by iruali.
+- Delivery: see **Delivery fees** below (iruali's fee once per order, plus each own-fee shop's fee).
+
+## Delivery fees
+
+- **iruali's fees** (Admin → Delivery: Greater Malé, each atoll, other islands, free over an amount) apply
+  to every shop that hasn't set its own. They are charged **once per order** when any such shop's part is
+  delivered, and iruali keeps them (and those shops' bulky-item charges), as before.
+- **A shop's own fees** (Seller Centre → Settings → Delivery & pickup → *Your delivery fees*): a shop that
+  delivers its orders itself sets a fee to Greater Malé, to other islands and, optionally, to its own home
+  island, plus an optional "free when your items come to" amount. Its fee is charged for **its part** of
+  each order, and the shop is paid it, with its bulky-item charges, **with its earnings and no
+  commission**. It is on the shop's invoice and in its GST (when it is registered), not iruali's.
+- Admin → Delivery → *Shops' own delivery fees*: turn own fees on or off for all shops (off: everyone uses
+  iruali's fees; saved fees are kept) and set the **highest fee** a shop may charge (it also caps fees
+  already saved).
+- Pickup from the shop has no fee either way.
+- Each part records `delivery_fee` and `delivery_fee_to_shop`; the order records `delivery_fee_shops`, the
+  shops' share of `shipping_amount`. iruali's delivery income (GST report) is the rest. Orders placed
+  before this have 0 there, so nothing about them changes.
 
 ## Commission and earnings
 
 - Each shop has a **commission rate** (Admin → Shop payouts). Blank = the default in Settings (10% to start).
 - When an order is placed, each part stores: item subtotal, the rate at that moment, commission, and the
-  shop's earnings (`subtotal − commission`). Changing a rate only affects new orders.
-- Delivery fees, vouchers and loyalty-point discounts are iruali's and don't change what a shop earns.
+  shop's earnings (`subtotal − shop discounts − commission`, plus its own delivery charge when it delivers
+  the part itself). Changing a rate only affects new orders.
+- iruali's delivery fees, vouchers and loyalty-point discounts are iruali's and don't change what a shop earns.
 
 Earnings states: **pending** (not delivered or not paid yet) → **ready** (part delivered *and* the order is
 paid: card payment confirmed by BML; older non-card orders can be marked paid by an admin) → **paid out**.
@@ -93,8 +112,10 @@ If BML changes the template, change `BankFileFormat` and the byte-for-byte test 
    notes and a photo (required for damaged or wrong items). One open request per shop part at a time.
 2. The shop and the admin contact email are emailed. Shops see requests under Seller Centre → **Returns**.
 3. **Admin → Returns** → open a request:
-   - **Approve** with the refund amount. The suggestion is the items' value, plus the delivery fee when the
-     shop was at fault and it was the only shop in the order. The refund can't exceed what is left on the
+   - **Approve** with the refund amount. The suggestion is the items' value, plus, when the shop was at
+     fault, its own delivery charge if it delivered the part itself, else the delivery fee when it was the
+     only shop in the order. A refund beyond the items' value is taken back from the shop up to its own
+     delivery charge. The refund can't exceed what is left on the
      order. Tick **Put the items back in stock** if they can be resold.
    - Or **Reject** with a reason (sent to the customer).
 4. Approving takes the shop's share of the returned items (price less the part's commission) from its

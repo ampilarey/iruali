@@ -3,11 +3,9 @@
 @php
     $dc = $deliveryCheckout;
     $area = $dc['area'];
-    $islandsArea = $area === \App\Services\DeliveryService::AREA_GREATER_MALE ? \App\Services\DeliveryService::AREA_ISLANDS : $area;
-    $zoneFees = [
-        \App\Services\DeliveryService::AREA_GREATER_MALE => $dc['delivered'] ? $dc['areaFees'][\App\Services\DeliveryService::AREA_GREATER_MALE] + $dc['surcharge'] : 0.0,
-        \App\Services\DeliveryService::AREA_ISLANDS => $dc['delivered'] ? ($dc['areaFees'][$islandsArea] ?? 0) + $dc['surcharge'] : 0.0,
-    ];
+    $islandsArea = $dc['islandsArea'];
+    // Each shop's own fee plus iruali's area fee (when another shop delivers) and bulky-item charges
+    $zoneFees = $dc['zoneFees'];
     $feeText = fn (float $fee) => $fee > 0 ? \App\Support\Money::format($fee) : __('Free');
 @endphp
 <section class="bg-white rounded-2xl border border-gray-200 p-6" data-delivery-section>
@@ -28,7 +26,7 @@
         @endforeach
     </div>
 
-    <p class="mt-3 text-sm text-gray-700 {{ $dc['delivered'] ? '' : 'hidden' }}" data-area-note>{{ __('Delivery to :area: :fee', ['area' => $dc['areas'][$area] ?? $area, 'fee' => $feeText($dc['delivered'] ? ($dc['areaFees'][$area] ?? 0) : 0)]) }}</p>
+    <p class="mt-3 text-sm text-gray-700 {{ $dc['delivered'] ? '' : 'hidden' }}" data-area-note>{{ __('Delivery to :area: :fee', ['area' => $dc['areas'][$area] ?? $area, 'fee' => $feeText($dc['deliveryFees'])]) }}</p>
     <p class="mt-1 text-sm text-gray-700 {{ $dc['delivered'] && $dc['surcharge'] > 0 ? '' : 'hidden' }}" data-surcharge-note>{{ __('Bulky items add :amount to delivery. Free delivery does not cover this charge.', ['amount' => \App\Support\Money::format($dc['surcharge'])]) }}</p>
     <p class="text-sm text-gray-700 {{ $dc['delivered'] ? 'hidden' : '' }}" data-all-pickup-note>{{ __('You are collecting everything from the shops, so there is no delivery fee and no address is needed.') }}</p>
 

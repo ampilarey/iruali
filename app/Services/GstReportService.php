@@ -216,7 +216,8 @@ class GstReportService
 
     /**
      * One return or dispute refund: the part of it up to the items' value is the shop's goods (iruali
-     * gives up its commission on that), the rest up to the delivery fee is iruali's delivery.
+     * gives up its commission on that), then the shop's own delivery charge when it delivered the
+     * part itself (also the shop's sale), and the rest up to iruali's delivery fee is iruali's.
      *
      * @return array<string, mixed>|null
      */
@@ -227,8 +228,9 @@ class GstReportService
         }
 
         $base = round(min($refund, $goodsCap), 2);
-        $goods = round(min($base, (float) ($part->gst_taxable ?? $part->subtotal)), 2);
-        $delivery = round(min(max(0, $refund - $goodsCap), $this->gst->deliveryFee($order)), 2);
+        $shopDelivery = $part->deliveryRefundShare($refund, $goodsCap);
+        $goods = round(min($base, (float) ($part->gst_taxable ?? $part->subtotal) - $part->shopDeliveryCharge()) + $shopDelivery, 2);
+        $delivery = round(min(max(0, $refund - $goodsCap - $shopDelivery), $this->gst->deliveryFee($order)), 2);
         $commission = round($base * (float) $part->commission_rate / 100, 2);
         $platformRate = $order->gst_platform_registered ? $order->gst_rate : null;
 

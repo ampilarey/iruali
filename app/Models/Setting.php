@@ -40,6 +40,9 @@ class Setting extends Model
         'delivery_fee_greater_male' => 25,
         'delivery_fee_islands' => 75,
         'free_delivery_over' => 1000,
+        // Shops may set their own delivery fees (and deliver their parts themselves), up to this much
+        'shop_own_fees_enabled' => 1,
+        'shop_delivery_fee_max' => 500,
         // Marketplace: percent of each shop's item sales iruali keeps (a shop can have its own rate)
         'default_commission_rate' => 10,
         // Marketplace: a shop part not shipped within this many days of payment counts as late

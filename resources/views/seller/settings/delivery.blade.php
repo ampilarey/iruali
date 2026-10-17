@@ -71,6 +71,44 @@
                 </div>
             </section>
 
+            @if($ownFeesAllowed)
+                <section class="rounded-lg bg-white p-6 shadow space-y-4" data-own-fees>
+                    <div>
+                        <h2 class="text-base font-semibold text-gray-900">{{ __('Your delivery fees') }}</h2>
+                        <p class="text-sm text-gray-500">{{ __('Deliver your orders yourself and set your own fees. Each order pays your fee for your part, and you are paid it with your earnings (no commission is taken on delivery). Bulky-item charges on your products are paid to you too.') }}</p>
+                        <p class="mt-1 text-sm text-gray-500">{{ __('If you don\'t, iruali\'s fees apply (now :male to Greater Malé, :islands to other islands) and iruali keeps them.', ['male' => \App\Support\Money::format($irualiFees['greater_male']), 'islands' => \App\Support\Money::format($irualiFees['islands'])]) }}</p>
+                    </div>
+                    <label class="flex items-start gap-3 text-sm text-gray-700">
+                        <input type="hidden" name="own_fees" value="0">
+                        <input type="checkbox" name="own_fees" value="1" @checked(old('own_fees', $setting->own_fees)) class="mt-0.5 h-5 w-5 rounded border-gray-300 text-primary-600">
+                        <span class="font-medium text-gray-900">{{ __('I deliver my orders myself, at my own fees') }}</span>
+                    </label>
+                    <div class="grid gap-4 sm:grid-cols-3">
+                        <div>
+                            <label for="fee_local" class="block text-sm font-medium text-gray-700">{{ $homeIsland ? __('To :island (your island)', ['island' => $homeIsland->localized_name]) : __('To your own island') }}</label>
+                            <input id="fee_local" name="fee_local" type="number" min="0" max="{{ $maxFee }}" step="0.01" class="{{ $field }}" value="{{ old('fee_local', $setting->fee_local) }}" placeholder="{{ __('Same as its area') }}" @disabled(! $homeIsland)>
+                            @unless($homeIsland)
+                                <p class="mt-1 text-xs text-gray-500">{{ __('Set your shop\'s island in your shop profile first.') }}</p>
+                            @endunless
+                        </div>
+                        <div>
+                            <label for="fee_greater_male" class="block text-sm font-medium text-gray-700">{{ __('To Greater Malé') }}</label>
+                            <input id="fee_greater_male" name="fee_greater_male" type="number" min="0" max="{{ $maxFee }}" step="0.01" class="{{ $field }}" value="{{ old('fee_greater_male', $setting->fee_greater_male) }}">
+                        </div>
+                        <div>
+                            <label for="fee_islands" class="block text-sm font-medium text-gray-700">{{ __('To other islands') }}</label>
+                            <input id="fee_islands" name="fee_islands" type="number" min="0" max="{{ $maxFee }}" step="0.01" class="{{ $field }}" value="{{ old('fee_islands', $setting->fee_islands) }}">
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">{{ __('In MVR, for one order, at most :max. 0 means free delivery. Only islands you deliver to (your shop profile) can order delivery from you.', ['max' => \App\Support\Money::format($maxFee)]) }}</p>
+                    <div class="max-w-xs">
+                        <label for="free_over" class="block text-sm font-medium text-gray-700">{{ __('Free delivery when your items come to (MVR)') }}</label>
+                        <input id="free_over" name="free_over" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('free_over', $setting->free_over) }}" placeholder="{{ __('Never free') }}">
+                        <p class="mt-1 text-xs text-gray-500">{{ __('Leave empty to always charge your fee. Bulky-item charges always apply.') }}</p>
+                    </div>
+                </section>
+            @endif
+
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ __('Save delivery settings') }}</button>
             </div>

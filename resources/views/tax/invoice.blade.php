@@ -7,7 +7,9 @@
     $lineAmount = fn ($item) => round((float) $item->price * $item->quantity, 2);
     $subtotal = round((float) $items->sum($lineAmount), 2);
     $total = round((float) ($part->gst_taxable ?? $part->subtotal), 2);
-    $discount = round(max(0, $subtotal - $total), 2);
+    // The shop's own delivery charge (when it delivered the part itself) is part of its sale
+    $delivery = $part->gst_taxable !== null ? $part->shopDeliveryCharge() : 0.0;
+    $discount = round(max(0, $subtotal + $delivery - $total), 2);
     $gst = round((float) $part->gst_amount, 2);
     $rate = T::rate($part->gst_rate);
     $title = $taxInvoice ? 'Tax invoice' : 'Receipt';
@@ -74,12 +76,20 @@
                         <td class="num">{{ Money::format($lineAmount($item)) }}</td>
                     </tr>
                 @endforeach
+                @if($delivery > 0)
+                    <tr data-shop-delivery>
+                        <td>{{ T::label('Delivery') }}</td>
+                        <td class="num">1</td>
+                        <td class="num">{{ Money::format($delivery) }}</td>
+                        <td class="num">{{ Money::format($delivery) }}</td>
+                    </tr>
+                @endif
             </tbody>
         </table>
 
         <table class="totals">
             @if($discount > 0)
-                <tr><td>{{ T::label('Subtotal') }}</td><td class="num">{{ Money::format($subtotal) }}</td></tr>
+                <tr><td>{{ T::label('Subtotal') }}</td><td class="num">{{ Money::format($subtotal + $delivery) }}</td></tr>
                 <tr><td>{{ T::label('Shop discount') }}</td><td class="num">&minus;{{ Money::format($discount) }}</td></tr>
             @endif
             <tr class="grand"><td>{{ T::label($taxInvoice ? 'Total incl. GST' : 'Total') }} (MVR)</td><td class="num">{{ Money::format($total) }}</td></tr>

@@ -26,6 +26,9 @@ class DeliveryController extends Controller
         return view('admin.delivery.index', [
             'rows' => $this->rows($delivery),
             'freeDeliveryOver' => Setting::get('free_delivery_over'),
+            'shopOwnFees' => \App\Models\SellerDeliverySetting::ownFeesAllowed(),
+            'shopFeeMax' => Setting::get('shop_delivery_fee_max'),
+            'shopsWithOwnFees' => \App\Models\SellerDeliverySetting::where('own_fees', true)->count(),
             'slotsEnabled' => filter_var(Setting::get('delivery_slots_enabled', 0), FILTER_VALIDATE_BOOLEAN),
             'slotList' => implode("\n", array_map(fn ($slot) => $slot[0].'-'.$slot[1], $slots->definitions())),
             'daysAhead' => $slots->daysAhead(),
@@ -46,6 +49,8 @@ class DeliveryController extends Controller
             'rates.*.min' => 'nullable|integer|min:0|max:60',
             'rates.*.max' => 'nullable|integer|min:0|max:60',
             'free_delivery_over' => 'required|numeric|min:0|max:1000000',
+            'shop_own_fees_enabled' => 'nullable|boolean',
+            'shop_delivery_fee_max' => 'sometimes|required|numeric|min:0|max:100000',
             'delivery_slots_enabled' => 'nullable|boolean',
             'delivery_slots' => 'nullable|string|max:1000',
             'delivery_slot_days_ahead' => 'required|integer|min:0|max:14',
@@ -56,6 +61,7 @@ class DeliveryController extends Controller
             'rates.*.min' => __('fewest days'),
             'rates.*.max' => __('most days'),
             'free_delivery_over' => __('free delivery over'),
+            'shop_delivery_fee_max' => __('highest shop delivery fee'),
         ]);
 
         $validator->after(function (Validator $validator) use ($request) {
@@ -93,6 +99,14 @@ class DeliveryController extends Controller
                 'delivery_slot_cutoff_hours' => (int) $data['delivery_slot_cutoff_hours'],
                 'delivery_slot_capacity' => (int) $data['delivery_slot_capacity'],
             ];
+
+            // Shops' own fees: only what the form sent (the page always sends both)
+            if (array_key_exists('shop_own_fees_enabled', $data)) {
+                $settings['shop_own_fees_enabled'] = (int) $data['shop_own_fees_enabled'];
+            }
+            if (array_key_exists('shop_delivery_fee_max', $data)) {
+                $settings['shop_delivery_fee_max'] = round((float) $data['shop_delivery_fee_max'], 2);
+            }
 
             foreach ($data['rates'] as $row) {
                 $area = $row['area'];
@@ -184,6 +198,8 @@ class DeliveryController extends Controller
             'free_delivery_over' => $money(Setting::get('free_delivery_over')),
             'fee:greater_male' => $money(Setting::get('delivery_fee_greater_male')),
             'fee:islands' => $money(Setting::get('delivery_fee_islands')),
+            'shop_own_fees' => \App\Models\SellerDeliverySetting::ownFeesAllowed() ? 'on' : 'off',
+            'shop_fee_max' => $money(Setting::get('shop_delivery_fee_max')),
             'slots_enabled' => filter_var(Setting::get('delivery_slots_enabled', 0), FILTER_VALIDATE_BOOLEAN) ? 'on' : 'off',
             'slots' => implode(', ', array_map(fn ($slot) => $slot[0].'-'.$slot[1], $slots->definitions())),
             'slot_days_ahead' => (string) $slots->daysAhead(),

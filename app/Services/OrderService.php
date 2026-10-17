@@ -202,6 +202,7 @@ class OrderService
             'status' => 'pending',
             'total_amount' => $discounts['final_total'] + $shippingData['shipping_amount'],
             'shipping_amount' => $shippingData['shipping_amount'],
+            'delivery_fee_shops' => $shippingData['delivery_fee_shops'] ?? 0,
             'delivery_zone' => $shippingData['delivery_zone'],
             'payment_method' => $shippingData['payment_method'] ?? 'bml',
             'voucher_code' => $voucher ? $voucher->code : null,

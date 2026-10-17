@@ -156,12 +156,12 @@ class GstService
     }
 
     /**
-     * iruali's delivery fee on the order, GST included. Delivery belongs to iruali, not the shops
-     * (PayoutService pays shops their goods less commission only).
+     * iruali's delivery fee on the order, GST included: the order's delivery less what shops that
+     * deliver their own parts charged (delivery_fee_shops; that is their sale, on their invoices).
      */
     public function deliveryFee(Order $order): float
     {
-        return round((float) $order->shipping_amount, 2);
+        return round(max(0, (float) $order->shipping_amount - (float) $order->delivery_fee_shops), 2);
     }
 
     protected function snapshot(SellerOrder $part, ?Order $order): void
@@ -180,8 +180,8 @@ class GstService
         $registered = (bool) ($values['gst_registered'] ?? $part->gst_registered);
         $rate = $values['gst_rate'] ?? $part->gst_rate;
 
-        // Goods after any shop discount: worked out in one place, SellerOrder::taxableGoodsTotal()
-        $taxable = $part->taxableGoodsTotal();
+        // Goods after any shop discount, plus the shop's own delivery charge: SellerOrder::taxableTotal()
+        $taxable = $part->taxableTotal();
         $values += [
             'gst_taxable' => $taxable,
             'gst_amount' => $registered ? self::gstIncluded($taxable, $rate) : 0,

@@ -141,16 +141,22 @@ class ReturnService
     }
 
     /**
-     * The refund we suggest: the items, plus the order's delivery fee when the shop was at fault and
-     * this is the only shop in the order. Admins can change it.
+     * The refund we suggest: the items, plus delivery when the shop was at fault: its own delivery
+     * charge when it delivered the part itself, else the order's delivery fee when it is the only
+     * shop in the order. Admins can change it.
      */
     public function suggestedRefund(ReturnRequest $request): float
     {
         $order = $request->order;
+        $part = $request->sellerOrder;
         $refund = (float) $request->items_value;
 
-        if (in_array($request->reason, ReturnRequest::SHOP_FAULT, true) && $order->sellerOrders()->count() === 1) {
-            $refund += (float) $order->shipping_amount;
+        if (in_array($request->reason, ReturnRequest::SHOP_FAULT, true)) {
+            if ($part?->delivery_fee_to_shop) {
+                $refund += $part->shopDeliveryCharge();
+            } elseif ($order->sellerOrders()->count() === 1) {
+                $refund += (float) $order->shipping_amount;
+            }
         }
 
         return round(min($refund, $this->refundableLeft($request)), 2);
@@ -197,6 +203,8 @@ class ReturnService
                 // The shop gives back its share of what the customer is actually refunded for the items
                 $base = min((float) $refund, (float) $request->items_value);
                 $shopShare = round($base * (1 - (float) $part->commission_rate / 100), 2);
+                // and its own delivery charge refunded beyond the items (no commission was taken on it)
+                $shopShare = round($shopShare + $part->deliveryRefundShare((float) $refund, (float) $request->items_value), 2);
                 if ($shopShare > 0) {
                     SellerAdjustment::create([
                         'seller_id' => $part->seller_id,

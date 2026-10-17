@@ -24,6 +24,12 @@ class SetLocale
             abort(404);
         }
 
+        // Dhivehi switched off: a /dv page sends the visitor to the same page in English (a temporary
+        // redirect, as it may come back on)
+        if (LocalePrefix::active($request) && ! LocalizationService::dhivehiEnabled()) {
+            return redirect()->to(LocaleUrl::alternate('en'), 302);
+        }
+
         // Get locale from various sources
         $locale = $this->getLocale($request);
 

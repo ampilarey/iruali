@@ -70,7 +70,11 @@ class SitemapController extends Controller
             $out = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
                 .'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'."\n";
             foreach ($pages as [$name, $params, $mod, $freq, $prio]) {
-                $locs = ['en' => LocaleUrl::route($name, $params, 'en'), 'dv' => LocaleUrl::route($name, $params, 'dv')];
+                // Each language the site offers now (English only while Dhivehi is switched off)
+                $locs = [];
+                foreach (\App\Services\LocalizationService::getAvailableLocales() as $locale) {
+                    $locs[$locale] = LocaleUrl::route($name, $params, $locale);
+                }
                 $links = '';
                 foreach ($locs + ['x-default' => $locs['en']] as $hreflang => $href) {
                     $links .= '<xhtml:link rel="alternate" hreflang="'.$hreflang.'" href="'.htmlspecialchars($href, ENT_XML1).'"/>';

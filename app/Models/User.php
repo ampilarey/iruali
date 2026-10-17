@@ -440,11 +440,11 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * Emails go out in the user's chosen language (en or dv).
+     * Emails go out in the user's chosen language (en or dv), English while Dhivehi is switched off.
      */
     public function preferredLocale(): ?string
     {
-        return in_array($this->preferred_language, ['en', 'dv'], true) ? $this->preferred_language : null;
+        return in_array($this->preferred_language, ['en', 'dv'], true) ? \App\Services\LocalizationService::usable($this->preferred_language) : null;
     }
 
     /**

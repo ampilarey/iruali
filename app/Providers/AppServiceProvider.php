@@ -54,6 +54,15 @@ class AppServiceProvider extends ServiceProvider
 
         // A guest's cart follows them into their account when they sign in
         \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, fn ($event) => app(CartService::class)->mergeGuestCart($event->user));
+
+        // Dhivehi switched off (Admin → Settings): a notification meant for Dhivehi (a stored alert's
+        // language, say) goes out in English. The sender restores the language after it.
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Notifications\Events\NotificationSending::class, function () {
+            $locale = app()->getLocale();
+            if (\App\Services\LocalizationService::usable($locale) !== $locale) {
+                app()->setLocale(\App\Services\LocalizationService::getFallbackLocale());
+            }
+        });
         // Admin → Sample data keeps finding the generic demo products when admin@example.com is renamed
         User::updated(fn (User $user) => \App\Support\DemoData::rememberRenamedAdmin($user));
 

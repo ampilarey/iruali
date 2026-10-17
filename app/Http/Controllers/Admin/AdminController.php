@@ -314,6 +314,7 @@ class AdminController extends Controller
             'payout_day' => 'sometimes|nullable|string|max:30',
             'late_shipment_days' => 'sometimes|required|integer|min:0|max:60',
             'guest_checkout_enabled' => 'sometimes|boolean',
+            'dhivehi_enabled' => 'sometimes|boolean',
             'analytics_provider' => 'sometimes|required|in:none,plausible,ga4',
             'analytics_id' => ['sometimes', 'nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9_-]+$/'],
             'analytics_domain' => ['sometimes', 'nullable', 'string', 'max:120', 'regex:/^[a-z0-9.-]+$/i'],
@@ -326,8 +327,13 @@ class AdminController extends Controller
             'points_expire_months' => 'sometimes|required|integer|min:0|max:120',
         ]);
 
+        $dhivehiBefore = \App\Services\LocalizationService::dhivehiEnabled();
         Setting::set($validated);
         \App\Support\Audit::record('settings.saved', null, ['keys' => array_keys($validated)]);
+        if (array_key_exists('dhivehi_enabled', $validated) && (bool) $validated['dhivehi_enabled'] !== $dhivehiBefore) {
+            \App\Support\Audit::record('settings.dhivehi', null, ['enabled' => (bool) $validated['dhivehi_enabled']]);
+            \Illuminate\Support\Facades\Cache::forget('sitemap.xml'); // the Dhivehi pages come off (or back on) the sitemap
+        }
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');
     }

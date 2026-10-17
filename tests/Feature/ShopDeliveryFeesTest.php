@@ -259,4 +259,18 @@ class ShopDeliveryFeesTest extends TestCase
             ->assertSee('MVR 140.00')
             ->assertDontSee('Shop discount');
     }
+
+    public function test_policies_explain_shops_own_fees_while_they_are_allowed(): void
+    {
+        Setting::set(['shop_delivery_fee_max' => 200]);
+        $this->get(route('policies.delivery'))->assertOk()
+            ->assertSee('Some shops deliver their orders themselves and set their own delivery fee, up to MVR 200.00.')
+            ->assertSee('Not every shop delivers to every island.');
+        $this->get(route('policies.seller_terms'))->assertOk()
+            ->assertSee('you deliver your parts yourself and are paid your fee and your bulky-item charges with your earnings', false)
+            ->assertDontSee('Delivery fees are set and charged by');
+
+        Setting::set(['shop_own_fees_enabled' => 0]);
+        $this->get(route('policies.delivery'))->assertOk()->assertDontSee('Some shops deliver their orders themselves');
+    }
 }

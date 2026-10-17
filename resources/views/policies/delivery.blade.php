@@ -7,6 +7,7 @@
     $male = (float) Setting::get('delivery_fee_greater_male');
     $islands = (float) Setting::get('delivery_fee_islands');
     $freeOver = (float) Setting::get('free_delivery_over');
+    $shopFees = \App\Models\SellerDeliverySetting::ownFeesAllowed();
 @endphp
 
 @section('policy_key', 'delivery')
@@ -24,11 +25,18 @@
         <li><strong>Free delivery</strong> on orders of {{ Money::format($freeOver) }} or more (after discounts).</li>
     @endif
 </ul>
+@if($shopFees)
+    <p>Some shops deliver their orders themselves and set their own delivery fee, up to {{ Money::format(\App\Models\SellerDeliverySetting::maxFee()) }}. Their fee is charged for their items instead of the fees above, and is shown on their product pages and at checkout. If your order also has items from other shops, the fees above are charged once for those.</p>
+@endif
+<ul>
+    <li><strong>Bulky items:</strong> some large items carry an extra delivery charge per item, shown on the product page. Free delivery does not cover it.</li>
+    <li><strong>Pick up from the shop:</strong> where a shop offers it, you can collect your items from the shop instead, with no delivery fee.</li>
+</ul>
 <p>The exact fee is shown at checkout before you place your order.</p>
 
 <h2>2. Delivery times</h2>
 <ul>
-    <li>Shops usually prepare orders within 1–2 working days.</li>
+    <li>Each shop shows how quickly it usually sends orders; most prepare them within 1–2 working days.</li>
     <li><strong>Greater Malé:</strong> usually 1–3 working days after the order is prepared.</li>
     <li><strong>Other islands:</strong> depends on the ferry, speedboat, cargo boat or flight schedule to your island, usually 3–10 working days.</li>
 </ul>
@@ -37,6 +45,7 @@
 <h2>3. How your order is delivered</h2>
 <ul>
     <li>Orders from different shops may arrive separately.</li>
+    <li>Not every shop delivers to every island. Choose your island on the site to see what can reach you; checkout tells you if a shop can't deliver to your address.</li>
     <li>For other islands, the order is sent by the shop's usual boat or cargo service and handed over at your island's jetty or delivered to your address, depending on the service. The shop or courier will call the phone number on your order to arrange it.</li>
     <li>Large, fragile or perishable items may need a delivery time agreed with you by phone.</li>
 </ul>

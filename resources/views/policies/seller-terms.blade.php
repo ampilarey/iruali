@@ -26,7 +26,7 @@
 <ul>
     <li>{{ $t('Customers pay {trading_name} by card when they order. You pack and send your part of each order and keep its status up to date in the Seller Centre (processing, sent with a tracking note, delivered).') }}</li>
     <li>{{ $t('You must ship within {late_shipment_days} days of the customer\'s payment. Later shipments count as late on your performance record; repeated late shipments can lead to suspension.') }}</li>
-    <li>{{ $t('Delivery fees are set and charged by {trading_name}. You do not charge customers for delivery separately.') }}</li>
+    <li>{{ $t('Delivery fees: unless you set your own, {trading_name}\'s fees apply and {trading_name} keeps them. If you set your own fees (Seller Centre → Settings → Delivery & pickup, up to {trading_name}\'s limit), you deliver your parts yourself and are paid your fee and your bulky-item charges with your earnings, with no commission on them. Never charge customers for delivery outside {trading_name}.') }}</li>
     <li>{{ $t('You choose your home island and where you deliver: all islands, your island and Greater Malé, or your island only, plus any islands you add. Keep it accurate. Customers only see your products as deliverable where you say you deliver, and you must deliver the orders placed for those islands. Pickup from your shop, if you offer it, is open to every customer.') }}</li>
     <li>{{ $t('Once any shop has sent its part, the order can no longer be cancelled; problems are then handled as returns.') }}</li>
 </ul>
@@ -34,13 +34,13 @@
 <h2>3. {{ __('Returns') }}</h2>
 <ul>
     <li>{{ $t('Customers may ask to return items within {return_window_days} days of delivery. {trading_name} reviews each request and decides whether to approve it; you must not refund customers directly.') }}</li>
-    <li>{{ $t('When a return is approved, your share of the returned items (their price less the commission on them) is deducted from your next payout. Delivery fees are not deducted from you.') }}</li>
+    <li>{{ $t('When a return is approved, your share of the returned items (their price less the commission on them) is deducted from your next payout. If you delivered the part at your own fee and the customer is refunded for delivery, that charge is deducted too. {trading_name}\'s own delivery fees are never deducted from you.') }}</li>
 </ul>
 
 <h2>4. {{ __('Commission') }}</h2>
 <ul>
     <li>{{ $t('{trading_name} keeps a commission of {commission_rate} of the item price of everything you sell, unless a different rate has been agreed for your shop in writing. The rate in force when an order is placed applies to that order.') }}</li>
-    <li>{{ $t('Your earnings on an order are its item subtotal less commission. Vouchers, loyalty points and delivery fees are {trading_name}\'s and do not change your earnings.') }}</li>
+    <li>{{ $t('Your earnings on an order are its item subtotal less your discounts and commission, plus your own delivery charge when you deliver the part at your own fee. Vouchers, loyalty points and {trading_name}\'s delivery fees are {trading_name}\'s and do not change your earnings.') }}</li>
 </ul>
 
 <h2>5. {{ __('Payouts') }}</h2>

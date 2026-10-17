@@ -47,7 +47,9 @@ class BrandController extends Controller
 
         // The layout's SEO tags and language links read the brand from the route
         $request->route()->setParameter('brand', $model);
-        $shops = $this->brands->shops($model);
+        // Its shops and departments follow the shopper's island, like the products listed
+        $shopping = app(\App\Services\ShoppingIsland::class);
+        $shops = $this->brands->shops($model, 8, $shopping->filterIsland(), $shopping->view());
 
         return view('catalog.index', $catalog->listing($request, ['brand' => $model]) + [
             'title' => $model->localizedName(),
@@ -56,7 +58,7 @@ class BrandController extends Controller
             'brand' => $model,
             'brandShops' => $shops['shops'],
             'brandShopCount' => $shops['total'],
-            'brandDepartments' => $this->brands->departments($model),
+            'brandDepartments' => $this->brands->departments($model, 8, $shopping->filterIsland(), $shopping->view()),
             // Follow / Following (brands._follow) and, once there are a few, how many follow it
             'brandFollowers' => $model->followers()->count(),
             'brandFollowing' => $request->user() !== null && $request->user()->followedBrands()->whereKey($model->id)->exists(),

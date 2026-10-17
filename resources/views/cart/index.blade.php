@@ -7,6 +7,7 @@
     $subtotal = (float) $cart->total;
     $total = max(0, $subtotal - (float) ($shopDeals['amount'] ?? 0) - (float) $discount);
     $units = (int) $items->sum('quantity');
+    $undeliverable = $deliveryIsland ? $items->filter(fn ($i) => $i->product->seller_id && in_array((int) $i->product->seller_id, $blockedSellers, true)) : collect();
 @endphp
 
 @section('content')
@@ -30,6 +31,11 @@
             </div>
         @else
             @include('cart._holiday_notice', ['cart' => $cart])
+            @if($undeliverable->isNotEmpty())
+                <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-island-cart-notice>
+                    {{ trans_choice(':count item in your cart can\'t be delivered to :island. Collect it from the shop if it offers pickup, remove it, or change the island you\'re delivering to.|:count items in your cart can\'t be delivered to :island. Collect them from the shop if it offers pickup, remove them, or change the island you\'re delivering to.', $undeliverable->count(), ['count' => $undeliverable->count(), 'island' => $deliveryIsland->localized_name]) }}
+                </div>
+            @endif
             <div class="grid lg:grid-cols-[1fr_22rem] gap-5 lg:gap-6 items-start">
                 <section class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-200" aria-label="{{ __('Items in your cart') }}">
                     @foreach($items as $item)
@@ -45,6 +51,9 @@
                                     @if($item->variant)<p class="text-sm text-gray-600">{{ $item->variant->displayNameWithKeys() }}@if($item->variant->sku) <span class="text-xs text-gray-400" dir="ltr">({{ $item->variant->sku }})</span>@endif</p>@endif
                                     @if($seller)<p class="text-xs text-gray-500 mt-0.5">{{ __('Sold by') }} {{ $seller->business_name ?: $seller->name }}</p>@endif
                                     @include('cart._holiday_item', ['seller' => $seller])
+                                    @if($undeliverable->contains($item))
+                                        <p class="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800" data-island-item>{{ __('Doesn\'t deliver to :island', ['island' => $deliveryIsland->localized_name]) }}</p>
+                                    @endif
                                     @include('cart._delivery_surcharge', ['product' => $product])
                                     @include('cart._preorder_item', ['item' => $item])
                                     <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

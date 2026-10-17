@@ -11,8 +11,11 @@ class CategoryController extends Controller
 {
     public function index()
     {
+        // Counts follow the shopper's island ("Delivering to"), like the listings do
+        $shopping = app(\App\Services\ShoppingIsland::class);
+        $coverage = app(\App\Services\ShopCoverage::class);
         $categories = Category::active()->root()
-            ->withCount(['products' => fn ($q) => $q->active()])
+            ->withCount(['products' => fn ($q) => $coverage->apply($q->active(), $shopping->filterIsland(), $shopping->view())])
             ->with(['children' => fn ($q) => $q->active()])
             ->get()
             ->sortBy(fn ($c) => $c->localized_name)

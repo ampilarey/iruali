@@ -47,6 +47,9 @@ class CartController extends Controller
             'shopDeals' => $cartSummary['shop_deals'] + ['voucher_error' => $cartSummary['voucher_error']],
             'saved' => $saved,
             'freeOver' => (float) Setting::get('free_delivery_over'),
+            // Items whose shop doesn't deliver to the shopper's island are flagged before checkout
+            'deliveryIsland' => $island = app(\App\Services\ShoppingIsland::class)->island(),
+            'blockedSellers' => $island ? app(\App\Services\ShopCoverage::class)->blockedSellerIds($island) : [],
         ]);
     }
 

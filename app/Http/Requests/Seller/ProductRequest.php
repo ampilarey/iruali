@@ -71,7 +71,8 @@ class ProductRequest extends FormRequest
             // An image uploaded with an edit still waiting for review, sent back by the form (ProductReviewService keeps only that edit's own files)
             'variants.*.staged_image' => 'nullable|string|max:255',
         ] + \App\Services\MultiBuyService::formRules()
-          + \App\Services\PreorderService::formRules();
+          + \App\Services\PreorderService::formRules()
+          + \App\Services\ComingSoonService::formRules();
     }
 
     public function attributes(): array
@@ -202,7 +203,18 @@ class ProductRequest extends FormRequest
      */
     public function messages(): array
     {
-        return \App\Services\PreorderService::formMessages();
+        return \App\Services\PreorderService::formMessages() + \App\Services\ComingSoonService::formMessages();
+    }
+
+    /**
+     * The "Coming soon" fieldset's columns, or nothing when the form did not have it
+     * (ComingSoonService::attributesFromForm()).
+     *
+     * @return array{coming_soon?: bool, available_on?: ?string}
+     */
+    public function comingSoonAttributes(): array
+    {
+        return app(\App\Services\ComingSoonService::class)->attributesFromForm($this->validated());
     }
 
     /**

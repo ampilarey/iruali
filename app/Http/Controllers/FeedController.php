@@ -72,7 +72,8 @@ class FeedController extends Controller
                 ];
                 $name = $product->getTranslation('name', 'en', false) ?: $product->getTranslation('name', 'dv', false);
                 // A shop on holiday takes no orders: its products are listed as out of stock until it is back
-                $onHoliday = (bool) $product->seller?->isOnHoliday();
+                // A shop on holiday, or a product "coming soon": nothing can be ordered now
+                $onHoliday = (bool) $product->seller?->isOnHoliday() || $product->isComingSoon();
 
                 $variants = $product->has_variants ? $product->variants->filter(fn ($v) => $v->attributes_list !== []) : collect();
                 if ($variants->isNotEmpty()) {

@@ -42,7 +42,7 @@ class ProductReviewService
     public const REVIEWED = [
         'name', 'description', 'sku', 'category_id', 'price', 'compare_price', 'sale_price', 'flash_sale_ends_at',
         'has_variants', 'brand', 'weight', 'delivery_surcharge', 'video_provider', 'video_id',
-        'preorder_enabled', 'preorder_ship_date', 'preorder_limit', 'preorder_note', 'quote_min_quantity',
+        'preorder_enabled', 'preorder_ship_date', 'preorder_limit', 'preorder_note', 'preorder_closes_on', 'quote_min_quantity',
     ];
 
     /** The variant fields a change to which needs review (stock and its alert level do not). */
@@ -146,12 +146,13 @@ class ProductReviewService
      */
     protected function applyFormStock(Product $product, array $form): void
     {
-        $attributes = Arr::only($form['product'], ['reorder_point']);
+        // "Coming soon" and its launch day apply at once too (ComingSoonService)
+        $attributes = Arr::only($form['product'], ['reorder_point']) + ($form['launch'] ?? []);
         if (! $product->has_variants && array_key_exists('stock_quantity', $form['product'])) {
             $attributes['stock_quantity'] = (int) $form['product']['stock_quantity'];
         }
         if ($attributes) {
-            $product->update($attributes);
+            $product->forceFill($attributes)->save(); // coming_soon and available_on are not mass-assignable
         }
 
         $variants = $product->variants()->get()->keyBy('id');
@@ -343,6 +344,7 @@ class ProductReviewService
             'preorder_ship_date' => $product->preorder_ship_date?->toDateString(),
             'preorder_limit' => $product->preorder_limit !== null ? (int) $product->preorder_limit : null,
             'preorder_note' => filled($product->getAttribute('preorder_note')) ? (string) $product->getAttribute('preorder_note') : null,
+            'preorder_closes_on' => $product->preorder_closes_on?->toDateString(),
             'quote_min_quantity' => $product->getAttribute('quote_min_quantity') !== null ? (int) $product->getAttribute('quote_min_quantity') : null,
         ];
     }
@@ -700,7 +702,9 @@ class ProductReviewService
         };
         $video = fn ($cols) => ($cols['video_provider'] ?? null) ? \App\Support\ProductVideo::make($cols['video_provider'], $cols['video_id'] ?? null)?->watchUrl() : null;
         $preorder = fn ($cols) => ! empty($cols['preorder_enabled'])
-            ? __('On: ships around :date, up to :limit units', ['date' => $cols['preorder_ship_date'] ?? '—', 'limit' => $cols['preorder_limit'] ?? '—']).(! empty($cols['preorder_note']) ? ' – '.$cols['preorder_note'] : '')
+            ? __('On: ships around :date, up to :limit units', ['date' => $cols['preorder_ship_date'] ?? '—', 'limit' => $cols['preorder_limit'] ?? '—'])
+                .(! empty($cols['preorder_closes_on']) ? ', '.__('closes :date', ['date' => $cols['preorder_closes_on']]) : '')
+                .(! empty($cols['preorder_note']) ? ' – '.$cols['preorder_note'] : '')
             : __('Off');
 
         $add(__('Name (English)'), $before['name']['en'] ?? null, $after['name']['en'] ?? null);

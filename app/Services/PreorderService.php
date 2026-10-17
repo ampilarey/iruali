@@ -74,6 +74,7 @@ class PreorderService
             'preorder_ship_date' => [$on, 'required', 'date', 'after:today', 'before_or_equal:'.today()->addYear()->toDateString()],
             'preorder_limit' => [$on, 'required', 'integer', 'min:1', 'max:'.self::MAX_LIMIT],
             'preorder_note' => [$on, 'nullable', 'string', 'max:255'],
+            'preorder_closes_on' => [$on, 'nullable', 'date', 'after_or_equal:today', 'before_or_equal:preorder_ship_date'],
         ];
     }
 
@@ -89,6 +90,8 @@ class PreorderService
             'preorder_ship_date.before_or_equal' => __('Choose an expected ship date within the next year.'),
             'preorder_limit.required' => __('Give the most units you will take as pre-orders.'),
             'preorder_limit.min' => __('Take at least 1 unit as a pre-order.'),
+            'preorder_closes_on.after_or_equal' => __('The last day for pre-orders can\'t be in the past.'),
+            'preorder_closes_on.before_or_equal' => __('Pre-orders must close on or before the expected ship date.'),
         ];
     }
 
@@ -115,6 +118,7 @@ class PreorderService
             'preorder_ship_date' => $data['preorder_ship_date'],
             'preorder_limit' => (int) $data['preorder_limit'],
             'preorder_note' => $note !== '' ? $note : null,
+            'preorder_closes_on' => filled($data['preorder_closes_on'] ?? null) ? $data['preorder_closes_on'] : null,
         ];
     }
 
@@ -122,18 +126,22 @@ class PreorderService
 
     /**
      * The product takes pre-orders now, whatever its stock: switched on, an expected date from
-     * today on, a limit, and on sale. A shop on holiday is refused where every order is
-     * (CartService::addToCart(), OrderService) and productOffer() shows nothing for it.
+     * today on, its last day for pre-orders (if any) not passed, a limit, on sale and not "coming
+     * soon". A shop on holiday is refused where every order is (CartService::addToCart(),
+     * OrderService) and productOffer() shows nothing for it.
      */
     public function accepting(Product $product): bool
     {
         $date = $product->preorder_ship_date;
+        $closes = $product->preorder_closes_on;
 
         return (bool) $product->preorder_enabled
             && (bool) $product->is_active
             && (int) $product->preorder_limit > 0
             && $date !== null
-            && ! $date->isBefore(today());
+            && ! $date->isBefore(today())
+            && ($closes === null || ! $closes->isBefore(today()))
+            && ! $product->isComingSoon();
     }
 
     /**
@@ -170,7 +178,7 @@ class PreorderService
      * holiday, units left) and the product, or at least one of its options, is out of stock.
      * "whole" is true when the product itself is out of stock (else only some options are).
      *
-     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool}|null
+     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface}|null
      */
     public function productOffer(Product $product): ?array
     {
@@ -186,7 +194,7 @@ class PreorderService
 
         $left = $this->unitsLeft($product);
 
-        return $left > 0 ? ['date' => $date, 'note' => $product->preorder_note, 'left' => $left, 'whole' => $whole] : null;
+        return $left > 0 ? ['date' => $date, 'note' => $product->preorder_note, 'left' => $left, 'whole' => $whole, 'closes' => $product->preorder_closes_on] : null;
     }
 
     /**

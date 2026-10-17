@@ -16,7 +16,7 @@
         </span>
     </label>
 
-    <div class="mt-3 grid gap-4 sm:grid-cols-3 {{ $preorderOn ? '' : 'opacity-60' }}" data-preorder-fields>
+    <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 {{ $preorderOn ? '' : 'opacity-60' }}" data-preorder-fields>
         <div>
             <label for="preorder_ship_date" class="block text-sm font-medium text-gray-700">{{ __('Expected ship date') }} *</label>
             <input id="preorder_ship_date" name="preorder_ship_date" type="date" min="{{ today()->addDay()->toDateString() }}" dir="ltr" class="{{ $field }}" value="{{ old('preorder_ship_date', $product->preorder_ship_date?->toDateString()) }}" aria-describedby="preorder_ship_date-hint">
@@ -28,6 +28,12 @@
             <input id="preorder_limit" name="preorder_limit" type="number" min="1" max="{{ \App\Services\PreorderService::MAX_LIMIT }}" step="1" dir="ltr" class="{{ $field }}" value="{{ old('preorder_limit', $product->preorder_limit) }}" aria-describedby="preorder_limit-hint">
             <p id="preorder_limit-hint" class="mt-1 text-xs text-gray-500">{{ __('Units waiting for stock at any one time, counted across all the options.') }}</p>
             @error('preorder_limit')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
+        <div>
+            <label for="preorder_closes_on" class="block text-sm font-medium text-gray-700">{{ __('Last day to pre-order') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
+            <input id="preorder_closes_on" name="preorder_closes_on" type="date" min="{{ today()->toDateString() }}" dir="ltr" class="{{ $field }}" value="{{ old('preorder_closes_on', $product->preorder_closes_on?->toDateString()) }}" aria-describedby="preorder_closes_on-hint">
+            <p id="preorder_closes_on-hint" class="mt-1 text-xs text-gray-500">{{ __('Stop taking pre-orders after this day, for example when you place your order with your supplier. Empty: until the ship date.') }}</p>
+            @error('preorder_closes_on')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
             <label for="preorder_note" class="block text-sm font-medium text-gray-700">{{ __('Note for shoppers') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>

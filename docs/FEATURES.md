@@ -287,6 +287,23 @@ morning `preorders:flag-late` flags pre-orders more than 7 days past their date:
 in Admin → Inbox, listed at `/admin/preorders`. Feeds say `preorder` with `availability_date`
 (Google) and `in stock` (Meta only takes in/out of stock), the JSON-LD `https://schema.org/PreOrder`.
 A part's days to ship (late shipments, "not delivered" disputes) count from when its stock arrived.
+An optional **last day to pre-order** (`preorder_closes_on`, on or before the ship date) stops new
+pre-orders after it, for example when the shop places its own order with its supplier. Cards and
+listings say "Pre-order · ships around 10 Nov" (`<x-stock :product>`) with a "Pre-order" button to
+the product page; the shop filter has **Pre-order** (`?preorder=1`, `Product::scopePreorderable()`:
+open now with units left) and the home page a "Pre-order now" row.
+
+**Coming soon.** A shop can list a product before it goes on sale: the product form's "Coming soon"
+fieldset (`products.coming_soon`, optional launch day `available_on`). It shows with a "Coming soon"
+label ("Coming 1 Nov" on cards, "on sale from …" on its page) but can't be added to a cart or
+ordered (`ProductComingSoonException`, `OrderService`), takes no pre-orders, and gives no back-in-stock
+emails; shoppers leave their email for "Email me when it goes on sale" (`stock_alerts.for_launch`).
+It goes on sale when the shop unticks it, or by itself on its launch day (`Product::isComingSoon()`
+turns false that day; `products:launch` runs at 00:05 Maldives time and clears the flag). Going on
+sale emails those who asked (`NowOnSale`), or, if it has no stock then, when its stock arrives.
+Switching it applies at once, like stock, without a product review. The shop filter has **Coming
+soon** (`?coming_soon=1`), the home page a "Coming soon" row; other home rows leave these products
+out. Feeds say `out_of_stock`, the JSON-LD `OutOfStock` with `availabilityStarts` set to the launch day.
 
 **Orders and fulfilment.** `/seller/orders` lists the shop's parts of orders; `/seller/orders/{order}`
 moves a part through pending → processing → shipped → out for delivery → delivered

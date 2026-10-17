@@ -55,6 +55,10 @@ class OrderService
             if ($product->seller?->isOnHoliday()) {
                 return ['success' => false, 'message' => \App\Support\ShopHoliday::cartMessage($product)];
             }
+            // "Coming soon": in the cart from before it was switched on; it can't be ordered yet
+            if ($product->isComingSoon()) {
+                return ['success' => false, 'message' => \App\Exceptions\ProductComingSoonException::messageFor($product)];
+            }
             // A product sold in variants must be bought as one of them; stock is then the variant's
             if ($product->has_variants && (! $cartItem->variant || ! $cartItem->variant->is_active)) {
                 return ['success' => false, 'message' => __('":name" needs an option (size, colour...) chosen. Please add it to your cart again.', ['name' => $product->name['en'] ?? $product->name])];

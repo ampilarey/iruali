@@ -23,12 +23,14 @@ class StockAlertController extends Controller
             abort_unless($variantId, 404);
         }
 
+        // A "coming soon" product: the email goes when it goes on sale (ComingSoonService)
+        $launch = $product->isComingSoon();
         StockAlert::updateOrCreate(
-            ['product_id' => $product->id, 'product_variant_id' => $variantId, 'email' => mb_strtolower($data['email'])],
-            ['user_id' => $request->user()?->id, 'locale' => app()->getLocale(), 'notified_at' => null]
+            ['product_id' => $product->id, 'product_variant_id' => $launch ? null : $variantId, 'email' => mb_strtolower($data['email'])],
+            ['user_id' => $request->user()?->id, 'locale' => app()->getLocale(), 'for_launch' => $launch, 'notified_at' => null]
         );
 
-        NotificationService::success(__('We will email you when it is back in stock.'));
+        NotificationService::success($launch ? __('We will email you when it goes on sale.') : __('We will email you when it is back in stock.'));
 
         return redirect(route('products.show', $product));
     }

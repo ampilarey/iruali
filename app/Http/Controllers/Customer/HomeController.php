@@ -17,10 +17,12 @@ class HomeController extends Controller
         $island = $shopping->filterIsland();
         $view = $shopping->view();
 
-        $cards = fn () => $coverage->apply(Product::query(), $island, $view)->active()->inStock()
+        // Every listed product (with what its card needs); the rows below are what can be bought now
+        $listed = fn () => $coverage->apply(Product::query(), $island, $view)->active()
             ->with(['category', 'mainImage', 'seller', 'brandModel'])
             ->withCount(['reviews as rating_count' => fn ($r) => $r->where('is_approved', true)])
             ->withAvg(['reviews as rating_avg' => fn ($r) => $r->where('is_approved', true)], 'rating');
+        $cards = fn () => $listed()->inStock()->notComingSoon();
 
         $deals = $cards()->onSale()->orderByRaw('(compare_price - price) / compare_price DESC')->take(10)->get();
 
@@ -60,6 +62,10 @@ class HomeController extends Controller
         $chosen = $shopping->island();
         $localShops = $chosen ? $coverage->localShops($chosen) : collect();
 
-        return view('home', compact('deals', 'featured', 'newArrivals', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns', 'chosen', 'localShops'));
+        // "Pre-order now" (soonest to ship first) and "Coming soon" (soonest launch first, undated last)
+        $preorders = $listed()->preorderable()->orderBy('preorder_ship_date')->take(10)->get();
+        $comingSoon = $listed()->comingSoon()->orderByRaw('available_on IS NULL')->orderBy('available_on')->latest()->take(10)->get();
+
+        return view('home', compact('deals', 'featured', 'newArrivals', 'preorders', 'comingSoon', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns', 'chosen', 'localShops'));
     }
 }

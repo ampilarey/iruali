@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Storage;
  *   multibuy   the multi-buy fieldset, or null when the form did not have it
  *   main_image an upload, the path of a file already stored, or null to keep the image
  *
- * @phpstan-type Form array{product: array<string, mixed>, extra: array<string, mixed>, variants: list<array<string, mixed>>, multibuy: array<string, mixed>|null, main_image: UploadedFile|string|null}
+ * @phpstan-type Form array{product: array<string, mixed>, extra: array<string, mixed>, variants: list<array<string, mixed>>, multibuy: array<string, mixed>|null, main_image: UploadedFile|string|null, launch?: array<string, mixed>}
  */
 class ProductEditService
 {
@@ -42,6 +42,7 @@ class ProductEditService
             'variants' => array_values($request->variantRows()),
             'multibuy' => $request->has('multibuy') ? (array) ($request->validated()['multibuy'] ?? []) : null,
             'main_image' => $file instanceof UploadedFile ? $file : null,
+            'launch' => $request->comingSoonAttributes(), // "coming soon": applied at once, never reviewed
         ];
     }
 
@@ -58,6 +59,7 @@ class ProductEditService
             $product->stock_quantity = 0; // set from the variants below
         }
         $product->forceFill($form['extra']); // video link, pre-orders (a new date emails waiting customers), quote minimum
+        $product->forceFill($form['launch'] ?? []); // "coming soon" and its launch day
         $product->save();
 
         $this->storeImage($product, $form['main_image']);

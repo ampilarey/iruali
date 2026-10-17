@@ -16,7 +16,9 @@ class StockAlertService
      */
     public function productRestocked(Product $product): void
     {
-        $this->notify(StockAlert::where('product_id', $product->id)->whereNull('product_variant_id')->whereNull('notified_at')->get(), $product, null);
+        $this->notify(StockAlert::where('product_id', $product->id)->whereNull('product_variant_id')->where('for_launch', false)->whereNull('notified_at')->get(), $product, null);
+        // Shoppers who asked about it while it was "coming soon" hear that it is on sale
+        app(ComingSoonService::class)->notify($product);
     }
 
     /**

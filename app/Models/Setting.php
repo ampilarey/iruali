@@ -17,6 +17,8 @@ class Setting extends Model
         'announcement_text' => 'Shop local sellers from every island, delivered across the Maldives.',
         // The Dhivehi side of the site (language button, /dv pages, Dhivehi emails); off: English only
         'dhivehi_enabled' => 1,
+        // Admin staff must use two-step sign-in before opening /admin (also needs STAFF_REQUIRE_2FA on)
+        'staff_require_two_factor' => 1,
         'contact_email' => '',
         'contact_phone' => '',
         // Business details BML asks to see on the website (policies, footer, checkout)

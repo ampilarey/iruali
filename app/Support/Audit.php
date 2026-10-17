@@ -65,6 +65,7 @@ class Audit
         'shop_staff.role_changed' => 'Shop staff role changed',
         'shop_staff.removed' => 'Shop staff removed',
         'shop_staff.two_factor' => 'Shop staff two-step sign-in rule changed',
+        'settings.staff_two_factor' => 'Admin staff two-step sign-in rule changed',
         'shop.staff_action' => 'Change made by shop staff',
         'preorder.stock_arrived' => 'Pre-order stock arrived',
         'preorder.date_moved' => 'Pre-order date moved',

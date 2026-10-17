@@ -315,6 +315,7 @@ class AdminController extends Controller
             'late_shipment_days' => 'sometimes|required|integer|min:0|max:60',
             'guest_checkout_enabled' => 'sometimes|boolean',
             'dhivehi_enabled' => 'sometimes|boolean',
+            'staff_require_two_factor' => 'sometimes|boolean',
             'payment_card_enabled' => 'sometimes|boolean',
             'payment_transfer_enabled' => 'sometimes|boolean',
             'transfer_bank_name' => 'sometimes|nullable|string|max:100',
@@ -338,11 +339,16 @@ class AdminController extends Controller
         ]);
 
         $dhivehiBefore = \App\Services\LocalizationService::dhivehiEnabled();
+        $twoFactorBefore = filter_var(Setting::get('staff_require_two_factor', 1), FILTER_VALIDATE_BOOLEAN);
         Setting::set($validated);
         \App\Support\Audit::record('settings.saved', null, ['keys' => array_keys($validated)]);
         if (array_key_exists('dhivehi_enabled', $validated) && (bool) $validated['dhivehi_enabled'] !== $dhivehiBefore) {
             \App\Support\Audit::record('settings.dhivehi', null, ['enabled' => (bool) $validated['dhivehi_enabled']]);
             \Illuminate\Support\Facades\Cache::forget('sitemap.xml'); // the Dhivehi pages come off (or back on) the sitemap
+        }
+
+        if (array_key_exists('staff_require_two_factor', $validated) && (bool) $validated['staff_require_two_factor'] !== $twoFactorBefore) {
+            \App\Support\Audit::record('settings.staff_two_factor', null, ['required' => (bool) $validated['staff_require_two_factor']]);
         }
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');

@@ -68,6 +68,16 @@
                             </span>
                         </label>
                     </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3" data-staff-2fa-setting>
+                        <input type="hidden" name="staff_require_two_factor" value="0">
+                        <label class="flex items-start gap-3 text-sm text-gray-800">
+                            <input type="checkbox" name="staff_require_two_factor" value="1" @checked(old('staff_require_two_factor', $settings['staff_require_two_factor'] ?? 1)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                            <span>
+                                <span class="font-medium">Staff must use two-step sign-in</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">On: admin, support, finance and catalogue staff must set up an authenticator app code before they can open the admin area. Off: it is optional. Anyone who already uses it is still asked for the code; they can turn it off for themselves in My Account → Security. Keeping it on is safer once the shop is live.</span>
+                            </span>
+                        </label>
+                    </div>
                     <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <input type="hidden" name="guest_checkout_enabled" value="0">
                         <label class="flex items-start gap-3 text-sm text-gray-800">

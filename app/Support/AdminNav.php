@@ -28,6 +28,7 @@ class AdminNav
                 ['admin.orders', 'Orders', 'box'],
                 ['admin.returns', 'Returns', 'return'],
                 ['admin.disputes', 'Disputes', 'shield'],
+                ['admin.complaints', 'Complaints', 'help'],
                 ['admin.preorders', 'Pre-orders', 'clock'],
                 ['admin.quotes', 'Bulk quotes', 'list'],
                 ['admin.messages', 'Messages', 'chat'],

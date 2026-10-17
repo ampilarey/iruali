@@ -38,6 +38,7 @@ return [
             'admin.newsletter', 'admin.newsletter.*',
             'admin.users', 'admin.customers.show', 'admin.customers.tags', 'admin.customers.notes',
             'admin.disputes', 'admin.disputes.*',
+            'admin.complaints', 'admin.complaints.*',
             'admin.quotes', 'admin.quotes.*', // bulk quotes: follow up shops, write in a request, close it
             'admin.messages', 'admin.messages.*',
             // SMS log, test sends and resends; the switches, limit and wordings are for admins

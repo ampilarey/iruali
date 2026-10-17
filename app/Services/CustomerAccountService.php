@@ -24,7 +24,7 @@ class CustomerAccountService
         ['product_reviews', 'user_id'], ['quote_messages', 'sender_id'], ['quote_requests', 'customer_id'],
         ['return_requests', 'user_id'], ['shop_discount_redemptions', 'user_id'], ['stock_alerts', 'user_id'],
         ['vouchers', 'user_id'], ['newsletter_deliveries', 'user_id'], ['social_accounts', 'user_id'],
-        ['customer_notes', 'user_id'],
+        ['customer_notes', 'user_id'], ['complaints', 'user_id'], ['order_feedback', 'user_id'],
     ];
 
     /** Tables with one row per customer and thing: [table, column, other key]. */
@@ -134,6 +134,8 @@ class CustomerAccountService
             }
             DB::table('stock_alerts')->where('user_id', $user->id)->orWhere('email', $email)->delete();
             DB::table('newsletter_subscribers')->where('email', $email)->delete();
+            DB::table('complaints')->where('user_id', $user->id)->orWhere('email', $email)
+                ->update(['name' => 'Erased customer', 'email' => 'erased-'.$user->id.'@iruali.invalid', 'phone' => null]);
             DB::table('personal_access_tokens')->where('tokenable_type', User::class)->where('tokenable_id', $user->id)->delete();
 
             Order::where('user_id', $user->id)->update([

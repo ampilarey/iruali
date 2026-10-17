@@ -85,3 +85,7 @@ Schedule::command('preorders:flag-late')->dailyAt('06:45')->timezone('Indian/Mal
 
 // "Coming soon" products whose launch day has come go on sale, and those who asked are emailed
 Schedule::command('products:launch')->dailyAt('00:05')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// Complaints left open without an update go to the team daily; a complaints and ratings summary on Mondays
+Schedule::command('complaints:remind')->dailyAt('09:15')->timezone('Indian/Maldives')->withoutOverlapping();
+Schedule::command('complaints:weekly-summary')->weeklyOn(1, '08:15')->timezone('Indian/Maldives');

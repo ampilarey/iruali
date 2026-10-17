@@ -376,6 +376,7 @@
                     <li><a href="{{ route('policies.delivery') }}" class="hover:text-white">{{ __('Delivery Policy') }}</a></li>
                     <li><a href="{{ route('policies.refunds') }}" class="hover:text-white">{{ __('Returns, Refunds & Cancellations') }}</a></li>
                     <li><a href="{{ route('policies.about') }}" class="hover:text-white">{{ __('About & Contact') }}</a></li>
+                    <li><a href="{{ route('complaints.create') }}" class="hover:text-white">{{ __('Make a complaint') }}</a></li>
                 </ul>
             </div>
             <div>

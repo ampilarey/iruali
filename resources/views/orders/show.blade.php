@@ -114,6 +114,7 @@
                     @endif
                 </div>
                 @include('orders._delivery_details', ['order' => $order])
+                @include('feedback._order_card', ['order' => $order])
             </div>
         </div>
 

@@ -170,6 +170,11 @@
             </form>
         </div>
 
+        <!-- Delivering to <island> (storefront pages) -->
+        @unless(request()->routeIs('admin.*', 'seller.*'))
+            @include('partials.shopping-island')
+        @endunless
+
         <!-- Department bar (desktop) -->
         <nav class="hidden lg:block bg-primary text-white" aria-label="{{ __('Departments') }}">
             <div class="max-w-7xl mx-auto px-6 flex items-center h-11 text-sm font-medium">

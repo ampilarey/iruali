@@ -53,6 +53,7 @@
                                     <form action="{{ route('compare.toggle', $product) }}" method="POST" class="text-end">@csrf<button type="submit" class="text-gray-400 hover:text-danger" aria-label="{{ __('Remove') }}"><x-icon name="x" class="w-5 h-5" /></button></form>
                                     <a href="{{ route('products.show', $product) }}" class="block aspect-square rounded-lg overflow-hidden bg-primary-50 mb-3"><img src="{{ $product->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="{{ $product->name }}" class="w-full h-full object-cover"></a>
                                     <a href="{{ route('products.show', $product) }}" class="font-semibold text-dark hover:text-primary hover:underline line-clamp-3">{{ $product->name }}</a>
+                                    @include('products._island_label', ['product' => $product, 'class' => 'mt-2'])
                                     <x-add-to-cart :product="$product" class="mt-3" small />
                                 </td>
                             @endforeach

@@ -96,16 +96,15 @@
             <div id="delivery" class="border-t border-gray-100 pt-4">
                 <h2 class="text-base font-semibold text-gray-900">{{ __('Delivery options') }}</h2>
                 <p class="text-sm text-gray-500">{{ __('Tell customers how you send orders: boat or flight to other islands, courier in Malé, pick-up, and how long it usually takes.') }}</p>
+                @if(! $user->home_island_id)
+                    <p class="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800" data-home-island-missing>{{ __('Choose your home island and where you deliver, so customers on each island see the right products.') }}</p>
+                @endif
                 <div class="mt-3 space-y-3">
                     <div>
                         <label for="delivery_notes" class="block text-sm font-medium text-gray-700">{{ __('How you deliver') }}</label>
                         <textarea id="delivery_notes" name="delivery_notes" rows="3" maxlength="1000" class="{{ $field }}">{{ old('delivery_notes', $user->delivery_notes) }}</textarea>
                     </div>
-                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                        <input type="hidden" name="ships_to_islands" value="0">
-                        <input type="checkbox" name="ships_to_islands" value="1" class="rounded border-gray-300" @checked(old('ships_to_islands', $user->ships_to_islands ?? true))>
-                        {{ __('I ship to other islands (not only my own island)') }}
-                    </label>
+                    @include('seller.partials.coverage-fields', ['shop' => $user, 'islandsByAtoll' => $islandsByAtoll, 'homeRequired' => false, 'prefix' => 'profile'])
                 </div>
             </div>
 

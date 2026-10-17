@@ -87,6 +87,7 @@ class Address extends Model
             'shipping_country' => $this->country ?: 'Maldives',
             'shipping_phone' => $this->phone,
             'delivery_zone' => $this->deliveryZone(),
+            'island_id' => $this->island_id,
         ];
     }
 

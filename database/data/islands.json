@@ -1,0 +1,2072 @@
+[
+    {
+        "salat_id": 1,
+        "name_en": "Thurakunu",
+        "name_dv": "ތުރާކުނު",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 7.103806,
+        "lng": 72.898976,
+        "active": 1
+    },
+    {
+        "salat_id": 2,
+        "name_en": "Uligamu",
+        "name_dv": "އުލިގަމު",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 7.084028,
+        "lng": 72.926216,
+        "active": 1
+    },
+    {
+        "salat_id": 3,
+        "name_en": "Berinmadhoo",
+        "name_dv": "ބެރިންމަދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 4,
+        "name_en": "Hathifushi",
+        "name_dv": "ހަތިފުށި",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 5,
+        "name_en": "Mulhadhoo",
+        "name_dv": "މުޅަދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 7.013668,
+        "lng": 72.997284,
+        "active": 1
+    },
+    {
+        "salat_id": 6,
+        "name_en": "Hoarafushi",
+        "name_dv": "ހޯރަފުށި",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.981879,
+        "lng": 72.896653,
+        "active": 1
+    },
+    {
+        "salat_id": 7,
+        "name_en": "Ihavandhoo",
+        "name_dv": "އިހަވަންދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.953145,
+        "lng": 72.926103,
+        "active": 1
+    },
+    {
+        "salat_id": 8,
+        "name_en": "Kelaa",
+        "name_dv": "ކެލާ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.957312,
+        "lng": 73.216152,
+        "active": 1
+    },
+    {
+        "salat_id": 9,
+        "name_en": "Vashafaru",
+        "name_dv": "ވަށަފަރު",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.897883,
+        "lng": 73.162744,
+        "active": 1
+    },
+    {
+        "salat_id": 10,
+        "name_en": "Dhidhdhoo",
+        "name_dv": "ދިއްދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.88712,
+        "lng": 73.114046,
+        "active": 1
+    },
+    {
+        "salat_id": 11,
+        "name_en": "Filladhoo",
+        "name_dv": "ފިއްލަދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.877091,
+        "lng": 73.2304,
+        "active": 1
+    },
+    {
+        "salat_id": 12,
+        "name_en": "Maarandhoo",
+        "name_dv": "މާރަންދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.8524,
+        "lng": 72.984406,
+        "active": 1
+    },
+    {
+        "salat_id": 13,
+        "name_en": "Thakandhoo",
+        "name_dv": "ތަކަންދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.844469,
+        "lng": 72.995584,
+        "active": 1
+    },
+    {
+        "salat_id": 14,
+        "name_en": "Utheemu",
+        "name_dv": "އުތީމު",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.835027,
+        "lng": 73.11227,
+        "active": 1
+    },
+    {
+        "salat_id": 15,
+        "name_en": "Muraidhoo",
+        "name_dv": "މުރައިދޫ",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.837774,
+        "lng": 73.167143,
+        "active": 1
+    },
+    {
+        "salat_id": 16,
+        "name_en": "Baarah",
+        "name_dv": "ބާރަށް",
+        "atoll_en": "Haa Alif",
+        "atoll_dv": "ހއ",
+        "lat": 6.816202,
+        "lng": 73.210831,
+        "active": 1
+    },
+    {
+        "salat_id": 17,
+        "name_en": "Faridhoo",
+        "name_dv": "ފަރިދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.784964,
+        "lng": 73.053905,
+        "active": 0
+    },
+    {
+        "salat_id": 18,
+        "name_en": "Hondaidhoo",
+        "name_dv": "ހޮނޑައިދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 19,
+        "name_en": "Hanimaadhoo",
+        "name_dv": "ހަނިމާދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.766216,
+        "lng": 73.176413,
+        "active": 1
+    },
+    {
+        "salat_id": 20,
+        "name_en": "Finey",
+        "name_dv": "ފިނޭ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.746074,
+        "lng": 73.053514,
+        "active": 1
+    },
+    {
+        "salat_id": 21,
+        "name_en": "Naivaadhoo",
+        "name_dv": "ނައިވާދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.747954,
+        "lng": 72.935228,
+        "active": 1
+    },
+    {
+        "salat_id": 22,
+        "name_en": "Nellaidhoo",
+        "name_dv": "ނެއްލައިދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.71494,
+        "lng": 72.946828,
+        "active": 1
+    },
+    {
+        "salat_id": 23,
+        "name_en": "Hirimaradhoo",
+        "name_dv": "ހިރިމަރަދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.724919,
+        "lng": 73.024126,
+        "active": 1
+    },
+    {
+        "salat_id": 24,
+        "name_en": "Nolhivaranfaru",
+        "name_dv": "ނޮޅިވަރަންފަރު",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.70088,
+        "lng": 73.120537,
+        "active": 1
+    },
+    {
+        "salat_id": 25,
+        "name_en": "Nolhivaram",
+        "name_dv": "ނޮޅިވަރަމު",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.662525,
+        "lng": 73.082409,
+        "active": 1
+    },
+    {
+        "salat_id": 26,
+        "name_en": "Kurinbi",
+        "name_dv": "ކުރިނބި",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.665513,
+        "lng": 72.996598,
+        "active": 1
+    },
+    {
+        "salat_id": 27,
+        "name_en": "Kunburudhoo",
+        "name_dv": "ކުނބުރުދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.658286,
+        "lng": 73.027382,
+        "active": 0
+    },
+    {
+        "salat_id": 28,
+        "name_en": "Kulhudhuffushi",
+        "name_dv": "ކުޅުދުއްފުށި",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.623269,
+        "lng": 73.069457,
+        "active": 1
+    },
+    {
+        "salat_id": 29,
+        "name_en": "Kumundhoo",
+        "name_dv": "ކުމުންދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.574361,
+        "lng": 73.051829,
+        "active": 1
+    },
+    {
+        "salat_id": 30,
+        "name_en": "Neykurendhoo",
+        "name_dv": "ނޭކުރެންދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.543473,
+        "lng": 72.978101,
+        "active": 1
+    },
+    {
+        "salat_id": 31,
+        "name_en": "Vaikaradhoo",
+        "name_dv": "ވައިކަރަދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.549727,
+        "lng": 72.952869,
+        "active": 1
+    },
+    {
+        "salat_id": 32,
+        "name_en": "Maavaidhoo",
+        "name_dv": "މާވައިދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.515374,
+        "lng": 73.053782,
+        "active": 0
+    },
+    {
+        "salat_id": 33,
+        "name_en": "Makunudhoo",
+        "name_dv": "މަކުނުދޫ",
+        "atoll_en": "Haa Dhaalu",
+        "atoll_dv": "ހދ",
+        "lat": 6.409141,
+        "lng": 72.705201,
+        "active": 1
+    },
+    {
+        "salat_id": 34,
+        "name_en": "Noomaraa",
+        "name_dv": "ނޫމަރާ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.434146,
+        "lng": 73.069023,
+        "active": 1
+    },
+    {
+        "salat_id": 35,
+        "name_en": "Kanditheemu",
+        "name_dv": "ކަނޑިތީމު",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.440817,
+        "lng": 72.916238,
+        "active": 1
+    },
+    {
+        "salat_id": 36,
+        "name_en": "Goidhoo",
+        "name_dv": "ގޮއިދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.430076,
+        "lng": 72.929577,
+        "active": 1
+    },
+    {
+        "salat_id": 37,
+        "name_en": "Feydhoo",
+        "name_dv": "ފޭދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.360313,
+        "lng": 73.048712,
+        "active": 1
+    },
+    {
+        "salat_id": 38,
+        "name_en": "Feevah",
+        "name_dv": "ފީވައް",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.348893,
+        "lng": 73.209658,
+        "active": 1
+    },
+    {
+        "salat_id": 39,
+        "name_en": "Bileffahi",
+        "name_dv": "ބިލެތްފަހި",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.33927,
+        "lng": 72.975461,
+        "active": 1
+    },
+    {
+        "salat_id": 40,
+        "name_en": "Foakaidhoo",
+        "name_dv": "ފޯކައިދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.326729,
+        "lng": 73.149293,
+        "active": 1
+    },
+    {
+        "salat_id": 41,
+        "name_en": "Narudhoo",
+        "name_dv": "ނަރުދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.264328,
+        "lng": 73.218099,
+        "active": 1
+    },
+    {
+        "salat_id": 42,
+        "name_en": "Maakandhoodhoo",
+        "name_dv": "މާކަނޑޫދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.234999,
+        "lng": 73.267472,
+        "active": 0
+    },
+    {
+        "salat_id": 43,
+        "name_en": "Maroshi",
+        "name_dv": "މަރޮށި",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.209848,
+        "lng": 73.061094,
+        "active": 1
+    },
+    {
+        "salat_id": 44,
+        "name_en": "Lhaimagu",
+        "name_dv": "ޅައިމަގު",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.163837,
+        "lng": 73.251372,
+        "active": 1
+    },
+    {
+        "salat_id": 45,
+        "name_en": "Funadhoo",
+        "name_dv": "ފުނަދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.149857,
+        "lng": 73.290482,
+        "active": 1
+    },
+    {
+        "salat_id": 46,
+        "name_en": "Firunbaidhoo",
+        "name_dv": "ފިރުނބައިދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.114326,
+        "lng": 73.227501,
+        "active": 0
+    },
+    {
+        "salat_id": 47,
+        "name_en": "Komandoo",
+        "name_dv": "ކޮމަންޑޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.054057,
+        "lng": 73.054533,
+        "active": 1
+    },
+    {
+        "salat_id": 48,
+        "name_en": "Maaungoodhoo",
+        "name_dv": "މާއުނގޫދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.070786,
+        "lng": 73.283701,
+        "active": 1
+    },
+    {
+        "salat_id": 49,
+        "name_en": "Henbadhoo",
+        "name_dv": "ހެނބަދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.967417,
+        "lng": 73.392908,
+        "active": 1
+    },
+    {
+        "salat_id": 50,
+        "name_en": "Kendhikulhudhoo",
+        "name_dv": "ކެނދިކުޅުދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.952303,
+        "lng": 73.4152,
+        "active": 1
+    },
+    {
+        "salat_id": 51,
+        "name_en": "Tholhendhoo",
+        "name_dv": "ތޮޅެންދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 52,
+        "name_en": "Maalhendhoo",
+        "name_dv": "މާޅެންދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.899933,
+        "lng": 73.45695,
+        "active": 1
+    },
+    {
+        "salat_id": 53,
+        "name_en": "Kudafari",
+        "name_dv": "ކުޑަފަރި",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.882637,
+        "lng": 73.400451,
+        "active": 1
+    },
+    {
+        "salat_id": 54,
+        "name_en": "Landhoo",
+        "name_dv": "ލަންދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.880829,
+        "lng": 73.466027,
+        "active": 1
+    },
+    {
+        "salat_id": 55,
+        "name_en": "Maafaru",
+        "name_dv": "މާފަރު",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.829578,
+        "lng": 73.479137,
+        "active": 1
+    },
+    {
+        "salat_id": 56,
+        "name_en": "Lhohi",
+        "name_dv": "ޅޮހި",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.816706,
+        "lng": 73.377085,
+        "active": 1
+    },
+    {
+        "salat_id": 57,
+        "name_en": "Miladhoo",
+        "name_dv": "މިލަދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.790502,
+        "lng": 73.362318,
+        "active": 1
+    },
+    {
+        "salat_id": 58,
+        "name_en": "Magoodhoo",
+        "name_dv": "މަގޫދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.776299,
+        "lng": 73.362182,
+        "active": 1
+    },
+    {
+        "salat_id": 59,
+        "name_en": "Manadhoo",
+        "name_dv": "މަނަދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.766205,
+        "lng": 73.410972,
+        "active": 1
+    },
+    {
+        "salat_id": 60,
+        "name_en": "Holhudhoo",
+        "name_dv": "ހޮޅުދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.75486,
+        "lng": 73.262672,
+        "active": 1
+    },
+    {
+        "salat_id": 61,
+        "name_en": "Foddhoo",
+        "name_dv": "ފޮއްދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.743517,
+        "lng": 73.215791,
+        "active": 1
+    },
+    {
+        "salat_id": 62,
+        "name_en": "Velidhoo",
+        "name_dv": "ވެލިދޫ",
+        "atoll_en": "Noonu",
+        "atoll_dv": "ނ",
+        "lat": 5.663899,
+        "lng": 73.274239,
+        "active": 1
+    },
+    {
+        "salat_id": 63,
+        "name_en": "Alifushi",
+        "name_dv": "އަލިފުށި",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.967254,
+        "lng": 72.953034,
+        "active": 1
+    },
+    {
+        "salat_id": 64,
+        "name_en": "Vaadhoo",
+        "name_dv": "ވާދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.8572,
+        "lng": 72.991362,
+        "active": 1
+    },
+    {
+        "salat_id": 65,
+        "name_en": "Rasgetheemu",
+        "name_dv": "ރަސްގެތީމު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.807783,
+        "lng": 73.003198,
+        "active": 1
+    },
+    {
+        "salat_id": 66,
+        "name_en": "Angolhitheemu",
+        "name_dv": "އަނގޮޅިތީމު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.794409,
+        "lng": 73.00621,
+        "active": 1
+    },
+    {
+        "salat_id": 67,
+        "name_en": "Gaaundhoodhoo",
+        "name_dv": "ގާއުނޑޫދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 68,
+        "name_en": "Ungulu",
+        "name_dv": "އުނގުލު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 69,
+        "name_en": "Ungoofaaru",
+        "name_dv": "އުނގޫފާރު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.668157,
+        "lng": 73.030155,
+        "active": 1
+    },
+    {
+        "salat_id": 70,
+        "name_en": "Kandholhudhoo",
+        "name_dv": "ކަނދޮޅުދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 71,
+        "name_en": "Maakurathu",
+        "name_dv": "މާކުރަތު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.60675,
+        "lng": 73.043944,
+        "active": 1
+    },
+    {
+        "salat_id": 72,
+        "name_en": "Rasmaadhoo",
+        "name_dv": "ރަސްމާދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.562959,
+        "lng": 73.043478,
+        "active": 1
+    },
+    {
+        "salat_id": 73,
+        "name_en": "Innamaadhoo",
+        "name_dv": "އިންނަމާދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.549558,
+        "lng": 73.045403,
+        "active": 1
+    },
+    {
+        "salat_id": 74,
+        "name_en": "Maduvvaree",
+        "name_dv": "މަޑުއްވަރި",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.486265,
+        "lng": 72.896006,
+        "active": 1
+    },
+    {
+        "salat_id": 75,
+        "name_en": "Inguraidhoo",
+        "name_dv": "އިނގުރައިދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.476875,
+        "lng": 73.036303,
+        "active": 1
+    },
+    {
+        "salat_id": 76,
+        "name_en": "Meedhoo",
+        "name_dv": "މީދޫ",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.458021,
+        "lng": 72.955283,
+        "active": 1
+    },
+    {
+        "salat_id": 77,
+        "name_en": "Fainu",
+        "name_dv": "ފައިނު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.463281,
+        "lng": 73.034446,
+        "active": 1
+    },
+    {
+        "salat_id": 78,
+        "name_en": "Kinolhas",
+        "name_dv": "ކިނޮޅަސް",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.449118,
+        "lng": 73.029535,
+        "active": 1
+    },
+    {
+        "salat_id": 79,
+        "name_en": "Kudarikilu",
+        "name_dv": "ކުޑަރިކިލު",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.300579,
+        "lng": 73.070712,
+        "active": 1
+    },
+    {
+        "salat_id": 80,
+        "name_en": "Kamadhoo",
+        "name_dv": "ކަމަދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.281926,
+        "lng": 73.137016,
+        "active": 1
+    },
+    {
+        "salat_id": 81,
+        "name_en": "Kendhoo",
+        "name_dv": "ކެންދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.275378,
+        "lng": 73.01015,
+        "active": 1
+    },
+    {
+        "salat_id": 82,
+        "name_en": "Kihaadoo",
+        "name_dv": "ކިހާދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.215911,
+        "lng": 73.124861,
+        "active": 1
+    },
+    {
+        "salat_id": 83,
+        "name_en": "Dhonfanu",
+        "name_dv": "ދޮންފަނު",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.188077,
+        "lng": 73.122865,
+        "active": 1
+    },
+    {
+        "salat_id": 84,
+        "name_en": "Dharavandhoo",
+        "name_dv": "ދަރަވަންދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.158351,
+        "lng": 73.130525,
+        "active": 1
+    },
+    {
+        "salat_id": 85,
+        "name_en": "Maalhos",
+        "name_dv": "މާޅޮސް",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.134814,
+        "lng": 73.108144,
+        "active": 1
+    },
+    {
+        "salat_id": 86,
+        "name_en": "Eydhafushi",
+        "name_dv": "އޭދަފުށި",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.103483,
+        "lng": 73.070395,
+        "active": 1
+    },
+    {
+        "salat_id": 87,
+        "name_en": "Thulhaadhoo",
+        "name_dv": "ތުޅާދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.022891,
+        "lng": 72.83998,
+        "active": 1
+    },
+    {
+        "salat_id": 88,
+        "name_en": "Hithaadhoo",
+        "name_dv": "ހިތާދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 5.007428,
+        "lng": 72.922791,
+        "active": 1
+    },
+    {
+        "salat_id": 89,
+        "name_en": "Fulhadhoo",
+        "name_dv": "ފުޅަދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 4.885453,
+        "lng": 72.931902,
+        "active": 1
+    },
+    {
+        "salat_id": 90,
+        "name_en": "Fehendhoo",
+        "name_dv": "ފެހެންދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 4.8806,
+        "lng": 72.972972,
+        "active": 1
+    },
+    {
+        "salat_id": 91,
+        "name_en": "Goidhoo",
+        "name_dv": "ގޮއިދޫ",
+        "atoll_en": "Baa",
+        "atoll_dv": "ބ",
+        "lat": 4.875896,
+        "lng": 72.996683,
+        "active": 1
+    },
+    {
+        "salat_id": 92,
+        "name_en": "Hinnavaru",
+        "name_dv": "ހިންނަވަރު",
+        "atoll_en": "Lhaviyani",
+        "atoll_dv": "ޅ",
+        "lat": 5.491961,
+        "lng": 73.412152,
+        "active": 1
+    },
+    {
+        "salat_id": 93,
+        "name_en": "Naifaru",
+        "name_dv": "ނައިފަރު",
+        "atoll_en": "Lhaviyani",
+        "atoll_dv": "ޅ",
+        "lat": 5.44444,
+        "lng": 73.365755,
+        "active": 1
+    },
+    {
+        "salat_id": 94,
+        "name_en": "Kurendhoo",
+        "name_dv": "ކުރެންދޫ",
+        "atoll_en": "Lhaviyani",
+        "atoll_dv": "ޅ",
+        "lat": 5.333784,
+        "lng": 73.463614,
+        "active": 1
+    },
+    {
+        "salat_id": 95,
+        "name_en": "Olhuvelifushi",
+        "name_dv": "އޮޅުވެލިފުށި",
+        "atoll_en": "Lhaviyani",
+        "atoll_dv": "ޅ",
+        "lat": 5.278309,
+        "lng": 73.606382,
+        "active": 1
+    },
+    {
+        "salat_id": 96,
+        "name_en": "Kaashidhoo",
+        "name_dv": "ކާށިދޫ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.95923,
+        "lng": 73.463473,
+        "active": 1
+    },
+    {
+        "salat_id": 97,
+        "name_en": "Gaafaru",
+        "name_dv": "ގާފަރު",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.736115,
+        "lng": 73.499846,
+        "active": 1
+    },
+    {
+        "salat_id": 98,
+        "name_en": "Dhiffushi",
+        "name_dv": "ދިއްފުށި",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.442153,
+        "lng": 73.713752,
+        "active": 1
+    },
+    {
+        "salat_id": 99,
+        "name_en": "Thulusdhoo",
+        "name_dv": "ތުލުސްދޫ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.374504,
+        "lng": 73.651807,
+        "active": 1
+    },
+    {
+        "salat_id": 100,
+        "name_en": "Huraa",
+        "name_dv": "ހުރާ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.333809,
+        "lng": 73.600427,
+        "active": 1
+    },
+    {
+        "salat_id": 101,
+        "name_en": "Himmafushi",
+        "name_dv": "ހިންމަފުށި",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.309941,
+        "lng": 73.570783,
+        "active": 1
+    },
+    {
+        "salat_id": 102,
+        "name_en": "Malé",
+        "name_dv": "މާލެ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.17503,
+        "lng": 73.509878,
+        "active": 1
+    },
+    {
+        "salat_id": 103,
+        "name_en": "Gulhi",
+        "name_dv": "ގުޅި",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 3.990986,
+        "lng": 73.509114,
+        "active": 1
+    },
+    {
+        "salat_id": 104,
+        "name_en": "Maafushi",
+        "name_dv": "މާފުށި",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 3.940617,
+        "lng": 73.48963,
+        "active": 1
+    },
+    {
+        "salat_id": 105,
+        "name_en": "Guraidhoo",
+        "name_dv": "ގުރައިދޫ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 3.900871,
+        "lng": 73.468191,
+        "active": 1
+    },
+    {
+        "salat_id": 106,
+        "name_en": "Thoddoo",
+        "name_dv": "ތޮއްޑޫ",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 4.437339,
+        "lng": 72.960119,
+        "active": 1
+    },
+    {
+        "salat_id": 107,
+        "name_en": "Rasdhoo",
+        "name_dv": "ރަސްދޫ",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 4.263105,
+        "lng": 72.991977,
+        "active": 1
+    },
+    {
+        "salat_id": 108,
+        "name_en": "Ukulhas",
+        "name_dv": "އުކުޅަސް",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 4.215585,
+        "lng": 72.863989,
+        "active": 1
+    },
+    {
+        "salat_id": 109,
+        "name_en": "Mathiveri",
+        "name_dv": "މަތިވެރި",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 4.192013,
+        "lng": 72.746004,
+        "active": 1
+    },
+    {
+        "salat_id": 110,
+        "name_en": "Bodufolhudhoo",
+        "name_dv": "ބޮޑުފޮޅުދޫ",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 4.185455,
+        "lng": 72.773479,
+        "active": 1
+    },
+    {
+        "salat_id": 111,
+        "name_en": "Feridhoo",
+        "name_dv": "ފެރިދޫ",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 4.051305,
+        "lng": 72.726134,
+        "active": 1
+    },
+    {
+        "salat_id": 112,
+        "name_en": "Maalhos",
+        "name_dv": "މާޅޮސް",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 3.98648,
+        "lng": 72.719628,
+        "active": 1
+    },
+    {
+        "salat_id": 113,
+        "name_en": "Himandhoo",
+        "name_dv": "ހިމެންދޫ",
+        "atoll_en": "Alif Alif",
+        "atoll_dv": "އއ",
+        "lat": 3.920943,
+        "lng": 72.743998,
+        "active": 1
+    },
+    {
+        "salat_id": 114,
+        "name_en": "Hangnaameedhoo",
+        "name_dv": "ހަންޏާމީދޫ",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.849134,
+        "lng": 72.955251,
+        "active": 1
+    },
+    {
+        "salat_id": 115,
+        "name_en": "Omadhoo",
+        "name_dv": "އޮމަދޫ",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.791761,
+        "lng": 72.961997,
+        "active": 1
+    },
+    {
+        "salat_id": 116,
+        "name_en": "Kunburudhoo",
+        "name_dv": "ކުނބުރުދޫ",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.775649,
+        "lng": 72.924317,
+        "active": 1
+    },
+    {
+        "salat_id": 117,
+        "name_en": "Mahibadhoo",
+        "name_dv": "މަހިބަދޫ",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.75722,
+        "lng": 72.969066,
+        "active": 1
+    },
+    {
+        "salat_id": 118,
+        "name_en": "Mandhoo",
+        "name_dv": "މަންދޫ",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.697902,
+        "lng": 72.710082,
+        "active": 1
+    },
+    {
+        "salat_id": 119,
+        "name_en": "Dhangethi",
+        "name_dv": "ދަނގެތި",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.607738,
+        "lng": 72.955409,
+        "active": 1
+    },
+    {
+        "salat_id": 120,
+        "name_en": "Dhigurah",
+        "name_dv": "ދިގުރަށް",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.52692,
+        "lng": 72.9241,
+        "active": 1
+    },
+    {
+        "salat_id": 121,
+        "name_en": "Dhidhdhoo",
+        "name_dv": "ދިއްދޫ",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.483672,
+        "lng": 72.877904,
+        "active": 1
+    },
+    {
+        "salat_id": 122,
+        "name_en": "Fenfushi",
+        "name_dv": "ފެންފުށި",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.489213,
+        "lng": 72.78291,
+        "active": 1
+    },
+    {
+        "salat_id": 123,
+        "name_en": "Maamigili",
+        "name_dv": "މާމިގިލި",
+        "atoll_en": "Alif Dhaalu",
+        "atoll_dv": "އދ",
+        "lat": 3.47667,
+        "lng": 72.836916,
+        "active": 1
+    },
+    {
+        "salat_id": 124,
+        "name_en": "Fulidhoo",
+        "name_dv": "ފުލިދޫ",
+        "atoll_en": "Vaavu",
+        "atoll_dv": "ވ",
+        "lat": 3.680477,
+        "lng": 73.415786,
+        "active": 1
+    },
+    {
+        "salat_id": 125,
+        "name_en": "Thinadhoo",
+        "name_dv": "ތިނަދޫ",
+        "atoll_en": "Vaavu",
+        "atoll_dv": "ވ",
+        "lat": 3.487673,
+        "lng": 73.537856,
+        "active": 1
+    },
+    {
+        "salat_id": 126,
+        "name_en": "Felidhoo",
+        "name_dv": "ފެލިދޫ",
+        "atoll_en": "Vaavu",
+        "atoll_dv": "ވ",
+        "lat": 3.471751,
+        "lng": 73.547044,
+        "active": 1
+    },
+    {
+        "salat_id": 127,
+        "name_en": "Keyodhoo",
+        "name_dv": "ކެޔޮދޫ",
+        "atoll_en": "Vaavu",
+        "atoll_dv": "ވ",
+        "lat": 3.462117,
+        "lng": 73.55011,
+        "active": 1
+    },
+    {
+        "salat_id": 128,
+        "name_en": "Rakeedhoo",
+        "name_dv": "ރަކީދޫ",
+        "atoll_en": "Vaavu",
+        "atoll_dv": "ވ",
+        "lat": 3.31494,
+        "lng": 73.469823,
+        "active": 1
+    },
+    {
+        "salat_id": 129,
+        "name_en": "Dhiggaru",
+        "name_dv": "ދިއްގަރު",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 3.112102,
+        "lng": 73.565258,
+        "active": 1
+    },
+    {
+        "salat_id": 130,
+        "name_en": "Maduvvaree",
+        "name_dv": "މަޑުއްވަރި",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 3.104647,
+        "lng": 73.572897,
+        "active": 1
+    },
+    {
+        "salat_id": 131,
+        "name_en": "Rathmandhoo",
+        "name_dv": "ރަތްމަންދޫ",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 3.08901,
+        "lng": 73.639095,
+        "active": 1
+    },
+    {
+        "salat_id": 132,
+        "name_en": "Madifushi",
+        "name_dv": "މަޑިފުށި",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 133,
+        "name_en": "Veyvah",
+        "name_dv": "ވޭވަށް",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 2.946387,
+        "lng": 73.584256,
+        "active": 1
+    },
+    {
+        "salat_id": 134,
+        "name_en": "Mulah",
+        "name_dv": "މުލައް",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 2.946387,
+        "lng": 73.584256,
+        "active": 1
+    },
+    {
+        "salat_id": 135,
+        "name_en": "Muli",
+        "name_dv": "މުލި",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 2.918991,
+        "lng": 73.581365,
+        "active": 1
+    },
+    {
+        "salat_id": 136,
+        "name_en": "Naalaafushi",
+        "name_dv": "ނާލާފުށި",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 2.895659,
+        "lng": 73.577401,
+        "active": 1
+    },
+    {
+        "salat_id": 137,
+        "name_en": "Kolhufushi",
+        "name_dv": "ކޮޅުފުށި",
+        "atoll_en": "Meemu",
+        "atoll_dv": "މ",
+        "lat": 2.78081,
+        "lng": 73.42444,
+        "active": 1
+    },
+    {
+        "salat_id": 138,
+        "name_en": "Feeali",
+        "name_dv": "ފީއަލި",
+        "atoll_en": "Faafu",
+        "atoll_dv": "ފ",
+        "lat": 3.269859,
+        "lng": 73.00217,
+        "active": 1
+    },
+    {
+        "salat_id": 139,
+        "name_en": "Bileddhoo",
+        "name_dv": "ބިލެތްދޫ",
+        "atoll_en": "Faafu",
+        "atoll_dv": "ފ",
+        "lat": 3.118307,
+        "lng": 72.98409,
+        "active": 1
+    },
+    {
+        "salat_id": 140,
+        "name_en": "Magoodhoo",
+        "name_dv": "މަގޫދޫ",
+        "atoll_en": "Faafu",
+        "atoll_dv": "ފ",
+        "lat": 3.078209,
+        "lng": 72.963638,
+        "active": 1
+    },
+    {
+        "salat_id": 141,
+        "name_en": "Dharanboodhoo",
+        "name_dv": "ދަރަނބޫދޫ",
+        "atoll_en": "Faafu",
+        "atoll_dv": "ފ",
+        "lat": 3.06291,
+        "lng": 72.926173,
+        "active": 1
+    },
+    {
+        "salat_id": 142,
+        "name_en": "Nilandhoo",
+        "name_dv": "ނިލަންދޫ",
+        "atoll_en": "Faafu",
+        "atoll_dv": "ފ",
+        "lat": 3.056289,
+        "lng": 72.88991,
+        "active": 1
+    },
+    {
+        "salat_id": 143,
+        "name_en": "Meedhoo",
+        "name_dv": "މީދޫ",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.998282,
+        "lng": 73.006371,
+        "active": 1
+    },
+    {
+        "salat_id": 144,
+        "name_en": "Bandidhoo",
+        "name_dv": "ބަނޑިދޫ",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.936526,
+        "lng": 72.990997,
+        "active": 1
+    },
+    {
+        "salat_id": 145,
+        "name_en": "Rinbudhoo",
+        "name_dv": "ރިނބުދޫ",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.924606,
+        "lng": 72.895473,
+        "active": 1
+    },
+    {
+        "salat_id": 146,
+        "name_en": "Hulhudheli",
+        "name_dv": "ހުޅުދެލި",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.858436,
+        "lng": 72.846363,
+        "active": 1
+    },
+    {
+        "salat_id": 147,
+        "name_en": "Gemendhoo",
+        "name_dv": "ގެމެންދޫ",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.797783,
+        "lng": 73.025436,
+        "active": 0
+    },
+    {
+        "salat_id": 148,
+        "name_en": "Vaani",
+        "name_dv": "ވާނި",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 0,
+        "lng": 0,
+        "active": 0
+    },
+    {
+        "salat_id": 149,
+        "name_en": "Maaenboodhoo",
+        "name_dv": "މާއެނބޫދޫ",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.695566,
+        "lng": 72.963335,
+        "active": 1
+    },
+    {
+        "salat_id": 150,
+        "name_en": "Kudahuvadhoo",
+        "name_dv": "ކުޑަހުވަދޫ",
+        "atoll_en": "Dhaalu",
+        "atoll_dv": "ދ",
+        "lat": 2.671707,
+        "lng": 72.893716,
+        "active": 1
+    },
+    {
+        "salat_id": 151,
+        "name_en": "Buruni",
+        "name_dv": "ބުރުނި",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.558714,
+        "lng": 73.105995,
+        "active": 1
+    },
+    {
+        "salat_id": 152,
+        "name_en": "Vilufushi",
+        "name_dv": "ވިލުފުށި",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.502818,
+        "lng": 73.308229,
+        "active": 1
+    },
+    {
+        "salat_id": 153,
+        "name_en": "Madifushi",
+        "name_dv": "މަޑިފުށި",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.356963,
+        "lng": 73.354817,
+        "active": 1
+    },
+    {
+        "salat_id": 154,
+        "name_en": "Dhiyamigili",
+        "name_dv": "ދިޔަމިގިލި",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.339136,
+        "lng": 73.336888,
+        "active": 1
+    },
+    {
+        "salat_id": 155,
+        "name_en": "Guraidhoo",
+        "name_dv": "ގުރައިދޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.324968,
+        "lng": 73.319421,
+        "active": 1
+    },
+    {
+        "salat_id": 156,
+        "name_en": "Kandoodhoo",
+        "name_dv": "ކަނޑޫދޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.321204,
+        "lng": 72.916608,
+        "active": 1
+    },
+    {
+        "salat_id": 157,
+        "name_en": "Vandhoo",
+        "name_dv": "ވަންދޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.291691,
+        "lng": 72.941997,
+        "active": 1
+    },
+    {
+        "salat_id": 158,
+        "name_en": "Hirilandhoo",
+        "name_dv": "ހިރިލަންދޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.269611,
+        "lng": 72.93253,
+        "active": 1
+    },
+    {
+        "salat_id": 159,
+        "name_en": "Gaadhiffushi",
+        "name_dv": "ގާދިއްފުށި",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.253011,
+        "lng": 73.213491,
+        "active": 1
+    },
+    {
+        "salat_id": 160,
+        "name_en": "Thimarafushi",
+        "name_dv": "ތިމަރަފުށި",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.205529,
+        "lng": 73.142935,
+        "active": 1
+    },
+    {
+        "salat_id": 161,
+        "name_en": "Veymandoo",
+        "name_dv": "ވޭމަންޑޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.186917,
+        "lng": 73.094457,
+        "active": 1
+    },
+    {
+        "salat_id": 162,
+        "name_en": "Kinbidhoo",
+        "name_dv": "ކިނބިދޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.168105,
+        "lng": 73.066,
+        "active": 1
+    },
+    {
+        "salat_id": 163,
+        "name_en": "Omadhoo",
+        "name_dv": "އޮމަދޫ",
+        "atoll_en": "Thaa",
+        "atoll_dv": "ތ",
+        "lat": 2.167358,
+        "lng": 73.023549,
+        "active": 1
+    },
+    {
+        "salat_id": 164,
+        "name_en": "Isdhoo",
+        "name_dv": "އިސްދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 2.119007,
+        "lng": 73.568444,
+        "active": 1
+    },
+    {
+        "salat_id": 165,
+        "name_en": "Dhanbidhoo",
+        "name_dv": "ދަނބިދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 2.09411,
+        "lng": 73.545799,
+        "active": 1
+    },
+    {
+        "salat_id": 166,
+        "name_en": "Maabaidhoo",
+        "name_dv": "މާބައިދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 2.025697,
+        "lng": 73.53291,
+        "active": 1
+    },
+    {
+        "salat_id": 167,
+        "name_en": "Mundhoo",
+        "name_dv": "މުންޑޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 2.011052,
+        "lng": 73.533739,
+        "active": 1
+    },
+    {
+        "salat_id": 168,
+        "name_en": "Kalaidhoo",
+        "name_dv": "ކަޅައިދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.988794,
+        "lng": 73.537528,
+        "active": 0
+    },
+    {
+        "salat_id": 169,
+        "name_en": "Gan",
+        "name_dv": "ގަން",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.915425,
+        "lng": 73.542676,
+        "active": 1
+    },
+    {
+        "salat_id": 170,
+        "name_en": "Maavah",
+        "name_dv": "މާވަށް",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.885328,
+        "lng": 73.242347,
+        "active": 1
+    },
+    {
+        "salat_id": 171,
+        "name_en": "Fonadhoo",
+        "name_dv": "ފޮނަދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.836324,
+        "lng": 73.504239,
+        "active": 1
+    },
+    {
+        "salat_id": 172,
+        "name_en": "Gaadhoo",
+        "name_dv": "ގާދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.821457,
+        "lng": 73.45209,
+        "active": 1
+    },
+    {
+        "salat_id": 173,
+        "name_en": "Maamendhoo",
+        "name_dv": "މާމެންދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.818038,
+        "lng": 73.389866,
+        "active": 1
+    },
+    {
+        "salat_id": 174,
+        "name_en": "Hithadhoo",
+        "name_dv": "ހިތަދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.795957,
+        "lng": 73.388047,
+        "active": 1
+    },
+    {
+        "salat_id": 175,
+        "name_en": "Kunahandhoo",
+        "name_dv": "ކުނަހަންދޫ",
+        "atoll_en": "Laamu",
+        "atoll_dv": "ލ",
+        "lat": 1.783307,
+        "lng": 73.368361,
+        "active": 1
+    },
+    {
+        "salat_id": 176,
+        "name_en": "Kolamaafushi",
+        "name_dv": "ކޮލަމާފުށި",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.837154,
+        "lng": 73.185015,
+        "active": 1
+    },
+    {
+        "salat_id": 177,
+        "name_en": "Villingili",
+        "name_dv": "ވިލިނގިލި",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.755293,
+        "lng": 73.434885,
+        "active": 1
+    },
+    {
+        "salat_id": 178,
+        "name_en": "Maamendhoo",
+        "name_dv": "މާމެންދޫ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.713464,
+        "lng": 73.438891,
+        "active": 1
+    },
+    {
+        "salat_id": 179,
+        "name_en": "Nilandhoo",
+        "name_dv": "ނިލަންދޫ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.636416,
+        "lng": 73.446208,
+        "active": 1
+    },
+    {
+        "salat_id": 180,
+        "name_en": "Dhaandhoo",
+        "name_dv": "ދާންދޫ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.621114,
+        "lng": 73.462094,
+        "active": 1
+    },
+    {
+        "salat_id": 181,
+        "name_en": "Dhevvadhoo",
+        "name_dv": "ދެއްވަދޫ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.556858,
+        "lng": 73.242237,
+        "active": 1
+    },
+    {
+        "salat_id": 182,
+        "name_en": "Kondey",
+        "name_dv": "ކޮނޑޭ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.499554,
+        "lng": 73.549653,
+        "active": 1
+    },
+    {
+        "salat_id": 183,
+        "name_en": "Dhiyadhoo",
+        "name_dv": "ދިޔަދޫ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.476468,
+        "lng": 73.558971,
+        "active": 0
+    },
+    {
+        "salat_id": 184,
+        "name_en": "Gemanafushi",
+        "name_dv": "ގެމަނަފުށި",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.442017,
+        "lng": 73.568521,
+        "active": 1
+    },
+    {
+        "salat_id": 185,
+        "name_en": "Kanduhulhudhoo",
+        "name_dv": "ކަނޑުހުޅުދޫ",
+        "atoll_en": "Gaafu Alif",
+        "atoll_dv": "ގއ",
+        "lat": 0.351344,
+        "lng": 73.539993,
+        "active": 1
+    },
+    {
+        "salat_id": 186,
+        "name_en": "Thinadhoo",
+        "name_dv": "ތިނަދޫ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.530185,
+        "lng": 72.997227,
+        "active": 1
+    },
+    {
+        "salat_id": 187,
+        "name_en": "Madaveli",
+        "name_dv": "މަޑަވެލި",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.45901,
+        "lng": 72.999236,
+        "active": 1
+    },
+    {
+        "salat_id": 188,
+        "name_en": "Hoandeddhoo",
+        "name_dv": "ހޯނޑެއްދޫ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.444125,
+        "lng": 73.003249,
+        "active": 1
+    },
+    {
+        "salat_id": 189,
+        "name_en": "Nadella",
+        "name_dv": "ނަޑައްލާ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.29359,
+        "lng": 73.040729,
+        "active": 1
+    },
+    {
+        "salat_id": 190,
+        "name_en": "Gadhdhoo",
+        "name_dv": "ގައްދޫ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.289472,
+        "lng": 73.456435,
+        "active": 1
+    },
+    {
+        "salat_id": 191,
+        "name_en": "Rathafandhoo",
+        "name_dv": "ރަތަފަންދޫ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.253248,
+        "lng": 73.104873,
+        "active": 1
+    },
+    {
+        "salat_id": 192,
+        "name_en": "Vaadhoo",
+        "name_dv": "ވާދޫ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.227282,
+        "lng": 73.273878,
+        "active": 1
+    },
+    {
+        "salat_id": 193,
+        "name_en": "Fiyoree",
+        "name_dv": "ފިޔޯރީ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.22127,
+        "lng": 73.136639,
+        "active": 1
+    },
+    {
+        "salat_id": 194,
+        "name_en": "Maathodaa",
+        "name_dv": "މާތޮޑާ",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.530185,
+        "lng": 72.997227,
+        "active": 1
+    },
+    {
+        "salat_id": 195,
+        "name_en": "Fares",
+        "name_dv": "ފަރެސް",
+        "atoll_en": "Gaafu Dhaalu",
+        "atoll_dv": "ގދ",
+        "lat": 0.19902,
+        "lng": 73.189809,
+        "active": 1
+    },
+    {
+        "salat_id": 196,
+        "name_en": "Fuvahmulah",
+        "name_dv": "ފުވައްމުލައް",
+        "atoll_en": "Gnaviyani",
+        "atoll_dv": "ޏ",
+        "lat": -0.297402,
+        "lng": 73.426523,
+        "active": 1
+    },
+    {
+        "salat_id": 197,
+        "name_en": "Hithadhoo",
+        "name_dv": "ހިތަދޫ",
+        "atoll_en": "Seenu",
+        "atoll_dv": "ސ",
+        "lat": -0.606382,
+        "lng": 73.087406,
+        "active": 1
+    },
+    {
+        "salat_id": 198,
+        "name_en": "Maradhoo",
+        "name_dv": "މަރަދޫ",
+        "atoll_en": "Seenu",
+        "atoll_dv": "ސ",
+        "lat": -0.665054,
+        "lng": 73.119106,
+        "active": 1
+    },
+    {
+        "salat_id": 199,
+        "name_en": "Maradhoo-Feydhoo",
+        "name_dv": "މަރަދޫފޭދޫ",
+        "atoll_en": "Seenu",
+        "atoll_dv": "ސ",
+        "lat": -0.673394,
+        "lng": 73.125882,
+        "active": 1
+    },
+    {
+        "salat_id": 200,
+        "name_en": "Feydhoo",
+        "name_dv": "ފޭދޫ",
+        "atoll_en": "Seenu",
+        "atoll_dv": "ސ",
+        "lat": -0.682021,
+        "lng": 73.134692,
+        "active": 1
+    },
+    {
+        "salat_id": 201,
+        "name_en": "Hulhudhoo",
+        "name_dv": "ހުޅުދޫ",
+        "atoll_en": "Seenu",
+        "atoll_dv": "ސ",
+        "lat": -0.589217,
+        "lng": 73.2307,
+        "active": 1
+    },
+    {
+        "salat_id": 202,
+        "name_en": "Meedhoo",
+        "name_dv": "މީދޫ",
+        "atoll_en": "Seenu",
+        "atoll_dv": "ސ",
+        "lat": -0.584196,
+        "lng": 73.230658,
+        "active": 1
+    },
+    {
+        "salat_id": 203,
+        "name_en": "Milandhoo",
+        "name_dv": "މިލަންދޫ",
+        "atoll_en": "Shaviyani",
+        "atoll_dv": "ށ",
+        "lat": 6.2877,
+        "lng": 73.245721,
+        "active": 1
+    },
+    {
+        "salat_id": 204,
+        "name_en": "Dhuvaafaru",
+        "name_dv": "ދުވާފަރު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.629225,
+        "lng": 73.041938,
+        "active": 1
+    },
+    {
+        "salat_id": 205,
+        "name_en": "Hulhudhuffaaru",
+        "name_dv": "ހުޅުދުއްފާރު",
+        "atoll_en": "Raa",
+        "atoll_dv": "ރ",
+        "lat": 5.765919,
+        "lng": 73.012176,
+        "active": 1
+    },
+    {
+        "salat_id": null,
+        "name_en": "Hulhumalé",
+        "name_dv": "ހުޅުމާލެ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.211,
+        "lng": 73.5405,
+        "active": 1
+    },
+    {
+        "salat_id": null,
+        "name_en": "Villimalé",
+        "name_dv": "ވިލިމާލެ",
+        "atoll_en": "Kaafu",
+        "atoll_dv": "ކ",
+        "lat": 4.1724,
+        "lng": 73.4846,
+        "active": 1
+    }
+]

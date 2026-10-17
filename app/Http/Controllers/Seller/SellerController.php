@@ -185,7 +185,9 @@ class SellerController extends Controller
             $user->load('bankAccount'); // staff never see the bank details
         }
 
-        return view('seller.profile', compact('user'));
+        $islandsByAtoll = app(\App\Services\DeliveryService::class)->islandsByAtoll();
+
+        return view('seller.profile', compact('user', 'islandsByAtoll'));
     }
 
     public function updateProfile(Request $request)
@@ -206,19 +208,21 @@ class SellerController extends Controller
             'payout_account_name' => 'nullable|string|max:150',
             'payout_account_number' => ['nullable', 'string', 'max:40', 'regex:/^[0-9 -]+$/'],
             'delivery_notes' => 'nullable|string|max:1000',
-            'ships_to_islands' => 'nullable|boolean',
             'shop_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'shop_banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ];
         if (CurrentShop::isStaff()) {
             $rules = array_diff_key($rules, array_flip(self::OWNER_FIELDS)); // staff keep to the shop's details
         }
-        $validated = $request->validate($rules);
-
-        unset($validated['shop_logo'], $validated['shop_banner']);
-        if ($request->has('ships_to_islands') || $request->has('delivery_notes')) {
-            $validated['ships_to_islands'] = $request->boolean('ships_to_islands');
+        // Home island and delivery area (the form always sends them; older clients may not)
+        $withCoverage = $request->has('delivery_coverage');
+        if ($withCoverage) {
+            $rules += \App\Services\ShopCoverage::rules(false);
         }
+        $validated = $request->validate($rules, \App\Services\ShopCoverage::messages());
+
+        $coverage = array_intersect_key($validated, array_flip(['home_island_id', 'delivery_coverage', 'delivers_to_home_atoll', 'delivery_island_ids']));
+        unset($validated['shop_logo'], $validated['shop_banner'], $validated['home_island_id'], $validated['delivery_coverage'], $validated['delivers_to_home_atoll'], $validated['delivery_island_ids']);
         foreach (['shop_logo', 'shop_banner'] as $image) {
             if ($request->hasFile($image) && ($path = $this->storeFileSecurely($request->file($image), 'shops', ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'], $image === 'shop_logo' ? 2048 : 4096))) {
                 $this->deleteFile($user->{$image});
@@ -227,6 +231,9 @@ class SellerController extends Controller
         }
 
         $user->update($validated);
+        if ($withCoverage) {
+            app(\App\Services\ShopCoverage::class)->save($user, $coverage);
+        }
         app(\App\Services\OnboardingService::class)->refresh($user->fresh());
 
         return redirect()->route('seller.profile')

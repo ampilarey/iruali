@@ -20,6 +20,7 @@
 <h2>Island deliveries</h2>
 <ul>
     <li>The customer pays one delivery fee per order to iruali: one rate for Greater Malé (Malé, Hulhumalé, Villimalé) and one for other islands. You do not charge delivery separately.</li>
+    <li>Set your <strong>home island and delivery area</strong> on your <a href="{{ route('seller.profile') }}#delivery">profile</a>: <em>All islands</em> (you send anywhere by boat, ferry or cargo; most Malé shops), <em>My island and Greater Malé</em> (you sell locally and send to Malé, Hulhumalé and Villimalé) or <em>My island only</em>. With the last two you can also tick your whole atoll and any other islands you reach, such as ferry-connected neighbours. Customers choose the island they shop for, and only see your products as deliverable on the islands you reach; checkout will not let them order delivery anywhere else. Pickup from your shop stays open to everyone.</li>
     <li>Use the delivery notes on your <a href="{{ route('seller.profile') }}#delivery">profile</a> to say how you send: supply boat, speed launch, domestic flight cargo, or courier in Malé, and how long it usually takes.</li>
     <li>Write the customer's name, island and phone number clearly on the parcel. Boat crews call the number on the parcel; it is on the order page.</li>
     <li>Pack for the sea: waterproof bags for paper and fabric, boxes with padding for anything fragile, and sealed containers for food. Perishables should go on the next departure, not wait for a weekly boat.</li>

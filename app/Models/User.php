@@ -92,7 +92,19 @@ class User extends Authenticatable implements HasLocalePreference
         'holiday_started_at' => 'datetime',
         'auto_approve_listings' => 'boolean',
         'auto_approve_listings_at' => 'datetime',
+        'delivers_to_home_atoll' => 'boolean',
     ];
+
+    /** Where a shop delivers (App\Services\ShopCoverage): every island, by boat, ferry or cargo. */
+    public const COVERAGE_ALL = 'all';
+
+    /** Its home island and Greater Malé (an island shop sending to Malé), plus any extra islands. */
+    public const COVERAGE_HOME_AND_MALE = 'home_and_male';
+
+    /** Its home island only, plus any extra islands. */
+    public const COVERAGE_HOME_ONLY = 'home_only';
+
+    public const COVERAGES = [self::COVERAGE_ALL, self::COVERAGE_HOME_AND_MALE, self::COVERAGE_HOME_ONLY];
 
     /**
      * Get the roles that belong to the user.
@@ -690,5 +702,42 @@ class User extends Authenticatable implements HasLocalePreference
     public function hasPassword(): bool
     {
         return (bool) ($this->getAttribute('has_password') ?? true);
+    }
+
+    /**
+     * The shop's home island (Seller Centre → Profile). home_island_id, delivery_coverage,
+     * delivers_to_home_atoll and shopping_island_id are not mass-assignable: they are saved with
+     * forceFill() from validated input (ShopCoverage::save(), ShoppingIsland).
+     *
+     * @return BelongsTo<Island, $this>
+     */
+    public function homeIsland(): BelongsTo
+    {
+        return $this->belongsTo(Island::class, 'home_island_id');
+    }
+
+    /**
+     * Extra islands a shop that does not deliver everywhere also reaches (ferry-connected neighbours).
+     *
+     * @return BelongsToMany<Island, $this>
+     */
+    public function deliveryIslands(): BelongsToMany
+    {
+        return $this->belongsToMany(Island::class, 'shop_delivery_islands', 'seller_id', 'island_id')->withTimestamps();
+    }
+
+    /**
+     * The island a signed-in customer shops for ("Delivering to"), kept across devices.
+     *
+     * @return BelongsTo<Island, $this>
+     */
+    public function shoppingIsland(): BelongsTo
+    {
+        return $this->belongsTo(Island::class, 'shopping_island_id');
+    }
+
+    public function deliveryCoverage(): string
+    {
+        return in_array($this->delivery_coverage, self::COVERAGES, true) ? $this->delivery_coverage : self::COVERAGE_ALL;
     }
 }

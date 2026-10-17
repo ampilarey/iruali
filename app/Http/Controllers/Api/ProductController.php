@@ -24,6 +24,9 @@ class ProductController extends BaseController
             'max_price' => 'nullable|numeric|min:0',
             'sort_by' => 'nullable|in:price_asc,price_desc,name_asc,name_desc,created_at_desc',
             'in_stock' => 'nullable|boolean',
+            // The phone app's "Delivering to" island and view (GET /api/v1/islands lists them)
+            'island_id' => 'nullable|integer|exists:islands,id',
+            'view' => 'nullable|in:'.implode(',', \App\Services\ShoppingIsland::VIEWS),
         ]);
 
         if ($validator->fails()) {
@@ -33,6 +36,10 @@ class ProductController extends BaseController
         $query = Product::with(['category', 'mainImage', 'seller'])
             ->active()
             ->where('is_active', true);
+
+        if ($request->filled('island_id') && ($island = \App\Models\Island::find((int) $request->input('island_id')))) {
+            app(\App\Services\ShopCoverage::class)->apply($query, $island, (string) ($request->input('view') ?: \App\Services\ShoppingIsland::VIEW_DELIVERS));
+        }
 
         // Apply filters
         if ($request->category_id) {

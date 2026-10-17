@@ -44,7 +44,10 @@ class DeliveryService
             return $zone;
         }
 
-        return in_array(mb_strtolower(trim((string) $city)), self::GREATER_MALE, true) ? 'greater_male' : 'islands';
+        // Accents and case ignored: "Male", "Malé" and "MALÉ" are all Malé
+        $normal = \App\Support\IslandList::normalize($city);
+
+        return $normal !== '' && in_array($normal, array_map(\App\Support\IslandList::normalize(...), self::GREATER_MALE), true) ? 'greater_male' : 'islands';
     }
 
     /**
@@ -341,9 +344,10 @@ class DeliveryService
     public function prepareOrder(Cart $cart, array $shippingData, float $goodsTotal): array
     {
         $choices = is_array($shippingData['fulfilment'] ?? null) ? $shippingData['fulfilment'] : [];
+        $shops = $this->cartShops($cart);
 
         $parts = [];
-        foreach ($this->cartShops($cart) as $sellerId => $shop) {
+        foreach ($shops as $sellerId => $shop) {
             $setting = $shop['setting'];
             $pickup = ($choices[$sellerId] ?? null) === SellerOrder::METHOD_PICKUP && $setting->offersPickup();
             $parts[$sellerId] = [
@@ -357,6 +361,20 @@ class DeliveryService
 
         $delivered = collect($parts)->contains(fn (array $part) => $part['method'] === SellerOrder::METHOD_DELIVER);
         $surcharge = round((float) collect($parts)->sum('surcharge'), 2);
+
+        // A shop's items can only be delivered to an island it reaches (a gift goes to the gift's
+        // address, so its island decides); otherwise collect them or take them out of the cart
+        if ($delivered) {
+            $island = $this->islandFor($shippingData);
+            foreach ($parts as $sellerId => $part) {
+                if ($part['method'] === SellerOrder::METHOD_DELIVER && ($message = $this->undeliverableMessage($shops[$sellerId], $island, $shippingData['shipping_city'] ?? null))) {
+                    throw new \RuntimeException($message);
+                }
+            }
+            if ($island) {
+                $shippingData['island_id'] = $island->id;
+            }
+        }
 
         if ($delivered) {
             $area = $this->areaFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_state'] ?? null);
@@ -394,6 +412,46 @@ class DeliveryService
         $shippingData['gift_hide_prices'] = $gift && filter_var($shippingData['gift_hide_prices'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         return $shippingData;
+    }
+
+    /**
+     * The island an order goes to: the one picked from the list (or the saved address's), else
+     * the typed island name and atoll looked up in the list.
+     *
+     * @param  array<string, mixed>  $shippingData
+     */
+    public function islandFor(array $shippingData): ?Island
+    {
+        $id = (int) ($shippingData['island_id'] ?? 0);
+        if ($id && ($island = Island::find($id))) {
+            return $island;
+        }
+
+        return app(IslandDirectory::class)->findByName($shippingData['shipping_city'] ?? null, $shippingData['shipping_state'] ?? null);
+    }
+
+    /**
+     * Why a shop's part can't be delivered to the island, or null when it can. An island typed
+     * by hand that is not in the list can only be reached by shops that deliver everywhere.
+     *
+     * @param  array<string, mixed>  $shop  one of cartShops()
+     */
+    public function undeliverableMessage(array $shop, ?Island $island, ?string $typedIsland = null): ?string
+    {
+        $seller = $shop['items']->first()?->product?->seller;
+        if (! $seller instanceof User) {
+            return null;
+        }
+        $coverage = app(ShopCoverage::class);
+        if ($island ? $coverage->canDeliverTo($seller, $island) : ($seller->deliveryCoverage() === User::COVERAGE_ALL || ! $seller->home_island_id)) {
+            return null;
+        }
+
+        $where = $island ? $island->localized_name : (trim((string) $typedIsland) ?: __('this island'));
+
+        return $shop['setting']->offersPickup()
+            ? __(':shop doesn\'t deliver to :island. Choose "Pick up from :shop" at checkout, or remove its items from your cart.', ['shop' => $shop['name'], 'island' => $where])
+            : __(':shop doesn\'t deliver to :island. Please remove its items from your cart, or deliver to another island.', ['shop' => $shop['name'], 'island' => $where]);
     }
 
     /**
@@ -454,6 +512,13 @@ class DeliveryService
         $choices = (array) old('fulfilment', []);
         $areas = $this->areas();
 
+        // The island the order is going to as the page opens: the saved address's, else the island
+        // picked before (or the customer's "Delivering to" island, which prefills a new address)
+        $activeIslands = app(IslandDirectory::class)->active();
+        $initialIsland = $selectedAddress
+            ? ($selectedAddress->island_id ? $activeIslands->firstWhere('id', $selectedAddress->island_id) : app(IslandDirectory::class)->findByName($selectedAddress->island, $selectedAddress->atoll))
+            : ($activeIslands->firstWhere('id', (int) old('island_id')) ?? app(ShoppingIsland::class)->island());
+
         if ($selectedAddress) {
             $area = $this->areaFor($selectedAddress->deliveryZone(), $selectedAddress->atoll);
         } else {
@@ -461,9 +526,15 @@ class DeliveryService
             $area = $this->areaFor($zone, old('shipping_state', $user?->state));
         }
 
-        $shops = $this->cartShops($cart)->map(function (array $shop, int $sellerId) use ($choices, $areas) {
+        $coverage = app(ShopCoverage::class);
+        $shops = $this->cartShops($cart)->map(function (array $shop, int $sellerId) use ($choices, $areas, $coverage, $activeIslands, $initialIsland) {
             $setting = $shop['setting'];
             $days = $setting->shipsWithinDays();
+            $seller = $shop['items']->first()?->product?->seller;
+            // The islands a shop that doesn't deliver everywhere reaches, for the page's script
+            $reach = $seller instanceof User && $seller->deliveryCoverage() !== User::COVERAGE_ALL && $seller->home_island_id
+                ? $activeIslands->filter(fn (Island $island) => $coverage->canDeliverTo($seller, $island))->pluck('id')->values()->all()
+                : null;
 
             return [
                 'key' => (string) $sellerId,
@@ -478,6 +549,8 @@ class DeliveryService
                 ] : null,
                 'method' => $setting->offersPickup() && ($choices[$sellerId] ?? null) === SellerOrder::METHOD_PICKUP ? SellerOrder::METHOD_PICKUP : SellerOrder::METHOD_DELIVER,
                 'estimates' => collect($areas)->map(fn ($label, $key) => $this->arrivalText($days, (string) $key))->all(),
+                'reach' => $reach,
+                'blocked' => $reach !== null && $initialIsland !== null && ! in_array($initialIsland->id, $reach, true),
             ];
         })->values();
 
@@ -508,37 +581,36 @@ class DeliveryService
             'addressAreas' => $addressAreas,
             'slotsEnabled' => $slotsEnabled,
             'slotDays' => $slotsEnabled ? $slots->days() : collect(),
+            'island' => $initialIsland,
+            'addressIslands' => ($addresses ?? collect())->mapWithKeys(fn (Address $address) => [$address->id => [
+                'id' => $address->island_id,
+                'name' => ($found = $activeIslands->firstWhere('id', $address->island_id)) ? (string) $found->localized_name : (string) $address->island,
+            ]])->all(),
         ];
     }
 
     // ---- Product page -------------------------------------------------------------------------
 
     /**
-     * Where the product page quotes delivery to: the island the shopper picked (session), else
-     * their default saved address, else Greater Malé.
+     * Where the product page quotes delivery to: the customer's "Delivering to" island
+     * (ShoppingIsland: picked, saved on the account, or the default address's), else the default
+     * address's typed island, else Greater Malé.
      *
      * @param  Collection<int, Island>|null  $activeIslands  when already loaded
      * @return array{label: string, area: string, island_id: ?int}
      */
     public function destination(?User $user, ?Collection $activeIslands = null): array
     {
-        $islands = $activeIslands ?? Island::where('is_active', true)->get();
-
-        $picked = (int) session(self::SESSION_ISLAND);
-        if ($picked && ($island = $islands->firstWhere('id', $picked))) {
+        if ($island = app(ShoppingIsland::class)->island()) {
             return $this->destinationForIsland($island);
         }
 
-        if ($user && ($address = $user->defaultAddress())) {
-            if ($address->island_id && ($island = $islands->firstWhere('id', $address->island_id))) {
-                return $this->destinationForIsland($island);
-            }
-            if (filled($address->island)) {
-                return ['label' => (string) $address->island, 'area' => $this->areaFor($address->deliveryZone(), $address->atoll), 'island_id' => null];
-            }
+        $islands = $activeIslands ?? app(IslandDirectory::class)->active();
+        if ($user && ($address = $user->defaultAddress()) && filled($address->island)) {
+            return ['label' => (string) $address->island, 'area' => $this->areaFor($address->deliveryZone(), $address->atoll), 'island_id' => null];
         }
 
-        $male = $islands->first(fn (Island $island) => in_array(mb_strtolower((string) $island->getTranslation('name', 'en', false)), ['malé', 'male'], true));
+        $male = $islands->first(fn (Island $island) => \App\Support\IslandList::normalize($island->getTranslation('name', 'en', false)) === 'male');
 
         return $male ? $this->destinationForIsland($male) : ['label' => __('Greater Malé'), 'area' => self::AREA_GREATER_MALE, 'island_id' => null];
     }
@@ -558,7 +630,7 @@ class DeliveryService
      */
     public function productBox(Product $product, ?User $user): array
     {
-        $islands = Island::where('is_active', true)->get();
+        $islands = app(IslandDirectory::class)->active();
         $destination = $this->destination($user, $islands);
         $setting = SellerDeliverySetting::for($product->seller_id);
         $days = $setting->shipsWithinDays();
@@ -572,6 +644,8 @@ class DeliveryService
             'shipsWithinDays' => $days,
             'pickup' => $setting->offersPickup() ? ['address' => (string) $setting->pickup_address, 'island' => $setting->pickupIslandName(), 'hours' => (string) $setting->pickup_hours] : null,
             'islandsByAtoll' => $this->islandsByAtoll($islands),
+            // Whether this product's shop reaches the island (null: no island chosen, nothing to say)
+            'delivers' => ($chosen = app(ShoppingIsland::class)->island()) ? app(ShopCoverage::class)->deliversProduct($product, $chosen) : null,
         ];
     }
 }

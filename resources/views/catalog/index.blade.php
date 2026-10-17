@@ -51,7 +51,10 @@
                     <h1 class="font-display text-xl lg:text-3xl font-bold text-dark truncate">{{ $title }}</h1>
                     @include('sellers._verified_badge', ['seller' => $seller, 'style' => 'inline'])
                     <p class="text-sm text-gray-600 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                        @if($seller->city)<span class="inline-flex items-center gap-1"><x-icon name="map-pin" class="w-4 h-4" />{{ $seller->city }}</span>@endif
+                        @if($seller->homeIsland)
+                            <span class="inline-flex items-center gap-1" data-shop-based-in><x-icon name="map-pin" class="w-4 h-4" />{{ __('Based in :place', ['place' => $seller->homeIsland->label()]) }}</span>
+                        @elseif($seller->city)<span class="inline-flex items-center gap-1"><x-icon name="map-pin" class="w-4 h-4" />{{ $seller->city }}</span>@endif
+                        <span class="inline-flex items-center gap-1" data-shop-delivers-to><x-icon name="truck" class="w-4 h-4" />{{ __('Delivers to: :places', ['places' => app(\App\Services\ShopCoverage::class)->summary($seller)]) }}</span>
                         <span class="inline-flex items-center gap-1 text-success font-medium"><x-icon name="shield" class="w-4 h-4" />{{ __('Reviewed seller') }}</span>
                         <span>{{ trans_choice(':count product|:count products', $products->total(), ['count' => $products->total()]) }}</span>
                     </p>
@@ -68,6 +71,10 @@
                 @if($subtitle)<p class="text-sm text-gray-600 mt-1 max-w-3xl">{{ $subtitle }}</p>@endif
             </div>
         @endif
+
+        @unless($seller)
+            <div class="mb-4">@include('partials.island-notice')</div>
+        @endunless
 
         @if($subcategories->isNotEmpty())
             <div class="flex gap-2 overflow-x-auto scrollbar-hide mb-4">
@@ -244,6 +251,16 @@
                         <span class="mx-auto w-14 h-14 rounded-full bg-primary-50 text-primary flex items-center justify-center mb-4"><x-icon name="search" class="w-7 h-7" /></span>
                         <p class="font-semibold text-lg">{{ __('No products match') }}</p>
                         <p class="text-gray-600 text-sm mt-1">{{ __('Try removing a filter or searching for something else.') }}</p>
+                        @php $emptyIsland = $seller ? null : app(\App\Services\ShoppingIsland::class)->filterIsland(); @endphp
+                        @if($emptyIsland)
+                            {{-- Narrowed to the customer's island: offer everything, labelled --}}
+                            <form method="POST" action="{{ route('delivery.island.view') }}" class="mt-4" data-empty-island>
+                                @csrf
+                                <input type="hidden" name="view" value="{{ \App\Services\ShoppingIsland::VIEW_ALL }}">
+                                <p class="text-gray-600 text-sm">{{ __('Only what delivers to :island is shown.', ['island' => $emptyIsland->localized_name]) }}</p>
+                                <button class="mt-2 text-sm font-semibold text-primary hover:underline">{{ __('Show everything') }}</button>
+                            </form>
+                        @endif
                         <a href="{{ route('shop') }}" class="inline-block mt-5 px-5 py-2.5 rounded-lg bg-primary text-white font-semibold">{{ __('Shop all products') }}</a>
                     </div>
                 @elseif($view === 'list')

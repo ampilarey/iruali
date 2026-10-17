@@ -69,6 +69,9 @@ class Audit
         'preorder.stock_arrived' => 'Pre-order stock arrived',
         'preorder.date_moved' => 'Pre-order date moved',
         'preorder.cancelled' => 'Pre-order cancelled by the customer',
+        'island.activated' => 'Island switched on',
+        'island.deactivated' => 'Island switched off',
+        'seller.coverage' => 'Shop home island / delivery area changed by staff',
     ];
 
     public static function record(string $action, ?Model $subject = null, array $changes = []): ?AuditLog

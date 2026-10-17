@@ -25,8 +25,11 @@ class CampaignController extends Controller
         abort_unless($campaign->isJoinable(), 404);
 
         $campaign->loadMissing('brand');
+        $shopping = app(\App\Services\ShoppingIsland::class);
         $products = $campaign->approvedProducts()
             ->active()
+            // What reaches the customer's island (or only its own shops)
+            ->where(fn (Builder $q) => app(\App\Services\ShopCoverage::class)->apply($q, $shopping->filterIsland(), $shopping->view()))
             // A brand campaign shows only that brand's products (one that changed brand gets no campaign price)
             ->when($campaign->brand_id, fn (Builder $q) => $q->where('products.brand_id', $campaign->brand_id))
             ->with(['category', 'mainImage', 'seller', 'brandModel'])

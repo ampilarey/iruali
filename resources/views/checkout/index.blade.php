@@ -96,7 +96,7 @@
                             <input type="text" id="shipping_address" name="shipping_address" required autocomplete="shipping address-line1" class="{{ $field }}" value="{{ old('shipping_address', $user?->address) }}" placeholder="{{ __('House name, street') }}" @error('shipping_address') aria-invalid="true" aria-describedby="shipping_address-error" @enderror>
                             @error('shipping_address')<p id="shipping_address-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                         </div>
-                        <x-island-picker :islands-by-atoll="$islandsByAtoll" :selected-id="old('island_id')" :island="old('shipping_city', $user?->city)" :atoll="old('shipping_state', $user?->state)" island-name="shipping_city" atoll-name="shipping_state" prefix="ship" />
+                        <x-island-picker :islands-by-atoll="$islandsByAtoll" :selected-id="old('island_id', app(\App\Services\ShoppingIsland::class)->island()?->id)" :island="old('shipping_city', $user?->city)" :atoll="old('shipping_state', $user?->state)" island-name="shipping_city" atoll-name="shipping_state" prefix="ship" />
                         @error('shipping_city')<p id="shipping_city-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                         @error('shipping_state')<p id="shipping_state-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

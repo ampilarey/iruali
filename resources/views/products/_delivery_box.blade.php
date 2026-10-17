@@ -14,7 +14,16 @@
             <span class="font-semibold text-dark">{{ __('Delivery to :island', ['island' => $destination['label']]) }}</span>
             <span class="font-semibold text-dark" dir="ltr">{{ $box['fee'] > 0 ? \App\Support\Money::format($box['fee']) : __('Free') }}</span>
         </p>
-        <p class="text-gray-700">{{ $box['arrival'] }}</p>
+        @if($box['delivers'] === false)
+            {{-- The shop doesn't reach the customer's island: say so plainly, and offer pickup when the shop has it --}}
+            <p class="rounded-lg bg-gray-100 px-2 py-1.5 font-semibold text-dark" data-island-label="no">{{ __('Doesn\'t deliver to :island', ['island' => $destination['label']]) }}</p>
+            <p class="text-gray-700">{{ __('This shop does not deliver to :island. Choose another island below, or collect from the shop if it offers pickup.', ['island' => $destination['label']]) }}</p>
+        @else
+            @if($box['delivers'] === true)
+                <p class="font-medium text-success" data-island-label="yes">{{ __('Delivers to :island', ['island' => $destination['label']]) }}</p>
+            @endif
+            <p class="text-gray-700">{{ $box['arrival'] }}</p>
+        @endif
         @if($box['surcharge'] > 0)
             <p class="text-gray-700">{{ __('Plus :amount delivery per item (bulky item), even with free delivery.', ['amount' => \App\Support\Money::format($box['surcharge'])]) }}</p>
         @endif

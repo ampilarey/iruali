@@ -78,6 +78,7 @@ class GuestCheckoutController extends Controller
             'shipping_country' => $request->shipping_country,
             'shipping_phone' => $request->shipping_phone,
             'delivery_zone' => $request->delivery_zone,
+            'island_id' => $request->filled('island_id') ? (int) $request->input('island_id') : null,
             'payment_method' => $request->payment_method,
         ];
         // Deliver or pick up per shop, the Malé time slot and the gift details

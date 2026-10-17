@@ -28,6 +28,7 @@ class OnboardingService
             ['key' => 'about', 'label' => __('About your shop'), 'hint' => __('At least :min characters about what you sell and where you are.', ['min' => self::ABOUT_MIN_LENGTH]), 'done' => mb_strlen(trim((string) $seller->business_description)) >= self::ABOUT_MIN_LENGTH, 'url' => route('seller.profile')],
             ['key' => 'phone', 'label' => __('Phone number'), 'hint' => __('So iruali and customers can reach you about orders.'), 'done' => filled($seller->phone), 'url' => route('seller.profile')],
             ['key' => 'delivery', 'label' => __('Delivery options'), 'hint' => __('How you send orders and whether you ship to other islands.'), 'done' => filled($seller->delivery_notes), 'url' => route('seller.profile').'#delivery'],
+            ['key' => 'home_island', 'label' => __('Home island and delivery area'), 'hint' => __('The island your shop is on and the islands you deliver to.'), 'done' => filled($seller->home_island_id), 'url' => route('seller.profile').'#delivery'],
             ['key' => 'bank', 'label' => __('Bank account'), 'hint' => __('Where iruali pays your earnings.'), 'done' => $seller->bankAccount !== null, 'url' => route('seller.settings.bank')],
             ['key' => 'product', 'label' => __('First product'), 'hint' => __('Add at least one product to your shop.'), 'done' => $seller->products()->exists(), 'url' => route('seller.products.create')],
         ];

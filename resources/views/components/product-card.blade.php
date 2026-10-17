@@ -34,6 +34,7 @@
             @if($sellerName)
                 <p class="mt-2 text-xs text-gray-600 flex items-center gap-1.5"><x-icon name="store" class="w-3.5 h-3.5 text-gray-400" />{{ __('Sold by') }} <a href="{{ route('sellers.show', $seller) }}" class="font-semibold text-dark hover:text-primary hover:underline truncate">{{ $sellerName }}</a>@if($seller->city)<span class="truncate">&middot; {{ $seller->city }}</span>@endif</p>
             @endif
+            @include('products._island_label', ['product' => $product, 'class' => 'mt-2'])
         </div>
         <div class="sm:border-s sm:border-gray-100 sm:ps-5 flex flex-col">
             <x-price :product="$product" size="lg" />
@@ -58,6 +59,7 @@
                 <span class="bg-sun text-sun-on text-[11px] font-bold px-1.5 py-0.5 rounded">{{ __('Top pick') }}</span>
             @endif
             @include('sellers._holiday_label', ['seller' => $seller])
+            @include('products._island_label', ['product' => $product])
         </span>
     </a>
     @unless($compact)

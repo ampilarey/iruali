@@ -14,6 +14,7 @@
         </div>
 
         @include('admin.sellers._auto_approve', ['seller' => $seller])
+        @include('admin.sellers._coverage', ['seller' => $seller])
 
         @include('seller.partials.performance', ['report' => $report])
 

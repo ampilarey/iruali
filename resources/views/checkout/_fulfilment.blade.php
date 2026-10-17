@@ -43,6 +43,16 @@
                     <p class="mt-1 text-sm text-gray-700 flex items-center gap-1.5"><x-icon name="truck" class="w-4 h-4 text-primary" /><span data-shop-estimate>{{ $shop['estimates'][$initialArea] ?? '' }}</span></p>
                 @endif
 
+                @if($shop['reach'] !== null)
+                    {{-- The shop doesn't deliver everywhere: when the delivery island is not one it reaches, say so (the order is refused otherwise) --}}
+                    @php $islandName = $deliveryCheckout['island']?->localized_name ?? ''; @endphp
+                    <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 {{ $shop['blocked'] && $shop['method'] === 'deliver' ? '' : 'hidden' }}" data-shop-blocked
+                         data-template="{{ $shop['pickup'] ? __(':shop doesn\'t deliver to :island. Choose "Pick up from :shop" above, or remove its items from your cart.', ['shop' => $shop['name'], 'island' => ':island']) : __(':shop doesn\'t deliver to :island. Please remove its items from your cart, or deliver to another island.', ['shop' => $shop['name'], 'island' => ':island']) }}">
+                        <p data-shop-blocked-text>{{ $shop['pickup'] ? __(':shop doesn\'t deliver to :island. Choose "Pick up from :shop" above, or remove its items from your cart.', ['shop' => $shop['name'], 'island' => $islandName]) : __(':shop doesn\'t deliver to :island. Please remove its items from your cart, or deliver to another island.', ['shop' => $shop['name'], 'island' => $islandName]) }}</p>
+                        <a href="{{ route('cart') }}" class="mt-1 inline-block font-semibold underline">{{ __('Go to your cart') }}</a>
+                    </div>
+                @endif
+
                 @if($shop['surcharge'] > 0)
                     <p class="mt-1 text-xs text-gray-600">{{ __('Bulky items: :amount extra delivery charge when delivered.', ['amount' => \App\Support\Money::format($shop['surcharge'])]) }}</p>
                 @endif

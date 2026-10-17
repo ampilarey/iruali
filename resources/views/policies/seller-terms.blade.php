@@ -27,6 +27,7 @@
     <li>{{ $t('Customers pay {trading_name} by card when they order. You pack and send your part of each order and keep its status up to date in the Seller Centre (processing, sent with a tracking note, delivered).') }}</li>
     <li>{{ $t('You must ship within {late_shipment_days} days of the customer\'s payment. Later shipments count as late on your performance record; repeated late shipments can lead to suspension.') }}</li>
     <li>{{ $t('Delivery fees are set and charged by {trading_name}. You do not charge customers for delivery separately.') }}</li>
+    <li>{{ $t('You choose your home island and where you deliver: all islands, your island and Greater Malé, or your island only, plus any islands you add. Keep it accurate. Customers only see your products as deliverable where you say you deliver, and you must deliver the orders placed for those islands. Pickup from your shop, if you offer it, is open to every customer.') }}</li>
     <li>{{ $t('Once any shop has sent its part, the order can no longer be cancelled; problems are then handled as returns.') }}</li>
 </ul>
 

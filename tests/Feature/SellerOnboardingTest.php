@@ -54,12 +54,12 @@ class SellerOnboardingTest extends TestCase
         $shop = $this->newShop();
 
         $this->actingAs($shop)->get('/seller/dashboard')->assertOk()
-            ->assertSee('Set up your shop')->assertSee('0 of 7 done')
+            ->assertSee('Set up your shop')->assertSee('0 of 8 done')
             ->assertSee('Shop logo')->assertSee('Shop banner')->assertSee('About your shop')->assertSee('Phone number')
-            ->assertSee('Delivery options')->assertSee('Bank account')->assertSee('First product');
+            ->assertSee('Delivery options')->assertSee('Home island and delivery area')->assertSee('Bank account')->assertSee('First product');
 
         $this->put('/seller/profile', $this->profileInput(['delivery_notes' => 'Boat to Addu twice a week, courier in Malé.', 'ships_to_islands' => 1]))->assertRedirect();
-        $this->get('/seller/dashboard')->assertSee('3 of 7 done');
+        $this->get('/seller/dashboard')->assertSee('3 of 8 done');
         $this->assertNull($shop->fresh()->onboarding_completed_at);
         Notification::assertNothingSent();
     }
@@ -71,6 +71,8 @@ class SellerOnboardingTest extends TestCase
 
         $this->put('/seller/profile', $this->profileInput([
             'delivery_notes' => 'Boat to Addu twice a week.',
+            'home_island_id' => \App\Models\Island::where('code', 'seenu-hithadhoo')->value('id'),
+            'delivery_coverage' => 'home_and_male',
             'shop_logo' => UploadedFile::fake()->image('logo.png', 300, 300),
             'shop_banner' => UploadedFile::fake()->image('banner.jpg', 1200, 400),
         ]))->assertRedirect();
@@ -80,7 +82,7 @@ class SellerOnboardingTest extends TestCase
         Storage::disk('public')->assertExists($shop->shop_logo);
 
         $this->put('/seller/settings/bank', ['bank' => 'bml', 'account_name' => 'Island Crafts', 'account_number' => '7730000123456']);
-        $this->get('/seller/dashboard')->assertSee('6 of 7 done');
+        $this->get('/seller/dashboard')->assertSee('7 of 8 done');
         $this->assertNull($shop->fresh()->onboarding_completed_at);
 
         $this->post('/seller/products', [

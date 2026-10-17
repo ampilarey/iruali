@@ -3,7 +3,7 @@
 @php use App\Support\Money; @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'Dispute #'.$dispute->id.' on order #'.$order->order_number, 'back' => route('admin.disputes')])
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">

@@ -1,8 +1,8 @@
 <div class="bg-white shadow">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 py-3 lg:py-4">
         <div>
             <p class="text-xs font-medium uppercase tracking-wider text-primary-600">Marketplace</p>
-            <h1 class="text-2xl font-bold text-gray-900">{{ $title }}</h1>
+            <h1 class="text-xl font-bold text-gray-900 lg:text-2xl">{{ $title }}</h1>
         </div>
         <div class="flex gap-2">
             @isset($back)<a href="{{ $back }}" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">Back</a>@endisset

@@ -3,7 +3,7 @@
 @section('title', 'Brands')
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => 'Brands'])
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">

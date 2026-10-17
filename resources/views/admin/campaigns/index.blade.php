@@ -6,7 +6,7 @@
 <div class="max-w-6xl mx-auto py-8 px-4">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold">Campaigns</h1>
+            <h1 class="text-xl font-bold lg:text-2xl">Campaigns</h1>
             <p class="text-sm text-gray-500">Sales and events: a banner on the home page, a landing page, and discounted products from shops.</p>
         </div>
         <div class="flex gap-2">

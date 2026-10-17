@@ -3,7 +3,7 @@
 @php use App\Support\Money; @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 pb-12">
+<div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => __('New payout batch'), 'back' => route('admin.payout-batches.index')])
 
     <form method="POST" action="{{ route('admin.payout-batches.store') }}" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" data-batch>

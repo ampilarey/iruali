@@ -36,13 +36,14 @@
         data-list-url="{{ route('delivery.island.show') }}" data-store-url="{{ route('delivery.island') }}"
         data-locate-url="{{ route('delivery.island.locate') }}" data-dismiss-url="{{ route('delivery.island.dismiss') }}"
         data-text-locating="{{ __('Finding your island…') }}" data-text-located-failed="{{ __('We could not get your location. Please choose your island from the list.') }}"
-        data-text-greater-male="{{ __('Greater Malé') }}" data-text-no-match="{{ __('No island matches.') }}"
+        data-text-greater-male="{{ __('Greater Malé') }}" data-text-other-islands="{{ __('Other islands') }}" data-text-atolls="{{ __(':count atolls') }}" data-text-no-match="{{ __('No island matches.') }}"
         aria-labelledby="island-dialog-title"
-        class="w-[min(32rem,calc(100%-2rem))] max-h-[85vh] rounded-2xl p-0 shadow-2xl backdrop:bg-reef/60">
+        class="m-auto w-[min(32rem,calc(100%-2rem))] max-h-[85vh] rounded-2xl p-0 shadow-2xl backdrop:bg-reef/60">
     <div class="flex max-h-[85vh] flex-col">
         <div class="flex items-start justify-between gap-3 border-b border-gray-100 p-4">
             <div>
-                <h2 id="island-dialog-title" class="font-display text-lg sm:text-xl font-bold text-dark">{{ __('Where should we deliver?') }}</h2>
+                {{-- Focus starts on the title (autofocus), so the close button shows no focus box on opening --}}
+                <h2 id="island-dialog-title" tabindex="-1" autofocus class="font-display text-lg sm:text-xl font-bold text-dark outline-none">{{ __('Where should we deliver?') }}</h2>
                 <p class="mt-1 text-sm text-gray-600">{{ __('Choose your island to see the shops that deliver there. You can change it any time, for example to send a gift to family.') }}</p>
             </div>
             <button type="button" data-island-dialog-close class="p-1 text-gray-500 hover:text-dark" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-5 h-5" /></button>

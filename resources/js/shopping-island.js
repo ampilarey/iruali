@@ -73,7 +73,17 @@
                 list.appendChild(quick);
             }
 
-            var atolls = el('div', 'divide-y divide-gray-100 rounded-xl border border-gray-200');
+            // Every other island sits behind one "Other islands" row, then one row per atoll
+            var others = el('details', 'group/others rounded-xl border border-gray-200');
+            others.dataset.others = '1';
+            var head = el('summary', 'flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-3 hover:bg-gray-50 [&::-webkit-details-marker]:hidden');
+            head.appendChild(el('span', 'font-semibold text-dark', dialog.dataset.textOtherIslands));
+            var headMeta = el('span', 'flex shrink-0 items-center gap-2 text-xs text-gray-500');
+            headMeta.appendChild(el('span', '', dialog.dataset.textAtolls.replace(':count', String(groups.length))));
+            headMeta.appendChild(el('span', 'inline-block transition-transform group-open/others:rotate-90 rtl:group-open/others:-rotate-90', document.documentElement.dir === 'rtl' ? '‹' : '›'));
+            head.appendChild(headMeta);
+            others.appendChild(head);
+            var atolls = el('div', 'divide-y divide-gray-100 border-t border-gray-200');
             groups.forEach(function (group) {
                 var box = el('details', 'group');
                 box.dataset.group = '1';
@@ -95,7 +105,7 @@
                     if (data.island && data.island.id === island.id) current = true;
                 });
                 box.appendChild(grid);
-                if (current) { box.open = true; box.dataset.current = '1'; }
+                if (current) { box.open = true; box.dataset.current = '1'; others.open = true; others.dataset.current = '1'; }
                 // One atoll open at a time (unless searching), brought into view when opened
                 box.addEventListener('toggle', function () {
                     if (!box.open || (search.value || '').trim()) return;
@@ -104,7 +114,8 @@
                 });
                 atolls.appendChild(box);
             });
-            list.appendChild(atolls);
+            others.appendChild(atolls);
+            list.appendChild(others);
             filter();
         }
 
@@ -125,6 +136,8 @@
             });
             var quick = list.querySelector('[data-quick]');
             if (quick) quick.hidden = !!q;
+            var others = list.querySelector('[data-others]');
+            if (others) others.open = q ? any : others.dataset.current === '1';
             var none = list.querySelector('[data-none]');
             if (!any && !none) { none = el('p', 'text-gray-500', dialog.dataset.textNoMatch); none.dataset.none = '1'; list.appendChild(none); }
             if (none) none.hidden = any;

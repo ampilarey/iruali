@@ -63,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
                 app()->setLocale(\App\Services\LocalizationService::getFallbackLocale());
             }
         });
+        // The nightly backup failed: a team alert as well as the backup package's email
+        \Illuminate\Support\Facades\Event::listen(\Spatie\Backup\Events\BackupHasFailed::class, function ($event) {
+            \App\Support\TeamAlerts::send('backup_failed', 'iruali: the backup failed: '.\Illuminate\Support\Str::limit($event->exception->getMessage(), 150));
+        });
         // Admin → Sample data keeps finding the generic demo products when admin@example.com is renamed
         User::updated(fn (User $user) => \App\Support\DemoData::rememberRenamedAdmin($user));
 

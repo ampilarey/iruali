@@ -149,4 +149,9 @@ return [
         'private_key_path' => env('APPLE_PRIVATE_KEY_PATH'),
     ],
 
+    // Team alerts to a Telegram group (Admin → Team alerts): the bot's token from @BotFather
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
 ];

@@ -18,6 +18,12 @@ Route::middleware('auth')->group(function () {
 // switch and wording, previews and tests) and the log
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/sms', [SmsController::class, 'index'])->name('sms');
+
+    // Admin → Team alerts: events to the Telegram group and to staff phones (admins only)
+    Route::get('/alerts', [\App\Http\Controllers\Admin\TeamAlertsController::class, 'index'])->name('alerts');
+    Route::put('/alerts', [\App\Http\Controllers\Admin\TeamAlertsController::class, 'update'])->name('alerts.update');
+    Route::post('/alerts/test', [\App\Http\Controllers\Admin\TeamAlertsController::class, 'test'])->name('alerts.test')->middleware('throttle:10,1,alerts.test');
+    Route::post('/alerts/find-chats', [\App\Http\Controllers\Admin\TeamAlertsController::class, 'findChats'])->name('alerts.find-chats')->middleware('throttle:10,1,alerts.find-chats');
     Route::post('/sms/test', [SmsController::class, 'test'])->name('sms.test')->middleware('throttle:10,1,sms.test');
     Route::put('/sms/settings', [SmsController::class, 'updateSettings'])->name('sms.settings');
     Route::put('/sms/types/{type}', [SmsController::class, 'updateType'])->name('sms.types.update')->where('type', '[a-z_]+');

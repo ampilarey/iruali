@@ -119,6 +119,7 @@ class ApplicationController extends Controller
         if ($verification) {
             app(\App\Services\SellerVerificationService::class)->submit($user, $verification);
         }
+        \App\Support\TeamAlerts::send('shop_application', 'iruali: new shop application: '.$validated['business_name'].' ('.$home->englishName().').', route('admin.sellers'));
 
         return redirect()->route('seller.dashboard')
             ->with('success', 'Application received! You can start adding products now; they go live once an admin approves your shop.');

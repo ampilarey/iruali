@@ -22,6 +22,9 @@ class Setting extends Model
         'sms_monthly_limit' => 0,
         'sms_quiet_from' => '',
         'sms_quiet_until' => '',
+        // Team alerts (Admin → Team alerts): the Telegram group's chat id and the events posted there
+        'telegram_chat_id' => '',
+        'telegram_events' => 'new_order,bank_slip,refund_due,dispute_opened,return_requested,shop_application,payment_error,backup_failed,sms_limit',
         // Admin staff must use two-step sign-in before opening /admin (also needs STAFF_REQUIRE_2FA on)
         'staff_require_two_factor' => 1,
         'contact_email' => '',

@@ -153,6 +153,8 @@ class ManualPaymentService
             $this->deletePrivateFile($old, self::SLIP_DISK);
         }
 
+        \App\Support\TeamAlerts::send('bank_slip', 'iruali: bank transfer slip to check for '.$order->order_number.' ('.\App\Support\Money::format($order->cardAmount()).').', route('admin.orders.show', $order));
+
         try {
             if ($email = trim((string) Setting::get('contact_email'))) {
                 Notification::route('mail', $email)->notify(new PaymentSlipUploaded($order));

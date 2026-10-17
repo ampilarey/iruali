@@ -18,9 +18,9 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
    Log page gets stats, CSV export and resend; old logs pruned.
    B&G: `backend/app/Domains/Notifications/Support/SmsTypeRegistry.php`, `admin/sms/control-center`,
    `sms:dispatch-scheduled`, `sms:release-deferred`, `sms:prune-logs`.
-2. **Dhiraagu SMS driver** next to the generic HTTP driver, set up from `.env`, with the ready check.
+2. ✅ **Dhiraagu SMS driver** (done: `SMS_DRIVER=dhiraagu` with the portal username and password) next to the generic HTTP driver, set up from `.env`, with the ready check.
    B&G: `backend/app/Domains/Notifications/Providers/DhiraaguSmsProvider.php`.
-3. **Alerts to the iruali team** by SMS, email or Telegram (each person picks): new order, bank
+3. ✅ **Alerts to the iruali team** (done: Admin → Team alerts, `App\Support\TeamAlerts`; SMS per staff member and a Telegram group; email stays with the contact inbox) by SMS, email or Telegram (each person picks): new order, bank
    slip uploaded, refund due, dispute opened, new shop application, product waiting for review,
    payment error, backup or scheduler failure. A Telegram bot posting new orders to a group.
    B&G: `backend/app/Domains/Telegram/*`, `admin/staff/{userId}/notification-prefs`.

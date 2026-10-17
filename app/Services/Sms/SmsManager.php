@@ -24,7 +24,9 @@ class SmsManager
 
     public function driverName(): string
     {
-        return config('sms.driver', 'log') === 'http' ? 'http' : 'log';
+        $driver = config('sms.driver', 'log');
+
+        return in_array($driver, ['http', 'dhiraagu'], true) ? $driver : 'log';
     }
 
     /**
@@ -156,6 +158,7 @@ class SmsManager
     {
         return $this->driver ??= match ($this->driverName()) {
             'http' => new HttpSms((array) config('sms.http', [])),
+            'dhiraagu' => new DhiraaguSms((array) config('sms.dhiraagu', [])),
             default => new LogSms,
         };
     }
@@ -193,6 +196,7 @@ class SmsManager
 
         try {
             Mail::to($to)->send(new SmsLimitReached(self::sentThisMonth(), self::monthlyLimit()));
+            \App\Support\TeamAlerts::send('sms_limit', 'iruali: monthly SMS limit of '.self::monthlyLimit().' reached. Only codes go out until the 1st.', route('admin.sms'));
         } catch (Throwable $e) {
             report($e);
         }

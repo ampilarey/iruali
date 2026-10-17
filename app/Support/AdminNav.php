@@ -61,6 +61,7 @@ class AdminNav
                 ['admin.islands', 'Islands', 'map-pin'],
                 ['admin.legal', 'Legal pages', 'list'],
                 ['admin.sms', 'SMS', 'phone'],
+                ['admin.alerts', 'Team alerts', 'bell'],
                 ['admin.sample-data', 'Sample data', 'squares'],
             ],
             'System' => [

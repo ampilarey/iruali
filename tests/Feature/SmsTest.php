@@ -223,4 +223,30 @@ class SmsTest extends TestCase
         $this->post(route('admin.sms.test'), ['to' => '999 1234', 'message' => 'Live test'])->assertSessionHas('error');
         $this->get(route('admin.sms'))->assertOk()->assertSee('failed');
     }
+
+    public function test_the_dhiraagu_driver_needs_only_the_portal_login(): void
+    {
+        config(['sms.driver' => 'dhiraagu', 'sms.dhiraagu.username' => 'iruali', 'sms.dhiraagu.password' => 'p@ss', 'sms.dhiraagu.url' => 'https://messaging.dhiraagu.test/v1/api/sms', 'sms.dhiraagu.use_sender' => false]);
+        app(SmsManager::class)->using(null);
+        Http::fakeSequence('messaging.dhiraagu.test/*')
+            ->push(['transactionStatus' => 'true', 'transactionId' => 'T1'])
+            ->push(['transactionId' => 'T2'])
+            ->push(['transactionStatus' => 'false', 'transactionDescription' => 'Invalid number'])
+            ->push('Unauthorized', 401);
+
+        $sms = app(SmsManager::class);
+        $this->assertTrue($sms->isLive());
+        $this->assertSame('sent', $sms->send('777 1234', 'Hi')->status);
+        Http::assertSent(fn ($r) => $r['destination'] === ['9607771234'] && $r['content'] === 'Hi'
+            && $r['authorizationKey'] === base64_encode('iruali:p@ss') && ! isset($r['source']));
+        $this->assertSame('sent', $sms->send('7771234', 'Hi')->status, 'a transactionId alone is a yes');
+        $this->assertSame('failed', $sms->send('7771234', 'Hi')->status);
+        $failed = $sms->send('7771234', 'Hi');
+        $this->assertSame('failed', $failed->status);
+        $this->assertStringContainsString('HTTP 401', (string) $failed->providerResponse);
+
+        config(['sms.dhiraagu.password' => '']);
+        app(SmsManager::class)->using(null);
+        $this->assertStringContainsString('SMS_DHIRAAGU_PASSWORD', (string) app(SmsManager::class)->send('7771234', 'Hi')->providerResponse);
+    }
 }

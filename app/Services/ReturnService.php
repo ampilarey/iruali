@@ -247,6 +247,8 @@ class ReturnService
 
     protected function notifyRequested(ReturnRequest $request): void
     {
+        \App\Support\TeamAlerts::send('return_requested', 'iruali: return requested on '.$request->order?->order_number.($request->sellerOrder ? ' ('.$request->sellerOrder->shopName().')' : '').', '.\App\Support\Money::format($request->refund_amount).'.', route('admin.returns.show', $request));
+
         try {
             if ($seller = $request->sellerOrder?->seller) {
                 $seller->notify(new ReturnRequested($request));

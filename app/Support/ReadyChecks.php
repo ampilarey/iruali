@@ -379,6 +379,9 @@ class ReadyChecks
         if ($driver === 'log') {
             return $this->warn('SMS driver is log (codes are written to the log, not sent)', 'Set the SMS driver and credentials in config/sms.php / .env.');
         }
+        if ($driver === 'dhiraagu' && (blank(config('sms.dhiraagu.username')) || blank(config('sms.dhiraagu.password')))) {
+            return $this->fail('SMS driver dhiraagu, but the username or password is missing', 'Set SMS_DHIRAAGU_USERNAME and SMS_DHIRAAGU_PASSWORD in .env, then php artisan config:cache.');
+        }
         if (! \App\Services\Sms\SmsManager::enabled()) {
             return $this->warn("SMS driver {$driver}, but all SMS are switched off", 'Switch SMS back on in Admin → SMS → Switches and limits.');
         }

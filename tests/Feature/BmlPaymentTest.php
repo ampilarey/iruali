@@ -306,4 +306,42 @@ class BmlPaymentTest extends TestCase
         $this->post(route('admin.orders.bml-sync', $order))->assertSessionHas('success', 'BML confirms this order is paid.');
         $this->assertSame('paid', $order->fresh()->payment_status);
     }
+
+    public function test_the_reconcile_job_records_a_payment_whose_return_and_webhook_were_lost(): void
+    {
+        $this->fakeBml('INITIATED');
+        $this->checkout();
+        $order = Order::sole();
+        $this->assertSame('unpaid', $order->payment_status);
+
+        // Still open at BML, and too new to check
+        $this->artisan('payments:reconcile-bml')->expectsOutputToContain('Checked 0')->assertSuccessful();
+        $this->travel(5)->minutes();
+        $this->artisan('payments:reconcile-bml')->expectsOutputToContain('Checked 1 open card payment(s); 0 went through.')->assertSuccessful();
+
+        // The customer paid, but neither the return nor the webhook reached iruali
+        $this->fakeBml('CONFIRMED');
+        $this->artisan('payments:reconcile-bml')->expectsOutputToContain('1 went through')->assertSuccessful();
+        $this->assertSame('paid', $order->fresh()->payment_status);
+
+        // Nothing left to check
+        $this->artisan('payments:reconcile-bml')->expectsOutputToContain('Checked 0')->assertSuccessful();
+    }
+
+    public function test_money_arriving_for_a_cancelled_order_is_flagged_for_a_refund(): void
+    {
+        $this->fakeBml('INITIATED');
+        $this->checkout();
+        $order = Order::sole();
+        app(\App\Services\OrderService::class)->updateOrderStatus($order, 'cancelled');
+
+        $this->travel(5)->minutes();
+        $this->fakeBml('CONFIRMED');
+        $this->artisan('payments:reconcile-bml')->assertSuccessful();
+
+        $order->refresh();
+        $this->assertSame('cancelled', $order->status);
+        $this->assertSame('due', $order->refund_status);
+        $this->assertSame('Paid after the order was cancelled', $order->refund_reason);
+    }
 }

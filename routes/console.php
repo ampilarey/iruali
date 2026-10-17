@@ -52,6 +52,9 @@ Schedule::command('queue:prune-failed --hours=168')->daily();
 // Yesterday's errors (new ones and the most frequent), mailed only when there is something to say
 Schedule::command('errors:digest')->dailyAt('07:00')->timezone('Indian/Maldives');
 
+// Open card payments are checked with BML, in case both the return and the webhook were lost
+Schedule::command('payments:reconcile-bml')->everyFiveMinutes()->withoutOverlapping()->name('payments-reconcile-bml');
+
 // SMS held back by quiet hours (Admin → SMS) go out when they end; the SMS log keeps 180 days
 Schedule::command('sms:release-held')->everyMinute()->withoutOverlapping()->name('sms-release-held');
 Schedule::command('sms:prune')->dailyAt('03:15')->timezone('Indian/Maldives');

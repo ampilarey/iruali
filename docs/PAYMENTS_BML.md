@@ -53,6 +53,7 @@ place one small real order to check the whole path.
 | Webhook | BML also calls `POST /api/payments/bml/webhook` (sent with each transaction). The signature (`X-Signature` = SHA-256 of nonce + timestamp + API key) is checked, then the API is asked again. |
 | Not paid | The order page shows **Pay now** to try again. Each try is a new BML transaction; `localId` is the order number in letters and digits only plus `P1`, `P2`, … (BML rejects other characters). |
 | Admin | The order page lists every attempt and its BML state, with **Check with BML** to refresh. |
+| Safety net | Every 5 minutes `payments:reconcile-bml` asks BML about card payments still open from the last 3 days (at least 3 minutes old), so a payment is recorded even if both the return and the webhook were lost. Money that arrives for an order already cancelled is flagged as a refund due, which emails the contact address and sends a team alert. |
 
 Amounts are sent in laari (MVR 1.00 = 100). Each transaction also sends `paymentPortalExperience`
 (`externalWebsiteTermsAccepted: true` and the terms URL), which BML Connect v2 expects. Each attempt is

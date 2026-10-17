@@ -18,7 +18,7 @@ throughout. Runs on cPanel shared hosting; `test.iruali.mv` deploys itself from 
   variants, bulk edit and CSV import/export, stock page, order fulfilment with tracking
   details, customer messages, returns, reviews with replies, earnings and payouts, analytics,
   performance (late shipping), low-stock digest, bank account for payouts.
-- **Admin (admin / support / finance roles, 2FA required):** dashboard with system status,
+- **Admin (admin / support / finance roles, 2FA required unless switched off in Settings):** dashboard with system status,
   inbox of everything waiting, sellers, products, users, orders and payments (BML re-check,
   refunds), returns, disputes, messages, payouts and bank-file payout batches, vouchers,
   reviews and questions moderation, settings and legal pages, newsletter, analytics, error

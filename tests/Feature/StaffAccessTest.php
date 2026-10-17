@@ -226,6 +226,26 @@ class StaffAccessTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/account')->assertOk();
     }
 
+    public function test_admins_can_make_two_factor_optional_for_staff(): void
+    {
+        config(['staff.require_two_factor' => true]);
+        $admin = $this->staff('admin');
+        $admin->forceFill(['two_factor_enabled' => true, 'two_factor_secret' => encrypt('secret')])->save();
+        $support = $this->staff('support');
+        $this->actingAs($support)->get('/admin/dashboard')->assertRedirect(route('profile.2fa.setup'));
+
+        $fields = ['loyalty_spend_per_point' => 100, 'referral_referrer_points' => 100, 'referral_referee_points' => 50];
+        $this->actingAs($admin->fresh())->get('/admin/settings')->assertOk()->assertSee('data-staff-2fa-setting', false);
+        $this->put('/admin/settings', $fields + ['staff_require_two_factor' => 0])->assertRedirect('/admin/settings');
+        $this->assertTrue(\App\Models\AuditLog::where('action', 'settings.staff_two_factor')->exists());
+
+        $this->actingAs($support)->get('/admin/dashboard')->assertOk();
+
+        // Back on: required again
+        $this->actingAs($admin->fresh())->put('/admin/settings', $fields + ['staff_require_two_factor' => 1]);
+        $this->actingAs($support)->get('/admin/dashboard')->assertRedirect(route('profile.2fa.setup'));
+    }
+
     public function test_admin_can_make_a_user_support_or_finance_and_it_is_audited(): void
     {
         $admin = $this->staff('admin');

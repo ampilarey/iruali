@@ -9,14 +9,23 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Staff must have two-step sign-in on before they can use /admin. Anyone without it is sent
  * to the setup page (the 2FA and logout routes themselves are always allowed).
+ *
+ * Admins can make it optional in Admin → Settings; STAFF_REQUIRE_2FA=false turns it off for a
+ * whole install (a dev machine). Staff who already use it keep being asked for their code.
  */
 class RequireTwoFactor
 {
+    public static function required(): bool
+    {
+        return config('staff.require_two_factor', true)
+            && filter_var(\App\Models\Setting::get('staff_require_two_factor', 1), FILTER_VALIDATE_BOOLEAN);
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        if (! config('staff.require_two_factor', true) || ! $user || ! $user->isStaff() || $user->isTwoFactorEnabled()) {
+        if (! self::required() || ! $user || ! $user->isStaff() || $user->isTwoFactorEnabled()) {
             return $next($request);
         }
 

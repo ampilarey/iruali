@@ -28,7 +28,7 @@
             @csrf
             @if($editing) @method('PUT') @endif
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="code" class="block text-sm font-medium text-gray-700">{{ __('Code') }} *</label>
                     <input id="code" name="code" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_\-]+" autocomplete="off" dir="ltr" class="{{ $field }} font-mono uppercase" value="{{ old('code', $code->code) }}" placeholder="SAVE10">
@@ -80,7 +80,7 @@
                 @if($products->isEmpty())
                     <p class="text-sm text-gray-500">{{ __('You have no products yet.') }}</p>
                 @else
-                    <div class="grid max-h-72 gap-2 overflow-y-auto rounded-lg border border-gray-200 p-3 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 max-h-72 gap-2 overflow-y-auto rounded-lg border border-gray-200 p-3 sm:grid-cols-2">
                         @foreach($products as $product)
                             <label class="flex items-center gap-2 text-sm">
                                 <input type="checkbox" name="product_ids[]" value="{{ $product->id }}" @checked(in_array($product->id, $chosen, true)) class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">

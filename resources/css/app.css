@@ -652,3 +652,16 @@
 
 /* Prices line up in columns */
 .price, .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* A visually hidden label inside a sideways-scrolling table is absolutely positioned against the page,
+   not the table, so at its column's place it would widen the whole page on a phone. Pin it to the start. */
+table .sr-only:not(:focus):not(:focus-within) {
+  inset-inline-start: 0;
+  top: 0;
+}
+
+/* Long words with no spaces (links, file paths, codes typed by customers) wrap instead of
+   pushing the page wider than a phone screen. */
+body {
+  overflow-wrap: break-word;
+}

@@ -20,7 +20,7 @@
                 <a href="{{ route('account.addresses.create') }}" class="mt-3 inline-block font-semibold text-primary hover:underline">{{ __('Add your first address') }}</a>
             </div>
         @else
-            <ul class="grid gap-4 sm:grid-cols-2">
+            <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @foreach($addresses as $address)
                     <li class="bg-white rounded-lg shadow-sm border {{ $address->is_default ? 'border-primary' : 'border-gray-100' }} p-5 flex flex-col">
                         <div class="flex items-start justify-between gap-2">

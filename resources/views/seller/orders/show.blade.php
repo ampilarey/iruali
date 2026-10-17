@@ -8,7 +8,7 @@
         @endslot
     @endcomponent
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 overflow-hidden rounded-lg bg-white shadow">
             <div class="border-b border-gray-100 px-5 py-4">
                 <h2 class="text-lg font-semibold text-gray-900">Your items in this order</h2>

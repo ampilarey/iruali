@@ -10,7 +10,7 @@
         </nav>
         <h1 class="font-display text-2xl lg:text-3xl font-bold text-dark mb-5">{{ __('All Departments') }}</h1>
 
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             @foreach($categories as $category)
                 <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col hover:border-primary hover:shadow-sm">
                     <a href="{{ route('categories.show', $category) }}" class="flex items-center gap-3 group">

@@ -7,12 +7,12 @@
 <div class="min-h-screen bg-gray-100 pb-6 lg:pb-12">
     @include('admin.payouts._header', ['title' => $brand->name, 'back' => route('admin.brands')])
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <form method="POST" action="{{ route('admin.brands.update', $brand) }}" enctype="multipart/form-data" class="lg:col-span-2 space-y-5 rounded-lg bg-white p-6 shadow">
             @csrf
             @method('PUT')
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                     <input id="name" name="name" required maxlength="120" class="{{ $field }}" value="{{ old('name', $brand->name) }}">
@@ -30,7 +30,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="name_dv" class="block text-sm font-medium text-gray-700">{{ __('Name in Dhivehi (optional)') }}</label>
                     <input id="name_dv" name="name_dv" maxlength="120" dir="rtl" lang="dv" class="{{ $field }}" value="{{ old('name_dv', $brand->name_dv) }}" aria-describedby="name_dv-hint">
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="description_en" class="block text-sm font-medium text-gray-700">Description (English)</label>
                     <textarea id="description_en" name="description_en" rows="4" maxlength="600" class="{{ $field }}">{{ old('description_en', $brand->getTranslation('description', 'en', false)) }}</textarea>
@@ -97,8 +97,7 @@
         </form>
 
         <div class="space-y-6">
-            <section class="rounded-lg bg-white p-6 shadow text-sm">
-                <h2 class="text-base font-semibold text-gray-900">About this brand</h2>
+            <x-admin.fold title="About this brand" body="text-sm">
                 <dl class="mt-3 space-y-2">
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">Products on sale</dt><dd class="font-medium tabular-nums">{{ $brand->active_products_count }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-gray-500">All products</dt><dd class="font-medium tabular-nums">{{ $brand->products_count }}</dd></div>
@@ -117,12 +116,11 @@
                         @endforeach
                     </ul>
                 @endif
-            </section>
+            </x-admin.fold>
 
             @include('admin.brands._authorised_sellers')
 
-            <section class="rounded-lg bg-white p-6 shadow text-sm">
-                <h2 class="text-base font-semibold text-gray-900">Merge into another brand</h2>
+            <x-admin.fold title="Merge into another brand" body="text-sm">
                 <p class="mt-1 text-gray-600">For duplicates. Every product of “{{ $brand->name }}” moves to the brand you choose, this brand's page redirects there, and shops typing “{{ $brand->name }}” get the other brand from now on.</p>
                 @if($similar->isEmpty() && $others->isEmpty())
                     <p class="mt-3 text-gray-500">There is no other brand yet.</p>
@@ -147,18 +145,17 @@
                         <button type="submit" class="w-full rounded-lg bg-gray-800 px-4 py-2 font-medium text-white hover:bg-gray-900">Merge</button>
                     </form>
                 @endif
-            </section>
+            </x-admin.fold>
 
             @if($brand->products_count === 0)
-                <section class="rounded-lg bg-white p-6 shadow text-sm">
-                    <h2 class="text-base font-semibold text-gray-900">Delete</h2>
+                <x-admin.fold title="Delete" body="text-sm">
                     <p class="mt-1 text-gray-600">No product uses this brand, so it can be deleted.</p>
                     <form method="POST" action="{{ route('admin.brands.destroy', $brand) }}" class="mt-3" onsubmit="return confirm('Delete “{{ addslashes($brand->name) }}”?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="rounded-lg border border-red-300 px-4 py-2 font-medium text-red-700 hover:bg-red-50">Delete brand</button>
                     </form>
-                </section>
+                </x-admin.fold>
             @endif
         </div>
     </div>

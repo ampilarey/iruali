@@ -23,9 +23,8 @@
 
         <p class="text-sm text-gray-600">{{ __(':from to :to. Paid orders only: a sale counts in the month it was paid, a refund in the month a return or dispute was approved or the paid order was cancelled. GST comes from what was recorded on each order when it was placed. Gift-card orders are left out.', ['from' => $report['from']->format('j M Y'), 'to' => $report['to']->format('j M Y')]) }}</p>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow" data-report-shops>
-            <div class="border-b border-gray-100 px-5 py-4">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('GST-registered shops') }}</h2>
+        <x-admin.fold :title="__('GST-registered shops')" flush data-report-shops :open="true">
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                 <p class="text-xs text-gray-500">{{ __('Shops that were GST-registered when their orders were placed. Amounts include GST.') }}</p>
             </div>
             <div class="overflow-x-auto">
@@ -73,11 +72,10 @@
                     @endif
                 </table>
             </div>
-        </div>
+        </x-admin.fold>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow" data-report-iruali>
-            <div class="border-b border-gray-100 px-5 py-4">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('iruali') }}</h2>
+        <x-admin.fold :title="__('iruali')" flush data-report-iruali>
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                 <p class="text-xs text-gray-500">
                     @if($report['registered_orders'] > 0)
                         {{ __('GST is shown for orders placed while iruali was GST-registered (:count this month). Amounts include GST.', ['count' => $report['registered_orders']]) }}
@@ -129,10 +127,9 @@
             @unless($registeredNow)
                 <p class="border-t border-gray-100 px-5 py-3 text-xs text-gray-500">{{ __('iruali is not GST-registered now. Switch it on under Admin → Tax once registered.') }}</p>
             @endunless
-        </div>
+        </x-admin.fold>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow" data-report-refunds>
-            <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">{{ __('Refunds in this month') }}</h2></div>
+        <x-admin.fold :title="__('Refunds in this month')" flush data-report-refunds>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
@@ -165,7 +162,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </x-admin.fold>
 
         <p class="text-xs text-gray-500">{{ __('This report helps you prepare your GST return; it is not a filing. Check the figures and what to file with your accountant or MIRA.') }}</p>
     </div>

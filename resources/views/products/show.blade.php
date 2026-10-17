@@ -72,9 +72,9 @@
             </div>
         </div>
 
-        <div class="grid lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 lg:gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 lg:gap-8 items-start">
             <div class="min-w-0">
-                <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                     <!-- Gallery -->
                     <div>
                         <div class="relative aspect-square rounded-xl bg-primary-50 overflow-hidden border border-gray-200">
@@ -318,7 +318,7 @@
 
         <section id="reviews" class="scroll-mt-40">
             <h2 class="font-display text-xl font-bold text-dark mb-4">{{ __('Reviews') }}</h2>
-            <div class="grid lg:grid-cols-[18rem_1fr] gap-6 lg:gap-10">
+            <div class="grid grid-cols-1 lg:grid-cols-[18rem_1fr] gap-6 lg:gap-10">
                 <div>
                     <div class="flex items-center gap-3">
                         <p class="font-display text-4xl font-bold">{{ $reviews->count() ? number_format($rating, 1) : '–' }}</p>

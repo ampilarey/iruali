@@ -134,6 +134,32 @@
             document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !drawer.classList.contains('hidden')) set(false); });
         })();
     </script>
+    <script>
+        // Folded sections (x-admin.fold): remember which were left open on this page, and open one when a
+        // field inside it is invalid or a link points into it.
+        (function () {
+            var folds = document.querySelectorAll('details[data-fold]');
+            if (!folds.length) return;
+            var key = function (d) { return 'admin-fold:' + location.pathname + ':' + d.getAttribute('data-fold'); };
+            folds.forEach(function (d) {
+                try {
+                    if (!d.open && localStorage.getItem(key(d)) === '1') d.open = true;
+                } catch (e) {}
+                d.addEventListener('toggle', function () {
+                    try { d.open ? localStorage.setItem(key(d), '1') : localStorage.removeItem(key(d)); } catch (e) {}
+                });
+            });
+            var openAround = function (el) {
+                for (var d = el && el.closest('details[data-fold]'); d; d = d.parentElement && d.parentElement.closest('details[data-fold]')) d.open = true;
+            };
+            document.addEventListener('invalid', function (e) { openAround(e.target); }, true);
+            var fromHash = function () {
+                if (location.hash.length > 1) { try { openAround(document.querySelector(location.hash)); } catch (e) {} }
+            };
+            fromHash();
+            window.addEventListener('hashchange', fromHash);
+        })();
+    </script>
     @stack('scripts')
 </body>
 </html>

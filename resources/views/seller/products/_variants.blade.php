@@ -36,7 +36,7 @@
         <div class="rounded-md bg-gray-50 p-3">
             <p class="text-sm font-medium text-gray-700">{{ __('Option types (up to 3)') }}</p>
             <p class="text-xs text-gray-500 mb-2">{{ __('For example "Size" with values "S, M, L". Then generate the combinations and fill in each row.') }}</p>
-            <div class="grid gap-2 sm:grid-cols-3" data-option-types>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3" data-option-types>
                 @for($i = 0; $i < \App\Http\Requests\Seller\ProductRequest::MAX_OPTION_TYPES; $i++)
                     @php $name = array_keys($options)[$i] ?? ''; $values = $name !== '' ? implode(', ', $options[$name]) : ''; @endphp
                     <div class="space-y-1">

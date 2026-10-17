@@ -50,7 +50,7 @@
                 @if($listPrice !== null)<p class="text-sm text-gray-500">{{ __('Your listed price is :price each.', ['price' => \App\Support\Money::format($listPrice)]) }}</p>@endif
                 <form method="POST" action="{{ route('seller.quotes.quote', $quote) }}" class="mt-4 space-y-4">
                     @csrf
-                    <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                             <label for="unit_price" class="block text-sm font-medium text-gray-700">{{ __('Unit price (MVR)') }}</label>
                             <input id="unit_price" name="unit_price" type="number" step="0.01" min="0.01" max="999999.99" required dir="ltr" class="{{ $field }}" value="{{ old('unit_price', $quote->unit_price ?? $listPrice) }}">

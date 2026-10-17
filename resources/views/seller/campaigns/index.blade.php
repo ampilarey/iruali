@@ -10,7 +10,7 @@
         @if($campaigns->isEmpty())
             <div class="rounded-lg bg-white p-8 text-center text-gray-500 shadow">{{ __('No campaign is open for shops right now.') }}</div>
         @else
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 @foreach($campaigns as $campaign)
                     <div class="rounded-lg bg-white p-5 shadow flex flex-col gap-3">
                         <div class="flex items-start justify-between gap-3">

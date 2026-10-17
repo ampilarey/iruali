@@ -37,10 +37,10 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.tax.update') }}" class="space-y-5 rounded-lg bg-white p-6 shadow" data-tax-settings>
+        <form method="POST" action="{{ route('admin.tax.update') }}" data-tax-settings>
+            <x-admin.fold :title="__('iruali\'s GST settings')" body="space-y-5">
             @csrf
             @method('PUT')
-            <h2 class="text-base font-semibold text-gray-900">{{ __('iruali\'s GST settings') }}</h2>
 
             <fieldset>
                 <legend class="text-sm font-medium text-gray-700">{{ __('Is iruali GST-registered?') }}</legend>
@@ -56,7 +56,7 @@
                 </div>
             </fieldset>
 
-            <div class="grid gap-4 sm:grid-cols-3">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
                     <label for="gst_tin" class="block text-sm font-medium text-gray-700">{{ __('iruali\'s GST TIN') }}</label>
                     <input id="gst_tin" name="gst_tin" maxlength="30" dir="ltr" autocomplete="off" placeholder="1012345GST501" class="{{ $field }}" value="{{ old('gst_tin', $settings['gst_tin']) }}">
@@ -79,12 +79,12 @@
             <div class="flex justify-end border-t border-gray-100 pt-4">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ __('Save tax settings') }}</button>
             </div>
+            </x-admin.fold>
         </form>
 
-        <div class="rounded-lg bg-white p-5 shadow text-sm" data-company-details>
-            <h2 class="text-base font-semibold text-gray-900">{{ __('Business details on invoices') }}</h2>
+        <x-admin.fold :title="__('Business details on invoices')" body="text-sm" data-company-details>
             <p class="mt-1 text-gray-600">{{ __('iruali\'s receipts and commission invoices use the business details from Settings.') }}</p>
-            <dl class="mt-3 grid gap-2 sm:grid-cols-2">
+            <dl class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div><dt class="text-gray-500">{{ __('Registered business name') }}</dt><dd class="font-medium text-gray-900">{{ $company['legal_name'] ?? $company['trading_name'] }}</dd></div>
                 <div><dt class="text-gray-500">{{ __('Registration no.') }}</dt><dd class="font-medium text-gray-900">{{ $company['registration_no'] ?? '—' }}</dd></div>
                 <div class="sm:col-span-2"><dt class="text-gray-500">{{ __('Business address') }}</dt><dd class="font-medium text-gray-900">{{ $company['address'] ?? '—' }}</dd></div>
@@ -92,11 +92,10 @@
             @if(\App\Support\StaffAccess::can('admin.settings'))
                 <a href="{{ route('admin.settings') }}" class="mt-3 inline-block text-sm font-medium text-primary-700 hover:underline">{{ __('Change in Settings') }}</a>
             @endif
-        </div>
+        </x-admin.fold>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow" data-registered-shops>
-            <div class="border-b border-gray-100 px-5 py-4">
-                <h2 class="text-base font-semibold text-gray-900">{{ __('GST-registered shops') }}</h2>
+        <x-admin.fold :title="__('GST-registered shops')" flush data-registered-shops>
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                 <p class="text-xs text-gray-500">{{ __('As each shop entered it in Seller Centre → Settings → Tax.') }}</p>
             </div>
             <div class="overflow-x-auto">
@@ -118,7 +117,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </x-admin.fold>
     </div>
 </div>
 @endsection

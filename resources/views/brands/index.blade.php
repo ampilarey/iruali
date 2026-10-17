@@ -63,7 +63,7 @@
                     @foreach($letters as $letter => $group)
                         <section id="letter-{{ $letter === '#' ? 'other' : $letter }}" data-letter-group class="scroll-mt-32">
                             <h2 class="font-display text-lg font-bold text-dark border-b border-gray-100 pb-1 mb-2" dir="ltr">{{ $letter }}</h2>
-                            <ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
                                 @foreach($group as $brand)
                                     <li data-brand-name="{{ mb_strtolower(trim($brand->name.' '.$brand->name_dv)) }}">
                                         <a href="{{ route('brands.show', $brand) }}" class="group flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">

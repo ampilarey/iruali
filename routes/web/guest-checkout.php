@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/checkout/guest', [GuestCheckoutController::class, 'index'])->name('checkout.guest');
-Route::post('/checkout/guest', [GuestCheckoutController::class, 'store'])->name('checkout.guest.store')->middleware('throttle:10,1');
+Route::post('/checkout/guest', [GuestCheckoutController::class, 'store'])->name('checkout.guest.store')->middleware('throttle:10,1,checkout.guest.store');
 
 Route::middleware('signed')->prefix('orders/guest/{order}/{token}')->name('guest.orders.')->group(function () {
     Route::get('/', [GuestCheckoutController::class, 'show'])->name('show');
     Route::get('/receipt', [GuestCheckoutController::class, 'receipt'])->name('receipt');
-    Route::post('/pay', [GuestCheckoutController::class, 'pay'])->name('pay')->middleware('throttle:10,1');
+    Route::post('/pay', [GuestCheckoutController::class, 'pay'])->name('pay')->middleware('throttle:10,1,pay');
 });

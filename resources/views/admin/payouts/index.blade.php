@@ -7,7 +7,7 @@
     @include('admin.payouts._header', ['title' => 'Shop payouts'])
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-lg bg-white p-5 shadow"><p class="text-sm text-gray-500">Ready to pay shops</p><p class="mt-1 text-2xl font-bold text-green-700">{{ Money::format($totals['available']) }}</p></div>
             <div class="rounded-lg bg-white p-5 shadow"><p class="text-sm text-gray-500">Pending (not delivered or unpaid)</p><p class="mt-1 text-2xl font-bold text-gray-900">{{ Money::format($totals['pending']) }}</p></div>
             <div class="rounded-lg bg-white p-5 shadow"><p class="text-sm text-gray-500">Paid to shops</p><p class="mt-1 text-2xl font-bold text-gray-900">{{ Money::format($totals['paid']) }}</p></div>
@@ -74,8 +74,7 @@
             </div>
         </div>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow">
-            <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">Recent payouts</h2></div>
+        <x-admin.fold title="Recent payouts" flush>
             <ul class="divide-y divide-gray-100 text-sm">
                 @forelse($recent as $payout)
                     <li class="px-5 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -87,7 +86,7 @@
                     <li class="px-5 py-6 text-center text-gray-500">No payouts yet.</li>
                 @endforelse
             </ul>
-        </div>
+        </x-admin.fold>
     </div>
 </div>
 @endsection

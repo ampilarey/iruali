@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         @foreach([
             ['Points issued', $totals['issued'], 'earned on orders '.number_format($totals['earned']).' + referrals '.number_format($totals['referral'])],
             ['Points redeemed', $totals['redeemed'], 'MVR '.number_format($totals['redeemed'], 2).' of discounts given'],
@@ -27,8 +27,7 @@
     </div>
     <p class="text-xs text-gray-500">Also: {{ number_format($totals['refunded']) }} points returned on cancelled orders, {{ number_format($totals['adjustments']) }} from adjustments and opening balances.</p>
 
-    <section class="rounded-lg bg-white shadow overflow-hidden">
-        <h2 class="px-5 py-3 font-semibold text-gray-900 border-b border-gray-200">Top referrers</h2>
+    <x-admin.fold title="Top referrers" :open="true">
         <table class="w-full text-sm">
             <thead><tr class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500"><th class="p-3 text-start">Customer</th><th class="p-3 text-start">Code</th><th class="p-3 text-end">Signed up</th><th class="p-3 text-end">Rewarded</th><th class="p-3 text-end">Points earned</th></tr></thead>
             <tbody class="divide-y divide-gray-100">
@@ -45,10 +44,9 @@
                 @endforelse
             </tbody>
         </table>
-    </section>
+    </x-admin.fold>
 
-    <section class="rounded-lg bg-white shadow overflow-hidden">
-        <h2 class="px-5 py-3 font-semibold text-gray-900 border-b border-gray-200">Latest point movements</h2>
+    <x-admin.fold title="Latest point movements">
         <table class="w-full text-sm">
             <thead><tr class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500"><th class="p-3 text-start">When</th><th class="p-3 text-start">Customer</th><th class="p-3 text-start">Type</th><th class="p-3 text-start">Order</th><th class="p-3 text-end">Points</th></tr></thead>
             <tbody class="divide-y divide-gray-100">
@@ -65,6 +63,6 @@
                 @endforelse
             </tbody>
         </table>
-    </section>
+    </x-admin.fold>
 </div>
 @endsection

@@ -13,7 +13,7 @@
             @csrf
             @if($address->exists) @method('PUT') @endif
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="label" class="block text-sm font-medium text-gray-700">{{ __('Label') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
                     <input id="label" name="label" maxlength="50" value="{{ old('label', $address->label) }}" placeholder="{{ __('e.g. Home, Office, Mum\'s house') }}" class="{{ $f }}">
@@ -41,7 +41,7 @@
                 @error('house_name_or_street')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="ward" class="block text-sm font-medium text-gray-700">{{ __('Ward / area') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
                     <input id="ward" name="ward" maxlength="100" value="{{ old('ward', $address->ward) }}" placeholder="{{ __('e.g. Henveiru') }}" class="{{ $f }}">

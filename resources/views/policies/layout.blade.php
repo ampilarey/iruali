@@ -26,8 +26,8 @@
 
 @section('content')
 <div class="bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4 lg:px-6 py-6 lg:py-10 grid lg:grid-cols-[15rem_1fr] gap-6 lg:gap-10">
-        <nav aria-label="{{ __('Policies') }}" class="lg:sticky lg:top-36 self-start">
+    <div class="max-w-6xl mx-auto px-4 lg:px-6 py-6 lg:py-10 grid grid-cols-1 lg:grid-cols-[15rem_1fr] gap-6 lg:gap-10">
+        <nav aria-label="{{ __('Policies') }}" class="lg:sticky lg:top-36 self-start min-w-0">
             <p class="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">{{ __('Policies') }}</p>
             <ul class="flex lg:flex-col gap-1 overflow-x-auto scrollbar-hide text-sm">
                 @foreach($policyLinks as $route => $label)

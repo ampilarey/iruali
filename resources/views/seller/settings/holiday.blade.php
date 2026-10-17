@@ -50,7 +50,7 @@
                 <input id="on_holiday" type="checkbox" name="on_holiday" value="1" class="mt-1 h-5 w-5 rounded border-gray-300 text-primary-600" @checked(old('on_holiday', $onHoliday ? '1' : '0') === '1')>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="holiday_until" class="block text-sm font-medium text-gray-700">{{ __('Back on') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
                     <input id="holiday_until" name="holiday_until" type="date" min="{{ today()->addDay()->toDateString() }}" max="{{ today()->addYear()->toDateString() }}" class="{{ $field }}" value="{{ old('holiday_until', $onHoliday ? $user->holiday_until?->toDateString() : '') }}">

@@ -17,18 +17,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/preorders', [PreorderController::class, 'index'])->name('preorders');
-    Route::post('/preorders/{product:id}/arrived', [PreorderController::class, 'stockArrived'])->name('preorders.arrived')->whereNumber('product')->middleware('throttle:30,1');
-    Route::put('/preorders/{product:id}/date', [PreorderController::class, 'moveDate'])->name('preorders.date')->whereNumber('product')->middleware('throttle:30,1');
+    Route::post('/preorders/{product:id}/arrived', [PreorderController::class, 'stockArrived'])->name('preorders.arrived')->whereNumber('product')->middleware('throttle:30,1,preorders.arrived');
+    Route::put('/preorders/{product:id}/date', [PreorderController::class, 'moveDate'])->name('preorders.date')->whereNumber('product')->middleware('throttle:30,1,preorders.date');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}/preorder/cancel', [PreorderCancelController::class, 'show'])->name('orders.preorder.cancel');
-    Route::post('/orders/{order}/preorder/cancel', [PreorderCancelController::class, 'store'])->name('orders.preorder.cancel.store')->middleware('throttle:10,1');
+    Route::post('/orders/{order}/preorder/cancel', [PreorderCancelController::class, 'store'])->name('orders.preorder.cancel.store')->middleware('throttle:10,1,orders.preorder.cancel.store');
 });
 
 Route::middleware('signed')->prefix('orders/guest/{order}/{token}')->name('guest.orders.')->group(function () {
     Route::get('/preorder/cancel', [PreorderCancelController::class, 'guestShow'])->name('preorder.cancel');
-    Route::post('/preorder/cancel', [PreorderCancelController::class, 'guestStore'])->name('preorder.cancel.store')->middleware('throttle:10,1');
+    Route::post('/preorder/cancel', [PreorderCancelController::class, 'guestStore'])->name('preorder.cancel.store')->middleware('throttle:10,1,preorder.cancel.store');
 });
 
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {

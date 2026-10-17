@@ -31,7 +31,7 @@
         @csrf
         @if($editing) @method('PUT') @endif
 
-        <section class="rounded-lg bg-white p-6 shadow grid gap-4 sm:grid-cols-2">
+        <section class="rounded-lg bg-white p-6 shadow grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">Name (internal) *</label>
                 <input id="name" name="name" required maxlength="120" class="{{ $field }}" value="{{ old('name', $campaign->name) }}">
@@ -86,9 +86,8 @@
             </label>
         </section>
 
-        <section class="rounded-lg bg-white p-6 shadow">
-            <h2 class="text-lg font-semibold text-gray-900">Banner</h2>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <x-admin.fold title="Banner" :open="! $editing">
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="headline_en" class="block text-sm font-medium text-gray-700">Headline (English) *</label>
                     <input id="headline_en" name="headline_en" required maxlength="120" class="{{ $field }}" value="{{ $t('headline', 'en') }}">
@@ -133,7 +132,7 @@
                     @endif
                 </div>
             </div>
-        </section>
+        </x-admin.fold>
 
         <div class="flex justify-end">
             <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ $editing ? 'Save campaign' : 'Create campaign' }}</button>
@@ -141,8 +140,7 @@
     </form>
 
     @if($editing)
-        <section class="rounded-lg bg-white p-6 shadow">
-            <h2 class="text-lg font-semibold text-gray-900">Products from shops</h2>
+        <x-admin.fold title="Products from shops">
             <p class="text-sm text-gray-500">Approve a product and its campaign price goes live on the site and at checkout while the campaign runs.</p>
             @if($campaign->participations->isEmpty())
                 <p class="mt-4 text-sm text-gray-500">No shop has joined yet. Shops join from Seller Centre → Campaigns.</p>
@@ -170,7 +168,7 @@
                     </tbody>
                 </table>
             @endif
-        </section>
+        </x-admin.fold>
     @endif
 </div>
 @endsection

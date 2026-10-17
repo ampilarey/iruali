@@ -75,7 +75,7 @@
                 </div>
                 <p class="px-5 pt-2 text-xs text-gray-500">{{ __('Units go to paid orders only; an unpaid order waits until its payment comes in and is cancelled after 24 hours without one.') }}</p>
 
-                <div class="grid gap-4 border-t border-gray-100 px-5 py-4 md:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 border-t border-gray-100 px-5 py-4 md:grid-cols-2">
                     <form method="POST" action="{{ route('seller.preorders.arrived', $product->id) }}" class="space-y-2 rounded-lg border border-gray-200 p-3" data-stock-arrived>
                         @csrf
                         <h3 class="text-sm font-semibold text-gray-900">{{ __('Stock arrived') }}</h3>

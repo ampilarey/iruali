@@ -5,7 +5,7 @@
     $verificationInput = 'mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500';
     $verificationFile = 'mt-1 block w-full text-sm text-gray-700 file:me-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100';
 @endphp
-<div class="grid gap-4 sm:grid-cols-2" data-verification-fields>
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-verification-fields>
     <div>
         <label for="business_registration_number" class="block text-sm font-medium text-gray-700">{{ __('Business registration number') }}</label>
         <input id="business_registration_number" name="business_registration_number" maxlength="50" dir="ltr" autocomplete="off" class="{{ $verificationInput }}" value="{{ old('business_registration_number', $verification?->business_registration_number) }}" placeholder="{{ __('e.g. C-0123/2020') }}">

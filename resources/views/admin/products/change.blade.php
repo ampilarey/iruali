@@ -38,9 +38,8 @@
             @endif
         </div>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow">
-            <div class="border-b border-gray-100 px-5 py-4">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('What changes') }}</h2>
+        <x-admin.fold :title="__('What changes')" flush :open="true">
+            <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                 <p class="text-xs text-gray-500">{{ __('Live now on the left, the shop\'s edit on the right.') }}</p>
             </div>
             <div class="overflow-x-auto">
@@ -72,11 +71,13 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </x-admin.fold>
 
         @if($diff['variants'] !== [])
-            <div class="overflow-hidden rounded-lg bg-white shadow" data-variant-changes>
-                <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">{{ __('Variants') }}</h2><p class="text-xs text-gray-500">{{ __('Stock is not reviewed and is not shown here.') }}</p></div>
+            <x-admin.fold :title="__('Variants')" flush data-variant-changes>
+                <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
+                    <p class="text-xs text-gray-500">{{ __('Stock is not reviewed and is not shown here.') }}</p>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
@@ -113,11 +114,11 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </x-admin.fold>
         @endif
 
         @if($change->isPending())
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <form method="POST" action="{{ route('admin.product-changes.approve', $change) }}" class="rounded-lg bg-white p-5 shadow">
                     @csrf
                     <h2 class="text-base font-semibold text-gray-900">{{ __('Approve') }}</h2>

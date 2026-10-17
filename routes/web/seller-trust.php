@@ -19,10 +19,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/settings/verification', [VerificationController::class, 'show'])->name('settings.verification');
-    Route::put('/settings/verification', [VerificationController::class, 'update'])->name('settings.verification.update')->middleware('throttle:10,1');
+    Route::put('/settings/verification', [VerificationController::class, 'update'])->name('settings.verification.update')->middleware('throttle:10,1,settings.verification.update');
     Route::get('/settings/verification/documents/{document}', [VerificationController::class, 'document'])->name('settings.verification.document')->whereIn('document', ['certificate', 'id_card']);
     Route::get('/settings/holiday', [HolidayController::class, 'show'])->name('settings.holiday');
-    Route::put('/settings/holiday', [HolidayController::class, 'update'])->name('settings.holiday.update')->middleware('throttle:20,1');
+    Route::put('/settings/holiday', [HolidayController::class, 'update'])->name('settings.holiday.update')->middleware('throttle:20,1,settings.holiday.update');
 });
 
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {

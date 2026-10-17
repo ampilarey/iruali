@@ -43,7 +43,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/categories', [\App\Http\Controllers\Customer\CategoryController::class, 'index'])->name('categories.index');
         Route::get('/categories/{category:slug}', [\App\Http\Controllers\Customer\CategoryController::class, 'show'])->name('categories.show');
         Route::get('/search', [SearchController::class, 'search'])->name('search');
-        Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest')->middleware('throttle:60,1');
+        Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest')->middleware('throttle:60,1,search.suggest');
         Route::get('/brands', [\App\Http\Controllers\Customer\BrandController::class, 'index'])->name('brands.index');
         // Slugs; old name-based links (/brands/Dr.%20Martens) still resolve and redirect, hence ".+"
         Route::get('/brands/{brand}', [\App\Http\Controllers\Customer\BrandController::class, 'show'])->name('brands.show')->where('brand', '.+');
@@ -58,8 +58,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::view('/privacy-policy', 'policies.privacy')->name('policies.privacy');
         Route::view('/payment-security', 'policies.security')->name('policies.security');
         Route::view('/about', 'policies.about')->name('policies.about');
-        Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1');
-        Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
+        Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1,stock-alerts.store');
+        Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1,newsletter.store');
         Route::get('/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('signed')->whereNumber('subscriber');
         Route::get('/newsletter/confirm/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'confirm'])->name('newsletter.confirm')->middleware('signed')->whereNumber('subscriber');
         Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');
@@ -75,16 +75,16 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
         Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
         Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
-        Route::post('cart/shop-code', [\App\Http\Controllers\Customer\ShopCodeController::class, 'apply'])->name('cart.shopCode.apply')->middleware('throttle:20,1');
+        Route::post('cart/shop-code', [\App\Http\Controllers\Customer\ShopCodeController::class, 'apply'])->name('cart.shopCode.apply')->middleware('throttle:20,1,cart.shopCode.apply');
         Route::post('cart/shop-code/remove', [\App\Http\Controllers\Customer\ShopCodeController::class, 'remove'])->name('cart.shopCode.remove');
         Route::middleware('auth')->group(function () {
-            Route::post('/products/{product}/reviews', [\App\Http\Controllers\Customer\ReviewController::class, 'store'])->name('reviews.store')->middleware('throttle:10,1');
-            Route::post('/reviews/{review}/helpful', [\App\Http\Controllers\Customer\ReviewController::class, 'helpful'])->name('reviews.helpful')->middleware('throttle:30,1');
-            Route::post('/products/{product}/questions', [\App\Http\Controllers\Customer\QuestionController::class, 'store'])->name('questions.store')->middleware('throttle:10,1');
+            Route::post('/products/{product}/reviews', [\App\Http\Controllers\Customer\ReviewController::class, 'store'])->name('reviews.store')->middleware('throttle:10,1,reviews.store');
+            Route::post('/reviews/{review}/helpful', [\App\Http\Controllers\Customer\ReviewController::class, 'helpful'])->name('reviews.helpful')->middleware('throttle:30,1,reviews.helpful');
+            Route::post('/products/{product}/questions', [\App\Http\Controllers\Customer\QuestionController::class, 'store'])->name('questions.store')->middleware('throttle:10,1,questions.store');
             Route::post('/questions/{question}/answer', [\App\Http\Controllers\Customer\QuestionController::class, 'answer'])->name('questions.answer');
             // Follow / unfollow a brand (its page's button; guests sign in and come back to the page)
-            Route::post('/brands/{brand}/follow', [\App\Http\Controllers\Customer\BrandFollowController::class, 'store'])->name('brands.follow')->middleware('throttle:30,1');
-            Route::delete('/brands/{brand}/follow', [\App\Http\Controllers\Customer\BrandFollowController::class, 'destroy'])->name('brands.unfollow')->middleware('throttle:30,1');
+            Route::post('/brands/{brand}/follow', [\App\Http\Controllers\Customer\BrandFollowController::class, 'store'])->name('brands.follow')->middleware('throttle:30,1,brands.follow');
+            Route::delete('/brands/{brand}/follow', [\App\Http\Controllers\Customer\BrandFollowController::class, 'destroy'])->name('brands.unfollow')->middleware('throttle:30,1,brands.unfollow');
             Route::post('/cart/{item}/save-for-later', [CartController::class, 'saveForLater'])->name('cart.saveForLater');
             Route::post('/saved/{saved}/move-to-cart', [CartController::class, 'moveToCart'])->name('saved.moveToCart');
             Route::delete('/saved/{saved}', [CartController::class, 'removeSaved'])->name('saved.remove');
@@ -94,29 +94,29 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     // Authentication routes
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-        Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+        Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,post-login');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-        Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+        Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1,post-register');
         // Password reset
         Route::get('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'request'])->name('password.request');
-        Route::post('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'email'])->name('password.email')->middleware('throttle:3,1');
+        Route::post('/forgot-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'email'])->name('password.email')->middleware('throttle:3,1,password.email');
     });
     // The emailed link also works while signed in: an account made with Google, Facebook or Apple sets its first password this way
     Route::get('/reset-password/{token}', [\App\Http\Controllers\Customer\PasswordResetController::class, 'reset'])->name('password.reset');
-    Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
+    Route::post('/reset-password', [\App\Http\Controllers\Customer\PasswordResetController::class, 'update'])->name('password.update')->middleware('throttle:5,1,password.update');
 
     // 2FA routes
     Route::middleware('guest')->group(function () {
         Route::get('/2fa', [AuthController::class, 'show2FA'])->name('2fa.show');
-        Route::post('/2fa/verify', [AuthController::class, 'verify2FA'])->name('2fa.verify')->middleware('throttle:5,1');
+        Route::post('/2fa/verify', [AuthController::class, 'verify2FA'])->name('2fa.verify')->middleware('throttle:5,1,2fa.verify');
     });
 
     // Verification routes
     Route::middleware('auth')->group(function () {
         Route::get('/verification/notice', [AuthController::class, 'showVerificationNotice'])->name('verification.notice');
-        Route::post('/auth/send/email/otp', [AuthController::class, 'sendEmailOTP'])->name('auth.send.email.otp')->middleware('throttle:3,1');
-        Route::post('/auth/verify/email/otp', [AuthController::class, 'verifyEmailOTP'])->name('auth.verify.email.otp')->middleware('throttle:5,1');
-        Route::post('/auth/verify/phone/otp', [AuthController::class, 'verifyPhoneOTP'])->name('auth.verify.phone.otp')->middleware('throttle:5,1');
+        Route::post('/auth/send/email/otp', [AuthController::class, 'sendEmailOTP'])->name('auth.send.email.otp')->middleware('throttle:3,1,auth.send.email.otp');
+        Route::post('/auth/verify/email/otp', [AuthController::class, 'verifyEmailOTP'])->name('auth.verify.email.otp')->middleware('throttle:5,1,auth.verify.email.otp');
+        Route::post('/auth/verify/phone/otp', [AuthController::class, 'verifyPhoneOTP'])->name('auth.verify.phone.otp')->middleware('throttle:5,1,auth.verify.phone.otp');
     });
 
     // Authenticated user routes
@@ -126,7 +126,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'show'])->name('account');
         Route::get('/account/edit', [\App\Http\Controllers\Customer\ProfileController::class, 'edit'])->name('account.edit');
         Route::put('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('account.update');
-        Route::put('/account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('account.password')->middleware('throttle:5,1');
+        Route::put('/account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('account.password')->middleware('throttle:5,1,account.password');
         // Cart routes
         // Wishlist routes
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
@@ -144,30 +144,30 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
-        Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1');
-        Route::post('/orders/{order}/parts/{part}/return', [\App\Http\Controllers\Customer\ReturnController::class, 'store'])->name('orders.returns.store')->middleware('throttle:10,1');
+        Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1,payments.bml.pay');
+        Route::post('/orders/{order}/parts/{part}/return', [\App\Http\Controllers\Customer\ReturnController::class, 'store'])->name('orders.returns.store')->middleware('throttle:10,1,orders.returns.store');
         Route::get('/returns/{return}/photo', [\App\Http\Controllers\Customer\ReturnController::class, 'photo'])->name('returns.photo');
         // Two-step sign-in setup
         Route::get('/profile/2fa/setup', [\App\Http\Controllers\Customer\ProfileController::class, 'twoFactor'])->name('profile.2fa.setup');
-        Route::post('/profile/2fa/enable', [\App\Http\Controllers\Customer\ProfileController::class, 'enableTwoFactor'])->name('profile.2fa.enable')->middleware('throttle:5,1');
-        Route::post('/profile/2fa/disable', [\App\Http\Controllers\Customer\ProfileController::class, 'disableTwoFactor'])->name('profile.2fa.disable')->middleware('throttle:5,1');
+        Route::post('/profile/2fa/enable', [\App\Http\Controllers\Customer\ProfileController::class, 'enableTwoFactor'])->name('profile.2fa.enable')->middleware('throttle:5,1,profile.2fa.enable');
+        Route::post('/profile/2fa/disable', [\App\Http\Controllers\Customer\ProfileController::class, 'disableTwoFactor'])->name('profile.2fa.disable')->middleware('throttle:5,1,profile.2fa.disable');
     });
 
     // BML sends the customer back here after the payment page (their session may have expired, so no auth)
-    Route::get('/payments/bml/return/{order}/{token?}', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'return'])->name('payments.bml.return')->middleware('throttle:30,1');
+    Route::get('/payments/bml/return/{order}/{token?}', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'return'])->name('payments.bml.return')->middleware('throttle:30,1,payments.bml.return');
 
     // Public order tracking
     Route::get('track', [OrderTrackingController::class, 'form'])->name('order.track.form');
-    Route::post('track', [OrderTrackingController::class, 'submit'])->name('order.track.submit')->middleware('throttle:10,1');
+    Route::post('track', [OrderTrackingController::class, 'submit'])->name('order.track.submit')->middleware('throttle:10,1,order.track.submit');
     Route::get('track/order/{order}', [OrderTrackingController::class, 'show'])->name('order.track.show')->middleware('signed');
 
     // Seller routes
     // Seller application: the page answers anyone (it shows the admins' message while applications
     // are paused or hidden, with "Tell me when you reopen"); sending the form needs an account
     Route::get('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'create'])->name('seller.apply');
-    Route::post('/seller/waitlist', [\App\Http\Controllers\Seller\ApplicationController::class, 'waitlist'])->name('seller.waitlist')->middleware('throttle:5,1');
+    Route::post('/seller/waitlist', [\App\Http\Controllers\Seller\ApplicationController::class, 'waitlist'])->name('seller.waitlist')->middleware('throttle:5,1,seller.waitlist');
     Route::middleware('auth')->group(function () {
-        Route::post('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'store'])->name('seller.apply.store')->middleware('throttle:5,1');
+        Route::post('/seller/apply', [\App\Http\Controllers\Seller\ApplicationController::class, 'store'])->name('seller.apply.store')->middleware('throttle:5,1,seller.apply.store');
     });
 
     Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {

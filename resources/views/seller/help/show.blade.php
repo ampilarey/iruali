@@ -4,7 +4,7 @@
 <div class="min-h-screen bg-gray-100 pb-12">
     @include('seller.partials.header', ['title' => $guide['title']])
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-[14rem_1fr]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-[14rem_1fr]">
         <nav aria-label="{{ __('Help centre') }}" class="self-start lg:sticky lg:top-24">
             <a href="{{ route('seller.help') }}" class="block px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Help centre') }}</a>
             <ul class="flex lg:flex-col gap-1 overflow-x-auto scrollbar-hide text-sm">

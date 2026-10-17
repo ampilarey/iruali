@@ -6,8 +6,7 @@
     $pickups = $parts->filter(fn ($part) => $part->isPickup())->count();
 @endphp
 @if($order->deliveryAreaLabel() || $pickups > 0 || $order->deliverySlotLabel() || $order->isGift())
-<div class="rounded-lg bg-white p-5 shadow text-sm space-y-2">
-    <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">{{ __('Delivery') }}</h2>
+<x-admin.fold :title="__('Delivery')" body="text-sm space-y-2">
     @if($order->deliveryAreaLabel())
         <dl class="space-y-1">
             <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Area') }}</dt><dd class="text-gray-900">{{ $order->deliveryAreaLabel() }}</dd></div>
@@ -33,5 +32,5 @@
             <p class="text-xs text-gray-500">{{ $order->gift_hide_prices ? __('Prices hidden on the packing slip.') : __('Prices shown on the packing slip.') }}</p>
         </div>
     @endif
-</div>
+</x-admin.fold>
 @endif

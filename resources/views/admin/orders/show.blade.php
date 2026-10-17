@@ -22,11 +22,15 @@
             <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('error') }}</div>
         @endif
 
-        <div class="grid gap-6 lg:grid-cols-3">
-            <div class="lg:col-span-2 overflow-hidden rounded-lg bg-white shadow">
-                <div class="border-b border-gray-100 px-5 py-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Items</h2>
-                </div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            @php
+                $fulfilment = app(\App\Services\FulfilmentService::class);
+                $parts = $order->sellerOrders()->with('seller')->get();
+                $unread = (int) $order->sellerOrders->sum(fn ($part) => (int) ($part->conversation->admin_unread_count ?? 0));
+            @endphp
+            <div class="lg:col-span-2 space-y-3">
+            <x-admin.fold title="Items" :open="true" flush>
+                <x-slot:badge><span class="text-sm font-semibold text-gray-900">{{ \App\Support\Money::format($order->total_amount) }}</span></x-slot:badge>
                 <ul class="divide-y divide-gray-100">
                     @foreach($order->items as $item)
                         <li class="flex items-center justify-between gap-4 px-5 py-3">
@@ -43,11 +47,23 @@
                         </li>
                     @endforeach
                 </ul>
-                @php $fulfilment = app(\App\Services\FulfilmentService::class); @endphp
-                <div class="border-t border-gray-100 px-5 py-4">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Shops in this order</h3>
-                    <div class="mt-3 space-y-3">
-                        @foreach($order->sellerOrders()->with('seller')->get() as $part)
+                <dl class="space-y-1 border-t border-gray-100 px-5 py-4 text-sm">
+                    @include('orders._shop_deals', ['order' => $order, 'as' => 'dl'])
+                    @if($order->voucher_discount > 0)
+                        <div class="flex justify-between text-gray-600"><dt>Voucher {{ $order->voucher_code }}</dt><dd>−{{ \App\Support\Money::format($order->voucher_discount) }}</dd></div>
+                    @endif
+                    @if($order->points_redeemed_discount > 0)
+                        <div class="flex justify-between text-gray-600"><dt>Points ({{ $order->points_redeemed }})</dt><dd>−{{ \App\Support\Money::format($order->points_redeemed_discount) }}</dd></div>
+                    @endif
+                    <div class="flex justify-between text-gray-600"><dt>Delivery ({{ $order->delivery_zone === 'greater_male' ? 'Greater Malé' : 'other islands' }})</dt><dd>{{ \App\Support\Money::format($order->shipping_amount) }}</dd></div>
+                    <div class="flex justify-between text-gray-600"><dt>Payment</dt><dd>{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</dd></div>
+                    <div class="flex justify-between font-semibold text-gray-900"><dt>Total</dt><dd>{{ \App\Support\Money::format($order->total_amount) }}</dd></div>
+                </dl>
+            </x-admin.fold>
+            <x-admin.fold title="Shops in this order" :open="$parts->contains(fn ($part) => $fulfilment->nextStatuses($part) !== [])">
+                <x-slot:badge><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">{{ $parts->count() }}</span></x-slot:badge>
+                    <div class="space-y-3">
+                        @foreach($parts as $part)
                             <div class="rounded-lg border border-gray-200 p-3 text-sm">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <p class="font-semibold text-gray-900">{{ $part->shopName() }}</p>
@@ -82,9 +98,10 @@
                             </div>
                         @endforeach
                     </div>
-                </div>
-                <div class="border-t border-gray-100 px-5 py-4 space-y-3">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Conversations</h3>
+            </x-admin.fold>
+            <x-admin.fold title="Conversations" :open="$unread > 0">
+                <x-slot:badge>@if($unread)<span class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">{{ $unread }} unread</span>@endif</x-slot:badge>
+                <div class="space-y-3">
                     @foreach($order->sellerOrders as $part)
                         @include('messaging._thread', [
                             'part' => $part,
@@ -103,29 +120,17 @@
                         @endif
                     @endforeach
                 </div>
-                <dl class="space-y-1 border-t border-gray-100 px-5 py-4 text-sm">
-                    @include('orders._shop_deals', ['order' => $order, 'as' => 'dl'])
-                    @if($order->voucher_discount > 0)
-                        <div class="flex justify-between text-gray-600"><dt>Voucher {{ $order->voucher_code }}</dt><dd>−{{ \App\Support\Money::format($order->voucher_discount) }}</dd></div>
-                    @endif
-                    @if($order->points_redeemed_discount > 0)
-                        <div class="flex justify-between text-gray-600"><dt>Points ({{ $order->points_redeemed }})</dt><dd>−{{ \App\Support\Money::format($order->points_redeemed_discount) }}</dd></div>
-                    @endif
-                    <div class="flex justify-between text-gray-600"><dt>Delivery ({{ $order->delivery_zone === 'greater_male' ? 'Greater Malé' : 'other islands' }})</dt><dd>{{ \App\Support\Money::format($order->shipping_amount) }}</dd></div>
-                    <div class="flex justify-between text-gray-600"><dt>Payment</dt><dd>{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</dd></div>
-                    <div class="flex justify-between font-semibold text-gray-900"><dt>Total</dt><dd>{{ \App\Support\Money::format($order->total_amount) }}</dd></div>
-                </dl>
+            </x-admin.fold>
             </div>
 
-            <div class="space-y-6">
-                <div class="rounded-lg bg-white p-5 shadow">
-                    <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Status</h2>
-                    <span class="mt-2 mb-4 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $order->status_badge }}">{{ \App\Support\OrderStatus::label($order->status) }}</span>
+            <div class="space-y-3">
+                <x-admin.fold title="Status" :open="true">
+                    <x-slot:badge><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $order->status_badge }}">{{ \App\Support\OrderStatus::label($order->status) }}</span></x-slot:badge>
                     @include('partials.order-status-actions', ['action' => route('admin.orders.status', $order), 'nextStatuses' => $nextStatuses])
-                </div>
-                <div class="rounded-lg bg-white p-5 shadow">
-                    <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Payment</h2>
-                    <p class="mt-2 text-sm text-gray-900">{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</p>
+                </x-admin.fold>
+                <x-admin.fold title="Payment" :open="$order->payment_status !== 'paid' || $order->refund_status === 'due'">
+                    <x-slot:badge><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span></x-slot:badge>
+                    <p class="text-sm text-gray-900">{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</p>
                     <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span>
                     @if($order->paid_at)
                         <p class="mt-1 text-xs text-gray-500">Paid {{ $order->paid_at->format('d M Y, H:i') }}</p>
@@ -193,10 +198,10 @@
                             </form>
                         </div>
                     @endif
-                </div>
-                <div class="rounded-lg bg-white p-5 shadow">
-                    <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Customer</h2>
-                    <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Deleted user' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span>@endif</p>
+                </x-admin.fold>
+                <x-admin.fold title="Customer">
+                    <x-slot:badge><span class="max-w-[10rem] truncate text-sm text-gray-600">{{ $order->customerName() ?? 'Deleted user' }}</span></x-slot:badge>
+                    <p class="text-sm text-gray-900">{{ $order->customerName() ?? 'Deleted user' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span>@endif</p>
                     <p class="text-sm text-gray-600">{{ $order->customerEmail() ?? '' }}</p>
                     <p class="mt-3 text-sm text-gray-700">{{ $order->shipping_address }}</p>
                     <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
@@ -205,7 +210,7 @@
                         <p class="mt-2 text-sm text-gray-700">Phone: <a href="tel:{{ $order->shipping_phone }}" dir="ltr" class="font-medium hover:underline">{{ $order->shipping_phone }}</a></p>
                     @endif
                     <p class="mt-3 text-xs text-gray-500">Placed {{ $order->created_at->format('d M Y, H:i') }}</p>
-                </div>
+                </x-admin.fold>
                 @include('admin.orders._delivery', ['order' => $order])
                 @include('admin.tax._order', ['order' => $order])
             </div>

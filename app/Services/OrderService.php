@@ -101,7 +101,7 @@ class OrderService
             // items' extra charges, which free delivery does not waive; also the Malé time slot
             // (checked again under a lock) and the gift details
             $delivery = app(DeliveryService::class);
-            $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null);
+            $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null, $shippingData['shipping_state'] ?? null);
             $shippingData = $delivery->prepareOrder($cart, $shippingData, (float) $discounts['final_total']);
 
             // Create order

@@ -290,7 +290,7 @@ class StoreOrderRequest extends FormRequest
 
         $delivery = app(\App\Services\DeliveryService::class);
         $slots = app(\App\Services\DeliverySlotService::class);
-        $area = $delivery->areaFor($delivery->zoneFor($this->input('delivery_zone'), $this->input('shipping_city')), $this->input('shipping_state'));
+        $area = $delivery->areaFor($delivery->zoneFor($this->input('delivery_zone'), $this->input('shipping_city'), $this->input('shipping_state')), $this->input('shipping_state'));
         if ($area === \App\Services\DeliveryService::AREA_GREATER_MALE && $slots->enabled() && ! $slots->find($slot)) {
             $validator->errors()->add('delivery_slot', __('That delivery time is no longer available. Please choose another time.'));
         }

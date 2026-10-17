@@ -41,9 +41,11 @@ class DeliveryService
     }
 
     /**
-     * Pick the zone from what the customer chose, else guess it from the island name.
+     * Pick the zone from what the customer chose, else guess it from the island name. Villingili
+     * is the one Greater Malé name another atoll shares (Gaafu Alif): with an atoll other than
+     * Kaafu it is that one. A typed atoll never changes the others (a wrong one is a typo).
      */
-    public function zoneFor(?string $zone, ?string $city = null): string
+    public function zoneFor(?string $zone, ?string $city = null, ?string $atoll = null): string
     {
         if ($zone && array_key_exists($zone, self::zones())) {
             return $zone;
@@ -51,6 +53,10 @@ class DeliveryService
 
         // Accents and case ignored: "Male", "Malé" and "MALÉ" are all Malé
         $normal = \App\Support\IslandList::normalize($city);
+        $atollKey = \App\Support\IslandList::normalizeAtoll($atoll);
+        if ($normal === 'villingili' && $atollKey !== '' && $atollKey !== 'kaafu') {
+            return 'islands';
+        }
 
         return $normal !== '' && in_array($normal, array_map(\App\Support\IslandList::normalize(...), self::GREATER_MALE), true) ? 'greater_male' : 'islands';
     }
@@ -66,7 +72,7 @@ class DeliveryService
             ? ($island->getTranslation('name', 'en', false) ?: $island->getTranslation('name', config('app.fallback_locale'), false))
             : $islandName;
 
-        return $this->zoneFor(null, $name);
+        return $this->zoneFor(null, $name, $island?->atoll);
     }
 
     /**
@@ -563,7 +569,7 @@ class DeliveryService
         if ($selectedAddress) {
             $area = $this->areaFor($selectedAddress->deliveryZone(), $selectedAddress->atoll);
         } else {
-            $zone = $this->zoneFor(old('delivery_zone'), old('shipping_city', $user?->city));
+            $zone = $this->zoneFor(old('delivery_zone'), old('shipping_city', $user?->city), old('shipping_state', $user?->state));
             $area = $this->areaFor($zone, old('shipping_state', $user?->state));
         }
 

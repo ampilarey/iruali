@@ -71,7 +71,9 @@ class Address extends Model
      */
     public function deliveryZone(): string
     {
-        return app(DeliveryService::class)->zoneForIsland($this->island_id ? $this->islandRecord : null, $this->island);
+        $record = $this->island_id ? $this->islandRecord : null;
+
+        return $record ? app(DeliveryService::class)->zoneForIsland($record) : app(DeliveryService::class)->zoneFor(null, $this->island, $this->atoll);
     }
 
     /**

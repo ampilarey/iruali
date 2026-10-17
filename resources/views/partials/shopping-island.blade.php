@@ -42,7 +42,7 @@
     <div class="flex max-h-[85vh] flex-col">
         <div class="flex items-start justify-between gap-3 border-b border-gray-100 p-4">
             <div>
-                <h2 id="island-dialog-title" class="font-display text-xl font-bold text-dark">{{ __('Where should we deliver?') }}</h2>
+                <h2 id="island-dialog-title" class="font-display text-lg sm:text-xl font-bold text-dark">{{ __('Where should we deliver?') }}</h2>
                 <p class="mt-1 text-sm text-gray-600">{{ __('Choose your island to see the shops that deliver there. You can change it any time, for example to send a gift to family.') }}</p>
             </div>
             <button type="button" data-island-dialog-close class="p-1 text-gray-500 hover:text-dark" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-5 h-5" /></button>

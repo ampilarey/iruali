@@ -17,6 +17,11 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
+        <form method="GET" action="{{ route('admin.users') }}" class="mb-4 flex gap-2" role="search">
+            <label for="user-search" class="sr-only">Search users</label>
+            <input id="user-search" type="search" name="q" value="{{ $search ?? '' }}" placeholder="Name, email or phone" class="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm">
+            <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">Search</button>
+        </form>
         <div class="bg-white shadow rounded-lg">
             <div class="px-4 py-5 sm:p-6">
                 <div class="overflow-x-auto">
@@ -40,7 +45,12 @@
                                             <span class="text-sm font-medium text-gray-700">{{ substr($user->name, 0, 1) }}</span>
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                                            @if(\App\Support\StaffAccess::can('admin.customers.show'))
+                                                <a href="{{ route('admin.customers.show', $user) }}" class="text-sm font-medium text-primary-700 hover:underline">{{ $user->name }}</a>
+                                            @else
+                                                <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                                            @endif
+                                            @if($user->phone)<div class="text-xs text-gray-500">{{ $user->phone }}</div>@endif
                                         </div>
                                     </div>
                                 </td>
@@ -85,7 +95,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">No users found</td>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">{{ ($search ?? '') !== '' ? 'No users match that search.' : 'No users found' }}</td>
                             </tr>
                             @endforelse
                         </tbody>

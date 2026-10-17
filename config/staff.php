@@ -36,7 +36,7 @@ return [
             'admin.reviews', 'admin.reviews.*',
             'admin.questions', 'admin.questions.*',
             'admin.newsletter', 'admin.newsletter.*',
-            'admin.users',
+            'admin.users', 'admin.customers.show', 'admin.customers.tags', 'admin.customers.notes',
             'admin.disputes', 'admin.disputes.*',
             'admin.quotes', 'admin.quotes.*', // bulk quotes: follow up shops, write in a request, close it
             'admin.messages', 'admin.messages.*',
@@ -59,6 +59,7 @@ return [
             'admin.audit',
             'admin.disputes', 'admin.disputes.show',
             'admin.rewards', 'admin.gift-cards', 'admin.gift-cards.*',
+            'admin.customer-report', 'admin.customer-report.export', 'admin.customers.show',
             'admin.tax', 'admin.tax.*', 'admin.orders.invoice', // GST settings, monthly GST report, shops' invoices
         ],
 

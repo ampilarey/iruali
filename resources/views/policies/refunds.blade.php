@@ -22,6 +22,9 @@
     <li><strong>Once the shop is preparing it or has sent it:</strong> contact us straight away. We will cancel it if the shop can still stop it; otherwise you can return it under section 2.</li>
     <li><strong>Cancelled by us or the shop</strong> (for example, the item is out of stock or delivery is not possible): full refund, including delivery.</li>
     <li>Card orders that are not paid within 24 hours are cancelled automatically. Nothing is charged.</li>
+    @if(\App\Services\ManualPaymentService::transferEnabled())
+        <li>Bank transfer orders with no transfer slip within {{ \App\Services\ManualPaymentService::payWithinHours() }} hours are cancelled automatically.</li>
+    @endif
 </ul>
 
 <h2>2. Returns and refunds</h2>
@@ -48,6 +51,9 @@
 <ul>
     <li><strong>Card payments</strong> are refunded to the original card through Bank of Maldives (BML). Processing time is usually <strong>5–7 business days</strong>, depending on your bank.</li>
     <li>We do not refund card payments in cash or to a different card.</li>
+    @if(\App\Services\ManualPaymentService::transferEnabled() || \App\Services\ManualPaymentService::codEnabled())
+        <li><strong>Bank transfer and cash payments</strong> are refunded by bank transfer to your account (or to your iruali wallet, if you prefer), usually within <strong>5 business days</strong>.</li>
+    @endif
     <li>You receive a confirmation when the refund has been started. Loyalty points and vouchers used on a cancelled order are returned to your account.</li>
 </ul>
 

@@ -70,6 +70,7 @@ class AdminInboxTest extends TestCase
         $this->assertSame([
             'sellers_pending' => 1,
             'products_pending' => 2,
+            'transfers_to_check' => 0,
             'refunds_due' => 1,
             'returns_open' => 1,
             'bml_failed' => 1,

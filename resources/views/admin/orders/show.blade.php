@@ -131,7 +131,7 @@
                         <p class="mt-1 text-xs text-gray-500">Paid {{ $order->paid_at->format('d M Y, H:i') }}</p>
                     @endif
                     @if((float) $order->wallet_amount > 0)
-                        <p class="mt-1 text-xs text-gray-600">{{ \App\Support\Money::format($order->wallet_amount) }} paid from the customer's wallet{{ $order->cardAmount() > 0 ? ', '.\App\Support\Money::format($order->cardAmount()).' by card' : '' }}{{ $order->wallet_refunded_at ? ' · wallet part returned '.$order->wallet_refunded_at->format('d M Y') : '' }}</p>
+                        <p class="mt-1 text-xs text-gray-600">{{ \App\Support\Money::format($order->wallet_amount) }} paid from the customer's wallet{{ $order->cardAmount() > 0 ? ', '.\App\Support\Money::format($order->cardAmount()).' by '.mb_strtolower(\App\Services\PaymentService::methodLabel($order->payment_method)) : '' }}{{ $order->wallet_refunded_at ? ' · wallet part returned '.$order->wallet_refunded_at->format('d M Y') : '' }}</p>
                     @endif
                     @if($order->payment_method === 'bml')
                         @php $attempts = $order->paymentTransactions()->latest('id')->get(); @endphp
@@ -156,10 +156,15 @@
                             @endif
                         </div>
                     @endif
+                    @include('admin.orders._manual_payment', ['order' => $order])
                             @if($order->refund_status === 'due')
                         <div class="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm space-y-2">
                             <p class="font-semibold text-red-800">Refund due: {{ \App\Support\Money::format($order->refund_amount) }}</p>
-                            <p class="text-red-700">{{ $order->refund_reason }}. Refund it in the BML merchant portal (Transactions → {{ $order->order_number }} → Refund), then record the reference here.</p>
+                            @if($order->payment_method === 'bml')
+                                <p class="text-red-700">{{ $order->refund_reason }}. Refund it in the BML merchant portal (Transactions → {{ $order->order_number }} → Refund), then record the reference here.</p>
+                            @else
+                                <p class="text-red-700">{{ $order->refund_reason }}. Paid by {{ mb_strtolower(\App\Services\PaymentService::methodLabel($order->payment_method)) }}: send it back by bank transfer, then record the reference here.</p>
+                            @endif
                             @if(\App\Support\StaffAccess::can('admin.orders.refunded'))
                             <form method="POST" action="{{ route('admin.orders.refunded', $order) }}" class="flex flex-wrap gap-2">
                                 @csrf

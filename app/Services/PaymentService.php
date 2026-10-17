@@ -24,9 +24,19 @@ class PaymentService
      * Payment methods offered at checkout: card payment through BML only, once it is configured.
      * Until then checkout is closed.
      */
+    /**
+     * The ways to pay offered at checkout, in order: card (BML set up and switched on), bank
+     * transfer and cash on delivery (when an admin switched them on, ManualPaymentService).
+     *
+     * @return array<string, string>
+     */
     public function methods(): array
     {
-        return $this->bml()->enabled() ? ['bml' => __('Card payment (BML)')] : [];
+        return array_filter([
+            'bml' => ManualPaymentService::cardEnabled() && $this->bml()->enabled() ? __('Card payment (BML)') : null,
+            ManualPaymentService::TRANSFER => ManualPaymentService::transferEnabled() ? __('Bank transfer') : null,
+            ManualPaymentService::COD => ManualPaymentService::codEnabled() ? __('Cash on delivery') : null,
+        ]);
     }
 
     public static function methodLabel(?string $method): string
@@ -36,6 +46,8 @@ class PaymentService
         return match ($method) {
             'bml', null, '' => __('Card payment (BML)'),
             'wallet' => __('Wallet (store credit)'),
+            ManualPaymentService::TRANSFER => __('Bank transfer'),
+            ManualPaymentService::COD => __('Cash on delivery'),
             default => ucfirst(str_replace('_', ' ', $method)),
         };
     }
@@ -45,6 +57,7 @@ class PaymentService
         return $order->payment_method === 'bml'
             && $order->payment_status !== 'paid'
             && $order->status === 'pending'
+            && ManualPaymentService::cardEnabled()
             && $this->bml()->enabled();
     }
 

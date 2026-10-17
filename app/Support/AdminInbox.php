@@ -128,6 +128,13 @@ class AdminInbox
                 'count' => Product::where('is_active', false)->count(),
                 'route' => 'admin.products', 'severity' => 'info',
             ],
+            // Bank transfers with a slip to check (ManualPaymentService)
+            'transfers_to_check' => fn () => [
+                'label' => 'Bank transfers to check',
+                'count' => Order::where('payment_method', \App\Services\ManualPaymentService::TRANSFER)->where('payment_status', '!=', 'paid')
+                    ->where('status', '!=', 'cancelled')->whereNotNull('payment_slip_uploaded_at')->count(),
+                'route' => 'admin.orders', 'severity' => 'warn',
+            ],
             'refunds_due' => fn () => [
                 'label' => 'Refunds due',
                 'count' => Order::where('refund_status', 'due')->count(),

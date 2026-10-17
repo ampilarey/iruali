@@ -71,3 +71,26 @@ reminds you to refund it.
 - Production: `https://api.merchants.bankofmaldives.com.mv/public`
 - Header: `Authorization: <API key>`
 - BML docs: https://docs.merchants.bankofmaldives.com.mv
+
+## Bank transfer and cash on delivery (fallbacks)
+
+For when card payment is not available (BML not set up yet, or the gateway has a problem), admins
+switch payment methods in **Admin → Settings → Payment methods** (`ManualPaymentService`):
+
+- **Card payment (BML)** can be unticked for a while; it is offered only when BML is set up too.
+- **Bank transfer** needs the account (bank, name, number; optional note). The customer sees the
+  account, the amount and the order number as the reference on the order page, and uploads the
+  transfer slip there (photo or PDF, kept on the private disk; signed link for guests). The contact
+  email is told; Admin → Inbox shows "Bank transfers to check". On the order page an admin (or finance
+  staff) views the slip and presses **Confirm payment received** (optional bank reference): the order
+  is then paid like a card order (`PaymentService::confirm()`: invoices, points, customer email) and the
+  shops are emailed to send it (`ShopOrderPaid`). No slip within the hours set (default 24) cancels
+  the order and puts its stock back (`orders:cancel-unpaid-transfer`, hourly).
+- **Cash on delivery** is for orders from one shop, with no pre-order lines, optionally up to an
+  amount and only to Greater Malé. The shop is told to collect the cash (new-order email and its order
+  page); pickup orders can be made ready before payment. An admin presses **Cash received** once the
+  money is with iruali.
+
+Until a payment is confirmed the order is unpaid, so the shops' earnings on it are not payable. A
+paid transfer or cash order that is cancelled is flagged for a refund, sent back by bank transfer (or
+to the wallet). The policies (terms, delivery, refunds) describe whichever methods are switched on.

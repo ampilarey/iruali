@@ -54,6 +54,18 @@ class Setting extends Model
         'payout_day' => 'Sunday',
         // Checkout without an account (orders carry the guest's email and a token for signed links)
         'guest_checkout_enabled' => 0,
+        // Payment methods (Admin → Settings → Payment methods): card needs BML set up as well;
+        // bank transfer needs the account; cash on delivery is for one shop's order at a time
+        'payment_card_enabled' => 1,
+        'payment_transfer_enabled' => 0,
+        'transfer_bank_name' => 'Bank of Maldives',
+        'transfer_account_name' => '',
+        'transfer_account_number' => '',
+        'transfer_note' => '',
+        'transfer_pay_within_hours' => 24,
+        'payment_cod_enabled' => 0,
+        'cod_max_amount' => 0,
+        'cod_greater_male_only' => 0,
         // Site analytics: none, plausible (needs the domain) or ga4 (needs the G-XXXX measurement id)
         'analytics_provider' => 'none',
         'analytics_id' => '',

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schedule;
 
 // Card orders nobody paid for are cancelled after 24 hours and their stock released
 Schedule::command('orders:cancel-unpaid-card')->hourly()->withoutOverlapping();
+// Bank transfer orders with no transfer slip in time (Admin → Settings → Payment methods)
+Schedule::command('orders:cancel-unpaid-transfer')->hourly()->withoutOverlapping();
 
 // Database backup every night (config/backup.php says where it goes), old ones cleaned up
 Schedule::command('backup:clean')->dailyAt('01:30');

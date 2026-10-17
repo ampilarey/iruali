@@ -59,7 +59,11 @@
 
 <h2>5. Special conditions</h2>
 <ul>
-    <li>All orders are paid by card when placed. Delivery staff never ask for payment.</li>
+    @if(\App\Services\ManualPaymentService::codEnabled())
+        <li>Orders are paid before they are sent, except cash on delivery orders, where you pay the delivery person in cash. Delivery staff never ask for payment on any other order.</li>
+    @else
+        <li>All orders are paid when placed. Delivery staff never ask for payment.</li>
+    @endif
     <li>Items that need an age check or permit are only handed over after the check.</li>
     <li>No import or export customs duties apply, because all orders are delivered within the Maldives.</li>
 </ul>

@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\Models\Message;
 use App\Models\User;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -45,9 +47,9 @@ class NewMessage extends Notification implements ShouldQueue
             ->line(__('You get at most one of these emails every 10 minutes per conversation; the full thread is on the order page.'));
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: new message from :sender about order :number. Reply at :url', [
+        return SmsTypes::render('new_message', [
             'sender' => $this->message->senderName(),
             'number' => $this->message->conversation->order->order_number,
             'url' => $this->urlFor($notifiable),

@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Models\SellerOrder;
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -70,9 +72,9 @@ class PickupReady extends Notification implements ShouldQueue
         return $mail->action(__('View your order'), $order->customerUrl());
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: order :number is ready for pickup at :shop, :address. Your pickup code is :code.', [
+        return SmsTypes::render('pickup_ready', [
             'number' => $this->part->order->order_number,
             'shop' => $this->part->shopName(),
             'address' => collect([$this->part->pickup_address, $this->part->pickup_island])->filter()->join(', '),

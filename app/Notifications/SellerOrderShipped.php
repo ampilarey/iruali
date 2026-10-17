@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Models\SellerOrder;
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -68,15 +70,13 @@ class SellerOrderShipped extends Notification implements ShouldQueue
             ->action(__('View your order'), $order->customerUrl());
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        $text = __('iruali: :shop has sent their part of order :number.', ['shop' => $this->part->shopName(), 'number' => $this->part->order->order_number]);
-
-        if (($details = $this->part->trackingSummary()) !== '') {
-            $text .= ' '.$details;
-        }
-
-        return $text;
+        return SmsTypes::render('part_shipped', [
+            'shop' => $this->part->shopName(),
+            'number' => $this->part->order->order_number,
+            'details' => $this->part->trackingSummary(),
+        ]);
     }
 
     /**

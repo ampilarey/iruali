@@ -376,8 +376,16 @@ class ReadyChecks
 
         $driver = (string) config('sms.driver', 'log');
 
-        return $driver === 'log'
-            ? $this->warn('SMS driver is log (codes are written to the log, not sent)', 'Set the SMS driver and credentials in config/sms.php / .env.')
-            : $this->pass("SMS driver {$driver}");
+        if ($driver === 'log') {
+            return $this->warn('SMS driver is log (codes are written to the log, not sent)', 'Set the SMS driver and credentials in config/sms.php / .env.');
+        }
+        if (! \App\Services\Sms\SmsManager::enabled()) {
+            return $this->warn("SMS driver {$driver}, but all SMS are switched off", 'Switch SMS back on in Admin → SMS → Switches and limits.');
+        }
+        if (\App\Services\Sms\SmsManager::limitReached()) {
+            return $this->warn("SMS driver {$driver}, monthly limit reached (only codes go out)", 'Raise or remove the limit in Admin → SMS.');
+        }
+
+        return $this->pass("SMS driver {$driver}");
     }
 }

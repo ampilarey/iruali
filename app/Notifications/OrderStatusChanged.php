@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Models\Order;
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -66,27 +68,23 @@ class OrderStatusChanged extends Notification implements ShouldQueue
         return $mail->action(__('View your order'), $this->order->customerUrl());
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
         $number = $this->order->order_number;
-
-        $text = match ($this->order->status) {
-            'processing' => __('iruali: order :number is being prepared by the shop.', ['number' => $number]),
-            'shipped' => __('iruali: order :number is on its way.', ['number' => $number]),
-            'out_for_delivery' => __('iruali: order :number is out for delivery today.', ['number' => $number]),
-            'delivered' => __('iruali: order :number has been delivered. Enjoy!', ['number' => $number]),
-            'cancelled' => __('iruali: order :number has been cancelled.', ['number' => $number]),
-            default => __('iruali: order :number is now :status.', ['number' => $number, 'status' => $this->order->status]),
+        $type = match ($this->order->status) {
+            'processing' => 'order_processing',
+            'shipped' => 'order_shipped',
+            'out_for_delivery' => 'order_out_for_delivery',
+            'delivered' => 'order_delivered',
+            'cancelled' => 'order_cancelled',
+            default => 'order_status',
         };
 
-        if (in_array($this->order->status, ['shipped', 'out_for_delivery'], true)) {
-            $details = $this->trackedParts()->map(fn ($p) => $p->trackingSummary())->filter()->join('; ');
-            if ($details !== '') {
-                $text .= ' '.$details;
-            }
-        }
+        $details = in_array($this->order->status, ['shipped', 'out_for_delivery'], true)
+            ? $this->trackedParts()->map(fn ($p) => $p->trackingSummary())->filter()->join('; ')
+            : '';
 
-        return $text;
+        return SmsTypes::render($type, ['number' => $number, 'status' => $this->order->status, 'details' => $details]);
     }
 
     /**

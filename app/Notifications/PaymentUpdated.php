@@ -5,7 +5,9 @@ namespace App\Notifications;
 use App\Models\Order;
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
+use App\Services\Sms\SmsText;
 use App\Support\Money;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -42,9 +44,9 @@ class PaymentUpdated extends Notification implements ShouldQueue
             ->action(__('View your order'), $this->order->customerUrl());
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: payment of :amount received for order :number. Thank you.', [
+        return SmsTypes::render('payment_received', [
             'amount' => Money::format($this->order->total_amount),
             'number' => $this->order->order_number,
         ]);

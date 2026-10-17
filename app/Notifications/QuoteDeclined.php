@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\Models\QuoteRequest;
 use App\Models\User;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -48,9 +50,9 @@ class QuoteDeclined extends Notification implements ShouldQueue
             ->action(__('See the request'), route('quotes.show', $quote));
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: your quote request #:number for :product was declined. :url', [
+        return SmsTypes::render('quote_declined', [
             'number' => $this->quote->id,
             'product' => Str::limit($this->quote->displayName(), 40),
             'url' => route('quotes.show', $this->quote),

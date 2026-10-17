@@ -4,7 +4,9 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Sms\SmsText;
 use App\Support\Money;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -56,9 +58,9 @@ class OrderPlaced extends Notification implements ShouldQueue
             ->line(__('Printable receipt: :url', ['url' => $order->customerReceiptUrl()]));
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: we have your order :number (:amount). We will text you when it is on its way.', [
+        return SmsTypes::render('order_placed', [
             'number' => $this->order->order_number,
             'amount' => Money::format($this->order->total_amount),
         ]);

@@ -24,6 +24,22 @@ final class SmsResult
         return new self(true, 'logged');
     }
 
+    /**
+     * Kept back by quiet hours; the scheduler sends it when they end (sms:release-held).
+     */
+    public static function held(): self
+    {
+        return new self(true, 'held');
+    }
+
+    /**
+     * Not sent: all SMS are switched off, or the monthly limit is reached.
+     */
+    public static function blocked(string $reason): self
+    {
+        return new self(false, 'blocked', $reason);
+    }
+
     public static function failed(?string $response = null, string $status = 'failed'): self
     {
         return new self(false, $status, $response);

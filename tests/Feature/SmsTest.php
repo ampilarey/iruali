@@ -212,7 +212,7 @@ class SmsTest extends TestCase
         $this->actingAs(User::factory()->create())->get(route('admin.sms'))->assertForbidden();
 
         $this->actingAs($this->admin())->get(route('admin.sms'))->assertOk()
-            ->assertSee('Earlier message')->assertSee('+9607771234')->assertSee('Send a test SMS')->assertSee('nothing is sent');
+            ->assertSee('Earlier message')->assertSee('+9607771234')->assertSee('Gateway and test')->assertSee('nothing is sent');
 
         $this->post(route('admin.sms.test'), ['to' => '3321234', 'message' => 'x'])->assertSessionHasErrors('to');
         $this->post(route('admin.sms.test'), ['to' => '999 1234', 'message' => 'Test from admin'])->assertRedirect()->assertSessionHas('success');

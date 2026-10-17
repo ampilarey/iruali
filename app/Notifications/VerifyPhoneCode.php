@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Models\OTP;
+use App\Services\Sms\SmsText;
+use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -25,8 +27,8 @@ class VerifyPhoneCode extends Notification implements ShouldQueue
         return ['sms'];
     }
 
-    public function toSms(object $notifiable): string
+    public function toSms(object $notifiable): SmsText
     {
-        return __('iruali: your verification code is :code. It expires in 10 minutes.', ['code' => $this->otp->code]);
+        return SmsTypes::render('phone_code', ['code' => $this->otp->code]);
     }
 }

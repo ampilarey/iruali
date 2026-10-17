@@ -17,6 +17,7 @@
 <h2>After approval</h2>
 <ul>
     <li>Each new product is approved by iruali, usually within a working day. You can see which are still waiting under <a href="{{ route('seller.products.index') }}">Products</a>.</li>
+    <li>Changes to a live product are checked the same way; shoppers see the current version until they are approved. Stock changes go live at once (<a href="{{ route('seller.help.show', 'listing-products') }}">Listing a product well</a>).</li>
     <li>Keep your profile and bank details current. A changed bank account is checked again before the next payout.</li>
     <li>iruali can suspend a shop that breaks the <a href="{{ \Illuminate\Support\Facades\Route::has('policies.seller_terms') ? route('policies.seller_terms') : route('policies.terms') }}">seller terms</a> (late shipping, wrong items, prohibited goods). A suspended shop's products are taken off the storefront and it cannot use the Seller Centre until iruali reinstates it.</li>
 </ul>

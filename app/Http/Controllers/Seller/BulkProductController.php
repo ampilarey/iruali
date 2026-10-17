@@ -38,9 +38,12 @@ class BulkProductController extends Controller
         $products = $this->ownProducts($data['ids']);
 
         $count = $this->bulk->apply($products, $data['action'], isset($data['value']) ? (float) $data['value'] : null);
+        $message = trans_choice(':count product updated.|:count products updated.', $count, ['count' => $count]);
+        if ($data['action'] === 'price_percent' && $products->contains(fn (Product $p) => app(\App\Services\ProductReviewService::class)->needsReview($p))) {
+            $message .= ' '.__('Price changes to live products wait for review; shoppers see the current prices until an admin approves them.');
+        }
 
-        return redirect()->route('seller.products.index')
-            ->with('success', trans_choice(':count product updated.|:count products updated.', $count, ['count' => $count]));
+        return redirect()->route('seller.products.index')->with('success', $message);
     }
 
     public function duplicate(Product $product)

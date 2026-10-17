@@ -61,12 +61,15 @@ return [
         ],
 
         // Catalogue: brand pages (names, logo, banner, description, merging duplicates, authorised
-        // sellers), new products waiting for approval, and sale campaigns (brand sales show on brand pages)
+        // sellers), new products waiting for approval, shops' edits to live products waiting for
+        // review, and sale campaigns (brand sales show on brand pages). Not the trusted-shop switch
+        // (admin.sellers.auto-approve), which is for admins.
         'catalogue' => [
             'admin.dashboard',
             'admin.inbox',
             'admin.brands', 'admin.brands.*',
             'admin.products', 'admin.products.approve',
+            'admin.product-changes', 'admin.product-changes.*',
             'admin.campaigns.*',
         ],
     ],

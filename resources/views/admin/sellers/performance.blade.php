@@ -13,6 +13,8 @@
             <a href="{{ route('sellers.show', $seller) }}" target="_blank" rel="noopener" class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">{{ __('View shop') }} ↗</a>
         </div>
 
+        @include('admin.sellers._auto_approve', ['seller' => $seller])
+
         @include('seller.partials.performance', ['report' => $report])
 
         <div class="overflow-hidden rounded-lg bg-white shadow">

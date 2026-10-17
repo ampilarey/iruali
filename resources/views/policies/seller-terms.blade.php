@@ -17,6 +17,7 @@
 <h2>1. {{ __('Your shop') }}</h2>
 <ul>
     <li>{{ $t('{trading_name} reviews each shop before it can sell and each product before it goes live. A shop must complete its checklist (logo, banner, about text, phone number, delivery options, bank account and a first product) before its products can be approved.') }}</li>
+    <li>{{ $t('Changes to a live product (names, descriptions, prices, photos, options and offers) are also reviewed before customers see them; until then the approved version stays on sale. Stock changes apply at once. {trading_name} may let a shop it trusts publish new products and changes without review, and may withdraw that at any time.') }}</li>
     <li>{{ $t('Listings must be honest: real photos, accurate names in English and Dhivehi, correct prices in MVR and true stock. Prohibited or restricted goods under Maldivian law may not be listed.') }}</li>
     <li>{{ $t('You are responsible for the products you sell, for their quality and for complying with Maldivian law, including any permits your goods need.') }}</li>
 </ul>

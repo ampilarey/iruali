@@ -16,7 +16,8 @@ class VariantService
     use SecureFileUpload;
 
     /**
-     * @param  array<int, array>  $rows  validated variants[] rows (see Seller\ProductRequest)
+     * @param  array<int, array>  $rows  validated variants[] rows (see Seller\ProductRequest); "image" is an
+     *                                   upload or the path of a file already stored
      */
     public function sync(Product $product, array $rows): void
     {
@@ -53,14 +54,19 @@ class VariantService
                     $variant->product_id = $product->id;
                 }
 
-                if (($row['image'] ?? null) instanceof UploadedFile) {
-                    $path = $this->storeFileSecurely($row['image'], 'products/variants');
-                    if ($path) {
-                        if ($variant->image) {
-                            $this->deleteFile($variant->image);
-                        }
-                        $variant->image = $path;
+                // A new upload, or (an approved edit, ProductReviewService) a file already stored for it
+                $image = $row['image'] ?? null;
+                $path = null;
+                if ($image instanceof UploadedFile) {
+                    $path = $this->storeFileSecurely($image, 'products/variants');
+                } elseif (is_string($image) && $image !== '' && $image !== $variant->image) {
+                    $path = $image;
+                }
+                if ($path) {
+                    if ($variant->image) {
+                        $this->deleteFile($variant->image);
                     }
+                    $variant->image = $path;
                 }
 
                 $variant->save();

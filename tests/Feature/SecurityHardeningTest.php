@@ -147,13 +147,12 @@ class SecurityHardeningTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_trusted_proxies_come_from_the_environment(): void
+    public function test_trusted_proxies_come_from_the_setting(): void
     {
-        // Set the way .env sets it, before the app boots
-        putenv('TRUSTED_PROXIES=10.9.9.9');
-        $_ENV['TRUSTED_PROXIES'] = $_SERVER['TRUSTED_PROXIES'] = '10.9.9.9';
+        // TRUSTED_PROXIES → config('app.trusted_proxies'), applied as the app boots
+        config(['app.trusted_proxies' => '10.9.9.9']);
+        \App\Providers\AppServiceProvider::trustProxies();
         try {
-            $this->refreshApplication();
             \Illuminate\Support\Facades\Route::get('/_ip-probe', fn () => request()->ip());
 
             // Through the trusted proxy, the visitor's address is used
@@ -161,9 +160,8 @@ class SecurityHardeningTest extends TestCase
             // From anywhere else the header is ignored
             $this->call('GET', '/_ip-probe', [], [], [], ['REMOTE_ADDR' => '10.1.1.1', 'HTTP_X_FORWARDED_FOR' => '203.0.113.5'])->assertSee('10.1.1.1');
         } finally {
-            putenv('TRUSTED_PROXIES');
-            unset($_ENV['TRUSTED_PROXIES'], $_SERVER['TRUSTED_PROXIES']);
-            \Illuminate\Http\Middleware\TrustProxies::at('127.0.0.1');
+            config(['app.trusted_proxies' => '127.0.0.1']);
+            \App\Providers\AppServiceProvider::trustProxies();
         }
     }
 }

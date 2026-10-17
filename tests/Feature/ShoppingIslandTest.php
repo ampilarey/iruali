@@ -408,4 +408,41 @@ class ShoppingIslandTest extends TestCase
         $this->get('/login')->assertDontSee('data-auto-open', false);
         $this->get('/register')->assertDontSee('data-auto-open', false);
     }
+
+    public function test_department_counts_follow_the_island(): void
+    {
+        $category = $this->maleProduct->category;
+        Product::whereKey([$this->adduProduct->id, $this->fuvahProduct->id])->update(['category_id' => $category->id]);
+
+        // Hithadhoo gets the Malé and Addu shops' products, not Fuvahmulah's home-only shop's
+        $this->shoppingFor('seenu-hithadhoo')->get(route('categories.index'))->assertOk()->assertSee('2 products');
+        $this->shoppingFor('seenu-hithadhoo', ShoppingIsland::VIEW_LOCAL)->get(route('categories.index'))->assertOk()->assertSee('1 product');
+        $this->shoppingFor('seenu-hithadhoo', ShoppingIsland::VIEW_ALL)->get(route('categories.index'))->assertOk()->assertSee('3 products');
+        $this->get(route('categories.index'))->assertOk()->assertSee('3 products');
+    }
+
+    public function test_brand_page_lists_only_the_shops_the_island_sees(): void
+    {
+        $brand = \App\Models\Brand::create(['name' => 'Reefline', 'slug' => 'reefline', 'key' => 'reefline']);
+        Product::whereKey([$this->maleProduct->id, $this->adduProduct->id, $this->fuvahProduct->id])->update(['brand_id' => $brand->id, 'brand' => 'Reefline']);
+
+        $this->shoppingFor('seenu-hithadhoo')->get(route('brands.show', $brand))->assertOk()
+            ->assertSee('sold by 2 shops')->assertSee('Addu Greens')->assertDontSee('Fuvah Fish');
+        $this->shoppingFor('seenu-hithadhoo', ShoppingIsland::VIEW_ALL)->get(route('brands.show', $brand))->assertOk()
+            ->assertSee('sold by 3 shops')->assertSee('Fuvah Fish');
+    }
+
+    public function test_the_cart_flags_items_the_shop_cannot_deliver_to_the_island(): void
+    {
+        $customer = User::factory()->create();
+        $this->cartFor($customer, [[$this->fuvahProduct, 1], [$this->maleProduct, 1]]);
+
+        $this->actingAs($customer)->shoppingFor('seenu-hithadhoo')->get('/cart')->assertOk()
+            ->assertSee('data-island-cart-notice', false)
+            ->assertSee('1 item in your cart can&#039;t be delivered to Hithadhoo', false)
+            ->assertSee('Doesn&#039;t deliver to Hithadhoo', false);
+
+        // On the shop's own island there is nothing to flag
+        $this->actingAs($customer)->shoppingFor('gnaviyani-fuvahmulah')->get('/cart')->assertOk()->assertDontSee('data-island-cart-notice', false);
+    }
 }

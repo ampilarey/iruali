@@ -402,13 +402,14 @@ class BrandService
 
     /**
      * The shops selling this brand, each with brand_product_count set: authorised sellers of the
-     * brand first, then most products first.
+     * brand first, then most products first. With an island, only shops the shopper sees for it
+     * (ShopCoverage::apply: those delivering there, or only its own shops).
      *
      * @return array{shops: Collection, total: int}
      */
-    public function shops(Brand $brand, int $limit = 8): array
+    public function shops(Brand $brand, int $limit = 8, ?\App\Models\Island $island = null, string $view = \App\Services\ShoppingIsland::VIEW_DELIVERS): array
     {
-        $counts = Product::query()->active()->where('brand_id', $brand->id)->whereNotNull('seller_id')
+        $counts = app(ShopCoverage::class)->apply(Product::query(), $island, $view)->active()->where('brand_id', $brand->id)->whereNotNull('seller_id')
             ->selectRaw('seller_id, count(*) as aggregate')->groupBy('seller_id')
             ->pluck('aggregate', 'seller_id');
 
@@ -446,9 +447,9 @@ class BrandService
     /**
      * The departments this brand's products sit in, most products first.
      */
-    public function departments(Brand $brand, int $limit = 8): Collection
+    public function departments(Brand $brand, int $limit = 8, ?\App\Models\Island $island = null, string $view = \App\Services\ShoppingIsland::VIEW_DELIVERS): Collection
     {
-        $counts = Product::query()->active()->where('brand_id', $brand->id)->whereNotNull('category_id')
+        $counts = app(ShopCoverage::class)->apply(Product::query(), $island, $view)->active()->where('brand_id', $brand->id)->whereNotNull('category_id')
             ->selectRaw('category_id, count(*) as aggregate')->groupBy('category_id')
             ->pluck('aggregate', 'category_id');
 

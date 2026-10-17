@@ -31,8 +31,9 @@ class HomeController extends Controller
 
         $newArrivals = $cards()->latest()->take(10)->get();
 
+        // Counts follow the island too, so a department never promises products the shopper can't get
         $departments = Category::active()->root()
-            ->withCount(['products' => fn ($q) => $q->active()])
+            ->withCount(['products' => fn ($q) => $coverage->apply($q->active(), $island, $view)])
             ->get()
             ->sortBy(fn ($c) => $c->localized_name)
             ->values();

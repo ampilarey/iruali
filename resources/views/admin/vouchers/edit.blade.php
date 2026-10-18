@@ -52,6 +52,18 @@
                 <span class="ml-2">Active</span>
             </label>
         </div>
+        <div class="mb-6 space-y-2 rounded border border-gray-200 bg-gray-50 p-3" data-automatic-offer>
+            <label class="flex items-start gap-2">
+                <input type="hidden" name="is_automatic" value="0">
+                <input type="checkbox" name="is_automatic" value="1" class="mt-1 rounded border-gray-300" {{ old('is_automatic', $voucher->is_automatic ?? false) ? 'checked' : '' }}>
+                <span><span class="font-medium">Apply automatically</span><br><span class="text-xs text-gray-500">No code needed: when a shopper has not typed a code, the best automatic offer their cart reaches is applied (the minimum order and dates above count).</span></span>
+            </label>
+            <label class="flex items-start gap-2">
+                <input type="hidden" name="free_delivery" value="0">
+                <input type="checkbox" name="free_delivery" value="1" class="mt-1 rounded border-gray-300" {{ old('free_delivery', $voucher->free_delivery ?? false) ? 'checked' : '' }}>
+                <span><span class="font-medium">Free delivery</span><br><span class="text-xs text-gray-500">With "Apply automatically": delivery is free on orders over the minimum while it runs. Set the amount to 0 for free delivery only.</span></span>
+            </label>
+        </div>
         <div class="flex justify-end space-x-4">
             <a href="{{ route('admin.vouchers.index') }}" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">Cancel</a>
             <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">Update</button>

@@ -86,7 +86,7 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
     island), with preview, test, scheduling, opt-out and the budget from item 1.
     B&G: `admin/sms/campaigns*`, `audiences*`.
 25. ✅ **Abandoned-cart SMS** (done: Settings → Abandoned cart → Also by SMS) as well as the email (for verified phones that allow marketing SMS).
-26. **Promotion rules**: automatic offers without a code (spend MVR X get Y off, free delivery over
+26. ✅ **Promotion rules** (done: Admin → Vouchers → "Apply automatically" and "Free delivery"; Printed discount cards with print and CSV): automatic offers without a code (spend MVR X get Y off, free delivery over
     X for a campaign); batches of printed discount cards. B&G: `backend/app/Domains/Promotions`,
     `admin/discount-cards/*`.
 27. **Social posting**: post new products, deals and campaigns to the iruali Facebook page,

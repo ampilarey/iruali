@@ -244,7 +244,7 @@ class DeliveryService
     {
         $freeOver = (float) Setting::get('free_delivery_over');
 
-        return $freeOver > 0 && $goodsTotal >= $freeOver;
+        return ($freeOver > 0 && $goodsTotal >= $freeOver) || \App\Support\Promotions::freeDelivery($goodsTotal);
     }
 
     /**

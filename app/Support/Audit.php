@@ -51,6 +51,7 @@ class Audit
         'voucher.created' => 'Voucher created',
         'voucher.updated' => 'Voucher updated',
         'voucher.deleted' => 'Voucher deleted',
+        'voucher.batch' => 'Discount card batch made',
         'user.role' => 'User role changed',
         'staff.login' => 'Staff signed in',
         'settings.ordering_pause' => 'Ordering paused or resumed',

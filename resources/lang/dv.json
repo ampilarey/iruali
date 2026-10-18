@@ -2985,5 +2985,18 @@
     "Sign in with email": "އީމެއިލް މެދުވެރިކޮށް ސައިން އިން ކުރައްވާ",
     "For staff, and customers who signed up with an email.": "މުވައްޒަފުންނާއި، އީމެއިލް މެދުވެރިކޮށް ސައިން އަޕް ކުރެއްވި ކަސްޓަމަރުންނަށް.",
     "Staff, or an older account with email?": "މުވައްޒަފެއް، ނުވަތަ އީމެއިލާ ގުޅޭ ކުރީގެ އެކައުންޓެއް؟",
-    "You no longer have enough points for this. Please check your points and try again.": "މިކަމަށް ފުދޭވަރަށް ޕޮއިންޓް މިހާރު ނެތް. ޕޮއިންޓްތައް ބައްލަވާފައި އަލުން މަސައްކަތް ކުރައްވާ."
+    "You no longer have enough points for this. Please check your points and try again.": "މިކަމަށް ފުދޭވަރަށް ޕޮއިންޓް މިހާރު ނެތް. ޕޮއިންޓްތައް ބައްލަވާފައި އަލުން މަސައްކަތް ކުރައްވާ.",
+    "Sign in or create an account": "ސައިން އިން ކުރައްވާ ނުވަތަ އެކައުންޓެއް ހައްދަވާ",
+    "Use your mobile number or email. New to iruali? Type your mobile number: we text you a code and your account is ready.": "މޯބައިލް ނަންބަރު ނުވަތަ އީމެއިލް ބޭނުން ކުރައްވާ. iruali އަށް އާ ނަމަ؟ މޯބައިލް ނަންބަރު ޖައްސަވާ: ކޯޑެއް ފޮނުވާނަން، އަދި އެކައުންޓް ތައްޔާރުވާނެ.",
+    "Email me a code instead": "ބަދަލުގައި އީމެއިލަށް ކޯޑެއް ފޮނުވާ",
+    "Forgot password?": "ޕާސްވޯޑު ހަނދާން ނެތިއްޖެ؟",
+    "Codes by text message are not available right now. Accounts with a password or an email can still sign in.": "މިވަގުތު އެސްއެމްއެސް އިން ކޯޑު ފޮނުވޭކަށް ނެތް. ޕާސްވޯޑު ނުވަތަ އީމެއިލް ހުރި އެކައުންޓްތަކަށް ސައިން އިން ކުރެވޭނެ.",
+    "Enter your mobile number or email.": "މޯބައިލް ނަންބަރު ނުވަތަ އީމެއިލް ޖައްސަވާ.",
+    "Enter a valid email address.": "ރަނގަޅު އީމެއިލް އެޑްރެހެއް ޖައްސަވާ.",
+    "No account uses that email. New to iruali? Continue with your mobile number.": "އެ އީމެއިލް ބޭނުންކުރާ އެކައުންޓެއް ނެތް. iruali އަށް އާ ނަމަ؟ މޯބައިލް ނަންބަރުން ކުރިއަށް ގެންދަވާ.",
+    "Enter a Maldivian mobile number (7 digits starting with 7 or 9), or your email.": "ދިވެހި މޯބައިލް ނަންބަރެއް (7 ނުވަތަ 9 އިން ފެށޭ 7 ދިޖިޓް)، ނުވަތަ އީމެއިލް ޖައްސަވާ.",
+    "We could not send a code. Please try again.": "ކޯޑު ފޮނުވޭކަށް ނެތް. އަލުން މަސައްކަތް ކުރައްވާ.",
+    "Codes by text message are not available right now. Please ask for a code by email.": "މިވަގުތު އެސްއެމްއެސް އިން ކޯޑު ފޮނުވޭކަށް ނެތް. އީމެއިލް އިން ކޯޑެއް ހޯއްދަވާ.",
+    "Codes by text message are not available right now. Please try again later.": "މިވަގުތު އެސްއެމްއެސް އިން ކޯޑު ފޮނުވޭކަށް ނެތް. ފަހުން މަސައްކަތް ކުރައްވާ.",
+    "We have emailed a 6-digit code to :to.": ":to އަށް 6 ދިޖިޓްގެ ކޯޑެއް އީމެއިލް ކޮށްފީމު."
 }

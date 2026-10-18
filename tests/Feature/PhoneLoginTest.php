@@ -99,7 +99,7 @@ class PhoneLoginTest extends TestCase
         $staff = User::factory()->create(['phone' => '7770001']);
         $staff->forceFill(['phone_verified_at' => now()])->save();
         $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
-        $this->post(route('login.phone.start'), ['phone' => '7770001'])->assertSessionHasErrors('phone');
+        $this->post(route('login.phone.start'), ['phone' => '7770001'])->assertSessionHasErrors('login');
 
         // Someone typed this number on their account but never verified it: the code decides who it belongs to
         $typo = User::factory()->create(['phone' => '7775555', 'email' => 'other@example.com']);
@@ -110,7 +110,7 @@ class PhoneLoginTest extends TestCase
         $this->assertSame('+9607775555', User::find(auth()->id())->phone);
 
         $this->post(route('logout'));
-        $this->post(route('login.phone.start'), ['phone' => '12345'])->assertSessionHasErrors('phone');
+        $this->post(route('login.phone.start'), ['phone' => '12345'])->assertSessionHasErrors('login');
     }
 
     public function test_a_mobile_only_customer_cannot_lose_their_number_from_the_profile_form(): void
@@ -118,5 +118,71 @@ class PhoneLoginTest extends TestCase
         $this->post(route('login.phone.start'), ['phone' => '7771234']);
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()]);
         $this->put(route('account.update'), ['name' => 'Ali', 'phone' => '7779999'])->assertSessionHasErrors('phone');
+    }
+
+    protected function customerWithEmail(): User
+    {
+        $user = User::factory()->create(['phone' => '7774321', 'email' => 'mariyam@example.com', 'password' => Hash::make('Good-pass-123!')]);
+        $user->forceFill(['phone_verified_at' => now(), 'has_password' => true])->save();
+
+        return $user;
+    }
+
+    public function test_sign_in_with_the_email_and_the_password_and_no_sms_is_sent(): void
+    {
+        $user = $this->customerWithEmail();
+
+        $this->post(route('login.phone.start'), ['login' => 'Mariyam@Example.com'])->assertRedirect(route('login'));
+        $this->get(route('login'))->assertSee('data-login-phone="password"', false)->assertSee('ma•••@example.com')->assertSee('data-email-code', false);
+        $this->post(route('login.phone.password'), ['password' => 'Good-pass-123!']);
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame(0, \App\Models\SmsMessage::count());
+    }
+
+    public function test_a_code_by_email_instead_of_the_password_saves_an_sms(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $user = $this->customerWithEmail();
+
+        $this->post(route('login.phone.start'), ['login' => '7774321']);
+        $this->post(route('login.phone.email-code'))->assertSessionHas('status', 'We have emailed a 6-digit code to ma•••@example.com.');
+        \Illuminate\Support\Facades\Notification::assertSentOnDemand(\App\Notifications\SignInCode::class, fn ($n, $channels, $to) => $channels === ['mail'] && $to->routes['mail'] === 'mariyam@example.com');
+        $this->get(route('login'))->assertSee('Enter the code we emailed to ma•••@example.com.');
+
+        $this->post(route('login.phone.verify'), ['code' => $this->lastCode()]);
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_an_account_without_a_password_gets_its_code_by_email_when_it_has_one(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $user = $this->customerWithEmail();
+        $user->forceFill(['has_password' => false])->save();
+
+        $this->post(route('login.phone.start'), ['login' => '7774321']);
+        \Illuminate\Support\Facades\Notification::assertSentOnDemand(\App\Notifications\SignInCode::class, fn ($n, $channels) => $channels === ['mail']);
+        \Illuminate\Support\Facades\Notification::assertSentOnDemandTimes(\App\Notifications\SignInCode::class, 1);
+    }
+
+    public function test_forgot_password_is_a_text_message_even_when_signing_in_by_email(): void
+    {
+        $user = $this->customerWithEmail();
+
+        $this->post(route('login.phone.start'), ['login' => 'mariyam@example.com']);
+        $this->post(route('login.phone.resend'))->assertSessionHas('status', 'We have texted a 6-digit code to •••4321.');
+        $this->assertSame('+9607774321', \App\Models\SmsMessage::sole()->to);
+
+        $this->post(route('login.phone.verify'), ['code' => $this->lastCode()])->assertRedirect(route('account').'#security');
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_an_unknown_email_is_told_to_use_the_mobile_number_and_staff_go_to_the_email_page(): void
+    {
+        $this->post(route('login.phone.start'), ['login' => 'nobody@example.com'])->assertSessionHasErrors('login');
+
+        $staff = User::factory()->create(['email' => 'ops@iruali.test']);
+        $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+        $this->post(route('login.phone.start'), ['login' => 'ops@iruali.test'])->assertRedirect(route('login.email'));
+        $this->assertGuest();
     }
 }

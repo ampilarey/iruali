@@ -339,7 +339,6 @@ class AdminController extends Controller
             'late_shipment_days' => 'sometimes|required|integer|min:0|max:60',
             'late_start_hours' => 'sometimes|required|integer|min:1|max:720',
             'refund_approval_over' => 'sometimes|nullable|numeric|min:0|max:10000000',
-            'guest_checkout_enabled' => 'sometimes|boolean',
             'prayer_times_enabled' => 'sometimes|boolean',
             'dhivehi_enabled' => 'sometimes|boolean',
             'staff_require_two_factor' => 'sometimes|boolean',

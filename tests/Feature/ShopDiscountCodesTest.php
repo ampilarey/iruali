@@ -295,37 +295,6 @@ class ShopDiscountCodesTest extends TestCase
         $this->assertSame('The shop code TWOTOTAL has been used the most times it can be.', session('errors')->first('shop_code'));
     }
 
-    public function test_a_guest_applies_a_code_in_the_cart_and_checkout_limits_it_by_email(): void
-    {
-        Setting::set(['guest_checkout_enabled' => 1]);
-        $a = $this->productOf($this->shopA, 100);
-        $this->codeFor($this->shopA, 'HELLO', ['max_uses_per_customer' => 1]);
-        $fields = fn (string $email) => $this->shippingFields() + [
-            'guest_email' => $email, 'guest_name' => 'Mariyam', 'delivery_zone' => 'islands', 'agree_terms' => '1', 'shipping_phone' => '777 1234',
-        ];
-
-        // A guest's cart (keyed by the session's cart token): the code goes on in the cart
-        $this->post(route('cart.add'), ['product_id' => $a->id, 'quantity' => 1])->assertRedirect(route('cart'));
-        $this->post(route('cart.shopCode.apply'), ['shop_code' => 'hello'])->assertSessionHasNoErrors();
-        $this->get(route('checkout.guest'))->assertOk()->assertSee('Shop code HELLO (Island Crafts)')->assertSee('MVR 165.00');
-        $this->post(route('checkout.guest.store'), $fields('Mariyam@Example.com'))->assertRedirect('https://pay.bml.test/txn_test');
-        $this->assertEquals(10, Order::sole()->shop_discount);
-        $this->assertSame('mariyam@example.com', ShopDiscountRedemption::sole()->email);
-
-        // The same email again: refused at checkout, since a guest is only known by email there
-        $this->post(route('cart.add'), ['product_id' => $a->id, 'quantity' => 1]);
-        $this->post(route('cart.shopCode.apply'), ['shop_code' => 'HELLO'])->assertSessionHasNoErrors();
-        $this->post(route('checkout.guest.store'), $fields('mariyam@example.com'))->assertRedirect(route('cart'));
-        $this->assertStringContainsString('You have already used the shop code HELLO', session('notification')['message']);
-        $this->assertSame(1, Order::count());
-
-        // Another email can use it
-        $this->post(route('cart.shopCode.apply'), ['shop_code' => 'HELLO'])->assertSessionHasNoErrors();
-        $this->post(route('checkout.guest.store'), $fields('fathimath@example.com'))->assertRedirect(); // (the fake BML hands out one transaction id only)
-        $this->assertSame(2, Order::count());
-        $this->assertSame(2, ShopDiscountRedemption::count());
-    }
-
     public function test_the_last_use_cannot_be_taken_twice_and_a_cancelled_order_gives_it_back(): void
     {
         $a = $this->productOf($this->shopA, 50);

@@ -18,7 +18,6 @@ use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -225,22 +224,6 @@ class ShopHolidayTest extends TestCase
         $this->assertSame(0, Order::count());
         $this->assertSame(5, $product->fresh()->stock_quantity);
         $this->assertSame(1, CartItem::count());
-    }
-
-    public function test_guest_checkout_refuses_items_from_a_shop_on_holiday(): void
-    {
-        Setting::set(['guest_checkout_enabled' => 1]);
-        $product = $this->product();
-        $token = Str::random(40);
-        $cart = Cart::factory()->create(['user_id' => null, 'session_id' => $token, 'status' => 'active']);
-        CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => 1, 'price' => 100]);
-        $this->goOnHoliday();
-
-        $this->withSession(['cart_token' => $token])->get(route('checkout.guest'))->assertOk()->assertSee('data-cart-holiday', false);
-        $this->withSession(['cart_token' => $token])->post(route('checkout.guest.store'), $this->shipping() + ['guest_email' => 'visitor@example.com', 'guest_name' => 'Mariyam'])
-            ->assertSessionHasErrors('cart');
-        $this->assertSame(0, Order::count());
-        $this->assertSame(1, $cart->items()->count());
     }
 
     public function test_holiday_mode_ends_by_itself_on_the_back_on_date(): void

@@ -12,8 +12,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 use Tests\Support\GstFixtures;
 use Tests\TestCase;
 
@@ -136,28 +134,5 @@ class GstBusinessBuyerTest extends TestCase
         $this->assertNull($order->buyer_business_name);
         $this->assertNull($order->buyer_tin);
         $this->actingAs($user)->get(route('checkout'))->assertRedirect(); // cart is empty now
-    }
-
-    public function test_a_guest_can_buy_for_a_business(): void
-    {
-        Setting::set(['guest_checkout_enabled' => 1]);
-        $token = Str::random(40);
-        $this->cartFor(null, ['session_id' => $token]);
-
-        $this->withSession(['cart_token' => $token])->get(route('checkout.guest'))->assertOk()
-            ->assertSee('Buying for a business? Add details for the invoice')->assertDontSee('Save business details to your profile');
-
-        $this->withSession(['cart_token' => $token])->post(route('checkout.guest.store'), $this->checkoutFields([
-            'guest_email' => 'buyer@example.com', 'guest_name' => 'Ahmed Visitor',
-            'business_invoice' => '1', 'buyer_business_name' => 'Reef Traders', 'buyer_tin' => '', 'buyer_business_address' => 'G. Sunny, Malé',
-        ]))->assertRedirect('https://pay.bml.test/txn_test');
-
-        $order = $this->pay(Order::sole());
-        $this->assertSame('Reef Traders', $order->buyer_business_name);
-        $this->assertNull($order->buyer_tin);
-
-        $part = $order->sellerOrders()->sole();
-        $link = URL::signedRoute('guest.orders.invoice', ['order' => $order->id, 'token' => $order->guest_token, 'part' => $part->id]);
-        $this->get($link)->assertOk()->assertSee('Reef Traders')->assertSee('G. Sunny, Malé')->assertSee('Ordered by Ahmed Visitor');
     }
 }

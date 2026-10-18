@@ -372,22 +372,20 @@ class PickupFromShopTest extends TestCase
             ->assertDontSee($code);
     }
 
-    public function test_guests_can_choose_pickup_and_see_their_code(): void
+    public function test_a_past_guest_pickup_order_still_shows_its_code(): void
     {
         Notification::fake();
-        Setting::set(['guest_checkout_enabled' => 1]);
         $product = $this->product($this->pickupShop, 120);
-        $token = Str::random(40);
-        $cart = Cart::factory()->create(['user_id' => null, 'session_id' => $token, 'status' => 'active']);
+        $cart = Cart::factory()->create(['user_id' => null, 'session_id' => Str::random(40), 'status' => 'active']);
         CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => 1, 'price' => 120]);
 
-        $this->withSession(['cart_token' => $token])->get('/checkout/guest')->assertOk()->assertSee('Pick up from Coral Corner');
-        $this->withSession(['cart_token' => $token])->post('/checkout/guest', [
-            'guest_email' => 'visitor@example.com', 'guest_name' => 'Mariyam', 'shipping_phone' => '7771234',
-            'fulfilment' => [$this->pickupShop->id => 'pickup'], 'payment_method' => 'bml', 'agree_terms' => '1',
-        ])->assertRedirect('https://pay.bml.test/txn_test');
-
-        $order = Order::sole();
+        // Placed as a guest before guest checkout was removed
+        $order = app(\App\Services\OrderService::class)->createOrderFromCart(null, [
+            'shipping_address' => null, 'shipping_city' => null, 'shipping_state' => null, 'shipping_zip' => null, 'shipping_country' => null, 'delivery_zone' => null,
+            'shipping_phone' => '7771234', 'fulfilment' => [$this->pickupShop->id => 'pickup'], 'payment_method' => 'bml',
+        ], $cart, ['email' => 'visitor@example.com', 'name' => 'Mariyam']);
+        $this->assertTrue($order['success'], $order['message'] ?? '');
+        $order = $order['order'];
         $this->assertEquals(120, $order->total_amount);
         app(PaymentService::class)->confirm($order);
         $this->actingAs($this->pickupShop)->post(route('seller.orders.pickup.ready', $order))->assertSessionHas('success');

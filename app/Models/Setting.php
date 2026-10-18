@@ -104,7 +104,6 @@ class Setting extends Model
         'payout_schedule' => 'weekly',
         'payout_day' => 'Sunday',
         // Checkout without an account (orders carry the guest's email and a token for signed links)
-        'guest_checkout_enabled' => 0,
         // Payment methods (Admin → Settings → Payment methods): card needs BML set up as well;
         // bank transfer needs the account; cash on delivery is for one shop's order at a time
         'payment_card_enabled' => 1,

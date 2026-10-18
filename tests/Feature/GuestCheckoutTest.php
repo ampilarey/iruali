@@ -7,7 +7,6 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Role;
-use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\NewSellerOrder;
 use App\Notifications\OrderPlaced;
@@ -25,7 +24,8 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
- * Guest checkout, behind the guest_checkout_enabled setting.
+ * Guest checkout is gone: every order comes from a signed-in customer (a password, or a code by SMS
+ * or email). Orders placed as a guest before keep their signed pages, payment and emails.
  */
 class GuestCheckoutTest extends TestCase
 {
@@ -70,47 +70,48 @@ class GuestCheckoutTest extends TestCase
         ], $overrides);
     }
 
-    public function test_with_the_setting_off_nothing_changes(): void
+    /**
+     * An order placed as a guest, the way guest checkout used to place it (it can't be placed from
+     * the site any more).
+     */
+    protected function pastGuestOrder(array $session): Order
+    {
+        $cart = Cart::where('session_id', $session['cart_token'])->where('status', 'active')->firstOrFail();
+        $fields = $this->guestOrderFields();
+        $order = app(OrderService::class)->createOrderFromCart(null, [
+            'shipping_address' => $fields['shipping_address'], 'shipping_city' => $fields['shipping_city'], 'shipping_state' => $fields['shipping_state'],
+            'shipping_zip' => $fields['shipping_zip'], 'shipping_country' => $fields['shipping_country'], 'shipping_phone' => '7771234',
+            'delivery_zone' => $fields['delivery_zone'], 'payment_method' => 'bml',
+        ], $cart, ['email' => 'visitor@example.com', 'name' => 'Mariyam'])['order'];
+        app(PaymentService::class)->startBmlPayment($order);
+
+        return $order;
+    }
+
+    public function test_there_is_no_guest_checkout_any_more(): void
     {
         $product = Product::factory()->create(['price' => 200, 'stock_quantity' => 5]);
         $session = $this->guestCartWith($product);
 
-        $this->withSession($session)->get('/cart')->assertOk()
-            ->assertSee('Sign in to check out')->assertDontSee(route('checkout.guest'));
-        $this->withSession($session)->get('/checkout')->assertRedirect('/login');
-        $this->withSession($session)->get('/checkout/guest')->assertRedirect('/login');
-        $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields())->assertForbidden();
+        $this->withSession($session)->get('/cart')->assertOk()->assertSee('Sign in to check out')->assertDontSee('/checkout/guest');
+        $this->withSession($session)->get('/checkout')->assertRedirect(route('login'));
+        $this->assertNotSame(200, $this->withSession($session)->get('/checkout/guest')->status());
+        $this->assertNotSame(302, $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields())->status());
         $this->assertSame(0, Order::count());
+        $this->assertSame(5, $product->fresh()->stock_quantity);
 
-        // The setting is editable in Admin → Settings
+        // And no switch to turn it back on
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
-        $this->actingAs($admin)->get('/admin/settings')->assertOk()->assertSee('name="guest_checkout_enabled"', false);
-        $this->actingAs($admin)->put('/admin/settings', [
-            'loyalty_spend_per_point' => 100, 'referral_referrer_points' => 100, 'referral_referee_points' => 50, 'guest_checkout_enabled' => '1',
-        ])->assertRedirect(route('admin.settings'));
-        $this->assertTrue(\App\Support\GuestCheckout::enabled());
+        $this->actingAs($admin)->get('/admin/settings')->assertOk()->assertDontSee('guest_checkout_enabled');
     }
 
-    public function test_a_guest_can_place_an_order_and_pay_through_bml(): void
+    public function test_a_past_guest_order_still_pays_through_bml(): void
     {
-        Setting::set(['guest_checkout_enabled' => 1]);
         $seller = $this->seller();
         $product = Product::factory()->create(['price' => 200, 'stock_quantity' => 5, 'seller_id' => $seller->id]);
         $session = $this->guestCartWith($product);
-
-        $this->withSession($session)->get('/cart')->assertOk()->assertSee(route('checkout.guest'))->assertSee('Proceed to checkout');
-        $this->withSession($session)->get('/checkout/guest')->assertOk()
-            ->assertSee('name="guest_email"', false)
-            ->assertSee('name="guest_name"', false)
-            ->assertSee(route('checkout.guest.store'), false)
-            ->assertDontSee('Loyalty Points')
-            ->assertDontSee('name="save_address"', false);
-
-        $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields(['guest_email' => '']))->assertSessionHasErrors('guest_email');
-        $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields(['guest_name' => '']))->assertSessionHasErrors('guest_name');
-
-        $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields())->assertRedirect('https://pay.bml.test/txn_test');
+        $this->pastGuestOrder($session);
 
         $order = Order::sole();
         $this->assertNull($order->user_id);
@@ -156,11 +157,8 @@ class GuestCheckoutTest extends TestCase
 
     public function test_guest_order_pages_need_the_signed_link_with_the_right_token(): void
     {
-        Setting::set(['guest_checkout_enabled' => 1]);
         $product = Product::factory()->create(['price' => 200, 'stock_quantity' => 5]);
-        $session = $this->guestCartWith($product);
-        $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields());
-        $order = Order::sole();
+        $order = $this->pastGuestOrder($this->guestCartWith($product));
 
         $this->get($order->guestUrl())->assertOk()
             ->assertSee($order->order_number)
@@ -201,11 +199,8 @@ class GuestCheckoutTest extends TestCase
 
     public function test_registering_with_the_guest_email_attaches_the_orders(): void
     {
-        Setting::set(['guest_checkout_enabled' => 1]);
         $product = Product::factory()->create(['price' => 200, 'stock_quantity' => 5]);
-        $session = $this->guestCartWith($product);
-        $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields());
-        $order = Order::sole();
+        $order = $this->pastGuestOrder($this->guestCartWith($product));
         $other = Order::factory()->create(['user_id' => null, 'guest_email' => 'someone@else.com', 'guest_name' => 'Other', 'guest_token' => Str::random(40)]);
 
         $this->get(route('register', ['email' => 'visitor@example.com']))->assertOk()->assertSee('value="visitor@example.com"', false);
@@ -254,14 +249,5 @@ class GuestCheckoutTest extends TestCase
         app(OrderNotifier::class)->statusChanged($mine);
         Notification::assertSentTo($user, OrderStatusChanged::class);
         $this->assertSame(route('orders.show', $mine), $mine->customerUrl());
-    }
-
-    public function test_signed_in_customers_are_sent_to_the_normal_checkout(): void
-    {
-        Setting::set(['guest_checkout_enabled' => 1]);
-        $user = User::factory()->create();
-
-        $this->actingAs($user)->get('/checkout/guest')->assertRedirect(route('checkout'));
-        $this->actingAs($user)->post('/checkout/guest', $this->guestOrderFields())->assertForbidden();
     }
 }

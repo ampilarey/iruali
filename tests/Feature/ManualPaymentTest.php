@@ -173,7 +173,6 @@ class ManualPaymentTest extends TestCase
 
     public function test_guests_upload_the_slip_through_their_order_link(): void
     {
-        Setting::set(['guest_checkout_enabled' => 1]);
         $order = Order::factory()->create(['user_id' => null, 'guest_email' => 'guest@example.com', 'guest_token' => str_repeat('a', 40), 'payment_method' => 'transfer', 'payment_status' => 'unpaid', 'status' => 'pending', 'total_amount' => 80]);
 
         $this->get($order->guestUrl())->assertOk()->assertSee('data-transfer-box', false);

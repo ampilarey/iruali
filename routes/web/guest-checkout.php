@@ -5,13 +5,10 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Guest checkout (Admin → Settings → "Allow checkout without an account")
+| Orders placed as a guest (guest checkout has been removed: every order now comes from a signed-in
+| customer). Their pages stay reachable through the signed links that carry the order's guest token.
 |--------------------------------------------------------------------------
-| The order pages are reached only through signed links that carry the order's guest token.
 */
-
-Route::get('/checkout/guest', [GuestCheckoutController::class, 'index'])->name('checkout.guest');
-Route::post('/checkout/guest', [GuestCheckoutController::class, 'store'])->name('checkout.guest.store')->middleware('throttle:10,1,checkout.guest.store');
 
 Route::middleware('signed')->prefix('orders/guest/{order}/{token}')->name('guest.orders.')->group(function () {
     Route::get('/', [GuestCheckoutController::class, 'show'])->name('show');

@@ -602,10 +602,12 @@ class DeliveryService
                     'address' => (string) $setting->pickup_address,
                     'island' => $setting->pickupIslandName(),
                     'hours' => (string) $setting->pickup_hours,
+                    'open' => $setting->hoursText(),
                     'ready' => $days > 0 ? trans_choice('Usually ready to collect within :count day|Usually ready to collect within :count days', $days, ['count' => $days]) : __('Usually ready to collect the same day'),
                 ] : null,
                 'method' => $setting->offersPickup() && ($choices[$sellerId] ?? null) === SellerOrder::METHOD_PICKUP ? SellerOrder::METHOD_PICKUP : SellerOrder::METHOD_DELIVER,
-                'estimates' => collect($areas)->map(fn ($label, $key) => $this->arrivalText($days, (string) $key))->all(),
+                // Counted from the next day the shop works (its opening hours)
+                'estimates' => collect($areas)->map(fn ($label, $key) => $this->arrivalText($days, (string) $key, $setting->nextWorkingDay()))->all(),
                 'reach' => $reach,
                 'blocked' => $reach !== null && $initialIsland !== null && ! in_array($initialIsland->id, $reach, true),
             ];
@@ -729,8 +731,9 @@ class DeliveryService
             // "Coming soon": counted from its launch day, and none without one
             'arrival' => $product->isComingSoon()
                 ? ($product->available_on ? $this->arrivalText($days, $destination['area'], $product->available_on) : null)
-                : $this->arrivalText($days, $destination['area']),
+                : $this->arrivalText($days, $destination['area'], $setting->nextWorkingDay()),
             'shipsWithinDays' => $days,
+            'hours' => $setting->hoursText(),
             'pickup' => $setting->offersPickup() ? ['address' => (string) $setting->pickup_address, 'island' => $setting->pickupIslandName(), 'hours' => (string) $setting->pickup_hours] : null,
             'islandsByAtoll' => $this->islandsByAtoll($islands),
             // Whether this product's shop reaches the island (null: no island chosen, nothing to say)

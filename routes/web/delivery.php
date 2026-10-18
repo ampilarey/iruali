@@ -44,3 +44,6 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::post('/orders/{order}/parts/{part}/collected', [AdminOrderDeliveryController::class, 'collected'])->name('orders.parts.collected');
     Route::get('/orders/{order}/parts/{part}/packing-slip', [AdminOrderDeliveryController::class, 'packingSlip'])->name('orders.parts.packing-slip');
 });
+
+// "Tell me when it is back" while ordering is paused (App\Support\OrderRules)
+Route::post('/ordering/notify', [\App\Http\Controllers\Customer\OrderingBackController::class, 'store'])->name('ordering.notify')->middleware('throttle:5,10,ordering.notify');

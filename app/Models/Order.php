@@ -15,6 +15,7 @@ class Order extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'small_order_fee',
         'user_id',
         'order_number',
         'status',
@@ -226,6 +227,14 @@ class Order extends Model
     public function customerUrl(): string
     {
         return $this->isGuest() && $this->guest_token ? $this->guestUrl() : route('orders.show', $this);
+    }
+
+    /**
+     * The delivery charge without the small-order fee (both are in shipping_amount).
+     */
+    public function deliveryCharge(): float
+    {
+        return round(max(0, (float) $this->shipping_amount - (float) $this->small_order_fee), 2);
     }
 
     /**

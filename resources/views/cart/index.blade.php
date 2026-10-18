@@ -145,6 +145,12 @@
                     @endif
                     @include('cart._shop_code_form')
 
+                    @if($minimumProblem = \App\Support\OrderRules::minimumProblem($cart, (float) $total))
+                        <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" data-minimum-order>{{ $minimumProblem }}</p>
+                    @elseif(($smallFee = \App\Support\OrderRules::smallOrderFee((float) $total)) > 0)
+                        <p class="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600" data-small-order-note>{{ __('A small order fee of :fee applies to orders under :amount.', ['fee' => \App\Support\Money::format($smallFee), 'amount' => \App\Support\Money::format((float) \App\Models\Setting::get('small_order_threshold'))]) }}</p>
+                    @endif
+
                     @auth
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
                     @elseif(\App\Support\GuestCheckout::enabled())

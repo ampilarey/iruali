@@ -109,6 +109,36 @@
                 </section>
             @endif
 
+            <section class="rounded-lg bg-white p-6 shadow space-y-3" data-opening-hours>
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900">{{ __('Opening hours') }}</h2>
+                    <p class="text-sm text-gray-500">{{ __('The days and times you work on orders. Arrival estimates count from your next open day, and customers see when you are open. Leave a day empty when you are closed, or all days empty to not use opening hours.') }}</p>
+                </div>
+                <div class="space-y-2">
+                    @foreach(\App\Models\SellerDeliverySetting::DAYS as $day => $dayName)
+                        @php $hours = $setting->hoursOn($day); @endphp
+                        <div class="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
+                            <span class="text-sm font-medium text-gray-700">{{ __($dayName) }}</span>
+                            <label class="text-xs text-gray-500"><span class="sr-only">{{ __($dayName) }} </span>{{ __('Opens') }}
+                                <input type="time" name="hours[{{ $day }}][0]" value="{{ old('hours.'.$day.'.0', $hours[0] ?? '') }}" class="{{ $field }}"></label>
+                            <label class="text-xs text-gray-500"><span class="sr-only">{{ __($dayName) }} </span>{{ __('Closes') }}
+                                <input type="time" name="hours[{{ $day }}][1]" value="{{ old('hours.'.$day.'.1', $hours[1] ?? '') }}" class="{{ $field }}"></label>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="rounded-lg bg-white p-6 shadow space-y-3">
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900">{{ __('Minimum order') }}</h2>
+                    <p class="text-sm text-gray-500">{{ __('Customers need at least this much of your items in one order. Leave empty for no minimum.') }}</p>
+                </div>
+                <div class="max-w-xs">
+                    <label for="min_order_amount" class="block text-sm font-medium text-gray-700">{{ __('Minimum (MVR)') }}</label>
+                    <input id="min_order_amount" name="min_order_amount" type="number" min="0" max="100000" step="0.01" class="{{ $field }}" value="{{ old('min_order_amount', $setting->min_order_amount) }}">
+                </div>
+            </section>
+
             <div class="flex justify-end">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ __('Save delivery settings') }}</button>
             </div>

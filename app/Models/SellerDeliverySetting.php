@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
@@ -18,7 +20,7 @@ class SellerDeliverySetting extends Model
     public const DEFAULT_SHIPS_WITHIN_DAYS = 1;
 
     protected $fillable = ['seller_id', 'ships_within_days', 'pickup_enabled', 'pickup_address', 'pickup_island_id', 'pickup_hours',
-        'own_fees', 'fee_local', 'fee_greater_male', 'fee_islands', 'free_over'];
+        'own_fees', 'fee_local', 'fee_greater_male', 'fee_islands', 'free_over', 'min_order_amount', 'opening_hours'];
 
     protected $attributes = [
         'ships_within_days' => self::DEFAULT_SHIPS_WITHIN_DAYS,
@@ -34,6 +36,8 @@ class SellerDeliverySetting extends Model
         'fee_greater_male' => 'decimal:2',
         'fee_islands' => 'decimal:2',
         'free_over' => 'decimal:2',
+        'min_order_amount' => 'decimal:2',
+        'opening_hours' => 'array',
     ];
 
     /** @return BelongsTo<User, $this> */
@@ -70,6 +74,70 @@ class SellerDeliverySetting extends Model
         $saved = $ids->isEmpty() ? collect() : static::with('pickupIsland')->whereIn('seller_id', $ids)->get()->keyBy('seller_id');
 
         return $ids->mapWithKeys(fn (int $id) => [$id => $saved[$id] ?? new self(['seller_id' => $id])]);
+    }
+
+    /** ISO weekday => English day name, for the hours form */
+    public const DAYS = [6 => 'Saturday', 7 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday'];
+
+    public function hasOpeningHours(): bool
+    {
+        return ! empty($this->opening_hours);
+    }
+
+    /**
+     * [open, close] for an ISO weekday, or null when closed that day.
+     *
+     * @return array{0: string, 1: string}|null
+     */
+    public function hoursOn(int $weekday): ?array
+    {
+        $hours = ((array) $this->opening_hours)[(string) $weekday] ?? null;
+
+        return is_array($hours) && count($hours) === 2 ? [(string) $hours[0], (string) $hours[1]] : null;
+    }
+
+    /**
+     * When the shop next works on orders: now while it is open (or before today's opening), else
+     * the start of the next day it opens. Without opening hours: now.
+     */
+    public function nextWorkingDay(?CarbonInterface $at = null): CarbonImmutable
+    {
+        $at = CarbonImmutable::instance($at ?? now());
+        if (! $this->hasOpeningHours()) {
+            return $at;
+        }
+        for ($i = 0; $i < 8; $i++) {
+            $day = $at->addDays($i);
+            if (($hours = $this->hoursOn($day->dayOfWeekIso)) && ($i > 0 || $day->format('H:i') < $hours[1])) {
+                return $i === 0 ? $at : $day->startOfDay();
+            }
+        }
+
+        return $at;
+    }
+
+    /**
+     * "Open today 09:00–21:00", "Closed now, opens Sunday 09:00", or null without opening hours.
+     */
+    public function hoursText(?CarbonInterface $at = null): ?string
+    {
+        if (! $this->hasOpeningHours()) {
+            return null;
+        }
+        $at = CarbonImmutable::instance($at ?? now());
+        $today = $this->hoursOn($at->dayOfWeekIso);
+        if ($today && $at->format('H:i') < $today[1]) {
+            return __('Open today :from–:until', ['from' => $today[0], 'until' => $today[1]]);
+        }
+        $next = $this->nextWorkingDay($at);
+        $hours = $this->hoursOn($next->dayOfWeekIso);
+
+        return $hours ? __('Closed now, opens :day :time', ['day' => $next->translatedFormat('l'), 'time' => $hours[0]]) : null;
+    }
+
+    public function minimumOrder(): float
+    {
+        return max(0, (float) $this->min_order_amount);
     }
 
     public function shipsWithinDays(): int

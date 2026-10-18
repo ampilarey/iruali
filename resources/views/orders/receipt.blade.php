@@ -76,7 +76,8 @@
             @include('orders._shop_deals', ['order' => $order, 'as' => 'table'])
             @if((float) $order->voucher_discount > 0)<tr><td>{{ __('Voucher') }} {{ $order->voucher_code }}</td><td class="num">&minus;{{ Money::format($order->voucher_discount) }}</td></tr>@endif
             @if((float) $order->points_redeemed_discount > 0)<tr><td>{{ __('Loyalty points') }}</td><td class="num">&minus;{{ Money::format($order->points_redeemed_discount) }}</td></tr>@endif
-            <tr><td>{{ __('Delivery') }}</td><td class="num">{{ Money::format($order->shipping_amount) }}</td></tr>
+            <tr><td>{{ __('Delivery') }}</td><td class="num">{{ Money::format($order->deliveryCharge()) }}</td></tr>
+            @if($order->small_order_fee > 0)<tr><td>{{ __('Small order fee') }}</td><td class="num">{{ Money::format($order->small_order_fee) }}</td></tr>@endif
             <tr class="grand"><td>{{ __('Total') }} (MVR)</td><td class="num">{{ Money::format($order->total_amount) }}</td></tr>
         </table>
         @include('tax.partials.receipt-gst', ['order' => $order])

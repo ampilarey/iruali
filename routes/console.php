@@ -89,3 +89,6 @@ Schedule::command('products:launch')->dailyAt('00:05')->timezone('Indian/Maldive
 // Complaints left open without an update go to the team daily; a complaints and ratings summary on Mondays
 Schedule::command('complaints:remind')->dailyAt('09:15')->timezone('Indian/Maldives')->withoutOverlapping();
 Schedule::command('complaints:weekly-summary')->weeklyOn(1, '08:15')->timezone('Indian/Maldives');
+
+// Ordering paused (Admin → Settings → Ordering): those who asked are emailed once it is back
+Schedule::command('ordering:notify-back')->everyFiveMinutes()->withoutOverlapping()->name('ordering-notify-back');

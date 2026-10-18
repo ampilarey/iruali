@@ -35,6 +35,7 @@
                             </span>
                         </label>
                     </div>
+                    @if(! empty($shop['pickup']['open']))<p class="mt-2 text-xs font-medium text-gray-700">{{ $shop['pickup']['open'] }}</p>@endif
                     @if($shop['pickup']['hours'])
                         <p class="mt-2 text-xs text-gray-500 flex items-start gap-1.5"><x-icon name="clock" class="w-3.5 h-3.5 mt-0.5 shrink-0" /><span><span class="font-medium">{{ __('Opening hours') }}:</span> {{ $shop['pickup']['hours'] }}</span></p>
                     @endif

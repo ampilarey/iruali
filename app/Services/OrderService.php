@@ -108,6 +108,13 @@ class OrderService
             $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null, $shippingData['shipping_state'] ?? null);
             $shippingData = $delivery->prepareOrder($cart, $shippingData, (float) $discounts['final_total']);
 
+            // Ordering rules: paused ordering, minimum orders, and the small-order fee (with delivery, for iruali)
+            if ($problem = \App\Support\OrderRules::pauseProblem($shippingData) ?? \App\Support\OrderRules::minimumProblem($cart, (float) $discounts['final_total'])) {
+                throw new \RuntimeException($problem);
+            }
+            $shippingData['small_order_fee'] = \App\Support\OrderRules::smallOrderFee((float) $discounts['final_total']);
+            $shippingData['shipping_amount'] = round((float) $shippingData['shipping_amount'] + $shippingData['small_order_fee'], 2);
+
             // Cash on delivery: one shop, no pre-orders, within the admins' limits (ManualPaymentService)
             if (($shippingData['payment_method'] ?? null) === ManualPaymentService::COD
                 && ($problem = app(ManualPaymentService::class)->codProblem($cart, (float) $discounts['final_total'] + (float) $shippingData['shipping_amount'], $shippingData['delivery_area'] ?? null))) {
@@ -212,6 +219,7 @@ class OrderService
             'status' => 'pending',
             'total_amount' => $discounts['final_total'] + $shippingData['shipping_amount'],
             'shipping_amount' => $shippingData['shipping_amount'],
+            'small_order_fee' => $shippingData['small_order_fee'] ?? 0,
             'delivery_fee_shops' => $shippingData['delivery_fee_shops'] ?? 0,
             'delivery_zone' => $shippingData['delivery_zone'],
             'payment_method' => $shippingData['payment_method'] ?? 'bml',

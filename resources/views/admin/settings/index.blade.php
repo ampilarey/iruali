@@ -222,6 +222,51 @@
                 </div>
             </x-admin.fold>
 
+            <x-admin.fold title="Ordering" id="ordering">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="min_order_amount" class="block text-sm font-medium text-gray-700">Minimum order (MVR)</label>
+                        <input id="min_order_amount" name="min_order_amount" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('min_order_amount', $settings['min_order_amount'] ?? 0) }}">
+                    </div>
+                    <div>
+                        <label for="small_order_threshold" class="block text-sm font-medium text-gray-700">Small-order fee on orders under (MVR)</label>
+                        <input id="small_order_threshold" name="small_order_threshold" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('small_order_threshold', $settings['small_order_threshold'] ?? 0) }}">
+                    </div>
+                    <div>
+                        <label for="small_order_fee" class="block text-sm font-medium text-gray-700">Small-order fee (MVR)</label>
+                        <input id="small_order_fee" name="small_order_fee" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('small_order_fee', $settings['small_order_fee'] ?? 0) }}">
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-gray-500">On the goods total after discounts. 0 turns each off. Shops can set their own minimum (Seller Centre → Delivery &amp; pickup). The fee is added to delivery and kept by iruali.</p>
+
+                <div class="mt-5 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-3" data-ordering-pause-settings>
+                    <h3 class="text-sm font-semibold text-gray-900">Pause ordering</h3>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <label for="ordering_pause_mode" class="block text-sm font-medium text-gray-700">Pause</label>
+                            <select id="ordering_pause_mode" name="ordering_pause_mode" class="{{ $field }}">
+                                @foreach(['off' => 'Off: taking orders', 'all' => 'All ordering', 'delivery' => 'Delivery only (pickup still works)', 'cod' => 'Cash on delivery only'] as $mode => $label)
+                                    <option value="{{ $mode }}" @selected(old('ordering_pause_mode', $settings['ordering_pause_mode'] ?? 'off') === $mode)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="ordering_pause_from" class="block text-sm font-medium text-gray-700">From (optional)</label>
+                            <input id="ordering_pause_from" name="ordering_pause_from" type="datetime-local" class="{{ $field }}" value="{{ old('ordering_pause_from', $settings['ordering_pause_from'] ?? '') }}">
+                        </div>
+                        <div>
+                            <label for="ordering_pause_until" class="block text-sm font-medium text-gray-700">Until (optional)</label>
+                            <input id="ordering_pause_until" name="ordering_pause_until" type="datetime-local" class="{{ $field }}" value="{{ old('ordering_pause_until', $settings['ordering_pause_until'] ?? '') }}">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="ordering_pause_message" class="block text-sm font-medium text-gray-700">Message on the site (optional)</label>
+                        <input id="ordering_pause_message" name="ordering_pause_message" maxlength="255" class="{{ $field }}" value="{{ old('ordering_pause_message', $settings['ordering_pause_message'] ?? '') }}" placeholder="We are closed for Eid and back on Sunday.">
+                    </div>
+                    <p class="text-xs text-gray-500">Maldives time. Leave the dates empty to pause now until you switch it off. While all ordering is paused, customers can leave their email and are told when it is back.</p>
+                </div>
+            </x-admin.fold>
+
             <x-admin.fold title="Delivery fees (MVR)">
                 <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>

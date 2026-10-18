@@ -116,7 +116,8 @@
                     @if($order->voucher_code && $order->voucher_discount > 0)
                         <div class="flex justify-between"><span class="text-green-700">{{ __('Voucher Discount') }} ({{ $order->voucher_code }})</span><span class="text-green-700" dir="ltr">-{{ \App\Support\Money::format($order->voucher_discount) }}</span></div>
                     @endif
-                    <div class="flex justify-between"><span class="text-gray-600">{{ __('Delivery') }}</span><span class="text-gray-900" dir="ltr">{{ $order->shipping_amount > 0 ? \App\Support\Money::format($order->shipping_amount) : __('Free') }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600">{{ __('Delivery') }}</span><span class="text-gray-900" dir="ltr">{{ $order->deliveryCharge() > 0 ? \App\Support\Money::format($order->deliveryCharge()) : __('Free') }}</span></div>
+                    @if($order->small_order_fee > 0)<div class="flex justify-between"><span class="text-gray-600">{{ __('Small order fee') }}</span><span class="text-gray-900" dir="ltr">{{ \App\Support\Money::format($order->small_order_fee) }}</span></div>@endif
                     <div class="flex justify-between"><span class="text-gray-600">{{ __('Payment') }}</span><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ \App\Services\PaymentService::statusBadge($order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($order->payment_status) }}</span></div>
                     @if($order->refund_status === 'due')
                         <p class="rounded-lg bg-sun-soft px-3 py-2 text-xs text-sun-ink">{{ __('A refund of :amount is on its way to you. We email you when it is sent.', ['amount' => \App\Support\Money::format($order->refund_amount)]) }}</p>

@@ -142,8 +142,14 @@
                     @endif
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Delivery') }}</span>
-                        <span class="text-gray-900" dir="ltr">{{ $order->shipping_amount > 0 ? \App\Support\Money::format($order->shipping_amount) : __('Free') }}</span>
+                        <span class="text-gray-900" dir="ltr">{{ $order->deliveryCharge() > 0 ? \App\Support\Money::format($order->deliveryCharge()) : __('Free') }}</span>
                     </div>
+                    @if($order->small_order_fee > 0)
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">{{ __('Small order fee') }}</span>
+                        <span class="text-gray-900" dir="ltr">{{ \App\Support\Money::format($order->small_order_fee) }}</span>
+                    </div>
+                    @endif
                     <div class="flex justify-between">
                         <span class="text-gray-600">{{ __('Payment Method') }}</span>
                         <span class="text-gray-900">{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</span>

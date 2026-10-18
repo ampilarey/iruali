@@ -50,6 +50,7 @@ class Audit
         'voucher.deleted' => 'Voucher deleted',
         'user.role' => 'User role changed',
         'staff.login' => 'Staff signed in',
+        'settings.ordering_pause' => 'Ordering paused or resumed',
         'staff.locked' => 'Staff account locked (wrong sign-in tries)',
         'staff.unlocked' => 'Staff account unlocked',
         'staff.two_factor_reset' => 'Staff two-step sign-in reset by an admin',

@@ -42,6 +42,8 @@ class CustomerController extends Controller
             'points' => \App\Models\PointsTransaction::where('user_id', $user->id)->latest('id')->take(10)->get(),
             'notes' => CustomerNote::with('author')->where('user_id', $user->id)->latest()->get(),
             'accounts' => app(CustomerAccountService::class),
+            'credit' => app(\App\Services\CreditService::class)->account($user),
+            'invoices' => app(\App\Services\CreditService::class)->openInvoices($user)->orderBy('credit_due_on')->get(),
         ]);
     }
 
@@ -94,5 +96,22 @@ class CustomerController extends Controller
         }
 
         return back()->with('success', 'Personal data erased. Orders stay for the records, without the customer\'s details.');
+    }
+
+    /**
+     * Pay later for a business buyer: the credit limit, the days to pay each invoice, on or suspended.
+     */
+    public function credit(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'credit_limit' => 'required|numeric|min:0|max:10000000',
+            'terms_days' => 'required|integer|min:1|max:120',
+            'status' => 'required|in:active,suspended',
+            'note' => 'nullable|string|max:500',
+        ]);
+        $account = \App\Models\CreditAccount::updateOrCreate(['user_id' => $user->id], $data + ['approved_by' => $request->user()->id]);
+        Audit::record('customer.credit', $user, ['limit' => (float) $account->credit_limit, 'terms' => $account->terms_days, 'status' => $account->status]);
+
+        return back()->with('success', 'Pay later saved.');
     }
 }

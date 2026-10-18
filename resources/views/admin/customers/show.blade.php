@@ -156,6 +156,41 @@
             <p class="text-xs text-gray-500">The new number has to be verified by the customer before codes go to it. The audit log keeps the old one.</p>
         </x-admin.fold>
 
+        <x-admin.fold title="Pay later (business invoice)" body="space-y-3 text-sm" id="pay-later">
+            <x-slot:badge>@if($credit)<span class="text-xs {{ $credit->isActive() ? 'text-green-700' : 'text-gray-500' }}">{{ $credit->isActive() ? 'On' : 'Suspended' }}</span>@endif</x-slot:badge>
+            <p class="text-xs text-gray-500">An approved business orders now and pays the invoice later. Orders go to the shops straight away; shops are paid once the invoice is paid. Record a payment on the order (Payment → Confirm payment).</p>
+            <form method="POST" action="{{ route('admin.customers.credit', $customer) }}" class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+                @csrf @method('PUT')
+                <div><label for="credit_limit" class="block text-xs font-medium text-gray-700">Credit limit (MVR)</label>
+                    <input id="credit_limit" name="credit_limit" type="number" min="0" step="0.01" required value="{{ old('credit_limit', $credit?->credit_limit) }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></div>
+                <div><label for="terms_days" class="block text-xs font-medium text-gray-700">Days to pay</label>
+                    <input id="terms_days" name="terms_days" type="number" min="1" max="120" required value="{{ old('terms_days', $credit?->terms_days ?? 30) }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></div>
+                <div><label for="credit_status" class="block text-xs font-medium text-gray-700">Status</label>
+                    <select id="credit_status" name="status" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="active" @selected(($credit?->status ?? 'active') === 'active')>On</option>
+                        <option value="suspended" @selected($credit?->status === 'suspended')>Suspended</option>
+                    </select></div>
+                <div><label for="credit_note" class="block text-xs font-medium text-gray-700">Note</label>
+                    <input id="credit_note" name="note" maxlength="500" value="{{ old('note', $credit?->note) }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></div>
+                <div class="sm:col-span-4"><button class="rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700">Save</button></div>
+            </form>
+            @if($invoices->isNotEmpty())
+                <table class="w-full text-sm">
+                    <thead><tr class="text-xs uppercase text-gray-500"><th class="py-1 text-start">Invoice</th><th class="py-1 text-start">Due</th><th class="py-1 text-end">Amount</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach($invoices as $invoice)
+                            <tr @class(['text-red-700' => $invoice->credit_due_on?->isPast()])>
+                                <td class="py-1"><a href="{{ route('admin.orders.show', $invoice) }}" class="font-mono hover:underline">{{ $invoice->order_number }}</a></td>
+                                <td class="py-1">{{ $invoice->credit_due_on?->format('j M Y') }}@if($invoice->credit_due_on?->isPast()) (overdue)@endif</td>
+                                <td class="py-1 text-end">MVR {{ number_format((float) $invoice->total_amount, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <p class="text-xs text-gray-500">Owed: MVR {{ number_format((float) $invoices->sum('total_amount'), 2) }}@if($credit) of MVR {{ number_format((float) $credit->credit_limit, 2) }}@endif.</p>
+            @endif
+        </x-admin.fold>
+
         <x-admin.fold title="Merge a duplicate account" body="space-y-2 text-sm" id="merge">
             @if($notCustomer)
                 <p class="text-gray-600">{{ $notCustomer }} Only customer accounts can be merged.</p>

@@ -50,9 +50,11 @@ class ProductController extends Controller
             ->take(8)
             ->get();
 
-        // Frequently bought together: what else was in the orders that had this product
-        $orderIds = OrderItem::where('product_id', $product->id)->pluck('order_id');
-        $boughtTogetherIds = $orderIds->isEmpty() ? collect() : OrderItem::whereIn('order_id', $orderIds)
+        // Frequently bought together: the nightly pairs (insights:compute-pairs); before the first run,
+        // what else was in the orders that had this product
+        $boughtTogetherIds = app(\App\Services\SuggestionService::class)->pairedIds([$product->id]);
+        $orderIds = $boughtTogetherIds->isEmpty() ? OrderItem::where('product_id', $product->id)->pluck('order_id') : collect();
+        $boughtTogetherIds = $orderIds->isEmpty() ? $boughtTogetherIds : OrderItem::whereIn('order_id', $orderIds)
             ->where('product_id', '!=', $product->id)
             ->selectRaw('product_id, count(*) as together')
             ->groupBy('product_id')
@@ -61,6 +63,9 @@ class ProductController extends Controller
             ->pluck('product_id');
         $boughtTogether = $boughtTogetherIds->isEmpty() ? collect() : $cards($reaching())->whereIn('id', $boughtTogetherIds)->inStock()->get()
             ->sortBy(fn ($p) => $boughtTogetherIds->search($p->id))->take(3)->values();
+        if ($boughtTogether->isNotEmpty()) {
+            app(\App\Services\SuggestionService::class)->record('product', 'shown');
+        }
 
         $reviews = $product->reviews;
         $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(fn ($stars) => [$stars => $reviews->where('rating', $stars)->count()]);

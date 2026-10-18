@@ -40,6 +40,12 @@ class CartController extends Controller
             ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->whereNotNull('product')
             : collect();
 
+        // Bought with what is in the cart (SuggestionService), counted for Admin → Analytics
+        $suggestions = app(\App\Services\SuggestionService::class)->forCart($cart);
+        if ($suggestions->isNotEmpty()) {
+            app(\App\Services\SuggestionService::class)->record('cart', 'shown');
+        }
+
         return view('cart.index', [
             'cart' => $cart,
             'voucher' => $cartSummary['voucher'],
@@ -50,6 +56,7 @@ class CartController extends Controller
             // Items whose shop doesn't deliver to the shopper's island are flagged before checkout
             'deliveryIsland' => $island = app(\App\Services\ShoppingIsland::class)->island(),
             'blockedSellers' => $island ? app(\App\Services\ShopCoverage::class)->blockedSellerIds($island) : [],
+            'suggestions' => $suggestions,
         ]);
     }
 
@@ -94,6 +101,9 @@ class CartController extends Controller
 
         NotificationService::addedToCart($product->name);
         \App\Services\FunnelService::record('add_to_cart', $product->id);
+        if ($request->input('suggested') === 'cart') {
+            app(\App\Services\SuggestionService::class)->record('cart', 'added');
+        }
 
         return redirect()->route('cart');
     }
@@ -116,6 +126,9 @@ class CartController extends Controller
             }
         }
 
+        if ($added > 1) {
+            app(\App\Services\SuggestionService::class)->record('product', 'added', $added - 1); // the bundle's extra items
+        }
         $added
             ? NotificationService::success(trans_choice(':count item added to your cart.|:count items added to your cart.', $added, ['count' => $added]))
             : NotificationService::error(__('This product is not available.'));

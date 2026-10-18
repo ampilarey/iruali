@@ -16,6 +16,7 @@ class Order extends Model
 
     protected $fillable = [
         'small_order_fee',
+        'credit_due_on',
         'user_id',
         'order_number',
         'status',
@@ -54,6 +55,9 @@ class Order extends Model
         'refunded_at' => 'datetime',
         'refund_amount' => 'decimal:2',
         'refund_approved_at' => 'datetime',
+        'credit_due_on' => 'date',
+        'credit_reminded_at' => 'datetime',
+        'credit_overdue_at' => 'datetime',
         'loyalty_points_awarded_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',

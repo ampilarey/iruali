@@ -169,6 +169,30 @@
             </div>
         @endif
 
+        @if(($suggestions ?? collect())->isNotEmpty())
+            <section class="mt-8" aria-labelledby="cart-suggestions" data-cart-suggestions>
+                <h2 id="cart-suggestions" class="font-display text-xl font-bold text-dark mb-3">{{ __('Customers also bought') }}</h2>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    @foreach($suggestions as $suggested)
+                        <div class="rounded-xl border border-gray-200 bg-white p-3 text-sm">
+                            <a href="{{ route('products.show', $suggested) }}" class="block">
+                                <img src="{{ $suggested->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="" class="aspect-square w-full rounded-lg object-cover bg-primary-50" loading="lazy">
+                                <span class="mt-2 block line-clamp-2 font-medium text-dark">{{ $suggested->name }}</span>
+                            </a>
+                            <span class="block font-semibold" dir="ltr">{{ \App\Support\Money::format($suggested->final_price) }}</span>
+                            <form method="POST" action="{{ route('cart.add') }}" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $suggested->id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="suggested" value="cart">
+                                <button class="w-full rounded-lg border border-primary-300 px-3 py-1.5 font-semibold text-primary-700 hover:bg-primary-50">{{ __('Add to cart') }}</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         @if($saved->isNotEmpty())
             <section class="mt-8">
                 <h2 class="font-display text-xl font-bold text-dark mb-3">{{ __('Saved for later') }} <span class="text-gray-500 font-sans font-normal text-base">({{ $saved->count() }})</span></h2>

@@ -248,7 +248,9 @@ class AdminController extends Controller
         $funnel = ['7' => \App\Services\FunnelService::funnel(7), '30' => \App\Services\FunnelService::funnel(30)];
         $funnelProducts = \App\Services\FunnelService::topProducts(30);
 
-        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers', 'funnel', 'funnelProducts', 'brandSales'));
+        $suggestions = app(\App\Services\SuggestionService::class)->report(30);
+
+        return view('admin.analytics.index', compact('stats', 'months', 'ordersByStatus', 'topProducts', 'topSellers', 'funnel', 'funnelProducts', 'brandSales', 'suggestions'));
     }
 
     /**

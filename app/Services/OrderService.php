@@ -121,6 +121,14 @@ class OrderService
                 throw new \RuntimeException($problem);
             }
 
+            // Pay later: within the business's credit left, nothing overdue; the invoice is due after its terms
+            if (($shippingData['payment_method'] ?? null) === CreditService::METHOD) {
+                if ($problem = app(CreditService::class)->problem($user, (float) $discounts['final_total'] + (float) $shippingData['shipping_amount'])) {
+                    throw new \RuntimeException($problem);
+                }
+                $shippingData['credit_due_on'] = app(CreditService::class)->dueDate($user)->toDateString();
+            }
+
             // Create order
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
 
@@ -220,6 +228,7 @@ class OrderService
             'total_amount' => $discounts['final_total'] + $shippingData['shipping_amount'],
             'shipping_amount' => $shippingData['shipping_amount'],
             'small_order_fee' => $shippingData['small_order_fee'] ?? 0,
+            'credit_due_on' => $shippingData['credit_due_on'] ?? null,
             'delivery_fee_shops' => $shippingData['delivery_fee_shops'] ?? 0,
             'delivery_zone' => $shippingData['delivery_zone'],
             'payment_method' => $shippingData['payment_method'] ?? 'bml',

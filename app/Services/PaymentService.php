@@ -36,6 +36,8 @@ class PaymentService
             'bml' => ManualPaymentService::cardEnabled() && $this->bml()->enabled() ? __('Card payment (BML)') : null,
             ManualPaymentService::TRANSFER => ManualPaymentService::transferEnabled() ? __('Bank transfer') : null,
             ManualPaymentService::COD => ManualPaymentService::codEnabled() ? __('Cash on delivery') : null,
+            // Pay later: only for business buyers an admin approved (CreditService)
+            CreditService::METHOD => app(CreditService::class)->offered(auth()->user()) ? __('Pay later (business invoice)') : null,
         ]);
     }
 
@@ -48,6 +50,7 @@ class PaymentService
             'wallet' => __('Wallet (store credit)'),
             ManualPaymentService::TRANSFER => __('Bank transfer'),
             ManualPaymentService::COD => __('Cash on delivery'),
+            CreditService::METHOD => __('Pay later (business invoice)'),
             default => ucfirst(str_replace('_', ' ', $method)),
         };
     }

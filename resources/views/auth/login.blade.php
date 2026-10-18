@@ -16,7 +16,12 @@
                 </a>
             </p>
         </div>
-        <form class="mt-8 space-y-6" action="{{ route('login') }}" method="POST">
+        {{-- Mobile number first (as on Bake & Grill): password if set, otherwise a code; new numbers sign up --}}
+        <a href="{{ route('login.phone') }}" class="mt-8 flex w-full items-center justify-center gap-2 rounded-md bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700" data-login-phone-link>
+            <x-icon name="phone" class="h-4 w-4" />{{ __('Continue with your mobile number') }}
+        </a>
+        <p class="text-center text-xs uppercase tracking-wide text-gray-400">{{ __('or with your email') }}</p>
+        <form class="space-y-6" action="{{ route('login') }}" method="POST">
             @csrf
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>

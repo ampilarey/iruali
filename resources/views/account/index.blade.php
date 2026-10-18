@@ -82,13 +82,13 @@
                     <h2 class="text-xl font-semibold text-dark">{{ __('Security') }}</h2>
 
                     @php $freshCode = \App\Http\Controllers\Customer\CodeLoginController::recentlySignedInWithCode(request()); @endphp
-                    @if($user->hasPassword() || $freshCode)
+                    @if($user->hasPassword() || $freshCode || filled($user->phone_verified_at))
                     <form method="POST" action="{{ route('account.password') }}" class="space-y-3 max-w-md" data-password-form>
                         @csrf @method('PUT')
                         <h3 class="font-medium text-gray-900">{{ $user->hasPassword() ? __('Change password') : __('Set a password') }}</h3>
                         @if($freshCode)
                         <p class="rounded-md bg-primary-50 px-3 py-2 text-sm text-primary-800" data-fresh-code>{{ __('You signed in with a code, so you can set a new password now without the old one.') }}</p>
-                        @else
+                        @elseif($user->hasPassword())
                         <div>
                             <label for="current_password" class="block text-sm text-gray-700">{{ __('Current password') }}</label>
                             <input id="current_password" name="current_password" type="password" autocomplete="current-password" required class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('current_password') border-red-500 @enderror">

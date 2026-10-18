@@ -33,7 +33,7 @@ class SmsSegments
             ->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', array_merge((array) config('staff.roles'), ['seller'])));
         self::narrow($query, $segment, $value);
 
-        return $query->get(['id', 'name', 'phone', 'phone_verified_at', 'notification_preferences'])
+        return $query->get(['id', 'name', 'email', 'phone', 'phone_verified_at', 'notification_preferences'])
             ->filter(fn (User $user) => in_array($user->notificationPreference('marketing'), ['sms', 'both'], true))->values();
     }
 

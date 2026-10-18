@@ -61,7 +61,9 @@ class ErrorTracker
             || $e instanceof AuthenticationException
             || $e instanceof AuthorizationException
             || $e instanceof TokenMismatchException
-            || $e instanceof ModelNotFoundException) {
+            || $e instanceof ModelNotFoundException
+            // A mistyped or not-yet-deployed artisan command at the server's terminal, not a site error
+            || $e instanceof \Symfony\Component\Console\Exception\CommandNotFoundException) {
             return true;
         }
 

@@ -137,6 +137,16 @@ class SmsTypes
                 'text' => 'iruali: happy birthday! :percent% off your next order with code :code, until :date.',
                 'data' => ['percent' => '10', 'code' => 'BDAY-7Q2K', 'date' => '24 Oct'], 'required' => ['code'],
             ],
+            'cart_reminder' => [
+                'group' => 'marketing', 'label' => 'Items left in the cart',
+                'text' => 'iruali: you left items in your cart. Finish your order: :url',
+                'data' => ['url' => 'https://iruali.mv/cart'],
+            ],
+            'cart_reminder_offer' => [
+                'group' => 'marketing', 'label' => 'Items left in the cart, with a code',
+                'text' => 'iruali: your cart is waiting with :percent% off, code :code until :date: :url',
+                'data' => ['percent' => '10', 'code' => 'BACK-7Q2K9X', 'date' => '31 Oct', 'url' => 'https://iruali.mv/cart'], 'required' => ['code'],
+            ],
             'dispute_refund' => [
                 'group' => 'disputes', 'label' => 'Dispute decided: refund',
                 'text' => 'iruali: your dispute on order :number is resolved. A refund of :amount is on its way.',

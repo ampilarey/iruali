@@ -30,4 +30,16 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::post('/sms/types/{type}/test', [SmsController::class, 'testType'])->name('sms.types.test')->where('type', '[a-z_]+')->middleware('throttle:10,1,sms.types.test');
     Route::get('/sms/export', [SmsController::class, 'export'])->name('sms.export');
     Route::post('/sms/messages/{message}/resend', [SmsController::class, 'resend'])->name('sms.resend')->middleware('throttle:20,1,sms.resend');
+
+    // Admin → SMS campaigns (admins only: admin.*)
+    Route::get('/sms/campaigns', [\App\Http\Controllers\Admin\SmsCampaignController::class, 'index'])->name('sms.campaigns');
+    Route::post('/sms/campaigns', [\App\Http\Controllers\Admin\SmsCampaignController::class, 'store'])->name('sms.campaigns.store');
+    Route::get('/sms/campaigns/{campaign}', [\App\Http\Controllers\Admin\SmsCampaignController::class, 'show'])->name('sms.campaigns.show');
+    Route::post('/sms/campaigns/{campaign}/test', [\App\Http\Controllers\Admin\SmsCampaignController::class, 'test'])->name('sms.campaigns.test')->middleware('throttle:10,1,sms.campaigns.test');
+    Route::post('/sms/campaigns/{campaign}/send', [\App\Http\Controllers\Admin\SmsCampaignController::class, 'send'])->name('sms.campaigns.send');
+    Route::post('/sms/campaigns/{campaign}/cancel', [\App\Http\Controllers\Admin\SmsCampaignController::class, 'cancel'])->name('sms.campaigns.cancel');
 });
+
+// The stop link at the end of a campaign SMS (App\Support\SmsOptOut)
+Route::get('/stop/{code}', [\App\Http\Controllers\Customer\SmsStopController::class, 'show'])->name('sms.stop')->middleware('throttle:20,1,sms.stop');
+Route::post('/stop/{code}', [\App\Http\Controllers\Customer\SmsStopController::class, 'store'])->name('sms.stop.store')->middleware('throttle:20,1,sms.stop.store');

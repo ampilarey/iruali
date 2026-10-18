@@ -104,3 +104,6 @@ Schedule::command('credit:reminders')->dailyAt('09:05')->timezone('Indian/Maldiv
 
 // "Frequently bought together" and cart suggestions, from the last year of paid orders
 Schedule::command('insights:compute-pairs')->dailyAt('03:45')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// SMS campaigns whose time has come (Admin → SMS campaigns)
+Schedule::command('sms:send-campaigns')->everyMinute()->withoutOverlapping()->name('sms-send-campaigns');

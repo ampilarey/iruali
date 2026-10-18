@@ -219,6 +219,11 @@
                         <input id="abandoned_cart_voucher_percent" name="abandoned_cart_voucher_percent" type="number" min="0" max="100" step="0.01" class="{{ $field }}" value="{{ old('abandoned_cart_voucher_percent', $settings['abandoned_cart_voucher_percent'] ?? 0) }}">
                         <p class="mt-1 text-xs text-gray-500">0 sends no voucher. Otherwise the second email carries a single-use code for that customer, valid 7 days.</p>
                     </div>
+                    <label class="flex items-start gap-3 text-sm text-gray-700" data-cart-sms-setting>
+                        <input type="hidden" name="abandoned_cart_sms_enabled" value="0">
+                        <input type="checkbox" name="abandoned_cart_sms_enabled" value="1" @checked(old('abandoned_cart_sms_enabled', $settings['abandoned_cart_sms_enabled'] ?? 0)) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span><span class="font-medium text-gray-900">Also by SMS</span><br><span class="text-xs text-gray-500">To customers with a verified phone who chose offers by SMS (wording under SMS → Messages; the monthly limit and quiet hours apply).</span></span>
+                    </label>
                 </div>
             </x-admin.fold>
 

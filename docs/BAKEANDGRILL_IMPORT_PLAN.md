@@ -82,10 +82,10 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 
 ## Phase 4: marketing
 
-24. **SMS campaigns** to segments (bought from a category, a brand's followers, inactive 90 days,
+24. ✅ **SMS campaigns** (done: Admin → SMS campaigns, `sms:send-campaigns`, a stop link in every message) to segments (bought from a category, a brand's followers, inactive 90 days,
     island), with preview, test, scheduling, opt-out and the budget from item 1.
     B&G: `admin/sms/campaigns*`, `audiences*`.
-25. **Abandoned-cart SMS** as well as the email (for verified phones that allow marketing SMS).
+25. ✅ **Abandoned-cart SMS** (done: Settings → Abandoned cart → Also by SMS) as well as the email (for verified phones that allow marketing SMS).
 26. **Promotion rules**: automatic offers without a code (spend MVR X get Y off, free delivery over
     X for a campaign); batches of printed discount cards. B&G: `backend/app/Domains/Promotions`,
     `admin/discount-cards/*`.

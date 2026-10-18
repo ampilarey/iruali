@@ -38,7 +38,7 @@ class AlertLateOrders extends Command
         return SellerOrder::query()->where('status', 'pending')->where(fn ($q) => $q->where('awaiting_stock', false)->orWhereNull('awaiting_stock'))
             ->whereHas('order', fn ($q) => $q->where('status', '!=', 'cancelled')->where(fn ($q) => $q
                 ->where(fn ($q) => $q->where('payment_status', 'paid')->where('paid_at', '<=', $since))
-                ->orWhere(fn ($q) => $q->where('payment_method', 'cod')->where('created_at', '<=', $since))));
+                ->orWhere(fn ($q) => $q->whereIn('payment_method', ['cod', 'credit'])->where('created_at', '<=', $since))));
     }
 
     /**

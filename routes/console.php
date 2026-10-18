@@ -98,3 +98,9 @@ Schedule::command('orders:alert-late')->hourly()->withoutOverlapping();
 
 // Yesterday's refunds and those still due, to the alerts inbox every morning
 Schedule::command('refunds:daily-summary')->dailyAt('07:45')->timezone('Indian/Maldives');
+
+// Pay later: reminders before an invoice is due, and overdue ones marked and alerted
+Schedule::command('credit:reminders')->dailyAt('09:05')->timezone('Indian/Maldives')->withoutOverlapping();
+
+// "Frequently bought together" and cart suggestions, from the last year of paid orders
+Schedule::command('insights:compute-pairs')->dailyAt('03:45')->timezone('Indian/Maldives')->withoutOverlapping();

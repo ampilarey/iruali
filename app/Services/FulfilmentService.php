@@ -278,7 +278,7 @@ class FulfilmentService
             $part->pickup_ready_at !== null => 'ready',
             $part->isAwaitingStock() => 'awaiting_stock', // pre-order items whose stock has not arrived yet
             // Cash on delivery is paid at the counter, so it may be made ready before
-            $part->order->payment_status !== 'paid' && $part->order->payment_method !== ManualPaymentService::COD => 'unpaid',
+            $part->order->payment_status !== 'paid' && ! in_array($part->order->payment_method, [ManualPaymentService::COD, CreditService::METHOD], true) => 'unpaid',
             default => 'ok',
         };
     }

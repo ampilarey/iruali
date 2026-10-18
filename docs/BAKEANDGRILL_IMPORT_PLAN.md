@@ -73,10 +73,10 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 20. ✅ **Refund approval** (done: Settings → Payments amount, approve on the order or return page, `refunds:daily-summary`): a refund above a set amount needs a second person; a daily refunds
     summary. B&G: `RefundWorkflowService`, `refunds:send-daily-summary`.
 21. ✅ **Receipts** (done: PDF download and "Email me this receipt" with the PDF; the PDF is in English): PDF download and "email me the receipt again". B&G: `/receipts/{token}/pdf`.
-22. **Pay later for business buyers**: approved businesses get a credit limit, invoices with a due
+22. ✅ **Pay later for business buyers** (done: customer page → Pay later, My Account → Pay later statement, `credit:reminders`): approved businesses get a credit limit, invoices with a due
     date, reminders, overdue marking and statements. B&G: `admin/customers/{id}/credit/*`,
     `invoices:mark-overdue`, `credit:send-payment-reminders`.
-23. **Better suggestions**: "frequently bought together" worked out nightly from orders, and cart
+23. ✅ **Better suggestions** (done: `insights:compute-pairs` nightly, cart "Customers also bought", Admin → Analytics → Suggestions): "frequently bought together" worked out nightly from orders, and cart
     suggestions, with a report of how often they are used. B&G: `insights:compute-item-pairs`,
     `recommendations/cart`.
 

@@ -146,6 +146,13 @@ class AdminInbox
                 'count' => \App\Console\Commands\AlertLateOrders::overdue()->count(),
                 'route' => 'admin.orders', 'severity' => 'warn',
             ],
+            // Pay later (CreditService)
+            'credit_overdue' => fn () => [
+                'label' => 'Pay-later invoices overdue',
+                'count' => \App\Models\Order::where('payment_method', \App\Services\CreditService::METHOD)->where('payment_status', '!=', 'paid')
+                    ->where('status', '!=', 'cancelled')->whereDate('credit_due_on', '<', today())->count(),
+                'route' => 'admin.orders', 'severity' => 'danger',
+            ],
             'refunds_due' => fn () => [
                 'label' => 'Refunds due',
                 'count' => Order::where('refund_status', 'due')->count(),

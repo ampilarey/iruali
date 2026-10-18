@@ -27,6 +27,7 @@
                         <a href="{{ route('account.notifications') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Notifications') }}</a>
                         <a href="{{ route('account.rewards') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Rewards') }}</a>
                         <a href="{{ route('account.wallet') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wallet') }}</a>
+                        @if(app(\App\Services\CreditService::class)->account($user))<a href="{{ route('account.credit') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Pay later') }}</a>@endif
                         <a href="#security" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Security') }}</a>
                     </nav>
                 </div>

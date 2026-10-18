@@ -18,6 +18,7 @@ class Audit
     /** Actions the admin audit page offers as filters, with a label. */
     public const ACTIONS = [
         'order.status' => 'Order status changed',
+        'customer.credit' => 'Pay later account changed',
         'customer.merged' => 'Duplicate customer account merged',
         'customer.erased' => 'Customer personal data erased',
         'customer.phone_changed' => 'Customer phone changed by staff',

@@ -156,6 +156,7 @@
                             'bml' => __('Pay now with Visa, Mastercard, American Express or Maestro on Bank of Maldives\' secure payment page.'),
                             \App\Services\ManualPaymentService::TRANSFER => __('Transfer to our bank account after placing the order, then upload the transfer slip. The shops send your order once the payment is confirmed.'),
                             \App\Services\ManualPaymentService::COD => __('Pay in cash when your order arrives. For orders from one shop.'),
+                            \App\Services\CreditService::METHOD => __('Your business pays the invoice later, within your terms. Credit left: :amount.', ['amount' => \App\Support\Money::format(app(\App\Services\CreditService::class)->available(auth()->user() ?? new \App\Models\User))]),
                         ];
                     @endphp
                     @if($paymentMethods === [])

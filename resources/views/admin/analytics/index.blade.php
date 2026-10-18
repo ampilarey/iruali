@@ -78,6 +78,18 @@
             $funnelMax = max($funnel['30']['view_product']['count'] ?? 0, 1);
         @endphp
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2" id="funnel">
+            <x-admin.fold title="Suggestions, last 30 days" flush data-suggestion-report>
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500"><th class="p-3 text-start">Where</th><th class="p-3 text-end">Shown</th><th class="p-3 text-end">Added to cart</th><th class="p-3 text-end">Rate</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach(['product' => 'Product page: frequently bought together', 'cart' => 'Cart: customers also bought'] as $place => $label)
+                            <tr><td class="p-3">{{ $label }}</td><td class="p-3 text-end">{{ number_format($suggestions[$place]['shown']) }}</td><td class="p-3 text-end">{{ number_format($suggestions[$place]['added']) }}</td><td class="p-3 text-end">{{ $suggestions[$place]['rate'] }}%</td></tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <p class="px-3 pb-3 text-xs text-gray-500">Worked out every night from the last year of paid orders (insights:compute-pairs).</p>
+            </x-admin.fold>
+
             <x-admin.fold title="Funnel" flush>
                 <div class="border-b border-gray-100 px-4 py-2 sm:px-6">
                     <p class="mt-1 text-xs text-gray-500">Visitors who reached each step (first-party, anonymised; no cookies or third parties). Conversion is from the step before.</p>

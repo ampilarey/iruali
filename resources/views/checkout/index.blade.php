@@ -11,6 +11,9 @@
     $selectedZone = old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
     // Deliver or pickup per shop, area fees, bulky-item charges, Malé time slots (checkout/_fulfilment, _delivery)
     $deliveryCheckout = app(\App\Services\DeliveryService::class)->checkout($cart, (float) $goodsTotal, $selectedAddress, $user, $addresses);
+    // Small-order fee (Admin → Settings → Ordering), charged with delivery; and a pause in force
+    $smallOrderFee = \App\Support\OrderRules::smallOrderFee((float) $goodsTotal);
+    $orderingPause = \App\Support\OrderRules::pause();
     // Pre-order lines: marked in the summary, remembered for placing the order, and their shops' estimates count from their date
     $preorderLines = app(\App\Services\PreorderService::class)->checkoutLines($cart);
     $deliveryCheckout['shops'] = app(\App\Services\PreorderService::class)->withCheckoutEstimates($deliveryCheckout['shops'], $cart, $deliveryCheckout['areas'], $preorderLines);
@@ -18,6 +21,9 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if($orderingPause)
+        <p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-ordering-paused>{{ $orderingPause['message'] }}</p>
+    @endif
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Checkout') }}</h1>
         <p class="text-gray-600">{{ __('Complete your order') }}</p>
@@ -143,6 +149,9 @@
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Payment Method') }}</h2>
                     @php
                         $paymentMethods = app(\App\Services\PaymentService::class)->methods();
+                        if (($orderingPause['mode'] ?? null) === 'cod') {
+                            unset($paymentMethods[\App\Services\ManualPaymentService::COD]); // cash on delivery paused
+                        }
                         $paymentHelp = [
                             'bml' => __('Pay now with Visa, Mastercard, American Express or Maestro on Bank of Maldives\' secure payment page.'),
                             \App\Services\ManualPaymentService::TRANSFER => __('Transfer to our bank account after placing the order, then upload the transfer slip. The shops send your order once the payment is confirmed.'),
@@ -241,9 +250,15 @@
                             <dt class="text-gray-600">{{ __('Delivery') }}</dt>
                             <dd class="font-medium" dir="ltr" id="delivery-fee">{{ \App\Support\Money::format($deliveryCheckout['fee']) }}</dd>
                         </div>
+                        @if($smallOrderFee > 0)
+                            <div class="flex justify-between" data-small-order-fee>
+                                <dt class="text-gray-600">{{ __('Small order fee') }}<span class="block text-xs text-gray-500">{{ __('Orders under :amount', ['amount' => \App\Support\Money::format((float) \App\Models\Setting::get('small_order_threshold'))]) }}</span></dt>
+                                <dd class="font-medium" dir="ltr">{{ \App\Support\Money::format($smallOrderFee) }}</dd>
+                            </div>
+                        @endif
                         <div class="flex justify-between border-t border-gray-200 pt-3 text-base">
                             <dt class="font-semibold">{{ __('Total') }}</dt>
-                            <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + $deliveryCheckout['fee']) }}</dd>
+                            <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + $smallOrderFee + $deliveryCheckout['fee']) }}</dd>
                         </div>
                         @if($walletBalance > 0)
                             <div class="flex justify-between hidden" id="wallet-row">
@@ -284,7 +299,7 @@
 
 <script>
     (function () {
-        var goods = @json((float) $goodsTotal);
+        var goods = @json((float) $goodsTotal + $smallOrderFee);
         var prefix = @json(\App\Support\Money::prefix());
         var fmt = function (n) { return prefix + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
         var checkedZone = document.querySelector('input[name="delivery_zone"]:checked');

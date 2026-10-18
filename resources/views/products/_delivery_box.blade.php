@@ -24,6 +24,7 @@
             @endif
             @if($box['arrival'])
                 <p class="text-gray-700">{{ $box['arrival'] }}</p>
+                @if(! empty($box['hours']))<p class="text-xs text-gray-500" data-shop-hours>{{ $box['hours'] }}</p>@endif
             @endif
         @endif
         @if($box['surcharge'] > 0)

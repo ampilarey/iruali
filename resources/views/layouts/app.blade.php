@@ -299,6 +299,23 @@
             </div>
         @endif
     @endauth
+    @php $orderingPause = \App\Support\OrderRules::pause(); @endphp
+    @if($orderingPause && ! request()->routeIs('seller.*'))
+        {{-- Ordering paused (Admin → Settings → Ordering): the message, and "tell me when it's back" --}}
+        <div class="bg-amber-50 border-b border-amber-200 text-amber-900 text-sm" data-ordering-pause="{{ $orderingPause['mode'] }}">
+            <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+                <p>{{ $orderingPause['message'] }}</p>
+                @if($orderingPause['mode'] === 'all')
+                    <form method="POST" action="{{ route('ordering.notify') }}" class="flex flex-wrap items-center gap-2">
+                        @csrf
+                        <label for="ordering-notify-email" class="sr-only">{{ __('Email') }}</label>
+                        <input id="ordering-notify-email" type="email" name="email" required value="{{ auth()->user()?->email }}" placeholder="{{ __('Your email') }}" class="w-48 rounded-md border border-amber-300 px-2 py-1 text-sm">
+                        <button class="rounded-md bg-amber-600 px-3 py-1 font-semibold text-white hover:bg-amber-700">{{ __('Tell me when it is back') }}</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+    @endif
     <main id="main" class="min-h-[60vh]">
         @yield('content')
     </main>

@@ -53,6 +53,10 @@ class DeliverySettingsController extends Controller
             'fee_greater_male' => [Rule::requiredIf($ownFees), ...explode('|', $money)],
             'fee_islands' => [Rule::requiredIf($ownFees), ...explode('|', $money)],
             'free_over' => 'nullable|numeric|min:0|max:1000000',
+            'min_order_amount' => 'nullable|numeric|min:0|max:100000',
+            'hours' => 'nullable|array',
+            'hours.*' => 'nullable|array',
+            'hours.*.*' => ['nullable', 'date_format:H:i'],
         ], [
             'fee_greater_male.required' => __('Please give your fee for Greater Malé.'),
             'fee_islands.required' => __('Please give your fee for other islands.'),
@@ -63,6 +67,19 @@ class DeliverySettingsController extends Controller
             'pickup_island_id.required' => __('Please choose the island your shop is on.'),
             'pickup_hours.required' => __('Please give your opening hours, so customers know when to come.'),
         ]);
+
+        // Opening hours: a day with both times, opening before closing; the rest are closed
+        $hours = [];
+        foreach (array_keys(SellerDeliverySetting::DAYS) as $day) {
+            [$open, $close] = [(string) ($data['hours'][$day][0] ?? ''), (string) ($data['hours'][$day][1] ?? '')];
+            if ($open === '' && $close === '') {
+                continue;
+            }
+            if ($open === '' || $close === '' || $open >= $close) {
+                return back()->withInput()->withErrors(['hours' => __('Give both times for :day, with the opening time before the closing time.', ['day' => __(SellerDeliverySetting::DAYS[$day])])]);
+            }
+            $hours[(string) $day] = [$open, $close];
+        }
 
         $amount = fn (string $key) => isset($data[$key]) && $data[$key] !== '' ? round((float) $data[$key], 2) : null;
         $fees = $feesEditable ? [
@@ -79,6 +96,8 @@ class DeliverySettingsController extends Controller
             'pickup_address' => filled($data['pickup_address'] ?? null) ? trim($data['pickup_address']) : null,
             'pickup_island_id' => $data['pickup_island_id'] ?? null,
             'pickup_hours' => filled($data['pickup_hours'] ?? null) ? trim($data['pickup_hours']) : null,
+            'opening_hours' => $hours ?: null,
+            'min_order_amount' => ($minimum = $amount('min_order_amount')) !== null && $minimum > 0 ? $minimum : null,
         ]);
 
         return redirect()->route('seller.settings.delivery')->with('success', __('Delivery settings saved.'));

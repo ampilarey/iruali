@@ -60,12 +60,12 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 
 ## Phase 3: ordering and money
 
-15. **Minimum order** (site-wide, and per shop) and an optional small-order fee.
+15. ✅ **Minimum order** (done: Admin → Settings → Ordering, and each shop under Delivery & pickup; the fee is added to delivery for iruali) (site-wide, and per shop) and an optional small-order fee.
     B&G: `config/ordering.php`, `OrderFeeTaxCalculator`.
-16. **Pause ordering**: site-wide switch (or delivery only / cash on delivery only) with a message,
+16. ✅ **Pause ordering** (done: Admin → Settings → Ordering, a site banner, `ordering:notify-back`): site-wide switch (or delivery only / cash on delivery only) with a message,
     a scheduled pause, and "tell me when it's back". B&G: `admin/service-availability/*`,
     `service-status/notify-me`.
-17. **Shop opening hours** used for "ships today" and pickup times. B&G: `opening-hours*`.
+17. ✅ **Shop opening hours** (done: Seller Centre → Delivery & pickup; estimates start on the next open day, "Open today" on product pages and pickup) used for "ships today" and pickup times. B&G: `opening-hours*`.
 18. **Live order page**: status changes show without a refresh (polling first; SSE later).
     B&G: `stream/order-status/{orderId}`.
 19. **Late order alerts**: paid orders a shop has not started within N hours, and parts past their

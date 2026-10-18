@@ -55,7 +55,8 @@
                     @if($order->points_redeemed_discount > 0)
                         <div class="flex justify-between text-gray-600"><dt>Points ({{ $order->points_redeemed }})</dt><dd>−{{ \App\Support\Money::format($order->points_redeemed_discount) }}</dd></div>
                     @endif
-                    <div class="flex justify-between text-gray-600"><dt>Delivery ({{ $order->delivery_zone === 'greater_male' ? 'Greater Malé' : 'other islands' }})</dt><dd>{{ \App\Support\Money::format($order->shipping_amount) }}</dd></div>
+                    <div class="flex justify-between text-gray-600"><dt>Delivery ({{ $order->delivery_zone === 'greater_male' ? 'Greater Malé' : 'other islands' }})</dt><dd>{{ \App\Support\Money::format($order->deliveryCharge()) }}</dd></div>
+                    @if($order->small_order_fee > 0)<div class="flex justify-between text-gray-600"><dt>Small order fee (iruali)</dt><dd>{{ \App\Support\Money::format($order->small_order_fee) }}</dd></div>@endif
                     <div class="flex justify-between text-gray-600"><dt>Payment</dt><dd>{{ \App\Services\PaymentService::methodLabel($order->payment_method) }}</dd></div>
                     <div class="flex justify-between font-semibold text-gray-900"><dt>Total</dt><dd>{{ \App\Support\Money::format($order->total_amount) }}</dd></div>
                 </dl>

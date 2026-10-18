@@ -354,7 +354,22 @@ class AdminController extends Controller
             'abandoned_cart_emails_enabled' => 'sometimes|boolean',
             'abandoned_cart_voucher_percent' => 'sometimes|required|numeric|min:0|max:100',
             'points_expire_months' => 'sometimes|required|integer|min:0|max:120',
+            'min_order_amount' => 'sometimes|nullable|numeric|min:0|max:1000000',
+            'small_order_fee' => 'sometimes|nullable|numeric|min:0|max:100000',
+            'small_order_threshold' => 'sometimes|nullable|numeric|min:0|max:1000000',
+            'ordering_pause_mode' => 'sometimes|required|in:'.implode(',', \App\Support\OrderRules::PAUSE_MODES),
+            'ordering_pause_from' => 'sometimes|nullable|date',
+            'ordering_pause_until' => 'sometimes|nullable|date|after:ordering_pause_from',
+            'ordering_pause_message' => 'sometimes|nullable|string|max:255',
         ]);
+        foreach (['min_order_amount', 'small_order_fee', 'small_order_threshold'] as $key) {
+            if (array_key_exists($key, $validated)) {
+                $validated[$key] = (float) ($validated[$key] ?? 0);
+            }
+        }
+        if (($validated['ordering_pause_mode'] ?? null) !== null && $validated['ordering_pause_mode'] !== Setting::get('ordering_pause_mode', 'off')) {
+            \App\Support\Audit::record('settings.ordering_pause', null, ['mode' => $validated['ordering_pause_mode']]);
+        }
 
         $dhivehiBefore = \App\Services\LocalizationService::dhivehiEnabled();
         $twoFactorBefore = filter_var(Setting::get('staff_require_two_factor', 1), FILTER_VALIDATE_BOOLEAN);

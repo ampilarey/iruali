@@ -116,3 +116,7 @@ Schedule::command('finance:recurring-expenses')->monthlyOn(1, '00:30')->timezone
 
 // GST return reminder (Settings: gst_reminder_day) until last month is locked as filed
 Schedule::command('gst:filing-reminder')->dailyAt('09:20')->timezone('Indian/Maldives');
+
+// The queue worker proves it is alive every 5 minutes; ops:watch alerts on failed jobs or a stopped worker
+Schedule::job(new \App\Jobs\QueueHeartbeat)->everyFiveMinutes()->name('queue-heartbeat');
+Schedule::command('ops:watch')->everyTenMinutes()->withoutOverlapping()->name('ops-watch');

@@ -106,14 +106,14 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 32. ✅ **GST tools** (done: ledger CSV, lock a filed month with its figures, `gst:filing-reminder`): GST ledger, period lock, filing reminder. B&G: `backend/app/Domains/Gst`,
     `gst:filing-reminder`.
 33. ✅ **Xero** (done as import files: commission invoices and expenses as bills, from Admin → Finance; a live Xero connection can come later): push commission invoices and expenses. B&G: `backend/app/Domains/Accounting`.
-34. **Webhooks out** (optional): order.created / paid / delivered for other systems.
+34. ✅ **Webhooks out** (done: Admin → Webhooks, signed, retried): order.created / paid / delivered for other systems.
     B&G: `backend/app/Domains/Webhooks`.
-35. **Running the site**: alerts when queued jobs fail or the queue stops; `/health/ready`
+35. ✅ **Running the site** (done: `/api/health/ready`, `ops:watch` for failed jobs and a stopped queue; the `.env` check is `iruali:ready`, Sentry is optional through ErrorTracker, and live-to-test copies use `iruali:anonymise`, see docs/SERVERS.md): alerts when queued jobs fail or the queue stops; `/health/ready`
     answering 503 when the database or storage is down; Sentry as an option; a command that checks
     the production `.env`; copy live to test with personal data removed.
     B&G: `jobs:alert-failed`, `ops:watch-queue-worker`, `SystemHealthService.php`,
     `VerifyProductionConfig`, `admin/ops/clone-live-to-test`.
-36. **Prayer times** (optional): a small prayer-time bar for the shopper's island.
+36. ✅ **Prayer times** (done: Settings → Storefront → Show prayer times, calculated per island): a small prayer-time bar for the shopper's island.
     B&G: `prayer-times/*`, `packages/prayer-times-widget`.
 
 ## Not brought over (restaurant only)

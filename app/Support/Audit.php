@@ -25,6 +25,8 @@ class Audit
         'order.cancelled' => 'Order cancelled',
         'refund.flagged' => 'Refund flagged',
         'refund.recorded' => 'Refund recorded',
+        'webhook.added' => 'Webhook added',
+        'webhook.removed' => 'Webhook removed',
         'tax.period_locked' => 'GST month locked (return filed)',
         'tax.period_unlocked' => 'GST month unlocked',
         'settlement.imported' => 'Bank statement imported',

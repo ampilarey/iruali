@@ -20,6 +20,7 @@ class OrderNotifier
 {
     public function orderPlaced(Order $order): void
     {
+        \App\Support\Webhooks::order('order.created', $order);
         $order->loadMissing(['user', 'items.product.seller']);
         $this->sendToCustomer($order, new OrderPlaced($order));
 
@@ -38,11 +39,17 @@ class OrderNotifier
 
     public function statusChanged(Order $order): void
     {
+        if (in_array($order->status, ['delivered', 'cancelled'], true)) {
+            \App\Support\Webhooks::order('order.'.$order->status, $order);
+        }
         $this->sendToCustomer($order, new OrderStatusChanged($order));
     }
 
     public function paymentUpdated(Order $order): void
     {
+        if ($order->payment_status === 'paid') {
+            \App\Support\Webhooks::order('order.paid', $order);
+        }
         $this->sendToCustomer($order, new PaymentUpdated($order));
     }
 

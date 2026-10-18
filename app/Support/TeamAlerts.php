@@ -21,6 +21,7 @@ class TeamAlerts
     public const EVENTS = [
         'new_order' => ['New order', 'Any order is placed (card orders before payment, too).'],
         'bank_slip' => ['Bank slip to check', 'A customer uploads a bank-transfer slip.'],
+        'ops_problem' => ['Site problem', 'Queued jobs fail or the queue worker stops (checked every 10 minutes).'],
         'gst_due' => ['GST return due', 'Last month\'s GST return is not marked filed yet (on the reminder day).'],
         'late_order' => ['Late orders', 'Paid orders a shop has not started in time, or sent but past their delivery date (hourly check).'],
         'refund_due' => ['Refund due', 'A refund needs to be sent (cancelled paid order, approved return).'],
@@ -52,6 +53,21 @@ class TeamAlerts
             }
 
             SendTeamAlert::dispatch($event, $text, $url)->afterCommit();
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Tell the team now, without the queue (for when the queue itself is the problem).
+     */
+    public static function sendNow(string $event, string $text, ?string $url = null): void
+    {
+        if (! isset(self::EVENTS[$event])) {
+            return;
+        }
+        try {
+            SendTeamAlert::dispatchSync($event, $text, $url);
         } catch (Throwable $e) {
             report($e);
         }

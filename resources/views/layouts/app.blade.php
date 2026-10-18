@@ -299,6 +299,21 @@
             </div>
         @endif
     @endauth
+    @if(\App\Support\PrayerTimes::enabled() && ! request()->routeIs('seller.*', 'checkout*'))
+        {{-- Prayer times for the shopper's island (Admin → Settings → Storefront), calculated --}}
+        @php
+            $prayer = \App\Support\PrayerTimes::forIsland(app(\App\Services\ShoppingIsland::class)->island());
+            [$nextPrayer, $nextAt] = \App\Support\PrayerTimes::next($prayer['times']);
+        @endphp
+        <div class="bg-primary-50 text-primary-900 text-xs" data-prayer-times>
+            <div class="max-w-7xl mx-auto px-4 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span class="font-semibold">{{ __('Prayer times in :place', ['place' => $prayer['place']]) }}</span>
+                @foreach(['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as $name)
+                    <span @class(['font-semibold' => $name === $nextPrayer])>{{ __(\App\Support\PrayerTimes::NAMES[$name]) }} <span dir="ltr">{{ $prayer['times'][$name] }}</span></span>
+                @endforeach
+            </div>
+        </div>
+    @endif
     @php $orderingPause = \App\Support\OrderRules::pause(); @endphp
     @if($orderingPause && ! request()->routeIs('seller.*'))
         {{-- Ordering paused (Admin → Settings → Ordering): the message, and "tell me when it's back" --}}

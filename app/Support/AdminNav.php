@@ -70,6 +70,7 @@ class AdminNav
                 ['admin.legal', 'Legal pages', 'list'],
                 ['admin.sms', 'SMS', 'phone'],
                 ['admin.alerts', 'Team alerts', 'bell'],
+                ['admin.webhooks', 'Webhooks', 'repeat'],
                 ['admin.sample-data', 'Sample data', 'squares'],
             ],
             'System' => [

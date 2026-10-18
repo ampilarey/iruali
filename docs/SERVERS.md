@@ -63,7 +63,19 @@ Scheduler (crontab of `iruali`):
 * * * * * /home/iruali/test/scripts/self-update-test.sh >> /home/iruali/self-update-test.log 2>&1
 ```
 
-Health: `php artisan iruali:ready` (expects only BML to fail until the keys exist).
+Health: `php artisan iruali:ready` (expects only BML to fail until the keys exist). For an uptime
+monitor, `/api/health/ready` answers 200, or 503 when the database, cache or storage fails
+(`/api/health` is unchanged for the deploy check). `ops:watch` (every 10 minutes) alerts when queued
+jobs fail or the queue worker stops.
+
+Optional `.env` for social posting (Admin → Social posts): `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN`
+(a long-lived page token) and `INSTAGRAM_ACCOUNT_ID`. Nothing posts without them and an approval.
+
+Staff from the server: `php artisan staff:list`, `staff:create email --role=…` (the password is typed
+hidden, or left empty for "Forgot password"), `staff:unlock email` after too many wrong tries.
+
+Copy live data to test: restore a production backup on test, then `php artisan iruali:anonymise`
+there before anyone uses it (it replaces customers' names, emails, phones and addresses).
 
 ## Rules learned the hard way
 

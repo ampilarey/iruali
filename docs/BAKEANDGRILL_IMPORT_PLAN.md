@@ -101,9 +101,9 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
     customers, vouchers used, refunds by reason. B&G: `reports/*/csv`.
 30. ✅ **iruali's own finance** (done: Admin → Finance, `finance:recurring-expenses`): commission income, delivery income, card fees, expenses (with
     receipts and recurring ones), a monthly profit and loss. B&G: `reports/finance/*`, `expenses*`.
-31. **Settlements**: import the BML statement and match card payments and bank transfers to
+31. ✅ **Settlements** (done: Admin → Settlements, CSV statement import with matching): import the BML statement and match card payments and bank transfers to
     orders. B&G: `settlements/*` (`BankStatementParser`).
-32. **GST tools**: GST ledger, period lock, filing reminder. B&G: `backend/app/Domains/Gst`,
+32. ✅ **GST tools** (done: ledger CSV, lock a filed month with its figures, `gst:filing-reminder`): GST ledger, period lock, filing reminder. B&G: `backend/app/Domains/Gst`,
     `gst:filing-reminder`.
 33. ✅ **Xero** (done as import files: commission invoices and expenses as bills, from Admin → Finance; a live Xero connection can come later): push commission invoices and expenses. B&G: `backend/app/Domains/Accounting`.
 34. **Webhooks out** (optional): order.created / paid / delivered for other systems.

@@ -47,11 +47,11 @@ class CustomerReportController extends Controller
             $out = fopen('php://output', 'w');
             fputcsv($out, ['name', 'email', 'phone', 'orders', 'spent_mvr', 'average_mvr', 'first_order', 'last_order', 'joined']);
             foreach ($customers as $row) {
-                fputcsv($out, [
+                fputcsv($out, \App\Support\Csv::row([
                     $row['name'], $row['email'], $row['phone'], $row['orders'], number_format($row['spent'], 2, '.', ''),
                     number_format($row['spent'] / max(1, $row['orders']), 2, '.', ''),
                     $row['first']->toDateString(), $row['last']->toDateString(), $row['joined']?->toDateString(),
-                ]);
+                ]));
             }
             fclose($out);
         }, 'iruali-customers-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);

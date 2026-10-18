@@ -43,7 +43,7 @@ class ExportController extends Controller
             $out = fopen('php://output', 'w');
             fputcsv($out, $header);
             foreach ($rows as $row) {
-                fputcsv($out, array_values((array) $row));
+                fputcsv($out, \App\Support\Csv::row(array_values((array) $row)));
             }
             fclose($out);
         }, 'iruali-'.str_replace('_', '-', $kind).'-'.$from->toDateString().'-to-'.$to->toDateString().'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);

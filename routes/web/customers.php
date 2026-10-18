@@ -36,6 +36,13 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::get('/finance/export', [\App\Http\Controllers\Admin\FinanceController::class, 'exportPnl'])->name('finance.export');
     Route::get('/finance/xero/invoices', [\App\Http\Controllers\Admin\FinanceController::class, 'xeroInvoices'])->name('finance.xero.invoices');
     Route::get('/finance/xero/bills', [\App\Http\Controllers\Admin\FinanceController::class, 'xeroBills'])->name('finance.xero.bills');
+
+    // Admin → Settlements: the BML statement matched to orders (admins and finance staff)
+    Route::get('/settlements', [\App\Http\Controllers\Admin\SettlementController::class, 'index'])->name('settlements');
+    Route::post('/settlements/import', [\App\Http\Controllers\Admin\SettlementController::class, 'import'])->name('settlements.import')->middleware('throttle:10,1,settlements.import');
+    Route::post('/settlements/{line}/confirm', [\App\Http\Controllers\Admin\SettlementController::class, 'confirm'])->name('settlements.confirm');
+    Route::post('/settlements/{line}/match', [\App\Http\Controllers\Admin\SettlementController::class, 'match'])->name('settlements.match');
+    Route::post('/settlements/{line}/ignore', [\App\Http\Controllers\Admin\SettlementController::class, 'ignore'])->name('settlements.ignore');
 });
 
 Route::middleware('auth')->group(function () {

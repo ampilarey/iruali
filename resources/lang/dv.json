@@ -2947,5 +2947,12 @@
     "Done. You will not get offers by SMS any more. Order updates still come as before.": "ނިމިއްޖެ. SMS އިން އޮފަރ އިތުރަށް ނުފޮނުވޭނެ. އޯޑަރުގެ މަޢުލޫމާތު ކުރިން ގޮތަށް ލިބޭނެ.",
     "You will still get texts about your orders.": "ތިބާގެ އޯޑަރުތަކާ ބެހޭ SMS ކުރިން ގޮތަށް ލިބޭނެ.",
     "Offer": "އޮފަރ",
-    "Ledger (every line)": "ލެޖަރ (ކޮންމެ ލައިނެއް)"
+    "Ledger (every line)": "ލެޖަރ (ކޮންމެ ލައިނެއް)",
+    "Prayer times in :place": ":place ގެ ނަމާދު ވަގުތުތައް",
+    "Fajr": "ފަތިސް",
+    "Sunrise": "އިރުއަރާ",
+    "Dhuhr": "މެންދުރު",
+    "Asr": "އަޞްރު",
+    "Maghrib": "މަޣްރިބް",
+    "Isha": "ޢިޝާ"
 }

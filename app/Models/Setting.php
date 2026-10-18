@@ -72,6 +72,10 @@ class Setting extends Model
         'card_fee_percent' => 0,
         // Day of the month the GST filing reminder goes out (gst:filing-reminder)
         'gst_reminder_day' => 21,
+        // A small prayer-times bar for the shopper's island (App\Support\PrayerTimes), and its sun angles
+        'prayer_times_enabled' => 0,
+        'prayer_fajr_angle' => 18,
+        'prayer_isha_angle' => 18,
         'xero_sales_account' => '200',
         'xero_expense_account' => '400',
         'xero_tax_sales' => 'GST on Income',

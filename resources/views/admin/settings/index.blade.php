@@ -87,6 +87,16 @@
                             </span>
                         </label>
                     </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3" data-prayer-setting>
+                        <input type="hidden" name="prayer_times_enabled" value="0">
+                        <label class="flex items-start gap-3 text-sm text-gray-800">
+                            <input type="checkbox" name="prayer_times_enabled" value="1" @checked(old('prayer_times_enabled', $settings['prayer_times_enabled'] ?? 0)) class="mt-0.5 rounded text-primary-600 focus:ring-primary-500">
+                            <span>
+                                <span class="font-medium">Show prayer times</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">A small bar with today's prayer times for the shopper's island (Malé when none is chosen), worked out from the island's location. A calculation, so it can differ from the official times by a minute or two.</span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </x-admin.fold>
 

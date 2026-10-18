@@ -125,6 +125,14 @@ Route::get('/health', function () {
     return response()->json($payload);
 });
 
+// Ready check for monitors: 503 when the database, cache or storage is not working (no details in public)
+Route::get('/health/ready', function () {
+    $checks = \App\Support\HealthReady::run();
+    $ok = ! in_array(false, $checks, true);
+
+    return response()->json(['status' => $ok ? 'ready' : 'not_ready', 'checks' => $checks], $ok ? 200 : 503)->header('Cache-Control', 'no-store');
+})->middleware('throttle:30,1,api.health-ready');
+
 // TEST-only immediate deploy trigger (GitHub Actions → cPanel). Disabled when
 // TEST_DEPLOY_WEBHOOK_SECRET is unset; always 404 on non-test hosts.
 Route::post('/deploy/test-pull', TestDeployWebhookController::class)

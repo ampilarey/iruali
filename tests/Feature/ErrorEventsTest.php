@@ -59,6 +59,7 @@ class ErrorEventsTest extends TestCase
         report(ValidationException::withMessages(['email' => 'bad']));
         report(new \Illuminate\Auth\AuthenticationException);
         report(new \Illuminate\Session\TokenMismatchException);
+        report(new \Symfony\Component\Console\Exception\NamespaceNotFoundException('There are no commands defined in the "staff" namespace.'));
         $this->get('/no-such-page')->assertNotFound();
 
         $this->assertSame(0, ErrorEvent::count());

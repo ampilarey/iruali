@@ -68,6 +68,12 @@ class Setting extends Model
         'social_auto_drafts' => 0,
         // Admin → Home page: the blocks as JSON (empty: the built-in order)
         'home_layout_published' => '',
+        // Admin → Finance: the BML card fee (%) for the estimate, and the codes Xero imports use
+        'card_fee_percent' => 0,
+        'xero_sales_account' => '200',
+        'xero_expense_account' => '400',
+        'xero_tax_sales' => 'GST on Income',
+        'xero_tax_purchases' => 'GST on Expenses',
         'home_layout_draft' => '',
         'telegram_channel_id' => '',
         'min_order_amount' => 0,

@@ -493,9 +493,14 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function notificationPreference(string $type): string
     {
-        $value = data_get($this->notification_preferences, 'customer.'.$type, 'email');
+        // No email (signed up with a mobile number): messages come by SMS. Offers stay opt-in.
+        $default = $type !== 'marketing' && blank($this->email) && $this->isPhoneVerified() ? 'sms' : 'email';
+        $value = data_get($this->notification_preferences, 'customer.'.$type, $default);
         if (! in_array($value, ['email', 'sms', 'both'], true)) {
-            return 'email';
+            $value = $default;
+        }
+        if ($value === 'email' && $default === 'sms') {
+            return 'sms';
         }
 
         return $value !== 'email' && ! $this->isPhoneVerified() ? 'email' : $value;

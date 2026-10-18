@@ -99,6 +99,12 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'show'])->name('login.code');
         Route::post('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'send'])->name('login.code.send')->middleware('throttle:5,1,login.code.send');
         Route::post('/login/code/verify', [\App\Http\Controllers\Customer\CodeLoginController::class, 'verify'])->name('login.code.verify')->middleware('throttle:10,1,login.code.verify');
+        // Continue with a mobile number (as on Bake & Grill): password if set, otherwise an SMS code; new numbers sign up here
+        Route::get('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'show'])->name('login.phone');
+        Route::post('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'start'])->name('login.phone.start')->middleware('throttle:10,1,login.phone.start');
+        Route::post('/login/phone/password', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'password'])->name('login.phone.password')->middleware('throttle:10,1,login.phone.password');
+        Route::post('/login/phone/code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'resend'])->name('login.phone.resend')->middleware('throttle:5,1,login.phone.resend');
+        Route::post('/login/phone/verify', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'verify'])->name('login.phone.verify')->middleware('throttle:10,1,login.phone.verify');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1,post-register');
         // Password reset
@@ -130,6 +136,8 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'show'])->name('account');
         Route::get('/account/edit', [\App\Http\Controllers\Customer\ProfileController::class, 'edit'])->name('account.edit');
         Route::put('/account', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('account.update');
+        Route::get('/account/setup', [\App\Http\Controllers\Customer\AccountSetupController::class, 'show'])->name('account.setup');
+        Route::post('/account/setup', [\App\Http\Controllers\Customer\AccountSetupController::class, 'store'])->name('account.setup.store')->middleware('throttle:10,1,account.setup.store');
         Route::put('/account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('account.password')->middleware('throttle:5,1,account.password');
         Route::post('/account/sign-out-everywhere', [\App\Http\Controllers\Customer\ProfileController::class, 'signOutEverywhere'])->name('account.sign-out-everywhere')->middleware('throttle:5,1,account.sign-out-everywhere');
         // Cart routes

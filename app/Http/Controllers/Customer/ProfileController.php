@@ -48,6 +48,10 @@ class ProfileController extends Controller
         ], ['phone.regex' => __('Enter a phone number with digits only, e.g. 777 1234.')]);
 
         $data['phone'] = filled($data['phone'] ?? null) ? preg_replace('/\s+/', '', $data['phone']) : null;
+        // An account without an email signs in with its mobile number: it can't be changed or removed here
+        if (blank($user->email) && $user->isPhoneVerified() && $data['phone'] !== $user->phone) {
+            return back()->withInput()->withErrors(['phone' => __('You sign in with this mobile number. Add an email to your account first, or ask us to change the number.')]);
+        }
         if ($data['phone'] !== $user->phone) {
             $data['phone_verified_at'] = null;
         }
@@ -67,12 +71,13 @@ class ProfileController extends Controller
         // Signed in with a code a moment ago (the "forgot password" route by SMS): no old password needed
         $fresh = CodeLoginController::recentlySignedInWithCode($request);
         $request->validate([
-            'current_password' => $fresh ? 'nullable' : 'required|current_password',
+            // No password yet (signed up with a mobile number, or Google/Facebook/Apple): nothing to confirm
+            'current_password' => $fresh || ! $request->user()->hasPassword() ? 'nullable' : 'required|current_password',
             'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
         $user = $request->user();
-        $user->forceFill(['password' => Hash::make($request->password)])->save();
+        $user->forceFill(['password' => Hash::make($request->password), 'has_password' => true])->save();
         $user->tokens()->delete();
         Auth::logoutOtherDevices($request->password);
         $request->session()->forget('code_signed_in_at');
@@ -119,7 +124,7 @@ class ProfileController extends Controller
             session(['2fa_pending_secret' => $secret]);
         }
 
-        $otpauth = $google2fa->getQRCodeUrl(config('app.name'), $user->email, $secret);
+        $otpauth = $google2fa->getQRCodeUrl(config('app.name'), $user->email ?: (string) $user->phone, $secret);
         $qr = (new Writer(new ImageRenderer(new RendererStyle(200, 0), new SvgImageBackEnd)))->writeString($otpauth);
 
         return view('account.two-factor', compact('user', 'secret', 'otpauth', 'qr'));

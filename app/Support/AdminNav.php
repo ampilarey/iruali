@@ -56,6 +56,8 @@ class AdminNav
                 ['admin.vouchers.index', 'Vouchers', 'tag'],
                 ['admin.newsletter', 'Newsletter', 'mail', ['admin.newsletter-issues.*']],
                 ['admin.sms.campaigns', 'SMS campaigns', 'phone'],
+                ['admin.social', 'Social posts', 'share'],
+                ['admin.home-page', 'Home page', 'home'],
                 ['admin.rewards', 'Rewards', 'heart'],
             ],
             'Settings' => [

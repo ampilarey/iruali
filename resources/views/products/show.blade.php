@@ -221,11 +221,13 @@
                     <x-compare-toggle :product="$product" />
                     <div class="flex items-center gap-1" aria-label="{{ __('Share') }}">
                         <span class="text-gray-500 text-xs me-1">{{ __('Share') }}</span>
-                        <a href="https://wa.me/?text={{ urlencode($shareText.' '.$shareUrl) }}" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-[#128C7E] text-white flex items-center justify-center" aria-label="WhatsApp">
+                        <a href="{{ route('share.go', [$product, 'whatsapp']) }}" target="_blank" rel="noopener nofollow" class="w-8 h-8 rounded-full bg-[#128C7E] text-white flex items-center justify-center" aria-label="WhatsApp">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.4c.1.3.6 1 1.3 1.6.9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"/></svg>
                         </a>
-                        <a href="viber://forward?text={{ rawurlencode($shareText.' '.$shareUrl) }}" class="w-8 h-8 rounded-full bg-[#7360F2] text-white flex items-center justify-center text-[10px] font-bold" aria-label="Viber">V</a>
-                        <button type="button" data-copy-link="{{ $shareUrl }}" data-copied="{{ __('Link copied') }}" class="w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:text-primary flex items-center justify-center" aria-label="{{ __('Copy link') }}"><x-icon name="share" class="w-4 h-4" /></button>
+                        <a href="{{ route('share.go', [$product, 'viber']) }}" rel="nofollow" class="w-8 h-8 rounded-full bg-[#7360F2] text-white flex items-center justify-center text-[10px] font-bold" aria-label="Viber">V</a>
+                        <a href="{{ route('share.go', [$product, 'facebook']) }}" target="_blank" rel="noopener nofollow" class="w-8 h-8 rounded-full bg-[#1877F2] text-white flex items-center justify-center text-xs font-bold" aria-label="Facebook">f</a>
+                        <a href="{{ route('share.go', [$product, 'telegram']) }}" target="_blank" rel="noopener nofollow" class="w-8 h-8 rounded-full bg-[#229ED9] text-white flex items-center justify-center text-[10px] font-bold" aria-label="Telegram">T</a>
+                        <button type="button" data-copy-link="{{ $shareUrl }}" data-copy-count="{{ route('share.copied', $product) }}" data-copied="{{ __('Link copied') }}" class="w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:text-primary flex items-center justify-center" aria-label="{{ __('Copy link') }}"><x-icon name="share" class="w-4 h-4" /></button>
                     </div>
                 </div>
                 @if($whatsapp)
@@ -586,6 +588,10 @@
                 navigator.clipboard && navigator.clipboard.writeText(b.dataset.copyLink).then(function () {
                     window.NotificationManager ? window.NotificationManager.success(b.dataset.copied, '') : alert(b.dataset.copied);
                 });
+                if (b.dataset.copyCount) {
+                    var token = document.querySelector('meta[name="csrf-token"]');
+                    fetch(b.dataset.copyCount, { method: 'POST', headers: { 'X-CSRF-TOKEN': token ? token.content : '' }, credentials: 'same-origin' }).catch(function () {});
+                }
             });
         });
 

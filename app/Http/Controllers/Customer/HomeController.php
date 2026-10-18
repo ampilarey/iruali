@@ -66,6 +66,21 @@ class HomeController extends Controller
         $preorders = $listed()->preorderable()->orderBy('preorder_ship_date')->take(10)->get();
         $comingSoon = $listed()->comingSoon()->orderByRaw('available_on IS NULL')->orderBy('available_on')->latest()->take(10)->get();
 
-        return view('home', compact('deals', 'featured', 'newArrivals', 'preorders', 'comingSoon', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns', 'chosen', 'localShops'));
+        // The blocks in the published order, or the draft for an admin previewing it (Admin → Home page)
+        $previewingDraft = request()->boolean('preview') && auth()->user()?->hasRole('admin');
+        $homeBlocks = \App\Support\HomeLayout::visible($previewingDraft ? \App\Support\HomeLayout::draft() : \App\Support\HomeLayout::published());
+        // Product rows staff added: a category, a brand or picked products, from what can be bought now
+        foreach ($homeBlocks as $i => $block) {
+            if ($block['type'] === 'product_row') {
+                $ids = array_filter(array_map('intval', explode(',', (string) ($block['products'] ?? ''))));
+                $homeBlocks[$i]['items'] = match ($block['source'] ?? '') {
+                    'category' => $cards()->where('category_id', (int) ($block['source_value'] ?? 0))->latest()->take(10)->get(),
+                    'brand' => $cards()->where('brand_id', (int) ($block['source_value'] ?? 0))->latest()->take(10)->get(),
+                    default => $ids ? $cards()->whereIn('products.id', $ids)->get()->sortBy(fn ($p) => array_search($p->id, $ids))->values() : collect(),
+                };
+            }
+        }
+
+        return view('home', compact('deals', 'featured', 'newArrivals', 'preorders', 'comingSoon', 'departments', 'shops', 'brands', 'heroCampaign', 'stripCampaigns', 'chosen', 'localShops', 'homeBlocks', 'previewingDraft'));
     }
 }

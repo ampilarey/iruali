@@ -64,6 +64,12 @@ class Setting extends Model
         // Ordering rules (App\Support\OrderRules): minimum order and small-order fee in MVR (0: off);
         // pausing ordering: off, all, delivery or cod, an optional window (Maldives time) and message
         'abandoned_cart_sms_enabled' => 0,
+        // Admin → Social posts: draft a post when a product is approved; the Telegram channel (@name or id)
+        'social_auto_drafts' => 0,
+        // Admin → Home page: the blocks as JSON (empty: the built-in order)
+        'home_layout_published' => '',
+        'home_layout_draft' => '',
+        'telegram_channel_id' => '',
         'min_order_amount' => 0,
         'small_order_fee' => 0,
         'small_order_threshold' => 0,

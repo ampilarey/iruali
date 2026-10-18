@@ -154,4 +154,13 @@ return [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
     ],
 
+    // Social posting (Admin → Social posts): the iruali Facebook page and its linked Instagram
+    // business account, with a long-lived page access token from Meta's Graph API
+    'facebook' => [
+        'page_id' => env('FACEBOOK_PAGE_ID'),
+        'page_token' => env('FACEBOOK_PAGE_TOKEN'),
+        'instagram_account_id' => env('INSTAGRAM_ACCOUNT_ID'),
+        'graph_version' => env('FACEBOOK_GRAPH_VERSION', 'v21.0'),
+    ],
+
 ];

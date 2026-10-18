@@ -89,10 +89,10 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 26. ✅ **Promotion rules** (done: Admin → Vouchers → "Apply automatically" and "Free delivery"; Printed discount cards with print and CSV): automatic offers without a code (spend MVR X get Y off, free delivery over
     X for a campaign); batches of printed discount cards. B&G: `backend/app/Domains/Promotions`,
     `admin/discount-cards/*`.
-27. **Social posting**: post new products, deals and campaigns to the iruali Facebook page,
+27. ✅ **Social posting** (done: Admin → Social posts with approval, `social:publish`, share tracking on product pages; set FACEBOOK_* and INSTAGRAM_ACCOUNT_ID in .env): post new products, deals and campaigns to the iruali Facebook page,
     Instagram and a Telegram/Viber channel, with an approval step; track which products customers
     share. B&G: `routes/domains/social.php`, `*AutoPoster.php`, `share-events`.
-28. **Home page builder**: arrange home page blocks (hero, campaign, category row, brand row,
+28. ✅ **Home page builder** (done: Admin → Home page, draft / preview / publish): arrange home page blocks (hero, campaign, category row, brand row,
     product row) with draft, preview and publish. B&G: `admin/page-blocks*`, Content Studio.
 
 ## Phase 5: admin, finance and running the site

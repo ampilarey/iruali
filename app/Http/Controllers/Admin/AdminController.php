@@ -168,6 +168,10 @@ class AdminController extends Controller
         }
         $product->update(['is_active' => true, 'approved_at' => $product->approved_at ?? now()]);
         \App\Support\Audit::record('product.approved', $product, ['name' => $product->name]);
+        // A social post draft for the new product, waiting for approval (Admin → Social posts)
+        if (filter_var(\App\Models\Setting::get('social_auto_drafts', 0), FILTER_VALIDATE_BOOL) && \App\Services\SocialPublisher::configuredChannels() !== []) {
+            \App\Models\SocialPost::draftForProduct($product);
+        }
 
         return redirect()->back()->with('success', 'Product approved successfully.');
     }

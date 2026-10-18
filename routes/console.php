@@ -107,3 +107,6 @@ Schedule::command('insights:compute-pairs')->dailyAt('03:45')->timezone('Indian/
 
 // SMS campaigns whose time has come (Admin → SMS campaigns)
 Schedule::command('sms:send-campaigns')->everyMinute()->withoutOverlapping()->name('sms-send-campaigns');
+
+// Approved social posts go out (Admin → Social posts)
+Schedule::command('social:publish')->everyFiveMinutes()->withoutOverlapping()->name('social-publish');

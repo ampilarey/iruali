@@ -52,10 +52,10 @@ class ShoppingFeaturesTest extends TestCase
         $user = User::factory()->create(['password' => bcrypt('secret-pass-123')]);
 
         $this->post(route('cart.add'), ['product_id' => $product->id, 'quantity' => 2])->assertRedirect(route('cart'));
-        $this->get(route('cart'))->assertOk()->assertSee('Woven mat')->assertSee('Sign in to check out');
+        $this->get(route('cart'))->assertOk()->assertSee('Woven mat')->assertSee('Proceed to checkout');
 
         // Checkout needs an account; the guest cart is merged on sign-in.
-        $this->get(route('checkout'))->assertRedirect(route('login'));
+        $this->get(route('checkout'))->assertOk()->assertSee('data-checkout-sign-in', false); // sign in right there
         $this->post('/login', ['email' => $user->email, 'password' => 'secret-pass-123']);
         $this->assertAuthenticatedAs($user);
 

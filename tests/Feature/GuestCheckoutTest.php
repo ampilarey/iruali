@@ -93,8 +93,8 @@ class GuestCheckoutTest extends TestCase
         $product = Product::factory()->create(['price' => 200, 'stock_quantity' => 5]);
         $session = $this->guestCartWith($product);
 
-        $this->withSession($session)->get('/cart')->assertOk()->assertSee('Sign in to check out')->assertDontSee('/checkout/guest');
-        $this->withSession($session)->get('/checkout')->assertRedirect(route('login'));
+        $this->withSession($session)->get('/cart')->assertOk()->assertSee('Proceed to checkout')->assertDontSee('/checkout/guest');
+        $this->withSession($session)->get('/checkout')->assertOk()->assertSee('data-checkout-sign-in', false)->assertDontSee('id="checkout-form"', false);
         $this->assertNotSame(200, $this->withSession($session)->get('/checkout/guest')->status());
         $this->assertNotSame(302, $this->withSession($session)->post('/checkout/guest', $this->guestOrderFields())->status());
         $this->assertSame(0, Order::count());

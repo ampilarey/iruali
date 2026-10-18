@@ -2998,5 +2998,14 @@
     "We could not send a code. Please try again.": "ކޯޑު ފޮނުވޭކަށް ނެތް. އަލުން މަސައްކަތް ކުރައްވާ.",
     "Codes by text message are not available right now. Please ask for a code by email.": "މިވަގުތު އެސްއެމްއެސް އިން ކޯޑު ފޮނުވޭކަށް ނެތް. އީމެއިލް އިން ކޯޑެއް ހޯއްދަވާ.",
     "Codes by text message are not available right now. Please try again later.": "މިވަގުތު އެސްއެމްއެސް އިން ކޯޑު ފޮނުވޭކަށް ނެތް. ފަހުން މަސައްކަތް ކުރައްވާ.",
-    "We have emailed a 6-digit code to :to.": ":to އަށް 6 ދިޖިޓްގެ ކޯޑެއް އީމެއިލް ކޮށްފީމު."
+    "We have emailed a 6-digit code to :to.": ":to އަށް 6 ދިޖިޓްގެ ކޯޑެއް އީމެއިލް ކޮށްފީމު.",
+    "Text me a code instead": "ބަދަލުގައި ކޯޑެއް ޓެކްސްޓް ކުރޭ",
+    "Sign in with your mobile number or email to place your order. Your cart comes with you.": "އޯޑަރ ކުރުމަށް މޯބައިލް ނަންބަރު ނުވަތަ އީމެއިލް މެދުވެރިކޮށް ސައިން އިން ކުރައްވާ. ކާޓް ވެސް އަންނާނެ.",
+    "1. Sign in": "1. ސައިން އިން",
+    "New to iruali? Type your mobile number: we text you a code and your account is ready.": "iruali އަށް އާ ނަމަ؟ މޯބައިލް ނަންބަރު ޖައްސަވާ: ކޯޑެއް ފޮނުވާނަން، އަދި އެކައުންޓް ތައްޔާރުވާނެ.",
+    "Your order": "ތިޔަ އޯޑަރ",
+    "Delivery and payment come next, once you are signed in.": "ސައިން އިން ކުރެއްވުމަށްފަހު ޑެލިވަރީއާއި ފައިސާ ދެއްކުން.",
+    "Edit cart": "ކާޓް ބަދަލުކުރައްވާ",
+    "For the shop and the delivery. You can set a password next time you sign in.": "ފިހާރައަށާއި ޑެލިވަރީއަށް. ޕާސްވޯޑު ދެން ސައިން އިން ކުރައްވާއިރު ހެދޭނެ.",
+    "You sign in at checkout with your mobile number or email. Your cart comes with you.": "ޗެކްއައުޓްގައި މޯބައިލް ނަންބަރު ނުވަތަ އީމެއިލް މެދުވެރިކޮށް ސައިން އިން ކުރައްވާނީ. ކާޓް ވެސް އަންނާނެ."
 }

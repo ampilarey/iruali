@@ -56,6 +56,9 @@ class OrderController extends Controller
         // $this->authorize('create', Order::class); // Removed as StoreOrderRequest handles authorization
 
         $user = Auth::user();
+        if (trim((string) $user->name) === '' && $request->filled('customer_name')) {
+            $user->forceFill(['name' => trim((string) $request->input('customer_name'))])->save(); // the shop needs a name on the order
+        }
         $buyer = app(\App\Services\GstService::class)->buyerFromRequest($request); // "Buying for a business?" details, checked before the order exists
 
         $shippingData = [

@@ -21,9 +21,12 @@ class CheckoutController extends Controller
         $this->discountService = $discountService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        if (! $user) {
+            return $this->signIn($request);
+        }
         $cart = $this->cartService->getOrCreateCart();
         // A bulk quote that expired or was closed comes out of the cart; the cart page says why
         if (app(\App\Services\QuoteService::class)->pruneCart($cart)) {
@@ -59,6 +62,30 @@ class CheckoutController extends Controller
         $islandsByAtoll = app(DeliveryService::class)->islandsByAtoll();
 
         return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll'));
+    }
+
+    /**
+     * Not signed in: the sign-in steps inside checkout (as on Bake & Grill), beside the order. After
+     * signing in the customer is back here with their cart, and setting a password can wait.
+     */
+    protected function signIn(Request $request)
+    {
+        if ($request->boolean('change')) {
+            $request->session()->forget(PhoneLoginController::SESSION);
+        }
+        $cart = $this->cartService->currentCart();
+        if (! $cart || $this->cartService->isCartEmpty($cart)) {
+            return redirect()->route('cart')->with('error', __('Your cart is empty.'));
+        }
+        $cart->load(['items.product']);
+        $request->session()->put('url.intended', route('checkout'));
+
+        return view('checkout.sign-in', [
+            'cart' => $cart,
+            'goodsTotal' => (float) $this->discountService->calculateTotalDiscount($cart)['final_total'],
+            'pending' => $request->session()->get(PhoneLoginController::SESSION),
+            'smsAvailable' => app(\App\Services\Sms\SmsManager::class)->isLive() && \App\Services\Sms\SmsManager::enabled(),
+        ]);
     }
 
     public function redeemPoints(Request $request)

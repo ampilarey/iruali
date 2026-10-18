@@ -70,6 +70,8 @@ class Setting extends Model
         'home_layout_published' => '',
         // Admin → Finance: the BML card fee (%) for the estimate, and the codes Xero imports use
         'card_fee_percent' => 0,
+        // Day of the month the GST filing reminder goes out (gst:filing-reminder)
+        'gst_reminder_day' => 21,
         'xero_sales_account' => '200',
         'xero_expense_account' => '400',
         'xero_tax_sales' => 'GST on Income',

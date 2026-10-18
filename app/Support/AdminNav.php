@@ -38,6 +38,7 @@ class AdminNav
                 ['admin.payout-batches.index', 'Payout batches', 'bank'],
                 ['admin.tax', 'Tax (GST)', 'badge'],
                 ['admin.finance', 'Finance', 'columns'],
+                ['admin.settlements', 'Settlements', 'bank'],
                 ['admin.exports', 'Exports', 'list'],
                 ['admin.gift-cards', 'Gift cards', 'gift'],
             ],

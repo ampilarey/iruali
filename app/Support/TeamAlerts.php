@@ -21,6 +21,7 @@ class TeamAlerts
     public const EVENTS = [
         'new_order' => ['New order', 'Any order is placed (card orders before payment, too).'],
         'bank_slip' => ['Bank slip to check', 'A customer uploads a bank-transfer slip.'],
+        'gst_due' => ['GST return due', 'Last month\'s GST return is not marked filed yet (on the reminder day).'],
         'late_order' => ['Late orders', 'Paid orders a shop has not started in time, or sent but past their delivery date (hourly check).'],
         'refund_due' => ['Refund due', 'A refund needs to be sent (cancelled paid order, approved return).'],
         'complaint' => ['Complaint or low rating', 'Someone sends the complaint form, or rates an order 1 or 2 out of 5.'],

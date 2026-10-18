@@ -18,8 +18,35 @@
                 </div>
                 <button class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Show') }}</button>
             </form>
-            <a href="{{ route('admin.tax.report', ['month' => $report['month'], 'export' => 'csv']) }}" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Download CSV') }}</a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('admin.tax.report', ['month' => $report['month'], 'export' => 'ledger']) }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Ledger (every line)') }}</a>
+                <a href="{{ route('admin.tax.report', ['month' => $report['month'], 'export' => 'csv']) }}" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Download CSV') }}</a>
+            </div>
         </div>
+
+        @if(session('success'))<div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>@endif
+        @if($period)
+            <div class="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 space-y-1" data-gst-locked>
+                <p class="font-semibold">Locked on {{ $period->locked_at->format('j M Y') }}@if($period->filing_reference) · return {{ $period->filing_reference }}@endif. The figures below are today's; the filed ones are kept.</p>
+                @php $changes = collect($currentTotals)->map(fn ($v, $k) => round($v - (float) ($period->totals[$k] ?? 0), 2))->filter(fn ($d) => abs($d) >= 0.01); @endphp
+                @if($changes->isNotEmpty())
+                    <p>Changed since filing (carry into the next return): @foreach($changes as $key => $diff){{ str_replace('_', ' ', $key) }} {{ $diff > 0 ? '+' : '' }}{{ number_format($diff, 2) }}@if(! $loop->last), @endif @endforeach</p>
+                @else
+                    <p>No changes since filing.</p>
+                @endif
+                @if(auth()->user()->hasRole('admin'))
+                    <form method="POST" action="{{ route('admin.tax.unlock', $period->month) }}" onsubmit="return confirm('Unlock {{ $period->month }}?')">@csrf @method('DELETE')<button class="text-xs underline">Unlock</button></form>
+                @endif
+            </div>
+        @else
+            <form method="POST" action="{{ route('admin.tax.lock') }}" class="flex flex-wrap items-end gap-2 rounded-lg bg-white p-4 text-sm shadow" data-gst-lock>
+                @csrf
+                <input type="hidden" name="month" value="{{ $report['month'] }}">
+                <label class="block text-xs font-medium text-gray-700">Filed the return? Reference (optional)<input name="filing_reference" maxlength="60" class="mt-1 rounded-lg border border-gray-300 px-3 py-2"></label>
+                <button class="rounded-lg border border-gray-300 px-4 py-2 font-semibold hover:bg-gray-50">Lock {{ $report['month'] }}</button>
+                <span class="text-xs text-gray-500">Keeps this month's figures as filed; later refunds show as differences.</span>
+            </form>
+        @endif
 
         <p class="text-sm text-gray-600">{{ __(':from to :to. Paid orders only: a sale counts in the month it was paid, a refund in the month a return or dispute was approved or the paid order was cancelled. GST comes from what was recorded on each order when it was placed. Gift-card orders are left out.', ['from' => $report['from']->format('j M Y'), 'to' => $report['to']->format('j M Y')]) }}</p>
 

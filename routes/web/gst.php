@@ -36,6 +36,8 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::get('/tax', [TaxController::class, 'edit'])->name('tax');
     Route::put('/tax', [TaxController::class, 'update'])->name('tax.update');
     Route::get('/tax/report', [TaxController::class, 'report'])->name('tax.report');
+    Route::post('/tax/periods', [TaxController::class, 'lock'])->name('tax.lock');
+    Route::delete('/tax/periods/{month}', [TaxController::class, 'unlock'])->name('tax.unlock')->where('month', '\d{4}-\d{2}');
     Route::get('/orders/{order}/invoices/{part}', [TaxInvoiceController::class, 'admin'])->name('orders.invoice')->whereNumber('part');
     Route::get('/payouts/{payout}/invoice', [TaxInvoiceController::class, 'adminCommission'])->name('payouts.invoice');
 });

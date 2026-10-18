@@ -113,3 +113,6 @@ Schedule::command('social:publish')->everyFiveMinutes()->withoutOverlapping()->n
 
 // Monthly expenses copied into the new month (Admin → Finance)
 Schedule::command('finance:recurring-expenses')->monthlyOn(1, '00:30')->timezone('Indian/Maldives');
+
+// GST return reminder (Settings: gst_reminder_day) until last month is locked as filed
+Schedule::command('gst:filing-reminder')->dailyAt('09:20')->timezone('Indian/Maldives');

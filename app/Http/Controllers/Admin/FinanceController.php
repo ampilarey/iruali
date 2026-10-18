@@ -111,11 +111,11 @@ class FinanceController extends Controller
             foreach ($payouts as $payout) {
                 $invoice = $gst->commissionInvoice($payout);
                 $date = $payout->invoiced_at?->format('d/m/Y');
-                fputcsv($out, [
+                fputcsv($out, \App\Support\Csv::row([
                     $payout->invoice_details['name'] ?? $payout->seller?->shopName() ?? 'Shop', $payout->seller?->email, $payout->invoice_number, $date, $date,
                     'iruali commission, '.$invoice['lines']->count().' order part(s)', 1, number_format($invoice['commission'], 2, '.', ''),
                     Setting::get('xero_sales_account', '200'), $invoice['gst'] > 0 ? Setting::get('xero_tax_sales', 'GST on Income') : 'No GST', 'MVR',
-                ]);
+                ]));
             }
         });
     }
@@ -132,11 +132,11 @@ class FinanceController extends Controller
             fputcsv($out, ['*ContactName', '*InvoiceNumber', '*InvoiceDate', '*DueDate', '*Description', '*Quantity', '*UnitAmount', '*AccountCode', '*TaxType', 'Currency']);
             foreach ($expenses as $expense) {
                 $date = $expense->spent_on->format('d/m/Y');
-                fputcsv($out, [
+                fputcsv($out, \App\Support\Csv::row([
                     $expense->supplier ?: $expense->categoryLabel(), 'EXP-'.$expense->id, $date, $date, $expense->description, 1,
                     number_format((float) $expense->amount, 2, '.', ''), Setting::get('xero_expense_account', '400'),
                     (float) $expense->gst_amount > 0 ? Setting::get('xero_tax_purchases', 'GST on Expenses') : 'No GST', 'MVR',
-                ]);
+                ]));
             }
         });
     }

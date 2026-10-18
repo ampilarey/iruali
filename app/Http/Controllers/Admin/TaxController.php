@@ -77,8 +77,90 @@ class TaxController extends Controller
         if ($request->query('export') === 'csv') {
             return $this->csv($reports, $report);
         }
+        if ($request->query('export') === 'ledger') {
+            return $this->ledger($report);
+        }
 
-        return view('admin.tax.report', ['report' => $report, 'registeredNow' => app(GstService::class)->platformRegistered()]);
+        return view('admin.tax.report', [
+            'report' => $report, 'registeredNow' => app(GstService::class)->platformRegistered(),
+            'period' => \App\Models\GstPeriod::where('month', $report['month'])->first(),
+            'currentTotals' => self::totals($report),
+        ]);
+    }
+
+    /**
+     * The figures a filed return is compared on.
+     *
+     * @param  array<string, mixed>  $report
+     * @return array<string, float>
+     */
+    public static function totals(array $report): array
+    {
+        return [
+            'shop_sales' => (float) ($report['shop_totals']['net_sales'] ?? 0),
+            'shop_gst' => (float) ($report['shop_totals']['net_gst'] ?? 0),
+            'iruali_income' => (float) ($report['iruali_totals']['net'] ?? 0),
+            'iruali_gst' => (float) ($report['iruali_totals']['net_gst'] ?? 0),
+        ];
+    }
+
+    /**
+     * Lock a month once its GST return is filed: its figures are kept as they were.
+     */
+    public function lock(Request $request, GstReportService $reports)
+    {
+        $data = $request->validate(['month' => ['required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/'], 'filing_reference' => 'nullable|string|max:60']);
+        abort_if(\App\Models\GstPeriod::where('month', $data['month'])->exists(), 422, 'This month is already locked.');
+        \App\Models\GstPeriod::create([
+            'month' => $data['month'], 'totals' => self::totals($reports->build($data['month'])), 'filing_reference' => $data['filing_reference'] ?? null,
+            'locked_by' => $request->user()->id, 'locked_at' => now(),
+        ]);
+        Audit::record('tax.period_locked', null, ['month' => $data['month'], 'reference' => $data['filing_reference'] ?? null]);
+
+        return back()->with('success', 'Locked: the figures for '.$data['month'].' are kept as filed.');
+    }
+
+    public function unlock(Request $request, string $month)
+    {
+        abort_unless($request->user()->hasRole('admin'), 403);
+        \App\Models\GstPeriod::where('month', $month)->delete();
+        Audit::record('tax.period_unlocked', null, ['month' => $month]);
+
+        return back()->with('success', 'Unlocked '.$month.'.');
+    }
+
+    /**
+     * Every taxable line of the month: each shop invoice, iruali's commission and delivery on it,
+     * and each refund, with the GST recorded on the order.
+     *
+     * @param  array<string, mixed>  $report
+     */
+    protected function ledger(array $report): StreamedResponse
+    {
+        $parts = \App\Models\SellerOrder::query()->join('orders', 'orders.id', '=', 'seller_orders.order_id')
+            ->leftJoin('users', 'users.id', '=', 'seller_orders.seller_id')
+            ->where('orders.payment_status', 'paid')->whereBetween('orders.paid_at', [$report['from'], $report['to']])
+            ->orderBy('orders.paid_at')->toBase()
+            ->get(['orders.order_number', 'orders.paid_at', 'orders.delivery_gst', 'seller_orders.invoice_number', 'seller_orders.gst_tin', 'seller_orders.gst_registered',
+                'seller_orders.gst_taxable', 'seller_orders.subtotal', 'seller_orders.gst_amount', 'seller_orders.commission_amount', 'seller_orders.commission_gst', 'users.business_name', 'users.name']);
+
+        return response()->streamDownload(function () use ($parts, $report) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['date', 'kind', 'order', 'invoice', 'shop', 'tin', 'amount_incl_gst', 'gst']);
+            foreach ($parts as $part) {
+                $date = \Illuminate\Support\Carbon::parse($part->paid_at)->toDateString();
+                $shop = $part->business_name ?: $part->name;
+                fputcsv($out, \App\Support\Csv::row([$date, 'shop sale', $part->order_number, $part->invoice_number, $shop, $part->gst_registered ? $part->gst_tin : '', number_format((float) ($part->gst_taxable ?? $part->subtotal), 2, '.', ''), number_format((float) $part->gst_amount, 2, '.', '')]));
+                fputcsv($out, \App\Support\Csv::row([$date, 'iruali commission', $part->order_number, '', $shop, '', number_format((float) $part->commission_amount, 2, '.', ''), number_format((float) $part->commission_gst, 2, '.', '')]));
+            }
+            foreach ($report['refunds'] as $refund) {
+                fputcsv($out, \App\Support\Csv::row([
+                    optional($refund['date'] ?? null)?->toDateString(), 'refund ('.($refund['kind'] ?? '').')', $refund['part']->order?->order_number, $refund['part']->invoice_number, '', '',
+                    number_format(-(float) (($refund['goods'] ?? 0) + ($refund['delivery'] ?? 0)), 2, '.', ''), number_format(-(float) (($refund['goods_gst'] ?? 0) + ($refund['delivery_gst'] ?? 0)), 2, '.', ''),
+                ]));
+            }
+            fclose($out);
+        }, 'gst-ledger-'.$report['month'].'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     /**

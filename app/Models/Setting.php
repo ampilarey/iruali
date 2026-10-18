@@ -63,6 +63,7 @@ class Setting extends Model
         'free_delivery_over' => 1000,
         // Ordering rules (App\Support\OrderRules): minimum order and small-order fee in MVR (0: off);
         // pausing ordering: off, all, delivery or cod, an optional window (Maldives time) and message
+        'abandoned_cart_sms_enabled' => 0,
         'min_order_amount' => 0,
         'small_order_fee' => 0,
         'small_order_threshold' => 0,

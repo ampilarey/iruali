@@ -22,7 +22,17 @@ class CartReminder extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        // By SMS too (or instead) when it is switched on and the customer chose SMS for offers
+        $sms = filter_var(\App\Models\Setting::get('abandoned_cart_sms_enabled', 0), FILTER_VALIDATE_BOOL);
+
+        return $sms && method_exists($notifiable, 'notificationChannels') ? $notifiable->notificationChannels('marketing') : ['mail'];
+    }
+
+    public function toSms(object $notifiable): \App\Services\Sms\SmsText
+    {
+        return $this->voucher
+            ? \App\Support\SmsTypes::render('cart_reminder_offer', ['percent' => self::percent($this->voucher), 'code' => $this->voucher->code, 'date' => $this->voucher->valid_until?->translatedFormat('j M'), 'url' => route('cart')])
+            : \App\Support\SmsTypes::render('cart_reminder', ['url' => route('cart')]);
     }
 
     public function toMail(object $notifiable): MailMessage

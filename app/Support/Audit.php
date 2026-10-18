@@ -25,6 +25,7 @@ class Audit
         'order.cancelled' => 'Order cancelled',
         'refund.flagged' => 'Refund flagged',
         'refund.recorded' => 'Refund recorded',
+        'sms.campaign_sent' => 'SMS campaign sent',
         'refund.approved' => 'Refund approved (second person)',
         'payout.created' => 'Payout created / paid',
         'seller.approved' => 'Seller approved',

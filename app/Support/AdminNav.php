@@ -55,6 +55,7 @@ class AdminNav
                 ['admin.campaigns.index', 'Campaigns', 'squares'],
                 ['admin.vouchers.index', 'Vouchers', 'tag'],
                 ['admin.newsletter', 'Newsletter', 'mail', ['admin.newsletter-issues.*']],
+                ['admin.sms.campaigns', 'SMS campaigns', 'phone'],
                 ['admin.rewards', 'Rewards', 'heart'],
             ],
             'Settings' => [

@@ -5,7 +5,6 @@
 @php
     $field = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500';
     $user = auth()->user();
-    $isGuest = $isGuest ?? ! auth()->check();
     $addresses = $addresses ?? collect();
     $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
     $selectedZone = old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
@@ -45,33 +44,10 @@
     <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>
     <form id="remove-points-form" action="{{ route('checkout.removePoints') }}" method="POST">@csrf</form>
 
-    <form id="checkout-form" action="{{ $isGuest ? route('checkout.guest.store') : route('orders.store') }}" method="POST">
+    <form id="checkout-form" action="{{ route('orders.store') }}" method="POST">
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div class="lg:col-span-3 space-y-6">
-                @if($isGuest)
-                    <section class="bg-white rounded-2xl border border-gray-200 p-6">
-                        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-900">{{ __('Your details') }}</h2>
-                                <p class="text-sm text-gray-600">{{ __('Checking out as a guest. We email your order confirmation and tracking link to this address.') }}</p>
-                            </div>
-                            <a href="{{ route('login') }}" class="text-sm font-medium text-primary hover:underline">{{ __('Have an account? Sign in') }}</a>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="guest_email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email address') }}</label>
-                                <input type="email" id="guest_email" name="guest_email" required autocomplete="email" dir="ltr" class="{{ $field }}" value="{{ old('guest_email') }}" @error('guest_email') aria-invalid="true" @enderror>
-                                @error('guest_email')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
-                            </div>
-                            <div>
-                                <label for="guest_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Full name') }}</label>
-                                <input type="text" id="guest_name" name="guest_name" required autocomplete="name" maxlength="120" class="{{ $field }}" value="{{ old('guest_name') }}" @error('guest_name') aria-invalid="true" @enderror>
-                                @error('guest_name')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
-                            </div>
-                        </div>
-                    </section>
-                @endif
                 @include('checkout._fulfilment')
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>

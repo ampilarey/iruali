@@ -1,5 +1,5 @@
 {{-- Cart and checkout: lines from a shop on holiday stay in the cart, but can't be ordered until the shop is back
-     (placing the order refuses them: StoreOrderRequest, StoreGuestOrderRequest, OrderService). --}}
+     (placing the order refuses them: StoreOrderRequest, OrderService). --}}
 @php
     $cart->loadMissing('items.product.seller');
     $holidayLines = $cart->items->filter(fn ($line) => $line->product?->seller?->isOnHoliday());

@@ -11,7 +11,7 @@ throughout. Runs on cPanel shared hosting; `test.iruali.mv` deploys itself from 
 - **Customers:** catalogue with departments, brands, shops, deals, search with suggestions,
   product variants, reviews with photos, Q&A, stock alerts, wishlist, compare, saved items;
   cart with vouchers and loyalty points; checkout with an address book and island picker,
-  guest checkout, card payment through BML Connect; order tracking with a progress bar per
+  sign-in by mobile number or email before checkout, card payment through BML Connect; order tracking with a progress bar per
   shop, messages to the shop, returns, disputes, cancel, buy again, receipts; email and SMS
   notifications; accounts with OTP verification and two-step sign-in; referral rewards.
 - **Sellers:** application and approval, shop profile, products with photos (WebP variants),

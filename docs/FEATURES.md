@@ -145,8 +145,9 @@ shopper presses it, and the Content-Security-Policy allows frames from those fou
 
 **Checkout and payment.** `/checkout` collects the delivery address (saved address or island
 picker, which sets the delivery zone and fee), lets points be redeemed (`checkout.redeemPoints`),
-and places the order at `POST /orders` (`orders.store`). Guests check out at `/checkout/guest` and
-get a signed order link (`/orders/guest/{order}/{token}`). The only payment method is a card
+and places the order at `POST /orders` (`orders.store`). Only signed-in customers check out (a
+password, or a code by SMS or email); guest checkout was removed, and orders placed as a guest
+before keep their signed links (`/orders/guest/{order}/{token}`). The only payment method is a card
 through BML Connect: the customer is sent to BML's page and comes back to
 `/payments/bml/return/{order}/{token?}` (the token is the guest order's code; signed-in customers have none); BML's webhook (`POST /api/payments/bml/webhook`) and a
 re-fetch of the transaction confirm the payment, "Pay now" (`payments.bml.pay`) retries an unpaid

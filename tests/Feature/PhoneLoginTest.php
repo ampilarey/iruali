@@ -68,7 +68,7 @@ class PhoneLoginTest extends TestCase
 
     public function test_checkout_can_wait_for_the_password_and_it_is_asked_again(): void
     {
-        $this->get(route('checkout'))->assertRedirect(route('login')); // remembers where to go back
+        $this->withSession(['url.intended' => route('checkout')]); // came from a page that needs an account
         $this->post(route('login.phone.start'), ['phone' => '7771234']);
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()])->assertRedirect(route('account.setup'));
         $this->post(route('account.setup.store'), ['name' => 'Ali', 'action' => 'later'])->assertRedirect(route('checkout'));

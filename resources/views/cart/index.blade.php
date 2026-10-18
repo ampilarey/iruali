@@ -154,8 +154,8 @@
                     @auth
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
                     @else
-                        <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Sign in to check out') }}</a>
-                        <p class="text-xs text-gray-500 text-center">{{ __('Your cart stays with you when you sign in.') }}</p>
+                        <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
+                        <p class="text-xs text-gray-500 text-center">{{ __('You sign in at checkout with your mobile number or email. Your cart comes with you.') }}</p>
                     @endauth
                     <ul class="text-xs text-gray-600 space-y-1.5">
                         <li class="flex items-center gap-2"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('Reviewed local sellers') }}</li>

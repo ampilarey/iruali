@@ -48,6 +48,14 @@
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div class="lg:col-span-3 space-y-6">
+                @if($user && trim((string) $user->name) === '')
+                    {{-- Signed up with just a mobile number at checkout: the shop needs a name on the order --}}
+                    <section class="bg-white rounded-2xl border border-gray-200 p-6" data-checkout-name>
+                        <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Your name') }}</label>
+                        <input type="text" id="customer_name" name="customer_name" required autocomplete="name" maxlength="120" class="{{ $field }}" value="{{ old('customer_name') }}">
+                        <p class="mt-1 text-xs text-gray-500">{{ __('For the shop and the delivery. You can set a password next time you sign in.') }}</p>
+                    </section>
+                @endif
                 @include('checkout._fulfilment')
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>

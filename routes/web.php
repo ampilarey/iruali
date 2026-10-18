@@ -91,6 +91,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         });
     }); // end of the localized storefront group
 
+    // Checkout: open to everyone (not under /dv); someone not signed in signs in right there (CheckoutController::signIn)
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+
     // Authentication routes
     Route::middleware('guest')->group(function () {
         // The mobile number is the customer's sign-in (as on Bake & Grill); email + password is for staff and older accounts
@@ -106,6 +109,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'start'])->name('login.phone.start')->middleware('throttle:10,1,login.phone.start');
         Route::post('/login/phone/password', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'password'])->name('login.phone.password')->middleware('throttle:10,1,login.phone.password');
         Route::post('/login/phone/code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'resend'])->name('login.phone.resend')->middleware('throttle:5,1,login.phone.resend');
+        Route::post('/login/phone/sms-code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'smsCode'])->name('login.phone.sms-code')->middleware('throttle:5,1,login.phone.sms-code');
         Route::post('/login/phone/email-code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'emailCode'])->name('login.phone.email-code')->middleware('throttle:5,1,login.phone.email-code');
         Route::post('/login/phone/verify', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'verify'])->name('login.phone.verify')->middleware('throttle:10,1,login.phone.verify');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -150,7 +154,6 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
         Route::delete('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
         // Checkout routes
-        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('checkout/redeem-points', [CheckoutController::class, 'redeemPoints'])->name('checkout.redeemPoints');
         Route::post('checkout/remove-points', [CheckoutController::class, 'removePoints'])->name('checkout.removePoints');
         // Order routes

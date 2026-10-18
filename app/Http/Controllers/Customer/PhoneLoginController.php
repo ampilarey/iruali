@@ -23,6 +23,10 @@ use Throwable;
  * and password", which can wait during checkout), "forgot password", and an account without a
  * password or an email. A number already on an account can only be used with its code or
  * password. Staff use email and password (/login/email).
+ *
+ * The same steps run inside checkout (CheckoutController::signIn, as on Bake & Grill): they come
+ * back to checkout, a registered customer may also ask for a code by SMS there, and setting a
+ * name and password waits until the next sign-in (checkout asks for the name if it is missing).
  */
 class PhoneLoginController extends AuthController
 {
@@ -63,7 +67,7 @@ class PhoneLoginController extends AuthController
             if ($user->isStaff()) {
                 return redirect()->route('login.email')->withInput(['email' => $email]);
             }
-            $pending = ['user_id' => $user->id, 'key' => $email, 'shown' => $this->maskEmail($email), 'remember' => $remember];
+            $pending = ['user_id' => $user->id, 'key' => $email, 'shown' => $this->maskEmail($email), 'remember' => $remember, 'checkout' => $request->boolean('checkout')];
         } else {
             $phone = PhoneNumber::normalize($raw);
             if (! $phone) {
@@ -73,13 +77,13 @@ class PhoneLoginController extends AuthController
             if ($user?->isStaff()) {
                 return back()->withInput()->withErrors(['login' => __('Staff sign in with their email and password.')]);
             }
-            $pending = ['user_id' => $user?->id, 'phone' => $phone, 'key' => $phone, 'shown' => '•••'.substr($phone, -4), 'remember' => $remember];
+            $pending = ['user_id' => $user?->id, 'phone' => $phone, 'key' => $phone, 'shown' => '•••'.substr($phone, -4), 'remember' => $remember, 'checkout' => $request->boolean('checkout')];
         }
 
         if ($user && $user->hasPassword()) {
             $request->session()->put(self::SESSION, $pending + ['step' => 'password', 'email_code' => filled($user->email)]);
 
-            return redirect()->route('login');
+            return $this->home($pending);
         }
 
         // No password: a code by email when the account has one (saves an SMS), else by SMS
@@ -93,7 +97,7 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         if (($pending['step'] ?? null) !== 'password') {
-            return redirect()->route('login');
+            return $this->home($pending);
         }
         $request->validate(['password' => 'required|string']);
 
@@ -109,7 +113,7 @@ class PhoneLoginController extends AuthController
         }
         RateLimiter::clear($tries);
 
-        return $this->signIn($request, $user, (bool) $pending['remember'], false);
+        return $this->signIn($request, $user, (bool) $pending['remember'], false, false, (bool) ($pending['checkout'] ?? false));
     }
 
     /**
@@ -120,10 +124,25 @@ class PhoneLoginController extends AuthController
         $pending = $request->session()->get(self::SESSION);
         $user = $pending ? $this->pendingUser($pending) : null;
         if (! $user || blank($user->email)) {
-            return redirect()->route('login');
+            return $this->home($pending);
         }
 
         return $this->sendCode($request, $pending, 'mail', 'login');
+    }
+
+    /**
+     * "Text me a code instead" of the password: only inside checkout, where a quick code is worth
+     * an SMS (anywhere else a registered customer uses the password or an email code).
+     */
+    public function smsCode(Request $request)
+    {
+        $pending = $request->session()->get(self::SESSION);
+        $user = $pending ? $this->pendingUser($pending) : null;
+        if (! $user || ! ($pending['checkout'] ?? false) || ! $user->isPhoneVerified() || blank($user->phone)) {
+            return $this->home($pending);
+        }
+
+        return $this->sendCode($request, $pending, 'sms', 'login');
     }
 
     /**
@@ -134,7 +153,7 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         if (! $pending) {
-            return redirect()->route('login');
+            return $this->home(null);
         }
         if (($pending['step'] ?? null) === 'password') {
             $user = $this->pendingUser($pending);
@@ -152,7 +171,7 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         if (($pending['step'] ?? null) !== 'code') {
-            return redirect()->route('login');
+            return $this->home($pending);
         }
         $request->validate(['code' => 'required|digits:6']);
 
@@ -161,7 +180,7 @@ class PhoneLoginController extends AuthController
             OTP::where($pending['channel'] === 'mail' ? 'email' : 'phone', $pending['target'])->where('purpose', 'login')->update(['is_used' => true]);
             $request->session()->forget(self::SESSION);
 
-            return redirect()->route('login')->withErrors(['login' => __('Too many wrong codes. Please ask for a new one.')]);
+            return $this->home($pending)->withErrors(['login' => __('Too many wrong codes. Please ask for a new one.')]);
         }
         if (! OTP::verify($pending['target'], (string) $request->input('code'), 'login')) {
             RateLimiter::hit($tries, 600);
@@ -178,7 +197,7 @@ class PhoneLoginController extends AuthController
         }
         if (! $user) {
             if ($pending['channel'] !== 'sms' || empty($pending['phone'])) {
-                return redirect()->route('login');
+                return $this->home($pending);
             }
             $user = $this->createAccount($pending['phone']);
         }
@@ -186,7 +205,17 @@ class PhoneLoginController extends AuthController
             $user->forceFill(['email_verified_at' => now()])->save(); // the code reached that inbox
         }
 
-        return $this->signIn($request, $user, (bool) $pending['remember'], true, ($pending['purpose'] ?? 'login') === 'reset');
+        return $this->signIn($request, $user, (bool) $pending['remember'], true, ($pending['purpose'] ?? 'login') === 'reset', (bool) ($pending['checkout'] ?? false));
+    }
+
+    /**
+     * Where the steps are shown: checkout when they started there, else the sign-in page.
+     *
+     * @param  array<string, mixed>|null  $pending
+     */
+    protected function home(?array $pending): \Illuminate\Http\RedirectResponse
+    {
+        return redirect()->route(($pending['checkout'] ?? false) ? 'checkout' : 'login');
     }
 
     /**
@@ -232,12 +261,12 @@ class PhoneLoginController extends AuthController
         return $user;
     }
 
-    protected function signIn(Request $request, User $user, bool $remember, bool $byCode, bool $resettingPassword = false)
+    protected function signIn(Request $request, User $user, bool $remember, bool $byCode, bool $resettingPassword = false, bool $atCheckout = false)
     {
         if ($user->isBanned() || ! $user->isActive()) {
             $request->session()->forget(self::SESSION);
 
-            return redirect()->route('login')->withErrors(['login' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
+            return redirect()->route($atCheckout ? 'checkout' : 'login')->withErrors(['login' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
         }
         $request->session()->forget(self::SESSION);
 
@@ -258,7 +287,11 @@ class PhoneLoginController extends AuthController
         if ($resettingPassword) {
             return redirect()->to(route('account').'#security')->with('success', __('You are signed in. Set a new password below.'));
         }
-        // No name or password yet: set them up now (it can wait during checkout)
+        // At checkout: straight back to the order. A name and password can wait (asked at the next sign-in)
+        if ($atCheckout) {
+            return redirect()->route('checkout');
+        }
+        // No name or password yet: set them up now
         if (trim((string) $user->name) === '' || ! $user->hasPassword()) {
             return redirect()->route('account.setup');
         }
@@ -281,7 +314,7 @@ class PhoneLoginController extends AuthController
             $target = $pending['phone'] ?? ($user?->isPhoneVerified() ? PhoneNumber::normalize((string) $user->phone) : null);
         }
         if (! $target) {
-            return redirect()->route('login')->withErrors(['login' => __('We could not send a code. Please try again.')]);
+            return $this->home($pending)->withErrors(['login' => __('We could not send a code. Please try again.')]);
         }
         if ($channel === 'sms' && ! $this->smsAvailable()) {
             return back()->withInput()->withErrors(['login' => $user && filled($user->email)
@@ -305,7 +338,7 @@ class PhoneLoginController extends AuthController
         $request->session()->put(self::SESSION, ['step' => 'code', 'channel' => $channel, 'target' => $target, 'purpose' => $purpose, 'shown_to' => $shown] + $pending);
         RateLimiter::clear('phone-login:'.sha1($pending['key']).':tries');
 
-        return redirect()->route('login')->with('status', $channel === 'mail'
+        return $this->home($pending)->with('status', $channel === 'mail'
             ? __('We have emailed a 6-digit code to :to.', ['to' => $shown])
             : __('We have texted a 6-digit code to :to.', ['to' => $shown]));
     }

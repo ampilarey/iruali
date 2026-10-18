@@ -49,7 +49,7 @@
             </form>
         @endif
 
-        <p class="text-center text-sm text-gray-600"><a href="{{ route('login') }}" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Sign in with your password instead') }}</a></p>
+        <p class="text-center text-sm text-gray-600"><a href="{{ route('login.email') }}" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Sign in with your password instead') }}</a></p>
     </div>
 </div>
 @endsection

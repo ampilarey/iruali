@@ -120,7 +120,7 @@ class CodeLoginController extends AuthController
         if ($user->isBanned() || ! $user->isActive()) {
             $request->session()->forget(self::SESSION);
 
-            return redirect()->route('login')->withErrors(['email' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
+            return redirect()->route('login.email')->withErrors(['email' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
         }
 
         RateLimiter::clear($tries);

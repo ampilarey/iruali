@@ -22,11 +22,11 @@ async function closeIslandQuestion(page: Page) {
 }
 
 async function signIn(page: Page) {
-    await page.goto('/login');
+    await page.goto('/login/email');
     await page.locator('#email').fill(EMAIL);
     await page.locator('#password').fill(PASSWORD);
     await page.locator('form[action$="/login"] button[type="submit"]').click();
-    await expect(page).not.toHaveURL(/\/login$/);
+    await expect(page).not.toHaveURL(/\/login(\/email)?$/);
     await closeIslandQuestion(page);
 }
 

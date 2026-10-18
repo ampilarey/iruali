@@ -1,26 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Login - iruali')
+@section('title', __('Sign in with email').' - iruali')
 
 @section('content')
 <div class="min-h-[60vh] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                {{ __('Sign in to your account') }}
+                {{ __('Sign in with email') }}
             </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                {{ __('Or') }}
-                <a href="{{ route('register') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                    {{ __('create a new account') }}
-                </a>
-            </p>
+            <p class="mt-2 text-center text-sm text-gray-600">{{ __('For staff, and customers who signed up with an email.') }}</p>
         </div>
-        {{-- Mobile number first (as on Bake & Grill): password if set, otherwise a code; new numbers sign up --}}
-        <a href="{{ route('login.phone') }}" class="mt-8 flex w-full items-center justify-center gap-2 rounded-md bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700" data-login-phone-link>
+        {{-- Customers sign in with their mobile number (as on Bake & Grill): password if set, otherwise a code --}}
+        <a href="{{ route('login') }}" class="mt-8 flex w-full items-center justify-center gap-2 rounded-md border border-primary-300 bg-white px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50" data-login-phone-link>
             <x-icon name="phone" class="h-4 w-4" />{{ __('Continue with your mobile number') }}
         </a>
-        <p class="text-center text-xs uppercase tracking-wide text-gray-400">{{ __('or with your email') }}</p>
         <form class="space-y-6" action="{{ route('login') }}" method="POST">
             @csrf
             <div class="rounded-md shadow-sm -space-y-px">

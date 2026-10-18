@@ -70,6 +70,6 @@ class PasswordResetController extends Controller
 
         NotificationService::success(__('Your password has been changed. Please sign in.'));
 
-        return redirect()->route('login');
+        return redirect()->route('login.email');
     }
 }

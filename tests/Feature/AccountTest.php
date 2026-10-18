@@ -92,7 +92,7 @@ class AccountTest extends TestCase
     public function test_password_reset_round_trip(): void
     {
         $user = User::factory()->create();
-        $this->get(route('login'))->assertSee(route('password.request'));
+        $this->get(route('login.email'))->assertSee(route('password.request'));
         $this->get(route('password.request'))->assertOk();
 
         // Unknown email: same reply, no mail, no account enumeration
@@ -109,7 +109,7 @@ class AccountTest extends TestCase
 
         $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))->assertOk();
         $this->post(route('password.update'), ['token' => $token, 'email' => $user->email, 'password' => 'N3w!Passw0rd#', 'password_confirmation' => 'N3w!Passw0rd#'])
-            ->assertRedirect(route('login'));
+            ->assertRedirect(route('login.email'));
         $this->assertTrue(Hash::check('N3w!Passw0rd#', $user->fresh()->password));
 
         // The token is single use

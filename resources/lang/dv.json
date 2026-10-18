@@ -2981,5 +2981,8 @@
     "That email is already on another account. Sign in with it, or leave this empty.": "އެ އީމެއިލް އެހެން އެކައުންޓެއްގައި ހުރި. އެއިން ސައިން އިން ވައްޓަވާ، ނުވަތަ މިތަން ހުސްކޮށް ބާއްވާ.",
     "Saved. You can set a password any time in My Account.": "ސޭވްކުރެވިއްޖެ. މައި އެކައުންޓުން ކޮންމެ ވަގުތެއްގައި ޕާސްވޯޑް ލެވޭނެ.",
     "All set. Next time, sign in with your mobile number and this password.": "ހުރިހާ ކަމެއް ތައްޔާރު. ދެން މޯބައިލް ނަންބަރާއި މި ޕާސްވޯޑުން ސައިން އިން ވައްޓަވާ.",
-    "You sign in with this mobile number. Add an email to your account first, or ask us to change the number.": "ތިބާ ސައިން އިން ވަނީ މި މޯބައިލް ނަންބަރުން. ފުރަތަމަ އީމެއިލެއް އިތުރުކުރައްވާ، ނުވަތަ ނަންބަރު ބަދަލުކުރަން އަޅުގަނޑުމެންނާ ގުޅުއްވާ."
+    "You sign in with this mobile number. Add an email to your account first, or ask us to change the number.": "ތިބާ ސައިން އިން ވަނީ މި މޯބައިލް ނަންބަރުން. ފުރަތަމަ އީމެއިލެއް އިތުރުކުރައްވާ، ނުވަތަ ނަންބަރު ބަދަލުކުރަން އަޅުގަނޑުމެންނާ ގުޅުއްވާ.",
+    "Sign in with email": "އީމެއިލް މެދުވެރިކޮށް ސައިން އިން ކުރައްވާ",
+    "For staff, and customers who signed up with an email.": "މުވައްޒަފުންނާއި، އީމެއިލް މެދުވެރިކޮށް ސައިން އަޕް ކުރެއްވި ކަސްޓަމަރުންނަށް.",
+    "Staff, or an older account with email?": "މުވައްޒަފެއް، ނުވަތަ އީމެއިލާ ގުޅޭ ކުރީގެ އެކައުންޓެއް؟"
 }

@@ -16,7 +16,7 @@
                 </a>
             </p>
         </div>
-        <a href="{{ route('login.phone') }}" class="mt-6 flex w-full items-center justify-center gap-2 rounded-md border border-primary-300 bg-white px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50" data-register-phone-link><x-icon name="phone" class="h-4 w-4" />{{ __('Sign up with just your mobile number') }}</a>
+        <a href="{{ route('login') }}" class="mt-6 flex w-full items-center justify-center gap-2 rounded-md border border-primary-300 bg-white px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50" data-register-phone-link><x-icon name="phone" class="h-4 w-4" />{{ __('Sign up with just your mobile number') }}</a>
         <form class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">
             @csrf
             <div class="rounded-md shadow-sm -space-y-px">

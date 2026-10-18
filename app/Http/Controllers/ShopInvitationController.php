@@ -42,7 +42,7 @@ class ShopInvitationController extends Controller
         if ($state['state'] === 'sign_in') {
             $request->session()->put('url.intended', $request->fullUrl());
 
-            return redirect()->route('login')->with('info', __('Sign in as :email to accept the invitation.', ['email' => $invite?->email]));
+            return redirect()->route('login.email')->with('info', __('Sign in as :email to accept the invitation.', ['email' => $invite?->email]));
         }
         if (! in_array($state['state'], ['accept', 'create_account'], true) || ! $invite) {
             return redirect($request->fullUrl());

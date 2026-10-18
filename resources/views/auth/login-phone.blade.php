@@ -17,7 +17,7 @@
         @if(($pending['step'] ?? null) === 'password')
             <form method="POST" action="{{ route('login.phone.password') }}" class="space-y-4 rounded-lg bg-white p-6 shadow-sm border border-gray-100">
                 @csrf
-                <p class="text-sm text-gray-700">{{ __('Signing in as :phone', ['phone' => $pending['shown']]) }} · <a href="{{ route('login.phone', ['change' => 1]) }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>
+                <p class="text-sm text-gray-700">{{ __('Signing in as :phone', ['phone' => $pending['shown']]) }} · <a href="{{ route('login', ['change' => 1]) }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">{{ __('Password') }}</label>
                     <input id="password" name="password" type="password" autocomplete="current-password" required autofocus class="{{ $field }} @error('password') border-red-500 @enderror">
@@ -32,7 +32,7 @@
         @elseif(($pending['step'] ?? null) === 'code')
             <form method="POST" action="{{ route('login.phone.verify') }}" class="space-y-4 rounded-lg bg-white p-6 shadow-sm border border-gray-100">
                 @csrf
-                <p class="text-sm text-gray-700">{{ __('Enter the code we texted to :to.', ['to' => $pending['shown']]) }} · <a href="{{ route('login.phone', ['change' => 1]) }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>
+                <p class="text-sm text-gray-700">{{ __('Enter the code we texted to :to.', ['to' => $pending['shown']]) }} · <a href="{{ route('login', ['change' => 1]) }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>
                 <div>
                     <label for="code" class="block text-sm font-medium text-gray-700">{{ __('Code') }}</label>
                     <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required autofocus dir="ltr"
@@ -63,7 +63,10 @@
             </form>
         @endif
 
-        <p class="text-center text-sm text-gray-600"><a href="{{ route('login') }}" class="font-medium text-primary-600 hover:text-primary-500">{{ __('Sign in with your email instead') }}</a></p>
+        @unless($pending)
+            @include('auth._social')
+        @endunless
+        <p class="text-center text-sm text-gray-600">{{ __('Staff, or an older account with email?') }} <a href="{{ route('login.email') }}" class="font-medium text-primary-600 hover:text-primary-500" data-login-email-link>{{ __('Sign in with email') }}</a></p>
     </div>
 </div>
 @endsection

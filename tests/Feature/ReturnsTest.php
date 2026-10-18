@@ -225,6 +225,24 @@ class ReturnsTest extends TestCase
         $this->assertSame('requested', $return->fresh()->status);
     }
 
+    public function test_a_return_cannot_refund_what_a_dispute_already_refunded(): void
+    {
+        $order = $this->deliveredOrder();
+        $part = $this->partA($order);
+        \App\Models\Dispute::forceCreate([
+            'order_id' => $order->id, 'seller_order_id' => $part->id, 'customer_id' => $this->customer->id, 'type' => 'not_as_described',
+            'status' => 'resolved_partial', 'amount_claimed' => 300, 'amount_resolved' => (float) $order->total_amount - 40, 'opened_at' => now(), 'resolved_at' => now(),
+        ]);
+
+        $this->requestReturn($order);
+        $return = ReturnRequest::sole();
+
+        $this->actingAs($this->admin)->post(route('admin.returns.approve', $return), ['refund_amount' => 100])->assertSessionHas('error');
+        $this->assertSame('requested', $return->fresh()->status);
+        $this->post(route('admin.returns.approve', $return), ['refund_amount' => 40]);
+        $this->assertSame('approved', $return->fresh()->status);
+    }
+
     public function test_reject_and_mark_refunded_email_the_customer(): void
     {
         $order = $this->deliveredOrder();

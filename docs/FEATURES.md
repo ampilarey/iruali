@@ -148,7 +148,7 @@ picker, which sets the delivery zone and fee), lets points be redeemed (`checkou
 and places the order at `POST /orders` (`orders.store`). Guests check out at `/checkout/guest` and
 get a signed order link (`/orders/guest/{order}/{token}`). The only payment method is a card
 through BML Connect: the customer is sent to BML's page and comes back to
-`/payments/bml/return/{order}`; BML's webhook (`POST /api/payments/bml/webhook`) and a
+`/payments/bml/return/{order}/{token?}` (the token is the guest order's code; signed-in customers have none); BML's webhook (`POST /api/payments/bml/webhook`) and a
 re-fetch of the transaction confirm the payment, "Pay now" (`payments.bml.pay`) retries an unpaid
 order, and unpaid card orders are cancelled after 24 hours with their stock released. See
 `PAYMENTS_BML.md`. `BML_FAKE=1` (never in production) walks the whole flow without BML.
@@ -493,10 +493,12 @@ one (`App\Services\QuoteService`; routes in `routes/web/quotes.php`, tables `quo
 ## Operations
 
 **Deploy and release.** `main` auto-deploys to test.iruali.mv (`TEST_AUTO_DEPLOY.md`);
-production runs tagged releases: `scripts/release.sh` → GitHub Release →
-`scripts/deploy-production.sh <tag>` on the server, `scripts/rollback-production.sh` to go back
-(`PRODUCTION_DEPLOY.md`). `/api/health` reports the running commit and tag; `/up` is Laravel's
-liveness check.
+production follows `main` for now: `bash ~/deploy-live.sh` on the server deploys the newest
+`main`, with a health check, smoke test and automatic rollback (`SERVERS.md`, `PRODUCTION_DEPLOY.md`).
+Release tags still work (`scripts/deploy-production.sh <tag>`, `scripts/rollback-production.sh`).
+`/api/health` answers `status`, `timestamp` and `version` to everyone, and adds the running commit
+and tag only with the `X-Health-Token` header (`HEALTH_DETAIL_TOKEN`); `/api/health/ready` answers 503
+when the database, cache or storage is not working; `/up` is Laravel's liveness check.
 
 **Checks.** `php artisan iruali:ready` (scheduler heartbeat, cache, sessions, queue, mail, BML,
 backups, uploads, settings) and `php artisan iruali:smoke [--place-order]` (key pages, health,

@@ -41,24 +41,26 @@ class DeliveryService
     }
 
     /**
-     * Pick the zone from what the customer chose, else guess it from the island name. Villingili
+     * Pick the zone from what the customer chose (Greater Malé only when the island typed is in
+     * Greater Malé), else guess it from the island name. Villingili
      * is the one Greater Malé name another atoll shares (Gaafu Alif): with an atoll other than
      * Kaafu it is that one. A typed atoll never changes the others (a wrong one is a typo).
      */
     public function zoneFor(?string $zone, ?string $city = null, ?string $atoll = null): string
     {
-        if ($zone && array_key_exists($zone, self::zones())) {
-            return $zone;
-        }
-
         // Accents and case ignored: "Male", "Malé" and "MALÉ" are all Malé
         $normal = \App\Support\IslandList::normalize($city);
         $atollKey = \App\Support\IslandList::normalizeAtoll($atoll);
-        if ($normal === 'villingili' && $atollKey !== '' && $atollKey !== 'kaafu') {
-            return 'islands';
+        $byAddress = ($normal === 'villingili' && $atollKey !== '' && $atollKey !== 'kaafu')
+            || ! ($normal !== '' && in_array($normal, array_map(\App\Support\IslandList::normalize(...), self::GREATER_MALE), true))
+            ? 'islands' : 'greater_male';
+
+        if ($zone && array_key_exists($zone, self::zones())) {
+            // The Greater Malé fee only for a Greater Malé address: a posted zone can't claim it for an island
+            return $zone === 'greater_male' && $normal !== '' && $byAddress !== 'greater_male' ? 'islands' : $zone;
         }
 
-        return $normal !== '' && in_array($normal, array_map(\App\Support\IslandList::normalize(...), self::GREATER_MALE), true) ? 'greater_male' : 'islands';
+        return $byAddress;
     }
 
     /**

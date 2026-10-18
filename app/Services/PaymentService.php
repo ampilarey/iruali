@@ -223,7 +223,12 @@ class PaymentService
 
     public function confirm(Order $order): void
     {
-        $order->update(['payment_status' => 'paid', 'paid_at' => now()]);
+        // Once only, even when two confirmations race: a second one changes no row and does nothing
+        $paidAt = now();
+        if (Order::whereKey($order->id)->where('payment_status', '!=', 'paid')->update(['payment_status' => 'paid', 'paid_at' => $paidAt]) === 0) {
+            return;
+        }
+        $order->forceFill(['payment_status' => 'paid', 'paid_at' => $paidAt])->syncOriginal();
         FunnelService::orderPaid($order);
         app(GstService::class)->orderPaid($order); // each shop's invoice number, once the payment is committed
 

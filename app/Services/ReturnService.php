@@ -163,12 +163,18 @@ class ReturnService
     }
 
     /**
-     * Most that can still be refunded on the order (its total minus refunds already approved).
+     * Most that can still be refunded on the order: its total minus other approved returns and
+     * dispute refunds (those go to the order's "refund due"). Nothing once the order was cancelled
+     * (its whole payment is refunded then).
      */
     public function refundableLeft(ReturnRequest $request): float
     {
+        if ($request->order->status === 'cancelled') {
+            return 0.0;
+        }
         $taken = (float) ReturnRequest::where('order_id', $request->order_id)
             ->whereIn('status', ['approved', 'refunded'])->whereKeyNot($request->id)->sum('refund_amount');
+        $taken += (float) \App\Models\Dispute::where('order_id', $request->order_id)->whereNotNull('amount_resolved')->sum('amount_resolved');
 
         return max(0, round((float) $request->order->total_amount - $taken, 2));
     }

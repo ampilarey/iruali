@@ -48,7 +48,7 @@ place one small real order to check the whole path.
 | Step | What happens |
 | --- | --- |
 | Checkout | Order is created (stock is reserved) with payment method `bml`, then the customer is sent to BML. |
-| BML page | Customer pays. BML sends them back to `/payments/bml/return/{order}`. |
+| BML page | Customer pays. BML sends them back to `/payments/bml/return/{order}/{token?}` (the token only on guest orders). |
 | Return | iruali **asks BML's API** for the transaction (`GET /v2/transactions/{id}`). Only `CONFIRMED` with a matching amount, currency and reference marks the order paid. |
 | Webhook | BML also calls `POST /api/payments/bml/webhook` (sent with each transaction). The signature (`X-Signature` = SHA-256 of nonce + timestamp + API key) is checked, then the API is asked again. |
 | Not paid | The order page shows **Pay now** to try again. Each try is a new BML transaction; `localId` is the order number in letters and digits only plus `P1`, `P2`, … (BML rejects other characters). |

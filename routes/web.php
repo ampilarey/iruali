@@ -106,6 +106,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'start'])->name('login.phone.start')->middleware('throttle:10,1,login.phone.start');
         Route::post('/login/phone/password', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'password'])->name('login.phone.password')->middleware('throttle:10,1,login.phone.password');
         Route::post('/login/phone/code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'resend'])->name('login.phone.resend')->middleware('throttle:5,1,login.phone.resend');
+        Route::post('/login/phone/email-code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'emailCode'])->name('login.phone.email-code')->middleware('throttle:5,1,login.phone.email-code');
         Route::post('/login/phone/verify', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'verify'])->name('login.phone.verify')->middleware('throttle:10,1,login.phone.verify');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1,post-register');

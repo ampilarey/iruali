@@ -34,20 +34,10 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        // Admins can view any order; everyone can view orders they placed themselves
-        if ($user->isAdmin() || $user->id === $order->user_id) {
-            return true;
-        }
-
-        // Sellers can view orders containing their products
-        if ($user->isSeller()) {
-            return $order->items()->whereHas('product', function ($query) use ($user) {
-                $query->where('seller_id', $user->id);
-            })->exists();
-        }
-
-        // Customers can only view their own orders
-        return $user->id === $order->user_id;
+        // Admins can view any order; everyone can view orders they placed themselves. A shop sees
+        // only its own part, in the Seller Centre (seller.orders.show): the customer page shows the
+        // delivery address, the phone and every shop's items.
+        return $user->isAdmin() || $user->id === $order->user_id;
     }
 
     /**

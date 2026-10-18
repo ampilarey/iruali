@@ -87,6 +87,39 @@ class CheckoutGuardsTest extends TestCase
         $this->assertSame(1, Voucher::where('code', 'LAST1')->value('used_count'));
     }
 
+    public function test_points_can_never_be_spent_below_zero(): void
+    {
+        $this->customer->forceFill(['loyalty_points' => 30])->save();
+
+        try {
+            app(\App\Services\PointsService::class)->record($this->customer, -50, 'redeemed');
+            $this->fail('spending more points than the balance was allowed');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('enough points', $e->getMessage());
+        }
+        $this->assertSame(30, $this->customer->fresh()->loyalty_points);
+        $this->assertSame(0, \App\Models\PointsTransaction::count());
+    }
+
+    public function test_a_posted_greater_male_zone_does_not_give_an_island_address_the_greater_male_fee(): void
+    {
+        \App\Models\Setting::set(['delivery_fee_greater_male' => '30', 'delivery_fee_islands' => '75', 'free_delivery_over' => '0']);
+        $this->cartWith(Product::factory()->create(['price' => 100, 'stock_quantity' => 5]));
+
+        $result = app(OrderService::class)->createOrderFromCart($this->customer, [
+            'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Seenu', 'delivery_zone' => 'greater_male',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml',
+        ]);
+
+        $this->assertTrue($result['success'], $result['message'] ?? '');
+        $this->assertNotSame('greater_male', $result['order']->delivery_area);
+        $this->assertEquals(75.0, (float) $result['order']->shipping_amount);
+
+        // A Greater Malé address keeps its own fee
+        $this->assertSame('greater_male', app(\App\Services\DeliveryService::class)->zoneFor('greater_male', 'Hulhumalé', 'Kaafu'));
+        $this->assertSame('greater_male', app(\App\Services\DeliveryService::class)->zoneFor('greater_male', null));
+    }
+
     public function test_redeemed_points_are_capped_by_the_balance_and_the_cart_at_checkout(): void
     {
         $product = Product::factory()->create(['price' => 100, 'stock_quantity' => 5]);

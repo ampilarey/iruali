@@ -31,6 +31,10 @@ class PointsService
         }
 
         return DB::transaction(function () use ($user, $points, $type, $order, $note) {
+            // Spending points never takes the balance below zero (the row is locked, as the wallet's is)
+            if ($type === 'redeemed' && $points < 0 && (int) User::whereKey($user->id)->lockForUpdate()->value('loyalty_points') + $points < 0) {
+                throw new \RuntimeException(__('You no longer have enough points for this. Please check your points and try again.'));
+            }
             User::whereKey($user->id)->increment('loyalty_points', $points);
             $user->loyalty_points = (int) $user->loyalty_points + $points;
             $user->syncOriginalAttribute('loyalty_points');

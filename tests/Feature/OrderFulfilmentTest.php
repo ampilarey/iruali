@@ -125,6 +125,33 @@ class OrderFulfilmentTest extends TestCase
         $this->actingAs($stranger)->post(route('seller.orders.status', $mixedOrder), ['status' => 'delivered'])->assertNotFound();
     }
 
+    public function test_a_shop_with_a_line_on_an_order_cannot_open_the_customer_order_page(): void
+    {
+        $seller = $this->withRole('seller', ['is_seller' => true, 'seller_approved' => true]);
+        $mine = Product::factory()->create(['seller_id' => $seller->id]);
+        $theirs = Product::factory()->create(['seller_id' => $this->withRole('seller')->id, 'name' => ['en' => 'Other shop teapot']]);
+        $order = $this->orderWith(User::factory()->create(), [[$mine, 1], [$theirs, 1]], 'pending', ['shipping_phone' => '7779911']);
+
+        $this->actingAs($seller)->get(route('orders.show', $order))->assertForbidden();
+        $this->get(route('orders.live', $order))->assertForbidden();
+        $this->get(route('seller.orders.show', $order))->assertOk()->assertDontSee('Other shop teapot');
+    }
+
+    public function test_confirming_a_payment_twice_does_it_once(): void
+    {
+        $order = $this->orderWith(User::factory()->create(), [[Product::factory()->create(), 1]], 'pending', ['payment_status' => 'pending', 'payment_method' => 'bank_transfer']);
+        $payments = app(\App\Services\PaymentService::class);
+
+        $payments->confirm($order);
+        $paidAt = $order->fresh()->paid_at;
+        $this->travel(5)->minutes();
+        $payments->confirm($order->fresh());
+
+        $this->assertSame('paid', $order->fresh()->payment_status);
+        $this->assertEquals($paidAt, $order->fresh()->paid_at);
+        $this->assertSame(1, \DB::table('funnel_events')->where('event', 'order_paid')->count());
+    }
+
     public function test_seller_can_view_an_order_they_placed_as_a_customer(): void
     {
         $seller = $this->withRole('seller', ['is_seller' => true, 'seller_approved' => true]);

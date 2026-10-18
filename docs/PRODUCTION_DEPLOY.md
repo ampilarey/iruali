@@ -158,7 +158,7 @@ One-off, in cPanel → Terminal, as the cPanel user:
 8. **Check**: `php artisan iruali:ready` must end with `READY`; `php artisan iruali:smoke --place-order`
    must end with `SMOKE OK`; open `https://iruali.mv/api/health`.
 
-Every later release is step 2 above: `bash scripts/deploy-production.sh <tag>`.
+Every later release: `bash ~/deploy-live.sh` (newest `main`, see the top of this page). With tags, step 2 above: `bash scripts/deploy-production.sh <tag>`.
 
 ## After deploying
 

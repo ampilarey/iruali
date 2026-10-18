@@ -89,7 +89,8 @@ class OrderService
             app(ShopDiscountService::class)->assertStillValid($discounts['shop'], $user, $guest['email'] ?? null);
             $redeem = min(
                 (int) $discounts['points']['points_redeemed'],
-                max(0, (int) $user?->fresh()->loyalty_points),
+                // Locked: two checkouts at once can't both spend the same points
+                max(0, $user && (int) $discounts['points']['points_redeemed'] > 0 ? (int) User::whereKey($user->id)->lockForUpdate()->value('loyalty_points') : 0),
                 (int) floor(max(0, $cart->total - $discounts['shop']['amount'] - $discounts['voucher']['amount']))
             );
             if ($redeem !== (int) $discounts['points']['points_redeemed']) {

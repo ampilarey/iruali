@@ -362,9 +362,9 @@ class PickupFromShopTest extends TestCase
             ->assertSee('Your pickup code')
             ->assertSee($code);
 
-        // The shop has to ask for it: not on its order page, nor on the customer's page it may open
+        // The shop has to ask for it: not on its order page, and the customer's page is not open to it
         $this->actingAs($this->pickupShop)->get(route('seller.orders.show', $order))->assertOk()->assertDontSee($code);
-        $this->actingAs($this->pickupShop)->get(route('orders.show', $order))->assertOk()->assertDontSee($code);
+        $this->actingAs($this->pickupShop)->get(route('orders.show', $order))->assertForbidden();
 
         // The public tracking page (anyone with the order number) shows where, not the code
         $this->get(\Illuminate\Support\Facades\URL::temporarySignedRoute('order.track.show', now()->addMinutes(30), [$order]))->assertOk()

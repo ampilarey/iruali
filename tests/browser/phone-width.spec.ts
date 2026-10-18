@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 const PHONE = { width: 390, height: 844 };
 
 const SHOP_PAGES = [
-    '/', '/products', '/brands', '/deals', '/cart', '/login', '/register', '/help',
+    '/', '/products', '/brands', '/deals', '/cart', '/login', '/login/email', '/register', '/help',
     '/terms', '/refund-policy', '/delivery-policy', '/privacy-policy', '/payment-security', '/about', '/seller-terms',
     '/dv', '/dv/products', '/dv/terms',
 ];
@@ -31,11 +31,11 @@ test('shop pages fit a phone screen', async ({ page }) => {
 });
 
 test('admin pages fit a phone screen', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/login/email');
     await page.locator('#email').fill(process.env.BROWSER_TEST_ADMIN_EMAIL || 'admin@example.com');
     await page.locator('#password').fill(process.env.BROWSER_TEST_ADMIN_PASSWORD || 'password');
     await page.locator('form[action$="/login"] button[type="submit"]').click();
-    await expect(page).not.toHaveURL(/\/login$/);
+    await expect(page).not.toHaveURL(/\/login(\/email)?$/);
 
     for (const path of ADMIN_PAGES) {
         const response = await page.goto(path);

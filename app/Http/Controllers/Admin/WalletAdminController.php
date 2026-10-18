@@ -41,6 +41,9 @@ class WalletAdminController extends Controller
 
     public function refundOrderToWallet(Order $order, WalletService $wallet)
     {
+        if ($problem = \App\Support\RefundApproval::problem($order, request()->user())) {
+            return back()->with('error', $problem);
+        }
         if (! $wallet->refundOrderToWallet($order)) {
             return back()->with('error', 'No refund is due on this order, or it has no customer to credit.');
         }
@@ -50,6 +53,9 @@ class WalletAdminController extends Controller
 
     public function refundReturnToWallet(ReturnRequest $return, WalletService $wallet)
     {
+        if ($problem = \App\Support\RefundApproval::problem($return, request()->user())) {
+            return back()->with('error', $problem);
+        }
         if (! $wallet->refundReturnToWallet($return)) {
             return back()->with('error', 'Only an approved return can be refunded to the wallet.');
         }

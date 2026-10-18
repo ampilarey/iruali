@@ -3,6 +3,7 @@
     use App\Support\Company;
     use App\Support\Money;
     $paidTxn = $order->paymentTransactions->firstWhere('state', 'CONFIRMED');
+    $pdf = $pdf ?? false; // App\Support\ReceiptPdf: no buttons or web fonts, local logo, table layout
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'dv' ? 'rtl' : 'ltr' }}">
@@ -11,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>{{ __('Receipt') }} {{ $order->order_number }} · {{ Company::tradingName() }}</title>
-    @if(app()->getLocale() === 'dv')
+    @if(app()->getLocale() === 'dv' && ! $pdf)
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana:wght@400;600;700&display=swap" rel="stylesheet">
     @endif
@@ -27,18 +28,26 @@
         .actions { max-width: 760px; margin: 0 auto; display: flex; gap: 8px; justify-content: flex-end; padding: 0 4px; }
         .btn { font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 8px; border: 1px solid #0B7A70; background: #0B7A70; color: #fff; cursor: pointer; text-decoration: none; }
         .btn.alt { background: #fff; color: #0B7A70; }
+        @if($pdf) body { background: #fff; font-family: DejaVu Sans, sans-serif; font-size: 12px; } .sheet { border: 0; margin: 0; padding: 0; } .row { display: block; } @endif
         @media print { body { background: #fff; } .sheet { border: 0; margin: 0; padding: 0; } .actions { display: none; } }
     </style>
 </head>
 <body>
-    <div class="actions" style="margin-top:16px">
+    @unless($pdf)
+    <div class="actions" style="margin-top:16px;flex-wrap:wrap">
         <a href="{{ $order->customerUrl() }}" class="btn alt">{{ __('Back to order') }}</a>
+        @if(! empty($pdfUrl))<a href="{{ $pdfUrl }}" class="btn alt" data-receipt-pdf>{{ __('Download PDF') }}</a>@endif
+        @if(! empty($emailUrl))
+            <form method="POST" action="{{ $emailUrl }}" style="margin:0">@csrf<button type="submit" class="btn alt" data-receipt-email>{{ __('Email me this receipt') }}</button></form>
+        @endif
         <button type="button" class="btn" onclick="window.print()">{{ __('Print / save as PDF') }}</button>
     </div>
+    @if(session('success'))<p style="max-width:760px;margin:8px auto 0;color:#186331;font-size:14px;text-align:end">{{ session('success') }}</p>@endif
+    @endunless
     <main class="sheet">
         <div class="row">
             <div>
-                <img src="/images/brand/iruali-logo.svg" alt="{{ Company::tradingName() }}" height="36">
+                <img src="{{ $pdf ? public_path('images/brand/iruali-logo.svg') : '/images/brand/iruali-logo.svg' }}" alt="{{ Company::tradingName() }}" height="36">
                 <p class="muted" style="margin:8px 0 0">
                     <strong style="color:#0F2A3A">{{ Company::legalName() ?? Company::tradingName() }}</strong>@if(Company::registrationNo()) · {{ __('Registration no.') }} {{ Company::registrationNo() }}@endif<br>
                     @if(Company::address()){{ Company::address() }}<br>@endif

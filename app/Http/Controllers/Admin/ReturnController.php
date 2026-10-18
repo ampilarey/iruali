@@ -69,11 +69,24 @@ class ReturnController extends Controller
     public function refunded(Request $request, ReturnRequest $return, ReturnService $returns)
     {
         $data = $request->validate(['refund_reference' => 'required|string|max:100']);
+        if ($problem = \App\Support\RefundApproval::problem($return, $request->user())) {
+            return back()->with('error', $problem);
+        }
 
         if (! $returns->markRefunded($return, $data['refund_reference'])) {
             return back()->with('error', 'Only an approved return can be marked as refunded.');
         }
 
         return back()->with('success', 'Refund recorded. The customer has been emailed.');
+    }
+
+    public function approveRefund(Request $request, ReturnRequest $return)
+    {
+        if ($return->status !== 'approved' || ! \App\Support\RefundApproval::needed($return)) {
+            return back()->with('error', 'This refund does not need an approval.');
+        }
+        \App\Support\RefundApproval::approve($return, $request->user());
+
+        return back()->with('success', 'Refund approved. Another staff member can now send and record it.');
     }
 }

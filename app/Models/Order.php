@@ -53,6 +53,7 @@ class Order extends Model
         'payment_slip_uploaded_at' => 'datetime',
         'refunded_at' => 'datetime',
         'refund_amount' => 'decimal:2',
+        'refund_approved_at' => 'datetime',
         'loyalty_points_awarded_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
@@ -227,6 +228,25 @@ class Order extends Model
     public function customerUrl(): string
     {
         return $this->isGuest() && $this->guest_token ? $this->guestUrl() : route('orders.show', $this);
+    }
+
+    /**
+     * A short fingerprint of what the customer sees change on the order page (status, payment,
+     * each shop part, messages): the live order page reloads when it changes.
+     */
+    public function liveState(): string
+    {
+        $parts = $this->sellerOrders()->toBase()->orderBy('id')->get(['id', 'status', 'updated_at'])
+            ->map(fn ($part) => $part->id.':'.$part->status.':'.$part->updated_at)->implode('|');
+        $messages = \App\Models\Message::query()->whereIn('conversation_id', \App\Models\Conversation::where('order_id', $this->id)->select('id'))->max('id');
+
+        return substr(sha1($this->status.'|'.$this->payment_status.'|'.$this->refund_status.'|'.$parts.'|'.$messages), 0, 16);
+    }
+
+    /** Statuses after which nothing changes for the customer any more (the page stops checking). */
+    public function isSettled(): bool
+    {
+        return in_array($this->status, ['delivered', 'cancelled', 'refunded'], true);
     }
 
     /**

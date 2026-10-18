@@ -172,6 +172,7 @@
                             @else
                                 <p class="text-red-700">{{ $order->refund_reason }}. Paid by {{ mb_strtolower(\App\Services\PaymentService::methodLabel($order->payment_method)) }}: send it back by bank transfer, then record the reference here.</p>
                             @endif
+                            @include('admin._refund_approval', ['refundable' => $order, 'approveRoute' => 'admin.orders.refund-approve'])
                             @if(\App\Support\StaffAccess::can('admin.orders.refunded'))
                             <form method="POST" action="{{ route('admin.orders.refunded', $order) }}" class="flex flex-wrap gap-2">
                                 @csrf

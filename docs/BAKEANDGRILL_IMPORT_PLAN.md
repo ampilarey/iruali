@@ -66,13 +66,13 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
     a scheduled pause, and "tell me when it's back". B&G: `admin/service-availability/*`,
     `service-status/notify-me`.
 17. ✅ **Shop opening hours** (done: Seller Centre → Delivery & pickup; estimates start on the next open day, "Open today" on product pages and pickup) used for "ships today" and pickup times. B&G: `opening-hours*`.
-18. **Live order page**: status changes show without a refresh (polling first; SSE later).
+18. ✅ **Live order page** (done: the order page checks every 20 seconds and reloads when something changes): status changes show without a refresh (polling first; SSE later).
     B&G: `stream/order-status/{orderId}`.
-19. **Late order alerts**: paid orders a shop has not started within N hours, and parts past their
+19. ✅ **Late order alerts** (done: `orders:alert-late` hourly, Admin → Inbox rows, Team alerts → Late orders): paid orders a shop has not started within N hours, and parts past their
     delivery estimate, to admins and the shop. B&G: `orders:alert-unstarted`, `ops:alert-delivery-delays`.
-20. **Refund approval**: a refund above a set amount needs a second person; a daily refunds
+20. ✅ **Refund approval** (done: Settings → Payments amount, approve on the order or return page, `refunds:daily-summary`): a refund above a set amount needs a second person; a daily refunds
     summary. B&G: `RefundWorkflowService`, `refunds:send-daily-summary`.
-21. **Receipts**: PDF download and "email me the receipt again". B&G: `/receipts/{token}/pdf`.
+21. ✅ **Receipts** (done: PDF download and "Email me this receipt" with the PDF; the PDF is in English): PDF download and "email me the receipt again". B&G: `/receipts/{token}/pdf`.
 22. **Pay later for business buyers**: approved businesses get a credit limit, invoices with a due
     date, reminders, overdue marking and statements. B&G: `admin/customers/{id}/credit/*`,
     `invoices:mark-overdue`, `credit:send-payment-reminders`.

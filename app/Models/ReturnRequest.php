@@ -32,6 +32,7 @@ class ReturnRequest extends Model
     protected $casts = [
         'items_value' => 'decimal:2',
         'refund_amount' => 'decimal:2',
+        'refund_approved_at' => 'datetime',
         'restocked' => 'boolean',
         'resolved_at' => 'datetime',
         'refunded_at' => 'datetime',

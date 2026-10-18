@@ -92,3 +92,9 @@ Schedule::command('complaints:weekly-summary')->weeklyOn(1, '08:15')->timezone('
 
 // Ordering paused (Admin → Settings → Ordering): those who asked are emailed once it is back
 Schedule::command('ordering:notify-back')->everyFiveMinutes()->withoutOverlapping()->name('ordering-notify-back');
+
+// Shop parts not started in time after payment, or past their delivery date: the shop and the team are told once
+Schedule::command('orders:alert-late')->hourly()->withoutOverlapping();
+
+// Yesterday's refunds and those still due, to the alerts inbox every morning
+Schedule::command('refunds:daily-summary')->dailyAt('07:45')->timezone('Indian/Maldives');

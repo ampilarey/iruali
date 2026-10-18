@@ -77,6 +77,10 @@ class Setting extends Model
         'default_commission_rate' => 10,
         // Marketplace: a shop part not shipped within this many days of payment counts as late
         'late_shipment_days' => 3,
+        // Hours after payment before a shop part not started counts as late (orders:alert-late)
+        'late_start_hours' => 24,
+        // Refunds over this many MVR need a second staff member to approve (0: never)
+        'refund_approval_over' => 0,
         // Marketplace: how often and on which day shops are paid (shown in the seller terms)
         'payout_schedule' => 'weekly',
         'payout_day' => 'Sunday',

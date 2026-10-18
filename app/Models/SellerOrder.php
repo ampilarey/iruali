@@ -50,6 +50,8 @@ class SellerOrder extends Model
         // Pre-order items waiting for their stock (App\Services\PreorderService)
         'awaiting_stock' => 'boolean',
         'preorder_ship_date' => 'date',
+        'late_start_alerted_at' => 'datetime',
+        'overdue_alerted_at' => 'datetime',
         'stock_arrived_at' => 'datetime',
     ];
 

@@ -30,6 +30,8 @@ class StoreVoucherRequest extends FormRequest
             'valid_from' => 'nullable|date|before_or_equal:valid_until',
             'valid_until' => 'nullable|date|after_or_equal:valid_from',
             'is_active' => 'boolean',
+            'is_automatic' => 'boolean',
+            'free_delivery' => 'boolean',
             'description' => 'nullable|string|max:500',
             'applicable_categories' => 'nullable|array',
             'applicable_categories.*' => 'exists:categories,id',

@@ -44,7 +44,15 @@ class DiscountService
         // Web checkout keeps the voucher in the session; API clients store it on the cart.
         $voucherCode = Session::get('voucher_code') ?: $cart->voucher_code;
         if (! $voucherCode) {
-            return ['amount' => 0, 'voucher' => null];
+            // No code entered: the best automatic offer the cart qualifies for (App\Support\Promotions)
+            $base ??= $this->goodsAfterShopDiscounts($cart);
+            $offer = \App\Support\Promotions::bestFor($cart, $base);
+            if (! $offer) {
+                return ['amount' => 0, 'voucher' => null];
+            }
+            $amount = $this->calculateVoucherAmount($cart, $offer, $base);
+
+            return ['amount' => $amount, 'voucher' => $offer, 'type' => $offer->type, 'description' => $this->getVoucherDescription($offer, $amount), 'automatic' => true];
         }
 
         $base ??= $this->goodsAfterShopDiscounts($cart);

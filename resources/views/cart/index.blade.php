@@ -121,13 +121,13 @@
                         <div class="flex justify-between"><dt class="text-gray-600">{{ __('Subtotal') }}</dt><dd class="font-medium">{{ \App\Support\Money::format($subtotal) }}</dd></div>
                         @include('cart._shop_deals_summary')
                         @if($voucher && $discount > 0)
-                            <div class="flex justify-between text-success"><dt>{{ __('Voucher') }} ({{ $voucher->code }})</dt><dd class="font-medium">&minus;{{ \App\Support\Money::format($discount) }}</dd></div>
+                            <div class="flex justify-between text-success"><dt>{{ $voucher->is_automatic ? __('Offer') : __('Voucher') }} ({{ $voucher->code }})</dt><dd class="font-medium">&minus;{{ \App\Support\Money::format($discount) }}</dd></div>
                         @endif
                         <div class="flex justify-between"><dt class="text-gray-600">{{ __('Delivery') }}</dt><dd class="text-gray-600">{{ __('Calculated at checkout') }}</dd></div>
                         <div class="flex justify-between border-t border-gray-200 pt-3 text-base"><dt class="font-semibold">{{ __('Estimated total') }}</dt><dd class="font-bold">{{ \App\Support\Money::format($total) }}</dd></div>
                     </dl>
 
-                    @if($voucher)
+                    @if($voucher && ! $voucher->is_automatic)
                         <form action="{{ route('cart.removeVoucher') }}" method="POST" class="text-sm">
                             @csrf
                             <button type="submit" class="text-danger hover:underline">{{ __('Remove voucher') }}</button>

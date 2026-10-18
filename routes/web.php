@@ -215,6 +215,10 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/sellers/{seller}/reject', [AdminController::class, 'rejectSeller'])->name('sellers.reject');
         Route::post('/sellers/{seller}/suspend', [AdminController::class, 'suspendSeller'])->name('sellers.suspend');
         Route::post('/products/{product}/approve', [AdminController::class, 'approveProduct'])->name('products.approve');
+        // Printed discount cards: a batch of single-use codes (before the resource, so "batches" is not a voucher id)
+        Route::post('vouchers/batches', [\App\Http\Controllers\Admin\VoucherController::class, 'batch'])->name('vouchers.batch');
+        Route::get('vouchers/batches/{batch}/print', [\App\Http\Controllers\Admin\VoucherController::class, 'printBatch'])->name('vouchers.batch.print')->where('batch', '[A-Za-z0-9-]+');
+        Route::get('vouchers/batches/{batch}/export', [\App\Http\Controllers\Admin\VoucherController::class, 'exportBatch'])->name('vouchers.batch.export')->where('batch', '[A-Za-z0-9-]+');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
 
         Route::get('/payouts', [\App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts');

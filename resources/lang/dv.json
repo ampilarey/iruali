@@ -2945,5 +2945,6 @@
     "iruali: your cart is waiting with :percent% off, code :code until :date: :url": "iruali: ތިބާގެ ކާޓަށް :percent% ލާޖެހޭ، ކޯޑް :code، :date އާ ހަމައަށް: :url",
     "Stop offers by SMS": "SMS އިން އޮފަރ ފޮނުވުން ހުއްޓާލާ",
     "Done. You will not get offers by SMS any more. Order updates still come as before.": "ނިމިއްޖެ. SMS އިން އޮފަރ އިތުރަށް ނުފޮނުވޭނެ. އޯޑަރުގެ މަޢުލޫމާތު ކުރިން ގޮތަށް ލިބޭނެ.",
-    "You will still get texts about your orders.": "ތިބާގެ އޯޑަރުތަކާ ބެހޭ SMS ކުރިން ގޮތަށް ލިބޭނެ."
+    "You will still get texts about your orders.": "ތިބާގެ އޯޑަރުތަކާ ބެހޭ SMS ކުރިން ގޮތަށް ލިބޭނެ.",
+    "Offer": "އޮފަރ"
 }

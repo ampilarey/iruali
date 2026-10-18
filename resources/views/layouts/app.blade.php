@@ -231,7 +231,7 @@
                         <a href="{{ route('account') }}" class="text-sm text-white/85 underline">{{ __('My Account') }}</a>
                     @else
                         <a href="{{ route('login') }}" class="font-semibold">{{ __('Hello, sign in') }}</a>
-                        <a href="{{ route('register') }}" class="block text-sm text-white/85 underline">{{ __('Create an account') }}</a>
+                        <a href="{{ route('login') }}" class="block text-sm text-white/85 underline">{{ __('Create an account') }}</a>
                     @endauth
                 </div>
                 <button type="button" data-drawer-close data-dialog-close class="p-1" aria-label="{{ __('Close menu') }}"><x-icon name="x" class="w-6 h-6" /></button>

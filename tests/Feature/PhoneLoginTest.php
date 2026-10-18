@@ -34,10 +34,11 @@ class PhoneLoginTest extends TestCase
 
     public function test_a_new_number_signs_up_with_a_code_then_sets_name_and_password(): void
     {
-        $this->get(route('login'))->assertSee('data-login-phone-link', false);
+        $this->get(route('login.email'))->assertSee('data-login-phone-link', false);
+        $this->get(route('login'))->assertOk()->assertSee('data-login-phone="phone"', false)->assertSee(route('login.email'), false);
 
-        $this->post(route('login.phone.start'), ['phone' => '9123456'])->assertRedirect(route('login.phone'));
-        $this->get(route('login.phone'))->assertSee('data-login-phone="code"', false)->assertSee('•••3456');
+        $this->post(route('login.phone.start'), ['phone' => '9123456'])->assertRedirect(route('login'));
+        $this->get(route('login'))->assertSee('data-login-phone="code"', false)->assertSee('•••3456');
         $this->post(route('login.phone.verify'), ['code' => '000000'])->assertSessionHasErrors('code');
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()])->assertRedirect(route('account.setup'));
 
@@ -59,7 +60,7 @@ class PhoneLoginTest extends TestCase
         // Next time: the number asks for the password
         $this->post(route('logout'));
         $this->post(route('login.phone.start'), ['phone' => '912 3456']);
-        $this->get(route('login.phone'))->assertSee('data-login-phone="password"', false);
+        $this->get(route('login'))->assertSee('data-login-phone="password"', false);
         $this->post(route('login.phone.password'), ['password' => 'wrong'])->assertSessionHasErrors('password');
         $this->post(route('login.phone.password'), ['password' => 'Strong-pass-1!'])->assertRedirect(route('home'));
         $this->assertAuthenticatedAs($user);
@@ -85,7 +86,7 @@ class PhoneLoginTest extends TestCase
         $user->forceFill(['phone_verified_at' => now()])->save();
 
         $this->post(route('login.phone.start'), ['phone' => '7771234']);
-        $this->post(route('login.phone.resend'))->assertRedirect(route('login.phone'));
+        $this->post(route('login.phone.resend'))->assertRedirect(route('login'));
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()])->assertRedirect(route('account').'#security');
         $this->assertAuthenticatedAs($user);
         $this->put(route('account.password'), ['password' => 'New-pass-456!', 'password_confirmation' => 'New-pass-456!'])->assertRedirect(route('account'));

@@ -140,7 +140,7 @@ class ShopStaffInvitationsTest extends TestCase
 
         $this->get($url)->assertOk()->assertSee('data-invitation-state="sign_in"', false)->assertSee('There is already an iruali account for fatima@example.test.');
         // Accepting before signing in goes to the sign-in page, which comes back here
-        $this->post($url)->assertRedirect(route('login'));
+        $this->post($url)->assertRedirect(route('login.email'));
         $this->post('/login', ['email' => 'fatima@example.test', 'password' => 'secret-pass'])->assertRedirect($url);
 
         $this->get($url)->assertOk()->assertSee('data-invitation-state="accept"', false)->assertSee('Accept and open the Seller Centre');

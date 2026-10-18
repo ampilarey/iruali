@@ -149,7 +149,7 @@ class AuthController extends Controller
         if ($until = StaffLockout::lockedUntil($user)) {
             session()->forget(['2fa_user_id', '2fa_remember']);
 
-            return redirect()->route('login')->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
+            return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
         }
 
         $code = strtoupper(trim($request->code));

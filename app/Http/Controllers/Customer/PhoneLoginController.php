@@ -60,7 +60,7 @@ class PhoneLoginController extends AuthController
         if ($user && $user->hasPassword()) {
             $request->session()->put(self::SESSION, $pending + ['step' => 'password']);
 
-            return redirect()->route('login.phone');
+            return redirect()->route('login');
         }
 
         return $this->sendCode($request, $pending + ['purpose' => 'login']);
@@ -73,7 +73,7 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         if (($pending['step'] ?? null) !== 'password') {
-            return redirect()->route('login.phone');
+            return redirect()->route('login');
         }
         $request->validate(['password' => 'required|string']);
 
@@ -99,7 +99,7 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         if (! $pending) {
-            return redirect()->route('login.phone');
+            return redirect()->route('login');
         }
 
         return $this->sendCode($request, $pending + ['purpose' => ($pending['step'] ?? null) === 'password' ? 'reset' : ($pending['purpose'] ?? 'login')]);
@@ -112,7 +112,7 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         if (($pending['step'] ?? null) !== 'code') {
-            return redirect()->route('login.phone');
+            return redirect()->route('login');
         }
         $request->validate(['code' => 'required|digits:6']);
 
@@ -121,7 +121,7 @@ class PhoneLoginController extends AuthController
             OTP::where('phone', $pending['phone'])->where('purpose', 'login')->update(['is_used' => true]);
             $request->session()->forget(self::SESSION);
 
-            return redirect()->route('login.phone')->withErrors(['phone' => __('Too many wrong codes. Please ask for a new one.')]);
+            return redirect()->route('login')->withErrors(['phone' => __('Too many wrong codes. Please ask for a new one.')]);
         }
         if (! OTP::verify($pending['phone'], (string) $request->input('code'), 'login')) {
             RateLimiter::hit($tries, 600);
@@ -134,7 +134,7 @@ class PhoneLoginController extends AuthController
         if ($user?->isStaff()) {
             $request->session()->forget(self::SESSION);
 
-            return redirect()->route('login')->withErrors(['email' => __('Staff sign in with their email and password.')]);
+            return redirect()->route('login.email')->withErrors(['email' => __('Staff sign in with their email and password.')]);
         }
         if (! $user) {
             $user = $this->createAccount($pending['phone']);
@@ -172,7 +172,7 @@ class PhoneLoginController extends AuthController
         if ($user->isBanned() || ! $user->isActive()) {
             $request->session()->forget(self::SESSION);
 
-            return redirect()->route('login.phone')->withErrors(['phone' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
+            return redirect()->route('login')->withErrors(['phone' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
         }
         $request->session()->forget(self::SESSION);
 
@@ -225,7 +225,7 @@ class PhoneLoginController extends AuthController
         $request->session()->put(self::SESSION, ['step' => 'code'] + $pending);
         RateLimiter::clear($key.':tries');
 
-        return redirect()->route('login.phone')->with('status', __('We have texted a 6-digit code to :to.', ['to' => $pending['shown']]));
+        return redirect()->route('login')->with('status', __('We have texted a 6-digit code to :to.', ['to' => $pending['shown']]));
     }
 
     protected function smsAvailable(): bool

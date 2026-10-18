@@ -93,14 +93,16 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
 
     // Authentication routes
     Route::middleware('guest')->group(function () {
-        Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+        // The mobile number is the customer's sign-in (as on Bake & Grill); email + password is for staff and older accounts
+        Route::get('/login', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'show'])->name('login');
+        Route::get('/login/email', [AuthController::class, 'showLogin'])->name('login.email');
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,post-login');
         // Sign in with a code by SMS or email instead of a password (also the "forgot password" route by SMS)
         Route::get('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'show'])->name('login.code');
         Route::post('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'send'])->name('login.code.send')->middleware('throttle:5,1,login.code.send');
         Route::post('/login/code/verify', [\App\Http\Controllers\Customer\CodeLoginController::class, 'verify'])->name('login.code.verify')->middleware('throttle:10,1,login.code.verify');
         // Continue with a mobile number (as on Bake & Grill): password if set, otherwise an SMS code; new numbers sign up here
-        Route::get('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'show'])->name('login.phone');
+        Route::redirect('/login/phone', '/login', 301)->name('login.phone');
         Route::post('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'start'])->name('login.phone.start')->middleware('throttle:10,1,login.phone.start');
         Route::post('/login/phone/password', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'password'])->name('login.phone.password')->middleware('throttle:10,1,login.phone.password');
         Route::post('/login/phone/code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'resend'])->name('login.phone.resend')->middleware('throttle:5,1,login.phone.resend');

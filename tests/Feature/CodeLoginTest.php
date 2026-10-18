@@ -46,7 +46,7 @@ class CodeLoginTest extends TestCase
     public function test_a_customer_signs_in_with_a_code_by_sms_and_sets_a_new_password(): void
     {
         $user = $this->customer();
-        $this->get(route('login'))->assertOk()->assertSee(route('login.code'), false);
+        $this->get(route('login.email'))->assertOk()->assertSee(route('login.code'), false);
 
         $this->post(route('login.code.send'), ['login' => '+960 777-1234'])->assertRedirect(route('login.code'))
             ->assertSessionHas('status', 'If that number belongs to an iruali account, we have texted it a code.');

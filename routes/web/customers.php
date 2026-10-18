@@ -24,6 +24,18 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
 
     Route::get('/customer-report', [CustomerReportController::class, 'index'])->name('customer-report');
     Route::get('/customer-report/export', [CustomerReportController::class, 'export'])->name('customer-report.export');
+
+    // Admin → Exports and Admin → Finance (admins and finance staff)
+    Route::get('/exports', [\App\Http\Controllers\Admin\ExportController::class, 'index'])->name('exports');
+    Route::get('/exports/{kind}', [\App\Http\Controllers\Admin\ExportController::class, 'export'])->name('exports.download')->where('kind', '[a-z_]+');
+    Route::get('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'index'])->name('finance');
+    Route::post('/finance/expenses', [\App\Http\Controllers\Admin\FinanceController::class, 'storeExpense'])->name('finance.expenses.store');
+    Route::delete('/finance/expenses/{expense}', [\App\Http\Controllers\Admin\FinanceController::class, 'destroyExpense'])->name('finance.expenses.destroy');
+    Route::get('/finance/expenses/{expense}/receipt', [\App\Http\Controllers\Admin\FinanceController::class, 'receipt'])->name('finance.expenses.receipt');
+    Route::put('/finance/settings', [\App\Http\Controllers\Admin\FinanceController::class, 'settings'])->name('finance.settings');
+    Route::get('/finance/export', [\App\Http\Controllers\Admin\FinanceController::class, 'exportPnl'])->name('finance.export');
+    Route::get('/finance/xero/invoices', [\App\Http\Controllers\Admin\FinanceController::class, 'xeroInvoices'])->name('finance.xero.invoices');
+    Route::get('/finance/xero/bills', [\App\Http\Controllers\Admin\FinanceController::class, 'xeroBills'])->name('finance.xero.bills');
 });
 
 Route::middleware('auth')->group(function () {

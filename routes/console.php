@@ -110,3 +110,6 @@ Schedule::command('sms:send-campaigns')->everyMinute()->withoutOverlapping()->na
 
 // Approved social posts go out (Admin → Social posts)
 Schedule::command('social:publish')->everyFiveMinutes()->withoutOverlapping()->name('social-publish');
+
+// Monthly expenses copied into the new month (Admin → Finance)
+Schedule::command('finance:recurring-expenses')->monthlyOn(1, '00:30')->timezone('Indian/Maldives');

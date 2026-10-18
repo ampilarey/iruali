@@ -97,15 +97,15 @@ tests, runs Pint and Larastan, and is deployed to test.iruali.mv before the next
 
 ## Phase 5: admin, finance and running the site
 
-29. **More CSV exports**: orders, order lines, sales by shop / category / brand / island,
+29. ✅ **More CSV exports** (done: Admin → Exports): orders, order lines, sales by shop / category / brand / island,
     customers, vouchers used, refunds by reason. B&G: `reports/*/csv`.
-30. **iruali's own finance**: commission income, delivery income, card fees, expenses (with
+30. ✅ **iruali's own finance** (done: Admin → Finance, `finance:recurring-expenses`): commission income, delivery income, card fees, expenses (with
     receipts and recurring ones), a monthly profit and loss. B&G: `reports/finance/*`, `expenses*`.
 31. **Settlements**: import the BML statement and match card payments and bank transfers to
     orders. B&G: `settlements/*` (`BankStatementParser`).
 32. **GST tools**: GST ledger, period lock, filing reminder. B&G: `backend/app/Domains/Gst`,
     `gst:filing-reminder`.
-33. **Xero** (optional): push commission invoices and expenses. B&G: `backend/app/Domains/Accounting`.
+33. ✅ **Xero** (done as import files: commission invoices and expenses as bills, from Admin → Finance; a live Xero connection can come later): push commission invoices and expenses. B&G: `backend/app/Domains/Accounting`.
 34. **Webhooks out** (optional): order.created / paid / delivered for other systems.
     B&G: `backend/app/Domains/Webhooks`.
 35. **Running the site**: alerts when queued jobs fail or the queue stops; `/health/ready`

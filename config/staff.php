@@ -61,6 +61,7 @@ return [
             'admin.disputes', 'admin.disputes.show',
             'admin.rewards', 'admin.gift-cards', 'admin.gift-cards.*',
             'admin.customer-report', 'admin.customer-report.export', 'admin.customers.show',
+            'admin.exports', 'admin.exports.*', 'admin.finance', 'admin.finance.*',
             'admin.tax', 'admin.tax.*', 'admin.orders.invoice', // GST settings, monthly GST report, shops' invoices
         ],
 

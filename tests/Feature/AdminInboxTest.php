@@ -71,6 +71,8 @@ class AdminInboxTest extends TestCase
             'sellers_pending' => 1,
             'products_pending' => 2,
             'transfers_to_check' => 0,
+            'orders_not_started' => 0,
+            'orders_past_delivery' => 0,
             'refunds_due' => 1,
             'returns_open' => 1,
             'bml_failed' => 1,

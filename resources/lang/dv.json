@@ -2902,5 +2902,19 @@
     "Minimum order": "މަދުވެގެން އޯޑަރު",
     "Customers need at least this much of your items in one order. Leave empty for no minimum.": "އެއް އޯޑަރެއްގައި ތިބާގެ ތަކެތި މަދުވެގެން މިހާވަރަކަށް ހުންނަން ޖެހޭނެ. މަދުވެގެން އަދަދެއް ނެތްނަމަ ހުސްކޮށް ބާއްވާ.",
     "Minimum (MVR)": "މަދުވެގެން (ރުފިޔާ)",
-    "Give both times for :day, with the opening time before the closing time.": ":day އަށް ދެ ގަޑިވެސް ދީ، ހުޅުވާ ގަޑި ބަންދުކުރާ ގަޑިއަށް ވުރެ ކުރިން ލިޔުއްވާ."
+    "Give both times for :day, with the opening time before the closing time.": ":day އަށް ދެ ގަޑިވެސް ދީ، ހުޅުވާ ގަޑި ބަންދުކުރާ ގަޑިއަށް ވުރެ ކުރިން ލިޔުއްވާ.",
+    "This order was just updated.": "މި އޯޑަރު މިދަންނަވީ އަޕްޑޭޓް ކުރެވިއްޖެ.",
+    "Refresh": "ރިފްރެޝް",
+    "Orders past their delivery date": "ޑެލިވަރީ ތާރީޚު ފަހަނަޅައިފައިވާ އޯޑަރުތައް",
+    "These orders were sent but are past the expected delivery date: :orders.": "މި އޯޑަރުތައް ފޮނުވިފައި ވީނަމަވެސް ލިބޭނެ ތާރީޚު ފަހަނަޅައިފި: :orders.",
+    "Please check with the courier, update the tracking details or mark them delivered, so customers know where their order is.": "ކޫރިއަރާ ސުވާލުކޮށް، ޓްރެކިންގ މަޢުލޫމާތު އަޕްޑޭޓް ކުރައްވާ ނުވަތަ ޑެލިވަރ ކުރެވިއްޖެ ކަމަށް ލައްވާ، ކަސްޓަމަރަށް އޯޑަރު ހުރި ތަން އެނގޭނެ ގޮތަށް.",
+    "Open your orders": "ތިބާގެ އޯޑަރުތައް ހުޅުވާ",
+    "Orders waiting for you to start": "ތިބާ ފަށަން މަޑުކުރާ އޯޑަރުތައް",
+    "These paid orders have been waiting more than :hours hours: :orders.": "ފައިސާ ދައްކާފައިވާ މި އޯޑަރުތައް :hours ގަޑިއިރަށް ވުރެ ގިނައިރު މަޑުކުރަމުން: :orders.",
+    "Please start packing them, or message the customer if something is out of stock.": "ޕެކް ކުރަން ފައްޓަވާ، ނުވަތަ ތަކެއްޗެއް ސްޓޮކުގައި ނެތްނަމަ ކަސްޓަމަރަށް މެސެޖް ކުރައްވާ.",
+    "Download PDF": "PDF ޑައުންލޯޑް",
+    "Email me this receipt": "މި ރިސީޓް އަހަރެންނަށް އީމެއިލް ކުރޭ",
+    "We have emailed the receipt to you.": "ރިސީޓް ތިބާއަށް އީމެއިލް ކޮށްފިން.",
+    "Your receipt for order :number": "އޯޑަރު :number ގެ ރިސީޓް",
+    "Here is the receipt for order :number, as a PDF.": "އޯޑަރު :number ގެ ރިސީޓް PDF ގޮތުގައި މިވަނީ."
 }

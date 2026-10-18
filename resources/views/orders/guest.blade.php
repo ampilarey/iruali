@@ -158,4 +158,5 @@
         </div>
     </div>
 </div>
+@include('orders._live', ['order' => $order, 'liveUrl' => $order->guestUrl('live')])
 @endsection

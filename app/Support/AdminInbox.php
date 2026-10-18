@@ -135,6 +135,17 @@ class AdminInbox
                     ->where('status', '!=', 'cancelled')->whereNotNull('payment_slip_uploaded_at')->count(),
                 'route' => 'admin.orders', 'severity' => 'warn',
             ],
+            // orders:alert-late
+            'orders_not_started' => fn () => [
+                'label' => 'Orders not started by the shop in time',
+                'count' => \App\Console\Commands\AlertLateOrders::unstarted()->count(),
+                'route' => 'admin.orders', 'severity' => 'warn',
+            ],
+            'orders_past_delivery' => fn () => [
+                'label' => 'Orders past their delivery date',
+                'count' => \App\Console\Commands\AlertLateOrders::overdue()->count(),
+                'route' => 'admin.orders', 'severity' => 'warn',
+            ],
             'refunds_due' => fn () => [
                 'label' => 'Refunds due',
                 'count' => Order::where('refund_status', 'due')->count(),

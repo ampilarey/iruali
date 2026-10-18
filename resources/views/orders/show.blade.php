@@ -233,4 +233,5 @@
         </div>
     </div>
 </div>
+@include('orders._live', ['order' => $order, 'liveUrl' => route('orders.live', $order)])
 @endsection 

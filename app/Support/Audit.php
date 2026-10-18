@@ -24,6 +24,7 @@ class Audit
         'order.cancelled' => 'Order cancelled',
         'refund.flagged' => 'Refund flagged',
         'refund.recorded' => 'Refund recorded',
+        'refund.approved' => 'Refund approved (second person)',
         'payout.created' => 'Payout created / paid',
         'seller.approved' => 'Seller approved',
         'seller.rejected' => 'Seller rejected',

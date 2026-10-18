@@ -331,6 +331,8 @@ class AdminController extends Controller
             'payout_schedule' => 'sometimes|required|in:weekly,fortnightly,monthly',
             'payout_day' => 'sometimes|nullable|string|max:30',
             'late_shipment_days' => 'sometimes|required|integer|min:0|max:60',
+            'late_start_hours' => 'sometimes|required|integer|min:1|max:720',
+            'refund_approval_over' => 'sometimes|nullable|numeric|min:0|max:10000000',
             'guest_checkout_enabled' => 'sometimes|boolean',
             'dhivehi_enabled' => 'sometimes|boolean',
             'staff_require_two_factor' => 'sometimes|boolean',
@@ -362,7 +364,7 @@ class AdminController extends Controller
             'ordering_pause_until' => 'sometimes|nullable|date|after:ordering_pause_from',
             'ordering_pause_message' => 'sometimes|nullable|string|max:255',
         ]);
-        foreach (['min_order_amount', 'small_order_fee', 'small_order_threshold'] as $key) {
+        foreach (['min_order_amount', 'small_order_fee', 'small_order_threshold', 'refund_approval_over'] as $key) {
             if (array_key_exists($key, $validated)) {
                 $validated[$key] = (float) ($validated[$key] ?? 0);
             }
@@ -460,12 +462,26 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
         $data = $request->validate(['refund_reference' => 'required|string|max:100']);
+        if ($problem = \App\Support\RefundApproval::problem($order, $request->user())) {
+            return back()->with('error', $problem);
+        }
 
         if (! $payments->markRefunded($order, $data['refund_reference'])) {
             return back()->with('error', 'No refund is due on this order.');
         }
 
         return back()->with('success', 'Refund recorded. The customer has been emailed.');
+    }
+
+    public function approveRefund(Request $request, Order $order)
+    {
+        $this->checkAdminRole();
+        if ($order->refund_status !== 'due' || ! \App\Support\RefundApproval::needed($order)) {
+            return back()->with('error', 'This refund does not need an approval.');
+        }
+        \App\Support\RefundApproval::approve($order, $request->user());
+
+        return back()->with('success', 'Refund approved. Another staff member can now send and record it.');
     }
 
     public function updatePayment(Request $request, Order $order, PaymentService $payments)

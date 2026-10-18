@@ -78,6 +78,7 @@
                     @else
                         <p class="text-gray-600">Send a bank transfer to an account in the customer's name, then record the transfer reference here.</p>
                     @endif
+                    @include('admin._refund_approval', ['refundable' => $return, 'approveRoute' => 'admin.returns.refund-approve'])
                     <form method="POST" action="{{ route('admin.returns.refunded', $return) }}" class="space-y-2">
                         @csrf
                         <label for="refund_reference" class="block font-medium text-gray-700">Refund reference</label>

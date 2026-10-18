@@ -128,13 +128,39 @@ class GuestCheckoutController extends Controller
         return view('orders.guest', compact('order'));
     }
 
+    public function live(Order $order, string $token)
+    {
+        $this->guard($order, $token);
+
+        return response()->json(['state' => $order->liveState(), 'settled' => $order->isSettled()])->header('Cache-Control', 'no-store');
+    }
+
     public function receipt(Order $order, string $token)
     {
         $this->guard($order, $token);
 
         $order->load(['items.product.seller', 'paymentTransactions']);
 
-        return view('orders.receipt', compact('order'));
+        return view('orders.receipt', ['order' => $order, 'pdfUrl' => $order->guestUrl('receipt-pdf'), 'emailUrl' => $order->guestUrl('receipt-email')]);
+    }
+
+    public function receiptPdf(Order $order, string $token)
+    {
+        $this->guard($order, $token);
+
+        return response(\App\Support\ReceiptPdf::make($order), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.\App\Support\ReceiptPdf::filename($order).'"',
+        ]);
+    }
+
+    public function emailReceipt(Order $order, string $token)
+    {
+        $this->guard($order, $token);
+        abort_unless(filled($order->guest_email), 404);
+        \Illuminate\Support\Facades\Notification::route('mail', $order->guest_email)->notify(new \App\Notifications\OrderReceipt($order));
+
+        return back()->with('success', __('We have emailed the receipt to you.'));
     }
 
     public function pay(Order $order, string $token, PaymentService $payments)

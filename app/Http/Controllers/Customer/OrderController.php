@@ -41,6 +41,16 @@ class OrderController extends Controller
         return view('orders.show', compact('order', 'messagingOpen'));
     }
 
+    /**
+     * The live order page asks this every few seconds and reloads when the state changes.
+     */
+    public function live(Order $order)
+    {
+        $this->authorize('view', $order);
+
+        return response()->json(['state' => $order->liveState(), 'settled' => $order->isSettled()])->header('Cache-Control', 'no-store');
+    }
+
     public function store(StoreOrderRequest $request)
     {
         // $this->authorize('create', Order::class); // Removed as StoreOrderRequest handles authorization
@@ -147,7 +157,26 @@ class OrderController extends Controller
 
         $order->load(['user', 'items.product.seller', 'paymentTransactions']);
 
-        return view('orders.receipt', compact('order'));
+        return view('orders.receipt', ['order' => $order, 'pdfUrl' => route('orders.receipt.pdf', $order), 'emailUrl' => route('orders.receipt.email', $order)]);
+    }
+
+    public function receiptPdf(Order $order)
+    {
+        $user = Auth::user();
+        abort_unless($order->user_id === $user->id || $user->isAdmin(), 403);
+
+        return response(\App\Support\ReceiptPdf::make($order), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.\App\Support\ReceiptPdf::filename($order).'"',
+        ]);
+    }
+
+    public function emailReceipt(Order $order)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+        Auth::user()->notify(new \App\Notifications\OrderReceipt($order));
+
+        return back()->with('success', __('We have emailed the receipt to you.'));
     }
 
     /**

@@ -330,6 +330,11 @@
 
             @php $bml = app(\App\Services\BmlConnect::class); @endphp
             <x-admin.fold title="Payments">
+                <div class="mb-4 max-w-xs" data-refund-approval-setting>
+                    <label for="refund_approval_over" class="block text-sm font-medium text-gray-700">Refunds over this need a second person (MVR)</label>
+                    <input id="refund_approval_over" name="refund_approval_over" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('refund_approval_over', $settings['refund_approval_over'] ?? 0) }}">
+                    <p class="mt-1 text-xs text-gray-500">One staff member approves, another sends and records it. 0 = no approval needed. A summary of refunds is emailed every morning.</p>
+                </div>
                 <div class="mt-3 rounded-lg border px-4 py-3 text-sm {{ $bml->enabled() ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-800' }}">
                     @if($bml->enabled())
                         <p class="font-semibold">BML card payments are on{{ $bml->isSandbox() ? ' (sandbox: test cards only, no real money)' : '' }}.</p>
@@ -366,6 +371,11 @@
                         <label for="late_shipment_days" class="block text-sm font-medium text-gray-700">{{ __('Days to ship after payment') }}</label>
                         <input id="late_shipment_days" name="late_shipment_days" type="number" min="0" max="60" class="{{ $field }}" value="{{ old('late_shipment_days', $settings['late_shipment_days'] ?? 3) }}">
                         <p class="mt-1 text-xs text-gray-500">{{ __('Parts shipped later than this count as late on performance pages.') }}</p>
+                    </div>
+                    <div>
+                        <label for="late_start_hours" class="block text-sm font-medium text-gray-700">Alert when not started after (hours)</label>
+                        <input id="late_start_hours" name="late_start_hours" type="number" min="1" max="720" class="{{ $field }}" value="{{ old('late_start_hours', $settings['late_start_hours'] ?? 24) }}">
+                        <p class="mt-1 text-xs text-gray-500">Paid orders a shop has not started by then: the shop is emailed and the team alerted (Team alerts → Late orders), once.</p>
                     </div>
                 </div>
                 <p class="mt-3 text-xs text-gray-500">{{ __('The return window is under Business details above. The Seller Terms page fills in these values through placeholders; edit its wording under Legal pages.') }}</p>

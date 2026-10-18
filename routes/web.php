@@ -145,9 +145,12 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         // Order routes
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/live', [OrderController::class, 'live'])->name('orders.live')->middleware('throttle:60,1,orders.live');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
+        Route::get('/orders/{order}/receipt.pdf', [OrderController::class, 'receiptPdf'])->name('orders.receipt.pdf')->middleware('throttle:10,1,orders.receipt.pdf');
+        Route::post('/orders/{order}/receipt/email', [OrderController::class, 'emailReceipt'])->name('orders.receipt.email')->middleware('throttle:3,10,orders.receipt.email');
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
         Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1,payments.bml.pay');
         Route::post('/orders/{order}/parts/{part}/return', [\App\Http\Controllers\Customer\ReturnController::class, 'store'])->name('orders.returns.store')->middleware('throttle:10,1,orders.returns.store');
@@ -204,6 +207,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/orders/{order}/parts/{part}/status', [AdminController::class, 'updatePartStatus'])->name('orders.parts.status');
         Route::post('/orders/{order}/bml-sync', [AdminController::class, 'syncBmlPayment'])->name('orders.bml-sync');
         Route::post('/orders/{order}/refunded', [AdminController::class, 'recordRefund'])->name('orders.refunded');
+        Route::post('/orders/{order}/refund-approve', [AdminController::class, 'approveRefund'])->name('orders.refund-approve');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
@@ -223,6 +227,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/returns/{return}/approve', [\App\Http\Controllers\Admin\ReturnController::class, 'approve'])->name('returns.approve');
         Route::post('/returns/{return}/reject', [\App\Http\Controllers\Admin\ReturnController::class, 'reject'])->name('returns.reject');
         Route::post('/returns/{return}/refunded', [\App\Http\Controllers\Admin\ReturnController::class, 'refunded'])->name('returns.refunded');
+        Route::post('/returns/{return}/refund-approve', [\App\Http\Controllers\Admin\ReturnController::class, 'approveRefund'])->name('returns.refund-approve');
         Route::get('/legal', [\App\Http\Controllers\Admin\LegalPagesController::class, 'edit'])->name('legal');
         Route::put('/legal', [\App\Http\Controllers\Admin\LegalPagesController::class, 'update'])->name('legal.update');
 

@@ -1,0 +1,5 @@
+expire-gift-cards ok
+prune-guest-carts ok deleted 0
+heartbeat ok 2026-10-19T08:42:03+05:00
+prune-funnel-events ok
+queue-heartbeat ok

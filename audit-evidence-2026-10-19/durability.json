@@ -1,0 +1,44 @@
+{
+    "points": {
+        "before": 100,
+        "after": 0,
+        "children": [
+            "ok 28895",
+            "fail 28896 You no longer have enough points for this. Please check your points and try again."
+        ],
+        "non_negative": true,
+        "one_failed": true
+    },
+    "stock": {
+        "set_to": 1,
+        "original": 25,
+        "left": 1,
+        "children": [
+            "fail 28897 We could not place your order. Please try again.",
+            "fail 28898 We could not place your order. Please try again."
+        ],
+        "not_negative": true,
+        "one_failed": true,
+        "restored_to": 25
+    },
+    "confirm": {
+        "children": [
+            "ok 28899",
+            "fail 28900"
+        ],
+        "payment_status": "paid",
+        "earned_rows_before": 0,
+        "earned_rows_after": 1,
+        "points_balance": 2
+    },
+    "return": {
+        "children": [
+            "ok 28901",
+            "ok 28902"
+        ],
+        "status": "approved",
+        "stock_before": 24,
+        "stock_after": 26,
+        "restocked_once": false
+    }
+}

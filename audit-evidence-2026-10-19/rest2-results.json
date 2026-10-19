@@ -1,0 +1,172 @@
+[
+  {
+    "feature": "aged order created_at",
+    "status": "Pass",
+    "detail": "pending 2026-10-19 08:33:47"
+  },
+  {
+    "feature": "unpaid cancel skipped while link is live",
+    "status": "Pass",
+    "detail": "Cancelled 0 unpaid card order(s). status pending"
+  },
+  {
+    "feature": "unpaid cancel after link is older than 48h",
+    "status": "Pass",
+    "detail": "Cancelled 1 unpaid card order(s). link 2026-10-17 07:34:26 status cancelled"
+  },
+  {
+    "feature": "admin /admin/exports",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/tax",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/tax/report",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/settlements",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/webhooks",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/audit",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/errors",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/home-page",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/sms",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/sms/campaigns",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/returns",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/payouts",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/finance",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "admin /admin/rewards",
+    "status": "Fail",
+    "detail": "500"
+  },
+  {
+    "feature": "admin /admin/users",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "throwaway customers",
+    "status": "Pass",
+    "detail": "13 14 12"
+  },
+  {
+    "feature": "customer page",
+    "status": "Pass",
+    "detail": "200 http://127.0.0.1:8020/admin/customers/13"
+  },
+  {
+    "feature": "customer merge",
+    "status": "Fail",
+    "detail": "http 200 <!DOCTYPE html> <html lang=\"en\" dir=\"ltr\" class=\"h-full bg-gray-100\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit"
+  },
+  {
+    "feature": "customer erase",
+    "status": "Fail",
+    "detail": "http 200 erased_at "
+  },
+  {
+    "feature": "api profile:read GET /api/v1/user",
+    "status": "Pass",
+    "detail": "with=200 without=403"
+  },
+  {
+    "feature": "api profile:write PUT /api/v1/user",
+    "status": "Pass",
+    "detail": "with=200 without=403"
+  },
+  {
+    "feature": "api cart:write GET /api/v1/cart",
+    "status": "Pass",
+    "detail": "with=200 without=403"
+  },
+  {
+    "feature": "api wishlist:write GET /api/v1/wishlist",
+    "status": "Pass",
+    "detail": "with=200 without=403"
+  },
+  {
+    "feature": "api order:read GET /api/v1/orders",
+    "status": "Pass",
+    "detail": "with=200 without=403"
+  },
+  {
+    "feature": "api order:write POST /api/v1/checkout/remove-points",
+    "status": "Pass",
+    "detail": "with=200 without=403"
+  },
+  {
+    "feature": "api products:write POST /api/v1/products",
+    "status": "Fail",
+    "detail": "with=403 without=403"
+  },
+  {
+    "feature": "/api/health",
+    "status": "Pass",
+    "detail": "200 {\"status\":\"healthy\",\"timestamp\":\"2026-10-19T03:34:30.491602Z\",\"version\":\"1.0.0\"}"
+  },
+  {
+    "feature": "/api/health/ready",
+    "status": "Pass",
+    "detail": "200 {\"status\":\"ready\",\"checks\":{\"database\":true,\"cache\":true,\"storage\":true}}"
+  },
+  {
+    "feature": "2FA enabled",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/profile/2fa/setup Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help c"
+  },
+  {
+    "feature": "2FA challenge",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/2fa"
+  },
+  {
+    "feature": "2FA code accepted",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/"
+  }
+]

@@ -1,0 +1,115 @@
+===== orders:cancel-unpaid-card =====
+Cancelled 0 unpaid card order(s).
+EXIT 0 ELAPSED 0s
+===== orders:cancel-unpaid-transfer =====
+Cancelled 0 unpaid bank transfer order(s).
+EXIT 0 ELAPSED 0s
+===== backup:clean =====
+Starting cleanup...
+Cleaning backups of Iruali on disk local...
+Used storage after cleanup: 0 KB.
+Cleanup completed!
+EXIT 0 ELAPSED 1s
+===== backup:run --only-db =====
+Starting backup...
+Dumping database /workspace/database/audit.sqlite...
+Determining files to backup...
+Zipping 1 files and directories...
+Created zip containing 1 files and directories. Size is 53.09 KB
+Copying zip to disk named local...
+Successfully copied zip to disk named local.
+Backup completed!
+EXIT 0 ELAPSED 0s
+===== sanctum:prune-expired --hours=24 =====
+  Pruning tokens with expired expires_at timestamps .............. 8.14ms DONE
+  Pruning tokens with expired expiration value based on configuration file  0.21ms DONE
+
+   INFO  Tokens expired for more than [24 hours] pruned successfully.  
+
+EXIT 0 ELAPSED 0s
+===== marketing:cart-reminders =====
+Sent 0 first and 0 second reminder(s).
+EXIT 0 ELAPSED 0s
+===== rewards:expire-points =====
+Points never expire (points_expire_months is 0).
+EXIT 0 ELAPSED 0s
+===== quotes:expire =====
+Expired 0 quote(s).
+EXIT 0 ELAPSED 0s
+===== sellers:applications-reopen =====
+Emailed 0 people on the waiting list.
+EXIT 0 ELAPSED 1s
+===== queue:prune-failed --hours=168 =====
+
+   INFO  0 entries deleted.  
+
+EXIT 0 ELAPSED 0s
+===== errors:digest =====
+No address to send the digest to: set ALERTS_EMAIL in .env or a contact email in Admin → Settings.
+EXIT 1 ELAPSED 0s
+===== rewards:refresh-tiers =====
+0 customer tier(s) changed.
+EXIT 0 ELAPSED 0s
+===== rewards:check-balances =====
+Fixed 1 points balance(s) to match the ledger.
+EXIT 0 ELAPSED 0s
+===== marketing:birthday-offers =====
+Birthday offers are switched off.
+EXIT 0 ELAPSED 0s
+===== payments:reconcile-bml =====
+Checked 3 open card payment(s); 0 went through.
+EXIT 0 ELAPSED 1s
+===== sms:release-held =====
+EXIT 0 ELAPSED 0s
+===== sms:prune =====
+Deleted 0 SMS log rows older than 180 days.
+EXIT 0 ELAPSED 0s
+===== seller:low-stock-digest =====
+Low-stock digest sent to 3 shop(s).
+EXIT 0 ELAPSED 0s
+===== brands:notify-followers =====
+Brand updates emailed to 0 customer(s).
+EXIT 0 ELAPSED 0s
+===== wishlist:price-drops =====
+Price-drop alerts sent to 0 customer(s).
+EXIT 0 ELAPSED 0s
+===== preorders:flag-late =====
+Flagged 0 late pre-order line(s); 0 order(s) with late pre-orders are in the admin inbox.
+EXIT 0 ELAPSED 0s
+===== products:launch =====
+0 product(s) went on sale.
+EXIT 0 ELAPSED 1s
+===== complaints:remind =====
+No complaints waiting.
+EXIT 0 ELAPSED 0s
+===== complaints:weekly-summary =====
+No alerts inbox (MAIL_ALERTS_TO or the contact email in Settings).
+EXIT 0 ELAPSED 0s
+===== ordering:notify-back =====
+EXIT 0 ELAPSED 0s
+===== orders:alert-late =====
+Not started: 0; past delivery date: 0.
+EXIT 0 ELAPSED 0s
+===== refunds:daily-summary =====
+No alerts inbox.
+EXIT 0 ELAPSED 0s
+===== credit:reminders =====
+Reminded: 0; overdue: 0.
+EXIT 0 ELAPSED 0s
+===== insights:compute-pairs =====
+Stored 0 product pairs.
+EXIT 0 ELAPSED 1s
+===== sms:send-campaigns =====
+EXIT 0 ELAPSED 0s
+===== social:publish =====
+EXIT 0 ELAPSED 0s
+===== finance:recurring-expenses =====
+Copied 0 recurring expense(s).
+EXIT 0 ELAPSED 0s
+===== gst:filing-reminder =====
+EXIT 0 ELAPSED 0s
+===== ops:watch =====
+All good.
+EXIT 0 ELAPSED 0s
+===== queue:work --stop-when-empty --max-time=15 --tries=3 =====
+EXIT 0 ELAPSED 4s

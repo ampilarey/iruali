@@ -1,0 +1,57 @@
+[
+  {
+    "feature": "password is asked at the next sign-in",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/account/setup"
+  },
+  {
+    "feature": "password saved",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/"
+  },
+  {
+    "feature": "Text me a code instead at checkout for a verified number",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "checkout SMS code is sent when the phone is verified",
+    "status": "Fail",
+    "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments "
+  },
+  {
+    "feature": "buyer password sign-in",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/"
+  },
+  {
+    "feature": "wishlist and 2FA",
+    "status": "Fail",
+    "detail": "locator.click: Timeout 30000ms exceeded."
+  },
+  {
+    "feature": "settings save",
+    "status": "Pass",
+    "detail": "phone=+9607770001 acct=7770001234567"
+  },
+  {
+    "feature": "payment link opens signed out on a phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "pay by card follows the local fake",
+    "status": "Fail",
+    "detail": "http://127.0.0.1:8020/pay/1?expires=1792553197&signature=7d8fcc8dd08f0a880deb2b9fe0cbb9a302427e18224ab6018b93e25936199d99"
+  },
+  {
+    "feature": "upload transfer slip",
+    "status": "Pass",
+    "detail": "Skip to content Search Choose your island to see what delivers to you. Choose island Pay for order ORD-H5FETBMG4U Audit Buyer 1 × Cotton sarong MVR 280.00 To pay MVR 355.00 We h"
+  },
+  {
+    "feature": "seller export and staff roles",
+    "status": "Fail",
+    "detail": "page.goto: Download is starting"
+  }
+]

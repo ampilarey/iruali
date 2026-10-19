@@ -1,0 +1,45 @@
+Pass	unverified seeded shop phones	7771001 is stored but phone_verified_at is empty, so /login treats that number as a new number. Password accounts are reached by email.
+Pass	Dhivehi /dv/login and /dv/checkout	404 is intended: SetLocale aborts /dv on non-storefront routes (login, checkout, admin, seller). Storefront /dv pages rendered Thaana.
+Pass	password step for an email account
+Pass	Email me a code instead on /login	count 1
+Pass	Text me a code instead absent on /login	count 0
+Pass	email code stored
+Pass	email code signs in	http://127.0.0.1:8020/seller/dashboard
+Pass	forgot password sends a code	channel email because the shop phone is not verified, so the code goes by email
+Pass	new number gets an SMS code
+Error: in prepare, no such column: phone
+  SELECT COUNT(*) FROM sms_messages WHERE phone LIKE '%7911101%';
+                            error here ---^
+Fail	new number account setup	Command failed: sqlite3 /workspace/database/audit.sqlite "SELECT COUNT(*) FROM sms_messages WHERE phone LIKE '%7911101%';" Error: in prepare, no such column: phone SELECT COUNT(*) FROM sms_messages WHERE phone LIKE '%791
+Fail	account without a password gets a code	code=0 password=0
+Pass	second code within a minute is refused	Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness El
+Pass	five wrong passwords lock the attempt
+Pass	signed-out checkout shows the sign-in box
+Pass	Text me a code instead appears at checkout
+Fail	checkout SMS option and signed-out box	page.waitForSelector: Timeout 8000ms exceeded. Call log: - waiting for locator('#code') to be visible 
+Pass	checkout asks Your name	http://127.0.0.1:8020/checkout
+Pass	first-time number places an order	http://127.0.0.1:8020/orders/1 orders=1 guestCartItemsBefore=2
+Error: in prepare, no such column: subtotal
+  SELECT order_number||' sub='||subtotal||' ship='||shipping_cost||' tax='||tax_
+                  error here ---^
+Fail	first-time checkout	Command failed: sqlite3 /workspace/database/audit.sqlite "SELECT order_number||' sub='||subtotal||' ship='||shipping_cost||' tax='||tax_amount||' total='||total||' pay='||payment_method||' status='||status FROM orders o 
+Fail	password asked at next sign-in	page.waitForSelector: Timeout 8000ms exceeded. Call log: - waiting for locator('#code') to be visible 
+Pass	cart follows the customer after sign-in
+Fail	catalogue	page.waitForSelector: Timeout 8000ms exceeded. Call log: - waiting for locator('#password') to be visible 
+Pass	admin sign-in	http://127.0.0.1:8020/admin/dashboard
+Fail	every admin menu item opens	http://127.0.0.1:8020/admin/rewards 500
+Fail	admin menu and settings	page.fill: Timeout 30000ms exceeded. Call log: - waiting for locator('#contact_phone') - locator resolved to <input value="" id="contact_phone" name="contact_phone" class="mt-1 block w-full rounded-lg border border-gray-
+Pass	seller dashboard	http://127.0.0.1:8020/seller
+Pass	seller products	HTTP 200
+Pass	seller product create	HTTP 200
+Fail	seller csv export	HTTP 405
+Pass	seller stock	HTTP 200
+Pass	seller orders	HTTP 200
+Pass	seller payouts	HTTP 200
+Pass	seller staff	HTTP 200
+Pass	seller cannot open customer /orders/{id}	HTTP 403 order 1
+Fail	staff role support	/admin/orders=403 /admin/settings=403 url=http://127.0.0.1:8020/admin/settings
+Fail	staff role finance	/admin/payouts=200 /admin/products=200 url=http://127.0.0.1:8020/login
+Fail	staff role catalogue	/admin/brands=200 /admin/orders=200 url=http://127.0.0.1:8020/login
+Fail	two-factor	page.waitForSelector: Timeout 30000ms exceeded. Call log: - waiting for locator('#password') to be visible 
+RESULTS 77

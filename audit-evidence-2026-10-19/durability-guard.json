@@ -1,0 +1,11 @@
+{
+    "stock_guard": {
+        "before_set": 24,
+        "left_after_race": 0,
+        "restored_to": 23,
+        "children": [
+            "taken 0 29140",
+            "taken 1 29141"
+        ]
+    }
+}

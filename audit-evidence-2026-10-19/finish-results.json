@@ -1,0 +1,57 @@
+[
+  {
+    "feature": "checkout SMS code for a verified phone",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "wishlist 2FA",
+    "status": "Fail",
+    "detail": "locator.click: Error: strict mode violation: getByRole('button', { name: 'Add to Wishlist' }) resolved to 3 elements:"
+  },
+  {
+    "feature": "seller csv export",
+    "status": "Pass",
+    "detail": "200 text/csv; charset=UTF-8"
+  },
+  {
+    "feature": "seller csv import page",
+    "status": "Pass",
+    "detail": "200"
+  },
+  {
+    "feature": "seller holiday page",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/seller/settings/holiday"
+  },
+  {
+    "feature": "assign support",
+    "status": "Fail",
+    "detail": "missing"
+  },
+  {
+    "feature": "assign finance",
+    "status": "Fail",
+    "detail": "missing"
+  },
+  {
+    "feature": "assign catalogue",
+    "status": "Fail",
+    "detail": "missing"
+  },
+  {
+    "feature": "staff role support",
+    "status": "Fail",
+    "detail": "/admin/orders=403 http://127.0.0.1:8020/admin/orders /admin/settings=403 http://127.0.0.1:8020/admin/settings"
+  },
+  {
+    "feature": "staff role finance",
+    "status": "Fail",
+    "detail": "/admin/payouts=403 http://127.0.0.1:8020/admin/payouts /admin/products=403 http://127.0.0.1:8020/admin/products"
+  },
+  {
+    "feature": "staff role catalogue",
+    "status": "Fail",
+    "detail": "/admin/brands=403 http://127.0.0.1:8020/admin/brands /admin/orders=403 http://127.0.0.1:8020/admin/orders"
+  }
+]

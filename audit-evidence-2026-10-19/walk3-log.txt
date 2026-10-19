@@ -1,0 +1,18 @@
+Pass	SMS row for the checkout number	rows 2
+Pass	account without a password gets a code	code=1 password=0 Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness El
+Fail	checkout SMS code step	Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness El
+Fail	password is asked at the next sign-in	http://127.0.0.1:8020/login Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help c
+Pass	search	
+Pass	brands	brand links 6
+Pass	compare	
+Fail	wishlist	
+Fail	set password then catalogue and 2FA	locator.innerText: Timeout 30000ms exceeded. Call log: - waiting for locator('.font-mono').first() 
+Pass	admin still signs in	http://127.0.0.1:8020/admin/dashboard
+Fail	admin rewards page	SQLite HAVING on referrals_count. RewardsReportController.php:34
+Fail	settings save	phone= account set=false
+AUDIT10 10	voucher created in admin	
+Pass	payment link box on the order	
+Error: in prepare, database is locked (5)
+Fail	admin settings voucher points pause payment link	Command failed: sqlite3 /workspace/database/audit.sqlite "SELECT payment_link_sent_at FROM orders WHERE id=1;" Error: in prepare, database is locked (5) 
+Fail	seller export holiday and staff roles	page.goto: Download is starting Call log: - navigating to "http://127.0.0.1:8020/seller/products/export.csv", waiting until "load" 
+DONE 16

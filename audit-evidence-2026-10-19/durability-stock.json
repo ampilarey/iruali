@@ -1,0 +1,14 @@
+{
+    "stock": {
+        "set_to": 1,
+        "original": 25,
+        "left": 0,
+        "children": [
+            "fail 29016 We could not place your order. Please try again.",
+            "ok 29017 Order placed successfully!"
+        ],
+        "not_negative": true,
+        "one_failed": true,
+        "restored_to": 24
+    }
+}

@@ -26,6 +26,15 @@
             <p>{{ __('"Shops based here" are approved shops with this home island. "Shops delivering here" counts every approved shop that delivers to all islands plus the island shops that reach this one.') }}</p>
         </div>
 
+        <x-admin.fold title="Add an island" body="p-4 sm:p-6 space-y-4" id="island-add" :open="$errors->any()">
+            <p class="text-sm text-gray-600">For an island the list is missing, such as a new or reclaimed island. It is switched on straight away.</p>
+            <form method="POST" action="{{ route('admin.islands.store') }}" class="space-y-4" data-island-add>
+                @csrf
+                @include('admin.islands._form', ['island' => null])
+                <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Add island</button>
+            </form>
+        </x-admin.fold>
+
         <form method="GET" class="flex flex-wrap items-end gap-3 rounded-lg bg-white p-4 shadow">
             <div>
                 <label for="island-q" class="block text-xs font-medium text-gray-600">{{ __('Search') }}</label>
@@ -77,6 +86,7 @@
                                     <input type="hidden" name="active" value="{{ $island->is_active ? 0 : 1 }}">
                                     <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $island->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">{{ $island->is_active ? __('On') : __('Off') }}</span>
                                     <button class="text-xs font-medium text-primary-600 hover:underline">{{ $island->is_active ? __('Switch off') : __('Switch on') }}</button>
+                                    <a href="{{ route('admin.islands.edit', $island) }}" class="text-xs font-medium text-gray-600 hover:underline">Edit</a>
                                 </form>
                             </td>
                         </tr>

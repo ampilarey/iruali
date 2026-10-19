@@ -210,6 +210,28 @@ class ReturnsTest extends TestCase
         $this->assertSame(1, SellerAdjustment::count());
     }
 
+    public function test_a_return_on_an_unpaid_order_takes_the_items_back_but_refunds_and_deducts_nothing(): void
+    {
+        $order = $this->deliveredOrder();
+        $order->forceFill(['payment_status' => 'unpaid', 'paid_at' => null])->save(); // e.g. cash on delivery not confirmed yet
+        $this->requestReturn($order, 1, 'faulty', ['photo' => UploadedFile::fake()->image('broken.png')]);
+        $return = ReturnRequest::sole();
+        $stock = $this->productA->fresh()->stock_quantity;
+
+        $this->actingAs($this->admin)->get(route('admin.returns.show', $return))->assertOk()->assertSee('value="0.00"', false);
+        $this->post(route('admin.returns.approve', $return), ['refund_amount' => 100, 'restock' => 1])
+            ->assertSessionHas('error', 'This order has not been paid, so there is no money to refund. Confirm the payment first, or approve with a refund of 0 to take the items back.');
+        $this->assertSame('requested', $return->fresh()->status);
+
+        $this->post(route('admin.returns.approve', $return), ['refund_amount' => 0, 'restock' => 1])->assertSessionHas('success');
+        $this->assertSame('approved', $return->fresh()->status);
+        $this->assertSame($stock + 1, $this->productA->fresh()->stock_quantity);
+        $this->assertSame(0, SellerAdjustment::count(), 'the shop is not charged for an order that was never paid');
+
+        $this->post(route('admin.returns.refunded', $return), ['refund_reference' => 'TRF-X'])->assertSessionHas('error');
+        $this->assertSame('approved', $return->fresh()->status);
+    }
+
     public function test_a_return_after_the_shop_was_paid_is_deducted_from_the_next_payout(): void
     {
         $order = $this->deliveredOrder();

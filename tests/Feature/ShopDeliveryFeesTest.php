@@ -221,6 +221,7 @@ class ShopDeliveryFeesTest extends TestCase
         $this->cartFor($customer, [[$this->product($fresh, 100), 1], [$this->product($plain, 50), 1]]);
         $this->placeOrder($customer, ['island_id' => $this->male->id])->assertRedirect();
         $order = Order::sole();
+        $order->forceFill(['payment_status' => 'paid', 'paid_at' => now()])->save(); // money goes back only on a paid order
         $part = $this->part($order, $fresh);
 
         $return = ReturnRequest::create([

@@ -148,6 +148,9 @@ class ReturnService
     public function suggestedRefund(ReturnRequest $request): float
     {
         $order = $request->order;
+        if ($order->payment_status !== 'paid') {
+            return 0.0; // nothing was paid, so nothing to send back
+        }
         $part = $request->sellerOrder;
         $refund = (float) $request->items_value;
 
@@ -184,8 +187,14 @@ class ReturnService
         if ($request->status !== 'requested' || $refund < 0 || $refund > $this->refundableLeft($request) + 0.001) {
             return false;
         }
+        // No money back, and nothing taken from the shop, on an order that was never paid (a card
+        // order left unpaid, cash not yet confirmed): the items can still come back with a refund of 0
+        $paid = $request->order->payment_status === 'paid';
+        if (! $paid && $refund > 0) {
+            return false;
+        }
 
-        $approved = DB::transaction(function () use ($request, $refund, $restock, $note, $admin) {
+        $approved = DB::transaction(function () use ($request, $refund, $restock, $note, $admin, $paid) {
             // Only from "requested", in one statement: a second approval at the same moment changes
             // no row and stops here (no second restock or shop deduction)
             $changes = [
@@ -211,7 +220,7 @@ class ReturnService
 
             // Take back what the shop earned on the returned items (their price less commission).
             $part = $request->sellerOrder;
-            if ($part?->seller_id) {
+            if ($paid && $part?->seller_id) {
                 // The shop gives back its share of what the customer is actually refunded for the items
                 $base = min((float) $refund, (float) $request->items_value);
                 $shopShare = round($base * (1 - (float) $part->commission_rate / 100), 2);
@@ -252,7 +261,8 @@ class ReturnService
 
     public function markRefunded(ReturnRequest $request, string $reference): bool
     {
-        if ($request->status !== 'approved') {
+        // Only money that was paid, and an amount to send back
+        if ($request->status !== 'approved' || $request->order->payment_status !== 'paid' || (float) $request->refund_amount <= 0) {
             return false;
         }
 

@@ -38,6 +38,9 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::put('/delivery', [DeliveryController::class, 'update'])->name('delivery.update');
     // Islands: switch islands on and off, see how many shops are based on / deliver to each (admins)
     Route::get('/islands', [\App\Http\Controllers\Admin\IslandController::class, 'index'])->name('islands');
+    Route::post('/islands', [\App\Http\Controllers\Admin\IslandController::class, 'store'])->name('islands.store');
+    Route::get('/islands/{island}/edit', [\App\Http\Controllers\Admin\IslandController::class, 'edit'])->name('islands.edit')->whereNumber('island');
+    Route::put('/islands/{island}', [\App\Http\Controllers\Admin\IslandController::class, 'update'])->name('islands.update')->whereNumber('island');
     Route::post('/islands/{island}/active', [\App\Http\Controllers\Admin\IslandController::class, 'toggle'])->name('islands.toggle')->whereNumber('island');
     // A shop's home island and where it delivers (Admin → Sellers → the shop's page)
     Route::put('/sellers/{seller}/coverage', [\App\Http\Controllers\Admin\IslandController::class, 'updateShop'])->name('sellers.coverage')->whereNumber('seller');

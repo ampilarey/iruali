@@ -51,6 +51,7 @@ class Order extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'payment_link_sent_at' => 'datetime',
         'payment_slip_uploaded_at' => 'datetime',
         'refunded_at' => 'datetime',
         'refund_amount' => 'decimal:2',

@@ -61,6 +61,8 @@ class PaymentLinkTest extends TestCase
         });
         $this->assertNotNull($order->fresh()->payment_link_sent_at);
         $this->assertTrue(AuditLog::where('action', 'payment.link_sent')->exists());
+        // The order page still opens once a link was sent, and says when
+        $this->get(route('admin.orders.show', $order))->assertOk()->assertSee('Last sent');
 
         // A paid order: no link
         $order->forceFill(['payment_status' => 'paid'])->save();

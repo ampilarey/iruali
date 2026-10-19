@@ -185,15 +185,21 @@ class ReturnService
             return false;
         }
 
-        DB::transaction(function () use ($request, $refund, $restock, $note, $admin) {
-            $request->update([
+        $approved = DB::transaction(function () use ($request, $refund, $restock, $note, $admin) {
+            // Only from "requested", in one statement: a second approval at the same moment changes
+            // no row and stops here (no second restock or shop deduction)
+            $changes = [
                 'status' => 'approved',
                 'refund_amount' => round($refund, 2),
                 'restocked' => $restock,
                 'admin_note' => $note,
                 'resolved_by' => $admin->id,
                 'resolved_at' => now(),
-            ]);
+            ];
+            if (ReturnRequest::whereKey($request->id)->where('status', 'requested')->update($changes) === 0) {
+                return false;
+            }
+            $request->forceFill($changes)->syncOriginal();
 
             if ($restock) {
                 foreach ($request->items()->with('orderItem.product')->get() as $line) {
@@ -220,7 +226,12 @@ class ReturnService
                     ]);
                 }
             }
+
+            return true;
         });
+        if (! $approved) {
+            return false;
+        }
 
         $this->notifyCustomer($request->fresh());
 

@@ -27,12 +27,15 @@ class CheckoutSignInTest extends TestCase
 
     protected array $session;
 
+    /** What the fake SMS gateway answers (500: it is down) */
+    protected int $smsStatus = 200;
+
     protected function setUp(): void
     {
         parent::setUp();
         config(['sms.driver' => 'http', 'sms.http.url' => 'https://sms.test/send', 'sms.http.body_template' => '{"to":"{to}","text":"{message}"}', 'sms.http.success_regex' => '']);
         app(SmsManager::class)->using(null);
-        Http::fake(['sms.test/*' => Http::response('ok', 200)]);
+        Http::fake(['sms.test/*' => fn () => Http::response($this->smsStatus === 200 ? 'ok' : 'gateway down', $this->smsStatus)]);
 
         $product = Product::factory()->create(['price' => 150, 'stock_quantity' => 5, 'name' => ['en' => 'Coconut oil']]);
         $token = Str::random(40);
@@ -118,5 +121,30 @@ class CheckoutSignInTest extends TestCase
         $this->get(route('login'))->assertSee('data-login-phone="password"', false)->assertDontSee('data-sms-code', false);
         $this->post(route('login.phone.sms-code'))->assertRedirect(route('login'));
         Notification::assertNothingSent();
+    }
+
+    public function test_no_sms_code_button_for_an_account_without_a_verified_number(): void
+    {
+        $user = $this->customer();
+        $user->forceFill(['phone_verified_at' => null])->save();
+
+        $this->withSession($this->session)->post(route('login.phone.start'), ['login' => 'aishath@example.com', 'checkout' => '1']);
+        $this->get(route('checkout'))->assertSee('data-login-phone="password"', false)->assertDontSee('data-sms-code', false);
+        $this->post(route('login.phone.sms-code'))->assertRedirect(route('checkout'))->assertSessionHasErrors('login');
+        $this->assertSame(0, SmsMessage::count());
+    }
+
+    public function test_a_failed_text_message_is_reported_not_claimed_as_sent(): void
+    {
+        $this->smsStatus = 500;
+
+        $this->withSession($this->session)->post(route('login.phone.start'), ['login' => '9123456', 'checkout' => '1'])
+            ->assertRedirect(route('checkout'))->assertSessionHasErrors('login')->assertSessionMissing('status');
+        $this->assertSame('failed', SmsMessage::sole()->status);
+        $this->get(route('checkout'))->assertSee('data-login-phone="phone"', false);
+
+        // The gateway is back: a retry straight away is allowed
+        $this->smsStatus = 200;
+        $this->post(route('login.phone.start'), ['login' => '9123456', 'checkout' => '1'])->assertSessionHas('status');
     }
 }

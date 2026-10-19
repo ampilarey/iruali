@@ -31,7 +31,7 @@ class RewardsReportController extends Controller
 
         $topReferrers = User::query()
             ->withCount(['referrals', 'referrals as rewarded_referrals_count' => fn ($q) => $q->whereNotNull('referral_rewarded_at')])
-            ->having('referrals_count', '>', 0)
+            ->whereHas('referrals') // (not HAVING on the count: SQLite refuses it without GROUP BY)
             ->orderByDesc('rewarded_referrals_count')->orderByDesc('referrals_count')
             ->take(20)
             ->get();

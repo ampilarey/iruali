@@ -27,7 +27,7 @@
                         <button class="text-sm font-medium text-primary-600 hover:text-primary-500">{{ __('Email me a code instead') }}</button>
                     </form>
                 @endif
-                @if($inCheckout && ($pending['checkout'] ?? false))
+                @if($inCheckout && ($pending['checkout'] ?? false) && ($pending['sms_code'] ?? false))
                     <form method="POST" action="{{ route('login.phone.sms-code') }}" data-sms-code>
                         @csrf
                         <button class="text-sm font-medium text-primary-600 hover:text-primary-500">{{ __('Text me a code instead') }}</button>

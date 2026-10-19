@@ -194,6 +194,22 @@ class ReturnsTest extends TestCase
         $this->assertSame(1, SellerAdjustment::count());
     }
 
+    public function test_two_approvals_at_the_same_moment_restock_and_deduct_once(): void
+    {
+        $order = $this->deliveredOrder();
+        $this->requestReturn($order, 1, 'change_of_mind');
+        $first = ReturnRequest::sole();
+        $second = ReturnRequest::sole(); // a second admin's copy, loaded before the first approval lands
+        $stock = $this->productA->fresh()->stock_quantity;
+        $returns = app(\App\Services\ReturnService::class);
+
+        $this->assertTrue($returns->approve($first, 100, true, null, $this->admin));
+        $this->assertFalse($returns->approve($second, 100, true, null, $this->admin));
+
+        $this->assertSame($stock + 1, $this->productA->fresh()->stock_quantity);
+        $this->assertSame(1, SellerAdjustment::count());
+    }
+
     public function test_a_return_after_the_shop_was_paid_is_deducted_from_the_next_payout(): void
     {
         $order = $this->deliveredOrder();

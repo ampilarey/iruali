@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Models\OTP;
+use App\Models\SmsMessage;
 use App\Models\User;
 use App\Notifications\SignInCode;
 use App\Services\NotificationService;
@@ -81,7 +82,7 @@ class PhoneLoginController extends AuthController
         }
 
         if ($user && $user->hasPassword()) {
-            $request->session()->put(self::SESSION, $pending + ['step' => 'password', 'email_code' => filled($user->email)]);
+            $request->session()->put(self::SESSION, $pending + ['step' => 'password', 'email_code' => filled($user->email), 'sms_code' => $user->isPhoneVerified() && filled($user->phone)]);
 
             return $this->home($pending);
         }
@@ -138,8 +139,11 @@ class PhoneLoginController extends AuthController
     {
         $pending = $request->session()->get(self::SESSION);
         $user = $pending ? $this->pendingUser($pending) : null;
-        if (! $user || ! ($pending['checkout'] ?? false) || ! $user->isPhoneVerified() || blank($user->phone)) {
+        if (! $user || ! ($pending['checkout'] ?? false)) {
             return $this->home($pending);
+        }
+        if (! $user->isPhoneVerified() || blank($user->phone)) {
+            return $this->home($pending)->withErrors(['login' => __('This account has no verified mobile number. Use your password, or ask for a code by email.')]);
         }
 
         return $this->sendCode($request, $pending, 'sms', 'login');
@@ -329,10 +333,22 @@ class PhoneLoginController extends AuthController
         RateLimiter::hit($key.':h', 3600);
 
         $otp = $channel === 'mail' ? OTP::createForEmail($target, 'login') : OTP::createForPhone($target, 'login');
+        $lastSms = (int) SmsMessage::max('id');
         try {
             Notification::route($channel, $target)->notifyNow(new SignInCode($otp)); // now: they are waiting for it
+            $sent = $channel === 'mail' || SmsMessage::where('id', '>', $lastSms)->where('to', $target)->latest('id')->value('status') !== 'failed';
         } catch (Throwable $e) {
             report($e);
+            $sent = false;
+        }
+        if (! $sent) {
+            // The gateway refused or could not be reached: say so (and let them try again at once)
+            $otp->forceFill(['is_used' => true])->save();
+            RateLimiter::clear($key.':m');
+
+            return $this->home($pending)->withErrors(['login' => $channel === 'sms' && $user && filled($user->email)
+                ? __('We could not send the text message just now. Please try again, or ask for a code by email.')
+                : __('We could not send the code just now. Please try again in a minute.')]);
         }
         $shown = $channel === 'mail' ? $this->maskEmail($target) : '•••'.substr($target, -4);
         $request->session()->put(self::SESSION, ['step' => 'code', 'channel' => $channel, 'target' => $target, 'purpose' => $purpose, 'shown_to' => $shown] + $pending);

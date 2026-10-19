@@ -89,7 +89,12 @@ class LoyaltyTiersTest extends TestCase
         $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
         $customer = User::factory()->create(['email' => 'mariyam@example.com']);
 
-        $this->actingAs($admin)->get(route('admin.rewards'))->assertOk()->assertSee('data-fold="points-adjust"', false);
+        // Top referrers: only people who referred someone (a plain WHERE, which SQLite accepts too)
+        $referrer = User::factory()->create(['name' => 'Hawwa Referrer']);
+        User::factory()->create()->forceFill(['referred_by' => $referrer->id])->save();
+        User::factory()->create(['name' => 'Nobody Referred']);
+        $this->actingAs($admin)->get(route('admin.rewards'))->assertOk()->assertSee('data-fold="points-adjust"', false)
+            ->assertSee('Hawwa Referrer')->assertDontSee('Nobody Referred');
         $this->post(route('admin.rewards.adjust'), ['email' => 'mariyam@example.com', 'points' => -5, 'reason' => 'x'])->assertSessionHasErrors('points');
         $this->post(route('admin.rewards.adjust'), ['email' => 'mariyam@example.com', 'points' => 150, 'reason' => 'Sorry for the late delivery'])->assertSessionHas('success');
         $this->assertSame(150, (int) $customer->fresh()->loyalty_points);

@@ -3007,5 +3007,8 @@
     "Delivery and payment come next, once you are signed in.": "ސައިން އިން ކުރެއްވުމަށްފަހު ޑެލިވަރީއާއި ފައިސާ ދެއްކުން.",
     "Edit cart": "ކާޓް ބަދަލުކުރައްވާ",
     "For the shop and the delivery. You can set a password next time you sign in.": "ފިހާރައަށާއި ޑެލިވަރީއަށް. ޕާސްވޯޑު ދެން ސައިން އިން ކުރައްވާއިރު ހެދޭނެ.",
-    "You sign in at checkout with your mobile number or email. Your cart comes with you.": "ޗެކްއައުޓްގައި މޯބައިލް ނަންބަރު ނުވަތަ އީމެއިލް މެދުވެރިކޮށް ސައިން އިން ކުރައްވާނީ. ކާޓް ވެސް އަންނާނެ."
+    "You sign in at checkout with your mobile number or email. Your cart comes with you.": "ޗެކްއައުޓްގައި މޯބައިލް ނަންބަރު ނުވަތަ އީމެއިލް މެދުވެރިކޮށް ސައިން އިން ކުރައްވާނީ. ކާޓް ވެސް އަންނާނެ.",
+    "This account has no verified mobile number. Use your password, or ask for a code by email.": "މި އެކައުންޓުގައި ވެރިފައި ކުރެވިފައިވާ މޯބައިލް ނަންބަރެއް ނެތް. ޕާސްވޯޑު ބޭނުން ކުރައްވާ، ނުވަތަ އީމެއިލް އިން ކޯޑެއް ހޯއްދަވާ.",
+    "We could not send the text message just now. Please try again, or ask for a code by email.": "މިވަގުތު އެސްއެމްއެސް ފޮނުވޭކަށް ނެތް. އަލުން މަސައްކަތް ކުރައްވާ، ނުވަތަ އީމެއިލް އިން ކޯޑެއް ހޯއްދަވާ.",
+    "We could not send the code just now. Please try again in a minute.": "މިވަގުތު ކޯޑު ފޮނުވޭކަށް ނެތް. އެއް މިނިޓު ފަހުން އަލުން މަސައްކަތް ކުރައްވާ."
 }

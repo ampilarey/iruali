@@ -2,7 +2,7 @@
 
 Read-only pass of GitHub `main` at `043853d450c4d88e37a13accbff01cc941b4176f` (merge of PR #104, 2026-10-18). No application code was changed. The only files added on `audit/full-test-2026-10-19` are this report and `audit-evidence-2026-10-19/`.
 
-`git diff --stat origin/main` after the commit is only those paths. `public/build/` was rebuilt for the demo with `NODE_ENV` unset and then left matching `origin/main`. `database/database.sqlite` was not created. Playwright used `database/browser.sqlite` (mtime `2026-10-19 03:10:56` after its own setup). The demo used `database/audit.sqlite` only.
+`git diff --stat origin/main` for the commit that adds this report (`ff4ced6`) is `120 files changed, 6522 insertions(+)`, and every path is this file or `audit-evidence-2026-10-19/`. `public/build/` was rebuilt for the demo with `NODE_ENV` unset and then left matching `origin/main`. `database/database.sqlite` was not created. Playwright used `database/browser.sqlite` (mtime `2026-10-19 03:10:56` after its own setup). The demo used `database/audit.sqlite` only.
 
 ## Environment
 

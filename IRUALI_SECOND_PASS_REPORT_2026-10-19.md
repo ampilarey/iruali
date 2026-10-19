@@ -2,7 +2,7 @@
 
 Read-only second pass of GitHub `main` at `a31987ab8700d32e91b38d53503e3110c7e1ebff` (merge of PR #106, 2026-10-19). That commit is the required `a31987a` tip, and it contains `1981420` (“Fix the findings from the 2026-10-19 full test pass”). No application code was changed. The only files added on `audit/second-pass-2026-10-19` are this report and `audit-evidence-second-pass/`.
 
-`git diff origin/main` for the commit that adds this report contains only this file and `audit-evidence-second-pass/`. `public/build/` was rebuilt for the demo with `NODE_ENV` unset and left matching `origin/main`. `database/database.sqlite` was not created. Playwright’s own server used `database/browser.sqlite`. The demo used `database/audit2.sqlite` only. `database/audit.sqlite` from the first pass was not opened.
+Commit `3ca8543` is `103 files changed, 3367 insertions(+)`. `git diff --name-only origin/main` lists only this file and paths under `audit-evidence-second-pass/`. `public/build/` was rebuilt for the demo with `NODE_ENV` unset and left matching `origin/main`. `database/database.sqlite` was not created. Playwright’s own server used `database/browser.sqlite`. The demo used `database/audit2.sqlite` only. `database/audit.sqlite` from the first pass was not opened.
 
 ## Environment
 

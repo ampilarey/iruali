@@ -1,0 +1,32 @@
+[
+  {
+    "step": "admin-min-save",
+    "status": "Pass",
+    "detail": "500"
+  },
+  {
+    "step": "min-order",
+    "status": "Pass",
+    "detail": "The minimum order is MVR 500."
+  },
+  {
+    "step": "small-order-shown",
+    "status": "Fail",
+    "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & "
+  },
+  {
+    "step": "small-order-stored",
+    "status": "Info",
+    "detail": "4|225|25|0|bml"
+  },
+  {
+    "step": "ordering-pause",
+    "status": "Pass",
+    "detail": "message shown"
+  },
+  {
+    "step": "ordering-reset",
+    "status": "Info",
+    "detail": "min_order_amount=0\nordering_pause_message=\nordering_pause_mode=off\nsmall_order_fee=0\nsmall_order_threshold=0"
+  }
+]

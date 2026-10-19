@@ -1,0 +1,65 @@
+{
+  "results": [
+    {
+      "step": "preorder-over",
+      "status": "Pass",
+      "detail": "cart qty 1; flash  | Sign Out | Pre-order: ships around 15 Dec\n\nExpected mid December\n\nYou pay now and the shop sends it when the stock arrives. You can cancel for a full refund until it is sent.\n\nOnly 2 left to pre-order"
+    },
+    {
+      "step": "points-cycle",
+      "status": "Pass",
+      "detail": "on has 20=true off still has=false"
+    },
+    {
+      "step": "stack-order",
+      "status": "Info",
+      "detail": "http://127.0.0.1:8030/orders/1 | 1|ORD-VADQRKP3ID|159|25|10|0|0|56|0|0|bml|unpaid | orders 0->1"
+    },
+    {
+      "step": "stack-page",
+      "status": "Info",
+      "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade & Crafts Home & Living Kids & Baby Search Search Hello, Audit Account & Orders 1 Cart Delivering to Malé (change) Show Delivers to Malé Only shops on Malé Show e"
+    },
+    {
+      "step": "shop-code-second",
+      "status": "Pass",
+      "detail": "Shop code Apply A shop's own code, for its items. One code per shop; you can use it with an iruali voucher. You have already used the shop code SHOP20 as many times as it allows. Proceed to checkout Reviewed local sellers Secure card payment via Bank of Maldives Delivered to your"
+    },
+    {
+      "step": "percent-voucher",
+      "status": "Info",
+      "detail": "before 1|ORD-VADQRKP3ID|159|25|10|0|0|56|0|0|bml|unpaid after 2|ORD-CTX69K8SXL|106|25|9|0|0|0|0|0|bml|unpaid"
+    },
+    {
+      "step": "gift-card",
+      "status": "Fail",
+      "detail": "wallet 140 card redeemed 0"
+    },
+    {
+      "step": "wallet-partial",
+      "status": "Fail",
+      "detail": "page.selectOption: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#variant-select')\n    - locator resolved to <select required=\"\" id=\"variant-select\" data-variant-select=\"\" name=\"product_variant_id\" class=\"block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary hidden\">…</select>\n  - attempting select option action\n    2 × waiting for element to be visible and enabled\n      - element is not visible\n    - retrying select option action\n    - waiting 20ms\n    2 × waiting for element to be visible and enabled\n      - element is not visible\n    - retrying select option action\n      - waiting 100ms\n    60 × waiting for element to be visible and enabled\n       - element is not visible\n     - retrying select option action\n       - waiting 500ms\n\n    at addQty (/tmp/audit2-walk2.mjs:28:29)\n    at async file:///tmp/audit2-walk2.mjs:154:5\n    at async guard (/tmp/audit2-walk2.mjs:69:9)\n    at async file:///tmp/audit2-walk2.mjs:152:3"
+    },
+    {
+      "step": "pay-later-offered",
+      "status": "Pass",
+      "detail": "radios 1"
+    },
+    {
+      "step": "pay-later-within",
+      "status": "Info",
+      "detail": "3|ORD-AAUGNCM8QD|80|25|0|0|0|0|0|0|credit|unpaid http://127.0.0.1:8030/orders/3"
+    },
+    {
+      "step": "pay-later",
+      "status": "Fail",
+      "detail": "page.selectOption: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#variant-select')\n    - locator resolved to <select required=\"\" id=\"variant-select\" data-variant-select=\"\" name=\"product_variant_id\" class=\"block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary hidden\">…</select>\n  - attempting select option action\n    2 × waiting for element to be visible and enabled\n      - element is not visible\n    - retrying select option action\n    - waiting 20ms\n    2 × waiting for element to be visible and enabled\n      - element is not visible\n    - retrying select option action\n      - waiting 100ms\n    60 × waiting for element to be visible and enabled\n       - element is not visible\n     - retrying select option action\n       - waiting 500ms\n\n    at addQty (/tmp/audit2-walk2.mjs:28:29)\n    at async file:///tmp/audit2-walk2.mjs:176:5\n    at async guard (/tmp/audit2-walk2.mjs:69:9)\n    at async file:///tmp/audit2-walk2.mjs:163:3"
+    },
+    {
+      "step": "widths",
+      "status": "Pass",
+      "detail": "desktop and 390px cart plus dv variant product"
+    }
+  ],
+  "consoles": []
+}

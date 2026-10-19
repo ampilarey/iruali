@@ -1,0 +1,19 @@
+{
+  "rewards": {
+    "status": 200,
+    "hasReferrer": true,
+    "hasBuyer": false,
+    "hasReferred": false
+  },
+  "paymentLink": {
+    "status": 200,
+    "lastSent": true,
+    "sentAt": "2026-10-19 10:31:39"
+  },
+  "unverified": {
+    "button": 0,
+    "stepHasPassword": false,
+    "postStatus": 200,
+    "message": false
+  }
+}

@@ -1,0 +1,9 @@
+Note: Using configuration file /workspace/phpstan.neon.
+   0/490 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%
+ 490/490 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+
+ [OK] No errors                                                                 
+
+EXIT:0
+ELAPSED_SEC:3

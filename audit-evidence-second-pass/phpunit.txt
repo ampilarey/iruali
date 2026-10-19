@@ -1,0 +1,1422 @@
+
+   PASS  Tests\Unit\CartServiceTest
+  ✓ get or create cart for authenticated user                            2.56s  
+  ✓ get or create cart for guest user                                    0.02s  
+  ✓ cart totals calculation                                              0.02s  
+  ✓ is cart empty                                                        0.02s  
+  ✓ cart summary                                                         0.02s  
+
+   PASS  Tests\Unit\DiscountServiceTest
+  ✓ calculate voucher discount percentage                                0.03s  
+  ✓ calculate voucher discount fixed                                     0.02s  
+  ✓ calculate voucher discount fixed exceeds total                       0.02s  
+  ✓ calculate loyalty points earned                                      0.02s  
+  ✓ validate voucher valid                                               0.02s  
+  ✓ validate voucher invalid code                                        0.01s  
+  ✓ validate voucher inactive                                            0.01s  
+  ✓ validate voucher expired                                             0.01s  
+  ✓ validate voucher usage limit reached                                 0.01s  
+  ✓ validate voucher min order not met                                   0.03s  
+  ✓ apply and remove voucher                                             0.01s  
+  ✓ apply and remove loyalty points                                      0.02s  
+  ✓ apply loyalty points exceeds available                               0.02s  
+  ✓ get available loyalty points                                         0.02s  
+
+   PASS  Tests\Unit\GstMathsTest
+  ✓ gst is the tax fraction of a gst inclusive amount rounded to the la… 0.02s  
+  ✓ small amounts and exact halves round half up                         0.01s  
+  ✓ no rate or no amount means no gst                                    0.01s  
+  ✓ tins are normalised and checked against the mira format              0.01s  
+
+   PASS  Tests\Unit\MoneyTest
+  ✓ formats rufiyaa as mvr in english                                    0.01s  
+  ✓ uses rufiyaa sign in dhivehi                                         0.01s  
+
+   PASS  Tests\Unit\ProductSlugTest
+  ✓ product uses slug as route key                                       0.02s  
+  ✓ product automatically generates slug on creation                     0.02s  
+  ✓ product generates unique slug when duplicate exists                  0.02s  
+  ✓ product updates slug when name changes                               0.02s  
+  ✓ product does not update slug when name unchanged                     0.02s  
+  ✓ product can be found by slug                                         0.02s  
+
+   PASS  Tests\Unit\SmokeChecksTest
+  ✓ all pages pass on a healthy site                                     0.01s  
+  ✓ a 500 a redirect and a connection error are failures                 0.01s  
+  ✓ missing product or category in the sitemap fails those rows          0.01s  
+  ✓ place order signs in adds to cart reaches bml cancels and checks st… 0.01s  
+  ✓ a fresh csrf token is taken after signing in                         0.01s  
+  ✓ a fake bml redirect counts as the pay page                           0.01s  
+  ✓ a failed sign in fails and skips the rest                            0.01s  
+  ✓ landing on the order page instead of bml is a failure                0.01s  
+  ✓ stock not restored and order not cancelled are failures              0.02s  
+
+   PASS  Tests\Unit\StatusEnumsTest
+  ✓ enum values match what is stored in the database                     0.01s  
+  ✓ every case has a label and a badge                                   0.02s  
+  ✓ unknown or legacy values fall back instead of breaking               0.01s  
+  ✓ labels are translated                                                0.01s  
+  ✓ models and helpers read from the enums                               0.01s  
+
+   PASS  Tests\Feature\AbandonedCartTest
+  ✓ first reminder goes out three hours after the last change and only…  0.05s  
+  ✓ the email lists the items with images and links to the cart and an…  0.05s  
+  ✓ second reminder after 48 hours carries a single use voucher for tha… 0.07s  
+  ✓ no voucher when the percent is zero                                  0.04s  
+  ✓ guests opted out customers ordered customers and empty carts are sk… 0.04s  
+  ✓ changing the cart restarts the clock                                 0.04s  
+  ✓ setting switches the emails off                                      0.03s  
+  ✓ signed unsubscribe link opts the customer out and the account page…  0.08s  
+  ✓ admin can change the settings                                        0.08s  
+
+   PASS  Tests\Feature\AccountSafetyTest
+  ✓ sign out everywhere ends other sessions and tokens                   0.05s  
+  ✓ staff accounts lock after wrong passwords and the owner is told      1.11s  
+  ✓ customers are not locked this way                                    1.05s  
+  ✓ admins reset another staff members two step sign in                  0.04s  
+  ✓ staff commands create list and unlock                                0.03s  
+
+   PASS  Tests\Feature\AccountTest
+  ✓ sign up with exactly the forms fields creates the account and email… 0.20s  
+  ✓ sign up accepts a phone and rejects a bad one                        0.19s  
+  ✓ nobody can make themselves a seller at sign up                       0.12s  
+  ✓ verification code only works for the signed in users own email       0.05s  
+  ✓ password reset round trip                                            0.48s  
+  ✓ customer edits profile and changes password                          0.08s  
+  ✓ two step sign in setup login recovery and disable                    0.14s  
+  ✓ register page links the real policies                                0.03s  
+
+   PASS  Tests\Feature\AddressesTest
+  ✓ address book crud and default handling                               0.12s  
+  ✓ addresses belong to their owner only                                 0.06s  
+  ✓ islands map to delivery zones and picked islands fill the address    0.08s  
+  ✓ checkout offers saved addresses and uses the chosen one              0.27s  
+  ✓ a new address at checkout can pick an island and be saved            0.16s  
+  ✓ profile edit still works alongside the address book                  0.04s  
+
+   PASS  Tests\Feature\AdminAnalyticsSettingsTest
+  ✓ non admins cannot view analytics or settings                         0.03s  
+  ✓ analytics page shows sales data                                      0.07s  
+  ✓ admin can update settings and they take effect                       0.06s  
+  ✓ blank announcement hides the bar                                     0.07s  
+  ✓ settings are validated                                               0.03s  
+
+   PASS  Tests\Feature\AdminAndApiCoverageTest
+  ✓ admin can create edit and delete vouchers                            0.13s  
+  ✓ voucher input is validated                                           0.03s  
+  ✓ only admins manage vouchers                                          0.05s  
+  ✓ admin approves a product                                             0.03s  
+  ✓ admin suspends a seller and their products go off sale               0.10s  
+  ✓ api creates an order from the cart with card payment                 0.08s  
+  ✓ api order needs a filled cart and a real payment method              0.03s  
+  ✓ api order is private to its owner                                    0.03s  
+  ✓ api wishlist add list and remove                                     0.06s  
+  ✓ api featured and on sale lists are reachable and filtered            0.07s  
+  ✓ redeeming points at checkout is capped by balance and cart           0.05s  
+  ✓ points cannot exceed the cart total                                  0.03s  
+  ✓ api points endpoints apply and clear a discount on the cart          0.04s  
+
+   PASS  Tests\Feature\AdminBrandsTest
+  ✓ admins see the list and mark new brands as reviewed                  0.13s  
+  ✓ renaming moves products and keeps the old address working            0.13s  
+  ✓ names and addresses of other brands are refused                      0.04s  
+  ✓ logos are uploaded safely and can be removed                         0.11s  
+  ✓ merging moves products and redirects the old page                    0.11s  
+  ✓ only unused brands can be deleted                                    0.03s  
+  ✓ brands are for admins only                                           0.04s  
+
+   PASS  Tests\Feature\AdminInboxTest
+  ✓ built in rows count what is waiting                                  0.09s  
+  ✓ other features can register rows                                     0.06s  
+  ✓ inbox page and nav badge for admin                                   0.13s  
+  ✓ support and finance only see rows they can open                      0.09s  
+
+   PASS  Tests\Feature\AdminLayoutTest
+  ✓ admin pages use the admin layout with a grouped menu                 0.08s  
+  ✓ staff see only what their role opens                                 0.05s  
+  ✓ page sections fold to their headings and open on errors              0.07s  
+  ✓ the menu links to the staff member s own two step sign in            0.06s  
+
+   PASS  Tests\Feature\AdminModerationTest
+  ✓ only admins can moderate                                             0.04s  
+  ✓ hidden reviews leave the shop and stay hidden when edited            0.13s  
+  ✓ admin can answer and delete questions                                0.11s  
+  ✓ newsletter list and csv export                                       0.05s  
+
+   PASS  Tests\Feature\AnonymiseTest
+  ✓ it replaces personal data but keeps staff                            0.06s  
+  ✓ business details and quote requests are replaced                     0.04s  
+  ✓ without force it is a dry run                                        0.03s  
+  ✓ it refuses on production without the extra flag                      0.03s  
+  ✓ fake names are stable and maldivian                                  0.01s  
+
+   PASS  Tests\Feature\ApiCartTest
+  ✓ add update remove and clear                                          0.06s  
+  ✓ a bulk quote line keeps its quantity and a variant line uses the va… 0.04s  
+  ✓ stock is enforced including quantity already in cart                 0.03s  
+  ✓ inactive products and foreign variants are rejected                  0.03s  
+  ✓ cannot modify another users cart item                                0.03s  
+  ✓ voucher is stored on cart and used at checkout                       0.11s  
+
+   PASS  Tests\Feature\ApiResourceTest
+  ✓ product resource transforms data correctly                           0.02s  
+  ✓ order resource transforms data correctly                             0.02s  
+  ✓ user resource transforms data correctly                              0.02s  
+  ✓ category resource transforms data correctly                          0.01s  
+  ✓ cart resource transforms data correctly                              0.01s  
+  ✓ product resource collection works                                    0.02s  
+  ✓ order resource collection works                                      0.02s  
+  ✓ wishlist item resource transforms data correctly                     0.02s  
+  ✓ auth user resource transforms data correctly                         0.01s  
+
+   PASS  Tests\Feature\ApiTest
+  ✓ health check endpoint                                                0.02s  
+  ✓ product endpoint shows approved reviews with their author and live…  0.03s  
+  ✓ products endpoint                                                    0.02s  
+  ✓ categories endpoint                                                  0.02s  
+  ✓ search endpoint                                                      0.02s  
+  ✓ authentication required for protected endpoints                      0.01s  
+  ✓ user registration                                                    0.02s  
+  ✓ user login                                                           0.02s  
+
+   PASS  Tests\Feature\AuditLogTest
+  ✓ record captures who what and where                                   0.03s  
+  ✓ order status changes cancellations and refunds are audited           0.05s  
+  ✓ payouts are audited                                                  0.04s  
+  ✓ seller product settings legal and voucher actions are audited        0.06s  
+  ✓ audit page filters by action user and date and links subjects        0.12s  
+
+   PASS  Tests\Feature\BackupRestoreDrillTest
+  ✓ the newest backup is restored compared and reported                  0.07s  
+  ✓ a plain sql dump works too and live tables are never touched         0.05s  
+  ✓ it refuses to use the live database as the drill database            0.02s  
+  ✓ a missing backup is reported as a failure                            0.02s  
+  ✓ backup disks come from the environment                               0.04s  
+
+   PASS  Tests\Feature\BmlFakeTest
+  ✓ fake mode enables card payment without an api key and never calls b… 0.01s  
+  ✓ fake mode is ignored in production                                   0.01s  
+  ✓ checkout with fake bml lands on the order page with pay now and the… 0.17s  
+
+   PASS  Tests\Feature\BmlPaymentTest
+  ✓ card payment is offered only when bml is configured                  0.14s  
+  ✓ checkout sends the customer to bml with the order total in laari     0.07s  
+  ✓ confirmed payment marks the order paid once                          0.12s  
+  ✓ a redirect claiming success is not trusted                           0.11s  
+  ✓ confirmed transaction with the wrong amount is not accepted          0.08s  
+  ✓ customer can try again with a new transaction                        0.08s  
+  ✓ webhook needs a valid signature and then checks the api              0.08s  
+  ✓ a stranger return syncs payment without showing the order            0.09s  
+  ✓ webhook signed with the portal secret is accepted                    0.07s  
+  ✓ auth header modes                                                    0.05s  
+  ✓ bml being down keeps the order and offers pay now                    0.08s  
+  ✓ unpaid card orders are cancelled after a day and stock returns       0.06s  
+  ✓ card payment is the only method and checkout closes without bml      0.15s  
+  ✓ admin sees attempts and can recheck with bml                         0.15s  
+  ✓ the reconcile job records a payment whose return and webhook were l… 0.11s  
+  ✓ money arriving for a cancelled order is flagged for a refund         0.09s  
+
+   PASS  Tests\Feature\BrandAuthorisedSellersTest
+  ✓ an admin authorises a shop that sells the brand and removes it agai… 0.17s  
+  ✓ any approved shop can be found by name or email and authorised       0.17s  
+  ✓ only admins manage authorised sellers                                0.07s  
+  ✓ the product page shows the badge only for an authorised shop of the… 0.29s  
+  ✓ the brand page lists authorised shops first with the badge           0.17s  
+  ✓ checking shops costs one query per brand and none when eager loaded  0.03s  
+  ✓ merging keeps authorised sellers and deleting a brand drops them     0.06s  
+
+   PASS  Tests\Feature\BrandBannerTest
+  ✓ the banner tops the brand page in both languages and is its share i… 0.24s  
+  ✓ a new banner replaces the old files and removing it deletes them     0.21s  
+  ✓ small large or non image banners are refused                         0.05s  
+  ✓ a merge carries the banner and deleting a brand removes it           0.20s  
+
+   PASS  Tests\Feature\BrandCampaignsTest
+  ✓ an admin makes a campaign for one brand                              0.10s  
+  ✓ shops can only put the brands own products into a brand campaign     0.12s  
+  ✓ the campaign page shows the brand and the brand page shows the runn… 0.19s  
+  ✓ campaigns without a brand work as before                             0.16s  
+  ✓ a campaign cannot take a brand while it holds other brands products  0.04s  
+  ✓ a product that changes brand loses the brand campaign price          0.09s  
+  ✓ a brand with a brand campaign cannot be deleted                      0.03s  
+  ✓ merging a brand keeps its campaigns for the merged brand             0.04s  
+
+   PASS  Tests\Feature\BrandDhivehiNamesTest
+  ✓ admins give a brand a dhivehi name that shops and old links match    0.16s  
+  ✓ a dhivehi name that belongs to another brand is refused              0.06s  
+  ✓ dhivehi pages show the dhivehi name and english pages the english o… 0.29s  
+  ✓ product cards the compare table and filter chips show the dhivehi n… 0.40s  
+  ✓ thaana searches and suggestions find the brand                       0.11s  
+  ✓ merging keeps the dhivehi name matched by the brand it joins         0.04s  
+
+   PASS  Tests\Feature\BrandFollowsTest
+  ✓ customers follow and unfollow a brand from its page                  0.14s  
+  ✓ guests sign in first and come back to the brand page                 0.06s  
+  ✓ following works on dhivehi pages                                     0.08s  
+  ✓ the follower count shows once five people follow                     0.10s  
+  ✓ the account page lists followed brands with an unfollow button       0.10s  
+  ✓ admins see how many people follow each brand                         0.08s  
+  ✓ merging a brand moves its followers                                  0.03s  
+  ✓ products remember when shoppers could first see their markdown       0.03s  
+  ✓ the daily email lists what followed brands put on sale and never re… 0.05s  
+  ✓ one email per customer covers every brand they follow                0.03s  
+  ✓ a long list is capped with a link to the brand page                  0.06s  
+  ✓ customers who switch brand emails off get none                       0.08s  
+  ✓ marketing opt outs get no brand emails                               0.05s  
+  ✓ the email is written in the customers language                       0.03s  
+  ✓ the digest is scheduled once a day                                   0.03s  
+
+   PASS  Tests\Feature\BrandSalesAnalyticsTest
+  ✓ top brands count the last 30 days like top products and sellers      0.12s  
+  ✓ no sales show an empty state and unbranded sales alone keep their r… 0.08s  
+  ✓ brands with nothing on sale get no storefront link and finance gets… 0.09s  
+
+   PASS  Tests\Feature\BrandsTest
+  ✓ names that differ only in case spaces or punctuation are one brand   0.02s  
+  ✓ no brand answers and changes keep the link right                     0.03s  
+  ✓ existing brand names are linked using the most common spelling       0.04s  
+  ✓ the directory lists brands a to z with counts                        0.08s  
+  ✓ a brand page shows logo description shops and departments            0.12s  
+  ✓ every brand has one address                                          0.08s  
+  ✓ brand pages with few products stay out of search engines and the si… 0.09s  
+  ✓ brands are reachable from search products the menu and the home pag… 0.09s  
+  ✓ shops pick from the brand list on the product form                   0.06s  
+  ✓ popular brands are the best sellers first                            0.03s  
+
+   PASS  Tests\Feature\BulkQuoteAdminTest
+  ✓ the quotes page lists every request with status filters              0.15s  
+  ✓ the inbox counts requests waiting more than two days for a shop      0.06s  
+  ✓ staff close a request both sides are told and it is audited          0.07s  
+  ✓ staff write in a request as iruali support and only staff actions a… 0.07s  
+  ✓ only staff who may open quotes get in                                0.08s  
+
+   PASS  Tests\Feature\BulkQuoteCheckoutTest
+  ✓ accepting puts a quoted line in the cart with a fixed price and loc… 0.13s  
+  ✓ the quoted line keeps its quantity when a guest cart is merged in    0.06s  
+  ✓ quoted lines get no multi buy and no shop code                       0.10s  
+  ✓ the voucher works on the rest of the cart points pay for quotes and… 0.13s  
+  ✓ a voucher is refused when everything in the cart is quoted           0.04s  
+  ✓ the order item keeps the quote and commission and earnings are on t… 0.11s  
+  ✓ the invoice carries the business details of the quote                0.09s  
+  ✓ business details given at checkout win over the quotes               0.07s  
+  ✓ an expired quote cannot be accepted                                  0.07s  
+  ✓ an expired quoted line is taken out of the cart with a notice        0.13s  
+  ✓ placing the order refuses a quote that expired on the way            0.04s  
+  ✓ a quote closed while the order is being placed stops the order       0.03s  
+  ✓ stock is checked when accepting and at checkout                      0.04s  
+  ✓ a quote cannot be accepted while the product is off sale or the sho… 0.04s  
+  ✓ options are checked on the quoted option                             0.07s  
+  ✓ the customer declines or withdraws and the shop is told              0.07s  
+  ✓ a removed quoted line can go back in the cart while the quote holds  0.08s  
+  ✓ an unpaid order that is cancelled gives the quote back               0.12s  
+  ✓ another customer gets 403 everywhere                                 0.07s  
+  ✓ the hourly command marks quotes past their day expired               0.04s  
+
+   PASS  Tests\Feature\BulkQuoteRequestsTest
+  ✓ signed in customers see request a bulk quote on the product page an… 0.17s  
+  ✓ the shop page offers a quote on any of its products                  0.12s  
+  ✓ the form is prefilled from the business profile and default address  0.07s  
+  ✓ a customer sends a request and the shop is emailed                   0.08s  
+  ✓ a picked island is kept with its name and the profile can be left a… 0.04s  
+  ✓ the request is validated                                             0.06s  
+  ✓ a product sold in options needs one of its options                   0.09s  
+  ✓ one open request per customer and product                            0.11s  
+  ✓ requests are rate limited                                            0.15s  
+  ✓ the shop sets its own minimum on the product form                    0.14s  
+  ✓ a shop cannot ask itself and a product that is gone cannot be quote… 0.04s  
+
+   PASS  Tests\Feature\BulkQuoteShopRepliesTest
+  ✓ the seller centre lists the shops own requests by status             0.14s  
+  ✓ the shop sends a quote and the customer is emailed                   0.06s  
+  ✓ the quote is validated                                               0.08s  
+  ✓ the shop may change its quote until the customer accepts             0.08s  
+  ✓ the shop declines with a reason and the customer is told             0.07s  
+  ✓ both sides write in the thread                                       0.15s  
+  ✓ the emails say what happened and link to the request                 0.02s  
+  ✓ quote emails follow the shop and customer preferences                0.07s  
+
+   PASS  Tests\Feature\BusinessVerificationTest
+  ✓ a shop sends its documents and they are kept on the private disk     0.08s  
+  ✓ documents are validated                                              0.05s  
+  ✓ only admins and the shop itself can open the documents               0.09s  
+  ✓ the seller application takes the documents optionally                0.08s  
+  ✓ admins review the queue and approve with an email an audit entry an… 0.14s  
+  ✓ admins reject with a reason that is emailed and audited              0.06s  
+  ✓ replacing documents puts the shop back to pending and a stale decis… 0.05s  
+  ✓ the verified business badge shows only for approved shops            0.32s  
+  ✓ payouts can be made to wait for a verified business                  0.20s  
+  ✓ the staging anonymiser replaces id card numbers                      0.04s  
+
+   PASS  Tests\Feature\CampaignsTest
+  ✓ only campaigns within their dates and switched on are live           0.08s  
+  ✓ home page shows the hero and strip campaigns only while they run     0.07s  
+  ✓ campaign price applies only for approved participation in a live ca… 0.03s  
+  ✓ the lowest price across several live campaigns wins and variants fo… 0.03s  
+  ✓ the campaign price is charged in the cart and snapshotted on the or… 0.05s  
+  ✓ a shop joins with its own products at or above the minimum and an a… 0.13s  
+  ✓ only sellers and admins reach their campaign pages                   0.04s  
+  ✓ admin creates schedules and uploads a banner                         0.08s  
+
+   PASS  Tests\Feature\CheckoutDeliveryTest
+  ✓ delivery phone is required validated and stored without spaces       0.10s  
+  ✓ postal code is optional and phone prefilled from profile             0.12s  
+  ✓ checkout page shows delivery areas and posts to orders               0.07s  
+  ✓ island delivery fee is added to the total                            0.09s  
+  ✓ greater male rate and zone guessed from island                       0.09s  
+  ✓ delivery is free over the threshold                                  0.08s  
+  ✓ fees come from settings                                              0.09s  
+  ✓ unknown payment method is rejected                                   0.04s  
+
+   PASS  Tests\Feature\CheckoutGuardsTest
+  ✓ an expired or used up voucher is dropped at checkout                 0.06s  
+  ✓ the last use of a voucher cannot be taken twice                      0.08s  
+  ✓ points can never be spent below zero                                 0.03s  
+  ✓ a posted greater male zone does not give an island address the grea… 0.05s  
+  ✓ redeemed points are capped by the balance and the cart at checkout   0.05s  
+  ✓ stock is taken atomically so the last unit sells once                0.06s  
+  ✓ a deleted product leaves carts and the cart page still works         0.05s  
+  ✓ guest cart merge is capped by stock                                  0.02s  
+  ✓ a suspended shop cannot sell or use the seller area                  0.05s  
+  ✓ return adjustment follows the refund actually approved               0.12s  
+  ✓ uploads are served by the app with caching                           0.06s  
+
+   PASS  Tests\Feature\CheckoutSignInTest
+  ✓ checkout shows the sign in beside the order                          0.07s  
+  ✓ a new number buys straight away and gives a name at checkout         0.21s  
+  ✓ a registered customer can use a code by sms or email instead of the… 0.12s  
+  ✓ the password works at checkout too                                   0.05s  
+  ✓ outside checkout there is no sms code instead of the password        0.04s  
+  ✓ no sms code button for an account without a verified number          0.05s  
+  ✓ a failed text message is reported not claimed as sent                0.05s  
+
+   PASS  Tests\Feature\CodeLoginTest
+  ✓ a customer signs in with a code by sms and sets a new password       0.09s  
+  ✓ by email too and the email counts as verified                        0.04s  
+  ✓ it says the same whoever asks and sends nothing to unknown or unver… 0.04s  
+  ✓ limits one code a minute and five wrong tries                        0.04s  
+  ✓ two step sign in still asks for the authenticator code               0.03s  
+  ✓ without an sms gateway it asks for the email                         0.04s  
+
+   PASS  Tests\Feature\ComingSoonTest
+  ✓ a coming soon product is shown but cannot be bought                  0.10s  
+  ✓ the shop switches it on and off at once without a review             0.08s  
+  ✓ it goes on sale by itself on its launch day                          0.04s  
+  ✓ launching with no stock waits for the stock to email                 0.02s  
+  ✓ no back in stock email and no pre orders while coming soon           0.06s  
+  ✓ pre orders stop after their last day                                 0.14s  
+  ✓ filters and home rows                                                0.15s  
+
+   PASS  Tests\Feature\CustomerAdminTest
+  ✓ staff find a customer and see everything on one page                 0.12s  
+  ✓ admins change a phone and it must be verified again                  0.03s  
+  ✓ merging moves everything into the account kept                       0.05s  
+  ✓ admins erase a customer and orders stay without their details        0.03s  
+  ✓ the customer report shows repeat customers cohorts and a csv         0.06s  
+  ✓ customers delete their own account with their password               0.05s  
+  ✓ shops and customers with open orders cannot delete themselves        0.05s  
+
+   PASS  Tests\Feature\DeliveryRatesTest
+  ✓ the delivery page lists greater male every atoll and other islands…  0.10s  
+  ✓ saving fees and transit days is audited and blank atolls fall back   0.09s  
+  ✓ the delivery page rejects bad rows                                   0.07s  
+  ✓ the order records the area it was charged for                        0.32s  
+  ✓ free delivery over the threshold still covers area fees              0.07s  
+  ✓ the product page shows the fee and arrival for the chosen island     0.11s  
+  ✓ the product page starts at the customers default address             0.07s  
+  ✓ checkout shows the estimate for each shop                            0.08s  
+  ✓ the delivery policy and help list atolls with their own fee          0.04s  
+  ✓ the delivery sections are in dhivehi                                 0.10s  
+  ✓ estimates are calendar days and ranges read well                     0.02s  
+
+   PASS  Tests\Feature\DeliverySlotsTest
+  ✓ slots follow the days ahead and the same day cut off                 0.04s  
+  ✓ checkout offers slots for greater male with any time by default      0.13s  
+  ✓ the chosen slot is stored and shown to the shop and admin            0.19s  
+  ✓ full and too late slots are refused on the server                    0.17s  
+  ✓ a slot that fills up while the order is placed is not overbooked     0.03s  
+  ✓ slots are only for deliveries to greater male while switched on      0.19s  
+  ✓ the admin sets up the slots                                          0.10s  
+
+   PASS  Tests\Feature\DeliverySurchargeTest
+  ✓ shops set the charge on the product form                             0.09s  
+  ✓ the charge shows on the product page and in the cart                 0.17s  
+  ✓ the charge is added per delivered item                               0.10s  
+  ✓ free delivery waives the fee but not the charge                      0.09s  
+
+   PASS  Tests\Feature\DeliveryTrackingTest
+  ✓ out for delivery sits between shipped and delivered                  0.06s  
+  ✓ the order status follows the slowest part                            0.04s  
+  ✓ shop records courier tracking when sending and everyone sees it      0.13s  
+  ✓ island delivery by boat with an expected date and admin edits        0.15s  
+
+   PASS  Tests\Feature\DemoDataTest
+  ✓ the seeders and the control share one list                           0.08s  
+  ✓ status counts the sample data                                        0.12s  
+  ✓ only the exact sample rows are touched                               0.07s  
+  ✓ the demo admin keeps its generic products after getting the owners…  0.05s  
+  ✓ the admin seeder never adds a default admin beside an existing one   0.03s  
+  ✓ restore puts back exactly what remove took off                       0.17s  
+  ✓ removing twice is harmless and restore still reopens the shops       0.12s  
+  ✓ customers lose the sample products and no page breaks                0.59s  
+  ✓ sample products in the compare list do not block new ones            0.14s  
+  ✓ orders with sample products stay open for customers shops and admin… 0.32s  
+  ✓ only full admins can open the page                                   0.15s  
+  ✓ removing needs remove typed and both actions are audited             0.19s  
+  ✓ the page shows the counts and hides remove when there is nothing to… 0.23s  
+  ✓ the artisan commands remove and restore                              0.16s  
+  ✓ the sitemap leaves out suspended shops                               0.04s  
+
+   PASS  Tests\Feature\DemoSeedersTest
+  ✓ marketplace demo seeder is idempotent                                0.11s  
+  ✓ cleanup only removes old demo products owned by admin                0.03s  
+
+   PASS  Tests\Feature\DhivehiSwitchTest
+  ✓ on by default with the language button and dhivehi pages             0.09s  
+  ✓ off the site is english only                                         0.11s  
+  ✓ emails go out in english while it is off                             0.03s  
+  ✓ the admin switches it and dhivehi text is kept                       0.10s  
+
+   PASS  Tests\Feature\DhivehiTest
+  ✓ dhivehi pages are right to left and translated                       0.04s  
+  ✓ english pages stay left to right                                     0.03s  
+  ✓ admin pages stay left to right in dhivehi                            0.05s  
+  ✓ every translated view string has a dhivehi entry                     0.02s  
+  ✓ every translated string in customer code has a dhivehi entry         0.02s  
+  ✓ dhivehi dates and validation messages are translated                 0.03s  
+  ✓ dhivehi mail is right to left                                        0.01s  
+
+   PASS  Tests\Feature\DisputesTest
+  ✓ non delivery can be raised only when paid and late                   0.15s  
+  ✓ not as described within seven days and rejected returns              0.17s  
+  ✓ full refund flags the money and debits the shop                      0.19s  
+  ✓ partial refund and rejection maths                                   0.15s  
+  ✓ admin can ask a side for more and the shop replies in the thread     0.19s  
+  ✓ authorisation                                                        0.11s  
+
+   PASS  Tests\Feature\ErrorEventsTest
+  ✓ reported exceptions are counted by fingerprint                       0.02s  
+  ✓ 404 validation and auth exceptions are ignored                       0.04s  
+  ✓ a resolved error reopens when it happens again                       0.02s  
+  ✓ payment errors alert at once but only once an hour                   0.02s  
+  ✓ alerts fall back to the contact email in settings                    0.02s  
+  ✓ non payment errors do not alert                                      0.01s  
+  ✓ digest is sent only when there is something to report                0.02s  
+  ✓ digest is scheduled at seven maldives time                           0.03s  
+  ✓ admin can list view and resolve errors                               0.12s  
+  ✓ customers cannot open the error pages                                0.02s  
+  ✓ tracking never throws even when the database is unreachable          0.01s  
+
+   PASS  Tests\Feature\FeedbackComplaintsTest
+  ✓ customers rate a delivered order once and low ratings alert the tea… 0.07s  
+  ✓ orders not delivered cannot be rated                                 0.03s  
+  ✓ anyone can send a complaint with photos                              0.04s  
+  ✓ support staff handle complaints                                      0.09s  
+  ✓ old open complaints are reminded and a weekly summary goes out       0.03s  
+
+   PASS  Tests\Feature\FinanceAndExportsTest
+  ✓ the monthly profit and loss                                          0.08s  
+  ✓ expenses with receipts recurring and xero bills                      0.03s  
+  ✓ csv exports for a date range                                         0.09s  
+
+   PASS  Tests\Feature\GiftOrdersTest
+  ✓ checkout has a gift section                                          0.08s  
+  ✓ gift details are validated                                           0.10s  
+  ✓ a gift order keeps the receiver and message                          0.18s  
+  ✓ the shop and admin see the gift details                              0.20s  
+  ✓ the gift packing slip hides prices and carries the message           0.10s  
+  ✓ slips show prices unless a gift hides them                           0.17s  
+
+   PASS  Tests\Feature\GstBusinessBuyerTest
+  ✓ profile business details are saved checked and removed               0.05s  
+  ✓ checkout offers the profile details and they go on the invoice       0.17s  
+  ✓ incomplete business details send the buyer back before any order ex… 0.04s  
+  ✓ left unticked the details are not used                               0.07s  
+
+   PASS  Tests\Feature\GstInvoiceConcurrencyTest
+  ✓ payments landing together never share or skip a shop invoice number  3.17s  
+
+   PASS  Tests\Feature\GstInvoiceNumbersTest
+  ✓ only paid orders are numbered and each shop has its own series       0.19s  
+  ✓ a number is never issued twice even if the counter is reset          0.12s  
+  ✓ gift card orders get no shop invoice                                 0.04s  
+  ✓ an order paid from the wallet is numbered straight away              0.07s  
+
+   PASS  Tests\Feature\GstInvoicePagesTest
+  ✓ the customer opens each shops invoice and nobody else can            0.18s  
+  ✓ unpaid orders have no invoice                                        0.12s  
+  ✓ a guest opens invoices only through the signed link                  0.13s  
+  ✓ a shop opens only its own invoice                                    0.13s  
+  ✓ staff open invoices by role                                          0.23s  
+  ✓ commission invoices for payouts                                      0.21s  
+  ✓ a payout in a batch is invoiced when the batch is paid               0.15s  
+  ✓ iruali receipt shows the gst in the delivery fee when iruali is reg… 0.10s  
+  ✓ invoices show dhivehi labels on dhivehi pages                        0.09s  
+  ✓ every invoice label has a dhivehi translation                        0.02s  
+
+   PASS  Tests\Feature\GstReportTest
+  ✓ report totals with a refund                                          0.22s  
+  ✓ a paid order cancelled next month is a refund in that month          0.13s  
+  ✓ a dispute refund counts like a return                                0.08s  
+  ✓ the csv never starts a cell with a formula                           0.07s  
+  ✓ the month defaults to this month and bad input is ignored            0.07s  
+
+   PASS  Tests\Feature\GstSettingsTest
+  ✓ defaults change nothing until set                                    0.02s  
+  ✓ admin saves the tax settings and the change is audited               0.10s  
+  ✓ finance staff open the tax pages and support and customers do not    0.12s  
+  ✓ a shop saves its tax details and admins see them                     0.16s  
+
+   PASS  Tests\Feature\GstSnapshotTest
+  ✓ nothing changes for shoppers when nobody is registered               0.15s  
+  ✓ the gst is frozen when the order is placed                           0.13s  
+  ✓ amounts follow the goods until the order is paid then never change   0.06s  
+  ✓ a part without a shop is iruali own sale with iruali registration    0.03s  
+
+   PASS  Tests\Feature\GstWithShopDiscountsTest
+  ✓ gst is charged on the goods total after the shops own code           0.08s  
+  ✓ gst is charged on the goods total after a multi buy offer            0.06s  
+
+   PASS  Tests\Feature\GuestCheckoutTest
+  ✓ there is no guest checkout any more                                  0.11s  
+  ✓ a past guest order still pays through bml                            0.07s  
+  ✓ guest order pages need the signed link with the right token          0.25s  
+  ✓ registering with the guest email attaches the orders                 0.21s  
+  ✓ notifications handle an order without a user                         0.03s  
+
+   PASS  Tests\Feature\HealthEndpointTest
+  ✓ health hides the commit from the public                              0.02s  
+  ✓ health reports unknown commit with the operator token and no stamp   0.01s  
+  ✓ health reports deployed commit from stamp                            0.01s  
+  ✓ health reports the release tag on production                         0.01s  
+
+   PASS  Tests\Feature\HomePageBuilderTest
+  ✓ changes stay in the draft until published                            0.12s  
+  ✓ blocks move and custom ones are removed                              0.03s  
+  ✓ a product row from a category                                        0.08s  
+
+   PASS  Tests\Feature\ImagesAndSearchTest
+  ✓ uploads get webp copies and cards use the small one                  0.18s  
+  ✓ search matches either language brand and sku through search text     0.16s  
+
+   PASS  Tests\Feature\IslandListTest
+  ✓ the migration loads every island once                                0.02s  
+  ✓ starter islands keep their ids and addu city is switched off         0.14s  
+  ✓ addu city stays on while an address points at it                     0.06s  
+  ✓ switched off islands stay off when the list loads again              0.06s  
+  ✓ the nearest island to a position                                     0.02s  
+  ✓ islands are found by typed names and greater male by the list        0.02s  
+  ✓ existing shops get a home island and keep todays coverage            0.02s  
+
+   PASS  Tests\Feature\LiveOrderAndLateAlertsTest
+  ✓ the order page checks for changes and only the owner can ask         0.08s  
+  ✓ guests poll with their signed link                                   0.02s  
+  ✓ shops and the team hear about late orders once                       0.04s  
+
+   PASS  Tests\Feature\LocalePrefixTest
+  ✓ dv prefix renders dhivehi and plain urls stay english                0.21s  
+  ✓ non storefront routes are not prefixed                               0.14s  
+  ✓ route generation follows the locale                                  0.02s  
+  ✓ links assets and current url on a dv page                            0.06s  
+  ✓ canonical hreflang and og locale                                     0.13s  
+  ✓ language links switch to the same page and remember the choice       0.11s  
+  ✓ session only dhivehi still works without the prefix                  0.06s  
+  ✓ cart forms on dv pages post to the prefixed routes                   0.05s  
+  ✓ sitemap lists both languages with alternates                         0.03s  
+
+   PASS  Tests\Feature\LocalizationTest
+  ✓ it uses fallback locale when translation missing                     0.03s  
+  ✓ it returns correct translation when available                        0.02s  
+  ✓ localization service handles fallbacks correctly                     0.02s  
+  ✓ category model supports translatable fields                          0.02s  
+  ✓ api resources use localized values                                   0.03s  
+  ✓ locale switching works correctly                                     0.02s  
+  ✓ invalid locale is rejected                                           0.02s  
+  ✓ translatable request validation works                                0.02s  
+  ✓ at least one translation is required                                 0.02s  
+  ✓ localization service returns available locales                       0.03s  
+  ✓ localization service returns current and fallback locales            0.02s  
+  ✓ category full path uses localized names                              0.02s  
+
+   PASS  Tests\Feature\LoyaltyTiersTest
+  ✓ tiers follow twelve months of spending and earn more points          0.06s  
+  ✓ moving up is announced once and the night job moves down quietly     0.03s  
+  ✓ admins adjust points and drifted balances are fixed                  0.07s  
+  ✓ birthday offers go once a year to customers who want offers          0.03s  
+  ✓ points redeemed at checkout are held until cancel returns them       0.03s  
+
+   PASS  Tests\Feature\ManualPaymentTest
+  ✓ admins choose the methods offered at checkout                        0.07s  
+  ✓ bank transfer slip and confirmation                                  0.17s  
+  ✓ finance staff confirm payments and support staff cannot              0.07s  
+  ✓ transfer orders with no slip in time are cancelled and the stock go… 0.11s  
+  ✓ cash on delivery rules and cash received                             0.21s  
+  ✓ guests upload the slip through their order link                      0.06s  
+  ✓ policies describe the methods on offer                               0.05s  
+
+   PASS  Tests\Feature\MarketplacePayoutsTest
+  ✓ checkout splits the order by shop with commission                    0.06s  
+  ✓ order status follows the slowest shop                                0.12s  
+  ✓ admin status changes carry to every part and cancel is blocked once… 0.08s  
+  ✓ cancelling a pending order cancels every part and no earnings are d… 0.07s  
+  ✓ earnings become payable when delivered and paid then are paid once   0.18s  
+  ✓ commission rate changes apply to new orders only                     0.10s  
+  ✓ only admins see payouts and sellers only their own earnings          0.10s  
+  ✓ seller saves payout bank details                                     0.03s  
+
+   PASS  Tests\Feature\MessagingTest
+  ✓ customer and shop exchange messages with unread counts and badges    0.20s  
+  ✓ new message alerts are sent at most every ten minutes per thread     0.07s  
+  ✓ admin reads everything and replies as iruali support                 0.18s  
+  ✓ only participants can post or read attachments                       0.08s  
+  ✓ messages close 90 days after the order unless a return is open       0.08s  
+
+   PASS  Tests\Feature\MultiBuyOffersTest
+  ✓ the shop sets tiers on the product form and the product page shows…  0.16s  
+  ✓ the product form checks the tiers and groups                         0.06s  
+  ✓ products join a mix and match group from the form                    0.11s  
+  ✓ the cart applies the best tier reached and shows the saving per lin… 0.14s  
+  ✓ a products variants count together                                   0.07s  
+  ✓ a mix and match group counts its products together                   0.06s  
+  ✓ the campaign price is the base                                       0.06s  
+  ✓ multi buy comes before the shop code and the shop pays for both      0.06s  
+  ✓ carts with several shops keep each shops offers and codes apart      0.07s  
+  ✓ the api cart and order show the multi buy saving                     0.06s  
+  ✓ shares are rounded to the laari and always add up                    0.02s  
+
+   PASS  Tests\Feature\NewsletterSenderTest
+  ✓ footer signups get the newsletter only after confirming              0.07s  
+  ✓ a signed in customers own verified address needs no confirmation em… 0.03s  
+  ✓ dhivehi signups are confirmed in dhivehi                             0.03s  
+  ✓ admins write a newsletter preview it and send themselves a test      0.14s  
+  ✓ the test email has the subject marked and a working unsubscribe lin… 0.03s  
+  ✓ only admins write and send support sees the subscribers              0.04s  
+  ✓ each address gets it once in its language with its unsubscribe link  0.15s  
+  ✓ an issue never goes to an address twice                              0.06s  
+  ✓ sending is queued in spaced batches                                  0.07s  
+  ✓ readers who unsubscribe after the send started are skipped           0.03s  
+  ✓ emails the mail server refused can be sent again                     0.09s  
+  ✓ it needs dhivehi and someone to send to                              0.03s  
+  ✓ sections are filled with new arrivals deals the campaign and brands  0.08s  
+
+   PASS  Tests\Feature\NewsletterUnsubscribeTest
+  ✓ signed link unsubscribes and shows a confirmation                    0.05s  
+  ✓ unsigned or tampered links are refused                               0.02s  
+  ✓ privacy policy mentions the unsubscribe link                         0.02s  
+
+   PASS  Tests\Feature\NotificationSystemTest
+  ✓ it shows success notification for registration                       0.13s  
+  ✓ it shows success notification for login                              0.04s  
+  ✓ it shows success notification for logout                             0.02s  
+  ✓ it shows success notification for email verification                 0.02s  
+  ✓ it shows success notification for phone verification                 0.02s  
+  ✓ it shows success notification for adding to cart                     0.03s  
+  ✓ it shows success notification for removing from cart                 0.02s  
+  ✓ it shows success notification for clearing cart                      0.02s  
+  ✓ it shows success notification for adding to wishlist                 0.02s  
+  ✓ it shows success notification for removing from wishlist             0.03s  
+  ✓ it shows success notification for clearing wishlist                  0.02s  
+  ✓ it shows success notification for voucher application                0.02s  
+  ✓ it shows success notification for voucher removal                    0.02s  
+  ✓ it shows error notification for invalid credentials                  0.22s  
+  ✓ it shows error notification for order creation failure               0.04s  
+  ✓ it shows info notification for duplicate wishlist item               0.02s  
+  ✓ notification service methods work correctly                          0.02s  
+  ✓ notification service convenience methods work                        0.02s  
+  ✓ multiple notifications work correctly                                0.02s  
+
+   PASS  Tests\Feature\OrderEmailsTest
+  ✓ customer and each seller are emailed when an order is placed         0.06s  
+  ✓ customer is emailed when the status changes                          0.06s  
+  ✓ payment confirmation is emailed to the customer                      0.03s  
+  ✓ a mail failure does not stop the order                               0.08s  
+  ✓ emails use the customers language                                    0.02s  
+  ✓ switching language is remembered for emails                          0.02s  
+
+   PASS  Tests\Feature\OrderFulfilmentTest
+  ✓ status must follow the allowed steps                                 0.07s  
+  ✓ cancelling restocks and reverses points and voucher                  0.04s  
+  ✓ customer can cancel only their own pending order                     0.07s  
+  ✓ admin can view and advance any order                                 0.08s  
+  ✓ each shop advances its own part even in a shared order               0.13s  
+  ✓ a shop with a line on an order cannot open the customer order page   0.06s  
+  ✓ confirming a payment twice does it once                              0.04s  
+  ✓ seller can view an order they placed as a customer                   0.05s  
+
+   PASS  Tests\Feature\OrderRulesTest
+  ✓ site and shop minimums stop small orders                             0.11s  
+  ✓ the small order fee is added to delivery                             0.14s  
+  ✓ pausing ordering with a window and tell me when back                 0.10s  
+  ✓ pausing delivery or cash on delivery only                            0.03s  
+  ✓ opening hours move the arrival estimate and show on the product      0.06s  
+
+   PASS  Tests\Feature\OrderStockCheckTest
+  ✓ order fails if stock is insufficient                                 0.03s  
+  ✓ order succeeds and decrements stock                                  0.07s  
+
+   PASS  Tests\Feature\OrderVariantsTest
+  ✓ order items snapshot the variant and stock comes off the variant ro… 0.14s  
+  ✓ overselling one variant is blocked even when the product total woul… 0.06s  
+  ✓ cancelling restores the variant row                                  0.06s  
+  ✓ an approved return restocks the variant                              0.12s  
+  ✓ back in stock alerts fire for the restocked variant                  0.03s  
+
+   PASS  Tests\Feature\PayLaterAndSuggestionsTest
+  ✓ an admin opens pay later and the business orders within its limit    0.15s  
+  ✓ reminders before the due date and overdue invoices block new ones    0.03s  
+  ✓ pairs are worked out from paid orders and suggested in the cart      0.12s  
+
+   PASS  Tests\Feature\PaymentLinkTest
+  ✓ an admin sends the link by sms and email                             0.09s  
+  ✓ the page works without signing in and only with the signature        0.05s  
+  ✓ paying by card switches the order to card and opens bml              0.04s  
+  ✓ a transfer slip switches to transfer and waits for the admin         0.04s  
+  ✓ an unpaid order with a live link is not cancelled                    0.05s  
+
+   PASS  Tests\Feature\PayoutBatchesTest
+  ✓ batch totals cover every payable part and open adjustments           0.13s  
+  ✓ earnings cannot be in two batches                                    0.05s  
+  ✓ bank file matches the bml bulk format byte for byte                  0.06s  
+  ✓ marking a batch paid pays every payout once and tells the shops      0.08s  
+  ✓ shops see a drafted payout as on its way                             0.06s  
+  ✓ only admins manage batches                                           0.11s  
+
+   PASS  Tests\Feature\PhoneLoginTest
+  ✓ a new number signs up with a code then sets name and password        0.10s  
+  ✓ checkout can wait for the password and it is asked again             0.04s  
+  ✓ forgot password sends a code and opens the new password form         0.04s  
+  ✓ staff and unverified numbers                                         0.04s  
+  ✓ a mobile only customer cannot lose their number from the profile fo… 0.04s  
+  ✓ sign in with the email and the password and no sms is sent           0.04s  
+  ✓ a code by email instead of the password saves an sms                 0.04s  
+  ✓ an account without a password gets its code by email when it has on… 0.03s  
+  ✓ forgot password is a text message even when signing in by email      0.04s  
+  ✓ an unknown email is told to use the mobile number and staff go to t… 0.03s  
+
+   PASS  Tests\Feature\PhoneVerificationTest
+  ✓ with the log driver sign up stays email only                         0.12s  
+  ✓ with a gateway the code is texted and verifies the phone             0.09s  
+  ✓ resending the phone code is throttled                                0.06s  
+  ✓ notification preferences page and sms needs a verified phone         0.08s  
+  ✓ order notifications follow the preferences                           0.05s  
+  ✓ a shipped order really texts the customer in their language          0.04s  
+
+   PASS  Tests\Feature\PickupFromShopTest
+  ✓ shops set up pickup in their settings                                0.09s  
+  ✓ checkout offers pickup only for shops that have it                   0.10s  
+  ✓ the fee covers only the delivered parts                              0.12s  
+  ✓ each shops new order email says how its part reaches the customer    0.08s  
+  ✓ free delivery with a mixed cart still charges the delivered bulky i… 0.12s  
+  ✓ everything picked up needs no address and no fee but a phone         0.10s  
+  ✓ the shop marks it ready and the customer gets a code by email        0.13s  
+  ✓ the code is texted when sms is set up                                0.13s  
+  ✓ no code goes out before the customer has paid                        0.09s  
+  ✓ the right code completes the pickup like a delivery                  0.12s  
+  ✓ too many wrong codes lock it until iruali confirms                   0.23s  
+  ✓ only the shop itself can handle its pickup                           0.27s  
+  ✓ the customer sees where when and the code but others do not          0.21s  
+  ✓ a past guest pickup order still shows its code                       0.09s  
+  ✓ the api always delivers                                              0.09s  
+  ✓ cancelling a ready pickup order still works                          0.16s  
+
+   PASS  Tests\Feature\PolicyPagesTest
+  ✓ every policy page loads and links the others                         0.08s  
+  ✓ business details from settings are shown                             0.05s  
+  ✓ policies state the key disclosures                                   0.06s  
+  ✓ policy pages show no raw template code                               0.08s  
+  ✓ checkout shows card marks currency country and requires accepting t… 0.08s  
+  ✓ admin sees what bml still needs                                      0.06s  
+  ✓ owner can replace a policy and set the last updated date             0.08s  
+  ✓ short policy urls redirect                                           0.02s  
+  ✓ printable receipt for the owner only                                 0.04s  
+
+   PASS  Tests\Feature\PreorderConcurrencyTest
+  ✓ two checkouts for the last pre order unit cannot both get it         3.18s  
+  ✓ four checkouts with in stock items for the last two pre order units  3.25s  
+
+   PASS  Tests\Feature\PreorderFulfilmentTest
+  ✓ a part with pre order items shows awaiting stock to the shop the cu… 0.19s  
+  ✓ the part cannot be marked shipped until its stock has arrived        0.10s  
+  ✓ a pickup part cannot be marked ready while it awaits stock           0.08s  
+  ✓ stock arrived goes to the oldest paid pre orders first including pa… 0.28s  
+  ✓ stock on the shelf goes to waiting pre orders and options are count… 0.15s  
+  ✓ only the shop sees and handles its own pre orders                    0.13s  
+  ✓ the product form switches pre orders on with a date a limit and a n… 0.09s  
+  ✓ moving the date emails the waiting customers with a link to cancel   0.14s  
+  ✓ the product form moving the date emails the waiting customers too    0.08s  
+  ✓ cancelling a pre order refunds it through the normal cancellation    0.12s  
+  ✓ a pre order cannot be cancelled once part of the order has been sen… 0.14s  
+  ✓ a guest cancels through the signed link                              0.09s  
+  ✓ units given back by a cancelled order go to the next waiting pre or… 0.11s  
+  ✓ late pre orders go to the admin inbox once a day                     0.18s  
+  ✓ a waiting part is not late and not reported undelivered before its…  0.07s  
+
+   PASS  Tests\Feature\PreorderShoppingTest
+  ✓ the product page says when a pre order ships and the button says pr… 0.11s  
+  ✓ no pre order when switched off past its date or with no units left   0.21s  
+  ✓ the cart and checkout mark pre order lines with the date             0.11s  
+  ✓ the customer pays in full at checkout and no stock is taken          0.11s  
+  ✓ the limit holds across orders and frees up when an order is cancell… 0.13s  
+  ✓ stock never goes below zero                                          0.13s  
+  ✓ a shop on holiday takes no pre orders                                0.07s  
+  ✓ a sold out option can be pre ordered and the limit counts across op… 0.17s  
+  ✓ mixed carts add up with shop discounts and gst                       0.10s  
+  ✓ feeds and structured data say pre order with the date                0.18s  
+  ✓ the smoke customer never places a pre order                          0.05s  
+  ✓ the smoke test still orders the cheapest product in stock            0.04s  
+  ✓ a line that sold out after the checkout page is not turned into a p… 0.15s  
+
+   PASS  Tests\Feature\ProductBulkToolsTest
+  ✓ export has a bom the columns and one row per variant                 0.05s  
+  ✓ export round trips through import with a dry run then apply          0.09s  
+  ✓ import never touches another shops products and reports errors by l… 0.04s  
+  ✓ bulk edit changes prices and stock with a confirm step               0.07s  
+  ✓ bulk activation respects admin approval and other shops products ar… 0.07s  
+  ✓ duplicate copies the product with its images and variants at zero s… 0.05s  
+
+   PASS  Tests\Feature\ProductChangeReviewTest
+  ✓ an edit to a live product waits for review and shoppers keep the ol… 0.10s  
+  ✓ a stock only edit applies at once without a request                  0.04s  
+  ✓ approving applies every field with the new image and variants        0.18s  
+  ✓ rejecting keeps the live version deletes the files and tells the sh… 0.06s  
+  ✓ a second edit replaces the waiting one and the shop can withdraw it  0.06s  
+  ✓ saving the untouched form creates no request                         0.04s  
+  ✓ saving the live values again withdraws the waiting edit              0.03s  
+  ✓ edits to a product that was never approved apply directly            0.02s  
+  ✓ shop staff edits wait for review on behalf of the shop               0.03s  
+  ✓ a trusted shop publishes new products and edits at once              0.04s  
+  ✓ a shop that is not trusted still waits for first approval            0.02s  
+  ✓ a suspended trusted shop gets no auto approval                       0.02s  
+  ✓ only admins can make a shop trusted and it is audited                0.16s  
+  ✓ catalogue staff review changes but support cannot                    0.07s  
+  ✓ approval fails gracefully when a variant in the edit was deleted     0.04s  
+  ✓ bulk price changes to live products wait for review but stock and h… 0.06s  
+  ✓ csv import sends changes to live products for review                 0.06s  
+  ✓ the admin inbox counts changes waiting                               0.06s  
+  ✓ a variant with orders removed in an approved edit is deactivated     0.06s  
+
+   PASS  Tests\Feature\ProductVariantModelTest
+  ✓ effective price uses own price or product price plus adjustment      0.03s  
+  ✓ display name joins attribute values and translates keys              0.02s  
+  ✓ product stock is the sum of active variant stock                     0.03s  
+  ✓ low stock considers variants and their thresholds                    0.02s  
+  ✓ from price only when variant prices differ                           0.02s  
+
+   PASS  Tests\Feature\ProductVideosTest
+  ✓ links are read as provider and id with data set " you tube"          0.01s  
+  ✓ links are read as provider and id with data set " you tube with a s… 0.02s  
+  ✓ links are read as provider and id with data set " you tube mobile"   0.01s  
+  ✓ links are read as provider and id with data set " you tube short li… 0.01s  
+  ✓ links are read as provider and id with data set " you tube without…  0.01s  
+  ✓ links are read as provider and id with data set " you tube live"     0.01s  
+  ✓ links are read as provider and id with data set " you tube shorts"   0.02s  
+  ✓ links are read as provider and id with data set " tik tok"           0.01s  
+  ✓ links are read as provider and id with data set " tik tok embed"     0.01s  
+  ✓ links are read as provider and id with data set " instagram post"    0.01s  
+  ✓ links are read as provider and id with data set " instagram reel"    0.01s  
+  ✓ links are read as provider and id with data set " instagram reels"   0.02s  
+  ✓ links are read as provider and id with data set " instagram reel un… 0.01s  
+  ✓ links are read as provider and id with data set " facebook page vid… 0.01s  
+  ✓ links are read as provider and id with data set " facebook video wi… 0.01s  
+  ✓ links are read as provider and id with data set " facebook watch"    0.01s  
+  ✓ links are read as provider and id with data set " facebook mobile"   0.02s  
+  ✓ links are read as provider and id with data set " facebook reel"     0.01s  
+  ✓ other links are refused                                              0.01s  
+  ✓ the player is 16 9 for youtube and 9 16 for tiktok shorts and reels  0.01s  
+  ✓ sellers add change and remove a video in the product form            0.09s  
+  ✓ the product page loads the player only after play is pressed         0.15s  
+  ✓ the csp allows exactly the video providers to be framed              0.07s  
+
+   PASS  Tests\Feature\PromotionsTest
+  ✓ the best automatic offer applies without a code                      0.10s  
+  ✓ an automatic free delivery offer                                     0.02s  
+  ✓ admins make print and export a batch of cards                        0.06s  
+
+   PASS  Tests\Feature\PwaAndPushTest
+  ✓ manifest is valid and its icons exist                                0.04s  
+  ✓ service worker handles fetch push and never caches private pages     0.01s  
+  ✓ offline page is translated and noindex                               0.04s  
+  ✓ account page offers push only when vapid is configured               0.04s  
+  ✓ subscription store and destroy                                       0.03s  
+  ✓ channel sends the payload and drops gone subscriptions               0.03s  
+  ✓ payment and shipped part payloads and channel is off without keys    0.03s  
+  ✓ vapid command writes keys to an env file                             0.02s  
+
+   PASS  Tests\Feature\QueuedNotificationsTest
+  ✓ every notification is queued and waits for the transaction           0.02s  
+  ✓ notifications go through the queue                                   0.02s  
+  ✓ a notification sent inside a transaction is delivered after commit   0.02s  
+  ✓ queue worker is scheduled unless the queue is sync                   0.04s  
+  ✓ queue worker is not scheduled for the sync queue                     0.03s  
+  ✓ jobs tables exist                                                    0.01s  
+
+   PASS  Tests\Feature\RateLimitTest
+  ✓ searching does not use up the sign in attempts                       0.24s  
+  ✓ sign in is still limited to five attempts a minute                   1.05s  
+  ✓ every numeric throttle names its own counter                         0.03s  
+
+   PASS  Tests\Feature\ReadyCheckTest
+  ✓ a bare install is not ready and explains why                         0.04s  
+  ✓ a configured install is ready                                        0.02s  
+  ✓ a stale heartbeat and old backup fail                                0.02s  
+  ✓ send test mail option sends one                                      0.02s  
+  ✓ admin dashboard shows the system status panel to admins only         0.05s  
+
+   PASS  Tests\Feature\ReferralProgrammeTest
+  ✓ a shared link sets a cookie and sign up uses it when no code is typ… 0.15s  
+  ✓ a typed code wins over the cookie and a stale cookie is ignored      0.16s  
+  ✓ every points change is written to the ledger and the balance always… 0.09s  
+  ✓ the migration backfills an opening balance row per user              0.06s  
+  ✓ points expire oldest first and customers are warned a month ahead    2.82s  
+  ✓ points never expire when the setting is zero                         0.02s  
+  ✓ rewards page shows the code link masked referrals and history        0.11s  
+  ✓ rewards page needs an account                                        0.03s  
+  ✓ admin rewards report shows totals and top referrers                  0.06s  
+
+   PASS  Tests\Feature\RefundApprovalAndReceiptsTest
+  ✓ big refunds need a second person                                     0.08s  
+  ✓ the morning summary lists yesterdays refunds and what is due         0.03s  
+  ✓ customers download and email their receipt                           0.33s  
+  ✓ guests use their signed links                                        0.19s  
+
+   PASS  Tests\Feature\RefundsAndHardeningTest
+  ✓ a payment that lands after cancellation is not confirmed but owed b… 0.08s  
+  ✓ cancelling a paid order records the refund and admin closes it       0.19s  
+  ✓ a second confirmed payment is flagged as a duplicate                 0.07s  
+  ✓ admin cannot mark a card or cancelled order as paid by hand          0.05s  
+  ✓ api sign in is rate limited and refuses two step accounts            1.04s  
+  ✓ every response carries the security headers                          0.04s  
+  ✓ uploads are stored with the extension of their real type             0.02s  
+  ✓ demo accounts are not seeded on production                           0.09s  
+
+   PASS  Tests\Feature\ReturnsTest
+  ✓ customer requests a return and the shop and admin are told           0.18s  
+  ✓ damaged items need a photo and quantities are capped                 0.11s  
+  ✓ returns are only possible on delivered parts within the window       0.11s  
+  ✓ approving restocks and takes the shops share from its next payout    0.17s  
+  ✓ two approvals at the same moment restock and deduct once             0.10s  
+  ✓ a return after the shop was paid is deducted from the next payout    0.18s  
+  ✓ shop fault on a single shop order suggests the delivery fee too and… 0.13s  
+  ✓ a return cannot refund what a dispute already refunded               0.12s  
+  ✓ reject and mark refunded email the customer                          0.18s  
+  ✓ access to returns screens and photos                                 0.16s  
+
+   PASS  Tests\Feature\ReviewPhotosAndRepliesTest
+  ✓ review photos are stored with webp copies and deleted with the revi… 0.23s  
+  ✓ verified purchase needs a delivered order with the product           0.13s  
+  ✓ only the products shop can reply and the customer is told once       0.16s  
+  ✓ review list can be filtered to photos and sorted                     0.21s  
+
+   PASS  Tests\Feature\RewardsTest
+  ✓ points are earned only when the order is paid and taken back on can… 0.09s  
+  ✓ cancelling an unpaid order takes nothing away                        0.07s  
+  ✓ referral reward is given once on the first paid order and never at…  0.15s  
+
+   PASS  Tests\Feature\SecurityHardeningTest
+  ✓ product description is escaped                                       0.06s  
+  ✓ product name cannot break out of the json ld block                   0.06s  
+  ✓ users cannot change or remove other peoples cart items               0.03s  
+  ✓ order status page needs a signed link                                0.03s  
+  ✓ login starts a new session                                           0.04s  
+  ✓ two factor users are not signed in before the code                   0.03s  
+  ✓ order numbers are random                                             0.01s  
+  ✓ privileged user columns are not mass assignable                      0.02s  
+  ✓ an api token without cart write cannot change the cart               0.02s  
+  ✓ trusted proxies come from the setting                                0.02s  
+
+   PASS  Tests\Feature\SellerAndLocaleTest
+  ✓ product seller relation uses seller id                               0.02s  
+  ✓ product tile shows the seller and island                             0.02s  
+  ✓ chosen language wins over browser header                             0.04s  
+  ✓ browser header is used when nothing was chosen                       0.03s  
+
+   PASS  Tests\Feature\SellerApplicationTest
+  ✓ guests are sent to login and returned to the form                    0.02s  
+  ✓ customer can apply and becomes pending seller                        0.08s  
+  ✓ application is validated                                             0.02s  
+  ✓ existing sellers are redirected to seller centre                     0.02s  
+  ✓ admin sees pending application and can approve or reject             0.07s  
+  ✓ menu shows sell link for customers                                   0.05s  
+
+   PASS  Tests\Feature\SellerApplicationsPauseTest
+  ✓ open by default the links lead to the form                           0.09s  
+  ✓ paused applications keep the links but show the message and refuse…  0.12s  
+  ✓ hidden applications take the links off the site but the address sti… 0.15s  
+  ✓ the waiting list is told once when applications reopen on their day  0.10s  
+  ✓ admins pause hide and reopen applications from the sellers page      0.12s  
+  ✓ the anonymiser replaces waiting list emails                          0.03s  
+
+   PASS  Tests\Feature\SellerAreaTest
+  ✓ guests are redirected and customers are forbidden                    0.03s  
+  ✓ seller pages render                                                  0.15s  
+  ✓ seller can create product pending approval                           0.04s  
+  ✓ seller can update and delete own product                             0.04s  
+  ✓ seller cannot touch another sellers product                          0.03s  
+  ✓ orders only show the sellers own items                               0.09s  
+  ✓ seller can update profile                                            0.02s  
+  ✓ admin approving seller marks them approved                           0.02s  
+
+   PASS  Tests\Feature\SellerBankAccountTest
+  ✓ seller adds a bml account and sees it masked                         0.09s  
+  ✓ account numbers are validated per bank                               0.04s  
+  ✓ changing the account clears verification and admin can verify        0.07s  
+  ✓ a shop without bank details cannot be paid out                       0.10s  
+  ✓ only sellers see the bank settings page                              0.02s  
+
+   PASS  Tests\Feature\SellerHelpCentreTest
+  ✓ index links every guide and the nav links the help centre            0.06s  
+  ✓ guides exist in english and dhivehi and use the live settings        0.20s  
+  ✓ only sellers read the help centre                                    0.03s  
+
+   PASS  Tests\Feature\SellerNotificationsTest
+  ✓ shop notifications are queued                                        0.02s  
+  ✓ seller manages notification preferences                              0.05s  
+  ✓ new order and return emails respect the shop preferences             0.10s  
+  ✓ low stock digest lists products and variants at or below their thre… 0.06s  
+
+   PASS  Tests\Feature\SellerOnboardingTest
+  ✓ dashboard shows the checklist until every item is done               0.06s  
+  ✓ completing the checklist marks the shop onboarded and tells admins…  0.14s  
+  ✓ products stay hidden until the shop is onboarded                     0.08s  
+  ✓ demo shops are onboarded so nothing live disappears                  0.07s  
+  ✓ shop page shows logo and banner                                      0.04s  
+
+   PASS  Tests\Feature\SellerPerformanceTest
+  ✓ report numbers                                                       0.08s  
+  ✓ seller and admin pages show the numbers                              0.12s  
+  ✓ summary for the sellers list and authorisation                       0.06s  
+
+   PASS  Tests\Feature\SellerStockPageTest
+  ✓ stock page lists products and variants and filters low stock         0.08s  
+  ✓ stock levels are saved inline and only for the shops own rows        0.05s  
+
+   PASS  Tests\Feature\SellerTermsTest
+  ✓ admin sets the marketplace terms and they are validated              0.07s  
+  ✓ seller terms page fills placeholders in both languages               0.09s  
+  ✓ owner text also gets placeholders and the editor explains them       0.06s  
+
+   PASS  Tests\Feature\SellerVariantEditorTest
+  ✓ seller creates a product with generated variants                     0.04s  
+  ✓ removed variants are deleted or deactivated when ordered             0.05s  
+  ✓ variant rows are validated                                           0.03s  
+  ✓ another shop cannot edit variants and cannot claim a foreign varian… 0.03s  
+  ✓ edit page shows the variant editor and admin list shows variants     0.07s  
+
+   PASS  Tests\Feature\SeoAndErrorPagesTest
+  ✓ robots and sitemap are served from the app                           0.03s  
+  ✓ pages get their own titles                                           0.07s  
+  ✓ private pages are noindex                                            0.14s  
+  ✓ error pages are branded                                              0.03s  
+
+   PASS  Tests\Feature\SeoTest
+  ✓ it generates default seo data                                        0.01s  
+  ✓ it generates product seo data                                        0.03s  
+  ✓ it generates category seo data                                       0.01s  
+  ✓ it generates search seo data                                         0.01s  
+  ✓ it generates user seo data for seller                                0.01s  
+  ✓ it generates user seo data for customer                              0.01s  
+  ✓ it includes canonical urls                                           0.02s  
+  ✓ it handles localized content in seo                                  0.01s  
+  ✓ it generates json ld schema for products                             0.02s  
+
+   PASS  Tests\Feature\SettlementsAndGstToolsTest
+  ✓ a statement is imported and matched to orders                        0.08s  
+  ✓ a file without a heading row is refused                              0.02s  
+  ✓ a filed gst month is locked with its figures and the reminder stops  0.07s  
+  ✓ csv text that looks like a formula is neutralised                    0.02s  
+
+   PASS  Tests\Feature\ShopDeliveryFeesTest
+  ✓ a shop sets its fees within the limit                                0.06s  
+  ✓ when iruali turns own fees off shops cannot change them and iruali…  0.12s  
+  ✓ each own fee shop charges its fee and iruali charges once for the r… 0.13s  
+  ✓ only own fee shops means no iruali fee and the local fee and free a… 0.19s  
+  ✓ iruali limit caps saved fees and pickup has no fee                   0.13s  
+  ✓ checkout and product page show the shop fee                          0.12s  
+  ✓ a shop fault return refunds and takes back the shops delivery        0.11s  
+  ✓ a gst registered shop invoices its delivery and iruali only its own  0.12s  
+  ✓ policies explain shops own fees while they are allowed               0.05s  
+
+   PASS  Tests\Feature\ShopDiscountCodesTest
+  ✓ a shop creates edits and pauses codes and sees only its own          0.13s  
+  ✓ the codes page shows uses and sales                                  0.08s  
+  ✓ percent and fixed codes apply only to their shops items one per sho… 0.11s  
+  ✓ a fixed code never takes more than the items and totals never go be… 0.06s  
+  ✓ bad paused not started expired and minimum spend codes get clear me… 0.06s  
+  ✓ minimum spend and selected products count only the eligible items    0.07s  
+  ✓ total and per customer limits count accounts and guest emails        0.16s  
+  ✓ the last use cannot be taken twice and a cancelled order gives it b… 0.09s  
+  ✓ a code that expires between cart and checkout is refused cleanly     0.13s  
+  ✓ a code that stops working before checkout is shown as removed        0.08s  
+  ✓ shop codes come first then the iruali voucher on what is left then…  0.12s  
+  ✓ points are capped by what is left after the shop and voucher discou… 0.06s  
+  ✓ earnings and commission are on the discounted total and the payout…  0.17s  
+  ✓ line amounts add up to the order total and the bml amount            0.11s  
+  ✓ a partial return refunds what the customer paid for the units        0.11s  
+
+   PASS  Tests\Feature\ShopHolidayTest
+  ✓ a shop switches holiday mode on and off in its settings              0.12s  
+  ✓ the product page says until when with the message and disables add…  0.15s  
+  ✓ adding to the cart is refused on the web and in the api              0.08s  
+  ✓ cart and checkout refuse items from a shop on holiday but keep them  0.11s  
+  ✓ holiday mode ends by itself on the back on date                      0.15s  
+  ✓ orders placed before the holiday are unaffected                      0.12s  
+  ✓ feeds and search engines see a holiday shops products as out of sto… 0.08s  
+  ✓ the shop page catalog cards and admin sellers list show the holiday  0.12s  
+  ✓ dhivehi shoppers read the holiday in dhivehi                         0.07s  
+
+   PASS  Tests\Feature\ShopStaffAccessTest
+  ✓ every seller route follows the role lists in config                  1.69s  
+  ✓ the config names only routes that exist                              0.02s  
+  ✓ owner only pages stay closed even if a role is given everything      0.06s  
+  ✓ owners see their seller centre as before plus the staff page         0.06s  
+  ✓ a packer lands on orders and sees only their pages                   0.05s  
+  ✓ a manager runs the shop but never sees money documents or staff      0.22s  
+  ✓ staff of a suspended or rejected shop are blocked like the owner     0.08s  
+  ✓ staff work on their own shop only                                    0.23s  
+  ✓ what staff do they do for the shop                                   0.07s  
+  ✓ changes by staff are audited with them as the actor                  0.07s  
+  ✓ messages replies and answers record the staff member but speak for…  0.21s  
+  ✓ removing someone or changing their role works from their next reque… 0.08s  
+  ✓ staff still shop on iruali with their own cart and orders            0.10s  
+  ✓ the owner can ask staff to use two step sign in                      0.10s  
+  ✓ a staff account cannot open a shop of its own                        0.02s  
+
+   PASS  Tests\Feature\ShopStaffInvitationsTest
+  ✓ the owner invites by email with a signed link that works for seven…  0.07s  
+  ✓ someone new makes an account from the link and joins                 0.09s  
+  ✓ someone with an account signs in with it and accepts                 0.10s  
+  ✓ run out withdrawn replaced and tampered links say so                 0.12s  
+  ✓ a link opened in the wrong account says so                           0.06s  
+  ✓ shop owners other shops staff and the iruali team cannot be invited  0.05s  
+  ✓ someone who got a shop or another job after the invitation cannot j… 0.09s  
+  ✓ invitations are rate limited and a shop has a ceiling                0.05s  
+  ✓ the owner manages only their own staff and staff cannot manage staf… 0.08s  
+
+   PASS  Tests\Feature\ShoppingFeaturesTest
+  ✓ guests can fill a cart and it follows them into their account        0.07s  
+  ✓ guest cart merges into an existing account cart                      0.03s  
+  ✓ one shopper cannot touch another shoppers cart item                  0.03s  
+  ✓ cart page quantity and save for later                                0.08s  
+  ✓ search suggestions                                                   0.03s  
+  ✓ compare up to four products                                          0.10s  
+  ✓ reviews with verified badge and helpful votes                        0.11s  
+  ✓ questions and seller answers                                         0.13s  
+  ✓ back in stock alert is sent once                                     0.07s  
+  ✓ deal countdown shows when the sale has an end                        0.14s  
+  ✓ seller can set a sale end                                            0.03s  
+  ✓ frequently bought together and add many                              0.08s  
+  ✓ buy again puts available items back in the cart                      0.05s  
+  ✓ newsletter signup                                                    0.04s  
+  ✓ brand page and whatsapp links                                        0.08s  
+
+   PASS  Tests\Feature\ShoppingIslandTest
+  ✓ without an island everything shows for people and search engines     0.12s  
+  ✓ choosing an island with the picker endpoint                          0.11s  
+  ✓ a returning browser keeps its island by cookie                       0.06s  
+  ✓ choosing an island by location and saving it on the account          0.05s  
+  ✓ a signed in customer starts at their default address island          0.10s  
+  ✓ outer islands see shops that deliver everywhere and not other islan… 0.19s  
+  ✓ home and male shops reach greater male but not other atolls          0.28s  
+  ✓ extra islands and the whole atoll                                    0.08s  
+  ✓ show everything labels what cannot be delivered                      0.19s  
+  ✓ only shops on the island                                             0.16s  
+  ✓ home page shops on the island and the no shops note                  0.11s  
+  ✓ answers never leak between islands in one process                    0.14s  
+  ✓ checkout refuses delivery from a shop that does not reach the islan… 0.20s  
+  ✓ checkout allows collecting from a shop that does not deliver there   0.10s  
+  ✓ a saved address on another island decides for a gift                 0.09s  
+  ✓ sellers save their home island and coverage                          0.10s  
+  ✓ new shops choose a home island when they apply                       0.08s  
+  ✓ admins see islands switch them and edit a shops coverage             0.13s  
+  ✓ the phone app reads and saves the island                             0.06s  
+  ✓ dhivehi pages show the island control in dhivehi                     0.07s  
+  ✓ pages let the site itself ask for the location                       0.07s  
+  ✓ the island question opens by itself only on shopping pages           0.08s  
+  ✓ department counts follow the island                                  0.09s  
+  ✓ brand page lists only the shops the island sees                      0.11s  
+  ✓ the cart flags items the shop cannot deliver to the island           0.08s  
+  ✓ villingili in gaafu alif is not greater male                         0.04s  
+
+   PASS  Tests\Feature\SiteAnalyticsTest
+  ✓ no snippet without a provider                                        0.04s  
+  ✓ plausible snippet on storefront pages only                           0.14s  
+  ✓ ga4 snippet anonymises ip                                            0.09s  
+  ✓ admin saves analytics settings and bad ids are rejected              0.07s  
+  ✓ funnel events are recorded server side                               0.13s  
+  ✓ funnel numbers and product conversion                                0.08s  
+
+   PASS  Tests\Feature\SmokeCommandTest
+  ✓ setup creates the flagged smoke customer                             0.03s  
+  ✓ setup refuses without credentials                                    0.01s  
+  ✓ command prints a table and exits 0 when everything passes            0.02s  
+  ✓ command exits 1 and names the failing check                          0.02s  
+  ✓ place order needs the smoke user and picks the cheapest product in…  0.03s  
+  ✓ a shop with nothing on sale skips the product checks instead of fai… 0.01s  
+  ✓ a sitemap without products still fails while products are on sale    0.02s  
+  ✓ place order with nothing in stock skips the order round trip         0.03s  
+  ✓ smoke customer gets no emails rewards or analytics                   0.05s  
+
+   PASS  Tests\Feature\SmsCampaignsTest
+  ✓ only customers who chose offers by sms are in a segment              0.02s  
+  ✓ an admin previews tests and sends a campaign once                    0.07s  
+  ✓ the monthly limit and scheduling                                     0.03s  
+  ✓ the stop link turns offers by sms off                                0.05s  
+  ✓ cart reminders go by sms when switched on                            0.02s  
+
+   PASS  Tests\Feature\SmsControlCentreTest
+  ✓ the built in wording is unchanged and an admin can reword or switch… 0.02s  
+  ✓ messages are logged with their type and the switch stops everything  0.02s  
+  ✓ the monthly limit stops updates but not codes and tells the team on… 0.02s  
+  ✓ quiet hours hold messages until morning                              0.02s  
+  ✓ admins manage it and support only reads and tests                    0.11s  
+  ✓ the log filters exports and resends                                  0.09s  
+  ✓ sms text is still a string for existing callers                      0.02s  
+
+   PASS  Tests\Feature\SmsTest
+  ✓ maldivian numbers are normalised                                     0.02s  
+  ✓ log driver records the message without sending                       0.01s  
+  ✓ http driver posts the json template and reads success from the rege… 0.01s  
+  ✓ http driver supports get with a query template                       0.01s  
+  ✓ a dhiraagu style gateway gets the number without the plus            0.02s  
+  ✓ the sms test command sends one message and shows the reply           0.02s  
+  ✓ a rejected or unreachable gateway is a failure and never throws      0.02s  
+  ✓ notifications can go out through the sms channel                     0.02s  
+  ✓ admin sees the log and can send a test message                       0.10s  
+  ✓ the dhiraagu driver needs only the portal login                      0.02s  
+
+   PASS  Tests\Feature\SocialLoginTest
+  ✓ buttons show only for providers with keys                            0.08s  
+  ✓ google makes a customer account using state pkce and nonce           0.04s  
+  ✓ a wrong or reused state is refused                                   0.04s  
+  ✓ an id token for another app or attempt is refused                    0.03s  
+  ✓ a provider that fails or times out gives a message not an error pag… 0.02s  
+  ✓ cancelling at the provider says so                                   0.03s  
+  ✓ an existing account is joined only when the provider verified the e… 0.03s  
+  ✓ staff accounts must use their password                               0.03s  
+  ✓ banned and inactive accounts are refused                             0.03s  
+  ✓ two step sign in still asks for the code                             0.03s  
+  ✓ the guest cart comes along and the customer returns where they were  0.04s  
+  ✓ facebook signs in with pkce and never joins an account by email      0.03s  
+  ✓ facebook without an email or without pkce                            0.02s  
+  ✓ apple posts back without the session and sends the name only once    0.04s  
+  ✓ apple cancelled and the post route is the only one without session…  0.02s  
+  ✓ apple keys can be given as a path or with escaped line breaks        0.03s  
+  ✓ customers see and unlink connected accounts while another way in re… 0.05s  
+  ✓ an account without a password keeps its last connection until it se… 0.48s  
+
+   PASS  Tests\Feature\SocialPostsTest
+  ✓ a post is approved then posted to each channel                       0.05s  
+  ✓ a failed channel is shown and instagram needs a picture              0.02s  
+  ✓ approving a product drafts a post when switched on                   0.03s  
+  ✓ shares are counted and listed                                        0.06s  
+
+   PASS  Tests\Feature\SoftDeletesTest
+  ✓ product soft delete                                                  0.02s  
+  ✓ product restore                                                      0.02s  
+  ✓ product force delete                                                 0.02s  
+  ✓ order soft delete                                                    0.02s  
+  ✓ order restore                                                        0.02s  
+  ✓ user soft delete                                                     0.01s  
+  ✓ user restore                                                         0.02s  
+  ✓ scopes with trashed                                                  0.02s  
+  ✓ soft deletes with relationships                                      0.02s  
+
+   PASS  Tests\Feature\StaffAccessTest
+  ✓ is staff covers admin support and finance                            0.02s  
+  ✓ route patterns match exactly or by prefix                            0.02s  
+  ✓ support opens orders returns moderation and users but not settings…  0.11s  
+  ✓ finance opens payouts analytics errors and audit but cannot resolve… 0.11s  
+  ✓ catalogue staff look after brands product approvals and campaigns o… 0.12s  
+  ✓ admins make a user catalogue staff but never someone from a shop     0.07s  
+  ✓ support and finance open every page their role lists but never refu… 0.18s  
+  ✓ admin sees everything and customers nothing                          0.07s  
+  ✓ staff without two factor are sent to set it up                       0.09s  
+  ✓ admins can make two factor optional for staff                        0.08s  
+  ✓ staff cannot turn their code off while it is required and the serve… 0.06s  
+  ✓ admin can make a user support or finance and it is audited           0.07s  
+  ✓ staff logins are audited and land on the dashboard                   0.03s  
+
+   PASS  Tests\Feature\StaticAnalysisFixesTest
+  ✓ signed in checkout explains a sold out item instead of crashing      0.03s  
+  ✓ signed in checkout explains an item that is no longer on sale        0.04s  
+  ✓ signed in checkout checks the chosen variants own stock              0.03s  
+  ✓ a product added while working in dhivehi gets a web address from it… 0.05s  
+  ✓ a banned account cannot sign in and is told why                      0.03s  
+  ✓ the api reports whether a category is active                         0.02s  
+
+   PASS  Tests\Feature\StorefrontCatalogTest
+  ✓ department pages load by slug                                        0.06s  
+  ✓ filters combine and show counts                                      0.09s  
+  ✓ deals only lists marked down products                                0.07s  
+  ✓ sorting by price                                                     0.07s  
+  ✓ search matches name brand and sku and keeps department               0.11s  
+  ✓ list view renders                                                    0.04s  
+  ✓ seller shop page                                                     0.06s  
+  ✓ product page shows buy box specs seller and reviews                  0.06s  
+  ✓ recently viewed products follow the shopper                          0.09s  
+  ✓ home page has deals departments and shops                            0.05s  
+  ✓ help page shows delivery fees                                        0.03s  
+  ✓ cart add refuses more than the stock                                 0.05s  
+
+   PASS  Tests\Feature\StorefrontVariantsTest
+  ✓ product page shows the variant picker and from price                 0.06s  
+  ✓ adding to cart requires a variant and respects its stock             0.06s  
+  ✓ guest cart merge caps at variant stock                               0.03s  
+  ✓ product card sends shoppers to choose options                        0.02s  
+  ✓ back in stock alert can target a variant                             0.08s  
+
+   PASS  Tests\Feature\StructuredDataAndFeedsTest
+  ✓ product page has rich product and breadcrumb schema                  0.05s  
+  ✓ product without reviews has no rating and out of stock is marked     0.05s  
+  ✓ home page has organization schema from settings                      0.05s  
+  ✓ feeds need the token                                                 0.05s  
+  ✓ google merchant feed is valid rss with variant groups                0.03s  
+  ✓ facebook catalog csv has the standard columns                        0.02s  
+
+   PASS  Tests\Feature\TeamAlertsTest
+  ✓ an event goes to the group and to staff who chose it                 0.03s  
+  ✓ a new shop application raises an alert                               0.02s  
+  ✓ admins choose the alerts and send tests                              0.06s  
+
+   PASS  Tests\Feature\WalletAndGiftCardsTest
+  ✓ the wallet pays the whole order without bml                          0.13s  
+  ✓ a partial wallet payment sends only the remainder to bml             0.08s  
+  ✓ cancelling an order the wallet paid credits the wallet back and onl… 0.13s  
+  ✓ the balance can never go negative                                    0.02s  
+  ✓ admin can refund a due refund to the wallet instead of the card      0.09s  
+  ✓ a gift card is bought issued on payment and redeemed into the recip… 0.11s  
+  ✓ gift card amounts are validated and custom amounts allowed           0.05s  
+  ✓ expired and cancelled cards cannot be redeemed and unpaid orders ca… 0.08s  
+  ✓ only admins reach admin wallet pages and users only see their own w… 0.04s  
+
+   PASS  Tests\Feature\WebhooksOpsPrayerTest
+  ✓ order events are signed and sent to endpoints that want them         0.04s  
+  ✓ a failing endpoint is retried later                                  0.02s  
+  ✓ the ready check answers and ops watch alerts once                    0.02s  
+  ✓ prayer times for an island                                           0.05s  
+
+   PASS  Tests\Feature\WishlistDuplicateTest
+  ✓ cannot add duplicate product to wishlist                             0.02s  
+  ✓ database unique constraint prevents duplicates                       0.02s  
+  ✓ is in wishlist method works correctly                                0.02s  
+  ✓ different users can add same product                                 0.03s  
+  ✓ remove from wishlist method works                                    0.02s  
+
+   PASS  Tests\Feature\WishlistPriceDropsTest
+  ✓ the final price is stored when a product is wishlisted               0.03s  
+  ✓ a drop must be at least five percent and ten rufiyaa                 0.01s  
+  ✓ one digest lists the drops biggest first and never repeats one       0.05s  
+  ✓ hidden sold out binned and smoke test cases are skipped              0.04s  
+  ✓ customers who switch the alert or marketing off get none             0.06s  
+  ✓ a queued alert is dropped when the customer switched it off meanwhi… 0.02s  
+  ✓ customers with push subscriptions also get a push                    0.04s  
+  ✓ the email shows before and after in the customers language           0.04s  
+  ✓ items saved before tracking start from the first runs price          0.03s  
+  ✓ a long list is capped and the rest wait for the next day             0.06s  
+  ✓ the wishlist page shows how much less it costs now                   0.07s  
+  ✓ the alert is scheduled daily at ten maldives time                    0.02s  
+
+  Tests:    1112 passed (11862 assertions)
+  Duration: 102.34s
+
+EXIT:0
+ELAPSED_SEC:103

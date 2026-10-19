@@ -1,0 +1,47 @@
+[
+  {
+    "step": "csv-errors",
+    "status": "Pass",
+    "detail": "errors LINE SKU PRODUCT ACTION DETAILS 2 BAD-ROW Broken row Error price must be a number between 0.01 and 999999.99. Delivered to your island Every atoll, by boat and air Reviewed local sellers Every shop is checked befo"
+  },
+  {
+    "step": "csv-valid",
+    "status": "Pass",
+    "detail": "27 active=0"
+  },
+  {
+    "step": "staff",
+    "status": "Fail",
+    "detail": "Error: Command failed: sqlite3 /workspace/database/audit2.sqlite SELECT id||'|'||token FROM shop_staff_invitations WHERE email='staff2@audit2.test' ORDER BY id DESC LIMIT 1;\nError: in prepare, no such column: token\n  SELECT id||'|'||token FROM shop_staff_invitations WHERE email='staff2@audit2.t\n                  ^--- error here\n\n    at genericNodeError (node:internal/errors:983:15)\n    at wrappedFn (node:internal/errors:537:14)\n    at checkExecSyncError (node:child_process:882:11)\n    at execFileSync (node:child_process:918:15)\n    at sql (file:///tmp/audit2-follow.mjs:9:20)\n    at file:///tmp"
+  },
+  {
+    "step": "holiday-checkout",
+    "status": "Pass",
+    "detail": "00 In stock This shop is on holiday for now Audit holiday: back next week"
+  },
+  {
+    "step": "holiday-off-2",
+    "status": "Pass",
+    "detail": "0"
+  },
+  {
+    "step": "return-requested",
+    "status": "Pass",
+    "detail": "1"
+  },
+  {
+    "step": "refund-recorded",
+    "status": "Info",
+    "detail": "refunded ref=AUDIT2-REFUND amt=95 stock 2->3"
+  },
+  {
+    "step": "gst-unlock",
+    "status": "Pass",
+    "detail": "no locked periods"
+  },
+  {
+    "step": "admin-rest",
+    "status": "Fail",
+    "detail": "locator.click: Error: strict mode violation: getByRole('button', { name: /Send/ }) resolved to 2 elements:\n    1) <button class=\"rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50\">Send me a test</button> aka getByRole('button', { name: 'Send me a test' })\n    2) <button class=\"rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700\">Send</button> aka getByRole('button', { name: 'Send', exact: true })\n\nCall log:\n  - waiting for getByRole('button', { name: /Send/ })\n\n    at /tmp/audit2-follow.mjs:146:56\n    at async guard (/tmp/"
+  }
+]

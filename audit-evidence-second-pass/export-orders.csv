@@ -1,0 +1,6 @@
+order,date,status,payment_status,payment_method,island,atoll,goods_after_discounts,delivery,small_order_fee,voucher,voucher_discount,points_discount,total,refund_status,refund_amount
+ORD-VADQRKP3ID,"2026-10-19 10:14:45",pending,unpaid,bml,Malé,Kaafu,134,25,0,FIXED10,10,0,159,,
+ORD-CTX69K8SXL,"2026-10-19 10:14:48",pending,unpaid,bml,Malé,Kaafu,81,25,0,PCT10,9,0,106,,
+ORD-AAUGNCM8QD,"2026-10-19 10:15:20",pending,unpaid,credit,Malé,Kaafu,55,25,0,,0,0,80,,
+ORD-PR4H0SKZN5,"2026-10-19 10:18:35",pending,unpaid,bml,Malé,Kaafu,200,25,0,,0,0,225,,
+ORD-JNGTHFHYDG,"2026-10-19 10:21:14",pending,unpaid,bml,Malé,Kaafu,55,25,15,,0,0,95,,

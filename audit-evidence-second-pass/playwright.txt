@@ -1,0 +1,1018 @@
+
+> test:browser
+> playwright test -c tests/browser/playwright.config.ts
+
+[WebServer] browser-test: migrating and seeding /workspace/database/browser.sqlite
+[WebServer] Smoke customer ready: browser@iruali.test (user #8, is_smoke_test = true)
+[WebServer] browser-test: serving http://127.0.0.1:8001
+[WebServer] [Mon Oct 19 04:57:46 2026] PHP 8.4.26 Development Server (http://127.0.0.1:8001) started
+[WebServer] [Mon Oct 19 04:57:47 2026] 127.0.0.1:41294 Accepted
+[WebServer] [Mon Oct 19 04:57:47 2026] 127.0.0.1:41294 [GET] URI: /up
+[WebServer] [Mon Oct 19 04:57:47 2026] 127.0.0.1:41294 Closing
+
+Running 3 tests using 1 worker
+
+(node:32663) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:32663) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41306 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41306 [GET] URI: /login/email
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41306 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41312 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41314 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41316 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41312 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41314 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41322 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41316 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41338 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41322 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41312 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41314 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41338 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41316 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41322 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41338 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41342 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41342 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41342 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41356 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41356 [200]: GET /sw.js
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41356 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41362 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41368 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41380 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41362 [GET] URI: /offline
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41362 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41368 [200]: GET /site.webmanifest
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41380 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41368 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41380 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41388 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41398 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41406 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41388 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41398 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41388 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41398 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41406 [200]: GET /images/icons/icon-192.png
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41406 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41410 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41416 Accepted
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41410 [200]: GET /images/icons/icon-512.png
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41416 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41410 Closing
+[WebServer] [Mon Oct 19 04:57:48 2026] 127.0.0.1:41416 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41422 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41422 [POST] URI: /login
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41422 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41432 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41432 [GET] URI: /
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41432 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41446 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41446 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41446 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41450 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41464 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41450 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41464 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41450 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41464 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41466 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41480 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41466 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41466 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41480 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41480 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41494 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41494 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41494 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41508 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41508 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41508 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41514 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41514 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41514 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41516 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41516 [POST] URI: /delivery/island/dismiss
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:41516 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35858 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35858 [GET] URI: /search
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35858 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35862 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35870 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35862 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35870 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35862 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35870 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35880 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35880 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35880 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35888 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35900 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35888 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35888 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35900 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35900 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35916 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35916 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35916 Closing
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35930 Accepted
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35930 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:49 2026] 127.0.0.1:35930 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35946 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35946 [GET] URI: /products/coir-rope-10-m
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35946 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35948 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35948 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35948 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35962 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35974 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35962 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35962 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35974 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35974 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35980 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35986 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35980 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35980 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35986 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35986 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35990 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35990 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:35990 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36004 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36004 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36004 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36012 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36012 [POST] URI: /cart/add
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36012 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36026 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36026 [GET] URI: /cart
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36026 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36038 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36038 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36038 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36048 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36048 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36048 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36050 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36050 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36050 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36054 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36054 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36054 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36062 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36062 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36062 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36076 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36076 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36076 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36084 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36084 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36084 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36090 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36090 [GET] URI: /checkout
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36090 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36104 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36120 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36136 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36144 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36104 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36120 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36136 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36144 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36104 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36120 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36136 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36144 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36148 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36156 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36148 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36156 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36148 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36156 Closing
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36168 Accepted
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36168 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:50 2026] 127.0.0.1:36168 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36178 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36178 [POST] URI: /orders
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36178 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36188 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36188 [GET] URI: /payments/bml/return/1
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36188 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36196 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36196 [GET] URI: /orders/1
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36196 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36200 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36200 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36200 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36202 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36202 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36202 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36212 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36212 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36212 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36220 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36236 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36240 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36220 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36220 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36236 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36236 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36240 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36240 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36254 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36254 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36254 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36268 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36268 [GET] URI: /orders
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36268 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36276 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36284 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36276 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36284 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36276 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36284 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36292 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36292 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36306 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36322 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36306 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36292 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36322 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36306 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36322 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36330 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36330 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36330 Closing
+  ✓  1 [chromium] › tests/browser/checkout.spec.ts:34:5 › checkout › search → product → cart → checkout → pay now → my orders (3.2s)
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36336 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36336 [GET] URI: /
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36336 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36346 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36356 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36346 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36372 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36356 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36376 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36372 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36384 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36346 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36376 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36356 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36384 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36372 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36376 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36384 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36392 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36392 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36392 Closing
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36394 Accepted
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36394 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:51 2026] 127.0.0.1:36394 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36408 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36408 [200]: GET /sw.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36408 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36422 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36438 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36452 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36422 [GET] URI: /offline
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36422 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36438 [200]: GET /site.webmanifest
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36452 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36438 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36452 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36456 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36466 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36468 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36470 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36456 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36466 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36468 [200]: GET /images/icons/icon-192.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36470 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36456 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36466 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36468 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36470 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36474 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36474 [200]: GET /images/icons/icon-512.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36474 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36482 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36482 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36482 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36496 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36496 [GET] URI: /products
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36496 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36512 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36524 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36512 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36526 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36524 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36526 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36512 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36524 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36526 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36536 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36544 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36548 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36536 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36536 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36544 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36544 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36548 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36548 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36554 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36554 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36554 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36560 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36560 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36560 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36568 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36568 [GET] URI: /brands
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36568 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36582 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36582 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36582 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36584 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36584 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36584 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36592 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36600 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36592 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36600 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36592 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36600 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36606 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36606 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36606 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36608 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36608 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36608 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36614 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36614 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36614 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36630 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36630 [GET] URI: /deals
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36630 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36634 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36646 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36634 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36646 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36634 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36646 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36658 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36658 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36658 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36662 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36662 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36662 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36678 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36678 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36678 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36686 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36686 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36686 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36690 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36690 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36690 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36706 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36706 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36706 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36722 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36722 [GET] URI: /cart
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36722 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36732 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36732 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36732 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36736 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36736 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36736 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36744 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36744 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36744 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36758 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36766 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36758 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36766 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36758 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36766 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36770 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36770 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36770 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36778 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36778 [GET] URI: /login
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36778 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36788 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36790 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36788 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36790 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36788 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36790 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36794 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36794 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36794 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36810 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36814 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36810 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36814 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36810 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36814 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36824 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36824 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36824 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36836 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36836 [GET] URI: /login/email
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36836 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36838 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36844 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36838 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36844 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36838 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36844 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36850 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36850 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36850 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36854 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36864 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36854 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36864 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36854 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36864 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36878 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36878 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36878 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36894 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36894 [GET] URI: /register
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36894 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36902 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36902 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36902 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36908 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36908 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36908 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36912 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36918 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36924 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36912 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36918 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36924 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36912 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36918 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36924 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36940 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36940 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36940 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36950 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36950 [GET] URI: /help
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36950 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36958 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36962 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36958 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36962 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36958 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36962 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36978 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36978 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36978 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36982 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36982 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36982 Closing
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36986 Accepted
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36986 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:52 2026] 127.0.0.1:36986 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:36990 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:36990 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:36990 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:36998 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:36998 [GET] URI: /terms
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:36998 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37004 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37004 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37008 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37024 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37004 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37008 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37008 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37024 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37024 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37034 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37044 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37034 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37044 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37034 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37044 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37048 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37048 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37048 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37056 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37056 [GET] URI: /refund-policy
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37056 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37062 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37062 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37062 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37070 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37072 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37080 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37096 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37070 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37072 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37080 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37096 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37070 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37072 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37080 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37096 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37110 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37110 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37110 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37122 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37122 [GET] URI: /delivery-policy
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37122 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37130 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37140 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37130 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37140 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37130 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37140 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37156 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37156 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37156 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37164 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37164 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37164 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37166 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37166 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37166 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37182 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37182 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37182 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37196 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37196 [GET] URI: /privacy-policy
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37196 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37206 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37206 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37206 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37214 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37214 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37214 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37216 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37216 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37216 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37220 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37220 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37220 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37236 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37236 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37236 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37252 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37252 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37252 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37254 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37254 [GET] URI: /payment-security
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37254 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37268 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37268 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37268 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37274 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37274 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37274 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37276 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37276 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37276 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37288 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37288 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37288 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37294 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37294 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37294 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37310 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37310 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37310 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37326 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37326 [GET] URI: /about
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37326 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37328 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37334 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37328 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37344 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37334 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37344 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37328 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37334 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37344 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37356 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37356 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37356 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37370 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37370 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37370 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37386 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37386 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37386 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37400 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37400 [GET] URI: /seller-terms
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37400 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37410 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37422 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37410 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37422 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37410 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37422 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37424 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37424 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37424 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37438 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37438 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37438 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37454 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37454 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37454 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37462 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37462 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37462 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37468 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37468 [GET] URI: /dv
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37468 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37474 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37490 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37474 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37490 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37474 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37490 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37498 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37498 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37498 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37510 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37510 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37510 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37514 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37514 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37514 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37530 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37530 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37530 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37534 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37534 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37534 Closing
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37538 Accepted
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37538 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:53 2026] 127.0.0.1:37538 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37540 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37540 [GET] URI: /dv/products
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37540 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37552 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37552 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37552 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37558 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37558 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37558 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37570 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37570 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37570 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37582 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37594 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37582 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37582 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37594 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37594 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37600 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37600 [GET] URI: /delivery/island
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37600 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37610 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37612 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37610 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37612 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37610 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37612 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37616 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37616 [GET] URI: /dv/terms
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37616 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37620 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37626 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37620 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37628 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37626 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37640 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37628 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37650 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37620 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37640 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37626 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37650 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37628 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37640 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37650 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37656 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37656 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37656 Closing
+  ✓  2 [chromium] › tests/browser/phone-width.spec.ts:25:1 › shop pages fit a phone screen (2.8s)
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37658 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37658 [GET] URI: /login/email
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37658 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37674 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37684 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37698 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37704 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37674 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37684 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37698 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37708 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37704 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37708 [200]: GET /images/card-brands.png
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37674 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37684 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37698 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37704 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37708 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37720 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37720 [200]: GET /sw.js
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37720 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37724 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37724 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37724 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37730 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37730 [GET] URI: /offline
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37730 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37734 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37736 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37734 [200]: GET /site.webmanifest
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37748 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37736 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37748 [200]: GET /images/brand/iruali-logo.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37756 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37734 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37736 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37748 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37760 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37774 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37760 [200]: GET /images/icons/icon-192.png
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37774 [200]: GET /images/icons/icon-512.png
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37756 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37760 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37774 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37756 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37790 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37790 [200]: GET /images/product-placeholder.svg
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37790 Closing
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37806 Accepted
+[WebServer] [Mon Oct 19 04:57:54 2026] 127.0.0.1:37806 [POST] URI: /login
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37806 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37812 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37812 [GET] URI: /admin/dashboard
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37812 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37818 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37822 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37818 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37824 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37822 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37836 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37824 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37818 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37836 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37822 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37824 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37836 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37848 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37848 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37848 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37864 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37864 [GET] URI: /admin/dashboard
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37864 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37874 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37874 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37874 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37886 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37886 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37886 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37892 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37892 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37892 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37900 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37900 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37900 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37914 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37914 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37914 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37926 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37926 [GET] URI: /admin/orders
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37926 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37928 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37928 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37928 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37944 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37944 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37944 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37950 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37962 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37950 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37962 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37950 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37962 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37964 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37964 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37964 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37968 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37968 [GET] URI: /admin/products
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37968 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37984 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37984 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37984 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37988 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37996 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37988 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37988 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38006 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37996 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38006 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:37996 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38006 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38008 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38008 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38008 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38020 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38020 [GET] URI: /admin/brands
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38020 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38030 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38030 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38030 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38036 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38042 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38036 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38042 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38036 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38042 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38044 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38044 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38044 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38050 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38050 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38050 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38056 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38056 [GET] URI: /admin/sellers
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38056 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38058 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38058 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38072 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38058 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38088 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38100 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38088 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38100 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38072 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38088 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38100 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38072 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38104 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38104 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38104 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38110 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38110 [GET] URI: /admin/users
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38110 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38118 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38132 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38148 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38118 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38164 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38132 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38148 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38164 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38118 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38132 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38148 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38164 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38176 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38176 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38176 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38180 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38180 [GET] URI: /admin/settings
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38180 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38184 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38184 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38188 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38184 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38196 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38196 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38188 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38196 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38188 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38208 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38208 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38208 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38210 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38210 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38210 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38218 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38218 [GET] URI: /admin/legal
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38218 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38224 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38236 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38224 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38236 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38224 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38236 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38246 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38262 Accepted
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38246 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38262 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38246 Closing
+[WebServer] [Mon Oct 19 04:57:55 2026] 127.0.0.1:38262 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38274 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38274 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38274 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38278 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38278 [GET] URI: /admin/delivery
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38278 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38280 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38286 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38296 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38280 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38312 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38286 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38296 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38280 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38312 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38286 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38296 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38312 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38316 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38316 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38316 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38330 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38330 [GET] URI: /admin/analytics
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38330 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38332 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38342 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38332 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38346 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38342 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38346 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38332 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38342 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38346 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38348 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38348 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38348 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38364 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38364 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38364 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38378 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38378 [GET] URI: /admin/audit
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38378 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38390 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38394 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38390 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38394 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38390 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38394 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38396 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38396 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38396 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38400 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38400 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38400 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38406 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38406 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38406 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38420 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38420 [GET] URI: /admin/tax
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38420 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38434 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38434 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38434 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38450 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38460 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38450 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38460 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38450 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38460 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38476 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38476 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38476 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38482 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38482 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38482 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38490 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38490 [GET] URI: /admin/settings
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38490 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38494 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38494 [200]: GET /build/assets/app-CmzrH3GF.css
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38494 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38498 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38504 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38498 [200]: GET /build/assets/app-vDIgK8FK.js
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38514 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38504 [200]: GET /images/brand/iruali-logo-reversed.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38514 [200]: GET /images/brand/iruali-mark.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38498 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38504 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38514 Closing
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38520 Accepted
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38520 [200]: GET /favicon.svg
+[WebServer] [Mon Oct 19 04:57:56 2026] 127.0.0.1:38520 Closing
+  ✓  3 [chromium] › tests/browser/phone-width.spec.ts:33:1 › admin pages fit a phone screen (2.3s)
+
+  3 passed (14.3s)
+EXIT:0
+ELAPSED_SEC:15

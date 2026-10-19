@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "step": "wallet-partial",
+      "status": "Info",
+      "detail": "before 140 after 0 row 4|ORD-PR4H0SKZN5|225|25|140|bml|unpaid|0 url http://127.0.0.1:8030/orders/4"
+    },
+    {
+      "step": "pay-later-over",
+      "status": "Pass",
+      "detail": "outlet country: Maldives Error This order is more than your pay-later credit left (MVR 120.00)."
+    },
+    {
+      "step": "ordering-rules",
+      "status": "Fail",
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('form[action$=\"/admin/settings\"] button[type=submit]')\n\n    at /tmp/audit2-walk3.mjs:111:79\n    at async guard (/tmp/audit2-walk3.mjs:69:40)\n    at async file:///tmp/audit2-walk3.mjs:103:3"
+    }
+  ],
+  "consoles": []
+}

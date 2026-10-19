@@ -49,7 +49,9 @@ class ReturnController extends Controller
         ]);
 
         if (! $returns->approve($return, (float) $data['refund_amount'], $request->boolean('restock'), $data['admin_note'] ?? null, $request->user())) {
-            return back()->with('error', 'This return can\'t be approved: it was already handled, or the refund is more than is left on the order.');
+            return back()->with('error', $return->order->payment_status !== 'paid' && (float) $data['refund_amount'] > 0
+                ? 'This order has not been paid, so there is no money to refund. Confirm the payment first, or approve with a refund of 0 to take the items back.'
+                : 'This return can\'t be approved: it was already handled, or the refund is more than is left on the order.');
         }
 
         return back()->with('success', 'Return approved. The customer has been told, and the shop\'s share was taken from its next payout.');
@@ -74,7 +76,7 @@ class ReturnController extends Controller
         }
 
         if (! $returns->markRefunded($return, $data['refund_reference'])) {
-            return back()->with('error', 'Only an approved return can be marked as refunded.');
+            return back()->with('error', 'Only an approved return on a paid order, with an amount to send back, can be marked as refunded.');
         }
 
         return back()->with('success', 'Refund recorded. The customer has been emailed.');

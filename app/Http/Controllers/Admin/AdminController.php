@@ -60,8 +60,9 @@ class AdminController extends Controller
 
         // "System status" panel: the same checks as php artisan iruali:ready (offline, cached 5 minutes), admins only
         $readyChecks = auth()->user()->hasRole('admin') ? \App\Support\ReadyChecks::cached() : [];
+        $launchChecks = auth()->user()->hasRole('admin') ? (new \App\Support\LaunchChecks)->run() : [];
 
-        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers', 'readyChecks'));
+        return view('admin.dashboard', compact('stats', 'recent_users', 'recent_orders', 'pending_sellers', 'readyChecks', 'launchChecks'));
     }
 
     public function sellers()

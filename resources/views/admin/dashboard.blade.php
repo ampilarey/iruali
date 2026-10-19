@@ -147,6 +147,44 @@
         </section>
     </div>
 
+    @if(! empty($launchChecks))
+    <!-- Launch checklist (App\Support\LaunchChecks): the business side of going live; open while anything is red -->
+    @php
+        $launchCounts = \App\Support\LaunchChecks::counts($launchChecks);
+        $launchRank = ['fail' => 0, 'warn' => 1, 'pass' => 2];
+        $sortedLaunch = collect($launchChecks)->sortBy(fn ($c) => $launchRank[$c['status']] ?? 9)->values();
+    @endphp
+    <details class="group bg-white shadow-sm rounded-xl" id="launch-checklist" data-launch-checklist @if($launchCounts['fail'] > 0) open @endif>
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-2 p-3 sm:p-4 [&::-webkit-details-marker]:hidden">
+            <h2 class="text-sm font-semibold text-gray-900">Launch checklist</h2>
+            <span class="flex items-center gap-2">
+                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $launchCounts['fail'] ? 'bg-red-100 text-red-800' : ($launchCounts['warn'] ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800') }}">
+                    {{ $launchCounts['fail'] ? $launchCounts['fail'].' to do before launch' : ($launchCounts['warn'] ? 'Ready, '.$launchCounts['warn'].' to look at' : 'Ready to launch') }}
+                </span>
+                <x-icon name="chevron-down" class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" />
+            </span>
+        </summary>
+        <div class="border-t border-gray-100 px-3 pb-3 sm:px-4">
+            <ul class="divide-y divide-gray-100 text-sm">
+                @foreach($sortedLaunch as $check)
+                    @php $tone = ['pass' => 'bg-green-500', 'warn' => 'bg-amber-500', 'fail' => 'bg-red-500'][$check['status']] ?? 'bg-gray-300'; @endphp
+                    <li class="flex items-start gap-2.5 py-2" data-launch-check="{{ $check['status'] }}">
+                        <span class="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full {{ $tone }}" title="{{ $check['status'] }}"></span>
+                        <div class="min-w-0 flex-1">
+                            <span class="font-medium text-gray-900">{{ $check['name'] }}</span>
+                            <span class="text-gray-600">— {{ $check['detail'] }}</span>
+                            @if($check['status'] !== 'pass' && $check['fix'])
+                                <p class="text-xs text-gray-500">{{ $check['fix'] }}@if($check['link']) <a href="{{ $check['link'] }}" class="font-medium text-primary-600 hover:underline">Fix</a>@endif</p>
+                            @endif
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+            <p class="mt-2 text-xs text-gray-400">Checked each time this page opens. The technical checks are under System status below.</p>
+        </div>
+    </details>
+    @endif
+
     @if(! empty($readyChecks))
     <!-- System status: the same checks as `php artisan iruali:ready` (offline, cached for 5 minutes); folded, problems listed first -->
     @php

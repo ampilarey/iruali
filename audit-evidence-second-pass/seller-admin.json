@@ -1,0 +1,93 @@
+{
+  "results": [
+    {
+      "step": "seller-variant-product",
+      "status": "Pass",
+      "detail": "product 26 AUDIT-SELLER-TEE 0 1 variants 2 url http://127.0.0.1:8030/seller/products"
+    },
+    {
+      "step": "bulk-edit",
+      "status": "Info",
+      "detail": "selected 26 stock now 18 url http://127.0.0.1:8030/seller/products"
+    },
+    {
+      "step": "csv-errors",
+      "status": "Pass",
+      "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade & Crafts Home & Living Kids & Baby Search Search Hello, Aisha"
+    },
+    {
+      "step": "csv-import",
+      "status": "Fail",
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: /import|apply|save/i }).first()\n    - locator resolved to <button type=\"submit\" aria-label=\"Apply price\" class=\"shrink-0 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-semibold\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <dialog open=\"\" data-auto-open=\"\" data-island-dialog=\"\" data-text-atolls=\":count atolls\" data-text-greater-male=\"Greater Malé\" aria-labelledby=\"island-dialog-title\" data-text-other-islands=\"Oth"
+    },
+    {
+      "step": "packing-slip",
+      "status": "Pass",
+      "detail": "HTTP 200 Back to order Print From Island Crafts Packing slip Order ORD-VADQRKP3ID 19 Oct 2026 DELIVER TO Audit Buyer Audit House Malé, Kaafu, Maldives Phone: +9607912101 ITEMS Product SKU Qty Price Amount Audi"
+    },
+    {
+      "step": "staff-invite",
+      "status": "Fail",
+      "detail": "locator.fill: Error: strict mode violation: locator('input[name=email]') resolved to 2 elements:\n    1) <input value=\"\" dir=\"ltr\" id=\"email\" required=\"\" name=\"email\" type=\"email\" maxlength=\"255\" autocomplete=\"off\" class=\"mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500\"/> aka getByRole('textbox', { name: 'Email', exact: true })\n    2) <input required=\"\" type=\"email\" name=\"email\" id=\"newsletter-email\" placeholder=\"Email address\" class=\"flex-1 lg:w-72 min-w-0 rounded-lg border-0 bg-white/10 px-4 py-2.5 text-white placeholder-white/50 focus:ring-2 focus:ring-sun\"/> aka getByRole('textbox', { name: 'Email address' })\n\nCall log:"
+    },
+    {
+      "step": "holiday-on",
+      "status": "Pass",
+      "detail": "disabled=true product=true checkout=false"
+    },
+    {
+      "step": "holiday-off",
+      "status": "Pass",
+      "detail": "holiday_mode=0"
+    },
+    {
+      "step": "return-form",
+      "status": "Pass",
+      "detail": "form 1"
+    },
+    {
+      "step": "return-refund",
+      "status": "Fail",
+      "detail": "locator.fill: Error: strict mode violation: locator('textarea[name=details]') resolved to 2 elements:\n    1) <textarea rows=\"3\" id=\"details-5\" name=\"details\" maxlength=\"2000\" class=\"mt-1 w-full rounded-lg border-gray-300 text-sm\"></textarea> aka getByRole('textbox', { name: 'Tell us what happened' })\n    2) <textarea rows=\"3\" required=\"\" name=\"details\" minlength=\"10\" maxlength=\"2000\" id=\"dispute-details-5\" class=\"mt-1 w-full rounded-lg border-gray-300 text-sm\"></textarea> aka locator('#dispute-details-5')\n\nCall log:\n  - waiting for locator('textarea[name=details]')\n\n    at /tmp/audit2-seller-admin.mjs:184:52\n    at async guard (/tmp/audit2-seller-admin.mjs:29:40)\n    at async file:///tmp/aud"
+    },
+    {
+      "step": "login-wait",
+      "status": "Info",
+      "detail": "admin@example.com still on login, waiting"
+    },
+    {
+      "step": "settlement",
+      "status": "Info",
+      "detail": "1 matched 159 1 Skip to content ADMIN Dashboard Inbox 9 SALES Orders Returns Disputes Complaints Pre-orders Bulk quotes Messages MONEY Shop payouts Payout batches Tax (GST) Finance Settlements Exp"
+    },
+    {
+      "step": "gst-lock",
+      "status": "Info",
+      "detail": "2026-09 AUDIT-GST-09 2026-10-19 10:25:17"
+    },
+    {
+      "step": "gst-unlock",
+      "status": "Info",
+      "detail": "1 true"
+    },
+    {
+      "step": "export",
+      "status": "Pass",
+      "detail": "HTTP 200 bytes 635"
+    },
+    {
+      "step": "sms-campaign",
+      "status": "Pass",
+      "detail": " Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Elec"
+    },
+    {
+      "step": "admin-writes",
+      "status": "Fail",
+      "detail": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('select[name=type]')\n\n    at /tmp/audit2-seller-admin.mjs:252:45\n    at async guard (/tmp/audit2-seller-admin.mjs:29:40)\n    at async file:///tmp/audit2-seller-admin.mjs:209:3"
+    }
+  ],
+  "consoles": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 429 (Too Many Requests)"
+  ]
+}

@@ -1,0 +1,109 @@
+{
+    "voucher": {
+        "before_uses": 0,
+        "results": {
+            "a": {
+                "ok": false,
+                "message": "We could not place your order. Please try again.",
+                "order": null
+            },
+            "b": {
+                "ok": true,
+                "message": "Order placed successfully!",
+                "order": 9
+            }
+        },
+        "after_uses": 1,
+        "orders": 1
+    },
+    "gift": {
+        "code_status_before": "active",
+        "results": {
+            "a": {
+                "ok": true,
+                "message": "redeemed"
+            },
+            "b": {
+                "ok": false,
+                "message": "This gift card has already been redeemed."
+            }
+        },
+        "after": {
+            "status": "redeemed",
+            "balance": "0.00",
+            "redeemed_by": 10
+        },
+        "wallets": {
+            "user10": 25,
+            "user12": 0
+        }
+    },
+    "preorder": {
+        "product": 28,
+        "results": {
+            "a": {
+                "ok": true,
+                "message": "Order placed successfully!",
+                "order": 10
+            },
+            "b": {
+                "ok": false,
+                "message": "We could not place your order. Please try again.",
+                "order": null
+            }
+        },
+        "preorder_lines": 1
+    },
+    "wallet": {
+        "before": 80,
+        "results": {
+            "a": {
+                "ok": true,
+                "message": "Order placed successfully!",
+                "order": 11
+            },
+            "b": {
+                "ok": false,
+                "message": "We could not place your order. Please try again.",
+                "order": null
+            }
+        },
+        "after": 0,
+        "orders": [
+            {
+                "id": 11,
+                "total_amount": 80,
+                "wallet_amount": 80,
+                "payment_status": "paid"
+            },
+            {
+                "id": 8,
+                "total_amount": 80,
+                "wallet_amount": 0,
+                "payment_status": "unpaid"
+            }
+        ]
+    },
+    "return": {
+        "setup": {
+            "ok": true,
+            "message": "Order placed successfully!",
+            "order": 12
+        },
+        "return": 2,
+        "stock_before": 14,
+        "results": {
+            "a": {
+                "ok": false,
+                "message": "refused"
+            },
+            "b": {
+                "ok": true,
+                "message": "approved"
+            }
+        },
+        "status": "approved",
+        "stock_after": 15,
+        "adjustments": 1
+    }
+}

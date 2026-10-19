@@ -1,0 +1,110 @@
+{
+  "results": [
+    {
+      "step": "oauth",
+      "status": "Not tested",
+      "detail": "No Google/Facebook/Apple keys; social buttons hidden"
+    },
+    {
+      "step": "dv-home-desktop",
+      "status": "Pass",
+      "detail": "HTTP 200 title=Iruali"
+    },
+    {
+      "step": "dv-home-phone",
+      "status": "Pass",
+      "detail": "HTTP 200 title=Iruali"
+    },
+    {
+      "step": "dv-video-desktop",
+      "status": "Pass",
+      "detail": "HTTP 200 title=އޯޑިޓް ވީޑިއޯ - iruali"
+    },
+    {
+      "step": "dv-video-phone",
+      "status": "Pass",
+      "detail": "HTTP 200 title=އޯޑިޓް ވީޑިއޯ - iruali"
+    },
+    {
+      "step": "product-video",
+      "status": "Pass",
+      "detail": "youtube iframes after play: 1"
+    },
+    {
+      "step": "buyer-login",
+      "status": "Pass",
+      "detail": "http://127.0.0.1:8030/account name shown"
+    },
+    {
+      "step": "save-for-later",
+      "status": "Pass",
+      "detail": "wishlist shows Audit price drop item"
+    },
+    {
+      "step": "review-photo",
+      "status": "Pass",
+      "detail": "review visible"
+    },
+    {
+      "step": "question",
+      "status": "Pass",
+      "detail": "question posted"
+    },
+    {
+      "step": "answer",
+      "status": "Pass",
+      "detail": "shop reply"
+    },
+    {
+      "step": "stock-alert-subscribe",
+      "status": "Pass",
+      "detail": "open alerts 1"
+    },
+    {
+      "step": "stock-alert-sent",
+      "status": "Pass",
+      "detail": "notified_at set=1; log mentions stock=true"
+    },
+    {
+      "step": "price-drop",
+      "status": "Pass",
+      "detail": "Price-drop alerts sent to 1 customer(s).\n"
+    },
+    {
+      "step": "preorder-within",
+      "status": "Pass",
+      "detail": "in cart"
+    },
+    {
+      "step": "preorder-over",
+      "status": "Pass",
+      "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade & Crafts Home & Living Kids & Baby Search Search Hello, Audit"
+    },
+    {
+      "step": "cart-discount-text",
+      "status": "Info",
+      "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade & Crafts Home & Living Kids & Baby Search Search Hello, Audit Account & Orders 1 2 Cart Delivering to Malé (change) Show Delivers to Malé Only shops on Malé Show everything All Departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Brands New arrivals Deals Please verify your email address. Verify now Cart(2 items) Audit multi-buy rope Sold by Island Crafts In stock Qty 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Save for later Remove MVR 200.00 MVR 100.00 each Multi-buy 10% off: −MVR 20.00 Shop code: −MVR 36.00 Continu"
+    },
+    {
+      "step": "checkout-before-points",
+      "status": "Info",
+      "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade & Crafts Home & Living Kids & Baby Search Search Hello, Audit Account & Orders 1 2 Cart Delivering to Malé (change) Show Delivers to Malé Only shops on Malé Show everything All Departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Brands New arrivals Deals Please verify your email address. Verify now Checkout Complete your order When it arrives Each shop sends its own parcel. Arrival dates are estimates. From Island Crafts 2 items Arrives 21–22 Oct Delivery address Home Default Audit Buyer · Audit House, Malé, Kaafu +9607912101 Use this address Deliver to a new address Manage saved addresses Delivery area Free delivery on orders over MVR 1,000.00. Greater Malé (Malé, Hulhumalé, Villimalé) MVR 25.00 Other islands MVR 75.00 Delivery to Greater Malé: MVR 25.00 This is a gift We deliver it to the address above for the person you name. You still get the receipt and the order updates. Buying for a business? Add details for "
+    },
+    {
+      "step": "points-applied",
+      "status": "Info",
+      "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade & Crafts Home & Living Kids & Baby Search Search Hello, Audit Account & Orders 1 2 Cart Delivering to Malé (change) Show Delivers to Malé Only shops on Malé Show everything All Departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Brands New arrivals Deals Please verify your email address. Verify now Checkout Complete your order "
+    },
+    {
+      "step": "points-removed",
+      "status": "Pass",
+      "detail": "remove clicked"
+    },
+    {
+      "step": "crash",
+      "status": "Fail",
+      "detail": "locator.click: Error: strict mode violation: locator('#checkout-form button[type=submit]') resolved to 2 elements:\n    1) <button type=\"submit\" form=\"redeem-points-form\" class=\"rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover\">Redeem</button> aka getByRole('button', { name: 'Redeem' })\n    2) <button type=\"submit\" class=\"w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4 disabled:cursor-not-allowed disabled:opacity-50\">↵                        Place Order↵            …</button> aka getByRole('button', { name: 'Place Order' })\n\nCall log:\n  - waiting for locator('#checkout-form button[type=submit]')\n\n    at /tmp/audit2-walk.mjs:246:60"
+    }
+  ],
+  "consoles": []
+}

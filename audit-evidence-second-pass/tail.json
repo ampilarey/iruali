@@ -1,0 +1,7 @@
+{
+  "staff": "http://127.0.0.1:8030/shop ",
+  "sms": "1 sent +9607000999\n2 sent +9607912101 | sent sent=1",
+  "home": true,
+  "webhook": "[\n  {\n    \"at\": \"2026-10-19T05:22:52.184Z\",\n    \"url\": \"/hook\",\n    \"len\": 0\n  },\n  {\n    \"at\": \"2026-10-19T05:22:52.208Z\",\n    \"url\": \"/hook\",\n    \"len\": 0\n  },\n  {\n    \"at\": \"2026-10-19T05:29:15.048Z\",\n    \"url\": \"/hook\",\n    \"event\": \"order.created\",\n    \"len\": 377\n  }\n]",
+  "webhookFlash": "Skip to content ADMIN Dashboard Inbox 11 SALES Orders Returns Disputes Complaints Pre-orders Bulk quotes Messages MONEY Shop payouts Payout batches Tax (GST) Finance Settlements Exports Gift cards SHOPS & PRODUCTS Sellers Shop applications Verifications Products Product changes Brands Moderation Que"
+}

@@ -1,0 +1,22 @@
+{
+    "buyer_id": 8,
+    "unverified_id": 9,
+    "referrer_id": 10,
+    "referred_id": 11,
+    "race_wallet_id": 12,
+    "staff_id": 13,
+    "tee_id": 19,
+    "tee_variant_blue": 1,
+    "tee_variant_red": 2,
+    "pre_id": 20,
+    "pre_race_id": 21,
+    "video_id": 22,
+    "stock_id": 23,
+    "drop_id": 24,
+    "multi_id": 25,
+    "offer_id": 1,
+    "gift_card": "IRU-6AD3-RENJ-H3PN",
+    "race_gift_card": "IRU-FMNW-9YGU-T2MK",
+    "loyalty": 500,
+    "wallet": "40.00"
+}

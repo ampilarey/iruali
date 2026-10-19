@@ -1,0 +1,42 @@
+[
+  {
+    "feature": "buyer still signed in",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/"
+  },
+  {
+    "feature": "crafted greater_male + Feridhoo",
+    "status": "Pass",
+    "detail": "http 302 loc http://127.0.0.1:8020/payments/bml/return/2?transactionId=FAKEORDQNGX8TTDJCP1&fake=1 db 2|ORD-QNGX8TTDJC|islands|Feridhoo|75|160|bml|pending body <!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\" /> <meta http-equiv=\"refresh\" content=\"0;url='http://127.0.0.1:8020/payments/bml/return/2?transactionId=FAKEORDQNGX8TTDJCP1&amp;fake=1'\" /> <title>Redirecting to http://127.0.0.1:8020/paym"
+  },
+  {
+    "feature": "admin order before payment link",
+    "status": "Pass",
+    "detail": "200 http://127.0.0.1:8020/admin/orders/2"
+  },
+  {
+    "feature": "send payment link",
+    "status": "Pass",
+    "detail": "http 302 sent_at 2026-10-19 08:33:47"
+  },
+  {
+    "feature": "admin order after payment link",
+    "status": "Fail",
+    "detail": "500 http://127.0.0.1:8020/admin/orders/2"
+  },
+  {
+    "feature": "fresh payment link",
+    "status": "Pass",
+    "detail": "200 http://127.0.0.1:8020/pay/2?expires=1792384428&signature=bd9954903306830ce44c5a5be937e4387374875984b674918a0fbfec19852b20"
+  },
+  {
+    "feature": "expired payment link",
+    "status": "Pass",
+    "detail": "403 http://127.0.0.1:8020/pay/2?expires=1792380768&signature=f22840dfcd1e85bf051482186ecd65b48e83aa1117c14070473027826e244158"
+  },
+  {
+    "feature": "rest script",
+    "status": "Fail",
+    "detail": "Error: Command failed: /tmp/iruali-audit-env.sh php artisan tinker --execute=\"$o=App\\\\Models\\\\Order::find(2); $o->created_at=now()->subHours(30); $o->save(); echo $o->status;\" | at genericNodeError (node:internal/errors:983:15) | at wrappedFn (node:internal/errors:537:14) | at checkExecSyncError (node:child_process:882:11)"
+  }
+]

@@ -1,0 +1,13 @@
+
+  - Newest backup on 'local': Iruali/iruali-backup-2026-10-19-08-41-49.zip (14 seconds ago, 53 KB)
+  - Downloaded and unzipped; SQL dump sqlite-sqlite-database-2026-10-19-08-41-49.sql (274 KB)
+  - Restored 1132 SQL statements into /workspace/database/audit-drill.sqlite
+  - Dropped the drill tables again
++----------+----------------+-----------+
+| Table    | Rows in backup | Rows live |
++----------+----------------+-----------+
+| orders   | 3              | 3         |
+| users    | 17             | 17        |
+| products | 18             | 18        |
++----------+----------------+-----------+
+Restore drill PASSED: 102 tables restored from Iruali/iruali-backup-2026-10-19-08-41-49.zip.

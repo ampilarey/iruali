@@ -1,0 +1,43 @@
+
+  0    *  * * *  php artisan orders:cancel-unpaid-card  Next Due: 18 minutes from now
+  0    *  * * *  php artisan orders:cancel-unpaid-transfer  Next Due: 18 minutes from now
+  30   1  * * *  php artisan backup:clean ........ Next Due: 16 hours from now
+  0    2  * * *  php artisan backup:run --only-db  Next Due: 17 hours from now
+  0    4  1 * *  php artisan backup:restore-drill .. Next Due: 1 week from now
+  0    0  * * *  php artisan sanctum:prune-expired --hours=24  Next Due: 15 hours from now
+  0    *  * * *  php artisan marketing:cart-reminders  Next Due: 18 minutes from now
+  0    4  1 * *  php artisan rewards:expire-points . Next Due: 1 week from now
+  30   3  * * *  expire-gift-cards ............... Next Due: 18 hours from now
+  0    *  * * *  php artisan quotes:expire ..... Next Due: 18 minutes from now
+  0    *  * * *  php artisan sellers:applications-reopen  Next Due: 18 minutes from now
+  0    3  * * *  prune-guest-carts ............... Next Due: 18 hours from now
+  *    *  * * *  php artisan queue:work --stop-when-empty --max-time=50 --tries=3  Next Due: 23 seconds from now
+  0    0  * * *  php artisan queue:prune-failed --hours=168  Next Due: 15 hours from now
+  0    7  * * *  php artisan errors:digest ....... Next Due: 22 hours from now
+  30   2  * * *  php artisan rewards:refresh-tiers  Next Due: 17 hours from now
+  45   2  * * *  php artisan rewards:check-balances  Next Due: 18 hours from now
+  30   9  * * *  php artisan marketing:birthday-offers  Next Due: 48 minutes from now
+  */5  *  * * *  php artisan payments:reconcile-bml  Next Due: 3 minutes from now
+  *    *  * * *  php artisan sms:release-held .. Next Due: 23 seconds from now
+  15   3  * * *  php artisan sms:prune ........... Next Due: 18 hours from now
+  *    *  * * *  heartbeat ..................... Next Due: 23 seconds from now
+  0    8  * * *  php artisan seller:low-stock-digest  Next Due: 23 hours from now
+  30   3  * * *  prune-funnel-events ............. Next Due: 18 hours from now
+  0    9  * * *  php artisan brands:notify-followers  Next Due: 18 minutes from now
+  0    10 * * *  php artisan wishlist:price-drops .. Next Due: 1 hour from now
+  45   6  * * *  php artisan preorders:flag-late . Next Due: 22 hours from now
+  5    0  * * *  php artisan products:launch ..... Next Due: 15 hours from now
+  15   9  * * *  php artisan complaints:remind . Next Due: 33 minutes from now
+  15   8  * * 1  php artisan complaints:weekly-summary  Next Due: 6 days from now
+  */5  *  * * *  php artisan ordering:notify-back  Next Due: 3 minutes from now
+  0    *  * * *  php artisan orders:alert-late . Next Due: 18 minutes from now
+  45   7  * * *  php artisan refunds:daily-summary  Next Due: 23 hours from now
+  5    9  * * *  php artisan credit:reminders .. Next Due: 23 minutes from now
+  45   3  * * *  php artisan insights:compute-pairs  Next Due: 19 hours from now
+  *    *  * * *  php artisan sms:send-campaigns  Next Due: 23 seconds from now
+  */5  *  * * *  php artisan social:publish ..... Next Due: 3 minutes from now
+  30   0  1 * *  php artisan finance:recurring-expenses  Next Due: 1 week from now
+  20   9  * * *  php artisan gst:filing-reminder  Next Due: 38 minutes from now
+  */5  *  * * *  queue-heartbeat ................ Next Due: 3 minutes from now
+  */10 *  * * *  php artisan ops:watch .......... Next Due: 8 minutes from now
+

@@ -1,0 +1,52 @@
+[
+  {
+    "feature": "assign support",
+    "status": "Pass",
+    "detail": "support"
+  },
+  {
+    "feature": "assign finance",
+    "status": "Pass",
+    "detail": "finance"
+  },
+  {
+    "feature": "assign catalogue",
+    "status": "Pass",
+    "detail": "catalogue"
+  },
+  {
+    "feature": "shop accounts cannot become staff",
+    "status": "Pass",
+    "detail": "StaffRoleController refuses a seller. Separate accounts were used."
+  },
+  {
+    "feature": "staff role support",
+    "status": "Pass",
+    "detail": "/admin/orders=200@http://127.0.0.1:8020/admin/orders /admin/settings=403@http://127.0.0.1:8020/admin/settings"
+  },
+  {
+    "feature": "staff role finance",
+    "status": "Pass",
+    "detail": "/admin/payouts=200@http://127.0.0.1:8020/admin/payouts /admin/products=403@http://127.0.0.1:8020/admin/products"
+  },
+  {
+    "feature": "staff role catalogue",
+    "status": "Pass",
+    "detail": "/admin/brands=200@http://127.0.0.1:8020/admin/brands /admin/orders=403@http://127.0.0.1:8020/admin/orders"
+  },
+  {
+    "feature": "wishlist",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "2FA enabled",
+    "status": "Fail",
+    "detail": "http://127.0.0.1:8020/shop"
+  },
+  {
+    "feature": "2FA challenge",
+    "status": "Fail",
+    "detail": "http://127.0.0.1:8020/"
+  }
+]

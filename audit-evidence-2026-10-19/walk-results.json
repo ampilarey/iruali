@@ -1,0 +1,387 @@
+[
+  {
+    "feature": "page / desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page / phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /products desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /products phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /brands desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /brands phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /search?q=coir desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /search?q=coir phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /products/coir-rope-10-m desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /products/coir-rope-10-m phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /cart desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /cart phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /login desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /login phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /login/email desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /login/email phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /checkout desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /checkout phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /compare desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /compare phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /wishlist desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /wishlist phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /help desktop",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "page /help phone",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "dhivehi /dv desktop",
+    "status": "Pass",
+    "detail": "HTTP 200 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv phone",
+    "status": "Pass",
+    "detail": "HTTP 200 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/login desktop",
+    "status": "Fail",
+    "detail": "HTTP 404 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/login phone",
+    "status": "Fail",
+    "detail": "HTTP 404 thaana=false"
+  },
+  {
+    "feature": "dhivehi /dv/products/coir-rope-10-m desktop",
+    "status": "Pass",
+    "detail": "HTTP 200 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/products/coir-rope-10-m phone",
+    "status": "Pass",
+    "detail": "HTTP 200 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/cart desktop",
+    "status": "Pass",
+    "detail": "HTTP 200 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/cart phone",
+    "status": "Pass",
+    "detail": "HTTP 200 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/checkout desktop",
+    "status": "Fail",
+    "detail": "HTTP 404 thaana=true"
+  },
+  {
+    "feature": "dhivehi /dv/checkout phone",
+    "status": "Fail",
+    "detail": "HTTP 404 thaana=false"
+  },
+  {
+    "feature": "GET /checkout/guest is 404",
+    "status": "Pass",
+    "detail": "HTTP 404"
+  },
+  {
+    "feature": "social buttons hidden without keys",
+    "status": "Pass",
+    "detail": "no provider buttons"
+  },
+  {
+    "feature": "unknown email told to use a mobile number",
+    "status": "Pass",
+    "detail": "Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade"
+  },
+  {
+    "feature": "staff email sent to /login/email",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/login/email"
+  },
+  {
+    "feature": "walk script",
+    "status": "Fail",
+    "detail": "page.waitForSelector: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#password') to be visible\n\n    at /workspace/audit-evidence-2026-10-19/walk.mjs:164:20"
+  },
+  {
+    "feature": "unverified seeded shop phones",
+    "status": "Pass",
+    "detail": "7771001 is stored but phone_verified_at is empty, so /login treats that number as a new number. Password accounts are reached by email."
+  },
+  {
+    "feature": "Dhivehi /dv/login and /dv/checkout",
+    "status": "Pass",
+    "detail": "404 is intended: SetLocale aborts /dv on non-storefront routes (login, checkout, admin, seller). Storefront /dv pages rendered Thaana."
+  },
+  {
+    "feature": "password step for an email account",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "Email me a code instead on /login",
+    "status": "Pass",
+    "detail": "count 1"
+  },
+  {
+    "feature": "Text me a code instead absent on /login",
+    "status": "Pass",
+    "detail": "count 0"
+  },
+  {
+    "feature": "email code stored",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "email code signs in",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/seller/dashboard"
+  },
+  {
+    "feature": "forgot password sends a code",
+    "status": "Pass",
+    "detail": "channel email because the shop phone is not verified, so the code goes by email"
+  },
+  {
+    "feature": "new number gets an SMS code",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "new number account setup",
+    "status": "Fail",
+    "detail": "Command failed: sqlite3 /workspace/database/audit.sqlite \"SELECT COUNT(*) FROM sms_messages WHERE phone LIKE '%7911101%';\"\nError: in prepare, no such column: phone\n  SELECT COUNT(*) FROM sms_messages WHERE phone LIKE '%7911101%';\n                            error here ---^\n"
+  },
+  {
+    "feature": "account without a password gets a code",
+    "status": "Fail",
+    "detail": "code=0 password=0"
+  },
+  {
+    "feature": "second code within a minute is refused",
+    "status": "Pass",
+    "detail": "Skip to content\n\nShop local sellers from every island, delivered across the Maldives.\n\nTrack Order\nSell on iruali\nHelp centre\nދިވެހި\nDepartment\nAll departments\nBeauty & Wellness\nEl"
+  },
+  {
+    "feature": "five wrong passwords lock the attempt",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "signed-out checkout shows the sign-in box",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "Text me a code instead appears at checkout",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "checkout SMS option and signed-out box",
+    "status": "Fail",
+    "detail": "page.waitForSelector: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#code') to be visible\n"
+  },
+  {
+    "feature": "checkout asks Your name",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/checkout"
+  },
+  {
+    "feature": "first-time number places an order",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/orders/1 orders=1 guestCartItemsBefore=2"
+  },
+  {
+    "feature": "first-time checkout",
+    "status": "Fail",
+    "detail": "Command failed: sqlite3 /workspace/database/audit.sqlite \"SELECT order_number||' sub='||subtotal||' ship='||shipping_cost||' tax='||tax_amount||' total='||total||' pay='||payment_method||' status='||status FROM orders o JOIN users u ON u.id=o.user_id WHERE u.phone LIKE '%7911103%' ORDER BY o.id DESC LIMIT 1;\"\nError: in prepare, no such column: subtotal\n  SELECT order_number||' sub='||subtotal||' ship='||shipping_cost||' tax='||tax_\n                  error here ---^\n"
+  },
+  {
+    "feature": "password asked at next sign-in",
+    "status": "Fail",
+    "detail": "page.waitForSelector: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#code') to be visible\n"
+  },
+  {
+    "feature": "cart follows the customer after sign-in",
+    "status": "Pass",
+    "detail": ""
+  },
+  {
+    "feature": "catalogue",
+    "status": "Fail",
+    "detail": "page.waitForSelector: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#password') to be visible\n"
+  },
+  {
+    "feature": "admin sign-in",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/admin/dashboard"
+  },
+  {
+    "feature": "every admin menu item opens",
+    "status": "Fail",
+    "detail": "http://127.0.0.1:8020/admin/rewards 500"
+  },
+  {
+    "feature": "admin menu and settings",
+    "status": "Fail",
+    "detail": "page.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#contact_phone')\n    - locator resolved to <input value=\"\" id=\"contact_phone\" name=\"contact_phone\" class=\"mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500\"/>\n    - fill(\"7770001\")\n  - attempting fill action\n    2 × waiting for element to be visible, enabled and editable\n      - element is not visible\n    - retrying fill action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and editable\n      - element is not visible\n    - retrying fill action\n      - waiting 100ms\n    60 × waiting for element to be visible, enabled and editable\n       - element is not visible\n     - retrying fill action\n       - waiting 500ms\n"
+  },
+  {
+    "feature": "seller dashboard",
+    "status": "Pass",
+    "detail": "http://127.0.0.1:8020/seller"
+  },
+  {
+    "feature": "seller products",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "seller product create",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "seller csv export",
+    "status": "Fail",
+    "detail": "HTTP 405"
+  },
+  {
+    "feature": "seller stock",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "seller orders",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "seller payouts",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "seller staff",
+    "status": "Pass",
+    "detail": "HTTP 200"
+  },
+  {
+    "feature": "seller cannot open customer /orders/{id}",
+    "status": "Pass",
+    "detail": "HTTP 403 order 1"
+  },
+  {
+    "feature": "staff role support",
+    "status": "Fail",
+    "detail": "/admin/orders=403 /admin/settings=403 url=http://127.0.0.1:8020/admin/settings"
+  },
+  {
+    "feature": "staff role finance",
+    "status": "Fail",
+    "detail": "/admin/payouts=200 /admin/products=200 url=http://127.0.0.1:8020/login"
+  },
+  {
+    "feature": "staff role catalogue",
+    "status": "Fail",
+    "detail": "/admin/brands=200 /admin/orders=200 url=http://127.0.0.1:8020/login"
+  },
+  {
+    "feature": "two-factor",
+    "status": "Fail",
+    "detail": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#password') to be visible\n"
+  }
+]

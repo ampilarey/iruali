@@ -1,0 +1,12 @@
+Pass	password is asked at the next sign-in	http://127.0.0.1:8020/account/setup
+Pass	password saved	http://127.0.0.1:8020/
+Pass	Text me a code instead at checkout for a verified number	
+Fail	checkout SMS code is sent when the phone is verified	Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments 
+Pass	buyer password sign-in	http://127.0.0.1:8020/
+Fail	wishlist and 2FA	locator.click: Timeout 30000ms exceeded.
+Pass	settings save	phone=+9607770001 acct=7770001234567
+Pass	payment link opens signed out on a phone	HTTP 200
+Fail	pay by card follows the local fake	http://127.0.0.1:8020/pay/1?expires=1792553197&signature=7d8fcc8dd08f0a880deb2b9fe0cbb9a302427e18224ab6018b93e25936199d99
+Pass	upload transfer slip	Skip to content Search Choose your island to see what delivers to you. Choose island Pay for order ORD-H5FETBMG4U Audit Buyer 1 × Cotton sarong MVR 280.00 To pay MVR 355.00 We h
+Fail	seller export and staff roles	page.goto: Download is starting
+DONE 11

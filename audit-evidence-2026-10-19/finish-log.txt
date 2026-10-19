@@ -1,0 +1,11 @@
+Pass	checkout SMS code for a verified phone	
+Fail	wishlist 2FA	locator.click: Error: strict mode violation: getByRole('button', { name: 'Add to Wishlist' }) resolved to 3 elements:
+Pass	seller csv export	200 text/csv; charset=UTF-8
+Pass	seller csv import page	200
+Pass	seller holiday page	http://127.0.0.1:8020/seller/settings/holiday
+Fail	assign support	missing
+Fail	assign finance	missing
+Fail	assign catalogue	missing
+Fail	staff role support	/admin/orders=403 http://127.0.0.1:8020/admin/orders /admin/settings=403 http://127.0.0.1:8020/admin/settings
+Fail	staff role finance	/admin/payouts=403 http://127.0.0.1:8020/admin/payouts /admin/products=403 http://127.0.0.1:8020/admin/products
+Fail	staff role catalogue	/admin/brands=403 http://127.0.0.1:8020/admin/brands /admin/orders=403 http://127.0.0.1:8020/admin/orders

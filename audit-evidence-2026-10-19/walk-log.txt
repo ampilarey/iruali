@@ -1,0 +1,45 @@
+Pass	page / desktop	HTTP 200
+Pass	page / phone	HTTP 200
+Pass	page /products desktop	HTTP 200
+Pass	page /products phone	HTTP 200
+Pass	page /brands desktop	HTTP 200
+Pass	page /brands phone	HTTP 200
+Pass	page /search?q=coir desktop	HTTP 200
+Pass	page /search?q=coir phone	HTTP 200
+Pass	page /products/coir-rope-10-m desktop	HTTP 200
+Pass	page /products/coir-rope-10-m phone	HTTP 200
+Pass	page /cart desktop	HTTP 200
+Pass	page /cart phone	HTTP 200
+Pass	page /login desktop	HTTP 200
+Pass	page /login phone	HTTP 200
+Pass	page /login/email desktop	HTTP 200
+Pass	page /login/email phone	HTTP 200
+Pass	page /checkout desktop	HTTP 200
+Pass	page /checkout phone	HTTP 200
+Pass	page /compare desktop	HTTP 200
+Pass	page /compare phone	HTTP 200
+Pass	page /wishlist desktop	HTTP 200
+Pass	page /wishlist phone	HTTP 200
+Pass	page /help desktop	HTTP 200
+Pass	page /help phone	HTTP 200
+Pass	dhivehi /dv desktop	HTTP 200 thaana=true
+Pass	dhivehi /dv phone	HTTP 200 thaana=true
+Fail	dhivehi /dv/login desktop	HTTP 404 thaana=true
+Fail	dhivehi /dv/login phone	HTTP 404 thaana=false
+Pass	dhivehi /dv/products/coir-rope-10-m desktop	HTTP 200 thaana=true
+Pass	dhivehi /dv/products/coir-rope-10-m phone	HTTP 200 thaana=true
+Pass	dhivehi /dv/cart desktop	HTTP 200 thaana=true
+Pass	dhivehi /dv/cart phone	HTTP 200 thaana=true
+Fail	dhivehi /dv/checkout desktop	HTTP 404 thaana=true
+Fail	dhivehi /dv/checkout phone	HTTP 404 thaana=false
+Pass	GET /checkout/guest is 404	HTTP 404
+Pass	social buttons hidden without keys	no provider buttons
+Pass	unknown email told to use a mobile number	Skip to content Shop local sellers from every island, delivered across the Maldives. Track Order Sell on iruali Help centre ދިވެހި Department All departments Beauty & Wellness Electronics Fashion Fishing & Marine Food & Groceries Handmade
+Pass	staff email sent to /login/email	http://127.0.0.1:8020/login/email
+Fail	walk script	page.waitForSelector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator('#password') to be visible
+
+    at /workspace/audit-evidence-2026-10-19/walk.mjs:164:20
+WROTE 39 results 5 console errors
+EXIT:0 ELAPSED:72

@@ -173,6 +173,16 @@ rejects or suspends it. Onboarding steps, `/seller/profile` (logo, banner, descr
 notes, "ships to islands"), `/seller/settings/bank` (payout account, verified by an admin) and
 `/seller/settings/notifications`. Seller help guides at `/seller/help/{guide}`.
 
+**iruali's team never sells.** Team accounts (admin, support, finance, catalogue) are for running the
+website, the shops and the money. They can't apply for a shop (`seller.apply` sends them away, and the
+account menu offers neither "Sell on iruali" nor the Seller Centre), be approved as one (Admin → Sellers
+refuses; a team account that became a shop before is marked "iruali team account: cannot sell"), open
+the Seller Centre (`ShopAccess`) or join a shop's staff; and a shop account (owner or staff) is never
+made team (`StaffRoleController`, `staff:create`). The admin area has no product form of its own. iruali
+sells like any shop: through a shop account of its own (e.g. "iruali Direct", with its own email and
+mobile number), applied for and approved like any other; its commission can be 0% (Admin → Sellers →
+the shop → commission), and pre-orders or "coming soon" are allowed to it like to any shop.
+
 **Home island and delivery area.** Every shop has a home island (picked from the islands list on
 `/seller/profile`, required on the shop application `seller.apply`, a step on the onboarding
 checklist, and asked on the dashboard of shops from before) and one of three delivery types:
@@ -406,7 +416,7 @@ delivered and the order paid; see `MARKETPLACE.md`.
 ## Admin
 
 Staff roles are **admin**, **support**, **finance** and **catalogue** (`config/staff.php`); two-step
-sign-in is required for all of them. Catalogue staff look after brand pages (Admin → Brands: names,
+sign-in is required for all of them. Staff accounts never sell (Seller → "iruali's team never sells"). Catalogue staff look after brand pages (Admin → Brands: names,
 logo, banner, descriptions, merging, authorised sellers), approve new products and shops' changes
 to live products, and run campaigns,
 and open nothing about orders, money, people or settings. A shop's owner or someone on a shop's staff

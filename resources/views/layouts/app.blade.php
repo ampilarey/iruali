@@ -117,7 +117,7 @@
                                     <a href="{{ route('account.rewards') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Rewards') }}</a>
                                     <a href="{{ route('quotes.index') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Quote requests') }}</a>
                                     <a href="{{ route('account.wallet') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wallet') }}</a>
-                                    @if(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) || $sellLinks)<a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>@endif
+                                    @if(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) || \App\Support\CurrentShop::offersSelling(auth()->user(), $sellLinks))<a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-2 hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>@endif
                                     @if(auth()->user()->isStaff())
                                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
                                     @endif
@@ -260,7 +260,7 @@
                     @auth<a href="{{ route('quotes.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Quote requests') }}</a>@endauth
                     <a href="{{ route('order.track.form') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Track Order') }}</a>
                     @auth
-                        @if(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) || $sellLinks)<a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>@endif
+                        @if(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) || \App\Support\CurrentShop::offersSelling(auth()->user(), $sellLinks))<a href="{{ route(\App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? 'seller.dashboard' : 'seller.apply') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ \App\Support\CurrentShop::opensSellerCentre(auth()->user()) ? __('Seller Centre') : __('Sell on iruali') }}</a>@endif
                         @if(auth()->user()->isStaff())
                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Admin Dashboard') }}</a>
                         @endif

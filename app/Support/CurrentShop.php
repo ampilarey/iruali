@@ -156,17 +156,17 @@ class CurrentShop
 
     /**
      * Does the account menu offer this user the Seller Centre (a shop's owner or one of its staff)?
-     * Never iruali's own team, who do not sell (ShopAccess).
+     * Not iruali's team, who do not sell (an admin account may be iruali's own shop: User::maySell()).
      */
     public static function opensSellerCentre(?User $user): bool
     {
-        return $user !== null && ! $user->isStaff() && ($user->hasRole('seller') || self::membershipOf($user) !== null);
+        return $user !== null && $user->maySell() && ($user->hasRole('seller') || self::membershipOf($user) !== null);
     }
 
-    /** Does the account menu offer "Sell on iruali": while shops can apply, not to iruali's own team. */
+    /** Does the account menu offer "Sell on iruali": while shops can apply, not to iruali's team. */
     public static function offersSelling(?User $user, bool $applicationsShown): bool
     {
-        return $applicationsShown && ! $user?->isStaff();
+        return $applicationsShown && ($user === null || $user->maySell());
     }
 
     /**

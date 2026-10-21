@@ -66,7 +66,11 @@ class PhoneLoginController extends AuthController
                 return back()->withInput()->withErrors(['login' => __('No account uses that email. New to iruali? Continue with your mobile number.')]);
             }
             if ($user->isStaff()) {
-                return redirect()->route('login.email')->withInput(['email' => $email]);
+                // Staff type their password right here; it goes to the staff sign-in (AuthController::login:
+                // lockout after wrong tries, then the authenticator code). Never a code by text or email.
+                $request->session()->put(self::SESSION, ['step' => 'password', 'staff' => true, 'email' => $email, 'key' => $email, 'shown' => $email, 'remember' => $remember, 'checkout' => $request->boolean('checkout')]);
+
+                return $this->home(['checkout' => $request->boolean('checkout')]);
             }
             $pending = ['user_id' => $user->id, 'key' => $email, 'shown' => $this->maskEmail($email), 'remember' => $remember, 'checkout' => $request->boolean('checkout')];
         } else {

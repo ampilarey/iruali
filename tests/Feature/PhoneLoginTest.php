@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Customer\PhoneLoginController;
 use App\Models\OTP;
 use App\Models\Role;
 use App\Models\User;
@@ -176,13 +177,35 @@ class PhoneLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function test_an_unknown_email_is_told_to_use_the_mobile_number_and_staff_go_to_the_email_page(): void
+    public function test_an_unknown_email_is_told_to_use_the_mobile_number(): void
     {
         $this->post(route('login.phone.start'), ['login' => 'nobody@example.com'])->assertSessionHasErrors('login');
-
-        $staff = User::factory()->create(['email' => 'ops@iruali.test']);
-        $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
-        $this->post(route('login.phone.start'), ['login' => 'ops@iruali.test'])->assertRedirect(route('login.email'));
         $this->assertGuest();
+    }
+
+    public function test_staff_type_their_password_on_the_same_page_and_never_get_a_code(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $staff = User::factory()->create(['email' => 'ops@iruali.test', 'password' => Hash::make('Staff-pass-123!'), 'phone' => '7779000']);
+        $staff->forceFill(['phone_verified_at' => now()])->save();
+        $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+
+        $this->post(route('login.phone.start'), ['login' => 'Ops@iruali.test'])->assertRedirect(route('login'));
+        $this->get(route('login'))->assertOk()->assertSee('data-staff-password', false)->assertSee('ops@iruali.test')
+            ->assertSee('action="'.route('login').'"', false)->assertDontSee('data-email-code', false)->assertDontSee('data-sms-code', false);
+        // No code by email or text for staff, whatever is posted
+        $this->post(route('login.phone.email-code'));
+        $this->post(route('login.phone.sms-code'));
+        \Illuminate\Support\Facades\Notification::assertNothingSent();
+
+        // A wrong password says so on the same page
+        $this->from(route('login'))->post(route('login'), ['email' => 'ops@iruali.test', 'password' => 'wrong'])->assertRedirect(route('login'));
+        $this->get(route('login'))->assertSee('data-staff-password', false)->assertSee(__('auth.failed'));
+        $this->assertGuest();
+
+        // The right one signs in (and the staff step is forgotten)
+        $this->from(route('login'))->post(route('login'), ['email' => 'ops@iruali.test', 'password' => 'Staff-pass-123!'])->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($staff);
+        $this->assertNull(session(PhoneLoginController::SESSION));
     }
 }

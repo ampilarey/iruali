@@ -55,6 +55,16 @@
                     @csrf
                     <button class="text-sm font-medium text-primary-600 hover:text-primary-500">{{ __('Forgot password?') }}</button>
                 </form>
+                @if(($pending['unverified_holder'] ?? false) && ! empty($pending['phone']))
+                    {{-- The number is on an account but not verified there: a different person can still start their own --}}
+                    <form method="POST" action="{{ route('login.phone.start') }}" data-not-you>
+                        @csrf
+                        <input type="hidden" name="login" value="{{ $pending['phone'] }}">
+                        <input type="hidden" name="new" value="1">
+                        @if($inCheckout)<input type="hidden" name="checkout" value="1">@endif
+                        <button class="text-sm text-gray-600 hover:text-gray-800">{{ __('Not you? Create a new account with this number') }}</button>
+                    </form>
+                @endif
             </div>
         @elseif(($pending['step'] ?? null) === 'code')
             <form method="POST" action="{{ route('login.phone.verify') }}" class="space-y-4 rounded-lg bg-white p-6 shadow-sm border border-gray-100">

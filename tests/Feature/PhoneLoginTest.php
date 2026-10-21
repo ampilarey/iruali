@@ -6,6 +6,7 @@ use App\Http\Controllers\Customer\PhoneLoginController;
 use App\Models\OTP;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\Sms\PhoneNumber;
 use App\Services\Sms\SmsManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -95,16 +96,42 @@ class PhoneLoginTest extends TestCase
         $this->assertSame(1, User::count()); // no second account for the number
     }
 
-    public function test_staff_and_unverified_numbers(): void
+    public function test_staff_numbers_go_to_the_staff_password_verified_or_not_and_are_never_taken(): void
     {
-        $staff = User::factory()->create(['phone' => '7770001']);
-        $staff->forceFill(['phone_verified_at' => now()])->save();
-        $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
-        $this->post(route('login.phone.start'), ['phone' => '7770001'])->assertSessionHasErrors('login');
+        \Illuminate\Support\Facades\Notification::fake();
+        foreach (['7770001' => now(), '7770002' => null] as $number => $verifiedAt) {
+            $staff = User::factory()->create(['phone' => $number, 'email' => 'staff'.$number.'@iruali.test']);
+            $staff->forceFill(['phone_verified_at' => $verifiedAt])->save();
+            $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
 
-        // Someone typed this number on their account but never verified it: the code decides who it belongs to
+            $this->post(route('login.phone.start'), ['login' => $number])->assertRedirect(route('login'));
+            $this->get(route('login'))->assertSee('data-staff-password', false)->assertSee('staff'.$number.'@iruali.test');
+            // "Not you?" can't get round it either
+            $this->post(route('login.phone.start'), ['login' => $number, 'new' => '1']);
+            $this->get(route('login'))->assertSee('data-staff-password', false);
+            $this->assertSame(PhoneNumber::normalize($number), PhoneNumber::normalize($staff->fresh()->phone));
+            $this->get(route('login', ['change' => 1]));
+        }
+        \Illuminate\Support\Facades\Notification::assertNothingSent();
+        $this->assertSame(2, User::count());
+    }
+
+    public function test_a_customer_whose_number_is_not_verified_signs_in_to_that_account_not_a_new_one(): void
+    {
+        $customer = User::factory()->create(['phone' => '7775555', 'email' => 'other@example.com', 'password' => Hash::make('Good-pass-123!')]);
+
+        $this->post(route('login.phone.start'), ['login' => '7775555']);
+        $this->get(route('login'))->assertSee('data-login-phone="password"', false)->assertSee('data-not-you', false)->assertDontSee('data-sms-code', false);
+        $this->post(route('login.phone.password'), ['password' => 'Good-pass-123!']);
+        $this->assertAuthenticatedAs($customer);
+        $this->assertSame(1, User::count());
+    }
+
+    public function test_not_you_starts_a_new_account_and_the_code_decides_who_the_number_belongs_to(): void
+    {
         $typo = User::factory()->create(['phone' => '7775555', 'email' => 'other@example.com']);
-        $this->post(route('login.phone.start'), ['phone' => '7775555']);
+
+        $this->post(route('login.phone.start'), ['login' => '7775555', 'new' => '1']);
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()]);
         $this->assertNull($typo->fresh()->phone);
         $this->assertNotSame($typo->id, auth()->id());

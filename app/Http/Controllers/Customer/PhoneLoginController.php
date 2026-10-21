@@ -9,6 +9,7 @@ use App\Notifications\SignInCode;
 use App\Services\NotificationService;
 use App\Services\Sms\PhoneNumber;
 use App\Services\Sms\SmsManager;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -66,11 +67,7 @@ class PhoneLoginController extends AuthController
                 return back()->withInput()->withErrors(['login' => __('No account uses that email. New to iruali? Continue with your mobile number.')]);
             }
             if ($user->isStaff()) {
-                // Staff type their password right here; it goes to the staff sign-in (AuthController::login:
-                // lockout after wrong tries, then the authenticator code). Never a code by text or email.
-                $request->session()->put(self::SESSION, ['step' => 'password', 'staff' => true, 'email' => $email, 'key' => $email, 'shown' => $email, 'remember' => $remember, 'checkout' => $request->boolean('checkout')]);
-
-                return $this->home(['checkout' => $request->boolean('checkout')]);
+                return $this->staffStep($request, $user, $remember);
             }
             $pending = ['user_id' => $user->id, 'key' => $email, 'shown' => $this->maskEmail($email), 'remember' => $remember, 'checkout' => $request->boolean('checkout')];
         } else {
@@ -79,10 +76,20 @@ class PhoneLoginController extends AuthController
                 return back()->withInput()->withErrors(['login' => __('Enter a Maldivian mobile number (7 digits starting with 7 or 9), or your email.')]);
             }
             $user = User::findByVerifiedPhone($phone);
-            if ($user?->isStaff()) {
-                return back()->withInput()->withErrors(['login' => __('Staff sign in with their email and password.')]);
+            // An account that has this number but never verified it: staff always keep theirs, and a
+            // customer signs in to that account (its password or an email code) instead of getting a
+            // second, empty one. "Not you?" (new=1) starts a new account for a different person.
+            $holder = $user ?? $this->unverifiedHolder($phone);
+            if ($holder?->isStaff()) {
+                return $this->staffStep($request, $holder, $remember); // always, "Not you?" included
             }
-            $pending = ['user_id' => $user?->id, 'phone' => $phone, 'key' => $phone, 'shown' => '•••'.substr($phone, -4), 'remember' => $remember, 'checkout' => $request->boolean('checkout')];
+            if (! $user && $request->boolean('new')) {
+                $holder = null;
+            }
+            if (! $user && $holder && ($holder->hasPassword() || filled($holder->email))) {
+                $user = $holder;
+            }
+            $pending = ['user_id' => $user?->id, 'phone' => $phone, 'key' => $phone, 'shown' => '•••'.substr($phone, -4), 'remember' => $remember, 'checkout' => $request->boolean('checkout'), 'unverified_holder' => $user !== null && ! $user->isPhoneVerified()];
         }
 
         if ($user && $user->hasPassword()) {
@@ -217,6 +224,32 @@ class PhoneLoginController extends AuthController
     }
 
     /**
+     * Staff type their password right on this page; it goes to the staff sign-in
+     * (AuthController::login: lockout after wrong tries, then the authenticator code). Never a code
+     * by text or email.
+     */
+    protected function staffStep(Request $request, User $staff, bool $remember): RedirectResponse
+    {
+        $email = mb_strtolower((string) $staff->email);
+        $request->session()->put(self::SESSION, ['step' => 'password', 'staff' => true, 'email' => $email, 'key' => $email, 'shown' => $email, 'remember' => $remember, 'checkout' => $request->boolean('checkout')]);
+
+        return $this->home(['checkout' => $request->boolean('checkout')]);
+    }
+
+    /**
+     * The account that typed this number without verifying it (a staff one first), if any.
+     */
+    protected function unverifiedHolder(string $phone): ?User
+    {
+        $holders = User::whereNull('phone_verified_at')
+            ->whereRaw("REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE ?", ['%'.substr($phone, -7)])
+            ->get()
+            ->filter(fn (User $u) => PhoneNumber::normalize($u->phone) === $phone);
+
+        return $holders->first(fn (User $u) => $u->isStaff()) ?? $holders->first();
+    }
+
+    /**
      * Where the steps are shown: checkout when they started there, else the sign-in page.
      *
      * @param  array<string, mixed>|null  $pending
@@ -252,7 +285,7 @@ class PhoneLoginController extends AuthController
     protected function createAccount(string $phone): User
     {
         User::whereNull('phone_verified_at')->whereNotNull('phone')->get(['id', 'phone'])
-            ->filter(fn (User $u) => PhoneNumber::normalize($u->phone) === $phone)
+            ->filter(fn (User $u) => PhoneNumber::normalize($u->phone) === $phone && ! $u->isStaff()) // a staff member's number is never taken
             ->each(fn (User $u) => $u->forceFill(['phone' => null])->save());
 
         // Like a sign-up with email: a referral code of their own, and the friend's code from a shared /r/{code} link

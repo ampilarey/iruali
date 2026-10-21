@@ -14,9 +14,11 @@
     $smallOrderFee = \App\Support\OrderRules::smallOrderFee((float) $goodsTotal);
     $orderingPause = \App\Support\OrderRules::pause();
     // Pre-order lines (CheckoutController): marked in the summary, remembered for placing the order, and their shops'
-    // estimates count from their date. With a booking fee only the fee is paid now (BookingFeeService)
+    // estimates count from their date. With a booking fee only the fee is paid now (BookingFeeService); a pre-order
+    // paid once the shop confirms is paid in full later, nothing now (PreorderConfirmService)
     $preorderLines ??= app(\App\Services\PreorderService::class)->checkoutLines($cart);
     $bookingFee ??= null;
+    $confirmFirst ??= null;
     $deliveryCheckout['shops'] = app(\App\Services\PreorderService::class)->withCheckoutEstimates($deliveryCheckout['shops'], $cart, $deliveryCheckout['areas'], $preorderLines);
 @endphp
 
@@ -40,7 +42,7 @@
         </div>
     @endif
     @include('cart._holiday_notice', ['cart' => $cart])
-    @include('checkout._preorder_notice', ['lines' => $preorderLines, 'bookingFee' => $bookingFee])
+    @include('checkout._preorder_notice', ['lines' => $preorderLines, 'bookingFee' => $bookingFee, 'confirmFirst' => $confirmFirst])
 
     {{-- Loyalty-point forms live outside the order form (forms can't nest); their controls point at them with form="" --}}
     <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>
@@ -138,8 +140,8 @@
                         if (($orderingPause['mode'] ?? null) === 'cod') {
                             unset($paymentMethods[\App\Services\ManualPaymentService::COD]); // cash on delivery paused
                         }
-                        if ($bookingFee) {
-                            // A booking fee is paid by card or bank transfer (BookingFeeService)
+                        if ($bookingFee || $confirmFirst) {
+                            // A booking fee, or a pre-order paid once the shop confirms, is paid by card or bank transfer
                             unset($paymentMethods[\App\Services\ManualPaymentService::COD], $paymentMethods[\App\Services\CreditService::METHOD]);
                         }
                         $paymentHelp = [
@@ -151,6 +153,8 @@
                     @endphp
                     @if($paymentMethods === [])
                         <p class="rounded-xl border border-sun bg-sun-soft px-4 py-3 text-sm text-sun-ink">{{ __('Payment is not available right now, so orders can\'t be placed. Please try again later.') }}</p>
+                    @elseif($confirmFirst)
+                        <p class="mb-3 text-sm text-gray-700" data-confirm-first-payment>{{ __('Nothing is charged now. Choose how you would like to pay once the shop confirms it can get your item; you can change it then.') }}</p>
                     @endif
                     <div class="space-y-3">
                         @foreach($paymentMethods as $method => $label)
@@ -208,7 +212,8 @@
                         </div>
                     @endif
 
-                    @php $walletBalance = round((float) ($user?->wallet_balance ?? 0), 2); @endphp
+                    {{-- Nothing is paid now for a pre-order the shop confirms first, so no wallet either --}}
+                    @php $walletBalance = $confirmFirst ? 0.0 : round((float) ($user?->wallet_balance ?? 0), 2); @endphp
                     @if($walletBalance > 0)
                         <label class="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
                             <input type="checkbox" name="use_wallet" value="1" id="use-wallet" data-balance="{{ $walletBalance }}" @checked(old('use_wallet')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
@@ -261,6 +266,14 @@
                                 <dt class="text-gray-600">{{ __('Balance when it arrives') }}</dt>
                                 <dd class="font-medium" dir="ltr" id="booking-balance">{{ \App\Support\Money::format($goodsTotal + $smallOrderFee + $deliveryCheckout['fee'] - $bookingFee['fee']) }}</dd>
                             </div>
+                        @endif
+                        @if($confirmFirst)
+                            {{-- Paid once the shop confirms it can get the item (PreorderConfirmService) --}}
+                            <div class="flex justify-between rounded-lg bg-primary-50 px-3 py-2 text-base" data-confirm-first-now>
+                                <dt class="font-semibold">{{ __('To pay now') }}</dt>
+                                <dd class="font-semibold text-primary-700" dir="ltr">{{ \App\Support\Money::format(0) }}</dd>
+                            </div>
+                            <p class="text-xs text-gray-600">{{ trans_choice('You pay the total within :count day of the shop confirming it can get your item.|You pay the total within :count days of the shop confirming it can get your item.', $confirmFirst['pay_days'], ['count' => $confirmFirst['pay_days']]) }}</p>
                         @endif
                         @if($walletBalance > 0)
                             <div class="flex justify-between hidden" id="wallet-row">

@@ -37,7 +37,7 @@ class ComingSoonTest extends TestCase
         parent::setUp();
         Notification::fake();
         $this->travelTo(Carbon::parse('2026-10-20 10:00'));
-        $this->shop = $this->staffedShop('Reef Goods', ['onboarding_completed_at' => now()]);
+        $this->shop = $this->staffedShop('Reef Goods', ['onboarding_completed_at' => now(), 'preorders_allowed' => true]);
         $this->category = Category::factory()->create(['status' => 'active']);
     }
 

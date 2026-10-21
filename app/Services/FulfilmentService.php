@@ -74,6 +74,12 @@ class FulfilmentService
             return [];
         }
 
+        // A pre-order paid once the shop confirms stays as it is until it is paid: moved on, it could no
+        // longer be paid (Order::awaitingPayment(); PreorderConfirmService)
+        if ($part->order->confirm_first && $part->order->payment_status !== 'paid') {
+            return [];
+        }
+
         // A part the customer collects is only started here; then it is marked ready for pickup and
         // completed with the customer's code (markReadyForPickup(), confirmPickup())
         if ($part->isPickup()) {

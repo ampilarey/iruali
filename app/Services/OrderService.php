@@ -120,6 +120,13 @@ class OrderService
             // checkout page showed it; the customer pays the fee now and the balance when the stock arrives
             $bookingFee = app(BookingFeeService::class)->forOrder($cart, $preorders, $shippingData, (float) $discounts['final_total']);
 
+            // Pre-orders paid once the shop confirms: ordered on their own, by card or transfer, nothing paid
+            // now (not even from the wallet); the customer is sent a payment link when the shop confirms
+            $confirmFirst = app(PreorderConfirmService::class)->forOrder($cart, $preorders, $shippingData);
+            if ($confirmFirst !== null) {
+                $shippingData['use_wallet'] = false;
+            }
+
             // Cash on delivery: one shop, no pre-orders, within the admins' limits (ManualPaymentService)
             if (($shippingData['payment_method'] ?? null) === ManualPaymentService::COD
                 && ($problem = app(ManualPaymentService::class)->codProblem($cart, (float) $discounts['final_total'] + (float) $shippingData['shipping_amount'], $shippingData['delivery_area'] ?? null))) {
@@ -138,6 +145,9 @@ class OrderService
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
             if ($bookingFee !== null) {
                 $order->forceFill(['deposit_amount' => $bookingFee['deposit'], 'balance_days' => $bookingFee['balance_days']])->save();
+            }
+            if ($confirmFirst !== null) {
+                $order->forceFill(['confirm_first' => true, 'pay_days' => $confirmFirst['pay_days']])->save();
             }
 
             // Process discounts and points
@@ -183,7 +193,7 @@ class OrderService
 
             // Clear cart
             $this->clearCart($cart);
-            Session::forget(BookingFeeService::SESSION_SHOWN);
+            Session::forget([BookingFeeService::SESSION_SHOWN, PreorderConfirmService::SESSION_SHOWN]);
 
             DB::commit();
 
@@ -444,6 +454,11 @@ class OrderService
 
         if (in_array('cancelled', $next, true) && app(FulfilmentService::class)->anyPartSent($order)) {
             $next = array_values(array_diff($next, ['cancelled']));
+        }
+
+        // A pre-order paid once the shop confirms stays pending until it is paid: it can only be cancelled
+        if ($order->confirm_first && $order->payment_status !== 'paid') {
+            $next = array_values(array_intersect($next, ['cancelled']));
         }
 
         // A shop's part still awaiting pre-order stock can't be sent, so neither can the whole order,

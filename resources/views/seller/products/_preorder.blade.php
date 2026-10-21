@@ -1,16 +1,23 @@
 {{-- Seller product form: pre-orders while the product is out of stock (App\Services\PreorderService).
-     The date (or days after the order), the limit, the note and the booking fee (App\Services\BookingFeeService)
-     only count while pre-orders are on. Needs $product and $field. --}}
+     The date (or days after the order), the limit, the note and what the customer pays at checkout (everything, a
+     booking fee: App\Services\BookingFeeService, or nothing until the shop confirms: App\Services\PreorderConfirmService)
+     only count while pre-orders are on. For shops an admin allows; another shop sees it only on a product that
+     already takes pre-orders ($allowed false), to switch them off. Needs $product and $field; $allowed. --}}
 @php
     $preorderOn = (bool) old('preorder_enabled', $product->preorder_enabled);
     $preorderWaiting = $product->exists ? app(\App\Services\PreorderService::class)->waitingUnits((int) $product->id) : 0;
     $preorderShips = old('preorder_ships', (int) $product->preorder_lead_days > 0 ? 'days' : 'date');
-    $depositType = old('preorder_deposit_type', $product->preorder_deposit_type ?? 'none');
+    $depositType = old('preorder_deposit_type', $product->preorder_confirm_first ? \App\Services\PreorderService::CONFIRM_FIRST : ($product->preorder_deposit_type ?? 'none'));
+    $isFee = in_array($depositType, \App\Services\BookingFeeService::TYPES, true);
+    $isConfirm = $depositType === \App\Services\PreorderService::CONFIRM_FIRST;
 @endphp
 <fieldset class="rounded-lg border border-gray-200 p-4" data-preorder-fieldset>
     <legend class="px-1 text-sm font-medium text-gray-700">{{ __('Pre-order') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></legend>
     <input type="hidden" name="preorder_form" value="1">
     <input type="hidden" name="preorder_enabled" value="0">
+    @unless($allowed ?? true)
+        <p class="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900" data-preorders-not-allowed>{{ __('Pre-orders are not allowed for your shop, so this product takes no new pre-orders. You can switch them off here; ask iruali if your shop needs them.') }}</p>
+    @endunless
     <label class="flex items-start gap-2 text-sm text-gray-700">
         <input type="checkbox" name="preorder_enabled" value="1" @checked($preorderOn) class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-preorder-toggle>
         <span>
@@ -63,28 +70,32 @@
             @error('preorder_late_days')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
 
-        {{-- Booking fee (BookingFeeService): the customer pays it at checkout and the rest when you record the stock as arrived --}}
+        {{-- What the customer pays at checkout: everything; a booking fee (BookingFeeService), the rest when you record the
+             stock as arrived; or nothing until you confirm you can get it, then everything (PreorderConfirmService) --}}
         <div class="sm:col-span-2" data-preorder-deposit>
             <label for="preorder_deposit_type" class="block text-sm font-medium text-gray-700">{{ __('What the customer pays at checkout') }}</label>
             <select id="preorder_deposit_type" name="preorder_deposit_type" class="{{ $field }}" aria-describedby="preorder_deposit-hint" data-preorder-deposit-type>
-                <option value="none" @selected(! in_array($depositType, \App\Services\BookingFeeService::TYPES, true))>{{ __('The full price') }}</option>
+                <option value="none" @selected(! $isFee && ! $isConfirm)>{{ __('The full price') }}</option>
                 <option value="percent" @selected($depositType === 'percent')>{{ __('A booking fee: a percentage of the price') }}</option>
                 <option value="fixed" @selected($depositType === 'fixed')>{{ __('A booking fee: an amount per item') }}</option>
+                <option value="{{ \App\Services\PreorderService::CONFIRM_FIRST }}" @selected($isConfirm)>{{ __('Nothing yet: the full price once I confirm I can get it') }}</option>
             </select>
             @error('preorder_deposit_type')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
-        <div @class(['sm:col-span-2', 'hidden' => ! in_array($depositType, \App\Services\BookingFeeService::TYPES, true)]) data-preorder-deposit-value data-preorder-deposit-only>
+        <div @class(['sm:col-span-2', 'hidden' => ! $isFee]) data-preorder-deposit-value data-preorder-deposit-only>
             <label for="preorder_deposit_value" class="block text-sm font-medium text-gray-700">{{ __('Booking fee') }} * <span class="font-normal text-gray-500">(<span data-unit-percent @class(['hidden' => $depositType !== 'percent'])>%</span><span data-unit-amount @class(['hidden' => $depositType === 'percent'])>{{ \App\Support\Money::prefix() }}{{ __('per item') }}</span>)</span></label>
             <input id="preorder_deposit_value" name="preorder_deposit_value" type="number" min="1" step="0.01" dir="ltr" class="{{ $field }}" value="{{ old('preorder_deposit_value', $product->preorder_deposit_value !== null ? rtrim(rtrim((string) $product->preorder_deposit_value, '0'), '.') : null) }}" aria-describedby="preorder_deposit-hint">
             @error('preorder_deposit_value')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
-        <div @class(['sm:col-span-2', 'hidden' => ! in_array($depositType, \App\Services\BookingFeeService::TYPES, true)]) data-preorder-balance-days data-preorder-deposit-only>
-            <label for="preorder_balance_days" class="block text-sm font-medium text-gray-700">{{ __('Days to pay the rest once it arrives') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
-            <input id="preorder_balance_days" name="preorder_balance_days" type="number" min="1" max="{{ \App\Services\PreorderService::MAX_DAYS }}" step="1" dir="ltr" class="{{ $field }}" value="{{ old('preorder_balance_days', $product->preorder_balance_days) }}" placeholder="{{ \App\Services\BookingFeeService::BALANCE_DAYS }}" aria-describedby="preorder_balance_days-hint">
-            <p id="preorder_balance_days-hint" class="mt-1 text-xs text-gray-500">{{ __('When you record it as arrived, the customer gets a payment link and this many days to pay the rest. Empty: :days.', ['days' => \App\Services\BookingFeeService::BALANCE_DAYS]) }}</p>
+        {{-- Days to pay: the rest once it arrives (booking fee), or everything once you confirm --}}
+        <div @class(['sm:col-span-2', 'hidden' => ! $isFee && ! $isConfirm]) data-preorder-balance-days>
+            <label for="preorder_balance_days" class="block text-sm font-medium text-gray-700"><span data-days-fee @class(['hidden' => $isConfirm])>{{ __('Days to pay the rest once it arrives') }}</span><span data-days-confirm @class(['hidden' => ! $isConfirm])>{{ __('Days to pay once you confirm') }}</span> <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
+            <input id="preorder_balance_days" name="preorder_balance_days" type="number" min="1" max="{{ \App\Services\PreorderService::MAX_DAYS }}" step="1" dir="ltr" class="{{ $field }}" value="{{ old('preorder_balance_days', $product->preorder_balance_days) }}" placeholder="{{ $isConfirm ? \App\Services\PreorderConfirmService::PAY_DAYS : \App\Services\BookingFeeService::BALANCE_DAYS }}" data-placeholder-fee="{{ \App\Services\BookingFeeService::BALANCE_DAYS }}" data-placeholder-confirm="{{ \App\Services\PreorderConfirmService::PAY_DAYS }}" aria-describedby="preorder_balance_days-hint">
+            <p id="preorder_balance_days-hint" class="mt-1 text-xs text-gray-500"><span data-days-fee @class(['hidden' => $isConfirm])>{{ __('When you record it as arrived, the customer gets a payment link and this many days to pay the rest. Empty: :days.', ['days' => \App\Services\BookingFeeService::BALANCE_DAYS]) }}</span><span data-days-confirm @class(['hidden' => ! $isConfirm])>{{ __('When you confirm you can get it, the customer gets a payment link and this many days to pay; unpaid after that, the order is cancelled. Empty: :days.', ['days' => \App\Services\PreorderConfirmService::PAY_DAYS]) }}</span></p>
             @error('preorder_balance_days')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
-        <p id="preorder_deposit-hint" class="sm:col-span-2 lg:col-span-4 text-xs text-gray-500">{{ __('With a booking fee the customer pays only the fee at checkout and the rest when you record the stock as arrived, before you send it. If they cancel, you keep the fee (less commission); if you cancel, can\'t get the item, move the date later or it is later than the days you allow, they get everything back. Booking-fee items are ordered on their own. If your shop is GST-registered, the fee gets its own tax invoice.') }}</p>
+        <p id="preorder_deposit-hint" class="sm:col-span-2 lg:col-span-4 text-xs text-gray-500">{{ __('With a booking fee the customer pays only the fee at checkout and the rest when you record the stock as arrived, before you send it. If they cancel, you keep the fee (less commission); if you cancel, can\'t get the item, move the date later or it is later than the days you allow, they get everything back. Booking-fee items are ordered on their own. If your shop is GST-registered, the fee gets its own tax invoice.') }}
+            {{ __('With "Nothing yet", the customer orders without paying; you check with your supplier, then confirm it under Pre-orders (they get a link to pay in full) or say you can\'t get it (the order is cancelled). Order the item once it shows as paid. These items are ordered on their own too.') }}</p>
     </div>
 
     @if($preorderWaiting > 0)
@@ -110,12 +121,18 @@
                 box.querySelector('[data-preorder-ships-days]').classList.toggle('hidden', radio.value !== 'days');
             });
         });
-        // The booking fee: a percentage or an amount per item
+        // The booking fee (a percentage or an amount per item), or nothing until the shop confirms; both have days to pay
         var type = box.querySelector('[data-preorder-deposit-type]');
         type.addEventListener('change', function () {
-            box.querySelectorAll('[data-preorder-deposit-only]').forEach(function (el) { el.classList.toggle('hidden', type.value === 'none'); });
+            var fee = type.value === 'percent' || type.value === 'fixed', confirm = type.value === 'confirm';
+            box.querySelectorAll('[data-preorder-deposit-only]').forEach(function (el) { el.classList.toggle('hidden', !fee); });
             box.querySelector('[data-unit-percent]').classList.toggle('hidden', type.value !== 'percent');
             box.querySelector('[data-unit-amount]').classList.toggle('hidden', type.value === 'percent');
+            box.querySelector('[data-preorder-balance-days]').classList.toggle('hidden', !fee && !confirm);
+            box.querySelectorAll('[data-days-fee]').forEach(function (el) { el.classList.toggle('hidden', confirm); });
+            box.querySelectorAll('[data-days-confirm]').forEach(function (el) { el.classList.toggle('hidden', !confirm); });
+            var days = box.querySelector('#preorder_balance_days');
+            days.placeholder = confirm ? days.dataset.placeholderConfirm : days.dataset.placeholderFee;
         });
     })();
 </script>

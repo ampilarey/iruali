@@ -3,23 +3,37 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\PreorderConfirmService;
 use App\Services\PreorderService;
+use App\Support\Money;
 use Illuminate\Http\Request;
 
 /**
  * Seller Centre → Pre-orders: the shop's open pre-orders per product, "Stock arrived" (the units
  * that came go to the paid pre-orders, oldest first, and the rest go on sale; a booking-fee
  * pre-order with everything in is asked for its balance) and moving the expected date (the waiting
- * customers are emailed). A shop only ever sees its own.
+ * customers are emailed). On top, the pre-orders paid once the shop confirms that wait for it:
+ * "I can get it" (the customer is sent a link to pay) or "I can't get it" (the order is cancelled;
+ * PreorderConfirmService). A shop only ever sees its own.
  */
 class PreorderController extends Controller
 {
     public function index(PreorderService $preorders)
     {
         $shop = $this->shop();
+
+        // Pre-orders paid once the shop confirms: waiting for it, then for the customer's payment
+        $confirmFirst = Order::query()
+            ->where('confirm_first', true)->whereNull('availability_declined_at')
+            ->whereIn('status', ['pending', 'processing'])->where('payment_status', '!=', 'paid')
+            ->whereHas('sellerOrders', fn ($q) => $q->where('seller_id', $shop->id))
+            ->with(['user', 'items.product' => fn ($q) => $q->withTrashed()])
+            ->orderBy('id')
+            ->get();
 
         // Pre-order lines of the shop's products still waiting for stock, oldest first
         $waiting = OrderItem::query()
@@ -36,6 +50,7 @@ class PreorderController extends Controller
             ->where(fn ($q) => $q->whereIn('id', $waiting->pluck('product_id')->unique())->orWhere('preorder_enabled', true))
             ->with(['variants' => fn ($q) => $q->ordered()])
             ->get()
+            ->each(fn (Product $product) => $product->setRelation('seller', $shop)) // accepting() asks whether the shop may take pre-orders
             ->sortBy(fn (Product $product) => $waiting->firstWhere('product_id', $product->id)->id ?? PHP_INT_MAX)
             ->values();
 
@@ -46,7 +61,41 @@ class PreorderController extends Controller
             'accepting' => $preorders->accepting($product),
         ]);
 
-        return view('seller.preorders.index', ['withWaiting' => $rows->filter(fn ($row) => $row['items']->isNotEmpty())->values(), 'taking' => $rows->filter(fn ($row) => $row['items']->isEmpty())->values()]);
+        return view('seller.preorders.index', [
+            'withWaiting' => $rows->filter(fn ($row) => $row['items']->isNotEmpty())->values(),
+            'taking' => $rows->filter(fn ($row) => $row['items']->isEmpty())->values(),
+            'toConfirm' => $confirmFirst->filter(fn (Order $order) => $order->availability_confirmed_at === null)->values(),
+            'awaitingPay' => $confirmFirst->filter(fn (Order $order) => $order->availability_confirmed_at !== null)->sortBy('pay_due_on')->values(),
+        ]);
+    }
+
+    /**
+     * "I can get it", for a pre-order paid once the shop confirms: the customer is texted and emailed
+     * a link to pay in full.
+     */
+    public function confirm(Request $request, Order $order, PreorderConfirmService $confirms)
+    {
+        abort_unless($confirms->isShopOf($order, $this->shop()), 403);
+        if (! $confirms->confirm($order, $request->user())) {
+            return back()->with('error', __('This order is no longer waiting for you to confirm it.'));
+        }
+
+        return back()->with('success', __('Confirmed. We have sent the customer a link to pay :amount by :date. We will tell you when it is paid: order the item then.', [
+            'amount' => Money::format($order->cardAmount()), 'date' => $order->pay_due_on?->translatedFormat('j M'),
+        ]));
+    }
+
+    /**
+     * "I can't get it": the order is cancelled and the customer told (they have not paid anything).
+     */
+    public function decline(Request $request, Order $order, PreorderConfirmService $confirms)
+    {
+        abort_unless($confirms->isShopOf($order, $this->shop()), 403);
+        if (! $confirms->decline($order, $request->user())) {
+            return back()->with('error', __('This order is no longer waiting for you to confirm it.'));
+        }
+
+        return back()->with('success', __('Order :number is cancelled. We have told the customer you can\'t get the item.', ['number' => $order->order_number]));
     }
 
     /**

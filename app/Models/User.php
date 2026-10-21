@@ -96,6 +96,8 @@ class User extends Authenticatable implements HasLocalePreference
         'holiday_started_at' => 'datetime',
         'auto_approve_listings' => 'boolean',
         'auto_approve_listings_at' => 'datetime',
+        'preorders_allowed' => 'boolean',
+        'preorders_allowed_at' => 'datetime',
         'delivers_to_home_atoll' => 'boolean',
     ];
 
@@ -688,6 +690,17 @@ class User extends Authenticatable implements HasLocalePreference
     public function autoApprovesListings(): bool
     {
         return (bool) $this->auto_approve_listings && $this->isSeller();
+    }
+
+    /**
+     * Pre-orders and "coming soon" (the product form's fieldsets, PreorderService, ComingSoonService):
+     * off for every shop until an admin allows them (Admin → Sellers → the shop's page;
+     * preorders_allowed is not mass-assignable), and only while the shop is an approved, non-suspended
+     * seller. A shop that is not allowed takes no new pre-orders, even on products set up before.
+     */
+    public function allowsPreorders(): bool
+    {
+        return (bool) $this->preorders_allowed && $this->isSeller();
     }
 
     /**

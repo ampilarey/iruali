@@ -8,7 +8,8 @@ use Illuminate\Console\Command;
 /**
  * Bank transfer orders hold stock from the moment they are placed. If no transfer slip comes within
  * the hours set (Admin → Settings → Payment methods), cancel the order, which puts the stock back.
- * Orders with a slip wait for an admin to confirm the payment.
+ * Orders with a slip wait for an admin to confirm the payment. A pre-order paid once the shop
+ * confirms waits until its payment is due (PreorderConfirmService).
  */
 class CancelUnpaidTransferOrders extends Command
 {

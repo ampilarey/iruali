@@ -551,7 +551,7 @@ class BookingFeePreorderTest extends TestCase
 
         // Three days before: not yet
         $this->travelTo(Carbon::parse('2026-10-24 09:40'));
-        $this->artisan('preorders:balance-reminders')->expectsOutputToContain('Sent 0 balance reminder(s); 0 balance(s) newly overdue.')->assertExitCode(0);
+        $this->artisan('preorders:balance-reminders')->expectsOutputToContain('Sent 0 balance reminder(s); 0 balance(s) newly overdue;')->assertExitCode(0);
         // Two days before: one reminder, once
         $this->travelTo(Carbon::parse('2026-10-25 09:40'));
         $this->artisan('preorders:balance-reminders')->expectsOutputToContain('Sent 1 balance reminder(s)')->assertExitCode(0);

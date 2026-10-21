@@ -266,6 +266,16 @@ set and an audit entry `product.auto_approved` by the shop (still not while the 
 incomplete), saving a product it never had approved publishes it, and its edits apply directly with
 no request.
 
+**Pre-orders and "coming soon" are for the shops an admin allows.** Off for every shop until an
+admin turns it on (Admin → Sellers → the shop's page → "Pre-orders and coming soon",
+`admin.sellers.preorders`, admin role only; `users.preorders_allowed`, not mass-assignable, audited
+as `seller.preorders_on/off`; a "Pre-orders allowed" badge in the sellers list). Another shop's
+product form has neither fieldset (a note says to ask iruali) and the request ignores them, so
+nothing can be switched on; a product that already has one shows it, to change or switch it off
+(`User::allowsPreorders()`). A shop that is not allowed takes no new pre-orders at all
+(`PreorderService::accepting()`, `Product::scopePreorderable()`: shown as out of stock); orders
+already placed carry on, and its "Stock arrived" still works. iruali's own products need no leave.
+
 **Pre-orders.** Stock reaches the islands by ship, so a shop can take orders for what is coming:
 the product form's "Pre-order" fieldset switches it on with the expected ship date (after today,
 within a year), the most units it takes (counted across the product's options) and an optional note
@@ -336,6 +346,30 @@ and iruali's commission on it (with GST when iruali was registered) counts when 
 unless they tick "Keep the booking fee" (e.g. the balance was never paid). A transfer slip for the fee
 is kept (`deposit_slip_path`) when the balance's slip comes, and "Confirm payment" says which part it
 records. The unpaid-order sweeps never cancel an order whose booking fee is paid.
+
+**Pre-orders paid once the shop confirms** (`App\Services\PreorderConfirmService`), for goods a shop
+can't promise before it asks its supplier. "What the customer pays at checkout" has **Nothing yet: the
+full price once I confirm I can get it** (`products.preorder_confirm_first`, never with a booking fee),
+with its **days to pay once confirmed** (the same field as the booking fee's days to pay the rest,
+`preorder_balance_days`; 3 by default). The product page and checkout say "Nothing to pay now".
+These items are **ordered on their own** (one shop; the cart and checkout say so) by card or bank
+transfer, without the wallet; the order (`orders.confirm_first`, `pay_days`) is placed **unpaid and
+not payable**: no card page, no pay button, no transfer slip, no payment link, and the unpaid-order
+sweeps leave it alone. The shop is told to check with its supplier; **Seller Centre → Pre-orders**
+lists it under "To confirm" (also on the shop's order page; owners and managers), and Admin → Inbox
+counts it ("Pre-orders to confirm", listed on `/admin/preorders`, where an admin or support can act
+for the shop). **"I can get it"** (`seller.preorders.confirm`, `admin.orders.preorder-confirm`) sets
+`availability_confirmed_at` and `pay_due_on` and texts and emails the customer a payment link for the
+full amount (`PreorderAvailable`; the link works until the day after it is due); from then on it is an
+unpaid order like any other (order page, pay page, transfer box, "Send payment link"). Every morning
+`preorders:balance-reminders` sends one reminder the day before it is due (not on the day it was
+confirmed, nor once a slip is in); still unpaid after its due date (and with no payment link sent in
+the last 48 hours), `orders:cancel-unpaid-card` / `orders:cancel-unpaid-transfer` cancel it. Paid, the
+shop is told to order the item (`ShopOrderPaid`, part `confirmed`), and it is a paid pre-order like
+any other. **"I can't get it"** (`seller.preorders.decline`, `admin.orders.preorder-decline`) cancels it
+(`availability_declined_at`; points and voucher go back, nothing to refund) and the cancellation
+message says the shop can't get it. Placing the order checks the checkout page showed it the same way
+(and not fewer days to pay).
 
 **Coming soon.** A shop can list a product before it goes on sale: the product form's "Coming soon"
 fieldset (`products.coming_soon`, optional launch day `available_on`). It shows with a "Coming soon"

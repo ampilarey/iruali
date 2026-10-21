@@ -12,7 +12,8 @@ use Illuminate\Queue\SerializesModels;
 /**
  * A bank transfer order has been confirmed as paid (ManualPaymentService): the shop can send it now.
  * For a pre-order with a booking fee (BookingFeeService), $part says which payment came: the fee
- * (deposit: order the item now) or the balance (send it now).
+ * (deposit: order the item now) or the balance (send it now). A pre-order paid once the shop
+ * confirmed it (confirmed: PreorderConfirmService) is paid in full: order the item now.
  */
 class ShopOrderPaid extends Notification implements ShouldQueue
 {
@@ -45,6 +46,9 @@ class ShopOrderPaid extends Notification implements ShouldQueue
                 ->line(__('When it arrives, record it in the Seller Centre under Pre-orders. We then ask the customer for the balance; send the order once it shows as paid.')),
             'balance' => $mail->subject(__('Order :number is paid: please send it', ['number' => $number]))
                 ->line(__('The customer has paid the balance for pre-order :number. You can pack and send it now.', ['number' => $number])),
+            'confirmed' => $mail->subject(__('Pre-order :number is paid: you can order the item', ['number' => $number]))
+                ->line(__('The customer has paid :amount in full for pre-order :number. You can order the item now.', ['amount' => \App\Support\Money::format($this->order->total_amount), 'number' => $number]))
+                ->line(__('When it arrives, record it in the Seller Centre under Pre-orders, then send the order.')),
             default => $mail->subject(__('Order :number is paid: please send it', ['number' => $number]))
                 ->line(__('The customer\'s bank transfer for order :number has been confirmed. You can pack and send your part now.', ['number' => $number])),
         };

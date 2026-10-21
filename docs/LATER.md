@@ -1,6 +1,6 @@
 # Saved for later
 
-Things agreed on 2026-10-19 but not started (updated 2026-10-21; booking-fee pre-orders are built). Pick any of them up by asking for it by name.
+Things agreed on 2026-10-19 but not started (updated 2026-10-21; booking-fee pre-orders, "pay once the shop confirms" and admin-allowed pre-orders are built). Pick any of them up by asking for it by name.
 
 ## Launch to-dos (owner, on the live server)
 
@@ -87,6 +87,7 @@ shop cancels, can't get the item, moves the date later or is later than the prod
 items are ordered on their own.
 
 How to use it: make a shop account for these imports (e.g. "iruali Direct", not the admin account),
+allow it pre-orders (Admin → Sellers → the shop → "Allow pre-orders"),
 then in its product form → Pre-order: tick "Take pre-orders", choose "Some days after each order"
 (e.g. 14), the most units, "A booking fee: a percentage of the price" (e.g. 30), and if they differ
 from 7, the days to pay the rest and the days late before a full refund. When the camera arrives,
@@ -95,6 +96,17 @@ GST-registered (Seller Centre → Settings → Tax), each booking fee gets its o
 
 Added on 2026-10-21 after the first version: each product sets its own days (to pay the rest once it
 arrives, and how late before a full refund), and the booking fee has GST with its own tax invoice.
+
+Added on 2026-10-21, third round:
+
+- **Only shops an admin allows** can take pre-orders or list "coming soon" (Admin → Sellers → the shop's
+  page → "Allow pre-orders"). Off for every shop until then, including shops that set some up before.
+- **Pay once the shop confirms:** in the product form → Pre-order → "What the customer pays at
+  checkout", choose "Nothing yet: the full price once I confirm I can get it" (and the days to pay, 3
+  if left empty). The customer orders without paying; the shop (Seller Centre → Pre-orders → "To
+  confirm") or an admin (Admin → Pre-orders) presses "I can get it", and the customer gets an SMS and
+  email with a link to pay in full. "I can't get it" cancels the order. Unpaid after the days to pay,
+  the order is cancelled.
 
 Still open (owner's choice):
 

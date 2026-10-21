@@ -180,6 +180,7 @@
                 </div>
 
                 @include('orders._booking_fee', ['order' => $order])
+                @include('orders._preorder_confirm', ['order' => $order])
                 @php $payments = app(\App\Services\PaymentService::class); @endphp
                 @if($payments->canPayOnline($order))
                     @php $lastAttempt = $order->paymentTransactions()->latest('id')->first(); @endphp

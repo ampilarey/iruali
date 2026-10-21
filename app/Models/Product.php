@@ -86,6 +86,7 @@ class Product extends Model
         'preorder_closes_on' => 'date',
         // A booking fee instead of the full price at checkout (App\Services\BookingFeeService)
         'preorder_deposit_value' => 'decimal:2',
+        'preorder_confirm_first' => 'boolean',
         'preorder_balance_days' => 'integer',
         'preorder_late_days' => 'integer',
         // Listed before it goes on sale (App\Services\ComingSoonService)
@@ -293,10 +294,25 @@ class Product extends Model
     }
 
     /**
+     * Pre-orders of this product are paid once the shop confirms it can get the item, in full
+     * (App\Services\PreorderConfirmService). Never together with a booking fee.
+     */
+    public function confirmsFirst(): bool
+    {
+        return (bool) $this->preorder_confirm_first && ! $this->hasBookingFee();
+    }
+
+    /** Days the customer has to pay once the shop confirms a pre-order of this product. */
+    public function preorderPayDays(): int
+    {
+        return (int) $this->preorder_balance_days > 0 ? (int) $this->preorder_balance_days : \App\Services\PreorderConfirmService::PAY_DAYS;
+    }
+
+    /**
      * Out of stock and open for pre-orders now, with units left (PreorderService::isPreorderable()
      * in SQL, for listings): switched on, the expected date today or later (or a number of days
-     * after the order), pre-orders not closed, not "coming soon", and fewer units waiting than the
-     * shop's limit.
+     * after the order), pre-orders not closed, not "coming soon", the shop allowed pre-orders (or
+     * iruali's own product), and fewer units waiting than the shop's limit.
      */
     public function scopePreorderable($query)
     {
@@ -309,6 +325,7 @@ class Product extends Model
             ->where(fn ($q) => $q->where('products.preorder_lead_days', '>', 0)->orWhereDate('products.preorder_ship_date', '>=', today()))
             ->where(fn ($q) => $q->whereNull('products.preorder_closes_on')->orWhereDate('products.preorder_closes_on', '>=', today()))
             ->notComingSoon()
+            ->where(fn ($q) => $q->whereNull('products.seller_id')->orWhereIn('products.seller_id', User::query()->select('id')->where('preorders_allowed', true)))
             ->whereRaw('products.preorder_limit > '.$waiting);
     }
 

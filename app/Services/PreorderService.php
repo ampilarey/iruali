@@ -25,11 +25,12 @@ use Throwable;
 
 /**
  * Pre-orders: customers pay now for goods coming on a later shipment (stock reaches the islands
- * by ship). The shop switches them on per product (product form → "Pre-order"): the date it
- * expects to send them, or "about N days after the order" (each order then gets its own date),
- * the most units it takes (counted across the product's variants) and an optional note. With a
- * booking fee the customer pays only the fee at checkout and the rest when the stock arrives
- * (BookingFeeService).
+ * by ship). A shop an admin allows (User::allowsPreorders()) switches them on per product (product
+ * form → "Pre-order"): the date it expects to send them, or "about N days after the order" (each
+ * order then gets its own date), the most units it takes (counted across the product's variants)
+ * and an optional note. With a booking fee the customer pays only the fee at checkout and the rest
+ * when the stock arrives (BookingFeeService); or nothing until the shop confirms it can get the
+ * item, then everything (PreorderConfirmService).
  *
  * - Shoppers: while the product, or the chosen option, has no stock and units are left, the
  *   product page says "Pre-order: ships around <date>" and the button says "Pre-order"; the
@@ -67,6 +68,9 @@ class PreorderService
     /** Session: the cart lines the checkout page showed as pre-orders, with their dates. */
     public const SESSION_SHOWN = 'preorder_checkout_lines';
 
+    /** The product form's "What the customer pays at checkout" for nothing until the shop confirms (PreorderConfirmService). */
+    public const CONFIRM_FIRST = 'confirm';
+
     // ---- The product form -----------------------------------------------------------------------
 
     /**
@@ -93,12 +97,14 @@ class PreorderService
             'preorder_closes_on' => [$on, 'nullable', 'date', 'after_or_equal:today', \Illuminate\Validation\Rule::when($onDate, ['before_or_equal:preorder_ship_date'])],
             // Days late before it counts as late (Admin → Inbox; a booking fee is then refunded in full), empty for the default
             'preorder_late_days' => [$on, 'nullable', 'integer', 'min:1', 'max:'.self::MAX_DAYS],
-            // A booking fee now and the rest when the stock arrives (BookingFeeService): a percentage or an amount per unit
-            'preorder_deposit_type' => [$on, 'nullable', 'in:none,'.implode(',', BookingFeeService::TYPES)],
+            // What the customer pays at checkout: everything (none), a booking fee now and the rest when the stock
+            // arrives (BookingFeeService: a percentage or an amount per unit), or nothing until the shop confirms
+            // it can get the item (confirm: PreorderConfirmService)
+            'preorder_deposit_type' => [$on, 'nullable', 'in:none,'.self::CONFIRM_FIRST.','.implode(',', BookingFeeService::TYPES)],
             'preorder_deposit_value' => [$on, 'exclude_unless:preorder_deposit_type,'.implode(',', BookingFeeService::TYPES), 'required', 'numeric', 'min:1',
                 \Illuminate\Validation\Rule::when(fn ($input) => $input->preorder_deposit_type === BookingFeeService::PERCENT, ['max:'.BookingFeeService::MAX_PERCENT], ['max:999999.99'])],
-            // Days to pay the balance once it arrives, empty for the default
-            'preorder_balance_days' => [$on, 'exclude_unless:preorder_deposit_type,'.implode(',', BookingFeeService::TYPES), 'nullable', 'integer', 'min:1', 'max:'.self::MAX_DAYS],
+            // Days to pay the balance once it arrives, or to pay once the shop confirms; empty for the default
+            'preorder_balance_days' => [$on, 'exclude_unless:preorder_deposit_type,'.self::CONFIRM_FIRST.','.implode(',', BookingFeeService::TYPES), 'nullable', 'integer', 'min:1', 'max:'.self::MAX_DAYS],
         ];
     }
 
@@ -131,8 +137,9 @@ class PreorderService
 
     /**
      * The product's pre-order columns from the validated form (nothing when the form had no
-     * "Pre-order" fieldset). Switching pre-orders off keeps the date, limit, note and booking fee
-     * for next time. Shipping "about N days after the order" clears the date (and the other way round).
+     * "Pre-order" fieldset). Switching pre-orders off keeps the date, limit, note, booking fee and
+     * "pay once I confirm" for next time. Shipping "about N days after the order" clears the date (and
+     * the other way round).
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -149,6 +156,7 @@ class PreorderService
         $note = trim((string) ($data['preorder_note'] ?? ''));
         $days = ($data['preorder_ships'] ?? 'date') === 'days';
         $fee = in_array($data['preorder_deposit_type'] ?? null, BookingFeeService::TYPES, true) ? $data['preorder_deposit_type'] : null;
+        $confirm = ($data['preorder_deposit_type'] ?? null) === self::CONFIRM_FIRST;
 
         return [
             'preorder_enabled' => true,
@@ -160,7 +168,8 @@ class PreorderService
             'preorder_late_days' => filled($data['preorder_late_days'] ?? null) ? (int) $data['preorder_late_days'] : null,
             'preorder_deposit_type' => $fee,
             'preorder_deposit_value' => $fee ? round((float) $data['preorder_deposit_value'], 2) : null,
-            'preorder_balance_days' => $fee && filled($data['preorder_balance_days'] ?? null) ? (int) $data['preorder_balance_days'] : null,
+            'preorder_confirm_first' => $confirm,
+            'preorder_balance_days' => ($fee || $confirm) && filled($data['preorder_balance_days'] ?? null) ? (int) $data['preorder_balance_days'] : null,
         ];
     }
 
@@ -169,8 +178,10 @@ class PreorderService
     /**
      * The product takes pre-orders now, whatever its stock: switched on, an expected date from
      * today on (or a number of days after the order), its last day for pre-orders (if any) not
-     * passed, a limit, on sale and not "coming soon". A shop on holiday is refused where every
-     * order is (CartService::addToCart(), OrderService) and productOffer() shows nothing for it.
+     * passed, a limit, on sale, not "coming soon", and its shop allowed pre-orders by an admin
+     * (User::allowsPreorders(); iruali's own products need no one's leave). A shop on holiday is
+     * refused where every order is (CartService::addToCart(), OrderService) and productOffer()
+     * shows nothing for it.
      */
     public function accepting(Product $product): bool
     {
@@ -183,7 +194,8 @@ class PreorderService
             && $date !== null
             && ! $date->isBefore(today())
             && ($closes === null || ! $closes->isBefore(today()))
-            && ! $product->isComingSoon();
+            && ! $product->isComingSoon()
+            && ($product->seller_id === null || (bool) $product->seller?->allowsPreorders());
     }
 
     /**
@@ -219,9 +231,10 @@ class PreorderService
      * The product page's pre-order offer, or null: the shop takes pre-orders for it now (not on
      * holiday, units left) and the product, or at least one of its options, is out of stock.
      * "whole" is true when the product itself is out of stock (else only some options are); "days"
-     * is set when it ships about that many days after the order; "fee" describes its booking fee.
+     * is set when it ships about that many days after the order; "fee" describes its booking fee;
+     * "confirm" is true when it is paid once the shop confirms it can get it (PreorderConfirmService).
      *
-     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface, days: ?int, fee: ?string, late_days: int, balance_days: int}|null
+     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface, days: ?int, fee: ?string, late_days: int, balance_days: int, confirm: bool, pay_days: int}|null
      */
     public function productOffer(Product $product): ?array
     {
@@ -242,6 +255,7 @@ class PreorderService
             'days' => (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null,
             'fee' => $product->hasBookingFee() ? app(BookingFeeService::class)->describe($product) : null,
             'late_days' => $product->preorderLateDays(), 'balance_days' => $product->preorderBalanceDays(),
+            'confirm' => $product->confirmsFirst(), 'pay_days' => $product->preorderPayDays(),
         ] : null;
     }
 
@@ -556,6 +570,9 @@ class PreorderService
         if ($notes !== [] && $order->hasBookingFee()) {
             $notes[] = __('You pay the booking fee of :fee now and the balance of :balance when your item arrives, before it is delivered.', ['fee' => \App\Support\Money::format($order->deposit_amount), 'balance' => \App\Support\Money::format($order->balanceAmount())]);
             $notes[] = __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, you get everything back.', ['days' => $order->preorderLateDays()]);
+        } elseif ($notes !== [] && $order->confirm_first) {
+            // Paid once the shop confirms it can get the item (PreorderConfirmService)
+            $notes[] = __('Nothing to pay yet: the shop first checks it can get your item. We then text and email you a link to pay :amount within :days days.', ['amount' => \App\Support\Money::format($order->total_amount), 'days' => (int) $order->pay_days ?: PreorderConfirmService::PAY_DAYS]);
         } elseif ($notes !== []) {
             $notes[] = __('Rather not wait? You can cancel the order for a full refund until it is sent.');
         }
@@ -578,6 +595,8 @@ class PreorderService
         ]))->values()->all();
         if ($notes !== [] && $order->hasBookingFee()) {
             $notes[] = __('This pre-order has a booking fee of :fee: order the item once we tell you the fee is paid. When it arrives, record it under Pre-orders; we then ask the customer for the balance, and you send the order once it is paid.', ['fee' => \App\Support\Money::format($order->deposit_amount)]);
+        } elseif ($notes !== [] && $order->confirm_first) {
+            $notes[] = __('The customer has not paid yet: they pay once you confirm you can get the item. Check with your supplier, then confirm it (or say you can\'t get it) in the Seller Centre under Pre-orders. Order the item once we tell you it is paid.');
         } elseif ($notes !== []) {
             $notes[] = __('When the stock arrives, record it in the Seller Centre under Pre-orders: you can send this order once its stock is in.');
         }

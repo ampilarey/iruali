@@ -124,14 +124,16 @@ class ManualPaymentService
 
     /**
      * Waiting for a bank transfer or cash: the order is not cancelled and not paid yet. A booking-fee
-     * pre-order whose fee is paid waits again only once its balance is asked for (BookingFeeService).
+     * pre-order whose fee is paid waits again only once its balance is asked for (BookingFeeService),
+     * and a pre-order paid once the shop confirms only once it is confirmed (PreorderConfirmService).
      */
     public static function awaiting(Order $order): bool
     {
         return in_array($order->payment_method, self::METHODS, true)
             && $order->payment_status !== 'paid'
             && $order->status !== 'cancelled'
-            && ($order->payment_status !== 'deposit_paid' || $order->balanceDue());
+            && ($order->payment_status !== 'deposit_paid' || $order->balanceDue())
+            && ! $order->awaitingConfirmation();
     }
 
     /**
@@ -207,8 +209,8 @@ class ManualPaymentService
         Audit::record('payment.confirmed_manually', $order, array_filter(['method' => $order->payment_method, 'part' => $paying, 'reference' => $reference, 'order_number' => $order->order_number]));
 
         // The shops were told to wait for a transfer: tell them they can send it now (a booking-fee
-        // order's shops are told about each part by PaymentService)
-        if ($order->payment_method === self::TRANSFER && ! $order->hasBookingFee()) {
+        // order's shops are told about each part, and a confirmed pre-order's to order it, by PaymentService)
+        if ($order->payment_method === self::TRANSFER && ! $order->hasBookingFee() && ! $order->confirm_first) {
             $order->loadMissing('sellerOrders.seller');
             foreach ($order->sellerOrders as $part) {
                 if ($part->seller && $part->status !== 'cancelled') {
@@ -231,9 +233,9 @@ class ManualPaymentService
     public function cancelUnpaidTransfers(): int
     {
         $cancelled = 0;
-        \App\Support\PayLink::withoutLiveLink(Order::where('payment_method', self::TRANSFER)
+        \App\Support\PayLink::withoutLiveLink(PreorderConfirmService::exceptUntilDue(Order::where('payment_method', self::TRANSFER)
             ->whereNotIn('payment_status', ['paid', 'deposit_paid']) // a booking fee paid: its balance waits for the stock
-            ->where('status', 'pending')
+            ->where('status', 'pending'))
             ->whereNull('payment_slip_uploaded_at')
             ->where('created_at', '<', now()->subHours(self::payWithinHours())))
             ->each(function (Order $order) use (&$cancelled) {

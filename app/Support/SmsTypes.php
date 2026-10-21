@@ -127,6 +127,20 @@ class SmsTypes
                 'text' => 'iruali: reminder: please pay the balance of :amount for order :number by :date: :url',
                 'data' => $order + ['amount' => 'MVR 3,500.00', 'date' => '12 Nov', 'url' => 'https://iruali.mv/pay/123?signature=…'], 'required' => ['url'],
             ],
+            'preorder_confirmed' => [
+                'group' => 'preorders', 'label' => 'Pre-order confirmed by the shop: please pay',
+                'text' => 'iruali: good news, the shop can get your pre-order (order :number). Please pay :amount by :date: :url',
+                'data' => $order + ['amount' => 'MVR 5,000.00', 'date' => '12 Nov', 'url' => 'https://iruali.mv/pay/123?signature=…'], 'required' => ['url'],
+            ],
+            'preorder_pay_reminder' => [
+                'group' => 'preorders', 'label' => 'Confirmed pre-order: payment reminder',
+                'text' => 'iruali: reminder: please pay :amount for order :number by :date, or it is cancelled: :url',
+                'data' => $order + ['amount' => 'MVR 5,000.00', 'date' => '12 Nov', 'url' => 'https://iruali.mv/pay/123?signature=…'], 'required' => ['url'],
+            ],
+            'preorder_unavailable' => [
+                'group' => 'preorders', 'label' => 'The shop can\'t get a pre-order',
+                'text' => 'iruali: sorry, the shop can\'t get your pre-order (order :number), so it is cancelled. You have not been charged.', 'data' => $order,
+            ],
             'new_message' => [
                 'group' => 'messages', 'label' => 'New message about an order',
                 'text' => 'iruali: new message from :sender about order :number. Reply at :url',

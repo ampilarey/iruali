@@ -8,8 +8,26 @@
 @endphp
         @if(session('status'))<p class="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800" role="status">{{ session('status') }}</p>@endif
         @error('login')<p class="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
+        @if($pending['staff'] ?? false)
+            @error('email')<p class="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
+        @endif
 
-        @if(($pending['step'] ?? null) === 'password')
+        @if(($pending['step'] ?? null) === 'password' && ($pending['staff'] ?? false))
+            {{-- Staff: password only (then the authenticator code), through the staff sign-in --}}
+            <form method="POST" action="{{ route('login') }}" class="space-y-4 rounded-lg bg-white p-6 shadow-sm border border-gray-100" data-staff-password>
+                @csrf
+                <input type="hidden" name="email" value="{{ $pending['email'] }}">
+                @if($pending['remember'] ?? false)<input type="hidden" name="remember" value="1">@endif
+                <p class="text-sm text-gray-700">{{ __('Signing in as :phone', ['phone' => $pending['shown']]) }} · <a href="{{ $changeUrl }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">{{ __('Password') }}</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required autofocus class="{{ $field }} @error('password') border-red-500 @enderror">
+                    @error('password')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+                <button type="submit" class="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Sign in') }}</button>
+            </form>
+            <p class="text-center"><a href="{{ route('password.request') }}" class="text-sm font-medium text-primary-600 hover:text-primary-500">{{ __('Forgot password?') }}</a></p>
+        @elseif(($pending['step'] ?? null) === 'password')
             <form method="POST" action="{{ route('login.phone.password') }}" class="space-y-4 rounded-lg bg-white p-6 shadow-sm border border-gray-100">
                 @csrf
                 <p class="text-sm text-gray-700">{{ __('Signing in as :phone', ['phone' => $pending['shown']]) }} · <a href="{{ $changeUrl }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>

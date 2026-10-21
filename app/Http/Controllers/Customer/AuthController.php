@@ -108,6 +108,7 @@ class AuthController extends Controller
             return back()->withErrors(['email' => $user->isBanned() ? __('auth.account_banned', ['reason' => $user->banned_reason]) : __('auth.account_inactive')]);
         }
 
+        $request->session()->forget(PhoneLoginController::SESSION); // a staff email typed on /login
         if ($user->isTwoFactorEnabled()) {
             // The password was right but the user is not signed in until the 2FA code is checked
             Auth::logout();

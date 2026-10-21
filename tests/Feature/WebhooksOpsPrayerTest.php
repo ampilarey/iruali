@@ -87,6 +87,29 @@ class WebhooksOpsPrayerTest extends TestCase
         $this->artisan('ops:watch')->expectsOutputToContain('All good.');
     }
 
+    public function test_a_stuck_worker_lock_is_released_and_the_recovery_is_reported(): void
+    {
+        Mail::fake();
+        config(['mail.alerts_to' => 'owner@iruali.mv', 'queue.default' => 'database']);
+        Cache::forget('queue.heartbeat');
+        DB::table('jobs')->insert(['queue' => 'default', 'payload' => '{}', 'attempts' => 0, 'available_at' => now()->timestamp, 'created_at' => now()->subMinutes(35)->timestamp]);
+
+        // The worker's schedule entry (routes/console.php registers it only for a real queue) uses a
+        // short lock; one killed mid-run left that lock behind
+        $this->assertStringContainsString("->everyMinute()->withoutOverlapping(5)->name('queue-worker')", (string) file_get_contents(base_path('routes/console.php')));
+        $event = app(\Illuminate\Console\Scheduling\Schedule::class)->command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5)->name('queue-worker');
+        $event->mutex->create($event);
+        $this->assertTrue($event->mutex->exists($event));
+
+        $this->artisan('ops:watch')->expectsOutputToContain('(1 job(s) waiting, the oldest 35 minutes): emails, SMS and alerts are waiting. Its schedule lock was left behind and has been released')->assertSuccessful();
+        $this->assertFalse($event->mutex->exists($event), 'the next minute can start a worker');
+
+        // The worker runs again: one "running again" email
+        (new \App\Jobs\QueueHeartbeat)->handle();
+        $this->artisan('ops:watch')->expectsOutputToContain('Queue worker running again.');
+        $this->artisan('ops:watch')->expectsOutputToContain('All good.');
+    }
+
     public function test_prayer_times_for_an_island(): void
     {
         $times = PrayerTimes::calculate(4.1755, 73.5093, Carbon::parse('2026-10-18'));

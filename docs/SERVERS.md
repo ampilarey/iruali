@@ -101,3 +101,21 @@ there before anyone uses it (it replaces customers' names, emails, phones and ad
   `verify_site` working: CI does not run the deploy scripts.
 - The old `~/public_html/robots.txt` and `debug-live.php` were removed; files left in `public_html`
   win over the app's routes, so don't add static files there.
+
+## "Queue worker stopped" email
+
+`ops:watch` (every ten minutes) sends it when no queued job has run for 20+ minutes. Emails, SMS
+and alerts wait in the `jobs` table until the worker runs; nothing is lost.
+
+- It releases the worker's schedule lock by itself (a worker killed by the host leaves its lock
+  behind), so the worker usually starts again within a minute. A **"Queue worker running again"**
+  email follows when it does.
+- If no "running again" email arrives within 15 minutes, on the server:
+  ```bash
+  cd /home/iruali/iruali
+  crontab -l | grep schedule:run                     # the cron must run every minute
+  php artisan schedule:clear-cache                   # release every schedule lock
+  php artisan queue:work --stop-when-empty --tries=3 # send what is waiting now
+  php artisan ops:watch                              # should end with "Queue worker running again." or "All good."
+  ```
+- `php artisan queue:failed` lists jobs that failed for good; `php artisan queue:retry all` resends them.

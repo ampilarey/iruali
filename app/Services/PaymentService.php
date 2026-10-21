@@ -15,7 +15,8 @@ use Throwable;
 /**
  * Payments are taken by card through BML Connect only.
  *
- * Statuses: unpaid → paid. Older orders may carry other methods (cash on delivery, bank transfer);
+ * Statuses: unpaid → paid, or for a pre-order with a booking fee unpaid → deposit_paid → paid
+ * (BookingFeeService). Older orders may carry other methods (cash on delivery, bank transfer);
  * admins can still mark those as paid.
  */
 class PaymentService
@@ -55,11 +56,14 @@ class PaymentService
         };
     }
 
+    /**
+     * The order waits for a card payment: unpaid and pending, or the balance of a booking-fee
+     * pre-order whose stock has arrived (Order::awaitingPayment()).
+     */
     public function canPayOnline(Order $order): bool
     {
         return $order->payment_method === 'bml'
-            && $order->payment_status !== 'paid'
-            && $order->status === 'pending'
+            && $order->awaitingPayment()
             && ManualPaymentService::cardEnabled()
             && $this->bml()->enabled();
     }
@@ -78,8 +82,9 @@ class PaymentService
 
         $transaction = $order->paymentTransactions()->create([
             'gateway' => 'bml',
+            'purpose' => BookingFeeService::nextPart($order), // a booking-fee order: the fee, then the balance
             'local_id' => $localId,
-            'amount' => BmlConnect::toLaari($order->cardAmount()), // the total less whatever the wallet paid
+            'amount' => BmlConnect::toLaari($order->cardAmount()), // the total (or its part due now) less whatever the wallet paid
             'currency' => 'MVR',
         ]);
 
@@ -160,8 +165,8 @@ class PaymentService
             if ($order->status === 'cancelled') {
                 // Paid after the order was cancelled (its stock is already released): the money goes back.
                 $this->flagRefund($order, $amount, 'Paid after the order was cancelled');
-            } elseif ($order->payment_status === 'paid') {
-                // A second successful payment for the same order.
+            } elseif ($order->payment_status === 'paid' || ($locked->purpose === 'deposit' && $order->payment_status === 'deposit_paid')) {
+                // A second successful payment for the same order (or for the same booking fee).
                 $locked->update(['state' => 'DUPLICATE']);
                 $this->flagRefund($order, $amount, 'Paid twice');
             } else {
@@ -221,11 +226,28 @@ class PaymentService
         return true;
     }
 
+    /**
+     * A payment for the order is confirmed (BML, an admin, the wallet). A booking-fee pre-order is
+     * paid in two parts: while its fee is unpaid this confirms the fee (BookingFeeService::feePaid()),
+     * after that the balance, which makes it paid like any other order. The part is the one the
+     * caller saw ($order->payment_status), so two confirmations of the fee never count as the balance.
+     */
     public function confirm(Order $order): void
     {
+        if ($order->hasBookingFee() && ! in_array($order->payment_status, ['deposit_paid', 'paid'], true)) {
+            app(BookingFeeService::class)->feePaid($order);
+
+            return;
+        }
+
         // Once only, even when two confirmations race: a second one changes no row and does nothing
         $paidAt = now();
-        if (Order::whereKey($order->id)->where('payment_status', '!=', 'paid')->update(['payment_status' => 'paid', 'paid_at' => $paidAt]) === 0) {
+        $from = $order->hasBookingFee() ? ['deposit_paid'] : null;
+        $query = Order::whereKey($order->id)->where('payment_status', '!=', 'paid');
+        if ($from !== null) {
+            $query->whereIn('payment_status', $from); // the balance: only after the booking fee
+        }
+        if ($query->update(['payment_status' => 'paid', 'paid_at' => $paidAt]) === 0) {
             return;
         }
         $order->forceFill(['payment_status' => 'paid', 'paid_at' => $paidAt])->syncOriginal();
@@ -235,6 +257,9 @@ class PaymentService
         app(OrderService::class)->awardRewards($order->fresh());
         app(GiftCardService::class)->issueForOrder($order); // a paid gift-card order sends the card
         app(OrderNotifier::class)->paymentUpdated($order);
+        if ($order->hasBookingFee()) {
+            app(BookingFeeService::class)->tellShops($order, 'balance'); // the shop holds the item: send it now
+        }
     }
 
     public static function statusLabel(?string $status): string

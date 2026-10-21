@@ -72,6 +72,7 @@ class OrderController extends Controller
             'island_id' => $request->filled('island_id') ? (int) $request->input('island_id') : null,
             'payment_method' => $request->payment_method,
             'use_wallet' => $request->boolean('use_wallet'),
+            'agree_booking_fee' => $request->boolean('agree_booking_fee'), // pre-orders with a booking fee (BookingFeeService)
         ];
         // Deliver or pick up per shop, the Malé time slot and the gift details
         $shippingData += $request->deliveryChoices();
@@ -94,8 +95,8 @@ class OrderController extends Controller
 
         // Card payment: straight to BML's payment page. If BML can't be reached the order
         // stays unpaid and the order page offers "Pay now" to try again.
-        // (An order the wallet covered in full is already paid and skips the card step.)
-        if ($order->payment_method === 'bml') {
+        // (An order the wallet covered in full, or whose booking fee it covered, is paid and skips the card step.)
+        if ($order->payment_method === 'bml' && app(\App\Services\PaymentService::class)->canPayOnline($order->fresh())) {
             try {
                 return redirect()->away(app(\App\Services\PaymentService::class)->startBmlPayment($order));
             } catch (\Throwable $e) {
@@ -139,13 +140,18 @@ class OrderController extends Controller
     {
         $this->authorize('cancel', $order);
 
-        if (! $this->orderService->updateOrderStatus($order, 'cancelled')) {
+        // A booking fee paid is kept when the customer cancels, unless it became refundable (BookingFeeService)
+        $bookingFees = app(\App\Services\BookingFeeService::class);
+        $refund = $bookingFees->customerCancelPreview($order);
+        if (! $this->orderService->updateOrderStatus($order, 'cancelled', $bookingFees->keepable($order))) {
             NotificationService::error(__('This order can no longer be cancelled.'));
 
             return redirect()->route('orders.show', $order);
         }
 
-        NotificationService::success(__('Your order has been cancelled.'));
+        NotificationService::success($refund['kept'] > 0
+            ? __('Your order has been cancelled. The booking fee of :fee is not refunded, as agreed at checkout.', ['fee' => \App\Support\Money::format($refund['kept'])])
+            : __('Your order has been cancelled.'));
 
         return redirect()->route('orders.show', $order);
     }

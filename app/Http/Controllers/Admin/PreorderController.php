@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\PreorderService;
 use Illuminate\Http\Request;
 
 /**
  * Admin → Pre-orders: pre-orders still waiting for their stock, the late ones (more than a week past
- * their date, flagged daily by preorders:flag-late; the "Late pre-orders" inbox row) first.
+ * their date, flagged daily by preorders:flag-late; the "Late pre-orders" inbox row) first, and the
+ * booking-fee pre-orders whose balance is due (overdue ones: the "Pre-order balances overdue" row).
  */
 class PreorderController extends Controller
 {
@@ -29,10 +31,20 @@ class PreorderController extends Controller
             ->paginate(50)
             ->withQueryString();
 
+        // Pre-orders with a booking fee whose stock is in and whose balance is not paid yet, the oldest due first
+        $balances = Order::query()
+            ->where('payment_status', 'deposit_paid')->whereNotNull('deposit_amount')->whereNotNull('balance_requested_at')
+            ->whereIn('status', ['pending', 'processing'])
+            ->with('user')
+            ->orderBy('balance_due_on')
+            ->limit(100)
+            ->get();
+
         return view('admin.preorders.index', [
             'items' => $items,
             'lateOnly' => $lateOnly,
             'lateDays' => PreorderService::LATE_AFTER_DAYS,
+            'balances' => $balances,
         ]);
     }
 }

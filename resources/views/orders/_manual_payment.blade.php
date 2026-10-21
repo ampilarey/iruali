@@ -8,7 +8,11 @@
 @if($order->payment_method === $manual::TRANSFER && $manual::awaiting($order))
     @php $bank = $manual::transferDetails(); @endphp
     <div class="mt-6 rounded-xl border border-primary-200 bg-primary-50 p-4 space-y-3 text-sm" data-transfer-box>
-        <h3 class="font-semibold text-gray-900">{{ __('Pay by bank transfer') }}</h3>
+        <h3 class="font-semibold text-gray-900">{{ match (\App\Services\BookingFeeService::nextPart($order)) {
+            'deposit' => __('Pay the booking fee by bank transfer'),
+            'balance' => __('Pay the balance by bank transfer'),
+            default => __('Pay by bank transfer'),
+        } }}</h3>
         <p class="text-gray-700">{{ __('Transfer :amount to this account, with your order number as the reference:', ['amount' => $amountDue]) }}</p>
         <dl class="rounded-lg bg-white p-3 space-y-1">
             <div class="flex justify-between gap-3"><dt class="text-gray-600">{{ __('Bank') }}</dt><dd class="font-medium text-dark">{{ $bank['bank'] }}</dd></div>
@@ -22,6 +26,8 @@
         @endif
         @if($order->payment_slip_uploaded_at)
             <p class="rounded-lg bg-green-50 px-3 py-2 text-green-800" data-slip-received>{{ __('We have your transfer slip (sent :date). We are checking the payment and will email you once it is confirmed.', ['date' => $order->payment_slip_uploaded_at->translatedFormat('j M, H:i')]) }}</p>
+        @elseif($order->balanceDue())
+            <p class="text-gray-700">{{ __('Then upload a photo or PDF of the transfer slip here by :date.', ['date' => $order->balance_due_on?->translatedFormat('j M Y')]) }}</p>
         @else
             <p class="text-gray-700">{{ __('Then upload a photo or PDF of the transfer slip here within :hours hours, or the order is cancelled.', ['hours' => $manual::payWithinHours()]) }}</p>
         @endif

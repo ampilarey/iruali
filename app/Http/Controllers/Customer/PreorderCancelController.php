@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\BookingFeeService;
 use App\Services\NotificationService;
 use App\Services\PreorderService;
 use App\Support\Money;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\URL;
  * been sent, from My Orders or, for a guest order, through the signed link in its emails. It is
  * the normal cancellation of the whole order (OrderService::updateOrderStatus()): stock that had
  * arrived goes back, points, voucher and wallet are returned and a card payment is flagged for refund.
+ * A booking fee paid is kept, unless the shop moved the date later or is late (BookingFeeService).
  */
 class PreorderCancelController extends Controller
 {
@@ -55,6 +57,7 @@ class PreorderCancelController extends Controller
         return view('preorders.cancel', [
             'order' => $order,
             'canCancel' => $preorders->canCancel($order),
+            'refund' => app(BookingFeeService::class)->customerCancelPreview($order), // a booking fee paid is kept, unless refundable
             'action' => $action,
             'back' => $back,
         ]);
@@ -62,7 +65,7 @@ class PreorderCancelController extends Controller
 
     protected function cancel(Order $order, PreorderService $preorders, string $back)
     {
-        $card = $order->payment_status === 'paid' ? $order->cardAmount() : 0.0;
+        $refund = app(BookingFeeService::class)->customerCancelPreview($order);
 
         if (! $preorders->cancel($order)) {
             NotificationService::error(__('This order can no longer be cancelled here: part of it has already been sent. Message the shop from your order if you need help.'));
@@ -70,9 +73,12 @@ class PreorderCancelController extends Controller
             return redirect()->to($back);
         }
 
-        NotificationService::success($card > 0
-            ? __('Your order has been cancelled. We will refund :amount to your card and email you when it is sent.', ['amount' => Money::format($card)])
-            : __('Your order has been cancelled.'));
+        NotificationService::success(match (true) {
+            $refund['kept'] > 0 && $refund['card'] > 0 => __('Your order has been cancelled. The booking fee of :fee is not refunded, as agreed at checkout. We will refund :amount and email you when it is sent.', ['fee' => Money::format($refund['kept']), 'amount' => Money::format($refund['card'])]),
+            $refund['kept'] > 0 => __('Your order has been cancelled. The booking fee of :fee is not refunded, as agreed at checkout.', ['fee' => Money::format($refund['kept'])]),
+            $refund['card'] > 0 => __('Your order has been cancelled. We will refund :amount to your card and email you when it is sent.', ['amount' => Money::format($refund['card'])]),
+            default => __('Your order has been cancelled.'),
+        });
 
         return redirect()->to($back);
     }

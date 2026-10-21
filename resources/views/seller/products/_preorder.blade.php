@@ -1,8 +1,11 @@
 {{-- Seller product form: pre-orders while the product is out of stock (App\Services\PreorderService).
-     The date, the limit and the note only count while pre-orders are on. Needs $product and $field. --}}
+     The date (or days after the order), the limit, the note and the booking fee (App\Services\BookingFeeService)
+     only count while pre-orders are on. Needs $product and $field. --}}
 @php
     $preorderOn = (bool) old('preorder_enabled', $product->preorder_enabled);
     $preorderWaiting = $product->exists ? app(\App\Services\PreorderService::class)->waitingUnits((int) $product->id) : 0;
+    $preorderShips = old('preorder_ships', (int) $product->preorder_lead_days > 0 ? 'days' : 'date');
+    $depositType = old('preorder_deposit_type', $product->preorder_deposit_type ?? 'none');
 @endphp
 <fieldset class="rounded-lg border border-gray-200 p-4" data-preorder-fieldset>
     <legend class="px-1 text-sm font-medium text-gray-700">{{ __('Pre-order') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></legend>
@@ -17,11 +20,24 @@
     </label>
 
     <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 {{ $preorderOn ? '' : 'opacity-60' }}" data-preorder-fields>
-        <div>
+        <fieldset class="sm:col-span-2 lg:col-span-4">
+            <legend class="block text-sm font-medium text-gray-700">{{ __('When does it ship?') }}</legend>
+            <div class="mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
+                <label class="flex items-center gap-2"><input type="radio" name="preorder_ships" value="date" @checked($preorderShips !== 'days') class="text-primary-600 focus:ring-primary-500" data-preorder-ships> {{ __('On a date (one shipment for everyone)') }}</label>
+                <label class="flex items-center gap-2"><input type="radio" name="preorder_ships" value="days" @checked($preorderShips === 'days') class="text-primary-600 focus:ring-primary-500" data-preorder-ships> {{ __('Some days after each order (you order it for each customer)') }}</label>
+            </div>
+        </fieldset>
+        <div data-preorder-ships-date @class(['hidden' => $preorderShips === 'days'])>
             <label for="preorder_ship_date" class="block text-sm font-medium text-gray-700">{{ __('Expected ship date') }} *</label>
             <input id="preorder_ship_date" name="preorder_ship_date" type="date" min="{{ today()->addDay()->toDateString() }}" dir="ltr" class="{{ $field }}" value="{{ old('preorder_ship_date', $product->preorder_ship_date?->toDateString()) }}" aria-describedby="preorder_ship_date-hint">
             <p id="preorder_ship_date-hint" class="mt-1 text-xs text-gray-500">{{ __('When you expect to send them. Moving it later emails the waiting customers.') }}</p>
             @error('preorder_ship_date')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
+        <div data-preorder-ships-days @class(['hidden' => $preorderShips !== 'days'])>
+            <label for="preorder_lead_days" class="block text-sm font-medium text-gray-700">{{ __('Ships about how many days after the order?') }} *</label>
+            <input id="preorder_lead_days" name="preorder_lead_days" type="number" min="1" max="{{ \App\Services\PreorderService::MAX_LEAD_DAYS }}" step="1" dir="ltr" class="{{ $field }}" value="{{ old('preorder_lead_days', $product->preorder_lead_days) }}" aria-describedby="preorder_lead_days-hint">
+            <p id="preorder_lead_days-hint" class="mt-1 text-xs text-gray-500">{{ __('Your usual time to get it and send it, e.g. 14. Each order gets its own date.') }}</p>
+            @error('preorder_lead_days')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
             <label for="preorder_limit" class="block text-sm font-medium text-gray-700">{{ __('Most units to take') }} *</label>
@@ -40,6 +56,23 @@
             <input id="preorder_note" name="preorder_note" maxlength="255" dir="auto" class="{{ $field }}" value="{{ old('preorder_note', $product->preorder_note) }}" placeholder="{{ __('e.g. Arrives on the next ship from Colombo') }}">
             @error('preorder_note')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
+
+        {{-- Booking fee (BookingFeeService): the customer pays it at checkout and the rest when you record the stock as arrived --}}
+        <div class="sm:col-span-2" data-preorder-deposit>
+            <label for="preorder_deposit_type" class="block text-sm font-medium text-gray-700">{{ __('What the customer pays at checkout') }}</label>
+            <select id="preorder_deposit_type" name="preorder_deposit_type" class="{{ $field }}" aria-describedby="preorder_deposit-hint" data-preorder-deposit-type>
+                <option value="none" @selected(! in_array($depositType, \App\Services\BookingFeeService::TYPES, true))>{{ __('The full price') }}</option>
+                <option value="percent" @selected($depositType === 'percent')>{{ __('A booking fee: a percentage of the price') }}</option>
+                <option value="fixed" @selected($depositType === 'fixed')>{{ __('A booking fee: an amount per item') }}</option>
+            </select>
+            @error('preorder_deposit_type')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
+        <div @class(['sm:col-span-2', 'hidden' => ! in_array($depositType, \App\Services\BookingFeeService::TYPES, true)]) data-preorder-deposit-value>
+            <label for="preorder_deposit_value" class="block text-sm font-medium text-gray-700">{{ __('Booking fee') }} * <span class="font-normal text-gray-500">(<span data-unit-percent @class(['hidden' => $depositType !== 'percent'])>%</span><span data-unit-amount @class(['hidden' => $depositType === 'percent'])>{{ \App\Support\Money::prefix() }}{{ __('per item') }}</span>)</span></label>
+            <input id="preorder_deposit_value" name="preorder_deposit_value" type="number" min="1" step="0.01" dir="ltr" class="{{ $field }}" value="{{ old('preorder_deposit_value', $product->preorder_deposit_value !== null ? rtrim(rtrim((string) $product->preorder_deposit_value, '0'), '.') : null) }}" aria-describedby="preorder_deposit-hint">
+            @error('preorder_deposit_value')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
+        <p id="preorder_deposit-hint" class="sm:col-span-2 lg:col-span-4 text-xs text-gray-500">{{ __('With a booking fee the customer pays only the fee at checkout and the rest when you record the stock as arrived, before you send it. If they cancel, you keep the fee (less commission); if you cancel, can\'t get the item, move the date later or are more than :days days late, they get everything back. Booking-fee items are ordered on their own.', ['days' => \App\Services\PreorderService::LATE_AFTER_DAYS]) }}</p>
     </div>
 
     @if($preorderWaiting > 0)
@@ -58,6 +91,20 @@
         if (!box) return;
         var toggle = box.querySelector('[data-preorder-toggle]'), fields = box.querySelector('[data-preorder-fields]');
         toggle.addEventListener('change', function () { fields.classList.toggle('opacity-60', !toggle.checked); });
+        // On a date, or some days after each order
+        box.querySelectorAll('[data-preorder-ships]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                box.querySelector('[data-preorder-ships-date]').classList.toggle('hidden', radio.value === 'days');
+                box.querySelector('[data-preorder-ships-days]').classList.toggle('hidden', radio.value !== 'days');
+            });
+        });
+        // The booking fee: a percentage or an amount per item
+        var type = box.querySelector('[data-preorder-deposit-type]');
+        type.addEventListener('change', function () {
+            box.querySelector('[data-preorder-deposit-value]').classList.toggle('hidden', type.value === 'none');
+            box.querySelector('[data-unit-percent]').classList.toggle('hidden', type.value !== 'percent');
+            box.querySelector('[data-unit-amount]').classList.toggle('hidden', type.value === 'percent');
+        });
     })();
 </script>
 @endpush

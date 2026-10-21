@@ -10,6 +10,8 @@
                         <a href="{{ route('admin.orders.payment-slip', $order) }}" target="_blank" rel="noopener" class="font-semibold text-primary underline">View slip</a>
                     @endif
                 </p>
+            @elseif($manual::awaiting($order) && $order->payment_status === 'deposit_paid')
+                <p class="text-xs text-gray-600">No transfer slip for the balance yet (due {{ $order->balance_due_on?->format('d M Y') }}). It is not cancelled automatically: the booking fee is paid.</p>
             @elseif($manual::awaiting($order))
                 <p class="text-xs text-gray-600">No transfer slip yet. Cancelled automatically {{ $manual::payWithinHours() }} hours after the order if none comes.</p>
             @endif
@@ -18,11 +20,18 @@
         @endif
 
         @if($manual::awaiting($order) && \App\Support\StaffAccess::can('admin.orders.confirm-payment'))
-            <form method="POST" action="{{ route('admin.orders.confirm-payment', $order) }}" class="space-y-2" onsubmit="return confirm('Record {{ \App\Support\Money::format($order->cardAmount()) }} as received for order {{ $order->order_number }}?')">
+            @php $part = \App\Services\BookingFeeService::nextPart($order); @endphp
+            <form method="POST" action="{{ route('admin.orders.confirm-payment', $order) }}" class="space-y-2" onsubmit="return confirm('Record {{ \App\Support\Money::format($order->cardAmount()) }} as received for order {{ $order->order_number }}{{ $part ? ' ('.($part === 'deposit' ? 'booking fee' : 'balance').')' : '' }}?')">
                 @csrf
+                {{-- The part the page showed: a booking fee and its balance are confirmed one at a time (BookingFeeService) --}}
+                <input type="hidden" name="part" value="{{ $part ?? 'full' }}">
                 <label for="payment_reference" class="sr-only">Reference</label>
                 <input id="payment_reference" name="payment_reference" maxlength="100" placeholder="{{ $order->payment_method === $manual::TRANSFER ? 'Bank reference (optional)' : 'Note, e.g. who brought the cash (optional)' }}" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
-                <button class="w-full rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ $order->payment_method === $manual::TRANSFER ? 'Confirm payment received' : 'Cash received' }}</button>
+                <button class="w-full rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ match ($part) {
+                    'deposit' => 'Confirm booking fee received ('.\App\Support\Money::format($order->cardAmount()).')',
+                    'balance' => 'Confirm balance received ('.\App\Support\Money::format($order->cardAmount()).')',
+                    default => $order->payment_method === $manual::TRANSFER ? 'Confirm payment received' : 'Cash received',
+                } }}</button>
             </form>
         @elseif($order->payment_status === 'paid' && ($order->payment_reference || $order->payment_confirmed_by))
             <p class="text-xs text-gray-600">Confirmed by {{ \App\Models\User::find($order->payment_confirmed_by)?->name ?? 'staff' }}@if($order->payment_reference) · {{ $order->payment_reference }}@endif</p>

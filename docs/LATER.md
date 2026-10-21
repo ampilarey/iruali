@@ -1,6 +1,6 @@
 # Saved for later
 
-Things agreed on 2026-10-19 but not started (updated 2026-10-21). Pick any of them up by asking for it by name.
+Things agreed on 2026-10-19 but not started (updated 2026-10-21; booking-fee pre-orders are built). Pick any of them up by asking for it by name.
 
 ## Launch to-dos (owner, on the live server)
 
@@ -77,38 +77,28 @@ None of these exist yet (checked against the code on 2026-10-19). Suggested orde
 10. **Search in Latin-letter Dhivehi.** Understand Dhivehi typed in English letters (e.g. "mas" for
     fish, "kandu mas") as well as Thaana and English.
 
-### Pre-orders with a booking fee (order-on-demand imports)
+### Pre-orders with a booking fee (order-on-demand imports): built on 2026-10-21
 
-Asked for on 2026-10-21: list an item that is bought abroad only when a customer orders it (e.g.
-cameras from an overseas shop), take a booking fee, buy and ship it, and collect the rest before
-delivery. Customers only see the listing under the shop's name; no supplier is shown anywhere.
+Built as recommended (see `docs/FEATURES.md`, "Pre-orders with a booking fee"): a booking fee per
+product (percentage or amount per item), "ships about N days after each order" or a fixed date, the
+balance by pay link (SMS and email) when "Stock arrived" is recorded, no delivery before it is paid,
+a reminder and an overdue alert, and the fee kept when the customer cancels (refunded in full when the
+shop cancels, can't get the item, moves the date later or is more than 7 days late). Booking-fee items
+are ordered on their own.
 
-What exists today (`App\Services\PreorderService`, product form → "Pre-order"): the customer pays
-the **full price** at checkout; the shop sets a **fixed** expected ship date (within a year), a limit
-of units, a note and an optional closing date; "Stock arrived" in the Seller Centre gives the units
-to the waiting orders oldest first; a moved date emails the customers with a cancel link; late
-pre-orders show in Admin → Inbox. Pre-orders are offered only while the product is out of stock.
+How to use it: make a shop account for these imports (e.g. "iruali Direct", not the admin account),
+then in its product form → Pre-order: tick "Take pre-orders", choose "Some days after each order"
+(e.g. 14), the most units, and "A booking fee: a percentage of the price" (e.g. 30). When the camera
+arrives, Seller Centre → Pre-orders → "Stock arrived"; the customer is asked for the balance.
 
-What it would add:
+Still open (owner's choice):
 
-1. **Booking fee** per product: a percentage of the price (e.g. 30%) or a fixed amount. Checkout
-   charges only the booking fee for that line (card, transfer or wallet); the order shows "Booking
-   fee paid, balance MVR … due before delivery".
-2. **Balance before delivery**: when the item arrives ("Stock arrived"), the customer gets an SMS
-   and email with a payment link (the existing pay link) for the balance; the order cannot be sent
-   until it is paid. Optional balance due date with reminders; unpaid after it → the shop decides
-   (cancel with the booking-fee rule below, or extend).
-3. **Delivery time after ordering** instead of a fixed date: "arrives about 14 days after you
-   order" (the shop's usual shipping time), so the listing can stay open all year; each order gets
-   its own expected date. The fixed-date option stays for batch shipments.
-4. **Booking fee rules shown at checkout**: refundable in full if the shop cannot get the item or
-   is late past a set number of days; customer cancelling after the shop has ordered it keeps or
-   loses the fee per the shop's stated rule (owner to decide the default).
-5. Money: shop earnings, commission, GST invoice and loyalty points on the full price once the
-   balance is paid; refunds handle a booking fee alone or both parts.
-
-Recommended first version: booking-fee items are checked out on their own (not mixed with ordinary
-items in one order), balance by pay link when the item arrives, delivery time in days after order.
+1. **GST:** the GST invoice is made when the order is fully paid (balance included). Ask the
+   accountant whether a booking fee needs its own receipt when it is paid, and how to treat a fee that
+   is kept when the customer cancels.
+2. **Balance due days:** 7 days after the stock arrives, fixed in code (`BookingFeeService::BALANCE_DAYS`);
+   an admin can give more time per order. Could become a setting.
+3. **Mixed carts:** booking-fee items with ordinary items in one order (second version).
 
 ## Testing still open
 

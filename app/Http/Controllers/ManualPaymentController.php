@@ -51,21 +51,30 @@ class ManualPaymentController extends Controller
         return back();
     }
 
-    public function slip(Order $order): Response
+    /**
+     * The transfer slip; ?part=deposit for the booking fee's slip on a booking-fee pre-order.
+     */
+    public function slip(Request $request, Order $order): Response
     {
-        abort_unless(ManualPaymentService::slipExists($order), 404);
+        $path = $request->query('part') === 'deposit' ? $order->deposit_slip_path : $order->payment_slip_path;
+        abort_unless($path && Storage::disk(ManualPaymentService::SLIP_DISK)->exists($path), 404);
 
-        return Storage::disk(ManualPaymentService::SLIP_DISK)->response((string) $order->payment_slip_path);
+        return Storage::disk(ManualPaymentService::SLIP_DISK)->response((string) $path);
     }
 
     public function confirm(Request $request, Order $order): RedirectResponse
     {
-        $data = $request->validate(['payment_reference' => 'nullable|string|max:100']);
+        $data = $request->validate(['payment_reference' => 'nullable|string|max:100', 'part' => 'nullable|in:deposit,balance,full']);
+        $part = \App\Services\BookingFeeService::nextPart($order);
 
-        if (! $this->payments->confirm($order, $request->user(), $data['payment_reference'] ?? null)) {
-            return back()->with('error', 'This order is not waiting for a bank transfer or cash.');
+        if (! $this->payments->confirm($order, $request->user(), $data['payment_reference'] ?? null, $data['part'] ?? null)) {
+            return back()->with('error', 'This order is not waiting for that bank transfer or cash payment. Reload the page to see where it is now.');
         }
 
-        return back()->with('success', 'Payment recorded. The order is paid and the customer has been emailed.');
+        return back()->with('success', match ($part) {
+            'deposit' => 'Booking fee recorded. The customer and the shop have been told; the balance is asked for when the stock arrives.',
+            'balance' => 'Balance recorded. The order is paid, and the customer and the shop have been told.',
+            default => 'Payment recorded. The order is paid and the customer has been emailed.',
+        });
     }
 }

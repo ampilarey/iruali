@@ -33,7 +33,7 @@
             </p>
         @endif
         @if($for === 'customer' && $preorderService->canCancel($part->order))
-            <p class="mt-1 ps-6 text-xs"><a href="{{ $preorderService->cancelUrl($part->order) }}" class="font-semibold underline hover:no-underline" data-preorder-cancel>{{ __('Rather not wait? Cancel for a full refund') }}</a></p>
+            <p class="mt-1 ps-6 text-xs"><a href="{{ $preorderService->cancelUrl($part->order) }}" class="font-semibold underline hover:no-underline" data-preorder-cancel>{{ app(\App\Services\BookingFeeService::class)->keepable($part->order) ? __('Rather not wait? Cancel (the booking fee is not refunded)') : __('Rather not wait? Cancel for a full refund') }}</a></p>
         @endif
     </div>
 @endif

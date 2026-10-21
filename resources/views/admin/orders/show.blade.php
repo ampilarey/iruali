@@ -162,6 +162,7 @@
                             @endif
                         </div>
                     @endif
+                    @include('admin.orders._booking_fee', ['order' => $order])
                     @include('admin.orders._manual_payment', ['order' => $order])
                     @include('admin.orders._payment_link', ['order' => $order])
                             @if($order->refund_status === 'due')
@@ -192,7 +193,7 @@
                     @elseif($order->refund_status === 'refunded')
                         <p class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-800">Refunded {{ \App\Support\Money::format($order->refund_amount) }} on {{ $order->refunded_at?->format('d M Y') }} · ref {{ $order->refund_reference }} ({{ $order->refund_reason }})</p>
                     @endif
-                    @if($order->payment_status !== 'paid' && $order->payment_method !== 'bml' && \App\Support\StaffAccess::can('admin.orders.payment'))
+                    @if($order->payment_status !== 'paid' && $order->payment_method !== 'bml' && ($order->payment_status !== 'deposit_paid' || $order->balanceDue()) && \App\Support\StaffAccess::can('admin.orders.payment'))
                         <div class="mt-3 flex flex-wrap gap-2">
                             <form method="POST" action="{{ route('admin.orders.payment', $order) }}">
                                 @csrf

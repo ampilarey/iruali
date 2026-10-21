@@ -179,6 +179,7 @@
                     </div>
                 </div>
 
+                @include('orders._booking_fee', ['order' => $order])
                 @php $payments = app(\App\Services\PaymentService::class); @endphp
                 @if($payments->canPayOnline($order))
                     @php $lastAttempt = $order->paymentTransactions()->latest('id')->first(); @endphp
@@ -193,7 +194,11 @@
                         @endif
                         <form method="POST" action="{{ route('payments.bml.pay', $order) }}">
                             @csrf
-                            <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Pay :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]) }}</button>
+                            <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ match (\App\Services\BookingFeeService::nextPart($order)) {
+                                'deposit' => __('Pay the booking fee of :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]),
+                                'balance' => __('Pay the balance of :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]),
+                                default => __('Pay :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]),
+                            } }}</button>
                         </form>
                         <p class="text-xs text-gray-500 flex items-center gap-1.5"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('You pay on Bank of Maldives\' secure page. iruali never sees your card details.') }}</p>
                     </div>
@@ -209,7 +214,10 @@
                     <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>
                 </form>
 
-                @if($order->status === 'pending')
+                @if($order->status === 'pending' && $order->hasBookingFee() && app(\App\Services\PreorderService::class)->canCancel($order))
+                    {{-- A booking fee: the cancel page says what is refunded and what is not (BookingFeeService) --}}
+                    <a href="{{ app(\App\Services\PreorderService::class)->cancelUrl($order) }}" class="mt-3 w-full inline-flex items-center justify-center border border-danger text-danger px-4 py-2 rounded-lg hover:bg-danger-50 transition duration-300" data-booking-cancel>{{ __('Cancel Order') }}</a>
+                @elseif($order->status === 'pending')
                 <div class="mt-3">
                     <form method="POST" action="{{ route('orders.cancel', $order) }}" onsubmit="return confirm('{{ __('Cancel this order?') }}')">
                         @csrf

@@ -227,7 +227,7 @@ class FeedController extends Controller
      */
     protected static function preorderDate(Product $product, ?\App\Models\ProductVariant $variant = null): ?string
     {
-        $date = $product->preorder_ship_date;
+        $date = $product->preorderShipDate(); // the date, or today plus the days after the order
         if ($date === null || ! app(\App\Services\PreorderService::class)->isPreorderable($product, $variant)) {
             return null;
         }

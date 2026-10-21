@@ -62,12 +62,14 @@ class WalletService
     /**
      * Pay as much of the order as the wallet holds. Runs inside the checkout transaction, right after
      * the order row is made. Returns the amount taken. When it covers the whole total the order is
-     * marked as a wallet payment (OrderService confirms it after the commit).
+     * marked as a wallet payment (OrderService confirms it after the commit). A pre-order with a
+     * booking fee takes from the wallet only towards the fee; the balance is paid when its stock
+     * arrives, the way the customer chose at checkout (BookingFeeService).
      */
     public function payFromWallet(Order $order, User $user): float
     {
         $balance = $this->balance($user);
-        $total = round((float) $order->total_amount, 2);
+        $total = round((float) ($order->hasBookingFee() ? $order->deposit_amount : $order->total_amount), 2);
         $amount = round(min($balance, $total), 2);
         if ($amount <= 0) {
             return 0.0;
@@ -76,12 +78,13 @@ class WalletService
         $this->debit($user, $amount, 'purchase', ['order_id' => $order->id, 'reference' => $order->order_number, 'note' => __('Order :number', ['number' => $order->order_number])]);
 
         $full = $amount >= $total;
-        $order->forceFill(['wallet_amount' => $amount, 'payment_method' => $full ? 'wallet' : $order->payment_method])->save();
+        $order->forceFill(['wallet_amount' => $amount, 'payment_method' => $full && ! $order->hasBookingFee() ? 'wallet' : $order->payment_method])->save();
 
         if ($full) {
             PaymentTransaction::create([
                 'order_id' => $order->id,
                 'gateway' => 'wallet',
+                'purpose' => BookingFeeService::nextPart($order),
                 'local_id' => BmlConnect::localId($order->order_number.'W'),
                 'transaction_id' => 'wallet-'.$order->id,
                 'amount' => BmlConnect::toLaari($amount),
@@ -95,12 +98,13 @@ class WalletService
     }
 
     /**
-     * An order is being cancelled: whatever the wallet paid goes back to it (once). A refund-due
-     * flag for the card part is raised by OrderService; the wallet part never needs one.
+     * An order is being cancelled: whatever the wallet paid goes back to it (once), less any part of
+     * a booking fee that is kept (BookingFeeService::refundSplit()). A refund-due flag for the card
+     * part is raised by OrderService; the wallet part never needs one.
      */
     public function reverseOrderPayment(Order $order): float
     {
-        $amount = round((float) $order->wallet_amount, 2);
+        $amount = BookingFeeService::refundSplit($order, (float) $order->deposit_kept_amount)['wallet'];
         if ($amount <= 0 || $order->wallet_refunded_at || ! $order->user) {
             return 0.0;
         }

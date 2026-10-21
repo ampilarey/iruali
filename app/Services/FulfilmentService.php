@@ -80,8 +80,9 @@ class FulfilmentService
             return $part->status === 'pending' ? ['processing'] : [];
         }
 
-        // Pre-order items still waiting for their stock: the part can be prepared but not sent (PreorderService)
-        if ($part->isAwaitingStock()) {
+        // Pre-order items still waiting for their stock, or a booking-fee pre-order whose balance is not
+        // paid yet: the part can be prepared but not sent (PreorderService, BookingFeeService)
+        if ($part->isAwaitingStock() || ($part->order->hasBookingFee() && $part->order->payment_status !== 'paid')) {
             return array_values(array_diff(OrderService::TRANSITIONS[$part->status] ?? [], ['cancelled', 'shipped']));
         }
 
@@ -277,6 +278,7 @@ class FulfilmentService
             $part->status === 'delivered' => 'collected',
             $part->pickup_ready_at !== null => 'ready',
             $part->isAwaitingStock() => 'awaiting_stock', // pre-order items whose stock has not arrived yet
+            $part->order->hasBookingFee() && $part->order->payment_status !== 'paid' => 'balance', // a booking-fee pre-order: the balance first
             // Cash on delivery is paid at the counter, so it may be made ready before
             $part->order->payment_status !== 'paid' && ! in_array($part->order->payment_method, [ManualPaymentService::COD, CreditService::METHOD], true) => 'unpaid',
             default => 'ok',

@@ -43,6 +43,7 @@ class ProductReviewService
         'name', 'description', 'sku', 'category_id', 'price', 'compare_price', 'sale_price', 'flash_sale_ends_at',
         'has_variants', 'brand', 'weight', 'delivery_surcharge', 'video_provider', 'video_id',
         'preorder_enabled', 'preorder_ship_date', 'preorder_limit', 'preorder_note', 'preorder_closes_on', 'quote_min_quantity',
+        'preorder_lead_days', 'preorder_deposit_type', 'preorder_deposit_value',
     ];
 
     /** The variant fields a change to which needs review (stock and its alert level do not). */
@@ -345,6 +346,9 @@ class ProductReviewService
             'preorder_limit' => $product->preorder_limit !== null ? (int) $product->preorder_limit : null,
             'preorder_note' => filled($product->getAttribute('preorder_note')) ? (string) $product->getAttribute('preorder_note') : null,
             'preorder_closes_on' => $product->preorder_closes_on?->toDateString(),
+            'preorder_lead_days' => (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null,
+            'preorder_deposit_type' => in_array($product->preorder_deposit_type, BookingFeeService::TYPES, true) ? $product->preorder_deposit_type : null,
+            'preorder_deposit_value' => $nullableMoney($product->preorder_deposit_value),
             'quote_min_quantity' => $product->getAttribute('quote_min_quantity') !== null ? (int) $product->getAttribute('quote_min_quantity') : null,
         ];
     }
@@ -702,8 +706,13 @@ class ProductReviewService
         };
         $video = fn ($cols) => ($cols['video_provider'] ?? null) ? \App\Support\ProductVideo::make($cols['video_provider'], $cols['video_id'] ?? null)?->watchUrl() : null;
         $preorder = fn ($cols) => ! empty($cols['preorder_enabled'])
-            ? __('On: ships around :date, up to :limit units', ['date' => $cols['preorder_ship_date'] ?? '—', 'limit' => $cols['preorder_limit'] ?? '—'])
+            ? (! empty($cols['preorder_lead_days'])
+                ? __('On: ships about :days days after the order, up to :limit units', ['days' => $cols['preorder_lead_days'], 'limit' => $cols['preorder_limit'] ?? '—'])
+                : __('On: ships around :date, up to :limit units', ['date' => $cols['preorder_ship_date'] ?? '—', 'limit' => $cols['preorder_limit'] ?? '—']))
                 .(! empty($cols['preorder_closes_on']) ? ', '.__('closes :date', ['date' => $cols['preorder_closes_on']]) : '')
+                .(! empty($cols['preorder_deposit_type']) ? ', '.($cols['preorder_deposit_type'] === BookingFeeService::PERCENT
+                    ? __('booking fee :value%', ['value' => rtrim(rtrim((string) ($cols['preorder_deposit_value'] ?? ''), '0'), '.')])
+                    : __('booking fee :amount per item', ['amount' => $cols['preorder_deposit_value'] ?? '—'])) : '')
                 .(! empty($cols['preorder_note']) ? ' – '.$cols['preorder_note'] : '')
             : __('Off');
 

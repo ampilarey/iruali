@@ -51,6 +51,13 @@ class CheckoutController extends Controller
         if ($problem = \App\Support\OrderRules::minimumProblem($cart, $goodsTotal) ?? \App\Support\OrderRules::pausedEntirely()) {
             return redirect()->route('cart')->with('error', $problem);
         }
+        // Pre-order lines (remembered for placing the order), and a booking fee for those that take one:
+        // booking-fee items are ordered on their own, so a mixed cart goes back to the cart, which says why
+        $preorderLines = app(\App\Services\PreorderService::class)->checkoutLines($cart);
+        $bookingFee = app(\App\Services\BookingFeeService::class)->checkout($cart, $preorderLines, $goodsTotal);
+        if ($bookingFee !== null && $bookingFee['problem'] !== null) {
+            return redirect()->route('cart')->with('error', $bookingFee['problem']);
+        }
         $deliveryZones = DeliveryService::zones();
         $deliveryQuotes = app(DeliveryService::class)->quotes($goodsTotal);
         $freeDeliveryOver = (float) \App\Models\Setting::get('free_delivery_over');
@@ -61,7 +68,7 @@ class CheckoutController extends Controller
         $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)->id ?? $addresses->first()->id ?? '');
         $islandsByAtoll = app(DeliveryService::class)->islandsByAtoll();
 
-        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll'));
+        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll', 'preorderLines', 'bookingFee'));
     }
 
     /**

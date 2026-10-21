@@ -33,7 +33,9 @@
                         <p class="mt-1 text-sm text-gray-700">
                             {{ trans_choice(':count unit waiting|:count units waiting', $waitingUnits, ['count' => $waitingUnits]) }}
                             · {{ trans_choice(':count order|:count orders', $items->pluck('order_id')->unique()->count(), ['count' => $items->pluck('order_id')->unique()->count()]) }}
-                            @if($product->preorder_ship_date) · {{ __('expected :date', ['date' => $product->preorder_ship_date->translatedFormat('j M Y')]) }}@endif
+                            @if((int) $product->preorder_lead_days > 0) · {{ trans_choice('ships about :count day after each order|ships about :count days after each order', (int) $product->preorder_lead_days, ['count' => (int) $product->preorder_lead_days]) }}
+                            @elseif($product->preorder_ship_date) · {{ __('expected :date', ['date' => $product->preorder_ship_date->translatedFormat('j M Y')]) }}@endif
+                            @if($product->hasBookingFee()) · {{ __('booking fee :fee', ['fee' => app(\App\Services\BookingFeeService::class)->describe($product)]) }}@endif
                         </p>
                     </div>
                     <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $row['accepting'] ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700' }}">
@@ -66,14 +68,14 @@
                                     <td class="px-4 py-2 text-gray-700">{{ $item->order->customerName() ?? __('Customer') }}</td>
                                     @if($product->has_variants)<td class="px-4 py-2 text-gray-700">{{ $item->variant_name ?? '—' }}</td>@endif
                                     <td class="px-4 py-2 text-end text-gray-900">{{ $item->preorderWaitingQuantity() }}@if($item->preorder_allocated_quantity > 0)<span class="block text-xs text-gray-500">{{ __(':done of :total in', ['done' => $item->preorder_allocated_quantity, 'total' => $item->quantity]) }}</span>@endif</td>
-                                    <td class="px-4 py-2"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ \App\Services\PaymentService::statusBadge($item->order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($item->order->payment_status) }}</span></td>
+                                    <td class="px-4 py-2"><span class="rounded-full px-2 py-0.5 text-xs font-medium {{ \App\Services\PaymentService::statusBadge($item->order->payment_status) }}">{{ \App\Services\PaymentService::statusLabel($item->order->payment_status) }}</span>@if($item->order->hasBookingFee())<span class="block text-xs text-gray-500">{{ __('Fee :fee, balance :balance', ['fee' => \App\Support\Money::format($item->order->deposit_amount), 'balance' => \App\Support\Money::format($item->order->balanceAmount())]) }}</span>@endif</td>
                                     <td class="px-4 py-2 text-gray-600">{{ $item->preorder_ship_date?->translatedFormat('j M Y') }}@if($item->preorder_late_at)<span class="ms-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">{{ __('Late') }}</span>@endif</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                <p class="px-5 pt-2 text-xs text-gray-500">{{ __('Units go to paid orders only; an unpaid order waits until its payment comes in and is cancelled after 24 hours without one.') }}</p>
+                <p class="px-5 pt-2 text-xs text-gray-500">{{ __('Units go to paid orders only; an unpaid order waits until its payment comes in and is cancelled after 24 hours without one.') }}@if($product->hasBookingFee()) {{ __('With a booking fee, "Booking fee paid" counts: order the item for those customers. When it arrives and is recorded here, they are asked for the balance; send each order once it shows as paid.') }}@endif</p>
 
                 <div class="grid grid-cols-1 gap-4 border-t border-gray-100 px-5 py-4 md:grid-cols-2">
                     <form method="POST" action="{{ route('seller.preorders.arrived', $product->id) }}" class="space-y-2 rounded-lg border border-gray-200 p-3" data-stock-arrived>
@@ -103,6 +105,9 @@
                         <h3 class="text-sm font-semibold text-gray-900">{{ __('Move the expected date') }}</h3>
                         <label for="date-{{ $product->id }}" class="block text-xs text-gray-600">{{ __('Waiting customers are emailed the new date, with a link to cancel if they would rather not wait.') }}</label>
                         <input id="date-{{ $product->id }}" name="preorder_ship_date" type="date" required min="{{ today()->addDay()->toDateString() }}" dir="ltr" value="{{ $product->preorder_ship_date?->toDateString() }}" class="{{ $field }} w-full">
+                        @if((int) $product->preorder_lead_days > 0)
+                            <p class="text-xs text-gray-500">{{ __('Moves only the orders waiting now; new orders still ship about :count days after they are placed.', ['count' => (int) $product->preorder_lead_days]) }}</p>
+                        @endif
                         <button type="submit" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Save the new date') }}</button>
                     </form>
                 </div>
@@ -122,7 +127,9 @@
                         <li class="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
                             <a href="{{ route('seller.products.edit', $row['product']) }}" class="font-medium text-gray-900 hover:underline">{{ $row['product']->name }}</a>
                             <span class="text-gray-600">
-                                @if($row['product']->preorder_ship_date){{ __('expected :date', ['date' => $row['product']->preorder_ship_date->translatedFormat('j M Y')]) }} · @endif
+                                @if((int) $row['product']->preorder_lead_days > 0){{ trans_choice('ships about :count day after each order|ships about :count days after each order', (int) $row['product']->preorder_lead_days, ['count' => (int) $row['product']->preorder_lead_days]) }} ·
+                                @elseif($row['product']->preorder_ship_date){{ __('expected :date', ['date' => $row['product']->preorder_ship_date->translatedFormat('j M Y')]) }} · @endif
+                                @if($row['product']->hasBookingFee()){{ __('booking fee :fee', ['fee' => app(\App\Services\BookingFeeService::class)->describe($row['product'])]) }} · @endif
                                 {{ $row['accepting'] ? __('Taking pre-orders: :count left', ['count' => $row['left']]) : __('Not taking new pre-orders') }}
                             </span>
                         </li>

@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 {{-- "Rather not wait?": cancel an order with pre-order items before anything in it is sent (the normal
-     cancellation of the whole order, with its refund). From My Orders or a guest's signed link. --}}
+     cancellation of the whole order, with its refund; a booking fee paid is kept unless it became refundable:
+     $refund from BookingFeeService::customerCancelPreview()). From My Orders or a guest's signed link. --}}
 
 @section('title', __('Cancel order :number', ['number' => $order->order_number]).' - iruali')
 
@@ -26,15 +27,22 @@
             @endforeach
         </ul>
 
+        @php $refund ??= \App\Services\BookingFeeService::refundSplit($order, 0); @endphp
         <div class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 space-y-1.5" data-refund-summary>
-            @if($order->payment_status === 'paid' && $order->cardAmount() > 0)
-                <p class="font-medium text-gray-900">{{ __('We refund :amount to the card you paid with.', ['amount' => \App\Support\Money::format($order->cardAmount())]) }}</p>
+            @if($refund['kept'] > 0)
+                {{-- A booking fee paid is kept when the customer cancels (BookingFeeService) --}}
+                <p class="font-medium text-danger" data-booking-fee-kept>{{ __('The booking fee of :fee is not refunded, as agreed at checkout.', ['fee' => \App\Support\Money::format($refund['kept'])]) }}</p>
+            @elseif($order->hasBookingFee() && $order->bookingFeePaid())
+                <p class="font-medium text-gray-900" data-booking-fee-refunded>{{ __('The shop moved the date later or is late, so your booking fee is refunded too.') }}</p>
+            @endif
+            @if($refund['card'] > 0)
+                <p class="font-medium text-gray-900">{{ __('We refund :amount to the card you paid with.', ['amount' => \App\Support\Money::format($refund['card'])]) }}</p>
                 <p>{{ __('Refunds usually reach you within 5–7 business days, depending on your bank.') }}</p>
-            @elseif($order->payment_status !== 'paid')
+            @elseif($order->cardPaid() <= 0 && (float) $order->wallet_amount <= 0)
                 <p>{{ __('This order has not been paid for, so there is nothing to refund.') }}</p>
             @endif
-            @if((float) $order->wallet_amount > 0)
-                <p>{{ __(':amount goes back to your wallet straight away.', ['amount' => \App\Support\Money::format($order->wallet_amount)]) }}</p>
+            @if($refund['wallet'] > 0)
+                <p>{{ __(':amount goes back to your wallet straight away.', ['amount' => \App\Support\Money::format($refund['wallet'])]) }}</p>
             @endif
             @if($order->points_redeemed > 0)
                 <p>{{ __('The loyalty points you used are returned.') }}</p>

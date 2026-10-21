@@ -31,6 +31,7 @@
             </div>
         @else
             @include('cart._holiday_notice', ['cart' => $cart])
+            @include('cart._booking_fee_notice', ['cart' => $cart])
             @if($undeliverable->isNotEmpty())
                 <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-island-cart-notice>
                     {{ trans_choice(':count item in your cart can\'t be delivered to :island. Collect it from the shop if it offers pickup, remove it, or change the island you\'re delivering to.|:count items in your cart can\'t be delivered to :island. Collect them from the shop if it offers pickup, remove them, or change the island you\'re delivering to.', $undeliverable->count(), ['count' => $undeliverable->count(), 'island' => $deliveryIsland->localized_name]) }}

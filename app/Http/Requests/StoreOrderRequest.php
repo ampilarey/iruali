@@ -39,9 +39,17 @@ class StoreOrderRequest extends FormRequest
             'billing_zip' => 'nullable|string|max:20',
             'billing_country' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
-            'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
+            'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods())),
+                // A booking fee (the checkout page showed one) is paid by card or bank transfer (BookingFeeService)
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if ($this->showsBookingFee() && in_array($value, [\App\Services\ManualPaymentService::COD, \App\Services\CreditService::METHOD], true)) {
+                        $fail(__('A booking fee is paid by card or bank transfer. Please choose one of those.'));
+                    }
+                }],
             'delivery_zone' => 'nullable|in:greater_male,islands',
             'agree_terms' => 'required|accepted',
+            // Only when the checkout page showed a booking fee ("accepted" runs even on a missing field)
+            'agree_booking_fee' => [\Illuminate\Validation\Rule::when(fn () => $this->showsBookingFee(), ['required', 'accepted'], ['nullable'])],
             // Saved addresses and the island picker (their values are copied into shipping_* before validation)
             'address_id' => 'nullable|integer',
             'island_id' => 'nullable|integer|exists:islands,id',
@@ -58,6 +66,12 @@ class StoreOrderRequest extends FormRequest
             'gift_message' => 'nullable|string|max:200',
             'gift_hide_prices' => 'nullable|boolean',
         ];
+    }
+
+    /** The checkout page showed a booking fee for this order (BookingFeeService::checkout()). */
+    public function showsBookingFee(): bool
+    {
+        return $this->hasSession() && $this->session()->get(\App\Services\BookingFeeService::SESSION_SHOWN) !== null;
     }
 
     /**
@@ -111,6 +125,8 @@ class StoreOrderRequest extends FormRequest
             'payment_method.in' => __('Please select a valid payment method.'),
             'agree_terms.required' => __('You must agree to the terms and conditions.'),
             'agree_terms.accepted' => __('You must agree to the terms and conditions.'),
+            'agree_booking_fee.required' => __('Please tick that you agree to the booking fee terms.'),
+            'agree_booking_fee.accepted' => __('Please tick that you agree to the booking fee terms.'),
             'gift_receiver_name.required' => __('Please enter the name of the person receiving the gift.'),
             'gift_receiver_phone.required' => __('Please enter a phone number for the person receiving the gift.'),
             'gift_receiver_phone.regex' => __('Please enter a valid phone number for the gift receiver (digits only, e.g. 7771234).'),

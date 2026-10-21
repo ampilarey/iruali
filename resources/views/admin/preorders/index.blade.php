@@ -9,6 +9,23 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <p class="text-sm text-gray-600">Pre-orders still waiting for their stock. A pre-order more than {{ $lateDays }} days past its expected date is flagged late each morning and shows in the inbox until its stock arrives, the shop moves the date (the customer is emailed) or the order is cancelled (the refund is flagged as for any paid order).</p>
 
+        @if($balances->isNotEmpty())
+            {{-- Booking-fee pre-orders: the stock is in and the balance is asked for (BookingFeeService) --}}
+            <section class="overflow-hidden rounded-lg bg-white shadow" data-balances-due>
+                <h2 class="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-900">Balances due ({{ $balances->count() }})
+                    <span class="block text-xs font-normal text-gray-500">Booking-fee pre-orders whose stock is in. The customer was sent a payment link; past the due date, cancel the order (tick "Keep the booking fee") or give more time on the order page.</span></h2>
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach($balances as $order)
+                        @php $overdue = $order->balance_due_on && $order->balance_due_on->lt(today()); @endphp
+                        <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-2 {{ $overdue ? 'bg-red-50' : '' }}" data-balance-row="{{ $order->id }}">
+                            <span><a href="{{ route('admin.orders.show', $order) }}" class="font-medium text-primary-700 hover:underline">#{{ $order->order_number }}</a> · {{ $order->customerName() }}</span>
+                            <span class="text-gray-700"><span dir="ltr">{{ Money::format($order->balanceAmount()) }}</span> due {{ $order->balance_due_on?->format('d M Y') }}@if($overdue) <span class="ms-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">Overdue</span>@endif</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         <nav class="flex flex-wrap gap-2 text-sm">
             <a href="{{ route('admin.preorders') }}" class="rounded-full px-3 py-1.5 font-medium {{ $lateOnly ? 'bg-white text-gray-700 shadow hover:bg-gray-50' : 'bg-primary-600 text-white' }}">All waiting</a>
             <a href="{{ route('admin.preorders', ['late' => 1]) }}" class="rounded-full px-3 py-1.5 font-medium {{ $lateOnly ? 'bg-primary-600 text-white' : 'bg-white text-gray-700 shadow hover:bg-gray-50' }}">Late only</a>

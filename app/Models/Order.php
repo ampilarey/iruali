@@ -68,6 +68,15 @@ class Order extends Model
         'total_amount' => 'decimal:2',
         'wallet_amount' => 'decimal:2',
         'wallet_refunded_at' => 'datetime',
+        // Pre-orders with a booking fee (App\Services\BookingFeeService)
+        'deposit_amount' => 'decimal:2',
+        'deposit_paid_at' => 'datetime',
+        'deposit_refundable_at' => 'datetime',
+        'deposit_kept_amount' => 'decimal:2',
+        'balance_requested_at' => 'datetime',
+        'balance_due_on' => 'date',
+        'balance_reminded_at' => 'datetime',
+        'balance_overdue_at' => 'datetime',
         'shipping_address' => 'array',
         'billing_address' => 'array',
         'delivery_surcharge' => 'decimal:2',
@@ -284,11 +293,71 @@ class Order extends Model
     // ---- Wallet and gift cards ------------------------------------------------------------
 
     /**
-     * What still has to be paid by card after the wallet's share.
+     * What the card (or bank transfer) pays: the amount due while unpaid, the card's share once paid.
+     * A booking-fee order is paid in two parts: first the booking fee less the wallet's share, then
+     * the balance (App\Services\BookingFeeService).
      */
     public function cardAmount(): float
     {
+        if ($this->hasBookingFee() && $this->payment_status !== 'paid') {
+            return $this->payment_status === 'deposit_paid'
+                ? $this->balanceAmount()
+                : round(max(0, (float) $this->deposit_amount - (float) $this->wallet_amount), 2);
+        }
+
         return round(max(0, (float) $this->total_amount - (float) $this->wallet_amount), 2);
+    }
+
+    /**
+     * What has been paid by card or bank transfer so far (the wallet's share not counted).
+     */
+    public function cardPaid(): float
+    {
+        return match (true) {
+            $this->payment_status === 'paid' => round(max(0, (float) $this->total_amount - (float) $this->wallet_amount), 2),
+            $this->hasBookingFee() && $this->payment_status === 'deposit_paid' => round(max(0, (float) $this->deposit_amount - (float) $this->wallet_amount), 2),
+            default => 0.0,
+        };
+    }
+
+    /**
+     * Still waiting for money from the customer: an unpaid order that is pending, or a booking-fee
+     * order whose balance has been asked for (its stock arrived) and is not paid yet.
+     */
+    public function awaitingPayment(): bool
+    {
+        if ($this->status === 'cancelled' || $this->payment_status === 'paid') {
+            return false;
+        }
+
+        return $this->payment_status === 'deposit_paid' ? $this->balanceDue() : $this->status === 'pending';
+    }
+
+    // ---- Pre-orders with a booking fee (App\Services\BookingFeeService) -------------------------
+
+    /** Paid in two parts: the booking fee at checkout, the balance when the stock arrives. */
+    public function hasBookingFee(): bool
+    {
+        return $this->deposit_amount !== null && (float) $this->deposit_amount > 0;
+    }
+
+    /** The booking fee has been paid (and maybe the balance too). */
+    public function bookingFeePaid(): bool
+    {
+        return $this->hasBookingFee() && in_array($this->payment_status, ['deposit_paid', 'paid'], true);
+    }
+
+    /** The order total less the booking fee: paid before delivery. */
+    public function balanceAmount(): float
+    {
+        return $this->hasBookingFee() ? round(max(0, (float) $this->total_amount - (float) $this->deposit_amount), 2) : 0.0;
+    }
+
+    /** The stock arrived and the customer has been asked for the balance, not paid yet. */
+    public function balanceDue(): bool
+    {
+        return $this->hasBookingFee() && $this->payment_status === 'deposit_paid'
+            && $this->balance_requested_at !== null && in_array($this->status, ['pending', 'processing'], true);
     }
 
     public function giftCard(): \Illuminate\Database\Eloquent\Relations\HasOne

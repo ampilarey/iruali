@@ -24,7 +24,7 @@ class CancelUnpaidCardOrders extends Command
         $cancelled = 0;
 
         \App\Support\PayLink::withoutLiveLink(Order::where('payment_method', 'bml')
-            ->where('payment_status', '!=', 'paid')
+            ->whereNotIn('payment_status', ['paid', 'deposit_paid']) // a booking fee paid: its balance waits for the stock
             ->where('status', 'pending')
             ->where('created_at', '<', $cutoff))
             ->with('paymentTransactions')
@@ -39,7 +39,7 @@ class CancelUnpaidCardOrders extends Command
                     }
                 }
 
-                if ($order->fresh()->payment_status !== 'paid' && $orders->updateOrderStatus($order->fresh(), 'cancelled')) {
+                if (! in_array($order->fresh()->payment_status, ['paid', 'deposit_paid'], true) && $orders->updateOrderStatus($order->fresh(), 'cancelled')) {
                     $cancelled++;
                 }
             });

@@ -254,8 +254,9 @@ class BookingFeeService
     }
 
     /**
-     * Tell the order's shops about its payment: the booking fee (order the item now) or the balance
-     * (send it now).
+     * Tell the order's shops about its payment: the booking fee (order the item now), the balance
+     * (send it now), or a pre-order paid in full once the shop confirmed it (confirmed: order the item
+     * now; PreorderConfirmService).
      */
     public function tellShops(Order $order, string $part): void
     {

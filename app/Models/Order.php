@@ -78,6 +78,13 @@ class Order extends Model
         'balance_days' => 'integer',
         'balance_reminded_at' => 'datetime',
         'balance_overdue_at' => 'datetime',
+        // Pre-orders paid once the shop confirms (App\Services\PreorderConfirmService)
+        'confirm_first' => 'boolean',
+        'availability_confirmed_at' => 'datetime',
+        'availability_declined_at' => 'datetime',
+        'pay_days' => 'integer',
+        'pay_due_on' => 'date',
+        'pay_reminded_at' => 'datetime',
         'shipping_address' => 'array',
         'billing_address' => 'array',
         'delivery_surcharge' => 'decimal:2',
@@ -323,11 +330,12 @@ class Order extends Model
 
     /**
      * Still waiting for money from the customer: an unpaid order that is pending, or a booking-fee
-     * order whose balance has been asked for (its stock arrived) and is not paid yet.
+     * order whose balance has been asked for (its stock arrived) and is not paid yet. A pre-order
+     * paid once the shop confirms waits for money only once the shop has confirmed it.
      */
     public function awaitingPayment(): bool
     {
-        if ($this->status === 'cancelled' || $this->payment_status === 'paid') {
+        if ($this->status === 'cancelled' || $this->payment_status === 'paid' || $this->awaitingConfirmation()) {
             return false;
         }
 
@@ -363,6 +371,16 @@ class Order extends Model
         $days = (int) $this->items()->where('is_preorder', true)->min('preorder_late_days');
 
         return $days > 0 ? $days : \App\Services\PreorderService::LATE_AFTER_DAYS;
+    }
+
+    /**
+     * A pre-order paid once the shop confirms it can get the item, not confirmed (or declined) yet:
+     * nothing can be paid meanwhile (App\Services\PreorderConfirmService).
+     */
+    public function awaitingConfirmation(): bool
+    {
+        return (bool) $this->confirm_first && $this->availability_confirmed_at === null
+            && $this->availability_declined_at === null && $this->status !== 'cancelled';
     }
 
     /** The stock arrived and the customer has been asked for the balance, not paid yet. */

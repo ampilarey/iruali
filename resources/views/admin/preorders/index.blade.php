@@ -9,6 +9,40 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <p class="text-sm text-gray-600">Pre-orders still waiting for their stock. A pre-order past its expected date by more than its product's late days ({{ $lateDays }} unless the shop set others) is flagged late each morning and shows in the inbox until its stock arrives, the shop moves the date (the customer is emailed) or the order is cancelled (the refund is flagged as for any paid order).</p>
 
+        @if($toConfirm->isNotEmpty())
+            {{-- Pre-orders paid once the shop confirms it can get the item (PreorderConfirmService) --}}
+            <section class="overflow-hidden rounded-lg border border-primary-200 bg-white shadow" data-to-confirm>
+                <h2 class="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-900">To confirm ({{ $toConfirm->count() }})
+                    <span class="block text-xs font-normal text-gray-500">The customer pays once the shop confirms it can get the item. The shop confirms in its Seller Centre; you can confirm or cancel for it here.</span></h2>
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach($toConfirm as $order)
+                        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3" data-to-confirm-order="{{ $order->id }}">
+                            <span><a href="{{ route('admin.orders.show', $order) }}" class="font-medium text-primary-700 hover:underline">#{{ $order->order_number }}</a>
+                                · {{ $order->sellerOrders->first()?->seller?->shopName() ?? 'iruali' }} · {{ $order->customerName() }} · <span dir="ltr">{{ Money::format($order->total_amount) }}</span>
+                                <span class="block text-xs text-gray-500">Ordered {{ $order->created_at->format('d M Y, H:i') }}</span></span>
+                            @if(\App\Support\StaffAccess::can('admin.orders.preorder-confirm'))
+                                @include('preorders._confirm_actions', ['confirmUrl' => route('admin.orders.preorder-confirm', $order), 'declineUrl' => route('admin.orders.preorder-decline', $order)])
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+        @if($awaitingPay->isNotEmpty())
+            <section class="overflow-hidden rounded-lg bg-white shadow" data-awaiting-pay>
+                <h2 class="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-900">Confirmed, waiting for payment ({{ $awaitingPay->count() }})
+                    <span class="block text-xs font-normal text-gray-500">The customer was sent a link to pay in full. Unpaid after the due date, the order is cancelled.</span></h2>
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach($awaitingPay as $order)
+                        <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-2">
+                            <span><a href="{{ route('admin.orders.show', $order) }}" class="font-medium text-primary-700 hover:underline">#{{ $order->order_number }}</a> · {{ $order->customerName() }}</span>
+                            <span class="text-gray-700"><span dir="ltr">{{ Money::format($order->cardAmount()) }}</span> due {{ $order->pay_due_on?->format('d M Y') }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         @if($balances->isNotEmpty())
             {{-- Booking-fee pre-orders: the stock is in and the balance is asked for (BookingFeeService) --}}
             <section class="overflow-hidden rounded-lg bg-white shadow" data-balances-due>

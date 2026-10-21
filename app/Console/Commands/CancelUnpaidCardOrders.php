@@ -10,7 +10,8 @@ use Throwable;
 
 /**
  * Card orders hold stock from the moment they are placed. If the customer never pays,
- * cancel the order (which puts the stock back) — after asking BML one last time.
+ * cancel the order (which puts the stock back) — after asking BML one last time. A pre-order
+ * paid once the shop confirms waits until its payment is due (PreorderConfirmService).
  */
 class CancelUnpaidCardOrders extends Command
 {
@@ -23,10 +24,10 @@ class CancelUnpaidCardOrders extends Command
         $cutoff = now()->subHours(max(1, (int) $this->option('hours')));
         $cancelled = 0;
 
-        \App\Support\PayLink::withoutLiveLink(Order::where('payment_method', 'bml')
+        \App\Support\PayLink::withoutLiveLink(\App\Services\PreorderConfirmService::exceptUntilDue(Order::where('payment_method', 'bml')
             ->whereNotIn('payment_status', ['paid', 'deposit_paid']) // a booking fee paid: its balance waits for the stock
             ->where('status', 'pending')
-            ->where('created_at', '<', $cutoff))
+            ->where('created_at', '<', $cutoff)))
             ->with('paymentTransactions')
             ->each(function (Order $order) use ($payments, $orders, &$cancelled) {
                 foreach ($order->paymentTransactions->whereNotNull('transaction_id') as $transaction) {

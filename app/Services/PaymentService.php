@@ -259,6 +259,8 @@ class PaymentService
         app(OrderNotifier::class)->paymentUpdated($order);
         if ($order->hasBookingFee()) {
             app(BookingFeeService::class)->tellShops($order, 'balance'); // the shop holds the item: send it now
+        } elseif ($order->confirm_first) {
+            app(BookingFeeService::class)->tellShops($order, 'confirmed'); // paid once the shop confirmed: order the item now
         }
     }
 

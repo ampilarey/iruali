@@ -501,9 +501,10 @@ class AdminController extends Controller
         $request->validate(['action' => 'required|in:confirm']);
 
         // Card orders are confirmed by BML; this is for older cash on delivery / bank transfer orders.
-        // A booking-fee pre-order whose fee is paid can be marked paid only once its balance is asked for.
-        if ($order->payment_method === 'bml' || $order->status === 'cancelled' || $order->payment_status === 'paid' || ($order->payment_status === 'deposit_paid' && ! $order->balanceDue())) {
-            return back()->with('error', 'Card payments are confirmed by BML, and cancelled or already-paid orders (or a pre-order balance not asked for yet) can\'t be marked paid.');
+        // A booking-fee pre-order whose fee is paid can be marked paid only once its balance is asked for,
+        // and a pre-order paid once the shop confirms only once it is confirmed.
+        if ($order->payment_method === 'bml' || $order->status === 'cancelled' || $order->payment_status === 'paid' || ($order->payment_status === 'deposit_paid' && ! $order->balanceDue()) || $order->awaitingConfirmation()) {
+            return back()->with('error', 'Card payments are confirmed by BML, and cancelled or already-paid orders (or a pre-order balance not asked for yet, or a pre-order the shop has not confirmed) can\'t be marked paid.');
         }
 
         $payments->confirm($order);

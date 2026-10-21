@@ -15,6 +15,44 @@
             <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ $errors->first() }}</div>
         @endif
 
+        {{-- Pre-orders paid once the shop confirms it can get the item (PreorderConfirmService) --}}
+        @if($toConfirm->isNotEmpty())
+            <section class="overflow-hidden rounded-lg border border-primary-200 bg-white shadow" data-to-confirm>
+                <div class="border-b border-gray-100 px-5 py-3">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('To confirm (:count)', ['count' => $toConfirm->count()]) }}</h2>
+                    <p class="text-xs text-gray-600">{{ __('These customers pay once you confirm you can get the item. Check with your supplier, then confirm (they get a link to pay) or cancel if you can\'t get it.') }}</p>
+                </div>
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach($toConfirm as $order)
+                        <li class="flex flex-wrap items-center justify-between gap-3 px-5 py-3" data-to-confirm-order="{{ $order->id }}">
+                            <div class="min-w-0">
+                                <a href="{{ route('seller.orders.show', $order) }}" class="font-medium text-primary-700 hover:underline" dir="ltr">#{{ $order->order_number }}</a>
+                                <span class="text-gray-600">· {{ $order->created_at->translatedFormat('j M Y') }} · {{ $order->customerName() ?? __('Customer') }} · <span dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</span></span>
+                                <span class="block text-xs text-gray-600">{{ $order->items->map(fn ($item) => $item->displayName().' × '.$item->quantity)->join(', ') }}</span>
+                            </div>
+                            @if(\App\Support\CurrentShop::can('seller.preorders.confirm'))
+                                @include('preorders._confirm_actions', ['confirmUrl' => route('seller.preorders.confirm', $order), 'declineUrl' => route('seller.preorders.decline', $order)])
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+        @if($awaitingPay->isNotEmpty())
+            <section class="overflow-hidden rounded-lg bg-white shadow" data-awaiting-pay>
+                <h2 class="border-b border-gray-100 px-5 py-3 text-sm font-semibold uppercase tracking-wider text-gray-500">{{ __('Confirmed, waiting for payment') }}</h2>
+                <ul class="divide-y divide-gray-100 text-sm">
+                    @foreach($awaitingPay as $order)
+                        <li class="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
+                            <span><a href="{{ route('seller.orders.show', $order) }}" class="font-medium text-primary-700 hover:underline" dir="ltr">#{{ $order->order_number }}</a> · {{ $order->customerName() ?? __('Customer') }}</span>
+                            <span class="text-gray-600">{{ __(':amount due :date', ['amount' => \App\Support\Money::format($order->cardAmount()), 'date' => $order->pay_due_on?->translatedFormat('j M')]) }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+                <p class="px-5 py-2 text-xs text-gray-500">{{ __('Order the item once we tell you it is paid. Unpaid after its date, the order is cancelled.') }}</p>
+            </section>
+        @endif
+
         @forelse($withWaiting as $row)
             @php
                 $product = $row['product'];

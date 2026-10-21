@@ -129,6 +129,7 @@
                 </div>
 
                 @include('orders._booking_fee', ['order' => $order])
+                @include('orders._preorder_confirm', ['order' => $order])
                 @if($payments->canPayOnline($order))
                     @php $lastAttempt = $order->paymentTransactions->sortByDesc('id')->first(); @endphp
                     <div class="mt-6 rounded-xl border border-primary-200 bg-primary-50 p-4 space-y-3">

@@ -49,7 +49,10 @@ class OrderStatusChanged extends Notification implements ShouldQueue
             'shipped' => [__('Order :number is on its way', ['number' => $number]), __('Your order has left the shop and is on its way to your island.')],
             'out_for_delivery' => [__('Order :number is out for delivery', ['number' => $number]), __('Your order is out for delivery today. Please keep your phone close.')],
             'delivered' => [__('Order :number has been delivered', ['number' => $number]), __('Your order has been delivered. We hope you enjoy it.')],
-            'cancelled' => [__('Order :number has been cancelled', ['number' => $number]), __('Your order has been cancelled. Any loyalty points you used have been returned.')],
+            'cancelled' => $this->order->availability_declined_at
+                // A pre-order paid once the shop confirms, and the shop can't get it (PreorderConfirmService)
+                ? [__('Order :number: the shop can\'t get your pre-order', ['number' => $number]), __('Sorry, the shop can\'t get your pre-order, so the order has been cancelled. You have not been charged, and any loyalty points you used have been returned.')]
+                : [__('Order :number has been cancelled', ['number' => $number]), __('Your order has been cancelled. Any loyalty points you used have been returned.')],
             default => [__('Update on order :number', ['number' => $number]), __('Your order status is now :status.', ['status' => $this->order->status])],
         };
 
@@ -80,7 +83,7 @@ class OrderStatusChanged extends Notification implements ShouldQueue
             'shipped' => 'order_shipped',
             'out_for_delivery' => 'order_out_for_delivery',
             'delivered' => 'order_delivered',
-            'cancelled' => 'order_cancelled',
+            'cancelled' => $this->order->availability_declined_at ? 'preorder_unavailable' : 'order_cancelled',
             default => 'order_status',
         };
 
@@ -111,7 +114,9 @@ class OrderStatusChanged extends Notification implements ShouldQueue
                 'processing' => __('Order :number is being prepared', ['number' => $number]),
                 'shipped' => __('Order :number is on its way', ['number' => $number]),
                 'delivered' => __('Order :number has been delivered', ['number' => $number]),
-                'cancelled' => __('Order :number has been cancelled', ['number' => $number]),
+                'cancelled' => $this->order->availability_declined_at
+                    ? __('Order :number: the shop can\'t get your pre-order', ['number' => $number])
+                    : __('Order :number has been cancelled', ['number' => $number]),
                 default => __('Update on order :number', ['number' => $number]),
             },
             'body' => __('Tap to see your order.'),

@@ -40,10 +40,16 @@ class StoreOrderRequest extends FormRequest
             'billing_country' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
             'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods())),
-                // A booking fee (the checkout page showed one) is paid by card or bank transfer (BookingFeeService)
+                // A booking fee (the checkout page showed one) is paid by card or bank transfer (BookingFeeService), and
+                // so is a pre-order paid once the shop confirms (PreorderConfirmService)
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    if ($this->showsBookingFee() && in_array($value, [\App\Services\ManualPaymentService::COD, \App\Services\CreditService::METHOD], true)) {
+                    if (! in_array($value, [\App\Services\ManualPaymentService::COD, \App\Services\CreditService::METHOD], true)) {
+                        return;
+                    }
+                    if ($this->showsBookingFee()) {
                         $fail(__('A booking fee is paid by card or bank transfer. Please choose one of those.'));
+                    } elseif ($this->hasSession() && $this->session()->get(\App\Services\PreorderConfirmService::SESSION_SHOWN) !== null) {
+                        $fail(__('A pre-order that the shop confirms first is paid by card or bank transfer. Please choose one of those.'));
                     }
                 }],
             'delivery_zone' => 'nullable|in:greater_male,islands',

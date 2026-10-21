@@ -42,7 +42,7 @@ class PreorderConcurrencyTest extends TestCase
             $this->markTestSkipped('Needs MySQL/MariaDB row locks and proc_open.');
         }
 
-        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Race Shop']);
+        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Race Shop', 'preorders_allowed' => true]);
         $category = Category::factory()->create(['status' => 'active']);
         $product = Product::factory()->create(['seller_id' => $shop->id, 'category_id' => $category->id, 'brand' => null, 'price' => 100, 'stock_quantity' => 0, 'is_active' => true]);
         $product->forceFill(['preorder_enabled' => true, 'preorder_ship_date' => now()->addWeeks(2)->toDateString(), 'preorder_limit' => $limit])->save();

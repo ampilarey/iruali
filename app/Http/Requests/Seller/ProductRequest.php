@@ -28,6 +28,21 @@ class ProductRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge(['has_variants' => $this->boolean('has_variants')]);
+
+        // Pre-orders and "coming soon" are for the shops an admin allows (User::allowsPreorders()). Any
+        // other shop can only change, or switch off, what a product already has; the fieldsets are ignored
+        if (! \App\Support\CurrentShop::get()->allowsPreorders()) {
+            /** @var Product|null $product */
+            $product = $this->route('product');
+            if (! $product?->preorder_enabled) {
+                $this->offsetUnset('preorder_form');
+                $this->merge(['preorder_enabled' => 0]);
+            }
+            if (! $product?->coming_soon) {
+                $this->offsetUnset('coming_soon_form');
+                $this->merge(['coming_soon' => 0]);
+            }
+        }
     }
 
     public function rules(): array

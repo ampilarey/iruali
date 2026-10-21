@@ -44,6 +44,7 @@ class BookingFeeGstAndDaysTest extends TestCase
         $this->travelTo(Carbon::parse('2026-10-20 10:00'));
         Setting::set(['free_delivery_over' => 0, 'delivery_fee_islands' => 75, 'contact_email' => 'ops@iruali.test', 'default_commission_rate' => 10]);
         $this->lens = $this->shop('Lens House', '1012345GST501');
+        $this->lens->forceFill(['preorders_allowed' => true])->save(); // an admin allowed it pre-orders
         $this->enableBml();
     }
 

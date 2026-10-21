@@ -45,6 +45,7 @@ return [
             // SMS log, test sends and resends; the switches, limit and wordings are for admins
             'admin.sms', 'admin.sms.test', 'admin.sms.export', 'admin.sms.resend', 'admin.sms.types.test',
             'admin.preorders', // late pre-orders (inbox row)
+            'admin.orders.preorder-confirm', 'admin.orders.preorder-decline', // pre-orders paid once the shop confirms
         ],
 
         // Finance: payouts, refunds, analytics, errors (read), audit log

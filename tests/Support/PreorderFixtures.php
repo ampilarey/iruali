@@ -21,7 +21,8 @@ trait PreorderFixtures
 {
     protected function seller(string $name = 'Reef Goods'): User
     {
-        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => $name]);
+        // Allowed pre-orders and "coming soon" by an admin (User::allowsPreorders())
+        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => $name, 'preorders_allowed' => true]);
         $shop->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
 
         return $shop;

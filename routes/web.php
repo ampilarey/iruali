@@ -105,7 +105,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/login/code', [\App\Http\Controllers\Customer\CodeLoginController::class, 'send'])->name('login.code.send')->middleware('throttle:5,1,login.code.send');
         Route::post('/login/code/verify', [\App\Http\Controllers\Customer\CodeLoginController::class, 'verify'])->name('login.code.verify')->middleware('throttle:10,1,login.code.verify');
         // Continue with a mobile number (as on Bake & Grill): password if set, otherwise an SMS code; new numbers sign up here
-        Route::redirect('/login/phone', '/login', 301)->name('login.phone');
+        // The old address of the sign-in page (GET only: Route::redirect answers every method, and with
+        // the route cache on it caught the form's POST to /login/phone below, so Continue did nothing)
+        Route::get('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'show'])->name('login.phone');
         Route::post('/login/phone', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'start'])->name('login.phone.start')->middleware('throttle:10,1,login.phone.start');
         Route::post('/login/phone/password', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'password'])->name('login.phone.password')->middleware('throttle:10,1,login.phone.password');
         Route::post('/login/phone/code', [\App\Http\Controllers\Customer\PhoneLoginController::class, 'resend'])->name('login.phone.resend')->middleware('throttle:5,1,login.phone.resend');

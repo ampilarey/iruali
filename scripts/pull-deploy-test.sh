@@ -81,7 +81,7 @@ php artisan storage:link --force 2>/dev/null \
 
 php artisan migrate --force \
   && php artisan config:cache \
-  && php artisan route:clear \
+  && php artisan route:cache \
   && php artisan view:clear \
   || { echo "$(date '+%F %T') Laravel deploy steps failed"; exit 1; }
 

@@ -3198,5 +3198,8 @@
     ":shop can now take pre-orders.": ":shop އަށް މިހާރު ޕްރީއޯޑަރ ބަލައިގަނެވޭނެ.",
     ":shop can no longer take pre-orders, and they are switched off on its products. Orders already placed carry on.": ":shop އަށް އިތުރަށް ޕްރީއޯޑަރ ބަލައިގަނެވޭކަށް ނެތް، އަދި އެ ފިހާރައިގެ ޕްރޮޑަކްޓްތަކުގެ ޕްރީއޯޑަރ އޮފްކުރެވިއްޖެ. މިހާރު ކޮށްފައިވާ އޯޑަރުތައް ކުރިއަށް ދާނެ.",
     ":shop can now list products as \"coming soon\".": ":shop އަށް މިހާރު ޕްރޮޑަކްޓްތައް \"އަވަހަށް ލިބޭނެ\" ކަމަށް ދެއްކޭނެ.",
-    ":shop can no longer list products as \"coming soon\": those it had are ordinary listings now.": ":shop އަށް އިތުރަށް ޕްރޮޑަކްޓްތައް \"އަވަހަށް ލިބޭނެ\" ކަމަށް ދެއްކޭކަށް ނެތް: އެގޮތަށް ހުރި ޕްރޮޑަކްޓްތައް މިހާރު އާދައިގެ ޕްރޮޑަކްޓްތަކެއް."
+    ":shop can no longer list products as \"coming soon\": those it had are ordinary listings now.": ":shop އަށް އިތުރަށް ޕްރޮޑަކްޓްތައް \"އަވަހަށް ލިބޭނެ\" ކަމަށް ދެއްކޭކަށް ނެތް: އެގޮތަށް ހުރި ޕްރޮޑަކްޓްތައް މިހާރު އާދައިގެ ޕްރޮޑަކްޓްތަކެއް.",
+    "Team accounts run the website and do not sell. The shop needs an account of its own.": "ޓީމުގެ އެކައުންޓްތަކަކީ ވެބްސައިޓު ހިންގާ އެކައުންޓްތައް، އެ އެކައުންޓްތަކުން ވިއްކައެއް ނުލެވޭ. ފިހާރައަށް އޭގެ އަމިއްލަ އެކައުންޓެއް ބޭނުންވޭ.",
+    "iruali team account: cannot sell": "iruali ޓީމުގެ އެކައުންޓް: ވިއްކައެއް ނުލެވޭ",
+    "This is an iruali team account, for running the website, so it cannot open a shop. To sell on iruali, open the shop with a separate account (its own email and mobile number).": "މިއީ ވެބްސައިޓު ހިންގުމަށް ބޭނުންކުރާ iruali ޓީމުގެ އެކައުންޓެއް، އެހެންވީމާ މި އެކައުންޓުން ފިހާރައެއް ހުޅުވައެއް ނުލެވޭ. iruali ގައި ވިއްކަން ބޭނުންނަމަ، ވަކި އެކައުންޓަކުން (އޭގެ އަމިއްލަ އީމެއިލާއި މޯބައިލް ނަންބަރާއެކު) ފިހާރަ ހުޅުއްވާ."
 }

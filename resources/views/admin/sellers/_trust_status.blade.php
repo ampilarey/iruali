@@ -1,5 +1,9 @@
-{{-- Admin → Sellers, under a shop's status: trusted (listings skip review), pre-orders and "coming soon" allowed,
-     holiday mode (customers can't order) and its business verification. --}}
+{{-- Admin → Sellers, under a shop's status: an iruali team account (from before team accounts were kept from
+     selling: it cannot sell), trusted (listings skip review), pre-orders and "coming soon" allowed, holiday mode
+     (customers can't order) and its business verification. --}}
+@if($seller->isStaff())
+    <span class="mt-1 flex w-fit items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800" data-seller-team title="{{ __('Team accounts run the website and do not sell. The shop needs an account of its own.') }}">{{ __('iruali team account: cannot sell') }}</span>
+@endif
 @if($seller->auto_approve_listings)
     <span class="mt-1 flex w-fit items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800" data-seller-trusted>{{ __('Trusted: listings skip review') }}</span>
 @endif

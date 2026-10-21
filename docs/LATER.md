@@ -19,6 +19,10 @@ Things agreed on 2026-10-19 but not started (updated 2026-10-21; booking-fee pre
    Islands: all 207 are loaded; add or correct any in Admin → Islands.
 8. **Cash on delivery:** confirm the cash on the order once collected. A return on an unpaid order
    can take the items back but refunds nothing until the payment is confirmed.
+9. **iruali's own shop (if iruali sells):** the admin account only runs the website and can't sell. Open
+   a shop for iruali like any shop ("Sell on iruali" with its own email and mobile number, e.g.
+   "iruali Direct"), approve it in Admin → Sellers, set its commission to 0% there, and give it iruali's
+   bank and GST details in its Seller Centre.
 
 ### Launch checklist on 2026-10-21 (Admin → dashboard → Launch checklist)
 

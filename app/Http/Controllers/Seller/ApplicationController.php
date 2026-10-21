@@ -24,6 +24,9 @@ class ApplicationController extends Controller
     {
         $user = Auth::user();
 
+        if ($user && ($team = $this->teamAccount($user))) {
+            return $team;
+        }
         if ($user?->hasRole('seller')) {
             return redirect()->route('seller.dashboard');
         }
@@ -73,6 +76,9 @@ class ApplicationController extends Controller
     {
         $user = Auth::user();
 
+        if ($team = $this->teamAccount($user)) {
+            return $team;
+        }
         if ($user->hasRole('seller')) {
             return redirect()->route('seller.dashboard');
         }
@@ -123,6 +129,20 @@ class ApplicationController extends Controller
 
         return redirect()->route('seller.dashboard')
             ->with('success', 'Application received! You can start adding products now; they go live once an admin approves your shop.');
+    }
+
+    /**
+     * iruali's own team (admin, support, finance, catalogue) runs the website and never sells: iruali
+     * sells through a shop account of its own, like any shop (StaffRoleController keeps it the other
+     * way round: a shop account is never made staff).
+     */
+    protected function teamAccount(User $user): ?RedirectResponse
+    {
+        if (! $user->isStaff()) {
+            return null;
+        }
+
+        return redirect()->route('home')->with('error', __('This is an iruali team account, for running the website, so it cannot open a shop. To sell on iruali, open the shop with a separate account (its own email and mobile number).'));
     }
 
     /**

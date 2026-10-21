@@ -20,7 +20,9 @@ use Symfony\Component\HttpFoundation\Response;
  *    their shop is open: a suspended or rejected shop is closed to its staff too. When the owner
  *    asks for it, staff must have two-step sign-in on first.
  * It sets CurrentShop for the request. What staff change is written to the audit log, with them
- * as the actor and the shop as the subject.
+ * as the actor and the shop as the subject. iruali's own team (admin, support, finance, catalogue)
+ * never gets in, even an account that has a shop from before: iruali sells through a shop account
+ * of its own, like any shop.
  */
 class ShopAccess
 {
@@ -29,6 +31,9 @@ class ShopAccess
         $user = $request->user();
         if (! $user instanceof User) {
             return redirect()->route('login');
+        }
+        if ($user->isStaff()) {
+            abort(403, 'This is an iruali team account, for running the website: it does not sell. Use the shop\'s own account for the Seller Centre.');
         }
 
         if ($user->hasRole('seller')) {

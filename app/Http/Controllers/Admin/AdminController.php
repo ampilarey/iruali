@@ -85,6 +85,10 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $seller = User::findOrFail($id);
+        // iruali's team runs the website and never sells: a shop applies with an account of its own
+        if ($seller->isStaff()) {
+            return redirect()->back()->with('error', 'This is an iruali team account (admin, support, finance or catalogue), so it cannot be a shop. The shop must apply with an account of its own.');
+        }
         $seller->forceFill([
             'status' => 'active',
             'is_seller' => true,

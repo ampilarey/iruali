@@ -10,6 +10,8 @@
     $inboxTotal = (Route::has('admin.inbox') && StaffAccess::can('admin.inbox')) ? \App\Support\AdminInbox::total() : 0;
     $currentLabel = AdminNav::currentLabel() ?? 'Admin';
     $staff = auth()->user();
+    // An admin account that is also iruali's own shop switches to its Seller Centre from here (User::maySell())
+    $ownShop = \App\Support\CurrentShop::opensSellerCentre($staff);
 @endphp
 <html lang="en" dir="ltr" class="h-full bg-gray-100">
 <head>
@@ -44,6 +46,9 @@
         <div class="flex-1 overflow-y-auto px-3 py-4">{!! $menu('sidebar') !!}</div>
         <div class="border-t border-white/10 p-3 space-y-1 text-sm">
             <a href="{{ route('home') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white"><x-icon name="store" class="w-4 h-4" />View the shop</a>
+            @if($ownShop)
+                <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white" data-switch-to-seller><x-icon name="box" class="w-4 h-4" />Switch to Seller Centre <span class="ms-auto truncate text-xs text-white/50">{{ $staff->business_name }}</span></a>
+            @endif
             <a href="{{ route('account') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white" data-admin-account-link><x-icon name="user" class="w-4 h-4" />My account <span class="ms-auto text-xs text-white/50">password, mobile</span></a>
             <a href="{{ route('profile.2fa.setup') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white" data-admin-2fa-link><x-icon name="shield" class="w-4 h-4" />Two-step sign-in <span class="ms-auto text-xs text-white/50">{{ $staff?->isTwoFactorEnabled() ? 'On' : 'Off' }}</span></a>
             <form method="POST" action="{{ route('logout') }}">
@@ -85,6 +90,9 @@
             <div class="flex-1 overflow-y-auto px-3 py-4">{!! $menu('drawer') !!}</div>
             <div class="border-t border-white/10 p-3 space-y-1 text-sm">
                 <a href="{{ route('home') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="store" class="w-4 h-4" />View the shop</a>
+                @if($ownShop)
+                    <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="box" class="w-4 h-4" />Switch to Seller Centre <span class="ms-auto truncate text-xs text-white/50">{{ $staff->business_name }}</span></a>
+                @endif
                 <a href="{{ route('account') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="user" class="w-4 h-4" />My account <span class="ms-auto text-xs text-white/50">password, mobile</span></a>
                 <a href="{{ route('profile.2fa.setup') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="shield" class="w-4 h-4" />Two-step sign-in <span class="ms-auto text-xs text-white/50">{{ $staff?->isTwoFactorEnabled() ? 'On' : 'Off' }}</span></a>
                 <form method="POST" action="{{ route('logout') }}">

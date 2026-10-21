@@ -132,13 +132,13 @@ class ApplicationController extends Controller
     }
 
     /**
-     * iruali's own team (admin, support, finance, catalogue) runs the website and never sells: iruali
-     * sells through a shop account of its own, like any shop (StaffRoleController keeps it the other
-     * way round: a shop account is never made staff).
+     * iruali's team (support, finance, catalogue) runs the website and never sells (User::maySell());
+     * an admin account may open iruali's own shop. StaffRoleController keeps it the other way round: a
+     * shop account is never made staff.
      */
     protected function teamAccount(User $user): ?RedirectResponse
     {
-        if (! $user->isStaff()) {
+        if ($user->maySell()) {
             return null;
         }
 

@@ -250,6 +250,16 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
+     * May this account sell (open a shop, run it in the Seller Centre)? iruali's team (support,
+     * finance, catalogue) runs the website and never sells; an admin account may also be iruali's
+     * own shop, so the owner signs in once and switches between Admin and the Seller Centre.
+     */
+    public function maySell(): bool
+    {
+        return ! $this->isStaff() || $this->isAdmin();
+    }
+
+    /**
      * Check if user is banned.
      */
     public function isBanned(): bool

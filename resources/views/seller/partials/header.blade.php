@@ -34,9 +34,15 @@
                 @endif
                 @include('seller.staff._signed_in_as')
             </div>
-            @isset($action)
-                <div>{{ $action }}</div>
-            @endisset
+            <div class="flex flex-wrap items-center gap-3">
+                {{-- An admin account that is also iruali's own shop goes back to Admin from here (User::maySell()) --}}
+                @if(auth()->user()?->isStaff())
+                    <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50" data-switch-to-admin><x-icon name="shield" class="w-4 h-4" />{{ __('Switch to Admin') }}</a>
+                @endif
+                @isset($action)
+                    <div>{{ $action }}</div>
+                @endisset
+            </div>
         </div>
         <nav class="flex gap-1 overflow-x-auto scrollbar-hide -mb-px">
             @foreach(\App\Support\ShopStaffAccess::visibleTabs($tabs + ['seller.staff' => [__('Staff'), 'seller.staff*']]) as $route => [$label, $pattern])

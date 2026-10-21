@@ -179,9 +179,8 @@ class PreorderService
      * The product takes pre-orders now, whatever its stock: switched on, an expected date from
      * today on (or a number of days after the order), its last day for pre-orders (if any) not
      * passed, a limit, on sale, not "coming soon", and its shop allowed pre-orders by an admin
-     * (User::allowsPreorders(); iruali's own products need no one's leave). A shop on holiday is
-     * refused where every order is (CartService::addToCart(), OrderService) and productOffer()
-     * shows nothing for it.
+     * (User::allowsPreorders()). A shop on holiday is refused where every order is
+     * (CartService::addToCart(), OrderService) and productOffer() shows nothing for it.
      */
     public function accepting(Product $product): bool
     {
@@ -195,7 +194,7 @@ class PreorderService
             && ! $date->isBefore(today())
             && ($closes === null || ! $closes->isBefore(today()))
             && ! $product->isComingSoon()
-            && ($product->seller_id === null || (bool) $product->seller?->allowsPreorders());
+            && (bool) $product->seller?->allowsPreorders();
     }
 
     /**
@@ -538,6 +537,21 @@ class PreorderService
     public function hasPreorders(Order $order): bool
     {
         return $order->items()->where('is_preorder', true)->exists();
+    }
+
+    /**
+     * Seller Centre → Pre-orders is for a shop an admin allowed pre-orders, or one that still has
+     * pre-orders to finish (waiting for their stock, or for the shop to confirm them): another shop
+     * sees nothing of them.
+     */
+    public function shopSees(User $shop): bool
+    {
+        return $shop->allowsPreorders() || OrderItem::query()
+            ->whereIn('product_id', Product::withTrashed()->where('seller_id', $shop->id)->select('id'))
+            ->where('is_preorder', true)
+            ->whereNull('preorder_allocated_at')
+            ->whereHas('order', fn ($q) => $q->where('status', '!=', 'cancelled'))
+            ->exists();
     }
 
     /**

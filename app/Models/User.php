@@ -98,6 +98,8 @@ class User extends Authenticatable implements HasLocalePreference
         'auto_approve_listings_at' => 'datetime',
         'preorders_allowed' => 'boolean',
         'preorders_allowed_at' => 'datetime',
+        'coming_soon_allowed' => 'boolean',
+        'coming_soon_allowed_at' => 'datetime',
         'delivers_to_home_atoll' => 'boolean',
     ];
 
@@ -693,14 +695,23 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * Pre-orders and "coming soon" (the product form's fieldsets, PreorderService, ComingSoonService):
+     * Pre-orders (the product form's "Pre-order" fieldset, Seller Centre → Pre-orders, PreorderService):
      * off for every shop until an admin allows them (Admin → Sellers → the shop's page;
      * preorders_allowed is not mass-assignable), and only while the shop is an approved, non-suspended
-     * seller. A shop that is not allowed takes no new pre-orders, even on products set up before.
+     * seller. A shop that is not allowed sees nothing of them and takes no new pre-orders.
      */
     public function allowsPreorders(): bool
     {
         return (bool) $this->preorders_allowed && $this->isSeller();
+    }
+
+    /**
+     * "Coming soon" (the product form's fieldset, ComingSoonService): allowed by an admin like
+     * pre-orders, separately (coming_soon_allowed, not mass-assignable).
+     */
+    public function allowsComingSoon(): bool
+    {
+        return (bool) $this->coming_soon_allowed && $this->isSeller();
     }
 
     /**

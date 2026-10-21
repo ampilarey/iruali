@@ -38,8 +38,9 @@ Route::middleware('signed')->prefix('orders/guest/{order}/{token}')->name('guest
 
 Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/preorders', [AdminPreorderController::class, 'index'])->name('preorders');
-    // Pre-orders and "coming soon" allowed for a shop: admins only (on no staff role's list)
+    // Pre-orders, and "coming soon", allowed for a shop each on its own: admins only (on no staff role's list)
     Route::post('/sellers/{seller}/preorders', [AdminPreorderController::class, 'allowShop'])->name('sellers.preorders')->whereNumber('seller');
+    Route::post('/sellers/{seller}/coming-soon', [AdminPreorderController::class, 'allowComingSoon'])->name('sellers.coming-soon')->whereNumber('seller');
     // A pre-order paid once the shop confirms, confirmed or declined for the shop
     Route::post('/orders/{order}/preorder-confirm', [AdminPreorderController::class, 'confirmOrder'])->name('orders.preorder-confirm')->whereNumber('order');
     Route::post('/orders/{order}/preorder-decline', [AdminPreorderController::class, 'declineOrder'])->name('orders.preorder-decline')->whereNumber('order');

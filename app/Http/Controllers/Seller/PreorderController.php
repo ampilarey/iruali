@@ -25,6 +25,7 @@ class PreorderController extends Controller
     public function index(PreorderService $preorders)
     {
         $shop = $this->shop();
+        abort_unless($preorders->shopSees($shop), 404); // not allowed pre-orders, none to finish
 
         // Pre-orders paid once the shop confirms: waiting for it, then for the customer's payment
         $confirmFirst = Order::query()

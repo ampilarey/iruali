@@ -87,7 +87,7 @@ shop cancels, can't get the item, moves the date later or is later than the prod
 items are ordered on their own.
 
 How to use it: make a shop account for these imports (e.g. "iruali Direct", not the admin account),
-allow it pre-orders (Admin → Sellers → the shop → "Allow pre-orders"),
+allow it pre-orders (Admin → Sellers → the shop → "Allow pre-orders"; "coming soon" is a separate switch),
 then in its product form → Pre-order: tick "Take pre-orders", choose "Some days after each order"
 (e.g. 14), the most units, "A booking fee: a percentage of the price" (e.g. 30), and if they differ
 from 7, the days to pay the rest and the days late before a full refund. When the camera arrives,
@@ -99,8 +99,10 @@ arrives, and how late before a full refund), and the booking fee has GST with it
 
 Added on 2026-10-21, third round:
 
-- **Only shops an admin allows** can take pre-orders or list "coming soon" (Admin → Sellers → the shop's
-  page → "Allow pre-orders"). Off for every shop until then, including shops that set some up before.
+- **Only shops an admin allows** can take pre-orders or list "coming soon", each allowed on its own
+  (Admin → Sellers → the shop's page → "Allow pre-orders" / "Allow "coming soon""). A shop sees only
+  what it is allowed: no Pre-order or Coming soon section in its product form and no Pre-orders tab
+  otherwise. Off for every shop until then; what shops had set up before was switched off.
 - **Pay once the shop confirms:** in the product form → Pre-order → "What the customer pays at
   checkout", choose "Nothing yet: the full price once I confirm I can get it" (and the days to pay, 3
   if left empty). The customer orders without paying; the shop (Seller Centre → Pre-orders → "To

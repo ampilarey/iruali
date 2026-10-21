@@ -26,6 +26,10 @@
                             {{ $taxPart->gst_registered ? __('GST-registered when placed · GST :amount', ['amount' => \App\Support\Money::format($taxPart->gst_amount)]) : __('Not GST-registered when placed') }}
                         </span>
                     </span>
+                    @if($taxPart->deposit_invoice_number && $canOpenInvoices)
+                        {{-- A pre-order's booking fee, invoiced when it was paid --}}
+                        <a href="{{ route('admin.orders.invoice', [$order, $taxPart, 'booking' => 1]) }}" target="_blank" rel="noopener" class="text-xs font-medium text-primary-700 hover:underline" data-admin-booking-fee-invoice>{{ __('Booking fee') }} <span dir="ltr">{{ $taxPart->deposit_invoice_number }}</span>@if($taxPart->gst_registered) · GST {{ \App\Support\Money::format($taxPart->deposit_gst) }}@endif</a>
+                    @endif
                     @if(! $paid)
                         <span class="text-xs text-gray-400">{{ __('Invoice once paid') }}</span>
                     @elseif($canOpenInvoices)

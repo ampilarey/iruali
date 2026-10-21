@@ -20,6 +20,11 @@ use Throwable;
  * GST-ready: iruali's own GST settings (Admin → Tax), each shop part's GST frozen when the order
  * is placed, invoice numbers, iruali's commission invoices and a business buyer's details.
  *
+ * A pre-order with a booking fee (BookingFeeService) is invoiced in two parts: the fee when it is
+ * paid (its own number in the shop's series, deposit_invoice_*), then the whole sale less the fee
+ * when the balance is paid. A fee refunded on cancelling is reversed; a fee kept stays a sale, and
+ * iruali's commission on it is counted (and invoiced to the shop with its payout) when it is kept.
+ *
  * Prices on iruali include GST, so the GST inside an amount is amount × rate ÷ (100 + rate),
  * rounded to the laari. Nothing here changes a price, a total, a delivery fee or what a shop earns;
  * until iruali or a shop is marked GST-registered, no GST shows anywhere.
@@ -142,7 +147,8 @@ class GstService
 
     /**
      * A paid order was cancelled: the shop's sale is reversed (it shows as a refund in that month's
-     * GST report, and on the invoice).
+     * GST report, and on the invoice). A booking fee invoiced on its own is reversed too, unless it
+     * was kept (depositKept()).
      */
     public function partCancelled(SellerOrder $part): void
     {
@@ -150,9 +156,123 @@ class GstService
             if (! $part->gst_reversed_at && $part->order?->payment_status === 'paid') {
                 $this->persist($part, ['gst_reversed_at' => now()]);
             }
+            if ($part->deposit_invoice_number && ! $part->deposit_reversed_at && ! $part->deposit_kept_at) {
+                $this->persist($part, ['deposit_reversed_at' => now()]);
+            }
         } catch (Throwable $e) {
             report($e);
         }
+    }
+
+    // ---- Booking fees (App\Services\BookingFeeService) ----------------------------------------------
+
+    /**
+     * The booking fee of a pre-order has been paid (BookingFeeService::feePaid()): once the payment
+     * is committed, the shop's part gets an invoice (or receipt) for the fee. Never holds up or
+     * undoes the payment; the invoice page numbers it if this did not.
+     */
+    public function depositPaid(Order $order): void
+    {
+        $orderId = $order->getKey();
+
+        DB::afterCommit(function () use ($orderId) {
+            try {
+                if ($order = Order::withTrashed()->find($orderId)) {
+                    $this->assignDepositInvoice($order);
+                }
+            } catch (Throwable $e) {
+                report($e);
+            }
+        });
+    }
+
+    /**
+     * Number the booking fee's invoice on the part that sells the pre-order (booking-fee orders come
+     * from one shop): the next number in the shop's own series, with the GST in the fee at the rate
+     * frozen when the order was placed. Safe to call again.
+     */
+    public function assignDepositInvoice(Order $order): void
+    {
+        if (! $order->bookingFeePaid()) {
+            return;
+        }
+
+        $row = $order->sellerOrders()->whereNull('deposit_invoice_number')->orderBy('id')->first(['id', 'seller_id']);
+        if ($row === null || $order->sellerOrders()->whereNotNull('deposit_invoice_number')->exists()) {
+            return;
+        }
+        $series = 'shop:'.($row->seller_id ?: 0);
+        $this->ensureSeries($series); // before locking, so the row lock is never upgraded
+
+        DB::transaction(function () use ($row, $series, $order) {
+            $last = $this->lockCounter($series); // first, before any other read: see lockCounter()
+            $part = SellerOrder::whereKey($row->id)->lockForUpdate()->first();
+            if (! $part || $part->deposit_invoice_number) {
+                return;
+            }
+
+            $this->snapshot($part, $order); // the shop's registration and rate as when the order was placed
+            $sellerId = $part->seller_id ?: null;
+            $sequence = $this->takeNumber($series, $last, fn () => $this->highestShopNumber($sellerId));
+            $deposit = round((float) $order->deposit_amount, 2);
+            $this->persist($part, [
+                'deposit_amount' => $deposit,
+                'deposit_gst' => $part->gst_registered ? self::gstIncluded($deposit, $part->gst_rate) : 0,
+                'deposit_invoice_sequence' => $sequence,
+                'deposit_invoice_number' => $this->shopInvoiceNumber($sellerId, $sequence),
+                'deposit_invoiced_at' => $order->deposit_paid_at ?? now(),
+            ]);
+        }, 5);
+    }
+
+    /**
+     * The customer cancelled and the booking fee is kept for the shop (BookingFeeService::keepOnCancel()):
+     * the fee's invoice stands as a sale, and iruali's commission on it (with the GST in it when iruali
+     * was GST-registered when the order was placed) counts from today.
+     */
+    public function depositKept(SellerOrder $part, float $commission): void
+    {
+        $order = $part->order;
+        $this->persist($part, [
+            'deposit_kept_at' => now(),
+            'deposit_commission' => round($commission, 2),
+            'deposit_commission_gst' => $order?->gst_platform_registered ? self::gstIncluded($commission, $order->gst_rate) : 0,
+        ]);
+    }
+
+    /**
+     * Is this shop GST-registered now (iruali itself for its own sales, seller null)? Checkout says
+     * whether a booking fee has GST in it; the order freezes it when placed.
+     */
+    public function sellerRegistered(?int $sellerId): bool
+    {
+        if (! $sellerId) {
+            return $this->platformRegistered();
+        }
+        $profile = ShopTaxProfile::forUser($sellerId);
+
+        return $profile !== null && $profile->isRegistered();
+    }
+
+    /**
+     * Where the customer opens the booking fee's invoice: My Orders, or the signed guest link.
+     */
+    public function customerDepositInvoiceUrl(Order $order, SellerOrder $part): string
+    {
+        if ($order->isGuest() && $order->guest_token) {
+            return URL::signedRoute('guest.orders.invoice', ['order' => $order->getKey(), 'token' => $order->guest_token, 'part' => $part->getKey(), 'booking' => 1]);
+        }
+
+        return route('orders.invoice', [$order, $part, 'booking' => 1]);
+    }
+
+    /** The highest number a shop has issued, on an order's invoice or on a booking fee's. */
+    protected function highestShopNumber(?int $sellerId): int
+    {
+        return max(
+            (int) SellerOrder::where('seller_id', $sellerId)->max('invoice_sequence'),
+            (int) SellerOrder::where('seller_id', $sellerId)->max('deposit_invoice_sequence'),
+        );
     }
 
     /**
@@ -303,7 +423,7 @@ class GstService
                 // Final amounts from the frozen details (an order placed before GST existed is captured now)
                 $this->snapshot($part, $order);
                 $sellerId = $part->seller_id ?: null;
-                $sequence = $this->takeNumber($series, $last, fn () => SellerOrder::where('seller_id', $sellerId)->max('invoice_sequence'));
+                $sequence = $this->takeNumber($series, $last, fn () => $this->highestShopNumber($sellerId));
                 $this->persist($part, [
                     'invoice_sequence' => $sequence,
                     'invoice_number' => $this->shopInvoiceNumber($sellerId, $sequence),
@@ -380,22 +500,27 @@ class GstService
 
     /**
      * What iruali's commission invoice for a payout shows: one line per order part with its
-     * commission and the GST in it (fixed when each order was placed), and the deductions settled.
+     * commission and the GST in it (fixed when each order was placed), one per booking fee kept for
+     * the shop (BookingFeeService), and the deductions settled.
      *
-     * @return array{lines: \Illuminate\Database\Eloquent\Collection<int, SellerOrder>, sales: float, commission: float, gst: float, adjustments: float, tax_invoice: bool}
+     * @return array{lines: \Illuminate\Database\Eloquent\Collection<int, SellerOrder>, kept: \Illuminate\Support\Collection<int, SellerOrder>, sales: float, commission: float, gst: float, adjustments: float, tax_invoice: bool}
      */
     public function commissionInvoice(SellerPayout $payout): array
     {
         $lines = $payout->sellerOrders()->with('order')->orderBy('id')->get();
-        $gst = round((float) $lines->sum('commission_gst'), 2);
+        // A kept booking fee is paid out as an adjustment linked to its part: shown as a commission line instead
+        $keptAdjustments = $payout->adjustments()->whereNotNull('seller_order_id')->with('sellerOrder.order')->orderBy('id')->get();
+        $kept = $keptAdjustments->map(fn ($adjustment) => $adjustment->sellerOrder)->filter(fn ($part) => $part !== null && $part->deposit_kept_at !== null)->values();
+        $gst = round((float) $lines->sum('commission_gst') + (float) $kept->sum('deposit_commission_gst'), 2);
 
         return [
             'lines' => $lines,
+            'kept' => $kept,
             // What the shop's earnings and the commission were taken from, so the settlement adds up
-            'sales' => round((float) $lines->sum(fn (SellerOrder $line) => (float) $line->seller_earnings + (float) $line->commission_amount), 2),
-            'commission' => round((float) $lines->sum('commission_amount'), 2),
+            'sales' => round((float) $lines->sum(fn (SellerOrder $line) => (float) $line->seller_earnings + (float) $line->commission_amount) + (float) $kept->sum('deposit_amount'), 2),
+            'commission' => round((float) $lines->sum('commission_amount') + (float) $kept->sum('deposit_commission'), 2),
             'gst' => $gst,
-            'adjustments' => round((float) $payout->adjustments()->sum('amount'), 2),
+            'adjustments' => round((float) $payout->adjustments()->sum('amount') - (float) $keptAdjustments->whereIn('seller_order_id', $kept->pluck('id'))->sum('amount'), 2),
             'tax_invoice' => $gst > 0,
         ];
     }

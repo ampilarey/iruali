@@ -2,7 +2,7 @@
 
 @php
     use App\Support\Money;
-    $kinds = ['return' => __('Return'), 'dispute' => __('Dispute'), 'cancellation' => __('Cancelled after payment')];
+    $kinds = ['return' => __('Return'), 'dispute' => __('Dispute'), 'cancellation' => __('Cancelled after payment'), 'booking_fee' => __('Booking fee refunded')];
 @endphp
 
 @section('content')

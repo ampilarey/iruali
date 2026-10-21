@@ -86,6 +86,8 @@ class Product extends Model
         'preorder_closes_on' => 'date',
         // A booking fee instead of the full price at checkout (App\Services\BookingFeeService)
         'preorder_deposit_value' => 'decimal:2',
+        'preorder_balance_days' => 'integer',
+        'preorder_late_days' => 'integer',
         // Listed before it goes on sale (App\Services\ComingSoonService)
         'coming_soon' => 'boolean',
         'available_on' => 'date',
@@ -266,6 +268,21 @@ class Product extends Model
         $days = (int) $this->preorder_lead_days;
 
         return $days > 0 ? today()->addDays($days) : $this->preorder_ship_date;
+    }
+
+    /**
+     * Days past the expected date after which a pre-order of this product is late: Admin → Inbox
+     * lists it, and a booking fee is then refunded in full if the customer cancels.
+     */
+    public function preorderLateDays(): int
+    {
+        return (int) $this->preorder_late_days > 0 ? (int) $this->preorder_late_days : \App\Services\PreorderService::LATE_AFTER_DAYS;
+    }
+
+    /** Days the customer has to pay the balance once a booking-fee pre-order has arrived. */
+    public function preorderBalanceDays(): int
+    {
+        return (int) $this->preorder_balance_days > 0 ? (int) $this->preorder_balance_days : \App\Services\BookingFeeService::BALANCE_DAYS;
     }
 
     /** Pre-orders of this product are paid with a booking fee first (App\Services\BookingFeeService). */

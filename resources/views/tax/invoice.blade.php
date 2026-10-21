@@ -13,6 +13,9 @@
     $gst = round((float) $part->gst_amount, 2);
     $rate = T::rate($part->gst_rate);
     $title = $taxInvoice ? 'Tax invoice' : 'Receipt';
+    // A pre-order's booking fee was invoiced on its own when it was paid: this invoice is the rest (BookingFeeService)
+    $fee = $part->deposit_invoice_number ? round((float) $part->deposit_amount, 2) : 0.0;
+    $feeGst = $part->deposit_invoice_number ? round((float) $part->deposit_gst, 2) : 0.0;
 @endphp
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -92,7 +95,13 @@
                 <tr><td>{{ T::label('Subtotal') }}</td><td class="num">{{ Money::format($subtotal + $delivery) }}</td></tr>
                 <tr><td>{{ T::label('Shop discount') }}</td><td class="num">&minus;{{ Money::format($discount) }}</td></tr>
             @endif
-            <tr class="grand"><td>{{ T::label($taxInvoice ? 'Total incl. GST' : 'Total') }} (MVR)</td><td class="num">{{ Money::format($total) }}</td></tr>
+            @if($fee > 0)
+                <tr><td>{{ T::label($taxInvoice ? 'Sale total incl. GST' : 'Sale total') }}</td><td class="num">{{ Money::format($total) }}</td></tr>
+                <tr data-less-booking-fee><td>{{ T::label('Less booking fee, invoice :number', ['number' => $part->deposit_invoice_number]) }}</td><td class="num">&minus;{{ Money::format($fee) }}</td></tr>
+                <tr class="grand"><td>{{ T::label($taxInvoice ? 'This invoice incl. GST' : 'This receipt') }} (MVR)</td><td class="num">{{ Money::format($total - $fee) }}</td></tr>
+            @else
+                <tr class="grand"><td>{{ T::label($taxInvoice ? 'Total incl. GST' : 'Total') }} (MVR)</td><td class="num">{{ Money::format($total) }}</td></tr>
+            @endif
         </table>
 
         @if($taxInvoice)
@@ -102,7 +111,13 @@
                     <tr><th>{{ T::label('GST rate') }}</th><th class="num">{{ T::label('Value excl. GST') }}</th><th class="num">{{ T::label('GST') }}</th><th class="num">{{ T::label('Total incl. GST') }}</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>{{ $rate }}%</td><td class="num">{{ Money::format($total - $gst) }}</td><td class="num">{{ Money::format($gst) }}</td><td class="num">{{ Money::format($total) }}</td></tr>
+                    @if($fee > 0)
+                        <tr><td>{{ T::label('Sale total') }} · {{ $rate }}%</td><td class="num">{{ Money::format($total - $gst) }}</td><td class="num">{{ Money::format($gst) }}</td><td class="num">{{ Money::format($total) }}</td></tr>
+                        <tr><td>{{ T::label('Less booking fee, invoice :number', ['number' => $part->deposit_invoice_number]) }}</td><td class="num">&minus;{{ Money::format($fee - $feeGst) }}</td><td class="num">&minus;{{ Money::format($feeGst) }}</td><td class="num">&minus;{{ Money::format($fee) }}</td></tr>
+                        <tr class="grand" data-gst-this-invoice><td>{{ T::label('This invoice') }}</td><td class="num">{{ Money::format($total - $gst - $fee + $feeGst) }}</td><td class="num">{{ Money::format($gst - $feeGst) }}</td><td class="num">{{ Money::format($total - $fee) }}</td></tr>
+                    @else
+                        <tr><td>{{ $rate }}%</td><td class="num">{{ Money::format($total - $gst) }}</td><td class="num">{{ Money::format($gst) }}</td><td class="num">{{ Money::format($total) }}</td></tr>
+                    @endif
                 </tbody>
             </table>
             <p class="muted" style="margin-top:8px">{{ T::label('Prices include GST. GST is :rate% of the price before GST.', ['rate' => $rate]) }}</p>

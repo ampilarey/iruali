@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SellerAdjustment extends Model
 {
-    protected $fillable = ['seller_id', 'amount', 'reason', 'return_request_id', 'payout_id'];
+    // seller_order_id: a booking fee kept for the shop when the order was cancelled (BookingFeeService)
+    protected $fillable = ['seller_id', 'amount', 'reason', 'return_request_id', 'seller_order_id', 'payout_id'];
 
     protected $casts = ['amount' => 'decimal:2'];
 
@@ -24,6 +25,12 @@ class SellerAdjustment extends Model
     public function payout(): BelongsTo
     {
         return $this->belongsTo(SellerPayout::class, 'payout_id');
+    }
+
+    /** @return BelongsTo<SellerOrder, $this> */
+    public function sellerOrder(): BelongsTo
+    {
+        return $this->belongsTo(SellerOrder::class);
     }
 
     /** @return BelongsTo<ReturnRequest, $this> */

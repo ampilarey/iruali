@@ -29,7 +29,7 @@
         @elseif($order->status !== 'cancelled' && $order->bookingFeePaid() && $order->payment_status !== 'paid')
             <p class="text-xs text-gray-700">{{ $order->deposit_refundable_at
                 ? __('The shop moved the date later or is late, so if you cancel now you get everything back.')
-                : __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, you get everything back.', ['days' => \App\Services\PreorderService::LATE_AFTER_DAYS]) }}</p>
+                : __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, you get everything back.', ['days' => $order->preorderLateDays()]) }}</p>
         @endif
     </div>
 @endif

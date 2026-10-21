@@ -47,6 +47,15 @@ class SellerOrder extends Model
         'invoice_sequence' => 'integer',
         'invoiced_at' => 'datetime',
         'gst_reversed_at' => 'datetime',
+        // The booking fee of a pre-order paid in two parts: its own invoice (App\Services\GstService)
+        'deposit_amount' => 'decimal:2',
+        'deposit_gst' => 'decimal:2',
+        'deposit_invoice_sequence' => 'integer',
+        'deposit_invoiced_at' => 'datetime',
+        'deposit_reversed_at' => 'datetime',
+        'deposit_kept_at' => 'datetime',
+        'deposit_commission' => 'decimal:2',
+        'deposit_commission_gst' => 'decimal:2',
         // Pre-order items waiting for their stock (App\Services\PreorderService)
         'awaiting_stock' => 'boolean',
         'preorder_ship_date' => 'date',

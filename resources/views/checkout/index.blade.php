@@ -254,7 +254,7 @@
                         @if($bookingFee)
                             {{-- Pre-orders with a booking fee: the fee now, the rest when the stock arrives (BookingFeeService) --}}
                             <div class="flex justify-between rounded-lg bg-primary-50 px-3 py-2 text-base" data-booking-fee-now>
-                                <dt class="font-semibold">{{ __('Booking fee to pay now') }}</dt>
+                                <dt class="font-semibold">{{ __('Booking fee to pay now') }}@if($bookingFee['gst'] ?? false)<span class="block text-xs font-normal text-gray-600" data-booking-fee-gst>{{ __('GST included. You get a tax invoice for it.') }}</span>@endif</dt>
                                 <dd class="font-semibold text-primary-700" dir="ltr">{{ \App\Support\Money::format($bookingFee['fee']) }}</dd>
                             </div>
                             <div class="flex justify-between" data-booking-balance>
@@ -292,7 +292,7 @@
                     @if($bookingFee)
                         <label class="mt-3 flex items-start gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3 text-sm text-gray-800" data-agree-booking-fee>
                             <input type="checkbox" name="agree_booking_fee" value="1" required @checked(old('agree_booking_fee')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
-                            <span>{{ __('I pay the booking fee of :fee now and the balance when my order arrives, before it is delivered. If I cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, I get everything back.', ['fee' => \App\Support\Money::format($bookingFee['fee']), 'days' => \App\Services\PreorderService::LATE_AFTER_DAYS]) }}</span>
+                            <span>{{ __('I pay the booking fee of :fee now and the balance within :balance_days days of my order arriving, before it is delivered. If I cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, I get everything back.', ['fee' => \App\Support\Money::format($bookingFee['fee']), 'balance_days' => $bookingFee['balance_days'], 'days' => $bookingFee['late_days']]) }}</span>
                         </label>
                         @error('agree_booking_fee')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                     @endif

@@ -7,7 +7,7 @@
     @include('admin.payouts._header', ['title' => 'Pre-orders'])
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <p class="text-sm text-gray-600">Pre-orders still waiting for their stock. A pre-order more than {{ $lateDays }} days past its expected date is flagged late each morning and shows in the inbox until its stock arrives, the shop moves the date (the customer is emailed) or the order is cancelled (the refund is flagged as for any paid order).</p>
+        <p class="text-sm text-gray-600">Pre-orders still waiting for their stock. A pre-order past its expected date by more than its product's late days ({{ $lateDays }} unless the shop set others) is flagged late each morning and shows in the inbox until its stock arrives, the shop moves the date (the customer is emailed) or the order is cancelled (the refund is flagged as for any paid order).</p>
 
         @if($balances->isNotEmpty())
             {{-- Booking-fee pre-orders: the stock is in and the balance is asked for (BookingFeeService) --}}

@@ -49,8 +49,14 @@ use Throwable;
  */
 class PreorderService
 {
-    /** Days past the expected date after which a pre-order still waiting is late (Admin → Inbox). */
+    /**
+     * Days past the expected date after which a pre-order still waiting is late (Admin → Inbox), unless
+     * the product sets its own (products.preorder_late_days; each order line keeps its days).
+     */
     public const LATE_AFTER_DAYS = 7;
+
+    /** The most days a product can allow for being late, or for paying a balance. */
+    public const MAX_DAYS = 90;
 
     /** The most units a shop can take as pre-orders for one product. */
     public const MAX_LIMIT = 99999;
@@ -85,10 +91,14 @@ class PreorderService
             'preorder_limit' => [$on, 'required', 'integer', 'min:1', 'max:'.self::MAX_LIMIT],
             'preorder_note' => [$on, 'nullable', 'string', 'max:255'],
             'preorder_closes_on' => [$on, 'nullable', 'date', 'after_or_equal:today', \Illuminate\Validation\Rule::when($onDate, ['before_or_equal:preorder_ship_date'])],
+            // Days late before it counts as late (Admin → Inbox; a booking fee is then refunded in full), empty for the default
+            'preorder_late_days' => [$on, 'nullable', 'integer', 'min:1', 'max:'.self::MAX_DAYS],
             // A booking fee now and the rest when the stock arrives (BookingFeeService): a percentage or an amount per unit
             'preorder_deposit_type' => [$on, 'nullable', 'in:none,'.implode(',', BookingFeeService::TYPES)],
             'preorder_deposit_value' => [$on, 'exclude_unless:preorder_deposit_type,'.implode(',', BookingFeeService::TYPES), 'required', 'numeric', 'min:1',
                 \Illuminate\Validation\Rule::when(fn ($input) => $input->preorder_deposit_type === BookingFeeService::PERCENT, ['max:'.BookingFeeService::MAX_PERCENT], ['max:999999.99'])],
+            // Days to pay the balance once it arrives, empty for the default
+            'preorder_balance_days' => [$on, 'exclude_unless:preorder_deposit_type,'.implode(',', BookingFeeService::TYPES), 'nullable', 'integer', 'min:1', 'max:'.self::MAX_DAYS],
         ];
     }
 
@@ -112,6 +122,10 @@ class PreorderService
             'preorder_deposit_value.required' => __('Give the booking fee: a percentage of the price, or an amount per item.'),
             'preorder_deposit_value.min' => __('The booking fee must be at least 1.'),
             'preorder_deposit_value.max' => __('The booking fee can be at most :max% of the price, or less than the price as an amount.', ['max' => BookingFeeService::MAX_PERCENT]),
+            'preorder_late_days.min' => __('Give at least 1 day.'),
+            'preorder_late_days.max' => __('Give at most :max days.', ['max' => self::MAX_DAYS]),
+            'preorder_balance_days.min' => __('Give at least 1 day.'),
+            'preorder_balance_days.max' => __('Give at most :max days.', ['max' => self::MAX_DAYS]),
         ];
     }
 
@@ -143,8 +157,10 @@ class PreorderService
             'preorder_limit' => (int) $data['preorder_limit'],
             'preorder_note' => $note !== '' ? $note : null,
             'preorder_closes_on' => filled($data['preorder_closes_on'] ?? null) ? $data['preorder_closes_on'] : null,
+            'preorder_late_days' => filled($data['preorder_late_days'] ?? null) ? (int) $data['preorder_late_days'] : null,
             'preorder_deposit_type' => $fee,
             'preorder_deposit_value' => $fee ? round((float) $data['preorder_deposit_value'], 2) : null,
+            'preorder_balance_days' => $fee && filled($data['preorder_balance_days'] ?? null) ? (int) $data['preorder_balance_days'] : null,
         ];
     }
 
@@ -205,7 +221,7 @@ class PreorderService
      * "whole" is true when the product itself is out of stock (else only some options are); "days"
      * is set when it ships about that many days after the order; "fee" describes its booking fee.
      *
-     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface, days: ?int, fee: ?string}|null
+     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface, days: ?int, fee: ?string, late_days: int, balance_days: int}|null
      */
     public function productOffer(Product $product): ?array
     {
@@ -225,6 +241,7 @@ class PreorderService
             'date' => $date, 'note' => $product->preorder_note, 'left' => $left, 'whole' => $whole, 'closes' => $product->preorder_closes_on,
             'days' => (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null,
             'fee' => $product->hasBookingFee() ? app(BookingFeeService::class)->describe($product) : null,
+            'late_days' => $product->preorderLateDays(), 'balance_days' => $product->preorderBalanceDays(),
         ] : null;
     }
 
@@ -398,7 +415,7 @@ class PreorderService
      * already waiting, under the product's lock, so two checkouts for the last unit cannot both
      * get it. Lines with stock are left to OrderService::takeStock().
      *
-     * @return array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int}> keyed by cart item id
+     * @return array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int, late_days: int}> keyed by cart item id
      *
      * @throws RuntimeException a message for the customer
      */
@@ -431,7 +448,7 @@ class PreorderService
             }
 
             $days = (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null;
-            $lines[(int) $item->id] = ['product_id' => (int) $product->id, 'variant_id' => $variant ? (int) $variant->id : null, 'seller_id' => (int) ($product->seller_id ?? 0), 'date' => $date, 'days' => $days];
+            $lines[(int) $item->id] = ['product_id' => (int) $product->id, 'variant_id' => $variant ? (int) $variant->id : null, 'seller_id' => (int) ($product->seller_id ?? 0), 'date' => $date, 'days' => $days, 'late_days' => $product->preorderLateDays()];
             $wanted[(int) $product->id] = ($wanted[(int) $product->id] ?? 0) + (int) $item->quantity;
         }
 
@@ -464,7 +481,7 @@ class PreorderService
      * Flag the new order's pre-order lines (with their expected date) and their shop parts:
      * "Awaiting stock" until the stock comes. No stock is taken for them.
      *
-     * @param  array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int}>  $lines  from reserveForCheckout()
+     * @param  array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int, late_days: int}>  $lines  from reserveForCheckout()
      */
     public function markOrder(Order $order, array $lines): void
     {
@@ -473,6 +490,8 @@ class PreorderService
         }
 
         $byLine = collect($lines)->keyBy(fn (array $line) => $line['product_id'].':'.($line['variant_id'] ?? 0));
+        // A booking-fee order promised one rule at checkout: late after the fewest days of its lines
+        $orderLateDays = $order->hasBookingFee() ? (int) collect($lines)->min('late_days') : null;
         $dates = [];
         foreach ($order->items()->get() as $item) {
             $line = $byLine[$item->product_id.':'.($item->product_variant_id ?? 0)] ?? null;
@@ -480,7 +499,7 @@ class PreorderService
                 continue;
             }
 
-            $item->forceFill(['is_preorder' => true, 'preorder_ship_date' => $line['date']])->save();
+            $item->forceFill(['is_preorder' => true, 'preorder_ship_date' => $line['date'], 'preorder_late_days' => $orderLateDays ?: $line['late_days']])->save();
             $seller = (int) $line['seller_id'];
             $dates[$seller] = isset($dates[$seller]) && $dates[$seller]->greaterThan($line['date']) ? $dates[$seller] : $line['date'];
         }
@@ -536,7 +555,7 @@ class PreorderService
         }
         if ($notes !== [] && $order->hasBookingFee()) {
             $notes[] = __('You pay the booking fee of :fee now and the balance of :balance when your item arrives, before it is delivered.', ['fee' => \App\Support\Money::format($order->deposit_amount), 'balance' => \App\Support\Money::format($order->balanceAmount())]);
-            $notes[] = __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, you get everything back.', ['days' => self::LATE_AFTER_DAYS]);
+            $notes[] = __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, you get everything back.', ['days' => $order->preorderLateDays()]);
         } elseif ($notes !== []) {
             $notes[] = __('Rather not wait? You can cancel the order for a full refund until it is sent.');
         }
@@ -832,8 +851,9 @@ class PreorderService
     // ---- Late pre-orders (daily, Admin → Inbox) -------------------------------------------------
 
     /**
-     * Flag pre-orders still waiting more than LATE_AFTER_DAYS days after their expected date (each
-     * once; moving the date clears it). Returns how many lines were flagged.
+     * Flag pre-orders still waiting more than their late days (the product's when the order was
+     * placed, LATE_AFTER_DAYS by default) after their expected date (each once; moving the date
+     * clears it). Returns how many lines were flagged.
      */
     public function flagLate(): int
     {
@@ -842,8 +862,10 @@ class PreorderService
             ->whereNull('preorder_allocated_at')
             ->whereNull('preorder_late_at')
             ->whereNotNull('preorder_ship_date')
-            ->whereDate('preorder_ship_date', '<', today()->subDays(self::LATE_AFTER_DAYS)->toDateString())
+            ->whereDate('preorder_ship_date', '<', today()->subDay()->toDateString())
             ->whereHas('order', fn ($q) => $q->where('status', '!=', 'cancelled'))
+            ->get(['id', 'preorder_ship_date', 'preorder_late_days'])
+            ->filter(fn (OrderItem $item) => $item->preorder_ship_date->lt(today()->subDays((int) $item->preorder_late_days ?: self::LATE_AFTER_DAYS)))
             ->pluck('id');
 
         if ($ids->isEmpty()) {

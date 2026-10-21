@@ -12,8 +12,8 @@
         @endif
         @if($preorder['fee'] ?? null)
             {{-- A booking fee now, the rest when it arrives (BookingFeeService) --}}
-            <p class="mt-1 ps-6 font-medium text-dark" data-booking-fee>{{ __('Booking fee now: :fee. You pay the rest when it arrives, before it is delivered.', ['fee' => $preorder['fee']]) }}</p>
-            <p class="mt-1 ps-6 text-xs text-gray-600">{{ __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get it, moves the date later or is more than :days days late, you get everything back. Ordered on its own, not with other items.', ['days' => \App\Services\PreorderService::LATE_AFTER_DAYS]) }}</p>
+            <p class="mt-1 ps-6 font-medium text-dark" data-booking-fee>{{ __('Booking fee now: :fee. You pay the rest within :days days of it arriving, before it is delivered.', ['fee' => $preorder['fee'], 'days' => $preorder['balance_days']]) }}</p>
+            <p class="mt-1 ps-6 text-xs text-gray-600">{{ __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get it, moves the date later or is more than :days days late, you get everything back. Ordered on its own, not with other items.', ['days' => $preorder['late_days']]) }}</p>
         @else
             <p class="mt-1 ps-6 text-xs text-gray-600">{{ __('You pay now and the shop sends it when the stock arrives. You can cancel for a full refund until it is sent.') }}</p>
         @endif

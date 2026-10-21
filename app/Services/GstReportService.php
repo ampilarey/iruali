@@ -25,7 +25,9 @@ use Illuminate\Support\Facades\DB;
  *
  * A sale counts in the month it was paid. A refund counts in the month a return or dispute was
  * approved, or the paid order was cancelled. Gift-card orders are left out (GST applies when a card
- * is spent).
+ * is spent). A pre-order with a booking fee (BookingFeeService) has two invoices: the fee counts in
+ * the month it was paid and the rest of the sale when the balance is paid; a fee refunded on
+ * cancelling counts as a refund then, and iruali's commission on a fee kept counts when it is kept.
  *
  * @phpstan-type ShopLine array{seller_id: int|null, name: string, tin: mixed, invoices: int, sales: float, gst: float, refunds: float, refund_gst: float, net_sales: float, net_gst: float}
  */
@@ -81,23 +83,34 @@ class GstReportService
      */
     protected function shops(Carbon $from, Carbon $to, Collection $refunds): array
     {
+        // A booking fee invoiced on its own is not counted again with the rest of the sale
         $sales = $this->paidIn(DB::table('seller_orders')->join('orders', 'orders.id', '=', 'seller_orders.order_id'), $from, $to)
             ->where('seller_orders.gst_registered', true)
             ->groupBy('seller_orders.seller_id')
-            ->selectRaw('seller_orders.seller_id, COUNT(*) AS invoices, SUM(COALESCE(seller_orders.gst_taxable, seller_orders.subtotal)) AS sales, SUM(seller_orders.gst_amount) AS gst, MAX(seller_orders.gst_tin) AS tin, MAX(seller_orders.gst_business_name) AS name')
+            ->selectRaw('seller_orders.seller_id, COUNT(*) AS invoices, SUM(COALESCE(seller_orders.gst_taxable, seller_orders.subtotal) - COALESCE(seller_orders.deposit_amount, 0)) AS sales, SUM(seller_orders.gst_amount - COALESCE(seller_orders.deposit_gst, 0)) AS gst, MAX(seller_orders.gst_tin) AS tin, MAX(seller_orders.gst_business_name) AS name')
+            ->get()
+            ->keyBy(fn ($row) => (int) $row->seller_id);
+        // Booking fees paid in the month, each with its own invoice
+        $fees = DB::table('seller_orders')
+            ->whereNotNull('seller_orders.deposit_invoice_number')
+            ->whereBetween('seller_orders.deposit_invoiced_at', [$from, $to])
+            ->where('seller_orders.gst_registered', true)
+            ->groupBy('seller_orders.seller_id')
+            ->selectRaw('seller_orders.seller_id, COUNT(*) AS invoices, SUM(seller_orders.deposit_amount) AS sales, SUM(seller_orders.deposit_gst) AS gst, MAX(seller_orders.gst_tin) AS tin, MAX(seller_orders.gst_business_name) AS name')
             ->get()
             ->keyBy(fn ($row) => (int) $row->seller_id);
 
         $refunded = $refunds->filter(fn (array $refund) => $refund['part']->gst_registered)->groupBy(fn (array $refund) => (int) $refund['part']->seller_id);
-        $keys = $sales->keys()->merge($refunded->keys())->unique()->values();
+        $keys = $sales->keys()->merge($fees->keys())->merge($refunded->keys())->unique()->values();
         $sellers = User::withTrashed()->whereIn('id', $keys->filter()->all())->get()->keyBy('id');
 
-        $shops = $keys->map(function (int $key) use ($sales, $refunded, $sellers) {
-            $row = $sales->get($key);
+        $shops = $keys->map(function (int $key) use ($sales, $fees, $refunded, $sellers) {
+            $row = $sales->get($key) ?? $fees->get($key);
+            $fee = $fees->get($key);
             $rows = $refunded->get($key, collect());
             $part = $rows->first()['part'] ?? null;
-            $amount = round((float) ($row->sales ?? 0), 2);
-            $gst = round((float) ($row->gst ?? 0), 2);
+            $amount = round((float) ($sales->get($key)->sales ?? 0) + (float) ($fee->sales ?? 0), 2);
+            $gst = round((float) ($sales->get($key)->gst ?? 0) + (float) ($fee->gst ?? 0), 2);
             $refunds = round((float) $rows->sum('goods'), 2);
             $refundGst = round((float) $rows->sum('goods_gst'), 2);
 
@@ -105,7 +118,7 @@ class GstReportService
                 'seller_id' => $key ?: null,
                 'name' => (string) ($row->name ?? $part->gst_business_name ?? $sellers->get($key)?->shopName() ?? 'iruali'),
                 'tin' => $row->tin ?? $part->gst_tin,
-                'invoices' => (int) ($row->invoices ?? 0),
+                'invoices' => (int) ($sales->get($key)->invoices ?? 0) + (int) ($fee->invoices ?? 0),
                 'sales' => $amount,
                 'gst' => $gst,
                 'refunds' => $refunds,
@@ -134,6 +147,10 @@ class GstReportService
         $commission = $this->paidIn(DB::table('seller_orders')->join('orders', 'orders.id', '=', 'seller_orders.order_id'), $from, $to)
             ->selectRaw('COALESCE(SUM(seller_orders.commission_amount), 0) AS amount, COALESCE(SUM(seller_orders.commission_gst), 0) AS gst')
             ->first();
+        // Commission on booking fees kept for the shops when their orders were cancelled
+        $kept = DB::table('seller_orders')->whereBetween('seller_orders.deposit_kept_at', [$from, $to])
+            ->selectRaw('COALESCE(SUM(seller_orders.deposit_commission), 0) AS amount, COALESCE(SUM(seller_orders.deposit_commission_gst), 0) AS gst')
+            ->first();
 
         $line = function (float $amount, float $gst, float $refunded, float $refundedGst): array {
             return [
@@ -143,7 +160,7 @@ class GstReportService
         };
 
         $lines = [
-            'commission' => $line((float) ($commission->amount ?? 0), (float) ($commission->gst ?? 0), (float) $refunds->sum('commission'), (float) $refunds->sum('commission_gst')),
+            'commission' => $line((float) ($commission->amount ?? 0) + (float) ($kept->amount ?? 0), (float) ($commission->gst ?? 0) + (float) ($kept->gst ?? 0), (float) $refunds->sum('commission'), (float) $refunds->sum('commission_gst')),
             'delivery' => $line(
                 (float) $orders->sum(fn (Order $order) => $this->gst->deliveryFee($order)),
                 (float) $orders->sum('delivery_gst'),
@@ -185,7 +202,21 @@ class GstReportService
             $events->push($this->refund('dispute', $dispute->resolved_at, $dispute->order, $dispute->sellerOrder, (float) $dispute->amount_resolved, (float) $dispute->sellerOrder?->subtotal));
         }
 
-        // Paid orders cancelled: every part's sale is reversed, and the delivery fee once per order
+        // Booking fees refunded when their orders were cancelled: the fee's own invoice is reversed
+        $fees = SellerOrder::whereNotNull('deposit_invoice_number')->whereBetween('deposit_reversed_at', [$from, $to])
+            ->with(['order' => fn ($q) => $q->withTrashed()])->orderBy('id')->get();
+        foreach ($fees as $part) {
+            if ($part->order) {
+                $events->push([
+                    'kind' => 'booking_fee', 'date' => $part->deposit_reversed_at, 'order' => $part->order, 'part' => $part,
+                    'goods' => round((float) $part->deposit_amount, 2), 'goods_gst' => round((float) $part->deposit_gst, 2),
+                    'delivery' => 0.0, 'delivery_gst' => 0.0, 'commission' => 0.0, 'commission_gst' => 0.0,
+                ]);
+            }
+        }
+
+        // Paid orders cancelled: every part's sale is reversed (a booking fee invoiced on its own is
+        // reversed above, or stays a sale when kept), and the delivery fee once per order
         $seen = [];
         $cancelled = SellerOrder::whereBetween('gst_reversed_at', [$from, $to])->with(['order' => fn ($q) => $q->withTrashed()])->orderBy('id')->get();
         foreach ($cancelled as $part) {
@@ -200,8 +231,8 @@ class GstReportService
                 'date' => $part->gst_reversed_at,
                 'order' => $order,
                 'part' => $part,
-                'goods' => round((float) ($part->gst_taxable ?? $part->subtotal), 2),
-                'goods_gst' => round((float) $part->gst_amount, 2),
+                'goods' => round((float) ($part->gst_taxable ?? $part->subtotal) - (float) $part->deposit_amount, 2),
+                'goods_gst' => round((float) $part->gst_amount - (float) $part->deposit_gst, 2),
                 'delivery' => $first ? $this->gst->deliveryFee($order) : 0.0,
                 'delivery_gst' => $first ? round((float) $order->delivery_gst, 2) : 0.0,
                 'commission' => round((float) $part->commission_amount, 2),
@@ -210,7 +241,7 @@ class GstReportService
         }
 
         return $events->filter(fn (?array $event) => $event !== null
-            && $event['order']->payment_status === 'paid'
+            && ($event['order']->payment_status === 'paid' || $event['kind'] === 'booking_fee')
             && ! in_array($event['order']->id, $giftCardOrders, true))->values();
     }
 

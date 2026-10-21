@@ -32,7 +32,7 @@
             <form method="POST" action="{{ route('admin.orders.balance-due', $order) }}" class="flex flex-wrap items-end gap-2 border-t border-primary-200 pt-2" data-balance-due-form>
                 @csrf
                 <label class="text-xs text-gray-700">More time for the balance
-                    <input type="date" name="balance_due_on" required min="{{ today()->toDateString() }}" max="{{ today()->addDays(90)->toDateString() }}" value="{{ today()->addDays(\App\Services\BookingFeeService::BALANCE_DAYS)->toDateString() }}" class="mt-1 block rounded-lg border border-gray-300 px-2 py-1 text-sm">
+                    <input type="date" name="balance_due_on" required min="{{ today()->toDateString() }}" max="{{ today()->addDays(90)->toDateString() }}" value="{{ today()->addDays((int) $order->balance_days ?: \App\Services\BookingFeeService::BALANCE_DAYS)->toDateString() }}" class="mt-1 block rounded-lg border border-gray-300 px-2 py-1 text-sm">
                 </label>
                 <button class="rounded-lg border border-primary-300 bg-white px-3 py-1.5 text-sm font-semibold text-primary-700 hover:bg-primary-50">Give more time</button>
             </form>

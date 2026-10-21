@@ -30,10 +30,12 @@ use Throwable;
  *   bank transfer (the wallet can pay part of the fee); the customer ticks that the fee is kept if
  *   they cancel. The order keeps the fee (orders.deposit_amount) and the customer pays only that.
  * - Booking fee paid: PaymentService::confirm() moves the order to "deposit_paid" (feePaid()) and
- *   tells the shop to order the item. Points, the GST invoice and the shop's earnings wait for the
- *   balance, when the order is paid like any other.
+ *   tells the shop to order the item. The fee gets its own invoice with the GST in it
+ *   (GstService::assignDepositInvoice()); points, the invoice for the rest and the shop's earnings
+ *   wait for the balance, when the order is paid like any other.
  * - Stock arrived (PreorderService::receiveStock()): once nothing in the order waits for stock, the
- *   customer is sent the balance with a payment link by SMS and email, due in BALANCE_DAYS days
+ *   customer is sent the balance with a payment link by SMS and email, due in the product's days
+ *   to pay (products.preorder_balance_days, BALANCE_DAYS by default; the order keeps them)
  *   (requestBalance()). The order can't be sent before it is paid (FulfilmentService, OrderService).
  * - Daily (preorders:balance-reminders): a reminder before the due date; past it, the team is told
  *   and Admin → Inbox lists it. An admin then cancels (keeping the fee) or moves the due date.
@@ -53,8 +55,11 @@ class BookingFeeService
     /** The largest booking fee as a percentage of the price. */
     public const MAX_PERCENT = 90;
 
-    /** Days the customer has to pay the balance once the stock has arrived. */
+    /** Days the customer has to pay the balance once the stock has arrived, unless the product sets its own. */
     public const BALANCE_DAYS = 7;
+
+    /** The balance's payment link keeps working this many days after the due date. */
+    public const LINK_DAYS_AFTER_DUE = 7;
 
     /** The reminder goes this many days before the balance is due. */
     public const REMIND_DAYS_BEFORE = 2;
@@ -100,8 +105,11 @@ class BookingFeeService
      * products with a booking fee, keyed by cart item id) and in total, and why the cart can't be
      * ordered like this (other items with them, or several shops), if so.
      *
+     * With them the days the order would be placed with: late after the fewest days of its lines
+     * (PreorderService::markOrder()) and the balance due after the most.
+     *
      * @param  array<int, mixed>  $preorderLines  the cart's pre-order lines keyed by cart item id (PreorderService)
-     * @return array{fee: float, lines: array<int, float>, problem: ?string}|null
+     * @return array{fee: float, lines: array<int, float>, problem: ?string, late_days: int, balance_days: int, gst: bool}|null
      */
     public function forCart(Cart $cart, array $preorderLines): ?array
     {
@@ -115,15 +123,21 @@ class BookingFeeService
             return null;
         }
 
-        $shops = $cart->items->filter(fn (CartItem $item) => isset($lines[(int) $item->id]))
-            ->map(fn (CartItem $item) => (int) ($item->product->seller_id ?? 0))->unique();
+        $feeItems = $cart->items->filter(fn (CartItem $item) => isset($lines[(int) $item->id]));
+        $shops = $feeItems->map(fn (CartItem $item) => (int) ($item->product->seller_id ?? 0))->unique();
         $problem = match (true) {
             count($lines) < $cart->items->count() => __('Pre-orders with a booking fee are ordered on their own. Please remove the other items from your cart and order them separately.'),
             $shops->count() > 1 => __('Pre-orders with a booking fee are ordered from one shop at a time. Please order from each shop separately.'),
             default => null,
         };
 
-        return ['fee' => round(array_sum($lines), 2), 'lines' => $lines, 'problem' => $problem];
+        return [
+            'fee' => round(array_sum($lines), 2), 'lines' => $lines, 'problem' => $problem,
+            'late_days' => (int) $feeItems->min(fn (CartItem $item) => $item->product->preorderLateDays()),
+            'balance_days' => (int) $feeItems->max(fn (CartItem $item) => $item->product->preorderBalanceDays()),
+            // The fee has GST in it when the shop is GST-registered (its own tax invoice: GstService)
+            'gst' => $shops->count() === 1 && app(GstService::class)->sellerRegistered($shops->first() ?: null),
+        ];
     }
 
     /**
@@ -136,39 +150,52 @@ class BookingFeeService
     }
 
     /**
-     * For the checkout page: the booking fee to pay now and the rest, remembered so that placing the
-     * order can tell if it changed in between. Null when the order is paid in full.
+     * For the checkout page: the booking fee to pay now and the rest, and its days, remembered so
+     * that placing the order can tell if they changed in between. Null when the order is paid in full.
      *
      * @param  array<int, mixed>  $preorderLines  PreorderService::checkoutLines()
-     * @return array{fee: float, lines: array<int, float>, problem: ?string}|null
+     * @return array{fee: float, lines: array<int, float>, problem: ?string, late_days: int, balance_days: int, gst: bool}|null
      */
     public function checkout(Cart $cart, array $preorderLines, float $goodsTotal): ?array
     {
         $booking = $this->forCart($cart, $preorderLines);
         $deposit = $booking ? $this->depositFor($booking['fee'], $goodsTotal) : null;
-        Session::put(self::SESSION_SHOWN, $deposit);
+        Session::put(self::SESSION_SHOWN, $deposit === null ? null : ['fee' => $deposit, 'late_days' => $booking['late_days'], 'balance_days' => $booking['balance_days']]);
 
         return $deposit === null ? null : ['fee' => $deposit] + $booking;
     }
 
     /**
      * Placing the order (OrderService, in its transaction): the booking fee for the pre-order lines
-     * reserveForCheckout() picked, as the checkout page showed it. Null for an order paid in full.
+     * reserveForCheckout() picked and the days to pay the balance, as the checkout page showed them.
+     * Null for an order paid in full.
      *
      * @param  array<int, mixed>  $preorderLines  PreorderService::reserveForCheckout()
      * @param  array<string, mixed>  $shippingData  payment_method and agree_booking_fee from the form
+     * @return array{deposit: float, balance_days: int}|null
      *
      * @throws RuntimeException a message for the customer
      */
-    public function forOrder(Cart $cart, array $preorderLines, array $shippingData, float $goodsTotal): ?float
+    public function forOrder(Cart $cart, array $preorderLines, array $shippingData, float $goodsTotal): ?array
     {
         $booking = $this->forCart($cart, $preorderLines);
         $deposit = $booking ? $this->depositFor($booking['fee'], $goodsTotal) : null;
 
-        if (Session::has(self::SESSION_SHOWN) && round((float) Session::get(self::SESSION_SHOWN), 2) !== round((float) $deposit, 2)) {
-            throw new RuntimeException($deposit === null
-                ? __('Your order no longer has a booking fee. Please check your order and place it again.')
-                : __('The booking fee for your order is now :amount. Please check your order and place it again.', ['amount' => Money::format($deposit)]));
+        $shown = Session::get(self::SESSION_SHOWN);
+        if ($shown !== null) {
+            $shown = is_array($shown) ? $shown : ['fee' => (float) $shown]; // a checkout page from before the days were shown
+            if ($deposit === null || round((float) ($shown['fee'] ?? 0), 2) !== round($deposit, 2)) {
+                throw new RuntimeException($deposit === null
+                    ? __('Your order no longer has a booking fee. Please check your order and place it again.')
+                    : __('The booking fee for your order is now :amount. Please check your order and place it again.', ['amount' => Money::format($deposit)]));
+            }
+            // Fewer days to pay, or more days late before a full refund, than the page said
+            if ($booking !== null && ($booking['late_days'] > (int) ($shown['late_days'] ?? $booking['late_days']) || $booking['balance_days'] < (int) ($shown['balance_days'] ?? $booking['balance_days']))) {
+                throw new RuntimeException(__('The shop has changed the terms of this pre-order. Please check your order and place it again.'));
+            }
+        } elseif ($deposit !== null && Session::has(PreorderService::SESSION_SHOWN)) {
+            // The checkout page showed no booking fee (the item was in stock then)
+            throw new RuntimeException(__('The booking fee for your order is now :amount. Please check your order and place it again.', ['amount' => Money::format($deposit)]));
         }
         if ($booking === null || $deposit === null) {
             return null;
@@ -184,7 +211,7 @@ class BookingFeeService
             throw new RuntimeException(__('Please tick that you agree to the booking fee terms.'));
         }
 
-        return $deposit;
+        return ['deposit' => $deposit, 'balance_days' => $booking['balance_days']];
     }
 
     // ---- Paying ---------------------------------------------------------------------------------
@@ -219,6 +246,7 @@ class BookingFeeService
         }
 
         Audit::record('booking_fee.paid', $order, ['amount' => (float) $order->deposit_amount, 'method' => $order->payment_method, 'order_number' => $order->order_number]);
+        app(GstService::class)->depositPaid($order); // the shop's invoice for the fee, with its GST
         app(OrderNotifier::class)->sendToCustomer($order, new \App\Notifications\PaymentUpdated($order, 'deposit'));
         $this->tellShops($order, 'deposit');
 
@@ -247,12 +275,13 @@ class BookingFeeService
 
     /**
      * Nothing in the order waits for stock any more (PreorderService::receiveStock()): ask the
-     * customer for the balance by SMS and email, with a payment link, due in BALANCE_DAYS days.
-     * Once per order; false when it isn't waiting for the balance.
+     * customer for the balance by SMS and email, with a payment link, due in the order's days to pay
+     * (as the product said when the order was placed). Once per order; false when it isn't waiting
+     * for the balance.
      */
     public function requestBalance(Order $order): bool
     {
-        $due = today()->addDays(self::BALANCE_DAYS);
+        $due = today()->addDays((int) $order->balance_days > 0 ? (int) $order->balance_days : self::BALANCE_DAYS);
         $asked = Order::whereKey($order->id)->where('payment_status', 'deposit_paid')->whereNotNull('deposit_amount')
             ->whereNull('balance_requested_at')->whereIn('status', ['pending', 'processing'])
             ->update(['balance_requested_at' => now(), 'balance_due_on' => $due->toDateString(), 'payment_link_sent_at' => now()]);
@@ -285,7 +314,7 @@ class BookingFeeService
             return;
         }
 
-        $until = ($order->balance_due_on ?? today())->copy()->addDays(self::BALANCE_DAYS)->endOfDay();
+        $until = ($order->balance_due_on ?? today())->copy()->addDays(self::LINK_DAYS_AFTER_DUE)->endOfDay();
         $url = PayLink::url($order, $until);
 
         try {
@@ -405,11 +434,16 @@ class BookingFeeService
         $fee = round((float) $order->deposit_amount, 2);
         $order->forceFill(['deposit_kept_amount' => $fee])->save();
 
-        // Booking-fee orders come from one shop (forCart())
-        $part = $order->sellerOrders()->whereNotNull('seller_id')->orderBy('id')->first();
-        $share = $part ? round($fee - round($fee * (float) $part->commission_rate / 100, 2), 2) : 0.0;
-        if ($part && $share > 0) {
-            SellerAdjustment::create(['seller_id' => $part->seller_id, 'amount' => $share, 'reason' => 'Booking fee kept: order '.$order->order_number.' cancelled']);
+        // Booking-fee orders come from one shop (forCart()). Its fee's invoice stands (GstService), and
+        // the shop is paid the fee less commission; iruali's own sales have no shop to pay
+        $part = $order->sellerOrders()->orderBy('id')->first();
+        $commission = $part?->seller_id ? round($fee * (float) $part->commission_rate / 100, 2) : 0.0;
+        $share = $part?->seller_id ? round($fee - $commission, 2) : 0.0;
+        if ($part) {
+            app(GstService::class)->depositKept($part, $commission);
+        }
+        if ($part?->seller_id && $share > 0) {
+            SellerAdjustment::create(['seller_id' => $part->seller_id, 'seller_order_id' => $part->id, 'amount' => $share, 'reason' => 'Booking fee kept: order '.$order->order_number.' cancelled']);
         }
         Audit::record('booking_fee.kept', $order, ['amount' => $fee, 'shop_share' => $share, 'order_number' => $order->order_number]);
 

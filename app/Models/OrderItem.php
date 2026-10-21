@@ -27,6 +27,7 @@ class OrderItem extends Model
         'preorder_allocated_quantity' => 'integer',
         'preorder_allocated_at' => 'datetime',
         'preorder_late_at' => 'datetime',
+        'preorder_late_days' => 'integer',
     ];
 
     /**

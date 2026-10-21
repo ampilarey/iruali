@@ -137,7 +137,7 @@ class OrderService
             // Create order
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
             if ($bookingFee !== null) {
-                $order->forceFill(['deposit_amount' => $bookingFee])->save();
+                $order->forceFill(['deposit_amount' => $bookingFee['deposit'], 'balance_days' => $bookingFee['balance_days']])->save();
             }
 
             // Process discounts and points

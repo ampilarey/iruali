@@ -64,7 +64,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($invoice['lines'] as $line)
+                @foreach($invoice['lines'] as $line)
                     <tr>
                         <td dir="ltr">{{ $line->order?->order_number }}</td>
                         <td>{{ $line->order?->created_at?->format('j M Y') }}</td>
@@ -73,9 +73,21 @@
                         <td class="num">{{ Money::format($line->commission_amount) }}</td>
                         @if($invoice['tax_invoice'])<td class="num">{{ Money::format($line->commission_gst) }}</td>@endif
                     </tr>
-                @empty
+                @endforeach
+                {{-- A pre-order's booking fee kept for the shop when the customer cancelled (BookingFeeService) --}}
+                @foreach($invoice['kept'] ?? [] as $line)
+                    <tr data-kept-booking-fee>
+                        <td dir="ltr">{{ $line->order?->order_number }} <span class="muted">({{ T::label('booking fee kept') }})</span></td>
+                        <td>{{ $line->order?->created_at?->format('j M Y') }}</td>
+                        <td class="num">{{ Money::format($line->deposit_amount) }}</td>
+                        <td class="num">{{ T::rate($line->commission_rate) }}%</td>
+                        <td class="num">{{ Money::format($line->deposit_commission) }}</td>
+                        @if($invoice['tax_invoice'])<td class="num">{{ Money::format($line->deposit_commission_gst) }}</td>@endif
+                    </tr>
+                @endforeach
+                @if($invoice['lines']->isEmpty() && collect($invoice['kept'] ?? [])->isEmpty())
                     <tr><td colspan="6" class="muted">{{ T::label('No orders in this payout.') }}</td></tr>
-                @endforelse
+                @endif
             </tbody>
         </table>
 

@@ -172,7 +172,7 @@ class BookingFeePreorderTest extends TestCase
         $this->get(route('products.show', $camera))->assertOk()
             ->assertSee('Pre-order: ships about 14 days after you order')
             ->assertSee('data-booking-fee', false)
-            ->assertSee('Booking fee now: MVR 300.00 per item (30% of the price). You pay the rest when it arrives, before it is delivered.')
+            ->assertSee('Booking fee now: MVR 300.00 per item (30% of the price). You pay the rest within 7 days of it arriving, before it is delivered.')
             ->assertSee('If you cancel, the booking fee is not refunded.');
 
         $customer = User::factory()->create();
@@ -229,8 +229,9 @@ class BookingFeePreorderTest extends TestCase
             ->assertSee('Balance when it arrives')
             ->assertSee('MVR 775.00')
             ->assertSee('name="agree_booking_fee"', false)
+            ->assertDontSee('data-booking-fee-gst', false) // the shop is not GST-registered
             ->assertDontSee('value="cod"', false);
-        $this->assertSame(300.0, session(BookingFeeService::SESSION_SHOWN));
+        $this->assertSame(['fee' => 300.0, 'late_days' => 7, 'balance_days' => 7], session(BookingFeeService::SESSION_SHOWN));
         $this->assertSame(['14d'], array_values(session(PreorderService::SESSION_SHOWN)), 'the checkout remembers "14 days after the order"');
 
         // The terms must be ticked, and cash on delivery is refused

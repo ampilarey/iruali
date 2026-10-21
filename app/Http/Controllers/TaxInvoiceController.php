@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 /**
  * Printable invoices. A shop's part of a paid order: a tax invoice when the shop was GST-registered
  * when the order was placed, otherwise a receipt (for the customer, a guest's signed link, the shop
- * and staff). iruali's commission invoice for a payout (for the shop and staff).
+ * and staff); with ?booking=1 the invoice for a pre-order's booking fee, from when the fee is paid.
+ * iruali's commission invoice for a payout (for the shop and staff).
  */
 class TaxInvoiceController extends Controller
 {
@@ -72,6 +73,9 @@ class TaxInvoiceController extends Controller
     protected function invoice(Order $order, SellerOrder $part, string $back)
     {
         abort_unless($part->order_id === $order->id, 404);
+        if (request()->boolean('booking')) {
+            return $this->bookingFeeInvoice($order, $part, $back);
+        }
         // Only paid orders have invoices (gift cards are not a sale of goods)
         abort_unless($order->payment_status === 'paid' && ! $order->isGiftCardOrder(), 404);
 
@@ -85,6 +89,30 @@ class TaxInvoiceController extends Controller
         $order->loadMissing('user');
 
         return view('tax.invoice', [
+            'order' => $order,
+            'part' => $part,
+            'items' => $part->items()->with('product')->orderBy('id')->get(),
+            'taxInvoice' => $this->gst->isTaxInvoice($part),
+            'back' => $back,
+        ]);
+    }
+
+    /**
+     * The booking fee's own invoice (App\Services\BookingFeeService): once the fee is paid, and kept
+     * after the order is cancelled (it says whether the fee was refunded or kept).
+     */
+    protected function bookingFeeInvoice(Order $order, SellerOrder $part, string $back)
+    {
+        if (! $part->deposit_invoice_number && $order->bookingFeePaid()) {
+            $this->gst->assignDepositInvoice($order); // one missed when the fee came in
+            $part->refresh();
+        }
+        abort_unless((bool) $part->deposit_invoice_number, 404);
+
+        $part->loadMissing('seller');
+        $order->loadMissing('user');
+
+        return view('tax.booking-fee-invoice', [
             'order' => $order,
             'part' => $part,
             'items' => $part->items()->with('product')->orderBy('id')->get(),

@@ -75,6 +75,7 @@ class Order extends Model
         'deposit_kept_amount' => 'decimal:2',
         'balance_requested_at' => 'datetime',
         'balance_due_on' => 'date',
+        'balance_days' => 'integer',
         'balance_reminded_at' => 'datetime',
         'balance_overdue_at' => 'datetime',
         'shipping_address' => 'array',
@@ -351,6 +352,17 @@ class Order extends Model
     public function balanceAmount(): float
     {
         return $this->hasBookingFee() ? round(max(0, (float) $this->total_amount - (float) $this->deposit_amount), 2) : 0.0;
+    }
+
+    /**
+     * Days past the expected date after which the order's pre-order items are late (the booking
+     * fee is then refunded in full if the customer cancels): as when the order was placed.
+     */
+    public function preorderLateDays(): int
+    {
+        $days = (int) $this->items()->where('is_preorder', true)->min('preorder_late_days');
+
+        return $days > 0 ? $days : \App\Services\PreorderService::LATE_AFTER_DAYS;
     }
 
     /** The stock arrived and the customer has been asked for the balance, not paid yet. */

@@ -43,7 +43,7 @@ class ProductReviewService
         'name', 'description', 'sku', 'category_id', 'price', 'compare_price', 'sale_price', 'flash_sale_ends_at',
         'has_variants', 'brand', 'weight', 'delivery_surcharge', 'video_provider', 'video_id',
         'preorder_enabled', 'preorder_ship_date', 'preorder_limit', 'preorder_note', 'preorder_closes_on', 'quote_min_quantity',
-        'preorder_lead_days', 'preorder_deposit_type', 'preorder_deposit_value',
+        'preorder_lead_days', 'preorder_deposit_type', 'preorder_deposit_value', 'preorder_balance_days', 'preorder_late_days',
     ];
 
     /** The variant fields a change to which needs review (stock and its alert level do not). */
@@ -349,6 +349,8 @@ class ProductReviewService
             'preorder_lead_days' => (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null,
             'preorder_deposit_type' => in_array($product->preorder_deposit_type, BookingFeeService::TYPES, true) ? $product->preorder_deposit_type : null,
             'preorder_deposit_value' => $nullableMoney($product->preorder_deposit_value),
+            'preorder_balance_days' => (int) $product->preorder_balance_days > 0 ? (int) $product->preorder_balance_days : null,
+            'preorder_late_days' => (int) $product->preorder_late_days > 0 ? (int) $product->preorder_late_days : null,
             'quote_min_quantity' => $product->getAttribute('quote_min_quantity') !== null ? (int) $product->getAttribute('quote_min_quantity') : null,
         ];
     }
@@ -713,6 +715,8 @@ class ProductReviewService
                 .(! empty($cols['preorder_deposit_type']) ? ', '.($cols['preorder_deposit_type'] === BookingFeeService::PERCENT
                     ? __('booking fee :value%', ['value' => rtrim(rtrim((string) ($cols['preorder_deposit_value'] ?? ''), '0'), '.')])
                     : __('booking fee :amount per item', ['amount' => $cols['preorder_deposit_value'] ?? '—'])) : '')
+                .(! empty($cols['preorder_deposit_type']) && ! empty($cols['preorder_balance_days']) ? ', '.__('the rest within :days days of arriving', ['days' => $cols['preorder_balance_days']]) : '')
+                .(! empty($cols['preorder_late_days']) ? ', '.__('late after :days days', ['days' => $cols['preorder_late_days']]) : '')
                 .(! empty($cols['preorder_note']) ? ' – '.$cols['preorder_note'] : '')
             : __('Off');
 

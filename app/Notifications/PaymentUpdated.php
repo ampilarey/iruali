@@ -72,9 +72,12 @@ class PaymentUpdated extends Notification implements ShouldQueue
         [$subject, $line] = $this->wording();
         $mail = (new MailMessage)->salutation(__('The iruali team'))->greeting(__('Hello :name,', ['name' => $notifiable->name ?? $this->order->customerName()]));
 
-        return $mail->subject($subject)
-            ->line($line)
-            ->action(__('View your order'), $this->order->customerUrl());
+        $mail->subject($subject)->line($line);
+        if ($this->part() === 'deposit') {
+            $mail->line(__('The invoice for the booking fee is on your order page.'));
+        }
+
+        return $mail->action(__('View your order'), $this->order->customerUrl());
     }
 
     public function toSms(object $notifiable): SmsText

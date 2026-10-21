@@ -83,21 +83,26 @@ Built as recommended (see `docs/FEATURES.md`, "Pre-orders with a booking fee"): 
 product (percentage or amount per item), "ships about N days after each order" or a fixed date, the
 balance by pay link (SMS and email) when "Stock arrived" is recorded, no delivery before it is paid,
 a reminder and an overdue alert, and the fee kept when the customer cancels (refunded in full when the
-shop cancels, can't get the item, moves the date later or is more than 7 days late). Booking-fee items
-are ordered on their own.
+shop cancels, can't get the item, moves the date later or is later than the product allows). Booking-fee
+items are ordered on their own.
 
 How to use it: make a shop account for these imports (e.g. "iruali Direct", not the admin account),
 then in its product form → Pre-order: tick "Take pre-orders", choose "Some days after each order"
-(e.g. 14), the most units, and "A booking fee: a percentage of the price" (e.g. 30). When the camera
-arrives, Seller Centre → Pre-orders → "Stock arrived"; the customer is asked for the balance.
+(e.g. 14), the most units, "A booking fee: a percentage of the price" (e.g. 30), and if they differ
+from 7, the days to pay the rest and the days late before a full refund. When the camera arrives,
+Seller Centre → Pre-orders → "Stock arrived"; the customer is asked for the balance. If the shop is
+GST-registered (Seller Centre → Settings → Tax), each booking fee gets its own tax invoice.
+
+Added on 2026-10-21 after the first version: each product sets its own days (to pay the rest once it
+arrives, and how late before a full refund), and the booking fee has GST with its own tax invoice.
 
 Still open (owner's choice):
 
-1. **GST:** the GST invoice is made when the order is fully paid (balance included). Ask the
-   accountant whether a booking fee needs its own receipt when it is paid, and how to treat a fee that
-   is kept when the customer cancels.
-2. **Balance due days:** 7 days after the stock arrives, fixed in code (`BookingFeeService::BALANCE_DAYS`);
-   an admin can give more time per order. Could become a setting.
+1. **GST check:** the booking fee gets its own tax invoice when it is paid, and the final invoice
+   deducts it. Ask the accountant to confirm this is how MIRA wants advance payments shown, and that a
+   fee kept when the customer cancels stays a sale.
+2. **Payouts:** a kept booking fee is credited to the shop, but paid out with the shop's next payout
+   that includes a delivered order (payouts need at least one).
 3. **Mixed carts:** booking-fee items with ordinary items in one order (second version).
 
 ## Testing still open

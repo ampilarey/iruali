@@ -131,7 +131,8 @@ class TaxController extends Controller
 
     /**
      * Every taxable line of the month: each shop invoice, iruali's commission and delivery on it,
-     * and each refund, with the GST recorded on the order.
+     * each booking fee's own invoice (and the commission on a fee kept), and each refund, with the
+     * GST recorded on the order.
      *
      * @param  array<string, mixed>  $report
      */
@@ -142,20 +143,40 @@ class TaxController extends Controller
             ->where('orders.payment_status', 'paid')->whereBetween('orders.paid_at', [$report['from'], $report['to']])
             ->orderBy('orders.paid_at')->toBase()
             ->get(['orders.order_number', 'orders.paid_at', 'orders.delivery_gst', 'seller_orders.invoice_number', 'seller_orders.gst_tin', 'seller_orders.gst_registered',
-                'seller_orders.gst_taxable', 'seller_orders.subtotal', 'seller_orders.gst_amount', 'seller_orders.commission_amount', 'seller_orders.commission_gst', 'users.business_name', 'users.name']);
+                'seller_orders.gst_taxable', 'seller_orders.subtotal', 'seller_orders.gst_amount', 'seller_orders.commission_amount', 'seller_orders.commission_gst',
+                'seller_orders.deposit_amount', 'seller_orders.deposit_gst', 'users.business_name', 'users.name']);
+        // Booking fees invoiced in the month, and fees kept for the shops (iruali's commission on them)
+        $fees = \App\Models\SellerOrder::query()->join('orders', 'orders.id', '=', 'seller_orders.order_id')
+            ->leftJoin('users', 'users.id', '=', 'seller_orders.seller_id')
+            ->whereNotNull('seller_orders.deposit_invoice_number')
+            ->where(fn ($q) => $q->whereBetween('seller_orders.deposit_invoiced_at', [$report['from'], $report['to']])->orWhereBetween('seller_orders.deposit_kept_at', [$report['from'], $report['to']]))
+            ->orderBy('seller_orders.deposit_invoiced_at')->toBase()
+            ->get(['orders.order_number', 'seller_orders.deposit_invoice_number', 'seller_orders.deposit_invoiced_at', 'seller_orders.deposit_kept_at', 'seller_orders.gst_tin', 'seller_orders.gst_registered',
+                'seller_orders.deposit_amount', 'seller_orders.deposit_gst', 'seller_orders.deposit_commission', 'seller_orders.deposit_commission_gst', 'users.business_name', 'users.name']);
+        $inMonth = fn ($date) => $date !== null && \Illuminate\Support\Carbon::parse($date)->between($report['from'], $report['to']);
 
-        return response()->streamDownload(function () use ($parts, $report) {
+        return response()->streamDownload(function () use ($parts, $fees, $inMonth, $report) {
             $out = fopen('php://output', 'w');
             fputcsv($out, ['date', 'kind', 'order', 'invoice', 'shop', 'tin', 'amount_incl_gst', 'gst']);
             foreach ($parts as $part) {
                 $date = \Illuminate\Support\Carbon::parse($part->paid_at)->toDateString();
                 $shop = $part->business_name ?: $part->name;
-                fputcsv($out, \App\Support\Csv::row([$date, 'shop sale', $part->order_number, $part->invoice_number, $shop, $part->gst_registered ? $part->gst_tin : '', number_format((float) ($part->gst_taxable ?? $part->subtotal), 2, '.', ''), number_format((float) $part->gst_amount, 2, '.', '')]));
+                // Less a booking fee invoiced on its own
+                fputcsv($out, \App\Support\Csv::row([$date, 'shop sale', $part->order_number, $part->invoice_number, $shop, $part->gst_registered ? $part->gst_tin : '', number_format((float) ($part->gst_taxable ?? $part->subtotal) - (float) $part->deposit_amount, 2, '.', ''), number_format((float) $part->gst_amount - (float) $part->deposit_gst, 2, '.', '')]));
                 fputcsv($out, \App\Support\Csv::row([$date, 'iruali commission', $part->order_number, '', $shop, '', number_format((float) $part->commission_amount, 2, '.', ''), number_format((float) $part->commission_gst, 2, '.', '')]));
+            }
+            foreach ($fees as $fee) {
+                $shop = $fee->business_name ?: $fee->name;
+                if ($inMonth($fee->deposit_invoiced_at)) {
+                    fputcsv($out, \App\Support\Csv::row([\Illuminate\Support\Carbon::parse($fee->deposit_invoiced_at)->toDateString(), 'shop sale (booking fee)', $fee->order_number, $fee->deposit_invoice_number, $shop, $fee->gst_registered ? $fee->gst_tin : '', number_format((float) $fee->deposit_amount, 2, '.', ''), number_format((float) $fee->deposit_gst, 2, '.', '')]));
+                }
+                if ($inMonth($fee->deposit_kept_at)) {
+                    fputcsv($out, \App\Support\Csv::row([\Illuminate\Support\Carbon::parse($fee->deposit_kept_at)->toDateString(), 'iruali commission (booking fee kept)', $fee->order_number, '', $shop, '', number_format((float) $fee->deposit_commission, 2, '.', ''), number_format((float) $fee->deposit_commission_gst, 2, '.', '')]));
+                }
             }
             foreach ($report['refunds'] as $refund) {
                 fputcsv($out, \App\Support\Csv::row([
-                    optional($refund['date'] ?? null)?->toDateString(), 'refund ('.($refund['kind'] ?? '').')', $refund['part']->order?->order_number, $refund['part']->invoice_number, '', '',
+                    optional($refund['date'] ?? null)?->toDateString(), 'refund ('.($refund['kind'] ?? '').')', $refund['part']->order?->order_number, ($refund['kind'] ?? '') === 'booking_fee' ? $refund['part']->deposit_invoice_number : $refund['part']->invoice_number, '', '',
                     number_format(-(float) (($refund['goods'] ?? 0) + ($refund['delivery'] ?? 0)), 2, '.', ''), number_format(-(float) (($refund['goods_gst'] ?? 0) + ($refund['delivery_gst'] ?? 0)), 2, '.', ''),
                 ]));
             }

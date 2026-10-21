@@ -309,7 +309,8 @@ and asks only for it: BML transactions carry a `purpose` (deposit or balance). P
 the order **"Booking fee paid"** (`payment_status` `deposit_paid`): the customer and the shop are told
 (the shop: order the item now); points, the GST invoice and the shop's earnings wait for the balance.
 When **Stock arrived** covers everything in the order, the customer is sent the **balance** with a
-payment link by SMS and email (`BookingBalanceDue`, due in 7 days, the link works until a week after),
+payment link by SMS and email (`BookingBalanceDue`, due in the product's **days to pay the rest**,
+`preorder_balance_days`, 7 by default; the link works until a week after),
 and the order page, the pay page and the bank-transfer box ask for it; the order **cannot be sent or
 made ready for pickup until the balance is paid**. Every morning `preorders:balance-reminders` sends
 one reminder two days before the due date and, once it has passed, tells the team
@@ -318,7 +319,20 @@ one reminder two days before the due date and, once it has passed, tells the tea
 a new link goes out). **Cancelling:** the customer cancelling (the cancel page explains it) keeps the
 fee for the shop — it is credited to the shop's earnings less commission (`SellerAdjustment`) and only
 the rest is refunded — unless the fee became refundable because the shop moved the date later or the
-order is more than 7 days late (`orders.deposit_refundable_at`). An admin cancelling refunds everything
+order is late (`orders.deposit_refundable_at`): more than the product's **late after** days
+(`preorder_late_days`, 7 by default; also when any pre-order shows as late in Admin → Inbox). Each order
+keeps the days it was placed with (`orders.balance_days`, `order_items.preorder_late_days`; a booking-fee
+order takes the fewest late days of its lines), and the checkout says them; fewer days to pay or more
+days before a refund since the checkout page refuse the order.
+**GST on the booking fee:** prices include GST, so the fee does too. When it is paid the shop's part gets
+its own **tax invoice (or receipt) for the booking fee** (`seller_orders.deposit_invoice_*`, the next
+number in the shop's series, the GST at the rate frozen when the order was placed); the customer, the
+shop and admins open it from the order page (`…/invoices/{part}?booking=1`). When the balance is paid the
+usual invoice shows the whole sale **less the booking fee invoiced**, and its GST is only the rest. The
+monthly GST report and ledger count the fee in the month it was paid and the rest when the balance is
+paid; a fee refunded on cancelling is a refund then (`deposit_reversed_at`); a fee kept stays a sale,
+and iruali's commission on it (with GST when iruali was registered) counts when it is kept
+(`deposit_kept_at`) and is a line of its own on iruali's commission invoice with the shop's next payout. An admin cancelling refunds everything
 unless they tick "Keep the booking fee" (e.g. the balance was never paid). A transfer slip for the fee
 is kept (`deposit_slip_path`) when the balance's slip comes, and "Confirm payment" says which part it
 records. The unpaid-order sweeps never cancel an order whose booking fee is paid.

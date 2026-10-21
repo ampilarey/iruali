@@ -35,7 +35,7 @@
                             · {{ trans_choice(':count order|:count orders', $items->pluck('order_id')->unique()->count(), ['count' => $items->pluck('order_id')->unique()->count()]) }}
                             @if((int) $product->preorder_lead_days > 0) · {{ trans_choice('ships about :count day after each order|ships about :count days after each order', (int) $product->preorder_lead_days, ['count' => (int) $product->preorder_lead_days]) }}
                             @elseif($product->preorder_ship_date) · {{ __('expected :date', ['date' => $product->preorder_ship_date->translatedFormat('j M Y')]) }}@endif
-                            @if($product->hasBookingFee()) · {{ __('booking fee :fee', ['fee' => app(\App\Services\BookingFeeService::class)->describe($product)]) }}@endif
+                            @if($product->hasBookingFee()) · {{ __('booking fee :fee', ['fee' => app(\App\Services\BookingFeeService::class)->describe($product)]) }} · {{ trans_choice('the rest within :count day of arriving|the rest within :count days of arriving', $product->preorderBalanceDays(), ['count' => $product->preorderBalanceDays()]) }}@endif
                         </p>
                     </div>
                     <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $row['accepting'] ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700' }}">

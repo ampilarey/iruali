@@ -44,6 +44,7 @@
         <div class="flex-1 overflow-y-auto px-3 py-4">{!! $menu('sidebar') !!}</div>
         <div class="border-t border-white/10 p-3 space-y-1 text-sm">
             <a href="{{ route('home') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white"><x-icon name="store" class="w-4 h-4" />View the shop</a>
+            <a href="{{ route('account') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white" data-admin-account-link><x-icon name="user" class="w-4 h-4" />My account <span class="ms-auto text-xs text-white/50">password, mobile</span></a>
             <a href="{{ route('profile.2fa.setup') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white" data-admin-2fa-link><x-icon name="shield" class="w-4 h-4" />Two-step sign-in <span class="ms-auto text-xs text-white/50">{{ $staff?->isTwoFactorEnabled() ? 'On' : 'Off' }}</span></a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -84,6 +85,7 @@
             <div class="flex-1 overflow-y-auto px-3 py-4">{!! $menu('drawer') !!}</div>
             <div class="border-t border-white/10 p-3 space-y-1 text-sm">
                 <a href="{{ route('home') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="store" class="w-4 h-4" />View the shop</a>
+                <a href="{{ route('account') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="user" class="w-4 h-4" />My account <span class="ms-auto text-xs text-white/50">password, mobile</span></a>
                 <a href="{{ route('profile.2fa.setup') }}" class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/80 hover:bg-white/10"><x-icon name="shield" class="w-4 h-4" />Two-step sign-in <span class="ms-auto text-xs text-white/50">{{ $staff?->isTwoFactorEnabled() ? 'On' : 'Off' }}</span></a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

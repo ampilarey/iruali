@@ -68,6 +68,9 @@ class AdminLayoutTest extends TestCase
     public function test_the_menu_links_to_the_staff_member_s_own_two_step_sign_in(): void
     {
         $this->actingAs($this->staff('admin'))->get(route('admin.dashboard'))->assertOk()
-            ->assertSee('data-admin-2fa-link', false)->assertSee(route('profile.2fa.setup'), false);
+            ->assertSee('data-admin-2fa-link', false)->assertSee(route('profile.2fa.setup'), false)
+            ->assertSee('data-admin-account-link', false)->assertSee('My account');
+        // ...which opens for staff, with the password change
+        $this->get(route('account'))->assertOk()->assertSee('data-password-form', false);
     }
 }

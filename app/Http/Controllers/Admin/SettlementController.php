@@ -46,11 +46,13 @@ class SettlementController extends Controller
     public function confirm(BankStatementLine $line, PaymentService $payments)
     {
         $order = $line->order;
-        if (! $order || $order->payment_status === 'paid' || $order->status === 'cancelled' || $order->payment_method === 'bml') {
+        if (! $order || $order->payment_status === 'paid' || $order->status === 'cancelled' || $order->payment_method === 'bml' || ($order->payment_status === 'deposit_paid' && ! $order->balanceDue())) {
             return back()->with('error', 'This order can\'t be confirmed from here.');
         }
-        if (abs((float) $order->total_amount - (float) $line->amount) > 0.01) {
-            return back()->with('error', 'The amount received ('.number_format((float) $line->amount, 2).') is not the order total ('.number_format((float) $order->total_amount, 2).'). Check it on the order page.');
+        // A pre-order with a booking fee is paid in two parts: the fee, then the balance (BookingFeeService)
+        $expected = $order->hasBookingFee() ? $order->cardAmount() : (float) $order->total_amount;
+        if (abs($expected - (float) $line->amount) > 0.01) {
+            return back()->with('error', 'The amount received ('.number_format((float) $line->amount, 2).') is not the amount due ('.number_format($expected, 2).'). Check it on the order page.');
         }
         $payments->confirm($order);
 

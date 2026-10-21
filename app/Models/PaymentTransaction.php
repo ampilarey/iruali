@@ -10,7 +10,8 @@ class PaymentTransaction extends Model
     /** States after which BML will not change the transaction any more (except refunds). */
     public const FINAL_FAILED = ['CANCELLED', 'FAILED', 'EXPIRED', 'VOIDED'];
 
-    protected $fillable = ['order_id', 'gateway', 'transaction_id', 'local_id', 'amount', 'currency', 'state', 'payment_url', 'response', 'confirmed_at'];
+    // purpose: deposit or balance on a pre-order with a booking fee (App\Services\BookingFeeService); null pays the whole order
+    protected $fillable = ['order_id', 'gateway', 'purpose', 'transaction_id', 'local_id', 'amount', 'currency', 'state', 'payment_url', 'response', 'confirmed_at'];
 
     protected $casts = [
         'amount' => 'integer',

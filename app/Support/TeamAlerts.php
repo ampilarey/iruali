@@ -25,6 +25,7 @@ class TeamAlerts
         'gst_due' => ['GST return due', 'Last month\'s GST return is not marked filed yet (on the reminder day).'],
         'late_order' => ['Late orders', 'Paid orders a shop has not started in time, or sent but past their delivery date (hourly check).'],
         'refund_due' => ['Refund due', 'A refund needs to be sent (cancelled paid order, approved return).'],
+        'booking_balance_overdue' => ['Pre-order balance overdue', 'A customer has not paid the balance of a booking-fee pre-order by its due date (daily check).'],
         'complaint' => ['Complaint or low rating', 'Someone sends the complaint form, or rates an order 1 or 2 out of 5.'],
         'dispute_opened' => ['Dispute opened', 'A customer opens a dispute about a shop.'],
         'return_requested' => ['Return requested', 'A customer asks to return items.'],

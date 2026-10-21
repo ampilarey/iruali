@@ -123,13 +123,15 @@ class ManualPaymentService
     }
 
     /**
-     * Waiting for a bank transfer or cash: the order is not cancelled and not paid yet.
+     * Waiting for a bank transfer or cash: the order is not cancelled and not paid yet. A booking-fee
+     * pre-order whose fee is paid waits again only once its balance is asked for (BookingFeeService).
      */
     public static function awaiting(Order $order): bool
     {
         return in_array($order->payment_method, self::METHODS, true)
             && $order->payment_status !== 'paid'
-            && $order->status !== 'cancelled';
+            && $order->status !== 'cancelled'
+            && ($order->payment_status !== 'deposit_paid' || $order->balanceDue());
     }
 
     /**
@@ -188,21 +190,25 @@ class ManualPaymentService
 
     /**
      * An admin saw the transfer in the bank, or has the cash: the order is paid from now on (as
-     * a paid card order is). False when it isn't waiting for a transfer or cash.
+     * a paid card order is), or for a booking-fee pre-order its fee or its balance is. False when it
+     * isn't waiting for a transfer or cash, or (with $part: deposit, balance or full) for another
+     * part than the one the admin's page showed.
      */
-    public function confirm(Order $order, User $admin, ?string $reference): bool
+    public function confirm(Order $order, User $admin, ?string $reference, ?string $part = null): bool
     {
-        if (! self::awaiting($order)) {
+        if (! self::awaiting($order) || ($part !== null && $part !== (BookingFeeService::nextPart($order) ?? 'full'))) {
             return false;
         }
 
         $reference = trim((string) $reference);
+        $paying = BookingFeeService::nextPart($order);
         $order->forceFill(['payment_reference' => $reference !== '' ? $reference : null, 'payment_confirmed_by' => $admin->id])->save();
         app(PaymentService::class)->confirm($order);
-        Audit::record('payment.confirmed_manually', $order, ['method' => $order->payment_method, 'reference' => $reference, 'order_number' => $order->order_number]);
+        Audit::record('payment.confirmed_manually', $order, array_filter(['method' => $order->payment_method, 'part' => $paying, 'reference' => $reference, 'order_number' => $order->order_number]));
 
-        // The shops were told to wait for a transfer: tell them they can send it now
-        if ($order->payment_method === self::TRANSFER) {
+        // The shops were told to wait for a transfer: tell them they can send it now (a booking-fee
+        // order's shops are told about each part by PaymentService)
+        if ($order->payment_method === self::TRANSFER && ! $order->hasBookingFee()) {
             $order->loadMissing('sellerOrders.seller');
             foreach ($order->sellerOrders as $part) {
                 if ($part->seller && $part->status !== 'cancelled') {
@@ -226,7 +232,7 @@ class ManualPaymentService
     {
         $cancelled = 0;
         \App\Support\PayLink::withoutLiveLink(Order::where('payment_method', self::TRANSFER)
-            ->where('payment_status', '!=', 'paid')
+            ->whereNotIn('payment_status', ['paid', 'deposit_paid']) // a booking fee paid: its balance waits for the stock
             ->where('status', 'pending')
             ->whereNull('payment_slip_uploaded_at')
             ->where('created_at', '<', now()->subHours(self::payWithinHours())))

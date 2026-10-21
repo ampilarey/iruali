@@ -112,6 +112,21 @@ class SmsTypes
                 'text' => 'iruali: your pre-order (order :number) now ships around :date. To cancel for a full refund, see your order.',
                 'data' => $order + ['date' => '12 Nov 2026'],
             ],
+            'booking_fee_received' => [
+                'group' => 'preorders', 'label' => 'Booking fee received',
+                'text' => 'iruali: booking fee :amount received for order :number. We will text you when your item arrives.',
+                'data' => $order + ['amount' => 'MVR 1,500.00'],
+            ],
+            'booking_balance_due' => [
+                'group' => 'preorders', 'label' => 'Pre-order arrived: pay the balance',
+                'text' => 'iruali: your pre-order (order :number) has arrived. Please pay the balance of :amount by :date: :url',
+                'data' => $order + ['amount' => 'MVR 3,500.00', 'date' => '12 Nov', 'url' => 'https://iruali.mv/pay/123?signature=…'], 'required' => ['url'],
+            ],
+            'booking_balance_reminder' => [
+                'group' => 'preorders', 'label' => 'Balance reminder',
+                'text' => 'iruali: reminder: please pay the balance of :amount for order :number by :date: :url',
+                'data' => $order + ['amount' => 'MVR 3,500.00', 'date' => '12 Nov', 'url' => 'https://iruali.mv/pay/123?signature=…'], 'required' => ['url'],
+            ],
             'new_message' => [
                 'group' => 'messages', 'label' => 'New message about an order',
                 'text' => 'iruali: new message from :sender about order :number. Reply at :url',

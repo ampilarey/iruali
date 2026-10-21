@@ -11,8 +11,9 @@ use Illuminate\Http\Request;
 
 /**
  * Seller Centre → Pre-orders: the shop's open pre-orders per product, "Stock arrived" (the units
- * that came go to the paid pre-orders, oldest first, and the rest go on sale) and moving the
- * expected date (the waiting customers are emailed). A shop only ever sees its own.
+ * that came go to the paid pre-orders, oldest first, and the rest go on sale; a booking-fee
+ * pre-order with everything in is asked for its balance) and moving the expected date (the waiting
+ * customers are emailed). A shop only ever sees its own.
  */
 class PreorderController extends Controller
 {
@@ -82,13 +83,21 @@ class PreorderController extends Controller
 
     /**
      * Move the expected date: the pre-orders still waiting take it and their customers are emailed.
+     * A product that ships some days after each order keeps doing so; only its waiting orders move.
      */
-    public function moveDate(Request $request, Product $product)
+    public function moveDate(Request $request, Product $product, PreorderService $preorders)
     {
         $this->authorizeProduct($product);
         $data = $request->validate([
             'preorder_ship_date' => ['required', 'date', 'after:today', 'before_or_equal:'.today()->addYear()->toDateString()],
         ], PreorderService::formMessages());
+
+        if ((int) $product->preorder_lead_days > 0) {
+            $date = \Illuminate\Support\Carbon::parse($data['preorder_ship_date'])->startOfDay();
+            $preorders->dateMoved($product, null, $date);
+
+            return back()->with('success', __('The waiting pre-orders now ship around :date. Their customers have been emailed.', ['date' => $date->translatedFormat('j M Y')]));
+        }
 
         $product->forceFill(['preorder_ship_date' => $data['preorder_ship_date']])->save();
         if (! $product->wasChanged('preorder_ship_date')) {

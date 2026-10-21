@@ -25,7 +25,7 @@ class StatusEnumsTest extends TestCase
     {
         $this->assertSame(['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'], OrderStatus::values());
         $this->assertSame(OrderStatus::values(), SellerOrderStatus::values());
-        $this->assertSame(['unpaid', 'paid'], PaymentStatus::values());
+        $this->assertSame(['unpaid', 'deposit_paid', 'paid'], PaymentStatus::values());
         $this->assertSame(['requested', 'approved', 'refunded', 'rejected'], ReturnStatus::values());
         $this->assertSame(['open', 'awaiting_customer', 'awaiting_seller', 'resolved_refund', 'resolved_partial', 'resolved_rejected'], DisputeStatus::values());
         $this->assertSame(['pending', 'paid'], PayoutStatus::values());

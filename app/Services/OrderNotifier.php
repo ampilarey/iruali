@@ -77,7 +77,9 @@ class OrderNotifier
 
     protected function send(?User $user, BaseNotification $notification): void
     {
-        if (! $user || ! $user->email || $user->isSmokeTest()) {
+        // A customer who signed up with only a mobile number has no email: their messages come by
+        // SMS (User::notificationChannels()). With neither there is nowhere to send.
+        if (! $user || $user->isSmokeTest() || (blank($user->email) && ! $user->isPhoneVerified())) {
             return;
         }
 

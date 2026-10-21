@@ -31,6 +31,7 @@ return [
             // Orders, but not money: confirming a payment or recording a refund is finance/admin.
             'admin.orders', 'admin.orders.show', 'admin.orders.status', 'admin.orders.parts.status',
             'admin.orders.bml-sync', 'admin.orders.messages.store', 'admin.orders.invoice', 'admin.orders.payment-link',
+            'admin.orders.balance-due', // more time for a pre-order's balance (BookingFeeService)
             'admin.orders.parts.tracking', 'admin.orders.parts.collected', 'admin.orders.parts.packing-slip',
             'admin.returns', 'admin.returns.*',
             'admin.reviews', 'admin.reviews.*',
@@ -53,7 +54,7 @@ return [
             'admin.payouts', 'admin.payouts.*',
             'admin.sellers.commission',
             'admin.orders', 'admin.orders.show', 'admin.orders.refunded', 'admin.orders.bml-sync',
-            'admin.orders.confirm-payment', 'admin.orders.payment-slip', 'admin.orders.payment-link', // bank transfers and cash on delivery
+            'admin.orders.confirm-payment', 'admin.orders.payment-slip', 'admin.orders.payment-link', 'admin.orders.balance-due', // bank transfers and cash on delivery
             'admin.returns', 'admin.returns.show', 'admin.returns.refunded', 'admin.returns.refund-approve', 'admin.orders.refund-approve',
             'admin.analytics',
             'admin.errors', 'admin.errors.show',

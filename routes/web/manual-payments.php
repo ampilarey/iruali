@@ -25,4 +25,6 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::get('/orders/{order}/payment-slip', [ManualPaymentController::class, 'slip'])->name('orders.payment-slip');
     Route::post('/orders/{order}/confirm-payment', [ManualPaymentController::class, 'confirm'])->name('orders.confirm-payment');
     Route::post('/orders/{order}/payment-link', [\App\Http\Controllers\Admin\PaymentLinkController::class, 'send'])->name('orders.payment-link')->middleware('throttle:10,1,admin.orders.payment-link');
+    // A pre-order with a booking fee: more time to pay the balance (App\Services\BookingFeeService)
+    Route::post('/orders/{order}/balance-due', [\App\Http\Controllers\Admin\BookingFeeController::class, 'moveDueDate'])->name('orders.balance-due')->middleware('throttle:10,1,admin.orders.balance-due');
 });

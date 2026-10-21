@@ -26,8 +26,10 @@ use Throwable;
 /**
  * Pre-orders: customers pay now for goods coming on a later shipment (stock reaches the islands
  * by ship). The shop switches them on per product (product form → "Pre-order"): the date it
- * expects to send them, the most units it takes (counted across the product's variants) and an
- * optional note.
+ * expects to send them, or "about N days after the order" (each order then gets its own date),
+ * the most units it takes (counted across the product's variants) and an optional note. With a
+ * booking fee the customer pays only the fee at checkout and the rest when the stock arrives
+ * (BookingFeeService).
  *
  * - Shoppers: while the product, or the chosen option, has no stock and units are left, the
  *   product page says "Pre-order: ships around <date>" and the button says "Pre-order"; the
@@ -53,28 +55,40 @@ class PreorderService
     /** The most units a shop can take as pre-orders for one product. */
     public const MAX_LIMIT = 99999;
 
+    /** "Ships about N days after the order": at most this many days. */
+    public const MAX_LEAD_DAYS = 365;
+
     /** Session: the cart lines the checkout page showed as pre-orders, with their dates. */
     public const SESSION_SHOWN = 'preorder_checkout_lines';
 
     // ---- The product form -----------------------------------------------------------------------
 
     /**
-     * Rules for the product form's "Pre-order" fieldset. The date, the limit and the note are only
-     * read while pre-orders are switched on; a form without the fieldset changes nothing.
+     * Rules for the product form's "Pre-order" fieldset. The date (or the days after the order), the
+     * limit, the note and the booking fee are only read while pre-orders are switched on; a form
+     * without the fieldset changes nothing.
      *
      * @return array<string, mixed>
      */
     public static function formRules(): array
     {
         $on = 'exclude_unless:preorder_enabled,1';
+        $onDate = fn ($input) => ($input->preorder_ships ?? 'date') !== 'days';
 
         return [
             'preorder_form' => 'nullable|boolean',
             'preorder_enabled' => 'nullable|boolean',
-            'preorder_ship_date' => [$on, 'required', 'date', 'after:today', 'before_or_equal:'.today()->addYear()->toDateString()],
+            // On a date, or "about N days after the order"
+            'preorder_ships' => [$on, 'nullable', 'in:date,days'],
+            'preorder_ship_date' => [$on, 'exclude_if:preorder_ships,days', 'required', 'date', 'after:today', 'before_or_equal:'.today()->addYear()->toDateString()],
+            'preorder_lead_days' => [$on, 'exclude_unless:preorder_ships,days', 'required', 'integer', 'min:1', 'max:'.self::MAX_LEAD_DAYS],
             'preorder_limit' => [$on, 'required', 'integer', 'min:1', 'max:'.self::MAX_LIMIT],
             'preorder_note' => [$on, 'nullable', 'string', 'max:255'],
-            'preorder_closes_on' => [$on, 'nullable', 'date', 'after_or_equal:today', 'before_or_equal:preorder_ship_date'],
+            'preorder_closes_on' => [$on, 'nullable', 'date', 'after_or_equal:today', \Illuminate\Validation\Rule::when($onDate, ['before_or_equal:preorder_ship_date'])],
+            // A booking fee now and the rest when the stock arrives (BookingFeeService): a percentage or an amount per unit
+            'preorder_deposit_type' => [$on, 'nullable', 'in:none,'.implode(',', BookingFeeService::TYPES)],
+            'preorder_deposit_value' => [$on, 'exclude_unless:preorder_deposit_type,'.implode(',', BookingFeeService::TYPES), 'required', 'numeric', 'min:1',
+                \Illuminate\Validation\Rule::when(fn ($input) => $input->preorder_deposit_type === BookingFeeService::PERCENT, ['max:'.BookingFeeService::MAX_PERCENT], ['max:999999.99'])],
         ];
     }
 
@@ -92,12 +106,19 @@ class PreorderService
             'preorder_limit.min' => __('Take at least 1 unit as a pre-order.'),
             'preorder_closes_on.after_or_equal' => __('The last day for pre-orders can\'t be in the past.'),
             'preorder_closes_on.before_or_equal' => __('Pre-orders must close on or before the expected ship date.'),
+            'preorder_lead_days.required' => __('Give the number of days after the order when you usually send it.'),
+            'preorder_lead_days.min' => __('Give at least 1 day.'),
+            'preorder_lead_days.max' => __('Give at most :max days.', ['max' => self::MAX_LEAD_DAYS]),
+            'preorder_deposit_value.required' => __('Give the booking fee: a percentage of the price, or an amount per item.'),
+            'preorder_deposit_value.min' => __('The booking fee must be at least 1.'),
+            'preorder_deposit_value.max' => __('The booking fee can be at most :max% of the price, or less than the price as an amount.', ['max' => BookingFeeService::MAX_PERCENT]),
         ];
     }
 
     /**
      * The product's pre-order columns from the validated form (nothing when the form had no
-     * "Pre-order" fieldset). Switching pre-orders off keeps the date, limit and note for next time.
+     * "Pre-order" fieldset). Switching pre-orders off keeps the date, limit, note and booking fee
+     * for next time. Shipping "about N days after the order" clears the date (and the other way round).
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -112,13 +133,18 @@ class PreorderService
         }
 
         $note = trim((string) ($data['preorder_note'] ?? ''));
+        $days = ($data['preorder_ships'] ?? 'date') === 'days';
+        $fee = in_array($data['preorder_deposit_type'] ?? null, BookingFeeService::TYPES, true) ? $data['preorder_deposit_type'] : null;
 
         return [
             'preorder_enabled' => true,
-            'preorder_ship_date' => $data['preorder_ship_date'],
+            'preorder_ship_date' => $days ? null : $data['preorder_ship_date'],
+            'preorder_lead_days' => $days ? (int) $data['preorder_lead_days'] : null,
             'preorder_limit' => (int) $data['preorder_limit'],
             'preorder_note' => $note !== '' ? $note : null,
             'preorder_closes_on' => filled($data['preorder_closes_on'] ?? null) ? $data['preorder_closes_on'] : null,
+            'preorder_deposit_type' => $fee,
+            'preorder_deposit_value' => $fee ? round((float) $data['preorder_deposit_value'], 2) : null,
         ];
     }
 
@@ -126,13 +152,13 @@ class PreorderService
 
     /**
      * The product takes pre-orders now, whatever its stock: switched on, an expected date from
-     * today on, its last day for pre-orders (if any) not passed, a limit, on sale and not "coming
-     * soon". A shop on holiday is refused where every order is (CartService::addToCart(),
-     * OrderService) and productOffer() shows nothing for it.
+     * today on (or a number of days after the order), its last day for pre-orders (if any) not
+     * passed, a limit, on sale and not "coming soon". A shop on holiday is refused where every
+     * order is (CartService::addToCart(), OrderService) and productOffer() shows nothing for it.
      */
     public function accepting(Product $product): bool
     {
-        $date = $product->preorder_ship_date;
+        $date = $product->preorderShipDate();
         $closes = $product->preorder_closes_on;
 
         return (bool) $product->preorder_enabled
@@ -176,13 +202,14 @@ class PreorderService
     /**
      * The product page's pre-order offer, or null: the shop takes pre-orders for it now (not on
      * holiday, units left) and the product, or at least one of its options, is out of stock.
-     * "whole" is true when the product itself is out of stock (else only some options are).
+     * "whole" is true when the product itself is out of stock (else only some options are); "days"
+     * is set when it ships about that many days after the order; "fee" describes its booking fee.
      *
-     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface}|null
+     * @return array{date: CarbonInterface, note: ?string, left: int, whole: bool, closes: ?CarbonInterface, days: ?int, fee: ?string}|null
      */
     public function productOffer(Product $product): ?array
     {
-        $date = $product->preorder_ship_date;
+        $date = $product->preorderShipDate();
         if ($date === null || ! $this->accepting($product) || $product->seller?->isOnHoliday()) {
             return null;
         }
@@ -194,7 +221,11 @@ class PreorderService
 
         $left = $this->unitsLeft($product);
 
-        return $left > 0 ? ['date' => $date, 'note' => $product->preorder_note, 'left' => $left, 'whole' => $whole, 'closes' => $product->preorder_closes_on] : null;
+        return $left > 0 ? [
+            'date' => $date, 'note' => $product->preorder_note, 'left' => $left, 'whole' => $whole, 'closes' => $product->preorder_closes_on,
+            'days' => (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null,
+            'fee' => $product->hasBookingFee() ? app(BookingFeeService::class)->describe($product) : null,
+        ] : null;
     }
 
     /**
@@ -246,14 +277,15 @@ class PreorderService
 
     /**
      * A cart line that would be ordered as a pre-order now (no stock for it, the shop takes
-     * pre-orders, units left), or null: its expected ship date and the shop's note.
+     * pre-orders, units left), or null: its expected ship date, the shop's note, the days after the
+     * order when it ships that way, and the line's booking fee (null without one).
      *
-     * @return array{date: CarbonInterface, note: ?string}|null
+     * @return array{date: CarbonInterface, note: ?string, days: ?int, fee: ?float}|null
      */
     public function cartLine(CartItem $item): ?array
     {
         $product = $item->product;
-        $date = $product?->preorder_ship_date;
+        $date = $product?->preorderShipDate();
         if (! $product || $date === null || ! $this->accepting($product) || ($product->has_variants && ! $item->product_variant_id)) {
             return null;
         }
@@ -263,8 +295,35 @@ class PreorderService
             return null;
         }
         $stock = $variant ? (int) $variant->stock_quantity : (int) $product->stock_quantity;
+        if ($stock > 0 || $this->unitsLeft($product, $variant) <= 0) {
+            return null;
+        }
 
-        return $stock <= 0 && $this->unitsLeft($product, $variant) > 0 ? ['date' => $date, 'note' => $product->preorder_note] : null;
+        return [
+            'date' => $date, 'note' => $product->preorder_note,
+            'days' => (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null,
+            'fee' => $product->hasBookingFee() ? round(app(BookingFeeService::class)->unitFee($product, (float) $item->unit_price) * (int) $item->quantity, 2) : null,
+        ];
+    }
+
+    /**
+     * What a pre-order line promises, for telling whether it changed between the checkout page and
+     * placing the order: "14d" for about 14 days after the order, else the date.
+     */
+    protected function promise(?int $days, CarbonInterface $date): string
+    {
+        return $days !== null ? $days.'d' : $date->toDateString();
+    }
+
+    /** Is promise $now later than promise $seen (or of another kind)? */
+    protected function laterThan(string $now, string $seen): bool
+    {
+        $nowDays = str_ends_with($now, 'd');
+        if ($nowDays !== str_ends_with($seen, 'd')) {
+            return true;
+        }
+
+        return $nowDays ? (int) $now > (int) $seen : $now > $seen;
     }
 
     /**
@@ -272,7 +331,7 @@ class PreorderService
      * session, so that placing the order can tell a line the customer saw as a pre-order from one
      * that sold out in the meantime (reserveForCheckout()).
      *
-     * @return array<int, array{date: CarbonInterface, note: ?string}>
+     * @return array<int, array{date: CarbonInterface, note: ?string, days: ?int, fee: ?float}>
      */
     public function checkoutLines(Cart $cart): array
     {
@@ -283,7 +342,7 @@ class PreorderService
             }
         }
 
-        Session::put(self::SESSION_SHOWN, array_map(fn (array $line) => $line['date']->toDateString(), $lines));
+        Session::put(self::SESSION_SHOWN, array_map(fn (array $line) => $this->promise($line['days'], $line['date']), $lines));
 
         return $lines;
     }
@@ -295,7 +354,7 @@ class PreorderService
      *
      * @param  Collection<int, array<string, mixed>>  $shops
      * @param  array<string, string>  $areas
-     * @param  array<int, array{date: CarbonInterface, note: ?string}>|null  $lines  checkoutLines() when already worked out
+     * @param  array<int, array{date: CarbonInterface, note: ?string, days: ?int, fee: ?float}>|null  $lines  checkoutLines() when already worked out
      * @return Collection<int, array<string, mixed>>
      */
     public function withCheckoutEstimates(Collection $shops, Cart $cart, array $areas, ?array $lines = null): Collection
@@ -339,7 +398,7 @@ class PreorderService
      * already waiting, under the product's lock, so two checkouts for the last unit cannot both
      * get it. Lines with stock are left to OrderService::takeStock().
      *
-     * @return array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface}> keyed by cart item id
+     * @return array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int}> keyed by cart item id
      *
      * @throws RuntimeException a message for the customer
      */
@@ -360,7 +419,7 @@ class PreorderService
         foreach ($items as $item) {
             $product = $products[$item->product_id] ?? null;
             $variant = $item->product_variant_id ? ($variants[$item->product_variant_id] ?? null) : null;
-            $date = $product?->preorder_ship_date;
+            $date = $product?->preorderShipDate();
             if (! $product || $date === null || ($item->product_variant_id && ! $variant) || ($product->has_variants && ! $variant)) {
                 continue; // OrderService refuses these lines itself
             }
@@ -371,7 +430,8 @@ class PreorderService
                 continue;
             }
 
-            $lines[(int) $item->id] = ['product_id' => (int) $product->id, 'variant_id' => $variant ? (int) $variant->id : null, 'seller_id' => (int) ($product->seller_id ?? 0), 'date' => $date];
+            $days = (int) $product->preorder_lead_days > 0 ? (int) $product->preorder_lead_days : null;
+            $lines[(int) $item->id] = ['product_id' => (int) $product->id, 'variant_id' => $variant ? (int) $variant->id : null, 'seller_id' => (int) ($product->seller_id ?? 0), 'date' => $date, 'days' => $days];
             $wanted[(int) $product->id] = ($wanted[(int) $product->id] ?? 0) + (int) $item->quantity;
         }
 
@@ -386,12 +446,12 @@ class PreorderService
         }
 
         // The checkout page said which lines were pre-orders: one that sold out since, or whose date
-        // moved later, is not bought as a pre-order without the customer seeing it first
+        // (or days after the order) moved later, is not bought as a pre-order without the customer seeing it first
         $shown = Session::get(self::SESSION_SHOWN);
         if (is_array($shown)) {
             foreach ($lines as $id => $line) {
                 $seen = $shown[$id] ?? null;
-                if (! is_string($seen) || $line['date']->toDateString() > $seen) {
+                if (! is_string($seen) || $this->laterThan($this->promise($line['days'], $line['date']), $seen)) {
                     throw new RuntimeException(__('":name" is now a pre-order that ships around :date. Please check your cart and place the order again.', ['name' => $products[$line['product_id']]->name, 'date' => $line['date']->translatedFormat('j M')]));
                 }
             }
@@ -404,7 +464,7 @@ class PreorderService
      * Flag the new order's pre-order lines (with their expected date) and their shop parts:
      * "Awaiting stock" until the stock comes. No stock is taken for them.
      *
-     * @param  array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface}>  $lines  from reserveForCheckout()
+     * @param  array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int}>  $lines  from reserveForCheckout()
      */
     public function markOrder(Order $order, array $lines): void
     {
@@ -474,7 +534,10 @@ class PreorderService
                 $notes[] = __('Pre-order: :item ships around :date. We will email you when its stock arrives.', ['item' => $item->displayName(), 'date' => $item->preorder_ship_date->translatedFormat('j M')]);
             }
         }
-        if ($notes !== []) {
+        if ($notes !== [] && $order->hasBookingFee()) {
+            $notes[] = __('You pay the booking fee of :fee now and the balance of :balance when your item arrives, before it is delivered.', ['fee' => \App\Support\Money::format($order->deposit_amount), 'balance' => \App\Support\Money::format($order->balanceAmount())]);
+            $notes[] = __('If you cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, you get everything back.', ['days' => self::LATE_AFTER_DAYS]);
+        } elseif ($notes !== []) {
             $notes[] = __('Rather not wait? You can cancel the order for a full refund until it is sent.');
         }
 
@@ -494,7 +557,9 @@ class PreorderService
         $notes = $items->map(fn (OrderItem $item) => __('Pre-order: :item × :quantity, waiting for stock (expected :date).', [
             'item' => $item->displayName(), 'quantity' => $item->quantity, 'date' => $item->preorder_ship_date?->translatedFormat('j M') ?? '',
         ]))->values()->all();
-        if ($notes !== []) {
+        if ($notes !== [] && $order->hasBookingFee()) {
+            $notes[] = __('This pre-order has a booking fee of :fee: order the item once we tell you the fee is paid. When it arrives, record it under Pre-orders; we then ask the customer for the balance, and you send the order once it is paid.', ['fee' => \App\Support\Money::format($order->deposit_amount)]);
+        } elseif ($notes !== []) {
             $notes[] = __('When the stock arrives, record it in the Seller Centre under Pre-orders: you can send this order once its stock is in.');
         }
 
@@ -542,8 +607,8 @@ class PreorderService
             $touchedOrders = [];
             foreach ($waiting as $item) {
                 $order = $orders[$item->order_id] ?? null;
-                // Units go to pre-orders that are paid for and still on, in the order they were placed
-                if (! $order || $order->status === 'cancelled' || $order->payment_status !== 'paid') {
+                // Units go to pre-orders that are paid for (or whose booking fee is) and still on, in the order they were placed
+                if (! $order || $order->status === 'cancelled' || ! in_array($order->payment_status, ['paid', 'deposit_paid'], true)) {
                     continue;
                 }
                 $key = $locked->has_variants ? (int) $item->product_variant_id : 0;
@@ -638,16 +703,29 @@ class PreorderService
     }
 
     /**
+     * Customers whose items are now all there are told. A booking-fee order with nothing left
+     * waiting is asked for its balance instead (BookingFeeService::requestBalance()).
+     *
      * @param  Collection<int, OrderItem>  $items  pre-order lines whose stock is now all there
      */
     protected function notifyArrived(Collection $items): void
     {
         foreach ($items->groupBy('order_id') as $orderId => $lines) {
             $order = Order::find($orderId);
-            if ($order && $order->status !== 'cancelled') {
-                app(OrderNotifier::class)->sendToCustomer($order, new PreorderArrived($order, $lines->pluck('id')->all()));
+            if (! $order || $order->status === 'cancelled') {
+                continue;
             }
+            if ($order->hasBookingFee() && ! $this->hasWaitingLines($order) && app(BookingFeeService::class)->requestBalance($order)) {
+                continue;
+            }
+            app(OrderNotifier::class)->sendToCustomer($order, new PreorderArrived($order, $lines->pluck('id')->all()));
         }
+    }
+
+    /** Any line of the order still waiting for its stock. */
+    protected function hasWaitingLines(Order $order): bool
+    {
+        return $order->items()->where('is_preorder', true)->whereNull('preorder_allocated_at')->exists();
     }
 
     // ---- The expected date moved ----------------------------------------------------------------
@@ -655,16 +733,19 @@ class PreorderService
     /**
      * The shop moved the product's expected ship date: the pre-orders still waiting take the new
      * date (no longer late), and their customers are emailed it with a link to cancel. Runs when
-     * the product is saved with a new date (PreorderServiceProvider).
+     * the product is saved with a new date (PreorderServiceProvider), or with $to when a product
+     * that ships some days after each order moves its waiting orders (Seller Centre → Pre-orders).
+     * A booking fee becomes refundable for the orders whose date moved later (BookingFeeService).
      */
-    public function dateMoved(Product $product, ?CarbonInterface $from): void
+    public function dateMoved(Product $product, ?CarbonInterface $from, ?CarbonInterface $to = null): void
     {
-        $to = $product->preorder_ship_date;
+        $to ??= $product->preorder_ship_date;
         if ($to === null) {
             return;
         }
 
-        $changed = DB::transaction(function () use ($product, $to) {
+        $later = collect();
+        $changed = DB::transaction(function () use ($product, $to, &$later) {
             // Locks first: the product (checkouts hold it while they add pre-orders), its waiting lines and their parts
             Product::whereKey($product->id)->lockForUpdate()->first();
             $items = OrderItem::where('product_id', $product->id)->where('is_preorder', true)->whereNull('preorder_allocated_at')->orderBy('id')->lockForUpdate()->get();
@@ -675,6 +756,7 @@ class PreorderService
 
             $live = Order::whereIn('id', $items->pluck('order_id')->unique())->where('status', '!=', 'cancelled')->pluck('id')->flip();
             $changed = $items->filter(fn (OrderItem $item) => isset($live[$item->order_id]) && ! $item->preorder_ship_date?->isSameDay($to));
+            $later = $changed->filter(fn (OrderItem $item) => $item->preorder_ship_date === null || $item->preorder_ship_date->lt($to->copy()->startOfDay()))->pluck('order_id')->unique()->values();
             foreach ($changed as $item) {
                 $item->forceFill(['preorder_ship_date' => $to->toDateString(), 'preorder_late_at' => null])->save();
             }
@@ -691,6 +773,9 @@ class PreorderService
         if ($changed->isEmpty()) {
             return;
         }
+
+        // Moved later: a booking fee is refunded in full if the customer cancels now
+        app(BookingFeeService::class)->markRefundable($later, 'date_moved');
 
         Audit::record('preorder.date_moved', $product, [
             'from' => $from?->toDateString(), 'to' => $to->toDateString(),
@@ -719,11 +804,13 @@ class PreorderService
     /**
      * Cancel the order through the normal cancellation (OrderService::updateOrderStatus()): stock that
      * had arrived for it goes back, points, voucher and wallet are returned, and a card payment is
-     * flagged for refund (PaymentService::flagRefund()) like any paid order cancelled.
+     * flagged for refund (PaymentService::flagRefund()) like any paid order cancelled. A booking fee
+     * paid is kept, unless it became refundable (BookingFeeService::keepable()).
      */
     public function cancel(Order $order): bool
     {
-        if (! $this->canCancel($order) || ! app(OrderService::class)->updateOrderStatus($order, 'cancelled')) {
+        $keepFee = app(BookingFeeService::class)->keepable($order);
+        if (! $this->canCancel($order) || ! app(OrderService::class)->updateOrderStatus($order, 'cancelled', $keepFee)) {
             return false;
         }
 
@@ -759,8 +846,17 @@ class PreorderService
             ->whereHas('order', fn ($q) => $q->where('status', '!=', 'cancelled'))
             ->pluck('id');
 
+        if ($ids->isEmpty()) {
+            return 0;
+        }
+
         // By id, so the update only locks the lines it flags; checked again in case their stock just came
-        return $ids->isEmpty() ? 0 : OrderItem::whereIn('id', $ids)->whereNull('preorder_allocated_at')->whereNull('preorder_late_at')->update(['preorder_late_at' => now()]);
+        $flagged = OrderItem::whereIn('id', $ids)->whereNull('preorder_allocated_at')->whereNull('preorder_late_at')->update(['preorder_late_at' => now()]);
+
+        // Late: a booking fee is refunded in full if the customer cancels now
+        app(BookingFeeService::class)->markRefundable(OrderItem::whereIn('id', $ids)->whereNotNull('preorder_late_at')->pluck('order_id'), 'late');
+
+        return $flagged;
     }
 
     /** Orders with a pre-order flagged late and still waiting (the Admin → Inbox row). */

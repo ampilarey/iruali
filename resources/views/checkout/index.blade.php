@@ -13,8 +13,10 @@
     // Small-order fee (Admin → Settings → Ordering), charged with delivery; and a pause in force
     $smallOrderFee = \App\Support\OrderRules::smallOrderFee((float) $goodsTotal);
     $orderingPause = \App\Support\OrderRules::pause();
-    // Pre-order lines: marked in the summary, remembered for placing the order, and their shops' estimates count from their date
-    $preorderLines = app(\App\Services\PreorderService::class)->checkoutLines($cart);
+    // Pre-order lines (CheckoutController): marked in the summary, remembered for placing the order, and their shops'
+    // estimates count from their date. With a booking fee only the fee is paid now (BookingFeeService)
+    $preorderLines ??= app(\App\Services\PreorderService::class)->checkoutLines($cart);
+    $bookingFee ??= null;
     $deliveryCheckout['shops'] = app(\App\Services\PreorderService::class)->withCheckoutEstimates($deliveryCheckout['shops'], $cart, $deliveryCheckout['areas'], $preorderLines);
 @endphp
 
@@ -38,7 +40,7 @@
         </div>
     @endif
     @include('cart._holiday_notice', ['cart' => $cart])
-    @include('checkout._preorder_notice', ['lines' => $preorderLines])
+    @include('checkout._preorder_notice', ['lines' => $preorderLines, 'bookingFee' => $bookingFee])
 
     {{-- Loyalty-point forms live outside the order form (forms can't nest); their controls point at them with form="" --}}
     <form id="redeem-points-form" action="{{ route('checkout.redeemPoints') }}" method="POST">@csrf</form>
@@ -136,6 +138,10 @@
                         if (($orderingPause['mode'] ?? null) === 'cod') {
                             unset($paymentMethods[\App\Services\ManualPaymentService::COD]); // cash on delivery paused
                         }
+                        if ($bookingFee) {
+                            // A booking fee is paid by card or bank transfer (BookingFeeService)
+                            unset($paymentMethods[\App\Services\ManualPaymentService::COD], $paymentMethods[\App\Services\CreditService::METHOD]);
+                        }
                         $paymentHelp = [
                             'bml' => __('Pay now with Visa, Mastercard, American Express or Maestro on Bank of Maldives\' secure payment page.'),
                             \App\Services\ManualPaymentService::TRANSFER => __('Transfer to our bank account after placing the order, then upload the transfer slip. The shops send your order once the payment is confirmed.'),
@@ -208,7 +214,7 @@
                             <input type="checkbox" name="use_wallet" value="1" id="use-wallet" data-balance="{{ $walletBalance }}" @checked(old('use_wallet')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
                             <span class="text-sm">
                                 <span class="block font-medium text-gray-900">{{ __('Use wallet balance') }} <span dir="ltr">({{ \App\Support\Money::format($walletBalance) }})</span></span>
-                                <span class="block text-gray-600">{{ __('Your store credit pays first; anything left is paid by card.') }}</span>
+                                <span class="block text-gray-600">{{ $bookingFee ? __('Your store credit pays the booking fee first; anything left is paid by card or transfer.') : __('Your store credit pays first; anything left is paid by card.') }}</span>
                             </span>
                         </label>
                     @endif
@@ -245,6 +251,17 @@
                             <dt class="font-semibold">{{ __('Total') }}</dt>
                             <dd class="font-semibold text-primary-700" dir="ltr" id="order-total">{{ \App\Support\Money::format($goodsTotal + $smallOrderFee + $deliveryCheckout['fee']) }}</dd>
                         </div>
+                        @if($bookingFee)
+                            {{-- Pre-orders with a booking fee: the fee now, the rest when the stock arrives (BookingFeeService) --}}
+                            <div class="flex justify-between rounded-lg bg-primary-50 px-3 py-2 text-base" data-booking-fee-now>
+                                <dt class="font-semibold">{{ __('Booking fee to pay now') }}</dt>
+                                <dd class="font-semibold text-primary-700" dir="ltr">{{ \App\Support\Money::format($bookingFee['fee']) }}</dd>
+                            </div>
+                            <div class="flex justify-between" data-booking-balance>
+                                <dt class="text-gray-600">{{ __('Balance when it arrives') }}</dt>
+                                <dd class="font-medium" dir="ltr" id="booking-balance">{{ \App\Support\Money::format($goodsTotal + $smallOrderFee + $deliveryCheckout['fee'] - $bookingFee['fee']) }}</dd>
+                            </div>
+                        @endif
                         @if($walletBalance > 0)
                             <div class="flex justify-between hidden" id="wallet-row">
                                 <dt class="text-gray-600">{{ __('From your wallet') }}</dt>
@@ -272,6 +289,13 @@
                         ]) !!}</span>
                     </label>
                     @error('agree_terms')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                    @if($bookingFee)
+                        <label class="mt-3 flex items-start gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3 text-sm text-gray-800" data-agree-booking-fee>
+                            <input type="checkbox" name="agree_booking_fee" value="1" required @checked(old('agree_booking_fee')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
+                            <span>{{ __('I pay the booking fee of :fee now and the balance when my order arrives, before it is delivered. If I cancel, the booking fee is not refunded. If the shop cancels, can\'t get the item, moves the date later or is more than :days days late, I get everything back.', ['fee' => \App\Support\Money::format($bookingFee['fee']), 'days' => \App\Services\PreorderService::LATE_AFTER_DAYS]) }}</span>
+                        </label>
+                        @error('agree_booking_fee')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                    @endif
 
                     <button type="submit" @disabled($paymentMethods === []) class="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4 disabled:cursor-not-allowed disabled:opacity-50">
                         {{ __('Place Order') }}
@@ -285,6 +309,7 @@
 <script>
     (function () {
         var goods = @json((float) $goodsTotal + $smallOrderFee);
+        var bookingFee = @json($bookingFee ? (float) $bookingFee['fee'] : null); // a booking fee: the wallet pays towards it, the rest is the balance
         var prefix = @json(\App\Support\Money::prefix());
         var fmt = function (n) { return prefix + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
         var checkedZone = document.querySelector('input[name="delivery_zone"]:checked');
@@ -292,7 +317,7 @@
         var wallet = document.getElementById('use-wallet');
         var splitWallet = function () {
             if (! wallet) return;
-            var total = goods + currentFee;
+            var total = bookingFee !== null ? bookingFee : goods + currentFee;
             var show = wallet.checked;
             var fromWallet = Math.min(parseFloat(wallet.dataset.balance) || 0, total);
             document.getElementById('wallet-row').classList.toggle('hidden', ! show);
@@ -307,6 +332,7 @@
                 currentFee = fee;
                 document.getElementById('delivery-fee').textContent = fmt(fee);
                 document.getElementById('order-total').textContent = fmt(goods + fee);
+                if (bookingFee !== null) { document.getElementById('booking-balance').textContent = fmt(goods + fee - bookingFee); }
                 splitWallet();
             });
         });

@@ -3,15 +3,17 @@
 namespace App\Providers;
 
 use App\Models\Product;
+use App\Services\BookingFeeService;
 use App\Services\PreorderService;
 use App\Support\AdminInbox;
 use Carbon\CarbonInterface;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Pre-orders (App\Services\PreorderService): the Admin → Inbox row for late pre-orders, and the
- * emails to waiting customers when a shop moves a product's expected date. Routes are in
- * routes/web/preorders.php, the daily late check in routes/console.php.
+ * Pre-orders (App\Services\PreorderService): the Admin → Inbox rows for late pre-orders and for
+ * booking-fee balances overdue (BookingFeeService), and the emails to waiting customers when a shop
+ * moves a product's expected date. Routes are in routes/web/preorders.php, the daily late check and
+ * balance reminders in routes/console.php.
  */
 class PreorderServiceProvider extends ServiceProvider
 {
@@ -25,10 +27,20 @@ class PreorderServiceProvider extends ServiceProvider
             'severity' => 'warn',
         ]);
 
+        // Pre-orders with a booking fee whose balance is past its due date (BookingFeeService)
+        AdminInbox::register('booking_balances_overdue', fn () => [
+            'label' => 'Pre-order balances overdue',
+            'count' => app(BookingFeeService::class)->overdueCount(),
+            'route' => 'admin.preorders',
+            'severity' => 'danger',
+        ]);
+
         // The shop moved a product's expected date (product form or Seller Centre → Pre-orders):
-        // the pre-orders still waiting take it, and their customers are emailed with a link to cancel
+        // the pre-orders still waiting take it, and their customers are emailed with a link to cancel.
+        // Not when the product ships some days after each order, or switches to or from that.
         Product::updated(function (Product $product) {
-            if ($product->wasChanged('preorder_ship_date') && $product->preorder_ship_date !== null) {
+            if ($product->wasChanged('preorder_ship_date') && $product->preorder_ship_date !== null
+                && ! $product->preorder_lead_days && ! $product->getOriginal('preorder_lead_days')) {
                 $from = $product->getOriginal('preorder_ship_date');
                 app(PreorderService::class)->dateMoved($product, $from instanceof CarbonInterface ? $from : null);
             }

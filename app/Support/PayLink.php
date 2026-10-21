@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Order;
 use App\Services\BmlConnect;
 use App\Services\ManualPaymentService;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\URL;
 
@@ -17,17 +18,22 @@ class PayLink
 {
     public const HOURS = 48;
 
-    public static function url(Order $order): string
+    /**
+     * The signed link, working for HOURS hours or until $until (the balance of a booking-fee
+     * pre-order is given until a week after it is due: BookingFeeService).
+     */
+    public static function url(Order $order, ?CarbonInterface $until = null): string
     {
-        return URL::temporarySignedRoute('pay.show', now()->addHours(self::HOURS), ['order' => $order->getKey()]);
+        return URL::temporarySignedRoute('pay.show', $until ?? now()->addHours(self::HOURS), ['order' => $order->getKey()]);
     }
 
     /**
-     * Still waiting for money: pending, not paid, not cancelled.
+     * Still waiting for money: an unpaid pending order, or the balance of a booking-fee pre-order
+     * whose stock has arrived (Order::awaitingPayment()).
      */
     public static function payable(Order $order): bool
     {
-        return $order->status === 'pending' && $order->payment_status !== 'paid' && $order->cardAmount() > 0;
+        return $order->awaitingPayment() && $order->cardAmount() > 0;
     }
 
     public static function cardAvailable(): bool

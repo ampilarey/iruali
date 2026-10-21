@@ -85,6 +85,9 @@ Schedule::command('wishlist:price-drops')->dailyAt('10:00')->timezone('Indian/Ma
 // Pre-orders more than a week past their expected date go to Admin → Inbox ("Late pre-orders")
 Schedule::command('preorders:flag-late')->dailyAt('06:45')->timezone('Indian/Maldives')->withoutOverlapping(120);
 
+// Pre-orders with a booking fee: a reminder before the balance is due, and overdue balances to the team
+Schedule::command('preorders:balance-reminders')->dailyAt('09:40')->timezone('Indian/Maldives')->withoutOverlapping(120);
+
 // "Coming soon" products whose launch day has come go on sale, and those who asked are emailed
 Schedule::command('products:launch')->dailyAt('00:05')->timezone('Indian/Maldives')->withoutOverlapping(120);
 

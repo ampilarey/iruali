@@ -23,6 +23,9 @@
             @case('unpaid')
                 <p class="rounded-lg bg-amber-50 px-3 py-2 text-amber-800">{{ __('Wait until the customer has paid. Then mark it ready for pickup and they get their pickup code.') }}</p>
                 @break
+            @case('balance')
+                <p class="rounded-lg bg-amber-50 px-3 py-2 text-amber-800">{{ __('Wait until the customer has paid the balance of this pre-order. Then mark it ready for pickup and they get their pickup code.') }}</p>
+                @break
             @case('ok')
                 <form method="POST" action="{{ route('seller.orders.pickup.ready', $order) }}" class="space-y-1">
                     @csrf

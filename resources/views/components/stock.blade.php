@@ -2,7 +2,7 @@
 {{-- With the product: "Coming soon" before it goes on sale, "Pre-order" when it is out of stock but the shop takes pre-orders --}}
 @php
     $comingSoon = $product?->isComingSoon();
-    $preorderDate = ! $comingSoon && $product && $quantity <= 0 && $product->preorder_enabled && app(\App\Services\PreorderService::class)->isPreorderable($product) ? $product->preorder_ship_date : null;
+    $preorderDate = ! $comingSoon && $product && $quantity <= 0 && $product->preorder_enabled && app(\App\Services\PreorderService::class)->isPreorderable($product) ? $product->preorderShipDate() : null;
 @endphp
 @if($comingSoon)
     <p {{ $attributes->merge(['class' => 'text-xs font-semibold text-sun-ink']) }} data-coming-soon-badge>{{ $product->available_on ? __('Coming :date', ['date' => $product->available_on->translatedFormat('j M')]) : __('Coming soon') }}</p>

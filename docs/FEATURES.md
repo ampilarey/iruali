@@ -294,6 +294,35 @@ listings say "Pre-order · ships around 10 Nov" (`<x-stock :product>`) with a "P
 the product page; the shop filter has **Pre-order** (`?preorder=1`, `Product::scopePreorderable()`:
 open now with units left) and the home page a "Pre-order now" row.
 
+**Pre-orders with a booking fee** (`App\Services\BookingFeeService`), for goods a shop buys only once
+a customer orders them (e.g. from a shop abroad; the customer only sees the shop). The "Pre-order"
+fieldset also takes **when it ships**: on a date, or **about N days after each order**
+(`products.preorder_lead_days`; each order line gets its own date, and the listing can stay open all
+year) — and **what the customer pays at checkout**: the full price, or a **booking fee** as a
+percentage of the price (up to 90%) or an amount per item (`preorder_deposit_type`/`_value`; changes
+on a live product of a reviewed shop wait for review). The product page says "Booking fee now: MVR
+300.00 per item (30% of the price)" and the cancellation rule. Booking-fee items are **ordered on
+their own** (nothing else in the cart, one shop; the cart says so and checkout sends the customer back
+there), paid by card or bank transfer (no cash on delivery or pay-later; the wallet pays towards the
+fee), and the customer ticks the booking-fee terms. The order keeps the fee (`orders.deposit_amount`)
+and asks only for it: BML transactions carry a `purpose` (deposit or balance). Paying the fee makes
+the order **"Booking fee paid"** (`payment_status` `deposit_paid`): the customer and the shop are told
+(the shop: order the item now); points, the GST invoice and the shop's earnings wait for the balance.
+When **Stock arrived** covers everything in the order, the customer is sent the **balance** with a
+payment link by SMS and email (`BookingBalanceDue`, due in 7 days, the link works until a week after),
+and the order page, the pay page and the bank-transfer box ask for it; the order **cannot be sent or
+made ready for pickup until the balance is paid**. Every morning `preorders:balance-reminders` sends
+one reminder two days before the due date and, once it has passed, tells the team
+(`booking_balance_overdue` alert) and lists it in Admin → Inbox ("Pre-order balances overdue") and on
+`/admin/preorders` ("Balances due"); the admin order page can give more time (`admin.orders.balance-due`,
+a new link goes out). **Cancelling:** the customer cancelling (the cancel page explains it) keeps the
+fee for the shop — it is credited to the shop's earnings less commission (`SellerAdjustment`) and only
+the rest is refunded — unless the fee became refundable because the shop moved the date later or the
+order is more than 7 days late (`orders.deposit_refundable_at`). An admin cancelling refunds everything
+unless they tick "Keep the booking fee" (e.g. the balance was never paid). A transfer slip for the fee
+is kept (`deposit_slip_path`) when the balance's slip comes, and "Confirm payment" says which part it
+records. The unpaid-order sweeps never cancel an order whose booking fee is paid.
+
 **Coming soon.** A shop can list a product before it goes on sale: the product form's "Coming soon"
 fieldset (`products.coming_soon`, optional launch day `available_on`). It shows with a "Coming soon"
 label ("Coming 1 Nov" on cards, "on sale from …" on its page) but can't be added to a cart or
@@ -510,9 +539,10 @@ customer). Both run at the end of a deploy. `tests/load/` has a k6 load test.
 nightly database backups to local and optional S3/B2 with a monthly restore drill
 (`backup:restore-drill`), queued mail sent every minute by a short-lived worker, expired tokens
 and failed jobs pruned, guest carts cleaned, the daily errors digest (`errors:digest`) and the
-seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts, and the
-late pre-orders check (`preorders:flag-late`), and hourly the reopening of paused shop applications
-on their day (`sellers:applications-reopen`).
+seller low-stock digest, the brand followers' digest and the wishlist price-drop alerts, the
+late pre-orders check (`preorders:flag-late`) and the booking-fee balance reminders
+(`preorders:balance-reminders`), and hourly the reopening of paused shop applications on their day
+(`sellers:applications-reopen`).
 
 **Staging data.** `php artisan iruali:anonymise --force` rewrites personal data on a copy of
 the production database before it is used on the test site.

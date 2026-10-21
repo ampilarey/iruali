@@ -116,6 +116,10 @@ class OrderService
             $shippingData['small_order_fee'] = \App\Support\OrderRules::smallOrderFee((float) $discounts['final_total']);
             $shippingData['shipping_amount'] = round((float) $shippingData['shipping_amount'] + $shippingData['small_order_fee'], 2);
 
+            // Pre-orders with a booking fee: ordered on their own, paid by card or transfer, the fee as the
+            // checkout page showed it; the customer pays the fee now and the balance when the stock arrives
+            $bookingFee = app(BookingFeeService::class)->forOrder($cart, $preorders, $shippingData, (float) $discounts['final_total']);
+
             // Cash on delivery: one shop, no pre-orders, within the admins' limits (ManualPaymentService)
             if (($shippingData['payment_method'] ?? null) === ManualPaymentService::COD
                 && ($problem = app(ManualPaymentService::class)->codProblem($cart, (float) $discounts['final_total'] + (float) $shippingData['shipping_amount'], $shippingData['delivery_area'] ?? null))) {
@@ -132,6 +136,9 @@ class OrderService
 
             // Create order
             $order = $this->createOrder($user, $cart, $shippingData, $discounts, $loyaltyPointsEarned, $guest);
+            if ($bookingFee !== null) {
+                $order->forceFill(['deposit_amount' => $bookingFee])->save();
+            }
 
             // Process discounts and points
             $this->processDiscounts($order, $discounts);
@@ -171,16 +178,17 @@ class OrderService
                 app(PointsService::class)->record($user, -(int) $discounts['points']['points_redeemed'], 'redeemed', $order);
             }
 
-            // Store credit pays as much of the total as it can; the rest (if any) goes to the card
+            // Store credit pays as much of the total (or of the booking fee) as it can; the rest (if any) goes to the card
             $walletPaid = ! empty($shippingData['use_wallet']) ? app(WalletService::class)->payFromWallet($order, $user) : 0.0;
 
             // Clear cart
             $this->clearCart($cart);
+            Session::forget(BookingFeeService::SESSION_SHOWN);
 
             DB::commit();
 
-            // The wallet covered everything: the order is paid, no card step
-            if ($walletPaid > 0 && $order->fresh()->payment_method === 'wallet') {
+            // The wallet covered everything due now (the order, or its booking fee): no card step
+            if ($walletPaid > 0 && $order->fresh()->cardAmount() <= 0) {
                 app(PaymentService::class)->confirm($order);
             }
 
@@ -438,8 +446,9 @@ class OrderService
             $next = array_values(array_diff($next, ['cancelled']));
         }
 
-        // A shop's part still awaiting pre-order stock can't be sent, so neither can the whole order
-        if (in_array('shipped', $next, true) && app(PreorderService::class)->orderAwaitingStock($order)) {
+        // A shop's part still awaiting pre-order stock can't be sent, so neither can the whole order,
+        // nor a booking-fee pre-order before its balance is paid (BookingFeeService)
+        if (in_array('shipped', $next, true) && (app(PreorderService::class)->orderAwaitingStock($order) || ($order->hasBookingFee() && $order->payment_status !== 'paid'))) {
             $next = array_values(array_diff($next, ['shipped']));
         }
 
@@ -458,25 +467,31 @@ class OrderService
 
     /**
      * Move an order to a new status, enforcing the allowed transitions.
-     * Cancelling also restocks the items and reverses loyalty points and voucher use.
+     * Cancelling also restocks the items and reverses loyalty points and voucher use. With
+     * $keepBookingFee a booking fee paid is kept (the customer cancelled, or never paid the balance:
+     * BookingFeeService::keepable()) and only the rest is refunded.
      */
-    public function updateOrderStatus(Order $order, string $status): bool
+    public function updateOrderStatus(Order $order, string $status, bool $keepBookingFee = false): bool
     {
         if (! $this->canTransition($order, $status)) {
             return false;
         }
 
         $before = $order->status;
-        DB::transaction(function () use ($order, $status) {
+        DB::transaction(function () use ($order, $status, $keepBookingFee) {
             if ($status === 'cancelled') {
+                if ($keepBookingFee) {
+                    app(BookingFeeService::class)->keepOnCancel($order);
+                }
                 $this->reverseOrder($order);
             }
 
             $order->update(['status' => $status]);
 
             // The wallet's share went straight back in reverseOrder(); only the card part needs a manual refund
-            if ($status === 'cancelled' && $order->payment_status === 'paid' && $order->cardAmount() > 0) {
-                app(PaymentService::class)->flagRefund($order, $order->cardAmount(), 'Order cancelled after payment');
+            $refund = $status === 'cancelled' ? BookingFeeService::refundSplit($order, (float) $order->deposit_kept_amount)['card'] : 0.0;
+            if ($refund > 0) {
+                app(PaymentService::class)->flagRefund($order, $refund, (float) $order->deposit_kept_amount > 0 ? 'Order cancelled after payment (booking fee kept)' : 'Order cancelled after payment');
             }
 
             // Bring every shop's part along with the order

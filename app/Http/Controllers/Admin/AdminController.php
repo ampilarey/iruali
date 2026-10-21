@@ -437,13 +437,15 @@ class AdminController extends Controller
     {
         $this->checkAdminRole();
 
-        $request->validate(['status' => 'required|in:'.implode(',', array_keys(OrderService::TRANSITIONS))]);
+        $request->validate(['status' => 'required|in:'.implode(',', array_keys(OrderService::TRANSITIONS)), 'keep_booking_fee' => 'nullable|boolean']);
 
-        if (! $orderService->updateOrderStatus($order, $request->status)) {
+        // A pre-order's booking fee is refunded with the rest unless the admin keeps it (e.g. the balance was never paid)
+        $keep = $request->status === 'cancelled' && $request->boolean('keep_booking_fee') && app(\App\Services\BookingFeeService::class)->keepable($order);
+        if (! $orderService->updateOrderStatus($order, $request->status, $keep)) {
             return back()->with('error', "An order that is {$order->status} can't be moved to {$request->status}.");
         }
 
-        return back()->with('success', 'Order marked as '.$request->status.'.');
+        return back()->with('success', 'Order marked as '.$request->status.'.'.($keep ? ' The booking fee of '.\App\Support\Money::format($order->deposit_amount).' is kept and credited to the shop (less commission).' : ''));
     }
 
     /**
@@ -499,8 +501,9 @@ class AdminController extends Controller
         $request->validate(['action' => 'required|in:confirm']);
 
         // Card orders are confirmed by BML; this is for older cash on delivery / bank transfer orders.
-        if ($order->payment_method === 'bml' || $order->status === 'cancelled' || $order->payment_status === 'paid') {
-            return back()->with('error', 'Card payments are confirmed by BML, and cancelled or already-paid orders can\'t be marked paid.');
+        // A booking-fee pre-order whose fee is paid can be marked paid only once its balance is asked for.
+        if ($order->payment_method === 'bml' || $order->status === 'cancelled' || $order->payment_status === 'paid' || ($order->payment_status === 'deposit_paid' && ! $order->balanceDue())) {
+            return back()->with('error', 'Card payments are confirmed by BML, and cancelled or already-paid orders (or a pre-order balance not asked for yet) can\'t be marked paid.');
         }
 
         $payments->confirm($order);

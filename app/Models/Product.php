@@ -81,8 +81,11 @@ class Product extends Model
         // Pre-orders while out of stock (App\Services\PreorderService)
         'preorder_enabled' => 'boolean',
         'preorder_ship_date' => 'date',
+        'preorder_lead_days' => 'integer',
         'preorder_limit' => 'integer',
         'preorder_closes_on' => 'date',
+        // A booking fee instead of the full price at checkout (App\Services\BookingFeeService)
+        'preorder_deposit_value' => 'decimal:2',
         // Listed before it goes on sale (App\Services\ComingSoonService)
         'coming_soon' => 'boolean',
         'available_on' => 'date',
@@ -255,9 +258,28 @@ class Product extends Model
     }
 
     /**
+     * When a pre-order placed today is expected to ship: the shop's date, or "about N days after the
+     * order" (preorder_lead_days) counted from today. Null when neither is set.
+     */
+    public function preorderShipDate(): ?\Carbon\CarbonInterface
+    {
+        $days = (int) $this->preorder_lead_days;
+
+        return $days > 0 ? today()->addDays($days) : $this->preorder_ship_date;
+    }
+
+    /** Pre-orders of this product are paid with a booking fee first (App\Services\BookingFeeService). */
+    public function hasBookingFee(): bool
+    {
+        return in_array($this->preorder_deposit_type, \App\Services\BookingFeeService::TYPES, true)
+            && (float) $this->preorder_deposit_value > 0;
+    }
+
+    /**
      * Out of stock and open for pre-orders now, with units left (PreorderService::isPreorderable()
-     * in SQL, for listings): switched on, the expected date today or later, pre-orders not closed,
-     * not "coming soon", and fewer units waiting than the shop's limit.
+     * in SQL, for listings): switched on, the expected date today or later (or a number of days
+     * after the order), pre-orders not closed, not "coming soon", and fewer units waiting than the
+     * shop's limit.
      */
     public function scopePreorderable($query)
     {
@@ -267,7 +289,7 @@ class Product extends Model
 
         return $query->where('products.preorder_enabled', true)
             ->where('products.stock_quantity', '<=', 0)
-            ->whereDate('products.preorder_ship_date', '>=', today())
+            ->where(fn ($q) => $q->where('products.preorder_lead_days', '>', 0)->orWhereDate('products.preorder_ship_date', '>=', today()))
             ->where(fn ($q) => $q->whereNull('products.preorder_closes_on')->orWhereDate('products.preorder_closes_on', '>=', today()))
             ->notComingSoon()
             ->whereRaw('products.preorder_limit > '.$waiting);

@@ -128,6 +128,7 @@
                     <div class="flex justify-between"><span class="text-lg font-semibold text-gray-900">{{ __('Total') }}</span><span class="text-lg font-semibold text-primary-600" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</span></div>
                 </div>
 
+                @include('orders._booking_fee', ['order' => $order])
                 @if($payments->canPayOnline($order))
                     @php $lastAttempt = $order->paymentTransactions->sortByDesc('id')->first(); @endphp
                     <div class="mt-6 rounded-xl border border-primary-200 bg-primary-50 p-4 space-y-3">

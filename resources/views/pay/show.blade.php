@@ -22,7 +22,16 @@
                 <li class="flex justify-between gap-3 py-2"><span class="min-w-0 text-gray-800">{{ $item->quantity }} × {{ $item->product ? $item->displayName() : __('Item') }}</span><span class="shrink-0 text-gray-700" dir="ltr">{{ \App\Support\Money::format($item->price * $item->quantity) }}</span></li>
             @endforeach
         </ul>
-        <div class="mt-2 flex justify-between border-t border-gray-100 pt-2 text-base font-semibold text-dark"><span>{{ __('To pay') }}</span><span dir="ltr">{{ $amount }}</span></div>
+        @if($order->hasBookingFee() && $order->payment_status === 'deposit_paid')
+            {{-- A pre-order with a booking fee: the fee is paid, the balance is due (BookingFeeService) --}}
+            <div class="mt-2 flex justify-between border-t border-gray-100 pt-2 text-gray-700"><span>{{ __('Booking fee paid') }}</span><span dir="ltr">−{{ \App\Support\Money::format($order->deposit_amount) }}</span></div>
+            <div class="mt-1 flex justify-between text-base font-semibold text-dark" data-pay-balance><span>{{ __('Balance to pay') }}</span><span dir="ltr">{{ $amount }}</span></div>
+            @if($order->balance_due_on)
+                <p class="mt-1 text-xs text-gray-600">{{ __('Due by :date. The shop sends your order once it is paid.', ['date' => $order->balance_due_on->translatedFormat('j M Y')]) }}</p>
+            @endif
+        @else
+            <div class="mt-2 flex justify-between border-t border-gray-100 pt-2 text-base font-semibold text-dark"><span>{{ $order->hasBookingFee() ? __('Booking fee to pay') : __('To pay') }}</span><span dir="ltr">{{ $amount }}</span></div>
+        @endif
     </section>
 
     @if($order->payment_status === 'paid')

@@ -299,10 +299,10 @@ class SeoService
             if ($product->available_on) {
                 $schema['offers']['availabilityStarts'] = $product->available_on->toDateString();
             }
-        } elseif ($product->preorder_ship_date && app(PreorderService::class)->isPreorderable($product)) {
-            // Sold out but open for pre-orders: on pre-order, from the date it is expected to ship
+        } elseif (($shipDate = $product->preorderShipDate()) && app(PreorderService::class)->isPreorderable($product)) {
+            // Sold out but open for pre-orders: on pre-order, from the date it is expected to ship (or the days after ordering today)
             $schema['offers']['availability'] = 'https://schema.org/PreOrder';
-            $schema['offers']['availabilityStarts'] = $product->preorder_ship_date->toDateString();
+            $schema['offers']['availabilityStarts'] = $shipDate->toDateString();
         }
 
         // Ratings only when there are approved reviews (Google rejects an empty aggregateRating).

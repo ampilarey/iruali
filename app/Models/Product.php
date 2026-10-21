@@ -311,8 +311,8 @@ class Product extends Model
     /**
      * Out of stock and open for pre-orders now, with units left (PreorderService::isPreorderable()
      * in SQL, for listings): switched on, the expected date today or later (or a number of days
-     * after the order), pre-orders not closed, not "coming soon", the shop allowed pre-orders (or
-     * iruali's own product), and fewer units waiting than the shop's limit.
+     * after the order), pre-orders not closed, not "coming soon", the shop allowed pre-orders by an
+     * admin, and fewer units waiting than the shop's limit.
      */
     public function scopePreorderable($query)
     {
@@ -325,7 +325,7 @@ class Product extends Model
             ->where(fn ($q) => $q->where('products.preorder_lead_days', '>', 0)->orWhereDate('products.preorder_ship_date', '>=', today()))
             ->where(fn ($q) => $q->whereNull('products.preorder_closes_on')->orWhereDate('products.preorder_closes_on', '>=', today()))
             ->notComingSoon()
-            ->where(fn ($q) => $q->whereNull('products.seller_id')->orWhereIn('products.seller_id', User::query()->select('id')->where('preorders_allowed', true)))
+            ->whereIn('products.seller_id', User::query()->select('id')->where('preorders_allowed', true))
             ->whereRaw('products.preorder_limit > '.$waiting);
     }
 

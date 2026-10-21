@@ -105,17 +105,14 @@
                 </div>
             </div>
 
-            {{-- Pre-orders and "coming soon": for the shops an admin allows; another shop sees them only on a product that already has them --}}
-            @php $presalesAllowed = \App\Support\CurrentShop::get()->allowsPreorders(); @endphp
-            @if($presalesAllowed || $product->coming_soon)
-                @include('seller.products._coming_soon', ['product' => $product])
+            {{-- "Coming soon" and pre-orders: only for a shop an admin allowed each of them (User::allowsComingSoon(), allowsPreorders()) --}}
+            @php $currentShop = \App\Support\CurrentShop::get(); @endphp
+            @if($currentShop->allowsComingSoon())
+                @include('seller.products._coming_soon', ['product' => $product, 'preorders' => $currentShop->allowsPreorders()])
             @endif
-            @if($presalesAllowed || $product->preorder_enabled)
-                @include('seller.products._preorder', ['product' => $product, 'allowed' => $presalesAllowed])
+            @if($currentShop->allowsPreorders())
+                @include('seller.products._preorder', ['product' => $product])
             @endif
-            @unless($presalesAllowed)
-                <p class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-600" data-presales-off>{{ __('Pre-orders and "coming soon" are for shops iruali allows. If your shop needs them, ask us.') }}</p>
-            @endunless
 
             @include('seller.products._delivery', ['product' => $product])
 

@@ -60,6 +60,13 @@ class ProductEditService
         }
         $product->forceFill($form['extra']); // video link, pre-orders (a new date emails waiting customers), quote minimum
         $product->forceFill($form['launch'] ?? []); // "coming soon" and its launch day
+        // Only for a shop an admin allowed them: an edit approved after the shop lost them keeps them off
+        if ($product->seller_id && $product->preorder_enabled && $product->isDirty('preorder_enabled') && ! $product->seller?->allowsPreorders()) {
+            $product->forceFill(['preorder_enabled' => false]);
+        }
+        if ($product->seller_id && $product->coming_soon && $product->isDirty('coming_soon') && ! $product->seller?->allowsComingSoon()) {
+            $product->forceFill(['coming_soon' => false, 'available_on' => null]);
+        }
         $product->save();
 
         $this->storeImage($product, $form['main_image']);

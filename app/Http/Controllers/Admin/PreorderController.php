@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\PreorderConfirmService;
 use App\Services\PreorderService;
@@ -17,7 +18,7 @@ use Illuminate\Http\Request;
  * booking-fee pre-orders whose balance is due (overdue ones: the "Pre-order balances overdue" row),
  * and the pre-orders paid once the shop confirms that wait for the shop (the "Pre-orders to confirm"
  * row) or for the customer's payment; an admin can confirm or decline them for the shop. Also the
- * switch on a shop's page that allows it pre-orders and "coming soon" (admins only).
+ * switches on a shop's page that allow it pre-orders, and "coming soon", each on its own (admins only).
  */
 class PreorderController extends Controller
 {
@@ -91,27 +92,60 @@ class PreorderController extends Controller
     }
 
     /**
-     * Pre-orders and "coming soon" allowed for a shop, or not (Admin → Sellers → the shop's page).
-     * Admin role only: the route is on no staff role's list in config/staff.php. Turning it off stops
-     * new pre-orders at once; orders already placed carry on.
+     * Pre-orders allowed for a shop, or not (Admin → Sellers → the shop's page). Admin role only: the
+     * route is on no staff role's list in config/staff.php. Turning it off switches pre-orders off on
+     * the shop's products (their settings are kept for if it is allowed again); orders already placed
+     * carry on.
      */
     public function allowShop(Request $request, User $seller)
+    {
+        $on = $this->allow($request, $seller, 'preorders');
+        if (! $on) {
+            Product::where('seller_id', $seller->id)->where('preorder_enabled', true)
+                ->each(fn (Product $product) => $product->forceFill(['preorder_enabled' => false])->save());
+        }
+
+        return back()->with('success', $on
+            ? __(':shop can now take pre-orders.', ['shop' => $seller->shopName()])
+            : __(':shop can no longer take pre-orders, and they are switched off on its products. Orders already placed carry on.', ['shop' => $seller->shopName()]));
+    }
+
+    /**
+     * "Coming soon" allowed for a shop, or not (admins only, like pre-orders). Turning it off makes the
+     * shop's "coming soon" products ordinary listings (whoever asked to be told is emailed if it can be
+     * bought now: ComingSoonService::launched()).
+     */
+    public function allowComingSoon(Request $request, User $seller)
+    {
+        $on = $this->allow($request, $seller, 'coming_soon');
+        if (! $on) {
+            Product::where('seller_id', $seller->id)->where('coming_soon', true)
+                ->each(fn (Product $product) => $product->forceFill(['coming_soon' => false, 'available_on' => null])->save());
+        }
+
+        return back()->with('success', $on
+            ? __(':shop can now list products as "coming soon".', ['shop' => $seller->shopName()])
+            : __(':shop can no longer list products as "coming soon": those it had are ordinary listings now.', ['shop' => $seller->shopName()]));
+    }
+
+    /**
+     * Turn a shop's permission (preorders or coming_soon) on or off, audited. Not mass-assignable
+     * (User::$fillable): only these admin actions set it. Returns whether it is on now.
+     */
+    protected function allow(Request $request, User $seller, string $what): bool
     {
         abort_unless($seller->is_seller, 404);
         $on = (bool) $request->validate(['enabled' => 'required|boolean'])['enabled'];
 
-        if ($on !== (bool) $seller->preorders_allowed) {
-            // Not mass-assignable (User::$fillable): only this admin action sets it
+        if ($on !== (bool) $seller->getAttribute($what.'_allowed')) {
             $seller->forceFill([
-                'preorders_allowed' => $on,
-                'preorders_allowed_at' => $on ? now() : null,
-                'preorders_allowed_by' => $on ? $request->user()->id : null,
+                $what.'_allowed' => $on,
+                $what.'_allowed_at' => $on ? now() : null,
+                $what.'_allowed_by' => $on ? $request->user()->id : null,
             ])->save();
-            Audit::record($on ? 'seller.preorders_on' : 'seller.preorders_off', $seller, ['business_name' => $seller->business_name]);
+            Audit::record('seller.'.$what.($on ? '_on' : '_off'), $seller, ['business_name' => $seller->business_name]);
         }
 
-        return back()->with('success', $on
-            ? __(':shop can now take pre-orders and list products as "coming soon".', ['shop' => $seller->shopName()])
-            : __(':shop can no longer take new pre-orders or list products as "coming soon". Orders already placed carry on.', ['shop' => $seller->shopName()]));
+        return $on;
     }
 }

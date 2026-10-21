@@ -18,6 +18,10 @@
         'seller.settings.bank' => [__('Settings'), 'seller.settings.*'],
         'seller.help' => [__('Help'), 'seller.help*'],
     ];
+    // Pre-orders: only for a shop an admin allowed them, or one with pre-orders still to finish
+    if (! app(\App\Services\PreorderService::class)->shopSees(\App\Support\CurrentShop::get())) {
+        unset($tabs['seller.preorders']);
+    }
 @endphp
 <div class="bg-white shadow">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

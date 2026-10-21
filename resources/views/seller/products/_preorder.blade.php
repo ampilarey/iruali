@@ -1,8 +1,7 @@
 {{-- Seller product form: pre-orders while the product is out of stock (App\Services\PreorderService).
      The date (or days after the order), the limit, the note and what the customer pays at checkout (everything, a
      booking fee: App\Services\BookingFeeService, or nothing until the shop confirms: App\Services\PreorderConfirmService)
-     only count while pre-orders are on. For shops an admin allows; another shop sees it only on a product that
-     already takes pre-orders ($allowed false), to switch them off. Needs $product and $field; $allowed. --}}
+     only count while pre-orders are on. Only for a shop an admin allowed pre-orders. Needs $product and $field. --}}
 @php
     $preorderOn = (bool) old('preorder_enabled', $product->preorder_enabled);
     $preorderWaiting = $product->exists ? app(\App\Services\PreorderService::class)->waitingUnits((int) $product->id) : 0;
@@ -15,9 +14,6 @@
     <legend class="px-1 text-sm font-medium text-gray-700">{{ __('Pre-order') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></legend>
     <input type="hidden" name="preorder_form" value="1">
     <input type="hidden" name="preorder_enabled" value="0">
-    @unless($allowed ?? true)
-        <p class="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900" data-preorders-not-allowed>{{ __('Pre-orders are not allowed for your shop, so this product takes no new pre-orders. You can switch them off here; ask iruali if your shop needs them.') }}</p>
-    @endunless
     <label class="flex items-start gap-2 text-sm text-gray-700">
         <input type="checkbox" name="preorder_enabled" value="1" @checked($preorderOn) class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-preorder-toggle>
         <span>

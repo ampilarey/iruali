@@ -29,19 +29,16 @@ class ProductRequest extends FormRequest
     {
         $this->merge(['has_variants' => $this->boolean('has_variants')]);
 
-        // Pre-orders and "coming soon" are for the shops an admin allows (User::allowsPreorders()). Any
-        // other shop can only change, or switch off, what a product already has; the fieldsets are ignored
-        if (! \App\Support\CurrentShop::get()->allowsPreorders()) {
-            /** @var Product|null $product */
-            $product = $this->route('product');
-            if (! $product?->preorder_enabled) {
-                $this->offsetUnset('preorder_form');
-                $this->merge(['preorder_enabled' => 0]);
-            }
-            if (! $product?->coming_soon) {
-                $this->offsetUnset('coming_soon_form');
-                $this->merge(['coming_soon' => 0]);
-            }
+        // Pre-orders and "coming soon" are for the shops an admin allowed each of them (User::allowsPreorders(),
+        // allowsComingSoon()); another shop's form has no such fieldset, and one sent anyway is ignored
+        $shop = \App\Support\CurrentShop::get();
+        if (! $shop->allowsPreorders()) {
+            $this->offsetUnset('preorder_form');
+            $this->merge(['preorder_enabled' => 0]);
+        }
+        if (! $shop->allowsComingSoon()) {
+            $this->offsetUnset('coming_soon_form');
+            $this->merge(['coming_soon' => 0]);
         }
     }
 

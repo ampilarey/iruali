@@ -266,15 +266,23 @@ set and an audit entry `product.auto_approved` by the shop (still not while the 
 incomplete), saving a product it never had approved publishes it, and its edits apply directly with
 no request.
 
-**Pre-orders and "coming soon" are for the shops an admin allows.** Off for every shop until an
-admin turns it on (Admin → Sellers → the shop's page → "Pre-orders and coming soon",
-`admin.sellers.preorders`, admin role only; `users.preorders_allowed`, not mass-assignable, audited
-as `seller.preorders_on/off`; a "Pre-orders allowed" badge in the sellers list). Another shop's
-product form has neither fieldset (a note says to ask iruali) and the request ignores them, so
-nothing can be switched on; a product that already has one shows it, to change or switch it off
-(`User::allowsPreorders()`). A shop that is not allowed takes no new pre-orders at all
-(`PreorderService::accepting()`, `Product::scopePreorderable()`: shown as out of stock); orders
-already placed carry on, and its "Stock arrived" still works. iruali's own products need no leave.
+**Pre-orders and "coming soon" are for the shops an admin allows, each on its own.** Both are off
+for every shop until an admin turns them on (Admin → Sellers → the shop's page → "Pre-orders and
+coming soon": **Allow pre-orders** `admin.sellers.preorders`, **Allow "coming soon"**
+`admin.sellers.coming-soon`; admin role only; `users.preorders_allowed` / `coming_soon_allowed`, not
+mass-assignable, audited as `seller.preorders_on/off` and `seller.coming_soon_on/off`; badges in the
+sellers list). **A shop sees only what it is allowed** (`User::allowsPreorders()`,
+`allowsComingSoon()`): the product form has only those fieldsets (no hint of the others), the request
+ignores any other, and the Seller Centre's **Pre-orders** tab and page are there only for a shop allowed
+pre-orders, or with pre-orders still to finish (`PreorderService::shopSees()`). Turning pre-orders off
+switches them off on the shop's products (their settings are kept for if it is allowed again);
+turning "coming soon" off makes those products ordinary listings (whoever asked is emailed if they
+can be bought). Orders already placed carry on, and "Stock arrived" still works for them. A shop that
+is not allowed takes no new pre-orders at all (`PreorderService::accepting()`,
+`Product::scopePreorderable()`), and an edit approved after a shop lost one keeps it off
+(`ProductEditService::apply()`). For iruali's own imports use a shop account of its own (e.g.
+"iruali Direct") and allow it. The switches came in on
+2026-10-21; that day's migrations switched off what shops not allowed already had.
 
 **Pre-orders.** Stock reaches the islands by ship, so a shop can take orders for what is coming:
 the product form's "Pre-order" fieldset switches it on with the expected ship date (after today,

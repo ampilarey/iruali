@@ -1,6 +1,6 @@
 {{-- Seller product form: "Coming soon" (App\Services\ComingSoonService). Listed but not on sale until the launch day,
      or until it is switched off; shoppers can ask to be emailed. Applies at once, without waiting for a review.
-     Needs $product and $field. --}}
+     Only for a shop an admin allowed it. Needs $product and $field; $preorders: the shop may take pre-orders too. --}}
 @php $comingSoonOn = (bool) old('coming_soon', $product->coming_soon); @endphp
 <fieldset class="rounded-lg border border-gray-200 p-4" data-coming-soon-fieldset>
     <legend class="px-1 text-sm font-medium text-gray-700">{{ __('Coming soon') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></legend>
@@ -10,7 +10,7 @@
         <input type="checkbox" name="coming_soon" value="1" @checked($comingSoonOn) class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-coming-soon-toggle>
         <span>
             <span class="font-medium text-gray-900">{{ __('Show it as "Coming soon"') }}</span>
-            <span class="block text-xs text-gray-500">{{ __('Customers can see it and ask to be emailed, but can\'t order it yet. Untick this to put it on sale now; everyone who asked gets an email. To take payment before it arrives, use Pre-order below instead.') }}</span>
+            <span class="block text-xs text-gray-500">{{ __('Customers can see it and ask to be emailed, but can\'t order it yet. Untick this to put it on sale now; everyone who asked gets an email.') }}@if($preorders ?? false) {{ __('To take payment before it arrives, use Pre-order below instead.') }}@endif</span>
         </span>
     </label>
     <div class="mt-3 max-w-xs {{ $comingSoonOn ? '' : 'opacity-60' }}" data-coming-soon-fields>

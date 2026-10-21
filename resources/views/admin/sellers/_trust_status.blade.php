@@ -1,10 +1,13 @@
-{{-- Admin → Sellers, under a shop's status: trusted (listings skip review), pre-orders allowed, holiday mode (customers
-     can't order) and its business verification. --}}
+{{-- Admin → Sellers, under a shop's status: trusted (listings skip review), pre-orders and "coming soon" allowed,
+     holiday mode (customers can't order) and its business verification. --}}
 @if($seller->auto_approve_listings)
     <span class="mt-1 flex w-fit items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800" data-seller-trusted>{{ __('Trusted: listings skip review') }}</span>
 @endif
 @if($seller->preorders_allowed)
     <span class="mt-1 flex w-fit items-center gap-1 rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800" data-seller-preorders>{{ __('Pre-orders allowed') }}</span>
+@endif
+@if($seller->coming_soon_allowed)
+    <span class="mt-1 flex w-fit items-center gap-1 rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800" data-seller-coming-soon>{{ __('"Coming soon" allowed') }}</span>
 @endif
 @if($seller->isOnHoliday())
     <span class="mt-1 flex w-fit items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800" @if($seller->holiday_message) title="{{ $seller->holiday_message }}" @endif data-seller-holiday>

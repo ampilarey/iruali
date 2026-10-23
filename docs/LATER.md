@@ -123,6 +123,31 @@ Still open (owner's choice):
 2. **Payouts:** a kept booking fee is credited to the shop, but paid out with the shop's next payout
    that includes a delivered order (payouts need at least one).
 3. **Mixed carts:** booking-fee items with ordinary items in one order (second version).
+4. **Link to the overseas listing:** a field on the product for the page the vendor buys from (e.g. an
+   Amazon or AliExpress link), seen by admins, so iruali can check what is being bought. Not built.
+
+### Review notes: how overseas pre-orders work now (checked 2026-10-23)
+
+For a vendor who lists items from online shops abroad and buys them once the customer pays:
+
+- **Who:** only vendors allowed in Admin → Sellers → the shop → "Allow pre-orders"; others see nothing of it.
+- **Listing:** a normal product in the Seller Centre (name, photos, MVR price that already covers shipping
+  to the Maldives), stock 0, then Pre-order: "Take pre-orders", when it ships ("Some days after each
+  order", e.g. 21, or a fixed date), most units at a time, what the customer pays at checkout, days to
+  pay (empty: 7 for a booking fee, 3 for confirm first) and days late before it counts as late.
+- **Three ways to pay:**
+  | Choice | When ordered | Vendor buys abroad | When it arrives |
+  | --- | --- | --- | --- |
+  | Full price | pays everything | once told it is paid | "Stock arrived", then send |
+  | Booking fee (% or amount) | pays the fee (own tax invoice if GST-registered) | once the fee is paid | "Stock arrived": customer gets an SMS/email link for the rest; send once paid |
+  | Nothing until the vendor confirms | pays nothing | checks the shop abroad, then "I can get it" (customer gets a link to pay in full) or "I can't get it" (cancelled) | "Stock arrived", then send |
+- **Rules:** these items are ordered on their own, by card or bank transfer (no cash on delivery); nothing
+  is sent before it is fully paid; unpaid links get one reminder, then the order is cancelled (confirm
+  first) or flagged in Admin → Inbox (booking-fee balance); a customer cancelling loses the booking fee
+  (kept by the vendor less commission), but gets everything back if the vendor cancels, can't get it,
+  moves the date later or is too late; late orders show in Admin → Inbox, all waiting ones in Admin →
+  Pre-orders.
+- **To decide on review:** items 1–4 above (GST check, payouts of kept fees, mixed carts, overseas link).
 
 ## Testing still open
 

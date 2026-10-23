@@ -7,6 +7,9 @@
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('seller.products.export') }}" class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Export CSV') }}</a>
                 <a href="{{ route('seller.products.import') }}" class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Import CSV') }}</a>
+                @if(\App\Support\CurrentShop::get()->allowsPreorders())
+                    <a href="{{ route('seller.products.from-link') }}" class="inline-flex items-center rounded-lg border border-primary-300 bg-white px-3 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50" data-import-from-link>{{ __('Import from a link') }}</a>
+                @endif
                 <a href="{{ route('seller.products.create') }}" class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">+ Add product</a>
             </div>
         @endslot

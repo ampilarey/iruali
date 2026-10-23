@@ -59,6 +59,12 @@
             <input id="preorder_note" name="preorder_note" maxlength="255" dir="auto" class="{{ $field }}" value="{{ old('preorder_note', $product->preorder_note) }}" placeholder="{{ __('e.g. Arrives on the next ship from Colombo') }}">
             @error('preorder_note')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
+        <div class="sm:col-span-2 lg:col-span-4">
+            <label for="source_url" class="block text-sm font-medium text-gray-700">{{ __('Where you buy it (link)') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
+            <input id="source_url" name="source_url" type="url" maxlength="500" dir="ltr" class="{{ $field }}" value="{{ old('source_url', $product->source_url) }}" placeholder="https://" aria-describedby="source_url-hint">
+            <p id="source_url-hint" class="mt-1 text-xs text-gray-500">{{ __('The product\'s page on the shop you order it from. Only iruali sees it, to check what is bought; shoppers don\'t.') }}</p>
+            @error('source_url')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
         <div class="sm:col-span-2" data-preorder-late-days>
             <label for="preorder_late_days" class="block text-sm font-medium text-gray-700">{{ __('Late after how many days?') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
             <input id="preorder_late_days" name="preorder_late_days" type="number" min="1" max="{{ \App\Services\PreorderService::MAX_DAYS }}" step="1" dir="ltr" class="{{ $field }}" value="{{ old('preorder_late_days', $product->preorder_late_days) }}" placeholder="{{ \App\Services\PreorderService::LATE_AFTER_DAYS }}" aria-describedby="preorder_late_days-hint">

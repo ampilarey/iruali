@@ -43,6 +43,10 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $product->name ?? 'N/A' }}</div>
+                                            @if($product->source_url)
+                                                {{-- Where the shop buys this pre-order abroad (ProductImportService) --}}
+                                                <a href="{{ $product->source_url }}" target="_blank" rel="noopener noreferrer nofollow" class="mt-0.5 block max-w-xs truncate text-xs text-primary-700 underline" data-source-url>Bought from: {{ parse_url($product->source_url, PHP_URL_HOST) }} ↗</a>
+                                            @endif
                                             @if($product->has_variants)
                                                 <div class="mt-1 text-xs text-gray-500">
                                                     {{ trans_choice(':count variant|:count variants', $product->variants->count(), ['count' => $product->variants->count()]) }}:

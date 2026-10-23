@@ -149,6 +149,27 @@
                 </div>
             </x-admin.fold>
 
+            <x-admin.fold title="Pre-order imports">
+                {{-- "Import from a link" (App\Services\ProductImportService): the MVR price suggested to shops --}}
+                <p class="mt-2 text-sm text-gray-600">When a shop fills a pre-order product from a page abroad, its price is suggested in MVR: the price on the page × the rate, plus shipping per kg when the page gives the weight, plus the margin. The shop sets the final price.</p>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="sm:row-span-2">
+                        <label for="import_exchange_rates" class="block text-sm font-medium text-gray-700">Exchange rates to MVR</label>
+                        <textarea id="import_exchange_rates" name="import_exchange_rates" rows="5" maxlength="1000" dir="ltr" class="{{ $field }} font-mono" placeholder="USD 15.42&#10;EUR 16.80&#10;CNY 2.15">{{ old('import_exchange_rates', $settings['import_exchange_rates'] ?? '') }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">One per line: the currency code and what 1 of it costs in MVR.</p>
+                        @error('import_exchange_rates')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="import_shipping_per_kg" class="block text-sm font-medium text-gray-700">Shipping to the Maldives (MVR per kg)</label>
+                        <input id="import_shipping_per_kg" name="import_shipping_per_kg" type="number" min="0" step="0.01" class="{{ $field }}" value="{{ old('import_shipping_per_kg', $settings['import_shipping_per_kg'] ?? 0) }}">
+                    </div>
+                    <div>
+                        <label for="import_margin_percent" class="block text-sm font-medium text-gray-700">Margin (%)</label>
+                        <input id="import_margin_percent" name="import_margin_percent" type="number" min="0" max="500" step="0.1" class="{{ $field }}" value="{{ old('import_margin_percent', $settings['import_margin_percent'] ?? 0) }}">
+                    </div>
+                </div>
+            </x-admin.fold>
+
             <x-admin.fold title="Loyalty & referrals">
                 <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>

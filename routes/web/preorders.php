@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
+    // A product filled from its page on an online shop abroad (ProductImportService), for shops allowed pre-orders
+    Route::get('/products/from-link', [\App\Http\Controllers\Seller\ProductLinkImportController::class, 'create'])->name('products.from-link');
+    Route::post('/products/from-link', [\App\Http\Controllers\Seller\ProductLinkImportController::class, 'store'])->name('products.from-link.store')->middleware('throttle:30,60,products.from-link');
     Route::get('/preorders', [PreorderController::class, 'index'])->name('preorders');
     Route::post('/preorders/{product:id}/arrived', [PreorderController::class, 'stockArrived'])->name('preorders.arrived')->whereNumber('product')->middleware('throttle:30,1,preorders.arrived');
     Route::put('/preorders/{product:id}/date', [PreorderController::class, 'moveDate'])->name('preorders.date')->whereNumber('product')->middleware('throttle:30,1,preorders.date');

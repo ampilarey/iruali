@@ -43,7 +43,7 @@ class ProductReviewService
         'name', 'description', 'sku', 'category_id', 'price', 'compare_price', 'sale_price', 'flash_sale_ends_at',
         'has_variants', 'brand', 'weight', 'delivery_surcharge', 'video_provider', 'video_id',
         'preorder_enabled', 'preorder_ship_date', 'preorder_limit', 'preorder_note', 'preorder_closes_on', 'quote_min_quantity',
-        'preorder_lead_days', 'preorder_deposit_type', 'preorder_deposit_value', 'preorder_confirm_first', 'preorder_balance_days', 'preorder_late_days',
+        'preorder_lead_days', 'preorder_deposit_type', 'preorder_deposit_value', 'preorder_confirm_first', 'preorder_balance_days', 'preorder_late_days', 'source_url',
     ];
 
     /** The variant fields a change to which needs review (stock and its alert level do not). */
@@ -352,6 +352,7 @@ class ProductReviewService
             'preorder_confirm_first' => (bool) $product->preorder_confirm_first,
             'preorder_balance_days' => (int) $product->preorder_balance_days > 0 ? (int) $product->preorder_balance_days : null,
             'preorder_late_days' => (int) $product->preorder_late_days > 0 ? (int) $product->preorder_late_days : null,
+            'source_url' => filled($product->getAttribute('source_url')) ? (string) $product->getAttribute('source_url') : null,
             'quote_min_quantity' => $product->getAttribute('quote_min_quantity') !== null ? (int) $product->getAttribute('quote_min_quantity') : null,
         ];
     }
@@ -740,6 +741,7 @@ class ProductReviewService
         $add(__('Sold in variants'), isset($before['has_variants']) ? ($before['has_variants'] ? __('Yes') : __('No')) : null, ($after['has_variants'] ?? false) ? __('Yes') : __('No'));
         $add(__('Video link'), $video($before), $video($after), 'link');
         $add(__('Pre-order'), $preorder($before), $preorder($after));
+        $add(__('Where the shop buys it'), $before['source_url'] ?? null, $after['source_url'] ?? null);
         $add(__('Smallest quantity for a quote'), $before['quote_min_quantity'] ?? null, $after['quote_min_quantity'] ?? null);
         $add(__('Multi-buy offer'), $this->describeMultibuy((array) $live['multibuy']), $this->describeMultibuy((array) ($payload['multibuy'] ?? [])));
         if (($payload['main_image'] ?? null) && ($payload['main_image'] ?? null) !== $live['main_image']) {

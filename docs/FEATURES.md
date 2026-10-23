@@ -393,6 +393,24 @@ any other. **"I can't get it"** (`seller.preorders.decline`, `admin.orders.preor
 message says the shop can't get it. Placing the order checks the checkout page showed it the same way
 (and not fewer days to pay).
 
+**Import from a link** (`App\Services\ProductImportService`, shops allowed pre-orders): Seller Centre →
+Products → "Import from a link" (`seller.products.from-link`, throttled) takes the address of a product on
+an online shop abroad and opens the product form filled from it, with no outside service: the page's
+schema.org Product / ProductGroup data (JSON-LD: name, description, brand, price and currency, weight,
+photos, options), then its share tags (og:title, og:image, product:price...), then its title; a Shopify
+shop's `/products/{handle}.js` gives every option and photo. Pages are fetched by `App\Support\SafeHttp`:
+http(s) on ports 80/443 only, every address the host resolves to must be public (no localhost, private,
+link-local or hosting-network ranges; the connection is pinned to the checked address; redirects are
+followed by hand and checked again), with size and time limits. Up to six photos are downloaded, checked to
+be real pictures and stored like uploads; the shop unticks any it doesn't want (the first kept is the main
+image unless it uploads one; the rest join the product's photos; the others are deleted). The MVR price is
+suggested from **Admin → Settings → Pre-order imports**: the page's price × the exchange rate (one per line,
+"USD 15.42"), plus shipping per kg when the page gives the weight, plus the margin; with no rate for the
+currency the shop enters it. The form opens with stock 0 and pre-orders ticked, and the page's address in
+the Pre-order fieldset's **Where you buy it (link)** (`products.source_url`, reviewed like other fields),
+which admins see on Admin → Products ("Bought from: …"); shoppers never do. Big shops that block robots
+(Amazon, Shein, Temu) give "We couldn't read that page", and the shop fills the product in by hand.
+
 **Coming soon.** A shop can list a product before it goes on sale: the product form's "Coming soon"
 fieldset (`products.coming_soon`, optional launch day `available_on`). It shows with a "Coming soon"
 label ("Coming 1 Nov" on cards, "on sale from …" on its page) but can't be added to a cart or

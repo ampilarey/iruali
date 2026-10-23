@@ -113,6 +113,10 @@ class Setting extends Model
         'transfer_account_number' => '',
         'transfer_note' => '',
         'transfer_pay_within_hours' => 24,
+        // "Import from a link": the MVR price suggested to shops (ProductImportService)
+        'import_exchange_rates' => '',
+        'import_shipping_per_kg' => 0,
+        'import_margin_percent' => 0,
         'payment_cod_enabled' => 0,
         'cod_max_amount' => 0,
         'cod_greater_male_only' => 0,

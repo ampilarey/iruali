@@ -94,6 +94,8 @@ class PreorderService
             'preorder_lead_days' => [$on, 'exclude_unless:preorder_ships,days', 'required', 'integer', 'min:1', 'max:'.self::MAX_LEAD_DAYS],
             'preorder_limit' => [$on, 'required', 'integer', 'min:1', 'max:'.self::MAX_LIMIT],
             'preorder_note' => [$on, 'nullable', 'string', 'max:255'],
+            // The product's page abroad the shop buys it from (only iruali sees it: ProductImportService)
+            'source_url' => [$on, 'nullable', 'url:http,https', 'max:500'],
             'preorder_closes_on' => [$on, 'nullable', 'date', 'after_or_equal:today', \Illuminate\Validation\Rule::when($onDate, ['before_or_equal:preorder_ship_date'])],
             // Days late before it counts as late (Admin → Inbox; a booking fee is then refunded in full), empty for the default
             'preorder_late_days' => [$on, 'nullable', 'integer', 'min:1', 'max:'.self::MAX_DAYS],
@@ -120,6 +122,7 @@ class PreorderService
             'preorder_ship_date.before_or_equal' => __('Choose an expected ship date within the next year.'),
             'preorder_limit.required' => __('Give the most units you will take as pre-orders.'),
             'preorder_limit.min' => __('Take at least 1 unit as a pre-order.'),
+            'source_url.url' => __('The link must be a web address starting with https://'),
             'preorder_closes_on.after_or_equal' => __('The last day for pre-orders can\'t be in the past.'),
             'preorder_closes_on.before_or_equal' => __('Pre-orders must close on or before the expected ship date.'),
             'preorder_lead_days.required' => __('Give the number of days after the order when you usually send it.'),
@@ -164,6 +167,7 @@ class PreorderService
             'preorder_lead_days' => $days ? (int) $data['preorder_lead_days'] : null,
             'preorder_limit' => (int) $data['preorder_limit'],
             'preorder_note' => $note !== '' ? $note : null,
+            'source_url' => filled($data['source_url'] ?? null) ? trim((string) $data['source_url']) : null,
             'preorder_closes_on' => filled($data['preorder_closes_on'] ?? null) ? $data['preorder_closes_on'] : null,
             'preorder_late_days' => filled($data['preorder_late_days'] ?? null) ? (int) $data['preorder_late_days'] : null,
             'preorder_deposit_type' => $fee,

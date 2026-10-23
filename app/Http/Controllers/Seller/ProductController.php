@@ -7,10 +7,14 @@ use App\Http\Requests\Seller\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductChangeRequest;
+use App\Models\ProductVariant;
 use App\Services\ProductEditService;
+use App\Services\ProductImportService;
 use App\Services\ProductReviewService;
 use App\Support\CurrentShop;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -31,13 +35,33 @@ class ProductController extends Controller
         return view('seller.products.index', compact('products'));
     }
 
-    public function create()
+    public function create(Request $request, ProductImportService $imports)
     {
+        $product = new Product(['stock_quantity' => 0, 'reorder_point' => 5, 'has_variants' => false]);
+        $variants = collect();
+
+        // Filled from a product's page abroad ("Import from a link"): a pre-order with stock 0
+        $draft = $request->boolean('from_link') && CurrentShop::get()->allowsPreorders() ? $imports->draft() : null;
+        if ($draft !== null) {
+            $suggest = fn (?float $price) => $imports->suggestPrice($price, $draft['currency'], $draft['weight'])['price'] ?? null;
+            $sku = 'IMP-'.strtoupper(Str::random(6));
+            $product->setTranslation('name', 'en', $draft['name']);
+            if ($draft['description']) {
+                $product->setTranslation('description', 'en', $draft['description']);
+            }
+            $product->fill(['sku' => $sku, 'brand' => $draft['brand'], 'weight' => $draft['weight'], 'price' => $suggest($draft['price']), 'has_variants' => $draft['variants'] !== []]);
+            $product->forceFill(['preorder_enabled' => true, 'source_url' => $draft['source_url']]);
+            foreach ($draft['variants'] as $i => $row) {
+                $variants->push(new ProductVariant(['attributes' => $row['attributes'], 'sku' => $sku.'-'.($i + 1), 'price' => $suggest($row['price']), 'stock_quantity' => 0, 'is_active' => true]));
+            }
+        }
+
         return view('seller.products.form', [
-            'product' => new Product(['stock_quantity' => 0, 'reorder_point' => 5, 'has_variants' => false]),
+            'product' => $product,
             'categories' => $this->categories(),
-            'variants' => collect(),
+            'variants' => $variants,
             'brandOptions' => \App\Models\Brand::orderBy('name')->pluck('name'),
+            'imported' => $draft,
         ]);
     }
 
@@ -47,6 +71,7 @@ class ProductController extends Controller
         $product->seller_id = CurrentShop::id();
         $product->is_active = false; // new listings wait for admin approval
         $editor->apply($product, $editor->formFromRequest($request));
+        $this->attachImportedImages($request, $product, $editor);
         app(\App\Services\OnboardingService::class)->refresh(CurrentShop::get()->fresh());
 
         // A trusted shop (an admin turned on auto-approval for it) goes live at once
@@ -133,6 +158,29 @@ class ProductController extends Controller
 
         return redirect()->route('seller.products.index')
             ->with('success', 'Product deleted.');
+    }
+
+    /**
+     * A product filled from a page abroad: the photos the shop kept go on it (the first is the main
+     * image unless one was uploaded), and the import's other photos are deleted.
+     */
+    protected function attachImportedImages(Request $request, Product $product, ProductEditService $editor): void
+    {
+        $imports = app(ProductImportService::class);
+        $draft = $request->boolean('from_link') ? $imports->draft() : null;
+        if ($draft === null) {
+            return;
+        }
+
+        $kept = array_values(array_intersect($draft['images'], array_map('strval', (array) $request->input('imported_images', []))));
+        $extra = $kept;
+        if (! $request->hasFile('main_image') && $kept !== []) {
+            $editor->storeImage($product, array_shift($extra));
+        }
+        foreach ($extra as $i => $path) {
+            $product->images()->create(['url' => Storage::url($path), 'alt_text' => $product->getTranslation('name', 'en', false), 'is_main' => false, 'sort_order' => $i + 1]);
+        }
+        $imports->forget($kept);
     }
 
     protected function authorizeOwner(Product $product): void

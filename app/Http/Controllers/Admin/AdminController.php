@@ -375,7 +375,23 @@ class AdminController extends Controller
             'ordering_pause_from' => 'sometimes|nullable|date',
             'ordering_pause_until' => 'sometimes|nullable|date|after:ordering_pause_from',
             'ordering_pause_message' => 'sometimes|nullable|string|max:255',
+            // "Import from a link": the MVR price suggested to shops (ProductImportService)
+            'import_exchange_rates' => ['sometimes', 'nullable', 'string', 'max:1000', 'regex:/^(\s*[A-Za-z]{3}\s*[=:\s]\s*[0-9]+(\.[0-9]+)?\s*(\R|$))*\s*$/'],
+            'import_shipping_per_kg' => 'sometimes|nullable|numeric|min:0|max:100000',
+            'import_margin_percent' => 'sometimes|nullable|numeric|min:0|max:500',
+        ], [
+            'import_exchange_rates.regex' => 'Write one rate per line, like "USD 15.42".',
         ]);
+        foreach (['import_exchange_rates'] as $key) {
+            if (array_key_exists($key, $validated)) {
+                $validated[$key] = trim((string) $validated[$key]);
+            }
+        }
+        foreach (['import_shipping_per_kg', 'import_margin_percent'] as $key) {
+            if (array_key_exists($key, $validated)) {
+                $validated[$key] = (float) ($validated[$key] ?? 0);
+            }
+        }
         foreach (['min_order_amount', 'small_order_fee', 'small_order_threshold', 'refund_approval_over'] as $key) {
             if (array_key_exists($key, $validated)) {
                 $validated[$key] = (float) ($validated[$key] ?? 0);

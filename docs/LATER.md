@@ -123,8 +123,11 @@ Still open (owner's choice):
 2. **Payouts:** a kept booking fee is credited to the shop, but paid out with the shop's next payout
    that includes a delivered order (payouts need at least one).
 3. **Mixed carts:** booking-fee items with ordinary items in one order (second version).
-4. **Link to the overseas listing:** a field on the product for the page the vendor buys from (e.g. an
-   Amazon or AliExpress link), seen by admins, so iruali can check what is being bought. Not built.
+4. **Link to the overseas listing:** built on 2026-10-23 with "Import from a link" (Seller Centre →
+   Products): the product form is filled from the page (no AI, no outside service), photos included, the
+   MVR price suggested from Admin → Settings → Pre-order imports (exchange rates, shipping per kg,
+   margin; **set these first**), and the link is kept on the product for admins (Admin → Products).
+   Possible later: an AI service only for pages it can't read.
 
 ### Review notes: how overseas pre-orders work now (checked 2026-10-23)
 

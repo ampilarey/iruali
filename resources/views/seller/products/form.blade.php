@@ -26,6 +26,9 @@
               action="{{ $editing ? route('seller.products.update', $product) : route('seller.products.store') }}"
               class="space-y-6 rounded-lg bg-white p-6 shadow">
             @csrf
+            @if(! $editing && ! empty($imported))
+                @include('seller.products._imported', ['imported' => $imported])
+            @endif
             @if($editing)
                 @method('PUT')
             @endif

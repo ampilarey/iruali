@@ -173,6 +173,24 @@ rejects or suspends it. Onboarding steps, `/seller/profile` (logo, banner, descr
 notes, "ships to islands"), `/seller/settings/bank` (payout account, verified by an admin) and
 `/seller/settings/notifications`. Seller help guides at `/seller/help/{guide}`.
 
+**Seller Terms, with versions.** `/seller-terms` is the agreement every shop signs (who does what,
+listings and rights to photos/text, pre-orders and "coming soon", payments incl. bank transfer and
+cash on delivery, returns, disputes and chargebacks, commission, payouts and deductions, GST, customer
+details only for their order and no selling outside iruali, fair dealing, content licence,
+responsibility, suspension, new versions, Maldivian law, English governs). It is dated
+(`App\Support\SellerTerms::version()`: the built-in `BUILT_IN_VERSION`, or a later one an admin
+publishes). A shop agrees when it applies, and **must agree again to every new version before it can
+use the Seller Centre**: `ShopAccess` sends it to `/seller/terms` (`seller.terms.show`, a 409 for
+JSON) showing what changed; only the owner agrees (`seller.terms.agree`, owner-only), staff see the
+page and wait. Customers can still order meanwhile. Each agreement is kept (`users.seller_terms_version`
+/ `seller_terms_agreed_at`, and a `seller_terms_agreements` row with who, IP and browser; audit
+`seller_terms.agreed`). Admin → Legal pages shows the version and how many shops agreed, and
+"Publish as a new version" (with a note of what changed) asks every shop again and emails active
+shops (`SellerTermsUpdated`); a save without it (a typo fix) asks no one. Admin → Sellers marks shops
+that have not agreed ("Has not agreed to the current Seller Terms"); a shop's performance page shows
+the version and date it agreed. Changing commission or payout settings is not a new version. When the
+built-in text changes in substance, raise `BUILT_IN_VERSION` and `BUILT_IN_CHANGES`.
+
 **iruali's team never sells; iruali sells through a shop.** The admin area is for running the website,
 the shops and the money: it has no product form of its own. iruali sells like any shop, through a
 registered shop (e.g. "iruali Direct"): applied for with "Sell on iruali", approved in Admin → Sellers,

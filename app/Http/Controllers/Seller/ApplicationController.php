@@ -122,6 +122,8 @@ class ApplicationController extends Controller
 
         app(\App\Services\ShopCoverage::class)->save($user, $validated);
         $user->roles()->syncWithoutDetaching([$role->id]);
+        // The box ticked on the form: the current version of the Seller Terms, kept with the shop
+        \App\Support\SellerTerms::recordAgreement($user, $user, $request);
         if ($verification) {
             app(\App\Services\SellerVerificationService::class)->submit($user, $verification);
         }

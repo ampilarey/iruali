@@ -28,6 +28,9 @@ Things agreed on 2026-10-19 but not started (updated 2026-10-24; booking-fee pre
     line, e.g. `USD 15.42`), shipping per kg (MVR) and the margin %. Without them, "Import from a
     link" still fills in the product but suggests no MVR price. Then allow pre-orders for the shops
     that import (Admin → Sellers → the shop → Pre-orders).
+11. **Seller Terms:** after deploying the versioned Seller Terms (2026-10-24), every shop, iruali's own
+    included, is asked to agree once when it next opens the Seller Centre. Tell the shops beforehand;
+    Admin → Sellers shows who hasn't agreed yet.
 
 ### Launch checklist on 2026-10-21 (Admin → dashboard → Launch checklist)
 
@@ -45,6 +48,23 @@ Still to do, all in **Admin → Settings** (`/admin/settings`, one Save button a
    and their products in Admin → Products.
 5. Google / Facebook / Apple sign-in (amber): optional.
 
+## Policies and agreements (started 2026-10-24)
+
+Step 1 is built: new Seller Terms (pre-orders, payments, rights to photos and text, customer details,
+GST, chargebacks, liability, versions), each version dated, every shop agreeing again before it can use
+the Seller Centre, and a record of who agreed when (see `docs/FEATURES.md`, "Seller Terms, with versions").
+**Have a lawyer read the Seller Terms**, especially responsibility/liability, GST and customer data.
+
+Next:
+
+1. **Step 2: customer pages up to date.** Terms & Conditions and Refund Policy: pre-orders (booking fee
+   kept when the customer cancels, full refund when the shop can't deliver or is late, "pay once the shop
+   confirms"), bank transfer and cash on delivery wording. Privacy Policy: analytics cookies when Google
+   Analytics is on, date of birth (birthday offer), "use my location", shops' ID cards (verification),
+   business buyers' GST numbers, Telegram team alerts, push notifications.
+2. **Step 3: Prohibited & restricted items page**, linked from the Seller Terms, the product form and the
+   footer (alcohol, pork, weapons, drugs and medicines, counterfeit goods, and items needing a permit).
+
 ## Optional setup
 
 - **Google / Facebook / Apple sign-in:** keys in `.env`, step by step in `docs/SOCIAL_LOGIN.md`.
@@ -53,7 +73,8 @@ Still to do, all in **Admin → Settings** (`/admin/settings`, one Save button a
 ## Ideas to build next
 
 None of these exist yet (checked against the code on 2026-10-24; vouchers, loyalty, referrals,
-reviews, Q&A, "notify me", wishlist price drops, abandoned-cart emails and deals already exist).
+reviews, Q&A, "notify me", wishlist price drops, abandoned-cart emails, deals, gift cards, the wallet
+and sale countdowns already exist).
 
 **Suggested order:** 1 (WhatsApp updates), 6 (boat-day estimates) and 4 (proof of delivery) first:
 together they answer "where is my order?" and "when will it arrive?", the questions customers ask
@@ -89,17 +110,16 @@ most. Then 3 and 2, then the rest as the shop grows.
    Eid gift collections.
 10. **Search in Latin-letter Dhivehi.** Understand Dhivehi typed in English letters (e.g. "mas" for
     fish, "kandu mas") as well as Thaana and English.
-11. **Gift cards and store credit.** Customers buy a gift card for someone else; refunds can go back as
-    iruali credit instead of to the card, so the money stays on the site. Needs a credit balance on
-    the account, usable at checkout, with its own GST treatment (a gift card is taxed when spent).
-12. **Flash sales with a countdown.** Short, time-limited deals (a few hours) with a timer on the
-    product and the deals page, and a limited quantity. Easy to share on social media.
+
+Already built (so not on this list): gift cards and wallet credit (refunds can go to the wallet), and a
+sale countdown ("Sale ends" in the product form).
 
 ### Earning more as the marketplace
 
-13. **Sponsored listings.** Shops pay to show their products at the top of search, a department or the
-    home page, marked "Sponsored". Charged per day or per click from the shop's payouts. A second
-    income besides commission.
+11. **Sponsored listings.** Shops pay to show their products at the top of search, a department or the
+    home page, marked "Sponsored". Products already have `is_sponsored` / `sponsored_until`, but there is
+    no way for a shop to buy a spot or for iruali to charge for it (e.g. per day, from the shop's
+    payouts). A second income besides commission.
 
 ### Pre-orders with a booking fee (order-on-demand imports): built on 2026-10-21
 

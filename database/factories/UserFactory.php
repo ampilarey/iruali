@@ -42,6 +42,8 @@ class UserFactory extends Factory
             'referral_code' => strtoupper(Str::random(8)),
             'referred_by' => null,
             'loyalty_points' => 0,
+            // Shops made in tests have agreed to the current Seller Terms (the Seller Centre asks otherwise)
+            'seller_terms_version' => \App\Support\SellerTerms::version(),
         ];
     }
 

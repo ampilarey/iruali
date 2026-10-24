@@ -51,6 +51,9 @@ class MarketplaceDemoSeeder extends Seeder
                 'seller_approved_at' => now(),
                 'seller_applied_at' => now()->subWeeks(3),
                 'onboarding_completed_at' => now(),
+                // Sample shops have agreed to the current Seller Terms, so the Seller Centre opens for them
+                'seller_terms_version' => \App\Support\SellerTerms::version(),
+                'seller_terms_agreed_at' => now(),
             ])->save();
             $seller->roles()->syncWithoutDetaching([$sellerRole->id]);
 

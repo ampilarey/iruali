@@ -40,6 +40,7 @@ return [
             'seller.settings.notifications', 'seller.settings.notifications.*',
             'seller.settings.delivery', 'seller.settings.delivery.*',
             'seller.help', 'seller.help.*',
+            'seller.terms.show', // the Seller Terms page; only the owner agrees (owner_only)
         ],
 
         // Packing and handing over orders: the order pages (view, move the part along, delivery
@@ -57,6 +58,7 @@ return [
             'seller.preorders', 'seller.preorders.arrived', // booking in stock that came; moving a promised date is for managers
             'seller.questions',
             'seller.help', 'seller.help.*',
+            'seller.terms.show',
         ],
     ],
 
@@ -71,6 +73,7 @@ return [
         'seller.settings.verification', 'seller.settings.verification.*',
         'seller.settings.holiday', 'seller.settings.holiday.*',
         'seller.staff', 'seller.staff.*',
+        'seller.terms.agree', // staff see the Seller Terms page but only the owner agrees to a new version
     ],
 
     // An invitation link works for this many days

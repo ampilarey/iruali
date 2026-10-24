@@ -50,6 +50,22 @@
                         </ul>
                         <p class="mt-2">{{ __('Change the values under Settings → Marketplace / seller terms and Settings → Payments.') }}</p>
                     </div>
+                    <div class="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 space-y-2" data-seller-terms-version>
+                        <p><span class="font-semibold text-gray-900">Current version: {{ $terms['version'] }}.</span>
+                            <span data-seller-terms-count>{{ $terms['agreed'] }} of {{ $terms['shops'] }} shops have agreed to it.</span>
+                            Shops that haven't are asked to agree before they can use the Seller Centre (Admin → Sellers shows who).</p>
+                        @if($terms['changes'] !== [])
+                            <p class="text-xs text-gray-500">What changed in it: {{ implode(' · ', $terms['changes']) }}</p>
+                        @endif
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="seller_terms_publish" value="1" @checked(old('seller_terms_publish')) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600">
+                            <span><span class="font-medium text-gray-900">Publish as a new version when I save:</span> every shop must agree again before using the Seller Centre, and each shop is emailed. Leave unticked for small fixes such as typos.</span>
+                        </label>
+                        <div>
+                            <label for="seller_terms_changes" class="block text-xs font-medium text-gray-700">What changed (one point per line; shops see this when asked to agree)</label>
+                            <textarea id="seller_terms_changes" name="seller_terms_changes" rows="3" maxlength="2000" class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">{{ old('seller_terms_changes') }}</textarea>
+                        </div>
+                    </div>
                 @endif
                 <textarea id="legal_{{ $key }}_body" name="legal_{{ $key }}_body" rows="{{ $values["legal_{$key}_body"] !== '' ? 16 : 4 }}" placeholder="Leave empty to use the built-in {{ strtolower($label) }}." class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono">{{ old("legal_{$key}_body", $values["legal_{$key}_body"]) }}</textarea>
             </x-admin.fold>

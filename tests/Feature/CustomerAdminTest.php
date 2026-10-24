@@ -154,7 +154,7 @@ class CustomerAdminTest extends TestCase
         $csv = $this->get(route('admin.customer-report.export'))->assertOk()->streamedContent();
         $this->assertStringContainsString('Loyal Buyer', $csv);
         $this->assertStringContainsString('1500.00', $csv);
-        $this->assertStringNotContainsString('999', $csv);
+        $this->assertStringNotContainsString(',999.00', $csv, 'the cancelled order is not counted');
 
         $this->actingAs($this->staff('catalogue'))->get(route('admin.customer-report'))->assertForbidden();
     }

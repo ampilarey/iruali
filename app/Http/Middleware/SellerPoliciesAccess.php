@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * The seller policies (Seller Terms, Prohibited & Restricted Items) are not public: they open for
+ * The Seller Terms are not public: they open for
  * shops, iruali's team and, while applications are open, signed-in visitors (SellerTerms::visibleTo()).
  * A visitor who is not signed in is asked to sign in while applications are open; otherwise 404.
  */

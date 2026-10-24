@@ -102,7 +102,7 @@ class SellerTerms
     }
 
     /**
-     * Who may read the seller policies (the Seller Terms and Prohibited & Restricted Items): shops
+     * Who may read the Seller Terms (Prohibited & Restricted Items stays public): shops
      * (owners and their staff), iruali's team, and, while new shop applications are open, anyone
      * signed in, who can reach the application form. Everyone else gets a 404
      * (App\Http\Middleware\SellerPoliciesAccess), and the policy menu leaves the links out.

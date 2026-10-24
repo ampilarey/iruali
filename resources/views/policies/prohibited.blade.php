@@ -6,7 +6,7 @@
 @section('policy_title', __('Prohibited & Restricted Items'))
 @section('policy_subtitle', __('What may not be sold on iruali, and what needs a permit or extra care.'))
 
-{{-- A seller policy, not public (SellerPoliciesAccess): linked from the Seller Terms, the product form and the seller application. --}}
+{{-- Public (unlike the Seller Terms): linked from the footer, the policy menu, the customer terms, the Seller Terms, the product form and the seller application. --}}
 @section('policy')
 <p>Every shop on {{ $name }} must follow Maldivian law, including the rules of the Maldives Customs Service, the Maldives Food and Drug Authority (MFDA) and the other authorities, and these rules of our own. Some items below are allowed by law in some places but are not allowed on {{ $name }}.</p>
 <p>This list is a guide, not the whole law, and it can change. <strong>If you are not sure about an item, ask us before you list it.</strong> We may remove any listing, cancel orders for it with a full refund to the customer, and suspend a shop that breaks these rules (see the <a href="{{ route('policies.seller_terms') }}">Seller Terms</a>).</p>

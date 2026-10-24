@@ -12,13 +12,11 @@
         'policies.privacy' => __('Privacy Policy'),
         'policies.security' => __('Payment Security'),
         'policies.about' => __('About & Contact'),
+        'policies.prohibited' => __('Prohibited & Restricted Items'),
     ];
-    // The seller policies are listed only for those who may open them (shops, the team, would-be shops)
+    // The Seller Terms are listed only for those who may open them (shops, the team, would-be shops)
     if (\App\Support\SellerTerms::visibleTo(auth()->user())) {
-        $policyLinks += [
-            'policies.seller_terms' => __('Seller Terms'),
-            'policies.prohibited' => __('Prohibited & Restricted Items'),
-        ];
+        $policyLinks['policies.seller_terms'] = __('Seller Terms');
     }
 
     // Same approach as Bake & Grill: the owner can replace a policy's text from Admin → Legal pages

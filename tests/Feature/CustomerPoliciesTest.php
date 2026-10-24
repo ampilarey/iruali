@@ -48,7 +48,7 @@ class CustomerPoliciesTest extends TestCase
         $this->get('/delivery-policy')->assertOk()->assertSee('are sent once the item has reached the shop');
     }
 
-    public function test_the_prohibited_items_page_is_linked_where_shops_look(): void
+    public function test_the_prohibited_items_page_is_public_and_linked_where_shops_and_customers_look(): void
     {
         $url = route('policies.prohibited');
         $shop = \App\Models\User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Reef Goods', 'onboarding_completed_at' => now()]);
@@ -63,6 +63,13 @@ class CustomerPoliciesTest extends TestCase
             ->assertSee(route('policies.seller_terms'), false)
             ->getContent();
         $this->assertDoesNotMatchRegularExpression('/@(if|endif|foreach)\b/', $page);
+
+        // Public: anyone can read it, from the footer, the policy menu and the customer terms
+        \Illuminate\Support\Facades\Auth::forgetGuards();
+        $this->get('/prohibited-items')->assertOk()->assertSee('1. Not allowed on');
+        $this->get('/')->assertSee($url, false);
+        $this->get('/terms')->assertSee($url, false);
+        $this->actingAs($shop);
 
         // In the Seller Terms and on the product form; the application form links it too
         $this->get('/seller-terms')->assertSee('data-prohibited-link', false)->assertSee($url, false);

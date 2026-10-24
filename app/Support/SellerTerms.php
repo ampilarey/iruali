@@ -101,6 +101,22 @@ class SellerTerms
         return $version;
     }
 
+    /**
+     * Who may read the seller policies (the Seller Terms and Prohibited & Restricted Items): shops
+     * (owners and their staff), iruali's team, and, while new shop applications are open, anyone
+     * signed in, who can reach the application form. Everyone else gets a 404
+     * (App\Http\Middleware\SellerPoliciesAccess), and the policy menu leaves the links out.
+     */
+    public static function visibleTo(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return $user->isStaff() || $user->hasRole('seller') || CurrentShop::membershipOf($user) !== null
+            || SellerApplications::open();
+    }
+
     /** Whether the shop has agreed to the current version. */
     public static function agreed(User $shop): bool
     {

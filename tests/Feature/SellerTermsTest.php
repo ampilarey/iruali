@@ -47,6 +47,8 @@ class SellerTermsTest extends TestCase
     {
         Setting::set(['default_commission_rate' => 15, 'payout_schedule' => 'monthly', 'payout_day' => 'the 5th', 'late_shipment_days' => 2, 'return_window_days' => 14, 'company_trading_name' => 'iruali']);
 
+        // Not public: a signed-in visitor reads them while applications are open (SellerTermsAgreementTest has the rest)
+        $this->actingAs(User::factory()->create());
         $en = $this->withSession(['locale' => 'en'])->get('/seller-terms')->assertOk()
             ->assertSee('Seller Terms')->assertSee('commission of 15%')->assertSee('every month, on the 5th')->assertSee('within 2 days of the customer')->assertSee('within 14 days of delivery')
             ->assertDontSee('{commission_rate}')->assertDontSee('{trading_name}')->assertSee(route('policies.terms'), false)->assertSee('keep a copy');
@@ -56,9 +58,9 @@ class SellerTermsTest extends TestCase
             ->assertSee('15%')->assertSee('14')->assertDontSee('{commission_rate}')->assertDontSee('{return_window_days}')->getContent();
         $this->assertGreaterThan(800, preg_match_all('/[\x{0780}-\x{07BF}]/u', $dv), 'The seller terms are translated');
 
-        // The other policy pages link to the seller terms, and the seller application does too
+        // The policy menu lists them for those who may read them, and the seller application links them
         $this->withSession(['locale' => 'en'])->get('/terms')->assertSee(route('policies.seller_terms'), false);
-        $this->actingAs(User::factory()->create())->get('/seller/apply')->assertOk()->assertSee(route('policies.seller_terms'), false);
+        $this->get('/seller/apply')->assertOk()->assertSee(route('policies.seller_terms'), false);
     }
 
     public function test_owner_text_also_gets_placeholders_and_the_editor_explains_them(): void

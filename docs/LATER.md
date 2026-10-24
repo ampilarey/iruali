@@ -65,7 +65,8 @@ Next:
    gift cards, push notifications, shops' ID cards and Seller Terms records, Telegram team alerts, and
    the analytics paragraph following Admin → Settings (Google Analytics sets cookies; Plausible none).
 2. **Step 3: Prohibited & Restricted Items page** (built 2026-10-24, `/prohibited-items`), linked from the
-   footer, the Seller Terms, the customer terms, the shop application and the product form. Have the
+   Seller Terms, the shop application and the product form. The seller policies (this page and the Seller
+   Terms) are private: shops, the team, and signed-in visitors only while applications are open. Have the
    lawyer check the list against current Maldivian rules (Customs, MFDA, tobacco and vape rules).
 
 ## Optional setup

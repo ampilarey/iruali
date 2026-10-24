@@ -53,6 +53,8 @@ class Audit
         'brand.seller_unauthorised' => 'Brand authorised seller removed',
         'settings.saved' => 'Settings saved',
         'legal.saved' => 'Legal page saved',
+        'seller_terms.published' => 'New seller terms version published',
+        'seller_terms.agreed' => 'Shop agreed to the seller terms',
         'demo.removed' => 'Sample data removed',
         'demo.restored' => 'Sample data restored',
         'voucher.created' => 'Voucher created',

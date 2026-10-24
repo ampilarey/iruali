@@ -100,6 +100,7 @@ class User extends Authenticatable implements HasLocalePreference
         'preorders_allowed_at' => 'datetime',
         'coming_soon_allowed' => 'boolean',
         'coming_soon_allowed_at' => 'datetime',
+        'seller_terms_agreed_at' => 'datetime',
         'delivers_to_home_atoll' => 'boolean',
     ];
 
@@ -685,6 +686,16 @@ class User extends Authenticatable implements HasLocalePreference
     public function businessVerification(): HasOne
     {
         return $this->hasOne(SellerVerification::class);
+    }
+
+    /**
+     * Every version of the Seller Terms this shop agreed to (App\Support\SellerTerms).
+     *
+     * @return HasMany<SellerTermsAgreement, $this>
+     */
+    public function sellerTermsAgreements(): HasMany
+    {
+        return $this->hasMany(SellerTermsAgreement::class);
     }
 
     /** iruali has checked this shop's business registration: it shows "Verified business". */

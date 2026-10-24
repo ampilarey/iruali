@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\SellerPerformanceController;
 use App\Http\Controllers\Seller\HelpController;
 use App\Http\Controllers\Seller\SellerController;
+use App\Http\Controllers\Seller\SellerTermsController;
 use App\Http\Controllers\Seller\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,9 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/help/{guide}', [HelpController::class, 'show'])->name('help.show');
     Route::get('/performance', [SellerController::class, 'performance'])->name('performance');
+    // A new version of the Seller Terms: the shop agrees before using the Seller Centre again (ShopAccess)
+    Route::get('/terms', [SellerTermsController::class, 'show'])->name('terms.show');
+    Route::post('/terms', [SellerTermsController::class, 'agree'])->name('terms.agree')->middleware('throttle:10,1,seller.terms.agree');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

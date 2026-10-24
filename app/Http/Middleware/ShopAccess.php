@@ -6,6 +6,7 @@ use App\Models\ShopStaff;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\CurrentShop;
+use App\Support\SellerTerms;
 use App\Support\ShopStaffAccess;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,9 @@ use Symfony\Component\HttpFoundation\Response;
  *  - a member of a shop's staff, for the pages their role may open (config/shop_staff.php), while
  *    their shop is open: a suspended or rejected shop is closed to its staff too. When the owner
  *    asks for it, staff must have two-step sign-in on first.
+ * A shop that has not agreed to the current Seller Terms is taken to "Agree to the new terms" first
+ * (App\Support\SellerTerms, Seller\SellerTermsController): only the owner can agree; staff see the
+ * same page and wait for them.
  * It sets CurrentShop for the request. What staff change is written to the audit log, with them
  * as the actor and the shop as the subject. iruali's team (support, finance, catalogue) never gets
  * in, even an account that has a shop from before; an admin account may also be iruali's own shop
@@ -26,6 +30,32 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ShopAccess
 {
+    /** The pages a shop can open before agreeing to the current Seller Terms. */
+    public const TERMS_PAGE = 'seller.terms.show';
+
+    public const TERMS_ROUTES = [self::TERMS_PAGE, 'seller.terms.agree'];
+
+    /**
+     * Until the shop has agreed to the current Seller Terms, every other Seller Centre page sends it
+     * to the terms page (a form or API call gets a 409 saying so).
+     */
+    protected function termsGate(Request $request, User $shop): ?Response
+    {
+        if (SellerTerms::agreed($shop) || in_array($request->route()?->getName(), self::TERMS_ROUTES, true)) {
+            return null;
+        }
+
+        $message = __('iruali\'s Seller Terms have changed. The shop owner must agree to the new terms before the Seller Centre can be used.');
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message], 409);
+        }
+        if ($request->isMethod('GET')) {
+            $request->session()->put('seller_terms_intended', $request->fullUrl());
+        }
+
+        return redirect()->route(self::TERMS_PAGE);
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
@@ -44,7 +74,7 @@ class ShopAccess
             }
             CurrentShop::set($user, null);
 
-            return $next($request);
+            return $this->termsGate($request, $user) ?? $next($request);
         }
 
         $membership = CurrentShop::membershipOf($user);
@@ -75,6 +105,9 @@ class ShopAccess
         }
 
         CurrentShop::set($shop, $membership);
+        if ($gate = $this->termsGate($request, $shop)) {
+            return $gate;
+        }
         $response = $next($request);
         $this->audit($request, $response, $shop, $membership);
 

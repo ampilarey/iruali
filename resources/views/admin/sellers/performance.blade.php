@@ -9,6 +9,7 @@
             <span>{{ $seller->email }}</span>
             @if($seller->phone)<span>· {{ $seller->phone }}</span>@endif
             <span>· {{ __('Commission') }} {{ rtrim(rtrim(number_format($seller->effectiveCommissionRate(), 2), '0'), '.') }}%</span>
+            <span data-seller-terms-agreement>· {{ $seller->seller_terms_version ? __('Seller Terms of :date agreed on :when', ['date' => \App\Support\SellerTerms::versionLabel($seller->seller_terms_version), 'when' => $seller->seller_terms_agreed_at?->translatedFormat('j M Y') ?? '—']) : __('Seller Terms: never agreed') }}@unless(\App\Support\SellerTerms::agreed($seller)) <strong class="text-amber-700">({{ __('not the current version') }})</strong>@endunless</span>
             <a href="{{ route('admin.payouts.create', $seller) }}" class="ms-auto rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">{{ __('Pay out') }}</a>
             <a href="{{ route('sellers.show', $seller) }}" target="_blank" rel="noopener" class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">{{ __('View shop') }} ↗</a>
         </div>

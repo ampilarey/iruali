@@ -147,9 +147,9 @@ class SellerTermsAgreementTest extends TestCase
         $this->actingAs($admin)->get(route('admin.legal'))->assertSee('1 of 2 shops have agreed to it.');
     }
 
-    public function test_the_seller_policies_are_only_for_shops_the_team_and_would_be_shops_while_applications_are_open(): void
+    public function test_the_seller_terms_are_only_for_shops_the_team_and_would_be_shops_while_applications_are_open(): void
     {
-        $pages = ['/seller-terms', '/prohibited-items'];
+        $pages = ['/seller-terms'];
         $shop = $this->staffedShop('Reef Goods', ['onboarding_completed_at' => now()]);
         $packer = $this->staffMember($shop, 'packer');
         $support = User::factory()->create();
@@ -160,8 +160,8 @@ class SellerTermsAgreementTest extends TestCase
         foreach ($pages as $page) {
             $this->get($page)->assertRedirect(route('login'));
         }
-        $this->get('/')->assertOk()->assertDontSee(route('policies.prohibited'), false)->assertDontSee(route('policies.seller_terms'), false);
-        $this->get('/terms')->assertOk()->assertDontSee(route('policies.seller_terms'), false)->assertDontSee(route('policies.prohibited'), false);
+        $this->get('/')->assertOk()->assertDontSee(route('policies.seller_terms'), false);
+        $this->get('/terms')->assertOk()->assertDontSee(route('policies.seller_terms'), false);
         foreach ($pages as $page) {
             $this->actingAs($customer)->get($page)->assertOk();
         }
@@ -181,8 +181,12 @@ class SellerTermsAgreementTest extends TestCase
                 }
             }
             $this->actingAs($customer)->get('/terms')->assertDontSee(route('policies.seller_terms'), false);
-            $this->actingAs($shop)->get('/terms')->assertSee(route('policies.seller_terms'), false)->assertSee(route('policies.prohibited'), false);
+            $this->actingAs($shop)->get('/terms')->assertSee(route('policies.seller_terms'), false);
         }
+
+        // The Prohibited & Restricted Items list stays public, whatever the state
+        \Illuminate\Support\Facades\Auth::forgetGuards();
+        $this->get('/prohibited-items')->assertOk();
     }
 
     public function test_the_seller_terms_cover_pre_orders_payments_rights_customer_data_and_tax(): void

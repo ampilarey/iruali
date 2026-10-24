@@ -437,6 +437,7 @@
                         <a href="{{ route('policies.terms') }}" class="hover:text-white">{{ __('Terms & Conditions') }}</a>
                         <a href="{{ route('policies.privacy') }}" class="hover:text-white">{{ __('Privacy Policy') }}</a>
                         <a href="{{ route('policies.security') }}" class="hover:text-white">{{ __('Payment Security') }}</a>
+                        <a href="{{ route('policies.prohibited') }}" class="hover:text-white">{{ __('Prohibited items') }}</a>
                     </p>
                 </div>
                 <div class="flex flex-col items-center md:items-end gap-1.5">

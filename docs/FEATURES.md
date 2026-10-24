@@ -169,12 +169,12 @@ payment, status changes, shipping and returns, according to the customer's prefe
 prescription medicines, weapons, protected wildlife, fakes, and more), what needs a permit or care
 (MFDA-registered medicines and supplements, food, cosmetics, drones and radio equipment, chemicals,
 plants, dangerous goods, used items, age limits) and that a shop importing for pre-orders is the
-importer; it is linked from the Seller Terms, the shop application and the product form.
-**The seller policies are not public** (Seller Terms and Prohibited & Restricted Items,
-`SellerPoliciesAccess`, `SellerTerms::visibleTo()`): they open for shops (owners and staff), iruali's
-team and, while shop applications are open, any signed-in visitor (a visitor not signed in is asked to
-sign in). While applications are paused or hidden everyone else gets a 404, and the policy menu lists
-the two pages only for those who may open them. Newsletter sign-up at `POST /newsletter` with an unsubscribe link.
+importer; it is public and linked from the footer, the policy menu, the customer terms, the Seller Terms, the
+shop application and the product form. **The Seller Terms are not public** (`SellerPoliciesAccess`,
+`SellerTerms::visibleTo()`): they open for shops (owners and staff), iruali's team and, while shop
+applications are open, any signed-in visitor (a visitor not signed in is asked to sign in). While
+applications are paused or hidden everyone else gets a 404, and the policy menu lists them only for
+those who may open them. Newsletter sign-up at `POST /newsletter` with an unsubscribe link.
 
 ## Seller
 

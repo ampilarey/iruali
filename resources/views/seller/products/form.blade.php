@@ -26,6 +26,7 @@
               action="{{ $editing ? route('seller.products.update', $product) : route('seller.products.store') }}"
               class="space-y-6 rounded-lg bg-white p-6 shadow">
             @csrf
+            <p class="text-sm text-gray-600" data-prohibited-note>{{ __('Some items may not be sold on iruali, and some need a permit.') }} <a href="{{ route('policies.prohibited') }}" target="_blank" rel="noopener" class="font-medium text-primary-600 hover:underline">{{ __('Check the Prohibited & Restricted Items list') }} ↗</a></p>
             @if(! $editing && ! empty($imported))
                 @include('seller.products._imported', ['imported' => $imported])
             @endif

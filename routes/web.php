@@ -57,6 +57,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::view('/delivery-policy', 'policies.delivery')->name('policies.delivery');
         Route::view('/privacy-policy', 'policies.privacy')->name('policies.privacy');
         Route::view('/payment-security', 'policies.security')->name('policies.security');
+        Route::view('/prohibited-items', 'policies.prohibited')->name('policies.prohibited');
         Route::view('/about', 'policies.about')->name('policies.about');
         Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1,stock-alerts.store');
         Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1,newsletter.store');

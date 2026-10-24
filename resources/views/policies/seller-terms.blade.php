@@ -32,7 +32,7 @@
 <h2>3. {{ __('Listings') }}</h2>
 <ul>
     <li>{{ $t('Changes to a live product (names, descriptions, prices, photos, options and offers) are also reviewed before customers see them; until then the approved version stays on sale. Stock changes apply at once. {trading_name} may let a shop it trusts publish new products and changes without review, and may withdraw that at any time.') }}</li>
-    <li>{{ $t('Listings must be honest: real photos, accurate names in English and Dhivehi, correct prices in MVR and true stock. Prohibited or restricted goods under Maldivian law may not be listed.') }}</li>
+    <li>{{ $t('Listings must be honest: real photos, accurate names in English and Dhivehi, correct prices in MVR and true stock. Prohibited or restricted goods under Maldivian law may not be listed.') }} <a href="{{ route('policies.prohibited') }}" data-prohibited-link>{{ __('See the Prohibited & Restricted Items list.') }}</a></li>
     <li>{{ $t('Use only photos, text, videos, logos and brand names you own or have permission to use. This includes what "Import from a link" copies from another website: check it, rewrite it where needed and remove anything you may not use. Never list fake or copied goods, or claim to be a brand\'s authorised seller when you are not.') }}</li>
     <li>{{ $t('You are responsible for the products you sell, for their quality and for complying with Maldivian law, including any permits your goods need.') }}</li>
 </ul>

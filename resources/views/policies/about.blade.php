@@ -6,7 +6,7 @@
 @section('policy_subtitle', __('Who we are and how to reach us.'))
 
 @section('policy')
-<p><strong>{{ $name }}</strong> is an online marketplace for shops across the Maldives. Local sellers, from fishermen and farmers to craftspeople and stores, list their products here, and we deliver to inhabited islands in every atoll. Every shop is reviewed by our team before its products go live.</p>
+<p><strong>{{ $name }}</strong> is an online store for the Maldives. We bring together products from across the country and from abroad, from fresh fish and farm produce to crafts and everyday goods, and deliver to inhabited islands in every atoll. Every product is checked by our team before it goes on sale.</p>
 
 <h2>Business details</h2>
 <dl class="grid grid-cols-1 sm:grid-cols-[14rem_1fr] gap-x-6 gap-y-2">

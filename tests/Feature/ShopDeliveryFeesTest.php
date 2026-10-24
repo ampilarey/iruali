@@ -265,13 +265,13 @@ class ShopDeliveryFeesTest extends TestCase
     {
         Setting::set(['shop_delivery_fee_max' => 200]);
         $this->get(route('policies.delivery'))->assertOk()
-            ->assertSee('Some shops deliver their orders themselves and set their own delivery fee, up to MVR 200.00.')
-            ->assertSee('Not every shop delivers to every island.');
+            ->assertSee('Some items have their own delivery fee, up to MVR 200.00')
+            ->assertSee('Not every item can be delivered to every island.');
         $this->actingAs(User::factory()->create())->get(route('policies.seller_terms'))->assertOk()
             ->assertSee('you deliver your parts yourself and are paid your fee and your bulky-item charges with your earnings', false)
             ->assertDontSee('Delivery fees are set and charged by');
 
         Setting::set(['shop_own_fees_enabled' => 0]);
-        $this->get(route('policies.delivery'))->assertOk()->assertDontSee('Some shops deliver their orders themselves');
+        $this->get(route('policies.delivery'))->assertOk()->assertDontSee('Some items have their own delivery fee');
     }
 }

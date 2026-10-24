@@ -162,7 +162,9 @@ again (`orders.buyAgain`) and a printable receipt (`orders.receipt`). `/track` l
 an order by number and email/phone (`order.track.*`). Emails and SMS go out on placement,
 payment, status changes, shipping and returns, according to the customer's preferences.
 
-**Help and policies.** `/help` and the policy pages (`/terms`, `/privacy-policy`,
+**Help and policies.** The public policy pages are written as one store ("iruali", "we"; partner
+businesses only where they matter: tax invoices, data sharing), with no mention of shops, sellers or a
+marketplace (`CustomerPoliciesTest` guards it); the private Seller Terms speak to shops. `/help` and the policy pages (`/terms`, `/privacy-policy`,
 `/refund-policy`, `/delivery-policy`, `/payment-security`, `/about`, `/seller-terms`,
 `/prohibited-items`), editable by admins at `/admin/legal`. **Prohibited & Restricted Items**
 (`policies.prohibited`) lists what may not be sold (alcohol, pork, tobacco and vapes, drugs and

@@ -272,7 +272,7 @@ class DeliveryRatesTest extends TestCase
             ->assertSee('MVR 120.00 per order.')
             ->assertDontSee('Kaafu Atoll')
             ->assertSee('extra delivery charge per item')
-            ->assertSee('collect your order from them');
+            ->assertSee('Some items can be collected instead, with no delivery fee.');
         $this->get(route('help'))->assertOk()->assertSee('Seenu Atoll')->assertSee('MVR 120.00');
     }
 

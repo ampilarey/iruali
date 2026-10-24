@@ -13,7 +13,7 @@
 
 @section('policy')
 <h2>1. Introduction</h2>
-<p>{{ Company::legalName() ?? $name }} ("we", "us", "our") operates the {{ $name }} online marketplace. This Privacy Policy explains how we collect, use and protect your personal information when you use our website and services.</p>
+<p>{{ Company::legalName() ?? $name }} ("we", "us", "our") operates the {{ $name }} online store. This Privacy Policy explains how we collect, use and protect your personal information when you use our website and services.</p>
 
 <h2>2. Information we collect</h2>
 <ul>
@@ -27,10 +27,10 @@
     <li><strong>Order history:</strong> to show your orders, give loyalty points and handle returns.</li>
     <li><strong>Payment information:</strong> the payment method, amount, and the transaction reference and status sent to us by Bank of Maldives. <strong>We never receive or store your card number, expiry date or security code.</strong></li>
     <li><strong>Reviews and questions</strong> you post, with your name.</li>
-    <li><strong>Messages, complaints and feedback:</strong> what you write to a shop or to us through the website, return requests with their photos, and how you rate an order.</li>
+    <li><strong>Messages, complaints and feedback:</strong> what you write to us through the website, return requests with their photos, and how you rate an order.</li>
     <li><strong>Wallet and gift cards:</strong> your credit balance and its history, and for a gift card you send, the recipient's name, email address and your message.</li>
     <li><strong>Push notifications, if you allow them:</strong> a code from your browser that lets us send order updates to it.</li>
-    <li><strong>Sellers:</strong> business name, contact person, island, bank account, the details in the seller application, when the shop agreed to the Seller Terms (with the IP address and browser used), and, for the optional "Verified business" badge, the business registration and the owner's ID card number and photo. These documents are kept outside the public website and seen only by our administrators.</li>
+    <li><strong>Partner businesses</strong> that supply products: business name, contact person, island, bank account, the details they gave us, when they agreed to our terms (with the IP address and browser used), and, for business verification, the business registration and the owner's ID card number and photo. These documents are kept outside the public website and seen only by our administrators.</li>
     <li><strong>Technical information:</strong> IP address, browser type and pages visited, in our server logs.</li>
 </ul>
 
@@ -63,8 +63,8 @@
 <ul>
     <li>encrypted data transmission (HTTPS / TLS) on every page;</li>
     <li>hashed passwords and optional two-step sign-in;</li>
-    <li>role-based access for staff; each seller sees only the orders for their own shop;</li>
-    <li>photos you add to a return request stored outside the public website, shown only to you, the shop and our administrators;</li>
+    <li>role-based access for staff and partners; each partner sees only the orders it handles;</li>
+    <li>photos you add to a return request stored outside the public website, shown only to you and the people handling your return;</li>
     <li>every payment result checked directly with Bank of Maldives, never trusted from the browser;</li>
     <li>regular reviews of access and security.</li>
 </ul>
@@ -72,7 +72,7 @@
 <h2>7. Data sharing</h2>
 <p>We do not sell or rent your personal information. We share it only with:</p>
 <ul>
-    <li><strong>The shop you buy from:</strong> your name, phone, delivery address and what you ordered, to prepare and deliver it;</li>
+    <li><strong>The partner business that prepares your order</strong>, where there is one: your name, phone, delivery address and what you ordered, to prepare and deliver it;</li>
     <li><strong>Bank of Maldives (BML):</strong> to process card payments and refunds;</li>
     <li><strong>Delivery partners:</strong> your name, phone and address for delivery;</li>
     <li><strong>Our SMS and email providers:</strong> your phone number or email address, only to deliver messages;</li>
@@ -90,14 +90,14 @@
 <h2>8. Cookies</h2>
 <p>We use the cookies needed for the website to work: keeping you signed in, your cart, your language, your island, and items you recently viewed or are comparing.</p>
 @if($analytics === 'ga4')
-    <p>We also use <strong>Google Analytics</strong>, which sets cookies to count visits and see how the website is used. It is not loaded in the Seller Centre or admin area, nor for a browser set to "Do Not Track" or Global Privacy Control. You can also block these cookies in your browser.</p>
+    <p>We also use <strong>Google Analytics</strong>, which sets cookies to count visits and see how the website is used. It is not loaded in our staff and partner areas, nor for a browser set to "Do Not Track" or Global Privacy Control. You can also block these cookies in your browser.</p>
 @elseif($analytics === 'plausible')
     <p>Our visitor statistics (Plausible Analytics) use no cookies and no personal data.</p>
 @endif
 <p>We do not use advertising cookies.</p>
 
 <h2>9. Data retention</h2>
-<p>Order and payment records, tax invoices and the Seller Terms a shop agreed to are kept for at least 5 years to meet accounting, tax and legal rules. Other information is kept while your account is open. If you ask us to delete your account, we delete or anonymise your information except records we must keep by law.</p>
+<p>Order and payment records, tax invoices and the terms our partners agreed to are kept for at least 5 years to meet accounting, tax and legal rules. Other information is kept while your account is open. If you ask us to delete your account, we delete or anonymise your information except records we must keep by law.</p>
 
 <h2>10. Your rights</h2>
 <ul>

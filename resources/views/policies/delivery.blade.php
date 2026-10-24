@@ -42,6 +42,8 @@
 </ul>
 <p>These are estimates, not guarantees. Weather, sea conditions and changes to boat or flight schedules can cause delays. We email you when your order is sent and when it is delivered, and you can follow it under <a href="{{ route('orders') }}">My Orders</a> or <a href="{{ route('order.track.form') }}">Track Order</a>.</p>
 
+<p><strong>Pre-orders</strong> are sent once the item has reached the shop (and, for a booking fee or "pay once the shop confirms", once it is paid in full), so they arrive around the date shown on the product page plus the delivery time above. See <a href="{{ route('policies.terms') }}">Terms &amp; Conditions</a>, section 5.</p>
+
 <h2>3. How your order is delivered</h2>
 <ul>
     <li>Orders from different shops may arrive separately.</li>

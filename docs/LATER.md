@@ -57,11 +57,13 @@ the Seller Centre, and a record of who agreed when (see `docs/FEATURES.md`, "Sel
 
 Next:
 
-1. **Step 2: customer pages up to date.** Terms & Conditions and Refund Policy: pre-orders (booking fee
-   kept when the customer cancels, full refund when the shop can't deliver or is late, "pay once the shop
-   confirms"), bank transfer and cash on delivery wording. Privacy Policy: analytics cookies when Google
-   Analytics is on, date of birth (birthday offer), "use my location", shops' ID cards (verification),
-   business buyers' GST numbers, Telegram team alerts, push notifications.
+1. **Step 2: customer pages up to date** (built 2026-10-24). Terms & Conditions: pre-orders (section 5:
+   full price, booking fee, "pay once the shop confirms"; the booking fee is kept when the customer
+   cancels, refunded when the shop cancels, can't get it, moves the date or is late), wallet, gift cards
+   and points (section 3). Refund Policy: pre-orders (section 2). Delivery Policy: when pre-orders ship.
+   Privacy Policy: location, date of birth, business GST numbers, messages and complaints, wallet and
+   gift cards, push notifications, shops' ID cards and Seller Terms records, Telegram team alerts, and
+   the analytics paragraph following Admin → Settings (Google Analytics sets cookies; Plausible none).
 2. **Step 3: Prohibited & restricted items page**, linked from the Seller Terms, the product form and the
    footer (alcohol, pork, weapons, drugs and medicines, counterfeit goods, and items needing a permit).
 

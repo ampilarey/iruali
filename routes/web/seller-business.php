@@ -38,5 +38,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/payout-batches/{batch}/cancel', [PayoutBatchController::class, 'cancel'])->name('payout-batches.cancel');
 });
 
-// Seller terms: the legal page every shop agrees to (public, editable under Admin → Legal pages)
-Route::view('/seller-terms', 'policies.seller-terms')->name('policies.seller_terms');
+// Seller terms: the agreement every shop signs (editable under Admin → Legal pages). Not public: shops,
+// the team and, while applications are open, signed-in visitors (App\Http\Middleware\SellerPoliciesAccess)
+Route::view('/seller-terms', 'policies.seller-terms')->name('policies.seller_terms')->middleware(\App\Http\Middleware\SellerPoliciesAccess::class);

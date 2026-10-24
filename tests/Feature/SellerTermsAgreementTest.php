@@ -147,11 +147,49 @@ class SellerTermsAgreementTest extends TestCase
         $this->actingAs($admin)->get(route('admin.legal'))->assertSee('1 of 2 shops have agreed to it.');
     }
 
+    public function test_the_seller_policies_are_only_for_shops_the_team_and_would_be_shops_while_applications_are_open(): void
+    {
+        $pages = ['/seller-terms', '/prohibited-items'];
+        $shop = $this->staffedShop('Reef Goods', ['onboarding_completed_at' => now()]);
+        $packer = $this->staffMember($shop, 'packer');
+        $support = User::factory()->create();
+        $support->roles()->attach(Role::firstOrCreate(['name' => 'support'], ['display_name' => 'Support'])->id);
+        $customer = User::factory()->create();
+
+        // Applications open: visitors are asked to sign in, then read them like the application form
+        foreach ($pages as $page) {
+            $this->get($page)->assertRedirect(route('login'));
+        }
+        $this->get('/')->assertOk()->assertDontSee(route('policies.prohibited'), false)->assertDontSee(route('policies.seller_terms'), false);
+        $this->get('/terms')->assertOk()->assertDontSee(route('policies.seller_terms'), false)->assertDontSee(route('policies.prohibited'), false);
+        foreach ($pages as $page) {
+            $this->actingAs($customer)->get($page)->assertOk();
+        }
+        $this->get('/terms')->assertSee(route('policies.seller_terms'), false);
+
+        // Applications paused or hidden: only shops, their staff and the team
+        foreach (['paused', 'hidden'] as $state) {
+            Setting::set(['seller_applications' => $state]);
+            \Illuminate\Support\Facades\Auth::forgetGuards();
+            foreach ($pages as $page) {
+                $this->get($page)->assertNotFound();
+            }
+            foreach ($pages as $page) {
+                $this->actingAs($customer)->get($page)->assertNotFound();
+                foreach ([$shop, $packer, $support] as $reader) {
+                    $this->actingAs($reader)->get($page)->assertOk();
+                }
+            }
+            $this->actingAs($customer)->get('/terms')->assertDontSee(route('policies.seller_terms'), false);
+            $this->actingAs($shop)->get('/terms')->assertSee(route('policies.seller_terms'), false)->assertSee(route('policies.prohibited'), false);
+        }
+    }
+
     public function test_the_seller_terms_cover_pre_orders_payments_rights_customer_data_and_tax(): void
     {
         Setting::set(['company_trading_name' => 'iruali']);
 
-        $this->get('/seller-terms')->assertOk()
+        $this->actingAs($this->staffedShop())->get('/seller-terms')->assertOk()
             ->assertSee('Version of 24 October 2026')
             ->assertSee('A pre-order is a promise.')
             ->assertSee('by bank transfer (once iruali has confirmed it) or, where offered, in cash on delivery')

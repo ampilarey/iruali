@@ -48,10 +48,13 @@ class CustomerPoliciesTest extends TestCase
         $this->get('/delivery-policy')->assertOk()->assertSee('are sent once the item has reached the shop');
     }
 
-    public function test_the_prohibited_items_page_is_linked_where_shops_and_customers_look(): void
+    public function test_the_prohibited_items_page_is_linked_where_shops_look(): void
     {
         $url = route('policies.prohibited');
-        $page = $this->get('/prohibited-items')->assertOk()
+        $shop = \App\Models\User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Reef Goods', 'onboarding_completed_at' => now()]);
+        $shop->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+
+        $page = $this->actingAs($shop)->get('/prohibited-items')->assertOk()
             ->assertSee('Prohibited &amp; Restricted Items', false)
             ->assertSee('1. Not allowed on')->assertSee('Alcohol')->assertSee('Pork')->assertSee('Tobacco, e-cigarettes and vapes')
             ->assertSee('Prescription medicines')->assertSee('Protected wildlife')->assertSee('Fake or copied goods')
@@ -61,17 +64,10 @@ class CustomerPoliciesTest extends TestCase
             ->getContent();
         $this->assertDoesNotMatchRegularExpression('/@(if|endif|foreach)\b/', $page);
 
-        // In the policy menu and the footer of every page, and in the seller and customer terms
-        $this->get('/')->assertSee($url, false);
+        // In the Seller Terms and on the product form; the application form links it too
         $this->get('/seller-terms')->assertSee('data-prohibited-link', false)->assertSee($url, false);
-        $this->get('/terms')->assertSee($url, false);
-
-        // On the shop application and the product form
-        $customer = \App\Models\User::factory()->create();
-        $this->actingAs($customer)->get('/seller/apply')->assertSee($url, false);
-        $shop = \App\Models\User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Reef Goods', 'onboarding_completed_at' => now()]);
-        $shop->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
-        $this->actingAs($shop)->get(route('seller.products.create'))->assertOk()->assertSee('data-prohibited-note', false)->assertSee($url, false);
+        $this->get(route('seller.products.create'))->assertOk()->assertSee('data-prohibited-note', false)->assertSee($url, false);
+        $this->actingAs(\App\Models\User::factory()->create())->get('/seller/apply')->assertSee($url, false);
 
         // The owner can replace it in Admin → Legal pages, like the other policies
         $admin = \App\Models\User::factory()->create();

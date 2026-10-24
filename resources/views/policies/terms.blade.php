@@ -84,7 +84,7 @@
 
 {{-- BML requirement 7: import/export, legal restrictions and customs duties --}}
 <h2>7. Import / export and legal restrictions</h2>
-<p>All products are sold and delivered within the Maldives. No import, export or customs duties apply to orders from {{ $name }}. Sellers must follow Maldivian law, and items that are prohibited or restricted in the Maldives, including under the Maldives Customs Service's rules, may not be listed (see <a href="{{ route('policies.prohibited') }}">Prohibited &amp; Restricted Items</a>). If an item needs an age check or a permit, the seller may ask for proof before delivery and cancel the order with a full refund if it cannot be provided.</p>
+<p>All products are sold and delivered within the Maldives. No import, export or customs duties apply to orders from {{ $name }}. Sellers must follow Maldivian law, and items that are prohibited or restricted in the Maldives, including under the Maldives Customs Service's rules, may not be listed. If an item needs an age check or a permit, the seller may ask for proof before delivery and cancel the order with a full refund if it cannot be provided.</p>
 
 {{-- BML requirements 9 and 10: privacy, security and card data --}}
 <h2>8. Security and card data</h2>

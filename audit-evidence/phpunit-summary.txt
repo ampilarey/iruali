@@ -1,0 +1,8 @@
+  ✓ a long list is capped and the rest wait for the next day             0.05s  
+  ✓ the wishlist page shows how much less it costs now                   0.06s  
+  ✓ the alert is scheduled daily at ten maldives time                    0.01s  
+
+  Tests:    918 passed (10146 assertions)
+  Duration: 65.63s
+
+TEST_EXIT:0

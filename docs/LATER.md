@@ -1,6 +1,6 @@
 # Saved for later
 
-Things agreed on 2026-10-19 but not started (updated 2026-10-21; booking-fee pre-orders, "pay once the shop confirms" and admin-allowed pre-orders are built). Pick any of them up by asking for it by name.
+Things agreed on 2026-10-19 but not started (updated 2026-10-24; booking-fee pre-orders, "pay once the shop confirms", admin-allowed pre-orders and "Import from a link" are built). Pick any of them up by asking for it by name.
 
 ## Launch to-dos (owner, on the live server)
 
@@ -24,6 +24,10 @@ Things agreed on 2026-10-19 but not started (updated 2026-10-21; booking-fee pre
    and mobile); approve it in Admin → Sellers and set its commission to 0% there; give it iruali's bank
    and GST details in its Seller Centre. Then switch with "Switch to Seller Centre" (admin menu) and
    "Switch to Admin" (Seller Centre). Support, finance and catalogue accounts can't sell.
+10. **Pre-order imports:** in Admin → Settings → "Pre-order imports", enter the exchange rates (one per
+    line, e.g. `USD 15.42`), shipping per kg (MVR) and the margin %. Without them, "Import from a
+    link" still fills in the product but suggests no MVR price. Then allow pre-orders for the shops
+    that import (Admin → Sellers → the shop → Pre-orders).
 
 ### Launch checklist on 2026-10-21 (Admin → dashboard → Launch checklist)
 
@@ -48,8 +52,12 @@ Still to do, all in **Admin → Settings** (`/admin/settings`, one Save button a
 
 ## Ideas to build next
 
-None of these exist yet (checked against the code on 2026-10-19). Suggested order: 1 and 4 first
-(they protect the business most in the first months), then 6.
+None of these exist yet (checked against the code on 2026-10-24; vouchers, loyalty, referrals,
+reviews, Q&A, "notify me", wishlist price drops, abandoned-cart emails and deals already exist).
+
+**Suggested order:** 1 (WhatsApp updates), 6 (boat-day estimates) and 4 (proof of delivery) first:
+together they answer "where is my order?" and "when will it arrive?", the questions customers ask
+most. Then 3 and 2, then the rest as the shop grows.
 
 ### Most useful at launch
 
@@ -81,6 +89,17 @@ None of these exist yet (checked against the code on 2026-10-19). Suggested orde
    Eid gift collections.
 10. **Search in Latin-letter Dhivehi.** Understand Dhivehi typed in English letters (e.g. "mas" for
     fish, "kandu mas") as well as Thaana and English.
+11. **Gift cards and store credit.** Customers buy a gift card for someone else; refunds can go back as
+    iruali credit instead of to the card, so the money stays on the site. Needs a credit balance on
+    the account, usable at checkout, with its own GST treatment (a gift card is taxed when spent).
+12. **Flash sales with a countdown.** Short, time-limited deals (a few hours) with a timer on the
+    product and the deals page, and a limited quantity. Easy to share on social media.
+
+### Earning more as the marketplace
+
+13. **Sponsored listings.** Shops pay to show their products at the top of search, a department or the
+    home page, marked "Sponsored". Charged per day or per click from the shop's payouts. A second
+    income besides commission.
 
 ### Pre-orders with a booking fee (order-on-demand imports): built on 2026-10-21
 

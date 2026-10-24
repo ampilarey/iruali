@@ -163,8 +163,14 @@ an order by number and email/phone (`order.track.*`). Emails and SMS go out on p
 payment, status changes, shipping and returns, according to the customer's preferences.
 
 **Help and policies.** `/help` and the policy pages (`/terms`, `/privacy-policy`,
-`/refund-policy`, `/delivery-policy`, `/payment-security`, `/about`, `/seller-terms`), editable
-by admins at `/admin/legal`. Newsletter sign-up at `POST /newsletter` with an unsubscribe link.
+`/refund-policy`, `/delivery-policy`, `/payment-security`, `/about`, `/seller-terms`,
+`/prohibited-items`), editable by admins at `/admin/legal`. **Prohibited & Restricted Items**
+(`policies.prohibited`) lists what may not be sold (alcohol, pork, tobacco and vapes, drugs and
+prescription medicines, weapons, protected wildlife, fakes, and more), what needs a permit or care
+(MFDA-registered medicines and supplements, food, cosmetics, drones and radio equipment, chemicals,
+plants, dangerous goods, used items, age limits) and that a shop importing for pre-orders is the
+importer; it is linked from the footer, the policy menu, the Seller Terms, the customer terms, the
+shop application and the product form. Newsletter sign-up at `POST /newsletter` with an unsubscribe link.
 
 ## Seller
 

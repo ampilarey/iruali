@@ -13,6 +13,7 @@
         'policies.security' => __('Payment Security'),
         'policies.about' => __('About & Contact'),
         'policies.seller_terms' => __('Seller Terms'),
+        'policies.prohibited' => __('Prohibited & Restricted Items'),
     ];
 
     // Same approach as Bake & Grill: the owner can replace a policy's text from Admin → Legal pages

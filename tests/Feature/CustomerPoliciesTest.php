@@ -48,6 +48,39 @@ class CustomerPoliciesTest extends TestCase
         $this->get('/delivery-policy')->assertOk()->assertSee('are sent once the item has reached the shop');
     }
 
+    public function test_the_prohibited_items_page_is_linked_where_shops_and_customers_look(): void
+    {
+        $url = route('policies.prohibited');
+        $page = $this->get('/prohibited-items')->assertOk()
+            ->assertSee('Prohibited &amp; Restricted Items', false)
+            ->assertSee('1. Not allowed on')->assertSee('Alcohol')->assertSee('Pork')->assertSee('Tobacco, e-cigarettes and vapes')
+            ->assertSee('Prescription medicines')->assertSee('Protected wildlife')->assertSee('Fake or copied goods')
+            ->assertSee('2. Allowed only with a permit or extra care')->assertSee('registered with the MFDA')
+            ->assertSee('3. Pre-orders from abroad')->assertSee('is the importer')
+            ->assertSee(route('policies.seller_terms'), false)
+            ->getContent();
+        $this->assertDoesNotMatchRegularExpression('/@(if|endif|foreach)\b/', $page);
+
+        // In the policy menu and the footer of every page, and in the seller and customer terms
+        $this->get('/')->assertSee($url, false);
+        $this->get('/seller-terms')->assertSee('data-prohibited-link', false)->assertSee($url, false);
+        $this->get('/terms')->assertSee($url, false);
+
+        // On the shop application and the product form
+        $customer = \App\Models\User::factory()->create();
+        $this->actingAs($customer)->get('/seller/apply')->assertSee($url, false);
+        $shop = \App\Models\User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Reef Goods', 'onboarding_completed_at' => now()]);
+        $shop->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+        $this->actingAs($shop)->get(route('seller.products.create'))->assertOk()->assertSee('data-prohibited-note', false)->assertSee($url, false);
+
+        // The owner can replace it in Admin → Legal pages, like the other policies
+        $admin = \App\Models\User::factory()->create();
+        $admin->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+        $this->actingAs($admin)->get(route('admin.legal'))->assertSee('name="legal_prohibited_body"', false);
+        $this->put(route('admin.legal.update'), ['legal_prohibited_body' => 'Our own list of banned items.'])->assertSessionHas('success');
+        $this->get('/prohibited-items')->assertSee('Our own list of banned items.')->assertDontSee('1. Not allowed on');
+    }
+
     public function test_the_privacy_policy_lists_the_data_kept_and_follows_the_analytics_setting(): void
     {
         Setting::set(['analytics_provider' => 'none']);

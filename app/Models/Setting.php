@@ -54,6 +54,7 @@ class Setting extends Model
         'legal_privacy_body' => '',
         'legal_security_body' => '',
         'legal_seller_terms_body' => '',
+        'legal_prohibited_body' => '',
         // A version of the Seller Terms an admin published (a timestamp) and what changed (App\Support\SellerTerms)
         'seller_terms_version' => '',
         'seller_terms_changes' => '',

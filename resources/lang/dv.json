@@ -3305,5 +3305,11 @@
     "Payments by card, bank transfer and cash on delivery, and that you never send an order before it is paid (except cash on delivery).": "ކާޑު، ބޭންކް ޓްރާންސްފަރ އަދި ޑެލިވަރީގައި ނަގުދުން ފައިސާ ދެއްކުން، އަދި ފައިސާ ދެއްކުމުގެ ކުރިން އޯޑަރެއް ނުފޮނުވުން (ޑެލިވަރީގައި ނަގުދުން ދައްކާ އޯޑަރު ފިޔަވައި).",
     "Photos, text and brands: only what you have the right to use, including what \"Import from a link\" fills in; no fakes or copies.": "ފޮޓޯ، ލިޔުމާއި ބްރޭންޑް: \"ލިންކަކުން ނަގާ\" އިން ފުރާ ތަކެތި ހިމެނޭ ގޮތުން، ބޭނުންކުރުމުގެ ޙައްޤު ލިބިފައިވާ ތަކެތި އެކަނި؛ ދޮގު ނުވަތަ ކޮޕީ ތަކެތި ނުވާނެ.",
     "Customer details: only for the customer's own order, never for marketing or selling outside iruali.": "ކަސްޓަމަރުންގެ މަޢުލޫމާތު: ހަމައެކަނި ކަސްޓަމަރުގެ އަމިއްލަ އޯޑަރަށް، މާކެޓިންއަށް ނުވަތަ iruali ން ބޭރުގައި ވިއްކުމަށް ދުވަހަކުވެސް ނޫން.",
-    "GST and your own tax, chargebacks, liability and how new versions of these terms work.": "ޖީއެސްޓީއާއި ތިބާގެ އަމިއްލަ ޓެކްސް، ޗާޖްބެކް، ޒިންމާ، އަދި މި ޝަރުތުތަކުގެ އާ ނުސްޚާތައް ހިނގާ ގޮތް."
+    "GST and your own tax, chargebacks, liability and how new versions of these terms work.": "ޖީއެސްޓީއާއި ތިބާގެ އަމިއްލަ ޓެކްސް، ޗާޖްބެކް، ޒިންމާ، އަދި މި ޝަރުތުތަކުގެ އާ ނުސްޚާތައް ހިނގާ ގޮތް.",
+    "Prohibited & Restricted Items": "މަނާ އަދި ހަނިކުރެވިފައިވާ ތަކެތި",
+    "What may not be sold on iruali, and what needs a permit or extra care.": "iruali ގައި ވިއްކުން މަނާ ތަކެތި، އަދި ހުއްދައެއް ނުވަތަ ހާއްސަ ސަމާލުކަމެއް ބޭނުންވާ ތަކެތި.",
+    "See the Prohibited & Restricted Items list.": "މަނާ އަދި ހަނިކުރެވިފައިވާ ތަކެތީގެ ލިސްޓު ބައްލަވާ.",
+    "Prohibited items": "މަނާ ތަކެތި",
+    "Some items may not be sold on iruali, and some need a permit.": "ބައެއް ތަކެތި iruali ގައި ވިއްކުން މަނާ، އަދި ބައެއް ތަކެއްޗަށް ހުއްދަ ބޭނުންވޭ.",
+    "Check the Prohibited & Restricted Items list": "މަނާ އަދި ހަނިކުރެވިފައިވާ ތަކެތީގެ ލިސްޓު ބައްލަވާ"
 }

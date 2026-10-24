@@ -69,6 +69,15 @@ Next:
    the Seller Terms are private (shops, the team, and signed-in visitors only while applications are open). Have the
    lawyer check the list against current Maldivian rules (Customs, MFDA, tobacco and vape rules).
 
+### Showing iruali as one store (for now)
+
+The public policy pages speak as one store (2026-10-24). Still showing shops elsewhere, if you want it
+hidden later ("single-store switch"): the announcement bar text (Admin → Settings → Storefront, now "Shop
+local sellers from every island"), the "Reviewed local sellers" trust badge, "Sell on iruali" links (set
+shop applications to "hidden" in Admin → Sellers to remove them), shop names on products, cart, checkout
+and orders, shop pages (`/shops/...`), home-page shop blocks, and order emails/SMS that say "the shop".
+Tax invoices keep the partner business's name and GST number (required by law).
+
 ## Optional setup
 
 - **Google / Facebook / Apple sign-in:** keys in `.env`, step by step in `docs/SOCIAL_LOGIN.md`.

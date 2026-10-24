@@ -19,8 +19,8 @@
 <h2>1. Cancellation</h2>
 <ul>
     <li><strong>While your order is Pending:</strong> cancel it yourself from <a href="{{ route('orders') }}">My Orders</a> at no charge. You get a full refund, including delivery.</li>
-    <li><strong>Once the shop is preparing it or has sent it:</strong> contact us straight away. We will cancel it if the shop can still stop it; otherwise you can return it under section 3.</li>
-    <li><strong>Cancelled by us or the shop</strong> (for example, the item is out of stock or delivery is not possible): full refund, including delivery.</li>
+    <li><strong>Once it is being prepared or has been sent:</strong> contact us straight away. We will cancel it if it can still be stopped; otherwise you can return it under section 3.</li>
+    <li><strong>Cancelled by us</strong> (for example, the item is out of stock or delivery is not possible): full refund, including delivery.</li>
     <li>Card orders that are not paid within 24 hours are cancelled automatically. Nothing is charged.</li>
     @if(\App\Services\ManualPaymentService::transferEnabled())
         <li>Bank transfer orders with no transfer slip within {{ \App\Services\ManualPaymentService::payWithinHours() }} hours are cancelled automatically.</li>
@@ -31,8 +31,8 @@
 <p>The product page and checkout show what kind of pre-order an item is, and the days that apply to your order.</p>
 <ul>
     <li><strong>Paid in full:</strong> cancel from My Orders until anything in the order has been sent, for a full refund.</li>
-    <li><strong>Booking fee:</strong> if you cancel, <strong>the booking fee is not refunded</strong>, because the shop has ordered the item for you; anything you paid beyond it is refunded. You get everything back, booking fee included, if the shop cancels, cannot get the item or moves the date later, or if the order is later than the number of days shown at checkout.</li>
-    <li><strong>Paid once the shop confirms:</strong> you have paid nothing until the shop confirms, so cancelling before then costs nothing. If the shop cannot get the item, the order is cancelled. If the shop confirms and the order is not paid by the date we give you, it is cancelled; once paid, it is like a full-price pre-order.</li>
+    <li><strong>Booking fee:</strong> if you cancel, <strong>the booking fee is not refunded</strong>, because we have ordered the item for you; anything you paid beyond it is refunded. You get everything back, booking fee included, if we cancel, cannot get the item or move the date later, or if the order is later than the number of days shown at checkout.</li>
+    <li><strong>Paid once we confirm:</strong> you have paid nothing until we confirm, so cancelling before then costs nothing. If we cannot get the item, the order is cancelled. If we confirm and the order is not paid by the date we give you, it is cancelled; once paid, it is like a full-price pre-order.</li>
     <li>If an expected date moves, we email you with a link to cancel.</li>
 </ul>
 
@@ -40,12 +40,12 @@
 <ul>
     <li><strong>Damaged, faulty, wrong or not as described:</strong> tell us within {{ $days }} days of delivery with your order number and a photo. We arrange a replacement, an exchange or a full refund, including the delivery fee, and we pay any return delivery.</li>
     <li><strong>Missing items:</strong> tell us within 48 hours of delivery. We send the missing items or refund them.</li>
-    <li><strong>Change of mind:</strong> at the shop's discretion. If the shop agrees, the item must be unused, in its original packaging and returned within {{ $days }} days of delivery; the original delivery fee and return delivery are not refunded.</li>
+    <li><strong>Change of mind:</strong> at our discretion. If we agree, the item must be unused, in its original packaging and returned within {{ $days }} days of delivery; the original delivery fee and return delivery are not refunded.</li>
     <li><strong>Order not fulfilled:</strong> if we cannot supply or deliver your order, you receive a full refund.</li>
 </ul>
 
 <h2>4. Exchanges</h2>
-<p>If you received the wrong size, colour or variant, or a faulty item, we exchange it for the right one when the shop has it in stock. If it does not, you get a refund.</p>
+<p>If you received the wrong size, colour or variant, or a faulty item, we exchange it for the right one when it is in stock. If it is not, you get a refund.</p>
 
 <h2>5. Items that cannot be returned</h2>
 <p>For health, hygiene and freshness reasons, these items cannot be returned or exchanged unless they arrived damaged, faulty or wrong:</p>

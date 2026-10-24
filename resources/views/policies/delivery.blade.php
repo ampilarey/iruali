@@ -26,29 +26,29 @@
     @endif
 </ul>
 @if($shopFees)
-    <p>Some shops deliver their orders themselves and set their own delivery fee, up to {{ Money::format(\App\Models\SellerDeliverySetting::maxFee()) }}. Their fee is charged for their items instead of the fees above, and is shown on their product pages and at checkout. If your order also has items from other shops, the fees above are charged once for those.</p>
+    <p>Some items have their own delivery fee, up to {{ Money::format(\App\Models\SellerDeliverySetting::maxFee()) }}, shown on the product page and at checkout. It is charged for those items instead of the fees above; the fees above are charged once for the rest of your order.</p>
 @endif
 <ul>
     <li><strong>Bulky items:</strong> some large items carry an extra delivery charge per item, shown on the product page. Free delivery does not cover it.</li>
-    <li><strong>Pick up from the shop:</strong> where a shop offers it, you can collect your items from the shop instead, with no delivery fee.</li>
+    <li><strong>Pick up:</strong> where it is offered for an item, you can collect it instead, with no delivery fee.</li>
 </ul>
 <p>The exact fee is shown at checkout before you place your order.</p>
 
 <h2>2. Delivery times</h2>
 <ul>
-    <li>Each shop shows how quickly it usually sends orders; most prepare them within 1–2 working days.</li>
+    <li>Each product page shows how quickly the item is usually sent; most orders are prepared within 1–2 working days.</li>
     <li><strong>Greater Malé:</strong> usually 1–3 working days after the order is prepared.</li>
     <li><strong>Other islands:</strong> depends on the ferry, speedboat, cargo boat or flight schedule to your island, usually 3–10 working days.</li>
 </ul>
 <p>These are estimates, not guarantees. Weather, sea conditions and changes to boat or flight schedules can cause delays. We email you when your order is sent and when it is delivered, and you can follow it under <a href="{{ route('orders') }}">My Orders</a> or <a href="{{ route('order.track.form') }}">Track Order</a>.</p>
 
-<p><strong>Pre-orders</strong> are sent once the item has reached the shop (and, for a booking fee or "pay once the shop confirms", once it is paid in full), so they arrive around the date shown on the product page plus the delivery time above. See <a href="{{ route('policies.terms') }}">Terms &amp; Conditions</a>, section 5.</p>
+<p><strong>Pre-orders</strong> are sent once the item has reached us (and, for a booking fee or "pay once we confirm", once it is paid in full), so they arrive around the date shown on the product page plus the delivery time above. See <a href="{{ route('policies.terms') }}">Terms &amp; Conditions</a>, section 5.</p>
 
 <h2>3. How your order is delivered</h2>
 <ul>
-    <li>Orders from different shops may arrive separately.</li>
-    <li>Not every shop delivers to every island. Choose your island on the site to see what can reach you; checkout tells you if a shop can't deliver to your address.</li>
-    <li>For other islands, the order is sent by the shop's usual boat or cargo service and handed over at your island's jetty or delivered to your address, depending on the service. The shop or courier will call the phone number on your order to arrange it.</li>
+    <li>An order may arrive in more than one parcel.</li>
+    <li>Not every item can be delivered to every island. Choose your island on the site to see what can reach you; checkout tells you if an item can't be delivered to your address.</li>
+    <li>For other islands, the order is sent by boat or cargo service and handed over at your island's jetty or delivered to your address, depending on the service. We or the courier will call the phone number on your order to arrange it.</li>
     <li>Large, fragile or perishable items may need a delivery time agreed with you by phone.</li>
 </ul>
 

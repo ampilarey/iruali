@@ -22,7 +22,7 @@ class CustomerPoliciesTest extends TestCase
         $page = $this->get('/terms')->assertOk()
             ->assertSee('5. Pre-orders')
             ->assertSee('If you cancel a booking-fee order, the booking fee is not refunded;')
-            ->assertSee('Nothing until the shop confirms:')
+            ->assertSee('Nothing until we confirm:')
             ->assertSee('Pre-orders cannot be paid in cash on delivery.')
             ->assertSee('3. Wallet, gift cards and loyalty points')
             ->assertSee('A gift card must be redeemed within 12 months of being issued.')
@@ -45,7 +45,7 @@ class CustomerPoliciesTest extends TestCase
             ->assertSee('a booking fee is not refunded if you cancel (section 2)')
             ->assertSee('otherwise you can return it under section 3.');
 
-        $this->get('/delivery-policy')->assertOk()->assertSee('are sent once the item has reached the shop');
+        $this->get('/delivery-policy')->assertOk()->assertSee('are sent once the item has reached us');
     }
 
     public function test_the_prohibited_items_page_is_public_and_linked_where_shops_and_customers_look(): void
@@ -59,8 +59,7 @@ class CustomerPoliciesTest extends TestCase
             ->assertSee('1. Not allowed on')->assertSee('Alcohol')->assertSee('Pork')->assertSee('Tobacco, e-cigarettes and vapes')
             ->assertSee('Prescription medicines')->assertSee('Protected wildlife')->assertSee('Fake or copied goods')
             ->assertSee('2. Allowed only with a permit or extra care')->assertSee('registered with the MFDA')
-            ->assertSee('3. Pre-orders from abroad')->assertSee('is the importer')
-            ->assertSee(route('policies.seller_terms'), false)
+            ->assertSee('3. Pre-orders from abroad')->assertSee("checked against the Maldives' import rules", false)
             ->getContent();
         $this->assertDoesNotMatchRegularExpression('/@(if|endif|foreach)\b/', $page);
 
@@ -82,6 +81,22 @@ class CustomerPoliciesTest extends TestCase
         $this->actingAs($admin)->get(route('admin.legal'))->assertSee('name="legal_prohibited_body"', false);
         $this->put(route('admin.legal.update'), ['legal_prohibited_body' => 'Our own list of banned items.'])->assertSessionHas('success');
         $this->get('/prohibited-items')->assertSee('Our own list of banned items.')->assertDontSee('1. Not allowed on');
+    }
+
+    public function test_the_public_policy_pages_speak_as_one_store(): void
+    {
+        // For now iruali shows itself as one store: the public pages never mention shops, sellers or a
+        // marketplace (the Seller Terms are private). Tax invoices still name a partner business.
+        Setting::set(['payment_transfer_enabled' => 1, 'payment_cod_enabled' => 1, 'shop_own_fees_enabled' => 1]);
+        foreach (['/terms', '/refund-policy', '/delivery-policy', '/privacy-policy', '/payment-security', '/about', '/prohibited-items'] as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            // The policy itself (the <article>), not the site's header and footer
+            preg_match('#<article\b.*?</article>#si', $html, $article);
+            $text = strip_tags(preg_replace('#<nav\b.*?</nav>#si', '', $article[0] ?? ''));
+            preg_match_all('/.{0,60}\b(?:shops?|sellers?|vendors?|marketplace|multi-?vendor)\b.{0,30}/i', $text, $found);
+            $this->assertSame([], $found[0], "{$url} mentions shops or sellers");
+        }
+        $this->get('/terms')->assertSee('the tax invoice shows their business name');
     }
 
     public function test_the_privacy_policy_lists_the_data_kept_and_follows_the_analytics_setting(): void

@@ -23,7 +23,7 @@
         <section class="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
             <div>
                 <label for="request-link" class="block text-sm font-medium text-gray-700">{{ __('Link to the item') }} <span class="font-normal text-gray-500">({{ __('optional, but it helps') }})</span></label>
-                <input id="request-link" name="link" type="url" maxlength="500" dir="ltr" placeholder="https://" value="{{ old('link') }}" class="{{ $field }}">
+                <input id="request-link" name="link" type="url" maxlength="500" dir="ltr" placeholder="https://" value="{{ old('link', $prefillLink) }}" class="{{ $field }}">
                 @error('link')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
             </div>
             <div>

@@ -194,6 +194,32 @@ class ItemRequestTest extends TestCase
         $this->assertTrue($expiring->fresh()->canAccept());
     }
 
+    public function test_a_link_shared_from_another_app_fills_the_form(): void
+    {
+        // The installed app is a share target: Android opens the form with what was shared
+        $manifest = json_decode(file_get_contents(public_path('site.webmanifest')), true);
+        $this->assertSame(['action' => '/request-an-item', 'method' => 'GET', 'params' => ['title' => 'title', 'text' => 'text', 'url' => 'url']], $manifest['share_target']);
+        $this->assertSame(parse_url(route('item-requests.create'), PHP_URL_PATH), $manifest['share_target']['action']);
+        $this->assertContains('/request-an-item', array_column($manifest['shortcuts'], 'url'));
+
+        // Not signed in: sign in first, then back to the form with the shared link
+        $shared = route('item-requests.create', ['title' => 'Trail Shoes | Example Shop', 'url' => 'https://www.example-shop.com/p/123']);
+        $this->get($shared)->assertRedirect(route('login'));
+        $this->assertSame($shared, session('url.intended'));
+
+        $customer = User::factory()->create();
+        $this->actingAs($customer)->get($shared)->assertOk()
+            ->assertSee('value="https://www.example-shop.com/p/123"', false)->assertSee('value="Trail Shoes | Example Shop"', false);
+
+        // Many apps put the link inside the text
+        $this->get(route('item-requests.create', ['text' => 'Check out this jacket! https://m.example.com/item/9?ref=app']))->assertOk()
+            ->assertSee('value="https://m.example.com/item/9?ref=app"', false)->assertSee('value="Check out this jacket!"', false);
+
+        // Anything that is not a web link is left out
+        $this->get(route('item-requests.create', ['url' => 'javascript:alert(1)', 'title' => 'Lamp']))->assertOk()
+            ->assertDontSee('javascript:alert', false)->assertSee('value="Lamp"', false);
+    }
+
     public function test_the_storefront_offers_it(): void
     {
         $this->get('/')->assertOk()->assertSee('data-footer-request-item', false)->assertSee(route('item-requests.create'), false);

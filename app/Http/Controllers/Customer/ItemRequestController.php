@@ -29,11 +29,36 @@ class ItemRequestController extends Controller
 
     public function create(Request $request): View
     {
+        [$link, $title] = $this->shared($request);
+
         return view('item-requests.create', [
             'address' => $request->user()->defaultAddress(),
             'islandsByAtoll' => app(DeliveryService::class)->islandsByAtoll(),
-            'prefill' => mb_substr(trim((string) $request->query('q', '')), 0, 200),
+            'prefill' => $title ?? mb_substr(trim((string) $request->query('q', '')), 0, 200),
+            'prefillLink' => $link,
         ]);
+    }
+
+    /**
+     * "Share to iruali": the installed app is a share target (public/site.webmanifest), so a link shared
+     * from another app opens this form as ?title=…&text=…&url=…. Apps put the link in url or inside text;
+     * the title is the shared page's name, or the text without the link.
+     *
+     * @return array{0: ?string, 1: ?string}
+     */
+    protected function shared(Request $request): array
+    {
+        $text = trim((string) $request->query('text', ''));
+        $candidates = array_filter([trim((string) $request->query('url', '')), preg_match('#https?://\S+#i', $text, $m) ? $m[0] : null]);
+        $link = collect($candidates)->first(fn ($url) => mb_strlen($url) <= 500 && filter_var($url, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $url));
+
+        $title = trim((string) $request->query('title', ''));
+        if ($title === '' && $text !== '') {
+            $title = trim(preg_replace('#https?://\S+#i', '', $text) ?? '');
+        }
+        $title = trim($title, " \t\n\r-–|:");
+
+        return [$link ?: null, $title !== '' ? mb_substr($title, 0, 200) : null];
     }
 
     public function store(Request $request): RedirectResponse

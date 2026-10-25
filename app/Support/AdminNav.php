@@ -31,6 +31,7 @@ class AdminNav
                 ['admin.complaints', 'Complaints', 'help'],
                 ['admin.preorders', 'Pre-orders', 'clock'],
                 ['admin.quotes', 'Bulk quotes', 'list'],
+                ['admin.item-requests', 'Item requests', 'box'],
                 ['admin.messages', 'Messages', 'chat'],
             ],
             'Money' => [

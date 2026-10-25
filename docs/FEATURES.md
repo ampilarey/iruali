@@ -581,6 +581,39 @@ must show with your accountant or MIRA before you switch registration on.**
   "Buying for a business?" block, prefilled from the profile and open to guests, stores them on
   the order and every shop's invoice prints them.
 
+## Item requests ("Can't find it? We'll bring it for you")
+
+Customers ask iruali for an item it doesn't list, usually from a shop abroad (`App\Services\ItemRequestService`;
+routes in `routes/web/item-requests.php`, table `item_requests`, `products.item_request_id`).
+
+- **Asking.** Signed-in customers open `/request-an-item` (`item-requests.create`; from the footer, the
+  account menus and the empty search results, which pass the search words along): a link, what it is,
+  size/colour/model, quantity (1–50), notes, an optional photo, the delivery island, an optional budget
+  and needed-by date. At most 5 open requests per customer (`ItemRequest::MAX_OPEN`), and the named throttle
+  `item-requests.store`. The team is told (`item_request` team alert) and Admin → Inbox counts "Item requests
+  waiting for a price". Customers follow them under **My account → Item requests** (`item-requests.index`,
+  `item-requests.show`; only their own).
+- **Answering (admins only: not in `config/staff.php`).** **Admin → Item requests** (`admin.item-requests`,
+  tabs open/new/priced/in cart/ordered/declined/cancelled/all). An admin declines with a reason
+  (`ItemRequestDeclined`), or sends a price (`admin.item-requests.quote`): the shop that fills it (shops
+  allowed pre-orders, iruali's own first), the department, the name the customer sees, the price per item in
+  MVR (all costs in; the import rates from Settings → Pre-order imports are shown), what is paid at checkout
+  (a booking fee, 30% by default, or the full price), the days until it ships (21 by default) and how long the
+  price holds (7 days). Sending it creates or updates **a pre-order product only this customer can buy**: never
+  active, so it is in no listing, search, feed, sitemap or review queue (`Product::pending()`, Admin → Inbox,
+  dashboards and the shop's product list leave it out; the shop can't edit it and it can't be approved), stock
+  0, `preorder_lead_days`, `preorder_limit` = the quantity, the booking fee, the link as `source_url`, the
+  customer's photo as its picture. `PreorderService::accepting()` takes pre-orders for it although it is not
+  active. The customer is told by email/SMS (`ItemRequestQuoted`, SMS `item_request_quoted`). A changed price
+  takes the old one out of the cart.
+- **Buying.** The customer accepts while the price holds (`item-requests.accept`): the product goes into their
+  cart, quantity and price fixed (`item-requests._cart_item`). Checkout is the usual booking-fee or full-price
+  pre-order (ordered on its own); placing the order marks the request ordered (`ItemRequestService::placeOrder()`
+  in `OrderService`), and from then on it is a pre-order like any other: "Stock arrived", the balance link,
+  refunds when late. Its product page sends the customer (and staff, and the shop) to the request; anyone else
+  gets a 404. The customer can cancel until it is ordered (the cart line goes). A price past its day shows
+  "Price expired" and can't be accepted; the admin can send a new one, also after a cancelled order.
+
 ## Bulk quotes (businesses)
 
 Resorts, offices and cafés buying in quantity ask a shop for a price instead of paying the listed

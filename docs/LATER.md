@@ -69,6 +69,15 @@ Next:
    the Seller Terms are private (shops, the team, and signed-in visitors only while applications are open). Have the
    lawyer check the list against current Maldivian rules (Customs, MFDA, tobacco and vape rules).
 
+### Item requests ("Can't find it? We'll bring it for you"): built on 2026-10-25
+
+Customers ask for items from abroad; admins answer in Admin → Item requests (see `docs/FEATURES.md`).
+**Set up first:** allow pre-orders for the shop that fills them (e.g. iruali Direct, Admin → Sellers), fill in
+Settings → Pre-order imports (rates, shipping per kg, margin) to work out prices, and tick "Item request" in
+Admin → Team alerts to get them on Telegram. Possible later: "Read the link" on the admin page (fill the name,
+photos and suggested price from the link, like "Import from a link"), messages between customer and admin on a
+request, and a reminder to admins when a request has waited more than 2 days.
+
 ### Showing iruali as one store (for now)
 
 The public policy pages speak as one store (2026-10-24). Still showing shops elsewhere, if you want it

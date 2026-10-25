@@ -21,6 +21,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = CurrentShop::get()->products()
+            ->whereNull('item_request_id') // customers' item requests are run from Admin → Item requests
             ->with(['category', 'variants', 'pendingChange'])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->q.'%';
@@ -186,6 +187,7 @@ class ProductController extends Controller
     protected function authorizeOwner(Product $product): void
     {
         abort_unless((int) $product->seller_id === (int) CurrentShop::id(), 403);
+        abort_if($product->item_request_id !== null, 404);
     }
 
     protected function categories()

@@ -26,7 +26,7 @@ class SellerController extends Controller
         $stats = [
             'total_products' => $user->products()->count(),
             'active_products' => $user->products()->where('is_active', true)->count(),
-            'pending_products' => $user->products()->where('is_active', false)->count(),
+            'pending_products' => $user->products()->where('is_active', false)->whereNull('item_request_id')->count(),
             'low_stock' => $user->products()->whereColumn('stock_quantity', '<=', 'reorder_point')->count(),
             'total_orders' => $this->sellerOrders()->count(),
             'pending_orders' => SellerOrder::where('seller_id', $user->id)->whereIn('status', ['pending', 'processing'])->count(),

@@ -41,6 +41,7 @@
                 <section class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-200" aria-label="{{ __('Items in your cart') }}">
                     @foreach($items as $item)
                         @if($item->quote_request_id) @include('quotes._cart_item', ['item' => $item]) @continue @endif
+                        @if($item->product?->item_request_id) @include('item-requests._cart_item', ['item' => $item]) @continue @endif
                         @php $product = $item->product; $seller = $product->seller; @endphp
                         <div class="p-4 flex gap-3 sm:gap-4">
                             <a href="{{ route('products.show', $product) }}" class="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-primary-50">

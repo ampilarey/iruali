@@ -124,6 +124,17 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    /**
+     * The customer's item request this product was made for (ItemRequestService): never active, so in
+     * no listing or review queue, and only that customer can buy it.
+     *
+     * @return BelongsTo<ItemRequest, $this>
+     */
+    public function itemRequest(): BelongsTo
+    {
+        return $this->belongsTo(ItemRequest::class);
+    }
+
     /** @return HasOne<ProductImage, $this> */
     public function mainImage(): HasOne
     {
@@ -331,7 +342,7 @@ class Product extends Model
 
     public function scopePending($query)
     {
-        return $query->where('is_active', false);
+        return $query->where('is_active', false)->whereNull('item_request_id');
     }
 
     public function scopeApproved($query)

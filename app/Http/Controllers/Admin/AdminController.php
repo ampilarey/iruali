@@ -49,7 +49,7 @@ class AdminController extends Controller
             'total_products' => Product::count(),
             'total_orders' => Order::withoutSmokeTests()->count(),
             'pending_sellers' => User::whereHas('roles', fn ($q) => $q->where('name', 'seller'))->where('seller_approved', false)->count(),
-            'pending_products' => Product::where('is_active', false)->count(),
+            'pending_products' => Product::where('is_active', false)->whereNull('item_request_id')->count(),
         ];
 
         $recent_users = User::latest()->take(5)->get();
@@ -168,6 +168,8 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $product = Product::findOrFail($id);
+        // A customer's item request product is never put on sale (Admin → Item requests)
+        abort_if($product->item_request_id !== null, 404);
         if (app(\App\Services\OnboardingService::class)->blocksActivation($product->seller)) {
             return redirect()->back()->with('error', __('This shop has not completed its checklist yet (logo, banner, about, phone, delivery, bank account, a product), so its products cannot go live.'));
         }

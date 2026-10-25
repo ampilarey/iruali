@@ -125,8 +125,14 @@ class AdminInbox
             ],
             'products_pending' => fn () => [
                 'label' => 'Products pending review',
-                'count' => Product::where('is_active', false)->count(),
+                'count' => Product::where('is_active', false)->whereNull('item_request_id')->count(),
                 'route' => 'admin.products', 'severity' => 'info',
+            ],
+            // Customers asking us to bring an item, not priced yet (ItemRequestService)
+            'item_requests' => fn () => [
+                'label' => 'Item requests waiting for a price',
+                'count' => \App\Models\ItemRequest::where('status', \App\Models\ItemRequest::NEW)->count(),
+                'route' => 'admin.item-requests', 'severity' => 'info',
             ],
             // Bank transfers with a slip to check (ManualPaymentService)
             'transfers_to_check' => fn () => [

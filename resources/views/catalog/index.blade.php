@@ -263,6 +263,8 @@
                         <span class="mx-auto w-14 h-14 rounded-full bg-primary-50 text-primary flex items-center justify-center mb-4"><x-icon name="search" class="w-7 h-7" /></span>
                         <p class="font-semibold text-lg">{{ __('No products match') }}</p>
                         <p class="text-gray-600 text-sm mt-1">{{ __('Try removing a filter or searching for something else.') }}</p>
+                        {{-- Not on iruali: ask us to bring it (ItemRequestService) --}}
+                        <a href="{{ route('item-requests.create', array_filter(['q' => request('q')])) }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover" data-request-an-item>{{ __('Can\'t find it? We\'ll bring it for you') }}</a>
                         @php $emptyIsland = $seller ? null : app(\App\Services\ShoppingIsland::class)->filterIsland(); @endphp
                         @if($emptyIsland)
                             {{-- Narrowed to the customer's island: offer everything, labelled --}}

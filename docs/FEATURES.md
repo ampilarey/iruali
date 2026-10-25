@@ -589,7 +589,10 @@ routes in `routes/web/item-requests.php`, table `item_requests`, `products.item_
 - **Asking.** Signed-in customers open `/request-an-item` (`item-requests.create`; from the footer, the
   account menus and the empty search results, which pass the search words along): a link, what it is,
   size/colour/model, quantity (1–50), notes, an optional photo, the delivery island, an optional budget
-  and needed-by date. At most 5 open requests per customer (`ItemRequest::MAX_OPEN`), and the named throttle
+  and needed-by date. **Share to iruali:** the installed app is a share target (`share_target` in
+  `public/site.webmanifest`, Android/Chrome), so "Share → iruali" in another shop's app opens the form with
+  the link and name filled in (`?url=`, or a link inside `?text=`; only http(s) links); there is also a
+  "Request an item" app shortcut. At most 5 open requests per customer (`ItemRequest::MAX_OPEN`), and the named throttle
   `item-requests.store`. The team is told (`item_request` team alert) and Admin → Inbox counts "Item requests
   waiting for a price". Customers follow them under **My account → Item requests** (`item-requests.index`,
   `item-requests.show`; only their own).

@@ -21,7 +21,13 @@ class ProductController extends Controller
 
     public function show(Request $request, Product $product)
     {
-        abort_unless($product->is_active, 404);
+        if (! $product->is_active) {
+            // A customer's item request product is never listed: its customer sees their request instead
+            $itemRequest = $product->item_request_id ? $product->itemRequest : null;
+            abort_unless($itemRequest && app(\App\Services\ItemRequestService::class)->canView($itemRequest, $request->user()), 404);
+
+            return redirect()->route('item-requests.show', $itemRequest);
+        }
 
         $product->load([
             'category.parent', 'images', 'variants', 'seller.homeIsland', 'brandModel',

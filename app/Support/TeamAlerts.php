@@ -31,6 +31,7 @@ class TeamAlerts
         'return_requested' => ['Return requested', 'A customer asks to return items.'],
         'shop_application' => ['New shop application', 'Someone applies to sell on iruali.'],
         'product_review' => ['Product to review', 'A shop sends a new product or a change for approval.'],
+        'item_request' => ['Item request', 'A customer asks iruali to bring an item it does not list.'],
         'payment_error' => ['Payment error', 'Something in the card payment code fails.'],
         'backup_failed' => ['Backup failed', 'The nightly backup did not complete.'],
         'sms_limit' => ['SMS limit reached', 'The monthly SMS limit stops order updates.'],

@@ -192,7 +192,7 @@ class PreorderService
         $closes = $product->preorder_closes_on;
 
         return (bool) $product->preorder_enabled
-            && (bool) $product->is_active
+            && ((bool) $product->is_active || $product->item_request_id !== null) // a customer's item request: never listed
             && (int) $product->preorder_limit > 0
             && $date !== null
             && ! $date->isBefore(today())

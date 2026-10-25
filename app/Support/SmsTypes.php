@@ -141,6 +141,16 @@ class SmsTypes
                 'group' => 'preorders', 'label' => 'The shop can\'t get a pre-order',
                 'text' => 'iruali: sorry, the shop can\'t get your pre-order (order :number), so it is cancelled. You have not been charged.', 'data' => $order,
             ],
+            'item_request_quoted' => [
+                'group' => 'preorders', 'label' => 'Item request: price ready',
+                'text' => 'iruali: we can bring :item for :total. Accept by :date: :url',
+                'data' => ['item' => 'Running shoes', 'total' => 'MVR 2,400.00', 'date' => '30 Oct', 'url' => 'https://iruali.mv/account/requests/12'], 'required' => ['url'],
+            ],
+            'item_request_declined' => [
+                'group' => 'preorders', 'label' => 'Item request: we can\'t bring it',
+                'text' => 'iruali: sorry, we can\'t bring :item. Details: :url',
+                'data' => ['item' => 'Running shoes', 'url' => 'https://iruali.mv/account/requests/12'],
+            ],
             'new_message' => [
                 'group' => 'messages', 'label' => 'New message about an order',
                 'text' => 'iruali: new message from :sender about order :number. Reply at :url',

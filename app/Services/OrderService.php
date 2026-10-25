@@ -158,6 +158,7 @@ class OrderService
 
             // Bulk quotes: each quote in the cart is taken (locked, checked again) and its business details kept for the invoices
             app(QuoteService::class)->placeOrder($order, $cart);
+            app(ItemRequestService::class)->placeOrder($order, $cart);
 
             // Shop-funded discounts (multi-buy, shop codes) onto the items, and the codes' uses recorded
             app(ShopDiscountService::class)->applyToOrder($order, $discounts['shop'], $user, $guest['email'] ?? null);

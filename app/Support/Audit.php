@@ -55,6 +55,8 @@ class Audit
         'legal.saved' => 'Legal page saved',
         'seller_terms.published' => 'New seller terms version published',
         'seller_terms.agreed' => 'Shop agreed to the seller terms',
+        'item_request.quoted' => 'Item request priced',
+        'item_request.declined' => 'Item request declined',
         'demo.removed' => 'Sample data removed',
         'demo.restored' => 'Sample data restored',
         'voucher.created' => 'Voucher created',

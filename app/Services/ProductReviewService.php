@@ -75,7 +75,7 @@ class ProductReviewService
     public function publishIfTrusted(Product $product, ?User $seller = null): bool
     {
         $seller ??= $product->seller;
-        if ($product->isApproved() || ! $seller || ! $seller->autoApprovesListings()) {
+        if ($product->isApproved() || $product->item_request_id !== null || ! $seller || ! $seller->autoApprovesListings()) {
             return false;
         }
         if (app(OnboardingService::class)->blocksActivation($seller)) {

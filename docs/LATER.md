@@ -143,6 +143,83 @@ sale countdown ("Sale ends" in the product form).
     no way for a shop to buy a spot or for iruali to charge for it (e.g. per day, from the shop's
     payouts). A second income besides commission.
 
+### Ideas from Amazon and other big marketplaces (2026-10-26)
+
+Checked against the code on 2026-10-26. Already built, so not here: reviews with photos and "verified
+purchase", Q&A, wishlist with price-drop alerts, back-in-stock alerts, compare, "frequently bought together",
+recently viewed, sale countdowns, multi-buy offers, vouchers, loyalty tiers, referrals, gift cards and wallet,
+bulk quotes, business credit, pickup, tracking, returns, disputes, messaging, brand pages with following,
+campaigns, pre-orders and item requests.
+
+**Top 5 for iruali now:** 12 (Subscribe & Save, = idea 8), 24 (affiliates), 18 + 19 (flash sale hour and big
+sale days), 22 (membership with free delivery), 14 (size guides).
+
+Shopping and buying:
+
+12. **Subscribe & Save** (Amazon): "deliver every 2 weeks / month" for everyday items with a small discount;
+    the same as idea 8 above, with the discount.
+13. **Buy now, pay later / instalments** (Lazada, Noon): pay in 2–3 parts on expensive items; a first
+    version can reuse the booking fee ("pay in 2").
+14. **Size guides** (Shein, Zalora): a size table per product or brand, and "fits small / true / large"
+    from reviews. Fewer fashion returns.
+15. **Search by photo** (Amazon, AliExpress): find similar items from a picture. Needs a paid image AI
+    service; later.
+16. **Clip coupons** (Amazon): a "Clip coupon" button on the product page (e.g. MVR 20 off at checkout).
+
+Engagement and coming back:
+
+17. **Daily check-in coins** (Shopee): open the app each day to collect points for small discounts.
+18. **Flash sale hour** (Shopee, Lazada): a fixed time each day or week ("9 PM Flash Deals"), limited
+    stock, a countdown banner on the home page (per-product countdowns already exist).
+19. **Big sale days** (11.11, Eid sale): a pre-registration page with "notify me when it starts" reminders,
+    built on campaigns. See also idea 9 (Ramadan & Eid mode).
+20. **Group buy** (Pinduoduo, Temu): a lower price when 3 people buy through a shared link; spreads through
+    WhatsApp and Viber groups.
+
+Delivery:
+
+21. **Pickup points and lockers** (Amazon Locker): collect from a partner point on the island.
+22. **Membership** (Amazon Prime, Noon One): e.g. MVR 99 a year for free delivery and early access to
+    deals. Steady income; delivery cost is the main pain outside Malé.
+23. **Delivery time slots** (Noon, Talabat): choose "tomorrow 4–6 PM" in Greater Malé.
+
+Trust and earning more:
+
+24. **Affiliates and influencers** (Amazon Associates, Shopee Affiliates): local creators share links and
+    earn a percentage of each sale. Cheap growth through Instagram and TikTok.
+25. **Review summaries** (Amazon): "Customers say: good quality, runs small" from all reviews; needs AI.
+26. **Warranty / protection plans** (Amazon, Noon): "+MVR 150 for 1-year protection" on electronics.
+27. **Fulfilled by iruali** (Amazon FBA): shops send stock to iruali's store room; iruali packs and
+    delivers, for a fee. Large operation; later.
+
+Hold back while iruali appears as one store (they show that there are several shops): "follow a shop",
+shop ratings and sponsored shops (idea 11).
+
+### "Shop the world, pay in MVR" (discussed 2026-10-26)
+
+Customers tap a store (Amazon, Shein, AliExpress…), pick an item and see an MVR price with shipping,
+handling and duty included. Showing Amazon inside iruali isn't possible on a website (stores block being
+embedded and their carts can't be read), so the plan, lowest risk first:
+
+1. **Instant price estimate:** when a customer pastes or shares a link in "Request an item", read the page
+   with the "Import from a link" reader and show an estimated MVR price at once (Settings → Pre-order
+   imports rates, shipping per kg, margin); the admin's price form comes pre-filled. Amazon often blocks
+   reading: then the request goes in as now.
+2. **"Shop the world" page:** store tiles that open the store in a new tab, with simple steps: find it, then
+   Share → iruali (Android) or copy the link and paste it.
+3. **Later, instant ordering for trusted stores:** order at the estimated price with "pay once we confirm";
+   the admin checks the final cost, then the customer pays.
+
+Avoid: copying Amazon's site into iruali, scraping Amazon in bulk, or a fixed price charged before the weight
+is known.
+
+**Amazon's own data (checked 2026-10-26):** the Product Advertising API was replaced in 2026 by the
+**Creators API**, which is only for Amazon Associates (affiliates who send shoppers to buy on Amazon), not for
+reselling. The **Selling Partner API** is for businesses selling on Amazon; its announced 2026 fees were
+dropped in May 2026. Neither fits buying for customers. If Amazon requests become common, a paid data service
+(Rainforest API, Keepa and similar) can give price, weight and photos from a link; check their terms and
+prices first.
+
 ### Pre-orders with a booking fee (order-on-demand imports): built on 2026-10-21
 
 Built as recommended (see `docs/FEATURES.md`, "Pre-orders with a booking fee"): a booking fee per

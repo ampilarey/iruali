@@ -112,7 +112,8 @@
                                         <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</p>
                                     </div>
                                     <a href="{{ route('account') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Account') }}</a>
-                                    <a href="{{ route('orders') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Orders') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white" title="{{ __('Unread messages') }}">{{ $messageBadges['customer'] }}</span>@endif</a>
+                                    <a href="{{ route('orders') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Orders') }}</a>
+                                    <a href="{{ route('messages.index') }}" class="block px-4 py-2 hover:bg-gray-50" data-menu-messages>{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white" title="{{ __('Unread messages') }}">{{ $messageBadges['customer'] }}</span>@endif</a>
                                     <a href="{{ route('wishlist') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wishlist') }}</a>
                                     <a href="{{ route('account.rewards') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Rewards') }}</a>
                                     <a href="{{ route('quotes.index') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Quote requests') }}</a>
@@ -256,7 +257,8 @@
                 </div>
                 <div class="border-t border-gray-100 mt-2">
                     <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Your account') }}</p>
-                    <a href="{{ route('orders') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My Orders') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>
+                    <a href="{{ route('orders') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My Orders') }}</a>
+                    @auth<a href="{{ route('messages.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>@endauth
                     <a href="{{ route('wishlist') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Wishlist') }}</a>
                     @auth<a href="{{ route('quotes.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Quote requests') }}</a>@endauth
                     @auth<a href="{{ route('item-requests.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Item requests') }}</a>@endauth

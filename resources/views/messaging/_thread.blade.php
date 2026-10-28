@@ -25,7 +25,7 @@
                 <li class="flex {{ $mine($m) ? 'justify-end' : 'justify-start' }}">
                     <div class="max-w-[85%] rounded-xl px-3 py-2 text-sm {{ $mine($m) ? 'bg-primary text-white' : ($m->sender_role === 'admin' ? 'bg-sun-soft text-sun-ink' : 'bg-gray-100 text-gray-900') }}">
                         <p class="text-[11px] font-semibold {{ $mine($m) ? 'text-white/80' : 'opacity-70' }}">
-                            {{ $m->senderName() }}
+                            {{ $m->senderName($role) }}
                             @if($m->sender_role === 'admin')<span class="ms-1 rounded-full bg-sun px-1.5 text-[10px] text-sun-on">{{ __('iruali support') }}</span>@endif
                             · <time datetime="{{ $m->created_at->toIso8601String() }}">{{ $m->created_at->translatedFormat('j M, H:i') }}</time>
                         </p>

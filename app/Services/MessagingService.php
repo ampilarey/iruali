@@ -3,22 +3,33 @@
 namespace App\Services;
 
 use App\Models\Conversation;
+use App\Models\ItemRequest;
 use App\Models\Message;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\ReturnRequest;
 use App\Models\SellerOrder;
 use App\Models\User;
 use App\Notifications\NewMessage;
+use App\Support\Audit;
 use App\Support\CurrentShop;
+use App\Support\TeamAlerts;
 use App\Traits\SecureFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 /**
- * Messages between a customer, a shop and iruali support about one shop's part of an order.
+ * The messages centre: threads about an order's shop part, an item before buying, with iruali support
+ * (customers and shops) and about an item request (Conversation::KINDS). iruali's team sees every thread
+ * (Admin → Messages) and can write in any of them. Nothing is ever deleted. In item questions phone
+ * numbers, email addresses and links are hidden from the other side (mask()), so sales stay on iruali;
+ * the team still sees what was written. A message can be reported, and the team can stop an account from
+ * writing (users.messaging_blocked_at).
  */
 class MessagingService
 {
@@ -68,22 +79,85 @@ class MessagingService
         return Conversation::where('order_id', $part->order_id)->where('seller_id', $part->seller_id)->first();
     }
 
+    /** A customer's questions about an item, with the shop that sells it (one thread per customer and item). */
+    public function productConversation(User $customer, Product $product): Conversation
+    {
+        return Conversation::firstOrCreate(
+            ['kind' => Conversation::PRODUCT, 'customer_id' => $customer->id, 'product_id' => $product->id],
+            ['seller_id' => $product->seller_id, 'subject' => Str::limit((string) ($product->getTranslation('name', 'en', false) ?: $product->name), 190), 'status' => 'open']
+        );
+    }
+
+    /** The customer's open thread with iruali support, or a new one (saved with its first message). */
+    public function supportConversation(User $customer): Conversation
+    {
+        return Conversation::where('kind', Conversation::SUPPORT)->where('customer_id', $customer->id)->where('status', 'open')->latest('id')->first()
+            ?? new Conversation(['kind' => Conversation::SUPPORT, 'customer_id' => $customer->id, 'status' => 'open']);
+    }
+
+    /** The shop's open thread with iruali support, or a new one. */
+    public function shopSupportConversation(User $shop): Conversation
+    {
+        return Conversation::where('kind', Conversation::SHOP_SUPPORT)->where('seller_id', $shop->id)->where('status', 'open')->latest('id')->first()
+            ?? new Conversation(['kind' => Conversation::SHOP_SUPPORT, 'seller_id' => $shop->id, 'status' => 'open']);
+    }
+
+    /** The thread between the customer and iruali about an item request. */
+    public function itemRequestConversation(ItemRequest $request): Conversation
+    {
+        return Conversation::firstOrCreate(
+            ['kind' => Conversation::ITEM_REQUEST, 'item_request_id' => $request->id],
+            ['customer_id' => $request->user_id, 'subject' => Str::limit($request->title, 190), 'status' => 'open']
+        );
+    }
+
+    /**
+     * Phone numbers, email addresses and links (and @handles) replaced, for item questions.
+     */
+    public static function mask(string $text): string
+    {
+        $hidden = __('[contact details hidden]');
+        $patterns = [
+            '/[\w.+-]+@[\w-]+(\.[\w-]+)+/u',                                    // email addresses
+            '#\b(?:https?://|www\.)\S+#iu',                                        // links
+            '/\b[\w-]+\.(?:com|mv|net|org|io|me|co|shop|store|app|link|ly)\b\S*/iu', // bare domains
+            '/\b(?:wa\.me|t\.me|viber|telegram|whatsapp|instagram|insta|facebook|fb|tiktok|snapchat)\b\S*/iu',
+            '/(?<![\w@])@[A-Za-z0-9_.]{3,}/u',                                     // @handles
+            '/(?:\+?\d[\s().-]*){7,}/u',                                          // phone numbers: 7+ digits
+        ];
+
+        return preg_replace($patterns, $hidden, $text) ?? $text;
+    }
+
     /**
      * Add a message, bump the other participants' unread counts and tell them (at most once
      * every ten minutes per thread and person).
      */
     public function send(Conversation $conversation, User $sender, string $role, string $body, ?UploadedFile $attachment = null, bool $notify = true): Message
     {
+        if ($role !== 'admin' && $sender->messaging_blocked_at !== null) {
+            throw new RuntimeException(__('Your account can no longer send messages. Please contact iruali.'));
+        }
+        $body = trim($body);
+        $original = null;
+        if ($role !== 'admin' && $conversation->hidesContactDetails() && ($masked = self::mask($body)) !== $body) {
+            [$original, $body] = [$body, $masked];
+        }
+        if (! $conversation->exists) {
+            $conversation->save();
+        }
+
         $path = null;
         if ($attachment) {
             $path = $attachment->storeAs('message-attachments', $this->generateSecureFilename($attachment), self::DISK) ?: null;
         }
 
-        $message = DB::transaction(function () use ($conversation, $sender, $role, $body, $path) {
+        $message = DB::transaction(function () use ($conversation, $sender, $role, $body, $original, $path) {
             $message = $conversation->messages()->create([
                 'sender_id' => $sender->id,
                 'sender_role' => $role,
-                'body' => trim($body),
+                'body' => $body,
+                'original_body' => $original,
                 'attachment_path' => $path,
             ]);
 
@@ -137,7 +211,7 @@ class MessagingService
         return [
             'customer' => (int) Conversation::where('customer_id', $user->id)->sum('customer_unread_count'),
             'seller' => $shopId ? (int) Conversation::where('seller_id', $shopId)->sum('seller_unread_count') : 0,
-            'admin' => $user->isAdmin() ? (int) Conversation::sum('admin_unread_count') : 0,
+            'admin' => Conversation::isTeam($user) ? (int) Conversation::sum('admin_unread_count') : 0,
         ];
     }
 
@@ -162,6 +236,28 @@ class MessagingService
         return Storage::disk(self::DISK)->response($message->attachment_path);
     }
 
+    /**
+     * A participant reports a message to iruali's team (Admin → Messages → Reported).
+     */
+    public function report(Message $message, User $user, string $reason): void
+    {
+        $conversation = $message->conversation;
+        $role = $conversation?->roleOf($user);
+        if (! $conversation || ! in_array($role, ['customer', 'seller'], true) || $message->sender_role === $role) {
+            throw new RuntimeException(__('You can report only messages written to you.'));
+        }
+        $message->forceFill(['reported_at' => now(), 'reported_by' => $user->id, 'report_reason' => Str::limit(trim($reason), 490)])->save();
+        $conversation->forceFill(['admin_unread_count' => $conversation->admin_unread_count + 1])->save();
+        TeamAlerts::send('message_reported', 'iruali: a message was reported in '.$conversation->title().': '.Str::limit(trim($reason), 100), route('admin.messages.show', $conversation));
+    }
+
+    /** iruali's team stops (or lets again) an account write messages; what it wrote stays. */
+    public function block(User $user, User $admin, bool $blocked = true): void
+    {
+        $user->forceFill(['messaging_blocked_at' => $blocked ? now() : null])->save();
+        Audit::record($blocked ? 'messaging.blocked' : 'messaging.unblocked', $user, ['by' => $admin->name]);
+    }
+
     protected function notify(Conversation $conversation, Message $message): void
     {
         $recipients = match ($message->sender_role) {
@@ -169,6 +265,12 @@ class MessagingService
             'seller' => [$conversation->customer],
             default => [$conversation->customer, $conversation->seller],
         };
+
+        // Written to iruali (support, item requests): the team hears about it
+        if ($message->sender_role !== 'admin' && in_array($conversation->kind, [Conversation::SUPPORT, Conversation::SHOP_SUPPORT, Conversation::ITEM_REQUEST], true)) {
+            TeamAlerts::send('customer_message', 'iruali: new message in '.$conversation->title().' from '.($message->sender->name ?? 'someone').': '.Str::limit($message->body, 100), route('admin.messages.show', $conversation));
+            $recipients = [];
+        }
 
         foreach (array_filter($recipients) as $recipient) {
             // One alert per thread and person every ten minutes; the thread itself shows everything

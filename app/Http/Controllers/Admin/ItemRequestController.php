@@ -87,4 +87,14 @@ class ItemRequestController extends Controller
 
         return redirect()->route('admin.item-requests.show', $itemRequest)->with('success', 'Request declined; the customer has been told.');
     }
+
+    /** Write to the customer about their request (Admin → Messages has the thread too). */
+    public function message(Request $request, ItemRequest $itemRequest): RedirectResponse
+    {
+        $data = $request->validate(['body' => 'required|string|max:2000', 'attachment' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120']]);
+        $messaging = app(\App\Services\MessagingService::class);
+        $messaging->send($messaging->itemRequestConversation($itemRequest), $request->user(), 'admin', $data['body'], $request->file('attachment'));
+
+        return redirect()->route('admin.item-requests.show', $itemRequest)->with('success', 'Message sent to the customer.');
+    }
 }

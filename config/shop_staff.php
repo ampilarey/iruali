@@ -40,6 +40,7 @@ return [
             'seller.settings.notifications', 'seller.settings.notifications.*',
             'seller.settings.delivery', 'seller.settings.delivery.*',
             'seller.help', 'seller.help.*',
+            'seller.messages', 'seller.messages.*', // customers' item questions and the shop's thread with iruali
             'seller.terms.show', // the Seller Terms page; only the owner agrees (owner_only)
         ],
 

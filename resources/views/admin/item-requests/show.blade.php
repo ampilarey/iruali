@@ -104,6 +104,15 @@
             </form>
         @endif
 
+        @php
+            $requestChat = \App\Models\Conversation::where('kind', 'item_request')->where('item_request_id', $itemRequest->id)->first()
+                ?? new \App\Models\Conversation(['kind' => 'item_request', 'item_request_id' => $itemRequest->id, 'customer_id' => $itemRequest->user_id, 'status' => 'open']);
+        @endphp
+        <section class="space-y-2" data-admin-item-request-messages>
+            <h2 class="text-lg font-semibold text-gray-900">Messages with the customer</h2>
+            @include('messaging._chat', ['conversation' => $requestChat, 'role' => 'admin', 'action' => route('admin.item-requests.messages', $itemRequest)])
+        </section>
+
         @if($itemRequest->canCancel())
             <form method="POST" action="{{ route('admin.item-requests.decline', $itemRequest) }}" class="rounded-lg bg-white p-6 shadow space-y-3 text-sm" data-admin-item-request-decline>
                 @csrf

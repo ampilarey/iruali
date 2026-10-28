@@ -73,6 +73,18 @@
         <p class="text-xs text-gray-500">{{ __('Sent on :date', ['date' => $itemRequest->created_at->translatedFormat('j M Y')]) }}</p>
     </section>
 
+    @php
+        $requestChat = \App\Models\Conversation::where('kind', 'item_request')->where('item_request_id', $itemRequest->id)->first()
+            ?? new \App\Models\Conversation(['kind' => 'item_request', 'item_request_id' => $itemRequest->id, 'customer_id' => $itemRequest->user_id, 'status' => 'open']);
+        if ($requestChat->exists) {
+            app(\App\Services\MessagingService::class)->markRead($requestChat, 'customer');
+        }
+    @endphp
+    <section class="space-y-2" data-item-request-messages>
+        <h2 class="text-lg font-semibold text-dark">{{ __('Messages with iruali') }}</h2>
+        @include('messaging._chat', ['conversation' => $requestChat, 'role' => 'customer', 'action' => route('item-requests.messages.store', $itemRequest)])
+    </section>
+
     @if($itemRequest->canCancel())
         <form method="POST" action="{{ route('item-requests.cancel', $itemRequest) }}" onsubmit="return confirm(@js(__('Cancel this request?')))">
             @csrf

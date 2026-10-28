@@ -144,6 +144,8 @@ trait ActsAsShopStaff
                 'member' => ShopStaff::where('user_id', $this->staffMember($shop, 'packer')->id)->firstOrFail(),
                 'invitation' => $this->pendingInvitationFor($shop),
                 'quote' => $this->quoteRequestFor($shop, $productFor()),
+                // A customer's question about one of the shop's items (Seller Centre → Messages)
+                'conversation' => \App\Models\Conversation::create(['kind' => 'product', 'product_id' => $productFor()->id, 'seller_id' => $shop->id, 'customer_id' => User::factory()->create()->id, 'status' => 'open', 'last_message_at' => now()]),
                 default => $this->fail("No test record for the route parameter {{$name}}: add one to ActsAsShopStaff::sellerRouteFixtures()."),
             };
         }

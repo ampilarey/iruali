@@ -26,4 +26,5 @@ Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.
     Route::get('/item-requests/{itemRequest}', [AdminItemRequestController::class, 'show'])->name('item-requests.show')->whereNumber('itemRequest');
     Route::post('/item-requests/{itemRequest}/quote', [AdminItemRequestController::class, 'quote'])->name('item-requests.quote')->whereNumber('itemRequest');
     Route::post('/item-requests/{itemRequest}/decline', [AdminItemRequestController::class, 'decline'])->name('item-requests.decline')->whereNumber('itemRequest');
+    Route::post('/item-requests/{itemRequest}/messages', [AdminItemRequestController::class, 'message'])->name('item-requests.messages')->whereNumber('itemRequest')->middleware('throttle:60,1,admin.item-requests.messages');
 });

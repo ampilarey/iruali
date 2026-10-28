@@ -212,6 +212,7 @@
                     </button>
                 </form>
                 @include('quotes._product_button', ['product' => $product])
+                @include('messaging._ask_about_item', ['product' => $product])
 
                 @php
                     $shareUrl = route('products.show', $product);

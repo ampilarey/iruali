@@ -101,6 +101,7 @@ class User extends Authenticatable implements HasLocalePreference
         'coming_soon_allowed' => 'boolean',
         'coming_soon_allowed_at' => 'datetime',
         'seller_terms_agreed_at' => 'datetime',
+        'messaging_blocked_at' => 'datetime',
         'delivers_to_home_atoll' => 'boolean',
     ];
 

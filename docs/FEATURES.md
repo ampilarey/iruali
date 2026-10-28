@@ -592,6 +592,9 @@ All messaging goes through `App\Services\MessagingService` (`conversations.kind`
   the Help centre's contact section and My messages; a closed thread makes the next message start a new one).
   *Shop support*: Seller Centre → Messages → "Message iruali" (`seller.messages.support`). *Item requests*: a
   thread on each request, on the customer's and the admin's request pages.
+- **On every storefront page:** a chat icon in the header beside the cart (My messages with the unread count;
+  visitors go to "Message iruali" after signing in) and a floating **"Message us"** button (not during checkout,
+  on order pages or on the message pages).
 - **Customers:** **My messages** (`messages.index`, account menus, with the unread count) lists every
   conversation; order threads open on the order page, the rest on `messages.show`. **Customers see one store:**
   replies from the shop or the team show as "iruali" / "iruali support" (`Message::senderName($viewerRole)`), in

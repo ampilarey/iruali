@@ -3419,5 +3419,6 @@
     "New message: :title": "އާ މެސެޖެއް: :title",
     ":sender wrote:": ":sender ލިޔުނީ:",
     "You get at most one of these emails every 10 minutes per conversation; the full conversation is on the website.": "ކޮންމެ ވާހަކައަކަށް 10 މިނެޓުން އެއްފަހަރަށްވުރެ ގިނައިން މި އީމެއިލް ނުލިބޭނެ؛ ފުރިހަމަ ވާހަކަ ވެބްސައިޓުގައި ހުންނާނެ.",
-    "iruali: new message from :sender. Reply at :url": "iruali: :sender ގެ އާ މެސެޖެއް. ޖަވާބު ދެއްވާ: :url"
+    "iruali: new message from :sender. Reply at :url": "iruali: :sender ގެ އާ މެސެޖެއް. ޖަވާބު ދެއްވާ: :url",
+    "Message us": "އަހަރެމެންނަށް މެސެޖުކުރައްވާ"
 }

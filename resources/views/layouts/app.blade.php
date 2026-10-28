@@ -152,6 +152,14 @@
                         @endif
                     </a>
 
+                    <!-- Messages (MessagingService): My messages when signed in, "Message iruali" otherwise (asks to sign in) -->
+                    <a href="{{ auth()->check() ? route('messages.index') : route('messages.support') }}" class="relative flex items-center p-2 lg:p-1 text-dark hover:text-primary" aria-label="{{ __('My messages') }}" title="{{ __('My messages') }}" data-header-messages>
+                        <x-icon name="chat" class="w-6 h-6" />
+                        @if(($messageBadges['customer'] ?? 0) > 0)
+                            <span class="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{{ $messageBadges['customer'] }}</span>
+                        @endif
+                    </a>
+
                     <!-- Cart -->
                     <a href="{{ route('cart') }}" class="relative flex items-center gap-2 p-2 lg:p-0 text-dark hover:text-primary" aria-label="{{ __('Cart') }}">
                         <span class="relative">
@@ -468,6 +476,13 @@
             </a>
         </div>
     </nav>
+
+    <!-- "Message us": a conversation with iruali from any storefront page (not during checkout or on the message pages) -->
+    @unless(request()->routeIs('checkout*', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show'))
+        <a href="{{ route('messages.support') }}" class="fixed z-40 start-4 bottom-20 lg:bottom-6 flex items-center gap-2 rounded-full bg-primary px-3 py-3 lg:px-4 text-white shadow-2xl hover:bg-primary-hover" aria-label="{{ __('Message us') }}" data-floating-message>
+            <x-icon name="chat" class="w-5 h-5" /><span class="hidden lg:inline text-sm font-semibold">{{ __('Message us') }}</span>
+        </a>
+    @endunless
 
     <!-- Compare tray -->
     @php $compareIds = session('compare', []); @endphp

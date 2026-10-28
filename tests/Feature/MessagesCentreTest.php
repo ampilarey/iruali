@@ -158,6 +158,22 @@ class MessagesCentreTest extends TestCase
         $this->actingAs(User::factory()->create())->post(route('item-requests.messages.store', $request), ['body' => 'Hi'])->assertNotFound();
     }
 
+    public function test_the_storefront_shows_a_way_to_message_iruali_on_every_page(): void
+    {
+        // Visitors: the header icon and "Message us" lead to "Message iruali" (after signing in)
+        $this->get('/')->assertOk()->assertSee('data-header-messages', false)->assertSee('data-floating-message', false)->assertSee(route('messages.support'), false);
+        $this->get(route('messages.support'))->assertRedirect(route('login'));
+
+        // Signed in: the header icon opens My messages, with the unread count
+        $customer = User::factory()->create();
+        $conversation = app(MessagingService::class)->supportConversation($customer);
+        app(MessagingService::class)->send($conversation, $customer, 'customer', 'Hello');
+        app(MessagingService::class)->send($conversation->fresh(), $this->teamMember('admin'), 'admin', 'Hi, how can we help?');
+        $this->actingAs($customer)->get(route('products.show', $this->product))->assertOk()
+            ->assertSee(route('messages.index'), false)->assertSee('data-floating-message', false);
+        $this->get(route('messages.index'))->assertOk()->assertDontSee('data-floating-message', false);
+    }
+
     public function test_reporting_blocking_and_nothing_is_ever_deleted(): void
     {
         $customer = User::factory()->create();

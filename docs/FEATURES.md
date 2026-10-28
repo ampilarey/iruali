@@ -505,7 +505,7 @@ and the send is in the audit log.
 order or a part's status, add tracking, message the shop or customer, re-check a payment with
 BML (`admin.orders.bml-sync`), record a manual payment, flag and record refunds.
 `/admin/returns` approve/reject/mark refunded; `/admin/disputes` ask for information and resolve
-(full refund, partial, not upheld); `/admin/messages` all conversations.
+(full refund, partial, not upheld); `/admin/messages` all conversations (see "Messages centre").
 
 **Payouts.** `/admin/payouts` per-seller balances and single payouts; `/admin/payout-batches`
 groups payable earnings into a batch, exports the bank file (`admin.payout-batches.file`), marks
@@ -580,6 +580,42 @@ must show with your accountant or MIRA before you switch registration on.**
   under **My account → Edit profile** (`account.business.update`). At checkout an optional
   "Buying for a business?" block, prefilled from the profile and open to guests, stores them on
   the order and every shop's invoice prints them.
+
+## Messages centre
+
+All messaging goes through `App\Services\MessagingService` (`conversations.kind`: `order`, `product`,
+`support`, `shop_support`, `item_request`; routes in `routes/web/messaging.php`).
+
+- **Kinds.** *Order* threads: one shop's part of an order, on the order pages (as before). *Item questions*:
+  "Ask about this item" in the product page's buy box (`messages.product.store`; one thread per customer and
+  item), answered by the shop that sells it. *Customer support*: "Message iruali" (`messages.support`, from
+  the Help centre's contact section and My messages; a closed thread makes the next message start a new one).
+  *Shop support*: Seller Centre → Messages → "Message iruali" (`seller.messages.support`). *Item requests*: a
+  thread on each request, on the customer's and the admin's request pages.
+- **Customers:** **My messages** (`messages.index`, account menus, with the unread count) lists every
+  conversation; order threads open on the order page, the rest on `messages.show`. **Customers see one store:**
+  replies from the shop or the team show as "iruali" / "iruali support" (`Message::senderName($viewerRole)`), in
+  order threads too.
+- **Shops:** **Seller Centre → Messages** (`seller.messages`, a tab with the unread count; managers too,
+  `config/shop_staff.php`): item questions, order threads and their iruali support thread. In item questions the
+  customer's name is shortened (`PointsService::maskName`).
+- **Contact details hidden in item questions:** phone numbers, email addresses, links, social handles and app
+  names are replaced with "[contact details hidden]" for the other side (`MessagingService::mask()`); the message
+  keeps what was written (`messages.original_body`) for the team. Both sides are told why.
+- **The team sees everything.** **Admin → Messages** (`admin.messages`; admins and support through
+  `config/staff.php`) lists every conversation of every kind (tabs: unread, open, reported, all; filter by kind).
+  `admin.messages.show` shows a thread in full, with the original text where details were hidden, who reported
+  what, the customer's and shop's contact details; the team replies as iruali support (`admin.messages.reply`),
+  closes or reopens (`admin.messages.status`) and can **stop an account from writing** (`admin.messages.block`,
+  `users.messaging_blocked_at`, audited; what it wrote stays). Every message raises the team's unread count.
+  Messages to iruali (support, shop support, item requests) also send the `customer_message` team alert.
+- **Reporting:** the customer or shop can report a message written to them (`messages.report`, with a reason);
+  it shows under Reported and sends the `message_reported` team alert.
+- **Never deleted.** `Conversation` and `Message` refuse to be deleted (a `deleting` hook throws), nothing in
+  the app deletes them, and the database keeps them when an order, product, item request or user is deleted
+  (`nullOnDelete`; `messages.conversation_id` is `restrictOnDelete`).
+- **Notifications:** `NewMessage` (customer: email/SMS as chosen for order updates; shop: email), at most one
+  per conversation and person every 10 minutes; SMS types `new_message` (orders) and `chat_message` (the rest).
 
 ## Item requests ("Can't find it? We'll bring it for you")
 

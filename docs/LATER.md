@@ -78,6 +78,14 @@ Admin → Team alerts to get them on Telegram. Possible later: "Read the link" o
 photos and suggested price from the link, like "Import from a link"), messages between customer and admin on a
 request, and a reminder to admins when a request has waited more than 2 days.
 
+### Messages centre: built on 2026-10-28
+
+"Ask about this item", "Message iruali" (customers and shops), item request chats, My messages, Seller Centre →
+Messages and Admin → Messages for every conversation (see `docs/FEATURES.md`). Conversations are never deleted;
+contact details are hidden in item questions. **Set up:** tick "Message to iruali" and "Message reported" in
+Admin → Team alerts. Possible later: quick replies (saved answers) for shops, the shop's average reply time on
+its performance page, the team starting a conversation with a customer or shop, and WhatsApp Business.
+
 ### Showing iruali as one store (for now)
 
 The public policy pages speak as one store (2026-10-24). Still showing shops elsewhere, if you want it

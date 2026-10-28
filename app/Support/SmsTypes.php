@@ -151,6 +151,11 @@ class SmsTypes
                 'text' => 'iruali: sorry, we can\'t bring :item. Details: :url',
                 'data' => ['item' => 'Running shoes', 'url' => 'https://iruali.mv/account/requests/12'],
             ],
+            'chat_message' => [
+                'group' => 'messages', 'label' => 'New message (item questions, iruali support)',
+                'text' => 'iruali: new message from :sender. Reply at :url',
+                'data' => ['sender' => 'iruali', 'url' => 'https://iruali.mv/messages/12'],
+            ],
             'new_message' => [
                 'group' => 'messages', 'label' => 'New message about an order',
                 'text' => 'iruali: new message from :sender about order :number. Reply at :url',

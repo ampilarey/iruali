@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Services\Sms\SmsText;
@@ -13,8 +14,8 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
 /**
- * Someone wrote in an order thread: the customer gets it by email and/or SMS as they chose,
- * the shop by email.
+ * Someone wrote in a conversation (MessagingService): a customer gets it by email and/or SMS as they
+ * chose for order updates, a shop by email.
  */
 class NewMessage extends Notification implements ShouldQueue
 {
@@ -24,8 +25,7 @@ class NewMessage extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $conversation = $this->message->conversation;
-        if ($notifiable instanceof User && $notifiable->id === $conversation?->customer_id) {
+        if ($notifiable instanceof User && $this->roleOf($notifiable) === 'customer') {
             return $notifiable->notificationChannels('order_updates');
         }
 
@@ -35,36 +35,41 @@ class NewMessage extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $conversation = $this->message->conversation;
-        $order = $conversation->order;
-        $url = $this->urlFor($notifiable);
+        $role = $this->roleOf($notifiable);
+        $sender = $this->message->senderName($role);
+        $mail = (new MailMessage)->salutation(__('The iruali team'))->greeting(__('Hello :name,', ['name' => $notifiable->name ?? '']));
 
-        return (new MailMessage)->salutation(__('The iruali team'))
-            ->subject(__('New message about order :number', ['number' => $order->order_number]))
-            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
-            ->line(__(':sender wrote about order :number:', ['sender' => $this->message->senderName(), 'number' => $order->order_number]))
-            ->line('> '.Str::limit($this->message->body, 500))
-            ->action(__('Reply'), $url)
-            ->line(__('You get at most one of these emails every 10 minutes per conversation; the full thread is on the order page.'));
+        if ($conversation->kind === Conversation::ORDER && $conversation->order) {
+            $number = $conversation->order->order_number;
+            $mail->subject(__('New message about order :number', ['number' => $number]))
+                ->line(__(':sender wrote about order :number:', ['sender' => $sender, 'number' => $number]));
+        } else {
+            $mail->subject(__('New message: :title', ['title' => Str::limit($conversation->title(), 60)]))
+                ->line(__(':sender wrote:', ['sender' => $sender]));
+        }
+
+        return $mail->line('> '.Str::limit($this->message->body, 500))
+            ->action(__('Reply'), $conversation->urlFor($role))
+            ->line(__('You get at most one of these emails every 10 minutes per conversation; the full conversation is on the website.'));
     }
 
     public function toSms(object $notifiable): SmsText
     {
-        return SmsTypes::render('new_message', [
-            'sender' => $this->message->senderName(),
-            'number' => $this->message->conversation->order->order_number,
-            'url' => $this->urlFor($notifiable),
-        ]);
-    }
-
-    protected function urlFor(object $notifiable): string
-    {
         $conversation = $this->message->conversation;
-        $order = $conversation->order;
-
-        if ($notifiable instanceof User && $conversation->seller_id && $notifiable->id === $conversation->seller_id) {
-            return route('seller.orders.show', $order);
+        $role = $this->roleOf($notifiable);
+        if ($conversation->kind === Conversation::ORDER && $conversation->order) {
+            return SmsTypes::render('new_message', [
+                'sender' => $this->message->senderName($role),
+                'number' => $conversation->order->order_number,
+                'url' => $conversation->urlFor($role),
+            ]);
         }
 
-        return route('orders.show', $order).'#conversation-'.$conversation->id;
+        return SmsTypes::render('chat_message', ['sender' => $this->message->senderName($role), 'url' => $conversation->urlFor($role)]);
+    }
+
+    protected function roleOf(object $notifiable): string
+    {
+        return $notifiable instanceof User ? ($this->message->conversation?->roleOf($notifiable) ?? 'customer') : 'customer';
     }
 }

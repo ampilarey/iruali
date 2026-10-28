@@ -32,6 +32,8 @@ class TeamAlerts
         'shop_application' => ['New shop application', 'Someone applies to sell on iruali.'],
         'product_review' => ['Product to review', 'A shop sends a new product or a change for approval.'],
         'item_request' => ['Item request', 'A customer asks iruali to bring an item it does not list.'],
+        'customer_message' => ['Message to iruali', 'A customer or shop writes to iruali support, or about an item request.'],
+        'message_reported' => ['Message reported', 'A customer or shop reports a message.'],
         'payment_error' => ['Payment error', 'Something in the card payment code fails.'],
         'backup_failed' => ['Backup failed', 'The nightly backup did not complete.'],
         'sms_limit' => ['SMS limit reached', 'The monthly SMS limit stops order updates.'],

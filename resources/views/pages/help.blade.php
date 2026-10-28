@@ -95,6 +95,8 @@
 
             <section id="contact" class="scroll-mt-36 bg-white border border-gray-200 rounded-xl p-5 lg:p-6">
                 <h2 class="font-display text-xl font-bold mb-2">{{ __('Contact Us') }}</h2>
+                {{-- "Message iruali": a conversation with the team, kept under My messages (MessagingService) --}}
+                <a href="{{ route('messages.support') }}" class="inline-flex items-center gap-2 mb-3 me-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold" data-help-message-iruali><x-icon name="chat" class="w-4 h-4" />{{ __('Message iruali') }}</a>
                 @if($whatsapp)
                     <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-lg bg-[#128C7E] text-white text-sm font-semibold"><x-icon name="chat" class="w-4 h-4" />{{ __('Chat on WhatsApp') }}</a>
                 @endif

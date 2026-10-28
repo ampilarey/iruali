@@ -57,6 +57,8 @@ class Audit
         'seller_terms.agreed' => 'Shop agreed to the seller terms',
         'item_request.quoted' => 'Item request priced',
         'item_request.declined' => 'Item request declined',
+        'messaging.blocked' => 'Account stopped from sending messages',
+        'messaging.unblocked' => 'Account may send messages again',
         'demo.removed' => 'Sample data removed',
         'demo.restored' => 'Sample data restored',
         'voucher.created' => 'Voucher created',

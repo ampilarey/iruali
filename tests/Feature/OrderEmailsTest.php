@@ -45,9 +45,34 @@ class OrderEmailsTest extends TestCase
 
         $order = $this->placeOrderFromTwoShops($customer, $shopA, $shopB);
 
+        // A card order is announced once it is paid, like Bake & Grill: nobody hears about a payment
+        // page the customer never finished
+        Notification::assertNothingSent();
+        $this->assertNull($order->fresh()->placed_notified_at);
+
+        app(PaymentService::class)->confirm($order->fresh());
         Notification::assertSentTo($customer, OrderPlaced::class, fn ($n) => $n->order->is($order));
         Notification::assertSentTo($shopA, NewSellerOrder::class, fn ($n) => $n->items->count() === 1);
         Notification::assertSentTo($shopB, NewSellerOrder::class);
+        // One message to the customer: the "we have your order" one, not a second "payment received"
+        Notification::assertNotSentTo($customer, PaymentUpdated::class);
+
+        // Confirming again announces nothing twice
+        app(PaymentService::class)->confirm($order->fresh());
+        Notification::assertSentToTimes($customer, OrderPlaced::class, 1);
+    }
+
+    public function test_an_order_paid_another_way_is_announced_when_placed(): void
+    {
+        Notification::fake();
+        [$customer, $shopA, $shopB] = User::factory()->count(3)->create()->all();
+        $order = $this->placeOrderFromTwoShops($customer, $shopA, $shopB);
+        $order->update(['payment_method' => 'bank_transfer', 'placed_notified_at' => null]);
+
+        $this->assertFalse(OrderService::waitsForCardPayment($order->fresh()));
+        $this->assertTrue(app(\App\Services\OrderNotifier::class)->placedOnce($order->fresh()));
+        $this->assertFalse(app(\App\Services\OrderNotifier::class)->placedOnce($order->fresh()));
+        Notification::assertSentToTimes($customer, OrderPlaced::class, 1);
     }
 
     public function test_customer_is_emailed_when_the_status_changes(): void

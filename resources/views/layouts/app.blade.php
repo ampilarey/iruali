@@ -302,7 +302,8 @@
 
     <!-- Main Content -->
     @auth
-        @if(! auth()->user()->isEmailVerified() && ! request()->routeIs('verification.*', 'admin.*', 'seller.*'))
+        {{-- Only for an account that signed up with an email and has not confirmed it: a mobile number confirmed by SMS code is enough --}}
+        @if(filled(auth()->user()->email) && ! auth()->user()->isEmailVerified() && ! auth()->user()->isPhoneVerified() && ! request()->routeIs('verification.*', 'admin.*', 'seller.*', 'checkout*'))
             <div class="bg-sun-soft text-sun-ink text-sm border-b border-sun/40">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2">
                     <span>{{ __('Please verify your email address.') }}</span>

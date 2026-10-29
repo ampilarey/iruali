@@ -50,6 +50,12 @@ class AccountTest extends TestCase
         // Signed in but unverified: pages work and carry the reminder
         $this->get('/')->assertOk()->assertSee('Please verify your email address.');
         $this->get('/checkout')->assertStatus(302); // empty cart, not a verification wall
+
+        // A mobile number confirmed by SMS code is enough: no email reminder (signed in with a code at checkout)
+        $user->forceFill(['phone' => '7771234', 'phone_verified_at' => now()])->save();
+        $this->actingAs($user->fresh())->get('/')->assertOk()->assertDontSee('Please verify your email address.');
+        $user->forceFill(['phone_verified_at' => null, 'email' => null])->save();
+        $this->actingAs($user->fresh())->get('/')->assertOk()->assertDontSee('Please verify your email address.'); // no email to verify
     }
 
     public function test_sign_up_accepts_a_phone_and_rejects_a_bad_one(): void

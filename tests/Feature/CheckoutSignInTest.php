@@ -89,14 +89,14 @@ class CheckoutSignInTest extends TestCase
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()])->assertRedirect(route('account.setup'));
     }
 
-    public function test_a_registered_customer_can_use_a_code_by_sms_or_email_instead_of_the_password_at_checkout(): void
+    public function test_at_checkout_a_registered_number_gets_an_sms_code_not_the_password(): void
     {
         $user = $this->customer();
 
-        $this->withSession($this->session)->post(route('login.phone.start'), ['login' => '7774321', 'checkout' => '1'])->assertRedirect(route('checkout'));
-        $this->get(route('checkout'))->assertSee('data-login-phone="password"', false)->assertSee('data-sms-code', false)->assertSee('data-email-code', false);
-
-        $this->post(route('login.phone.sms-code'))->assertRedirect(route('checkout'))->assertSessionHas('status', 'We have texted a 6-digit code to •••4321.');
+        // A mobile number is enough at checkout, as on Bake & Grill: straight to the SMS code
+        $this->withSession($this->session)->post(route('login.phone.start'), ['login' => '7774321', 'checkout' => '1'])
+            ->assertRedirect(route('checkout'))->assertSessionHas('status', 'We have texted a 6-digit code to •••4321.');
+        $this->get(route('checkout'))->assertSee('data-login-phone="code"', false)->assertDontSee('name="password"', false);
         $this->assertSame('+9607774321', SmsMessage::sole()->to);
         $this->post(route('login.phone.verify'), ['code' => $this->lastCode()])->assertRedirect(route('checkout'));
         $this->assertAuthenticatedAs($user);

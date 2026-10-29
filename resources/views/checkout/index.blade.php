@@ -52,14 +52,6 @@
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div class="lg:col-span-3 space-y-6">
-                @if($user && trim((string) $user->name) === '')
-                    {{-- Signed up with just a mobile number at checkout: the shop needs a name on the order --}}
-                    <section class="bg-white rounded-2xl border border-gray-200 p-6" data-checkout-name>
-                        <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Your name') }}</label>
-                        <input type="text" id="customer_name" name="customer_name" required autocomplete="name" maxlength="120" class="{{ $field }}" value="{{ old('customer_name') }}">
-                        <p class="mt-1 text-xs text-gray-500">{{ __('For the shop and the delivery. You can set a password next time you sign in.') }}</p>
-                    </section>
-                @endif
                 @include('checkout._fulfilment')
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>
@@ -85,6 +77,14 @@
                         <p class="mb-4 text-xs text-gray-500"><a href="{{ route('account.addresses') }}" class="text-primary hover:underline">{{ __('Manage saved addresses') }}</a></p>
                     @endif
                     <div class="space-y-4 {{ $addresses->isNotEmpty() && (string) $selectedAddressId !== '' ? 'hidden' : '' }}" data-new-address>
+                        @if($user && trim((string) $user->name) === '')
+                            {{-- Signed in with just a mobile number: the courier needs a name (none for a pickup, as on Bake & Grill) --}}
+                            <div data-checkout-name>
+                                <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Name for the delivery') }}</label>
+                                <input type="text" id="customer_name" name="customer_name" required autocomplete="name" maxlength="120" class="{{ $field }}" value="{{ old('customer_name') }}" @error('customer_name') aria-invalid="true" @enderror>
+                                @error('customer_name')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                            </div>
+                        @endif
                         <div>
                             <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Address') }}</label>
                             <input type="text" id="shipping_address" name="shipping_address" required autocomplete="shipping address-line1" class="{{ $field }}" value="{{ old('shipping_address', $user?->address) }}" placeholder="{{ __('House name, street') }}" @error('shipping_address') aria-invalid="true" aria-describedby="shipping_address-error" @enderror>
@@ -93,27 +93,17 @@
                         <x-island-picker :islands-by-atoll="$islandsByAtoll" :selected-id="old('island_id', app(\App\Services\ShoppingIsland::class)->island()?->id)" :island="old('shipping_city', $user?->city)" :atoll="old('shipping_state', $user?->state)" island-name="shipping_city" atoll-name="shipping_state" prefix="ship" />
                         @error('shipping_city')<p id="shipping_city-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                         @error('shipping_state')<p id="shipping_state-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="shipping_phone" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Phone for delivery') }}</label>
-                                <input type="tel" id="shipping_phone" name="shipping_phone" required inputmode="tel" autocomplete="tel" dir="ltr" class="{{ $field }}" value="{{ old('shipping_phone', $user?->phone) }}" placeholder="7771234" @error('shipping_phone') aria-invalid="true" aria-describedby="shipping_phone-error" @enderror>
-                                @error('shipping_phone')
-                                    <p id="shipping_phone-error" class="mt-1 text-sm text-danger">{{ $message }}</p>
-                                @else
-                                    <p class="mt-1 text-xs text-gray-500">{{ __('The courier will call this number when your order arrives.') }}</p>
-                                @enderror
-                            </div>
-                            <div>
-                                <label for="shipping_zip" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Postal code') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
-                                <input type="text" id="shipping_zip" name="shipping_zip" autocomplete="shipping postal-code" class="{{ $field }}" value="{{ old('shipping_zip', $user?->postal_code) }}" placeholder="20026" @error('shipping_zip') aria-invalid="true" aria-describedby="shipping_zip-error" @enderror>
-                                @error('shipping_zip')<p id="shipping_zip-error" class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
-                            </div>
-                            <div>
-                                <label for="shipping_country" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Country') }}</label>
-                                <input type="text" id="shipping_country" name="shipping_country" required autocomplete="shipping country-name" class="{{ $field }} bg-gray-50" value="{{ old('shipping_country', 'Maldives') }}" readonly>
-                                @error('shipping_country')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
-                            </div>
+                        <div>
+                            <label for="shipping_phone" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Phone for delivery') }}</label>
+                            <input type="tel" id="shipping_phone" name="shipping_phone" required inputmode="tel" autocomplete="tel" dir="ltr" class="{{ $field }}" value="{{ old('shipping_phone', $user?->phone) }}" placeholder="7771234" @error('shipping_phone') aria-invalid="true" aria-describedby="shipping_phone-error" @enderror>
+                            @error('shipping_phone')
+                                <p id="shipping_phone-error" class="mt-1 text-sm text-danger">{{ $message }}</p>
+                            @else
+                                <p class="mt-1 text-xs text-gray-500">{{ __('The courier will call this number when your order arrives.') }}</p>
+                            @enderror
                         </div>
+                        {{-- Every order is delivered in the Maldives: no country or postal code to type --}}
+                        <input type="hidden" name="shipping_country" value="Maldives">
                         @auth
                             <div class="rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 space-y-2">
                                 <label class="flex items-center gap-2 text-sm text-gray-700">

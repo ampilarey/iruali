@@ -89,10 +89,11 @@ class WalletAndGiftCardsTest extends TestCase
         $this->assertDatabaseHas('payment_transactions', ['order_id' => $order->id, 'gateway' => 'wallet', 'state' => 'CONFIRMED']);
         Http::assertNothingSent();
 
-        // PaymentService::confirm ran: rewards given and the "paid" email sent
+        // PaymentService::confirm ran: rewards given and the order announced once, already paid
         $this->assertNotNull($order->loyalty_points_awarded_at);
         $this->assertSame($order->loyalty_points_earned, $user->fresh()->loyalty_points);
-        Notification::assertSentTo($user, PaymentUpdated::class);
+        Notification::assertSentToTimes($user, \App\Notifications\OrderPlaced::class, 1);
+        Notification::assertNotSentTo($user, PaymentUpdated::class);
         $this->assertWalletConsistent($user);
 
         $this->actingAs($user)->get(route('orders.show', $order))->assertOk()->assertSee('Paid from your wallet');

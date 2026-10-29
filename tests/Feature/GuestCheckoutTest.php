@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Notifications\NewSellerOrder;
 use App\Notifications\OrderPlaced;
 use App\Notifications\OrderStatusChanged;
-use App\Notifications\PaymentUpdated;
 use App\Services\OrderNotifier;
 use App\Services\OrderService;
 use App\Services\PaymentService;
@@ -128,7 +127,10 @@ class GuestCheckoutTest extends TestCase
         $this->assertSame(4, $product->fresh()->stock_quantity);
         $this->assertSame(0, Cart::where('session_id', $session['cart_token'])->where('status', 'active')->count(), 'the guest cart is used up');
 
-        // The confirmation email goes to the guest's address, the shop gets its new-order email
+        // The confirmation email goes to the guest's address, the shop gets its new-order email,
+        // once the card payment went through
+        Notification::assertNothingSent();
+        app(\App\Services\PaymentService::class)->confirm($order);
         Notification::assertSentOnDemand(OrderPlaced::class, fn ($n, $channels, AnonymousNotifiable $to) => $to->routes['mail'] === 'visitor@example.com' && $n->order->is($order));
         Notification::assertSentTo($seller, NewSellerOrder::class);
 
@@ -140,9 +142,7 @@ class GuestCheckoutTest extends TestCase
         // Paying marks the order paid; BML sends the guest back to their signed page, not to /orders
         Notification::fake();
         $this->withSession($session)->get(route('payments.bml.return', $order))->assertRedirect($order->guestUrl());
-        app(PaymentService::class)->confirm($order->fresh());
-        $this->assertSame('paid', $order->fresh()->payment_status);
-        Notification::assertSentOnDemand(PaymentUpdated::class);
+        $this->assertSame('paid', $order->fresh()->payment_status); // confirmed above
 
         // BML brings the guest back to a link with their code in the path (BML adds ?transactionId=),
         // so finishing the payment in another browser, with no session, still ends on the order

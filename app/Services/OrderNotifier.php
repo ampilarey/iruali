@@ -18,16 +18,37 @@ use Throwable;
  */
 class OrderNotifier
 {
-    public function orderPlaced(Order $order): void
+    /**
+     * Tell the customer, the shops and iruali's team about a new order, once only (orders.placed_notified_at).
+     * A card order waits for its payment (OrderService::waitsForCardPayment()): PaymentService::confirm()
+     * announces it then, so nobody gets "order placed" for a payment that never went through.
+     * Returns whether this call announced it.
+     */
+    public function placedOnce(Order $order, bool $customer = true, bool $shops = true): bool
+    {
+        if (Order::whereKey($order->id)->whereNull('placed_notified_at')->update(['placed_notified_at' => now()]) === 0) {
+            return false;
+        }
+        $order->forceFill(['placed_notified_at' => now()])->syncOriginal();
+        $this->orderPlaced($order, $customer, $shops);
+
+        return true;
+    }
+
+    public function orderPlaced(Order $order, bool $customer = true, bool $shops = true): void
     {
         \App\Support\Webhooks::order('order.created', $order);
         $order->loadMissing(['user', 'items.product.seller']);
-        $this->sendToCustomer($order, new OrderPlaced($order));
+        if ($customer) {
+            $this->sendToCustomer($order, new OrderPlaced($order));
+        }
 
-        $order->items
-            ->whereNotNull('product.seller')
-            ->groupBy(fn ($item) => $item->product->seller_id)
-            ->each(fn ($items) => $this->send($items->first()->product->seller, new NewSellerOrder($order, $items)));
+        if ($shops) {
+            $order->items
+                ->whereNotNull('product.seller')
+                ->groupBy(fn ($item) => $item->product->seller_id)
+                ->each(fn ($items) => $this->send($items->first()->product->seller, new NewSellerOrder($order, $items)));
+        }
 
         if (! $order->user?->isSmokeTest()) {
             $shops = $order->items->pluck('product.seller_id')->filter()->unique()->count();

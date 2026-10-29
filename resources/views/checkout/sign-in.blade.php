@@ -3,12 +3,12 @@
 @section('title', __('Checkout').' - iruali')
 
 {{-- Checkout for someone not signed in yet (as on Bake & Grill): the sign-in steps right here, beside
-     the order. A password, or a code by email or SMS; a new number gets an account on the spot. --}}
+     the order. A mobile number and the SMS code, nothing else; a new number gets an account on the spot. --}}
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Checkout') }}</h1>
-        <p class="text-gray-600">{{ __('Sign in with your mobile number or email to place your order. Your cart comes with you.') }}</p>
+        <p class="text-gray-600">{{ __('Type your mobile number and the code we text you. No password, no account to set up.') }}</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -18,9 +18,6 @@
                 <p class="mt-1 text-sm text-gray-600">{{ __('New to iruali? Type your mobile number: we text you a code and your account is ready.') }}</p>
             </div>
             @include('auth._sign-in-steps', ['inCheckout' => true])
-            @unless($pending)
-                @include('auth._social')
-            @endunless
         </section>
 
         <aside class="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6 h-fit" data-checkout-summary>

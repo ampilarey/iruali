@@ -24,6 +24,7 @@ class OrderFactory extends Factory
             'order_number' => 'ORD-'.str_pad($this->faker->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
             'status' => $this->faker->randomElement(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
             'total_amount' => $totalAmount,
+            'placed_notified_at' => now(), // already announced (OrderNotifier::placedOnce())
             'voucher_code' => $this->faker->optional()->regexify('[A-Z]{3}[0-9]{3}'),
             'voucher_discount' => $this->faker->randomFloat(2, 0, 50),
             'loyalty_points_earned' => $this->faker->numberBetween(10, 100),

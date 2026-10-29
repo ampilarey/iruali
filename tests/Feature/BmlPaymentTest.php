@@ -169,7 +169,9 @@ class BmlPaymentTest extends TestCase
 
         // Returning again (or the webhook) doesn't confirm twice
         $this->get(route('payments.bml.return', $order).'?transactionId=txn_123');
-        Notification::assertSentToTimes($this->customer, PaymentUpdated::class, 1);
+        // The card order is announced once, now that it is paid ("we have your order")
+        Notification::assertSentToTimes($this->customer, \App\Notifications\OrderPlaced::class, 1);
+        Notification::assertNotSentTo($this->customer, PaymentUpdated::class);
 
         $this->actingAs($this->customer)->get(route('orders.show', $order))->assertSee('Paid by card')->assertDontSee('Pay MVR');
     }

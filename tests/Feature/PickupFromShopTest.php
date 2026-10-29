@@ -154,6 +154,8 @@ class PickupFromShopTest extends TestCase
             'fulfilment' => [$this->pickupShop->id => 'pickup'],
             'is_gift' => '1', 'gift_receiver_name' => 'Mariyam Ali', 'gift_receiver_phone' => '9998877',
         ])->assertRedirect();
+        // Shops hear about a card order once it is paid
+        app(\App\Services\PaymentService::class)->confirm(\App\Models\Order::latest('id')->firstOrFail());
 
         $lines = function (User $shop) {
             $sent = Notification::sent($shop, \App\Notifications\NewSellerOrder::class)->first();

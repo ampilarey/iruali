@@ -42,8 +42,9 @@ class SellerNotificationsTest extends TestCase
             'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml',
         ]);
         $this->assertTrue($result['success'], $result['message'] ?? '');
+        app(\App\Services\PaymentService::class)->confirm($result['order']); // a card order is announced once paid
 
-        return $result['order'];
+        return $result['order']->fresh();
     }
 
     public function test_shop_notifications_are_queued(): void

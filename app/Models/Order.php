@@ -51,6 +51,7 @@ class Order extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'placed_notified_at' => 'datetime',
         'payment_link_sent_at' => 'datetime',
         'payment_slip_uploaded_at' => 'datetime',
         'refunded_at' => 'datetime',
@@ -222,9 +223,12 @@ class Order extends Model
     /**
      * Who the order is for: the account holder, or the guest who gave their details at checkout.
      */
+    /** The customer's name, or their phone when they gave none (a pickup ordered with just an SMS code). */
     public function customerName(): ?string
     {
-        return $this->user->name ?? $this->guest_name;
+        $name = trim((string) ($this->user->name ?? $this->guest_name));
+
+        return $name !== '' ? $name : ($this->shipping_phone ?: null);
     }
 
     public function customerEmail(): ?string

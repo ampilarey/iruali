@@ -52,6 +52,12 @@ class ReadyCheckTest extends TestCase
         $this->assertSame('pass', $checks['Database backup']['status']);
         $this->assertSame('pass', $checks['Mail']['status']);
         $this->assertSame('pass', $checks['BML Connect']['status']);
+
+        // The webhook secret is optional: BML Connect v2 signs webhooks with the API key
+        config(['services.bml.webhook_secret' => null]);
+        $bml = collect((new ReadyChecks(offline: true))->run())->keyBy('name')['BML Connect'];
+        $this->assertSame('pass', $bml['status']);
+        $this->assertStringContainsString('webhooks checked with the API key', $bml['detail']);
     }
 
     public function test_a_stale_heartbeat_and_old_backup_fail(): void

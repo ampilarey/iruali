@@ -271,9 +271,6 @@ class ReadyChecks
         if (blank(config('services.bml.api_key'))) {
             $missing[] = 'BML_API_KEY';
         }
-        if (blank(config('services.bml.webhook_secret'))) {
-            $missing[] = 'BML_WEBHOOK_SECRET';
-        }
         $environment = (string) config('services.bml.environment');
         if (! in_array($environment, ['sandbox', 'production'], true)) {
             $missing[] = 'BML_ENVIRONMENT (sandbox or production)';
@@ -282,7 +279,8 @@ class ReadyChecks
             return $this->fail('Missing: '.implode(', ', $missing), 'Set them in .env from the BML merchant portal (docs/PAYMENTS_BML.md). Card payment is hidden until BML_API_KEY is set.');
         }
 
-        $detail = "environment={$environment}, API key and webhook secret set";
+        // The webhook secret is optional: BML Connect v2 signs webhooks with the API key (BmlConnect::verifyWebhook())
+        $detail = "environment={$environment}, API key set, webhooks checked with ".(blank(config('services.bml.webhook_secret')) ? 'the API key' : 'the webhook secret');
         if ($this->production() && $environment !== 'production') {
             return $this->warn($detail, 'The live site is still on the BML sandbox: set BML_ENVIRONMENT=production and the live key once BML approves go-live.');
         }

@@ -40,11 +40,13 @@ class OnboardingService
     }
 
     /**
-     * Products of a shop still on its checklist cannot be activated.
+     * Products of a shop still on its checklist cannot be activated. iruali's own shop (an admin
+     * account, User::maySell()) is not held back: it has no payouts to a bank account and admins
+     * approve its products themselves.
      */
     public function blocksActivation(?User $seller): bool
     {
-        return $seller !== null && $seller->is_seller && $seller->onboarding_completed_at === null;
+        return $seller !== null && $seller->is_seller && $seller->onboarding_completed_at === null && ! $seller->isAdmin();
     }
 
     /**

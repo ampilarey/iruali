@@ -108,6 +108,9 @@ class SellerOnboardingTest extends TestCase
         $product = Product::factory()->create(['seller_id' => $shop->id, 'is_active' => false, 'name' => ['en' => 'Lacquer Box', 'dv' => 'ލިޔެލާ ފޮށި']]);
 
         $this->actingAs($this->admin)->post(route('admin.products.approve', $product->id))->assertRedirect()->assertSessionHas('error');
+        // The admin sees why on the products page (it used to look as if nothing happened)
+        $this->from(route('admin.products'))->followingRedirects()->post(route('admin.products.approve', $product->id))
+            ->assertSee('has not completed its checklist yet');
         $this->assertFalse($product->fresh()->is_active);
         $this->get('/products')->assertOk()->assertDontSee('Lacquer Box');
         $this->assertTrue(app(OnboardingService::class)->blocksActivation($shop));
@@ -126,6 +129,11 @@ class SellerOnboardingTest extends TestCase
         $this->assertGreaterThan(0, $sellers->count());
         $this->assertTrue($sellers->every(fn ($s) => $s->isOnboarded()));
         $this->assertFalse(app(OnboardingService::class)->blocksActivation($sellers->first()));
+
+        // iruali's own shop (an admin account) is never held back by the checklist
+        $own = User::factory()->create(['is_seller' => true, 'seller_approved' => true]);
+        $own->roles()->attach(\App\Models\Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+        $this->assertFalse(app(OnboardingService::class)->blocksActivation($own->fresh()));
 
         // A customer account is never "blocked": the rule is only for shops
         $this->assertFalse(app(OnboardingService::class)->blocksActivation(User::factory()->create()));

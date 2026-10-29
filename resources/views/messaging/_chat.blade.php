@@ -11,7 +11,7 @@
 @endphp
 <div id="messages" class="rounded-xl border border-gray-200 bg-white p-4 space-y-3 scroll-mt-36" data-chat="{{ $conversation->id ?? 'new' }}">
     @if($messages->isEmpty())
-        <p class="text-sm text-gray-500">{{ __('No messages yet.') }}</p>
+        @if($conversation->exists)<p class="text-sm text-gray-500">{{ __('No messages yet.') }}</p>@endif
     @else
         <ol class="space-y-2 max-h-[32rem] overflow-y-auto pe-1">
             @foreach($messages as $m)
@@ -46,23 +46,32 @@
     @endif
 
     @if($canReply)
-        <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="space-y-2">
+        @php $field = 'block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-dark placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20'; @endphp
+        <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="space-y-4 {{ $messages->isNotEmpty() ? 'border-t border-gray-100 pt-4' : '' }}">
             @csrf
             @if($guestForm ?? false)
                 @include('messaging._guest_fields')
             @endif
-            <label for="chat-body" class="sr-only">{{ __('Your message') }}</label>
-            <textarea id="chat-body" name="body" rows="3" maxlength="2000" required placeholder="{{ __('Write a message…') }}" class="w-full rounded-lg border-gray-300 text-sm">{{ old('body') }}</textarea>
-            @error('body')<p class="text-sm text-danger">{{ $message }}</p>@enderror
-            @error('attachment')<p class="text-sm text-danger">{{ $message }}</p>@enderror
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <label class="text-xs text-gray-600">{{ __('Photo (optional)') }} <input type="file" name="attachment" accept="image/jpeg,image/png,image/webp,image/gif" class="text-xs"></label>
-                <button type="submit" class="rounded-lg bg-primary px-4 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover" data-chat-send>{{ __('Send') }}</button>
+            <div>
+                <label for="chat-body" class="block text-sm font-semibold text-dark {{ ($guestForm ?? false) ? '' : 'sr-only' }}">{{ __('Your message') }}</label>
+                <textarea id="chat-body" name="body" rows="4" maxlength="2000" required placeholder="{{ __('Write a message…') }}" class="mt-1 {{ $field }} {{ $errors->has('body') ? 'border-danger' : '' }}">{{ old('body') }}</textarea>
+                @error('body')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
-            @if($conversation->hidesContactDetails() && $role !== 'admin')
-                <p class="text-xs text-gray-500">{{ __('Phone numbers, emails and links are hidden in these messages: please keep everything on iruali, where your order is protected.') }}</p>
-            @endif
-            <p class="text-xs text-gray-500">{{ __('Messages are kept and can be read by the iruali team.') }}</p>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <label class="text-xs text-gray-600">
+                    <span class="sr-only">{{ __('Photo (optional)') }}</span>
+                    <input type="file" name="attachment" accept="image/jpeg,image/png,image/webp,image/gif" class="block w-full text-xs text-gray-600 file:me-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary-100">
+                    <span class="mt-1 block text-gray-500">{{ __('Photo (optional)') }}</span>
+                </label>
+                <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover sm:w-auto" data-chat-send><x-icon name="chat" class="h-4 w-4" />{{ __('Send') }}</button>
+            </div>
+            @error('attachment')<p class="text-xs text-danger">{{ $message }}</p>@enderror
+            <div class="space-y-1 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+                @if($conversation->hidesContactDetails() && $role !== 'admin')
+                    <p>{{ __('Phone numbers, emails and links are hidden in these messages: please keep everything on iruali, where your order is protected.') }}</p>
+                @endif
+                <p>{{ __('Messages are kept and can be read by the iruali team.') }}</p>
+            </div>
         </form>
     @else
         <p class="text-xs text-gray-500">{{ __('This conversation is closed.') }}</p>

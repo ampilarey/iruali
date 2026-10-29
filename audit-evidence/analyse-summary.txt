@@ -1,0 +1,8 @@
+Note: Using configuration file /workspace/phpstan.neon.
+   0/371 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%
+ 371/371 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+
+ [OK] No errors                                                                 
+
+ANALYSE_EXIT:0

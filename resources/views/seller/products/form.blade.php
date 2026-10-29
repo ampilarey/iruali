@@ -57,8 +57,9 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                    <label for="sku" class="block text-sm font-medium text-gray-700">SKU *</label>
-                    <input id="sku" name="sku" required class="{{ $field }}" value="{{ old('sku', $product->sku) }}">
+                    <label for="sku" class="block text-sm font-medium text-gray-700">SKU <span class="font-normal text-gray-500">(your product code)</span></label>
+                    <input id="sku" name="sku" maxlength="100" placeholder="Leave empty to make one" class="{{ $field }}" value="{{ old('sku', $product->sku) }}" aria-describedby="sku-hint">
+                    <p id="sku-hint" class="mt-1 text-xs text-gray-500">Leave it empty and we make one, e.g. IRU-7K3F9Q.</p>
                 </div>
                 <div class="sm:col-span-2">
                     <label for="category_id" class="block text-sm font-medium text-gray-700">Category *</label>

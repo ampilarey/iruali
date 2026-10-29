@@ -29,6 +29,11 @@ class ProductRequest extends FormRequest
     {
         $this->merge(['has_variants' => $this->boolean('has_variants')]);
 
+        // No SKU typed: make one (Product::generateSku()), so a shop never has to invent codes
+        if (trim((string) $this->input('sku')) === '') {
+            $this->merge(['sku' => Product::generateSku(\App\Support\CurrentShop::get()->shopName())]);
+        }
+
         // Pre-orders and "coming soon" are for the shops an admin allowed each of them (User::allowsPreorders(),
         // allowsComingSoon()); another shop's form has no such fieldset, and one sent anyway is ignored
         $shop = \App\Support\CurrentShop::get();

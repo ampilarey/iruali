@@ -66,6 +66,23 @@ class SellerAreaTest extends TestCase
         $this->assertSame('Reef Safe Sunscreen', $product->getTranslation('name', 'en'));
     }
 
+    public function test_an_empty_sku_is_made_for_the_shop(): void
+    {
+        $seller = $this->userWithRole('seller', ['business_name' => 'Island Crafts']);
+        $category = Category::factory()->create();
+
+        foreach (['Coir rope', 'Lacquer box'] as $name) {
+            $this->actingAs($seller)->post('/seller/products', [
+                'name_en' => $name, 'sku' => '  ', 'category_id' => $category->id, 'price' => 50, 'stock_quantity' => 3,
+            ])->assertSessionHasNoErrors()->assertRedirect(route('seller.products.index'));
+        }
+
+        $skus = Product::where('seller_id', $seller->id)->pluck('sku');
+        $this->assertCount(2, $skus->unique());
+        $skus->each(fn ($sku) => $this->assertMatchesRegularExpression('/^ISL-[A-Z0-9]{6}$/', $sku));
+        $this->assertMatchesRegularExpression('/^SKU-[A-Z0-9]{6}$/', Product::generateSku('ހަ'));
+    }
+
     public function test_seller_can_update_and_delete_own_product(): void
     {
         $seller = $this->userWithRole('seller');

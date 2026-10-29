@@ -727,4 +727,18 @@ class Product extends Model
     {
         return $this->hasOne(ProductChangeRequest::class)->where('status', ProductChangeRequest::PENDING);
     }
+
+    /**
+     * A new SKU for a shop that left the box empty: the first three letters of its name and six
+     * random letters and digits, e.g. "IRU-7K3F9Q". Unique among products (deleted ones too) and variants.
+     */
+    public static function generateSku(string $shopName = ''): string
+    {
+        $prefix = substr(strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', \Illuminate\Support\Str::ascii($shopName))), 0, 3) ?: 'SKU';
+        do {
+            $sku = $prefix.'-'.strtoupper(\Illuminate\Support\Str::random(6));
+        } while (self::withTrashed()->where('sku', $sku)->exists() || ProductVariant::where('sku', $sku)->exists());
+
+        return $sku;
+    }
 }

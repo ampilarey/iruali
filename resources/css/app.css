@@ -665,3 +665,81 @@ table .sr-only:not(:focus):not(:focus-within) {
 body {
   overflow-wrap: break-word;
 }
+
+/*
+ * Mobile first: on phones every data table inside the page (one with a <thead>) turns into a
+ * list of cards, one card per row, each value with its column name (data-label, set by
+ * resources/js/stack-tables.js). Wide tables never need sideways scrolling on a phone.
+ * A table that must stay a grid (product comparison, a printed document) carries data-no-stack.
+ */
+@media (max-width: 767.98px) {
+    main table:has(> thead):not([data-no-stack]) {
+        display: block;
+        width: 100% !important;
+        min-width: 0 !important;
+        border: 0;
+    }
+    main table:has(> thead):not([data-no-stack]) > thead {
+        display: none;
+    }
+    main table:has(> thead):not([data-no-stack]) > tbody,
+    main table:has(> thead):not([data-no-stack]) > tfoot {
+        display: block;
+        border: 0 !important;
+    }
+    main table:has(> thead):not([data-no-stack]) > tbody > tr,
+    main table:has(> thead):not([data-no-stack]) > tfoot > tr {
+        display: block;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0.875rem;
+        border: 1px solid var(--color-gray-200, #e5e7eb) !important;
+        border-radius: 0.75rem;
+        background: #fff;
+    }
+    main table:has(> thead):not([data-no-stack]) > tbody > tr > td,
+    main table:has(> thead):not([data-no-stack]) > tbody > tr > th,
+    main table:has(> thead):not([data-no-stack]) > tfoot > tr > td,
+    main table:has(> thead):not([data-no-stack]) > tfoot > tr > th {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.25rem 1rem;
+        width: 100%;
+        padding: 0.375rem 0 !important;
+        border: 0 !important;
+        text-align: end;
+        white-space: normal !important;
+    }
+    main table:has(> thead):not([data-no-stack]) > tbody > tr > :is(td, th) + :is(td, th) {
+        border-top: 1px solid var(--color-gray-100, #f3f4f6) !important;
+    }
+    main table:has(> thead):not([data-no-stack]) :is(td, th)[data-label]::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-gray-500, #6b7280);
+        text-align: start;
+    }
+    /* The first column (usually the name) is the card's title: no label, full width */
+    main table:has(> thead):not([data-no-stack]) > tbody > tr > :is(td, th):first-child {
+        justify-content: flex-start;
+        text-align: start;
+        font-weight: 600;
+    }
+    main table:has(> thead):not([data-no-stack]) > tbody > tr > :is(td, th):first-child::before {
+        display: none;
+    }
+    /* "No results" rows and other full-width cells */
+    main table:has(> thead):not([data-no-stack]) :is(td, th)[colspan] {
+        justify-content: center;
+        text-align: center;
+    }
+    main table:has(> thead):not([data-no-stack]) :is(td, th)[colspan]::before {
+        display: none;
+    }
+    main table:has(> thead):not([data-no-stack]) :is(td, th):empty {
+        display: none;
+    }
+}

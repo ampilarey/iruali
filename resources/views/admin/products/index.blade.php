@@ -64,7 +64,7 @@
                                     <div class="text-sm text-gray-900">{{ $product->category->name ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $product->seller->name ?? 'N/A' }}</div>
+                                    <div class="text-sm text-gray-900">{{ $product->seller?->shopName() ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ \App\Support\Money::format($product->price ?? 0) }}</div>

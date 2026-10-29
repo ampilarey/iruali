@@ -15,10 +15,10 @@
             <form method="POST" action="{{ route('messages.product.store', $product) }}" class="mt-2 space-y-2">
                 @csrf
                 @if($askGuest)
-                    @include('messaging._guest_fields')
+                    @include('messaging._guest_fields', ['compact' => true])
                 @endif
                 <label for="ask-body" class="sr-only">{{ __('Your question') }}</label>
-                <textarea id="ask-body" name="body" rows="2" maxlength="2000" required placeholder="{{ __('e.g. Is it original? Do you have it in blue?') }}" class="w-full rounded-lg border-gray-300 text-sm"></textarea>
+                <textarea id="ask-body" name="body" rows="2" maxlength="2000" required placeholder="{{ __('e.g. Is it original? Do you have it in blue?') }}" class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
                 @error('body')<p class="text-xs text-danger">{{ $message }}</p>@enderror
                 <button class="w-full h-10 rounded-lg border border-primary text-primary font-semibold hover:bg-primary-50">{{ __('Send question') }}</button>
                 <p class="text-xs text-gray-500">{{ __('Only you and iruali see this. For answers everyone can read, use Q&A below.') }}</p>

@@ -37,9 +37,13 @@ class Conversation extends Model
     public const KINDS = [self::ORDER, self::PRODUCT, self::SUPPORT, self::SHOP_SUPPORT, self::ITEM_REQUEST];
 
     protected $fillable = [
-        'kind', 'order_id', 'seller_order_id', 'product_id', 'item_request_id', 'subject', 'customer_id', 'seller_id', 'last_message_at',
+        'kind', 'order_id', 'seller_order_id', 'product_id', 'item_request_id', 'subject', 'customer_id', 'seller_id',
+        'guest_name', 'guest_email', 'guest_phone', 'last_message_at',
         'customer_unread_count', 'seller_unread_count', 'admin_unread_count', 'status',
     ];
+
+    /** The visitor's private link token never goes out with the model. */
+    protected $hidden = ['access_token'];
 
     protected $casts = [
         'last_message_at' => 'datetime',
@@ -171,7 +175,25 @@ class Conversation extends Model
         return match ($role) {
             'seller' => route('seller.messages.show', $this),
             'admin' => route('admin.messages.show', $this),
-            default => route('messages.show', $this),
+            default => $this->isGuest() ? $this->guestUrl() : route('messages.show', $this),
         };
+    }
+
+    /** Started by a visitor without an account (name and email/mobile on the conversation, no customer). */
+    public function isGuest(): bool
+    {
+        return $this->customer_id === null && $this->access_token !== null;
+    }
+
+    /** The visitor's private link to read and answer the conversation. */
+    public function guestUrl(): string
+    {
+        return route('messages.guest.show', ['conversation' => $this->id, 'token' => (string) $this->access_token]);
+    }
+
+    /** The customer's name as the team sees it: their account's, or the visitor's. */
+    public function customerName(): string
+    {
+        return $this->customer->name ?? $this->guest_name ?? __('Customer');
     }
 }

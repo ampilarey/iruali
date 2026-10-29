@@ -102,6 +102,27 @@ class MessagingService
             ?? new Conversation(['kind' => Conversation::SHOP_SUPPORT, 'seller_id' => $shop->id, 'status' => 'open']);
     }
 
+    /**
+     * A visitor without an account writes to iruali, or about an item (always a new conversation): their
+     * name and email and/or mobile are kept on it, with a secret token for their private link.
+     */
+    public function guestConversation(string $kind, string $name, ?string $email, ?string $phone, ?Product $product = null): Conversation
+    {
+        $conversation = new Conversation([
+            'kind' => $kind,
+            'guest_name' => Str::limit(trim($name), 95),
+            'guest_email' => filled($email) ? mb_strtolower(trim((string) $email)) : null,
+            'guest_phone' => filled($phone) ? \App\Services\Sms\PhoneNumber::normalize((string) $phone) : null,
+            'status' => 'open',
+        ]);
+        if ($product) {
+            $conversation->fill(['product_id' => $product->id, 'seller_id' => $product->seller_id, 'subject' => Str::limit((string) ($product->getTranslation('name', 'en', false) ?: $product->name), 190)]);
+        }
+        $conversation->access_token = Str::random(48);
+
+        return $conversation;
+    }
+
     /** The thread between the customer and iruali about an item request. */
     public function itemRequestConversation(ItemRequest $request): Conversation
     {
@@ -133,9 +154,9 @@ class MessagingService
      * Add a message, bump the other participants' unread counts and tell them (at most once
      * every ten minutes per thread and person).
      */
-    public function send(Conversation $conversation, User $sender, string $role, string $body, ?UploadedFile $attachment = null, bool $notify = true): Message
+    public function send(Conversation $conversation, ?User $sender, string $role, string $body, ?UploadedFile $attachment = null, bool $notify = true): Message
     {
-        if ($role !== 'admin' && $sender->messaging_blocked_at !== null) {
+        if ($role !== 'admin' && $sender?->messaging_blocked_at !== null) {
             throw new RuntimeException(__('Your account can no longer send messages. Please contact iruali.'));
         }
         $body = trim($body);
@@ -154,7 +175,7 @@ class MessagingService
 
         $message = DB::transaction(function () use ($conversation, $sender, $role, $body, $original, $path) {
             $message = $conversation->messages()->create([
-                'sender_id' => $sender->id,
+                'sender_id' => $sender?->id, // null: a visitor without an account
                 'sender_role' => $role,
                 'body' => $body,
                 'original_body' => $original,
@@ -260,21 +281,24 @@ class MessagingService
 
     protected function notify(Conversation $conversation, Message $message): void
     {
+        // A visitor without an account hears by email and/or SMS, on the details they gave
+        $customer = $conversation->customer ?? $this->guestRecipient($conversation);
         $recipients = match ($message->sender_role) {
             'customer' => [$conversation->seller],
-            'seller' => [$conversation->customer],
-            default => [$conversation->customer, $conversation->seller],
+            'seller' => [$customer],
+            default => [$customer, $conversation->seller],
         };
 
         // Written to iruali (support, item requests): the team hears about it
         if ($message->sender_role !== 'admin' && in_array($conversation->kind, [Conversation::SUPPORT, Conversation::SHOP_SUPPORT, Conversation::ITEM_REQUEST], true)) {
-            TeamAlerts::send('customer_message', 'iruali: new message in '.$conversation->title().' from '.($message->sender->name ?? 'someone').': '.Str::limit($message->body, 100), route('admin.messages.show', $conversation));
+            TeamAlerts::send('customer_message', 'iruali: new message in '.$conversation->title().' from '.$conversation->customerName().': '.Str::limit($message->body, 100), route('admin.messages.show', $conversation));
             $recipients = [];
         }
 
         foreach (array_filter($recipients) as $recipient) {
             // One alert per thread and person every ten minutes; the thread itself shows everything
-            if (! Cache::add('new-message:'.$conversation->id.':'.$recipient->id, true, now()->addMinutes(self::NOTIFY_EVERY_MINUTES))) {
+            $key = $recipient instanceof User ? $recipient->id : 'guest';
+            if (! Cache::add('new-message:'.$conversation->id.':'.$key, true, now()->addMinutes(self::NOTIFY_EVERY_MINUTES))) {
                 continue;
             }
             try {
@@ -283,5 +307,23 @@ class MessagingService
                 report($e);
             }
         }
+    }
+
+    /** The visitor's email and/or mobile as a notification route, or null. */
+    protected function guestRecipient(Conversation $conversation): ?\Illuminate\Notifications\AnonymousNotifiable
+    {
+        if (! $conversation->isGuest()) {
+            return null;
+        }
+        $routes = array_filter(['mail' => $conversation->guest_email, 'sms' => $conversation->guest_phone]);
+        if ($routes === []) {
+            return null;
+        }
+        $notifiable = new \Illuminate\Notifications\AnonymousNotifiable;
+        foreach ($routes as $channel => $to) {
+            $notifiable->route($channel, $to);
+        }
+
+        return $notifiable;
     }
 }

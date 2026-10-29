@@ -48,7 +48,7 @@ class MessagesCentreTest extends TestCase
 
     public function test_a_customer_asks_about_an_item_and_contact_details_are_hidden(): void
     {
-        $this->get(route('products.show', $this->product))->assertOk()->assertSee('data-ask-about-item', false)->assertSee('Sign in to ask');
+        $this->get(route('products.show', $this->product))->assertOk()->assertSee('data-ask-about-item', false)->assertSee('data-guest-fields', false);
         $customer = User::factory()->create(['name' => 'Aishath Mohamed']);
 
         $this->actingAs($customer)->post(route('messages.product.store', $this->product), ['body' => 'Is it original? Call me on +960 777 1234 or aishath@example.com, or see https://other-shop.mv/kettle'])
@@ -160,9 +160,9 @@ class MessagesCentreTest extends TestCase
 
     public function test_the_storefront_shows_a_way_to_message_iruali_on_every_page(): void
     {
-        // Visitors: the header icon and "Message us" lead to "Message iruali" (after signing in)
+        // Visitors: the header icon and "Message us" lead to "Message iruali" (no account needed)
         $this->get('/')->assertOk()->assertSee('data-header-messages', false)->assertSee('data-floating-message', false)->assertSee(route('messages.support'), false);
-        $this->get(route('messages.support'))->assertRedirect(route('login'));
+        $this->get(route('messages.support'))->assertOk()->assertSee('data-guest-fields', false);
 
         // Signed in: the header icon opens My messages, with the unread count
         $customer = User::factory()->create();
@@ -172,6 +172,53 @@ class MessagesCentreTest extends TestCase
         $this->actingAs($customer)->get(route('products.show', $this->product))->assertOk()
             ->assertSee(route('messages.index'), false)->assertSee('data-floating-message', false);
         $this->get(route('messages.index'))->assertOk()->assertDontSee('data-floating-message', false);
+    }
+
+    public function test_visitors_without_an_account_can_message_iruali_and_ask_about_items(): void
+    {
+        $this->assertGuest();
+
+        // "Message iruali": a name and an email or mobile, a private link back
+        $this->post(route('messages.support.store'), ['body' => 'Do you deliver to Fuvahmulah?', 'name' => 'Hawwa'])->assertSessionHasErrors(['email', 'phone']);
+        $this->post(route('messages.support.store'), ['body' => 'Hi', 'name' => 'Bot', 'email' => 'bot@example.com', 'website' => 'http://spam.example'])->assertSessionHasErrors('website');
+        $this->assertSame(0, Conversation::count());
+
+        $response = $this->post(route('messages.support.store'), ['body' => 'Do you deliver to Fuvahmulah?', 'name' => 'Hawwa', 'email' => 'Hawwa@Example.com']);
+        $support = Conversation::sole();
+        $this->assertSame([Conversation::SUPPORT, null, 'Hawwa', 'hawwa@example.com', 1], [$support->kind, $support->customer_id, $support->guest_name, $support->guest_email, $support->admin_unread_count]);
+        $this->assertTrue($support->isGuest());
+        $this->assertSame(48, strlen($support->access_token));
+        $this->assertArrayNotHasKey('access_token', $support->toArray());
+        $response->assertRedirect($support->guestUrl());
+        $this->assertNull(Message::sole()->sender_id);
+        $this->get($support->guestUrl())->assertOk()->assertSee('data-guest-link', false)->assertSee('Do you deliver to Fuvahmulah?');
+
+        // The private link is the only way in
+        $this->get(route('messages.guest.show', ['conversation' => $support->id, 'token' => str_repeat('a', 48)]))->assertNotFound();
+        $this->get(route('messages.show', $support))->assertRedirect(route('login'));
+
+        // The team answers; the visitor gets it by email with the link, and replies there
+        $admin = $this->teamMember('admin');
+        $this->actingAs($admin)->get(route('admin.messages.show', $support))->assertOk()->assertSee('data-admin-guest', false)->assertSee('hawwa@example.com');
+        $this->post(route('admin.messages.reply', $support), ['body' => 'Yes, by cargo boat.']);
+        Notification::assertSentOnDemand(NewMessage::class, function ($notification, $channels, $notifiable) use ($support) {
+            return $notifiable->routes['mail'] === 'hawwa@example.com' && $channels === ['mail']
+                && str_contains((string) $notification->toMail($notifiable)->actionUrl, $support->access_token);
+        });
+        \Illuminate\Support\Facades\Auth::logout();
+        $this->post($support->guestUrl(), ['body' => 'Thank you!'])->assertRedirect($support->guestUrl());
+        $this->assertSame(3, $support->messages()->count());
+        $this->assertSame('Hawwa', $support->messages()->first()->senderName('admin'));
+
+        // "Ask about this item" with a mobile number: the shop answers, contact details stay hidden
+        $this->post(route('messages.product.store', $this->product), ['body' => 'Is it original? My email is me@example.com', 'name' => 'Ali Hassan', 'phone' => '777 1234'])->assertRedirect();
+        $question = Conversation::where('kind', Conversation::PRODUCT)->sole();
+        $this->assertSame([$this->shop->id, '+9607771234'], [$question->seller_id, $question->guest_phone]);
+        $this->assertStringNotContainsString('me@example.com', $question->messages()->sole()->body);
+        Notification::assertSentTo($this->shop, NewMessage::class);
+        $this->actingAs($this->shop)->get(route('seller.messages.show', $question))->assertOk()->assertSee('Asked by Al*')->assertDontSee('7771234');
+        $this->post(route('seller.messages.reply', $question), ['body' => 'Yes, it is original.']);
+        Notification::assertSentOnDemand(NewMessage::class, fn ($n, $channels, $notifiable) => ($notifiable->routes['sms'] ?? null) === '+9607771234' && $channels === ['sms']);
     }
 
     public function test_reporting_blocking_and_nothing_is_ever_deleted(): void

@@ -18,14 +18,18 @@ Route::middleware('auth')->group(function () {
 
     // My messages, "Message iruali", "Ask about this item", item request threads, reporting
     Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
-    Route::get('/messages/support', [MessagesController::class, 'support'])->name('messages.support');
-    Route::post('/messages/support', [MessagesController::class, 'storeSupport'])->name('messages.support.store')->middleware('throttle:20,1,messages.support.store');
     Route::get('/messages/c/{conversation}', [MessagesController::class, 'show'])->name('messages.show')->whereNumber('conversation');
     Route::post('/messages/c/{conversation}', [MessagesController::class, 'reply'])->name('messages.reply')->whereNumber('conversation')->middleware('throttle:20,1,messages.reply');
-    Route::post('/products/{product}/ask', [MessagesController::class, 'ask'])->name('messages.product.store')->middleware('throttle:10,10,messages.product.store');
     Route::post('/account/item-requests/{itemRequest}/messages', [MessagesController::class, 'itemRequest'])->name('item-requests.messages.store')->whereNumber('itemRequest')->middleware('throttle:20,1,item-requests.messages.store');
     Route::post('/messages/{message}/report', [MessagesController::class, 'report'])->name('messages.report')->whereNumber('message')->middleware('throttle:10,60,messages.report');
 });
+
+// Also for visitors without an account (a name and an email or mobile; a private link to the conversation)
+Route::get('/messages/support', [MessagesController::class, 'support'])->name('messages.support');
+Route::post('/messages/support', [MessagesController::class, 'storeSupport'])->name('messages.support.store')->middleware('throttle:10,60,messages.support.store');
+Route::post('/products/{product}/ask', [MessagesController::class, 'ask'])->name('messages.product.store')->middleware('throttle:10,60,messages.product.store');
+Route::get('/messages/g/{conversation}/{token}', [MessagesController::class, 'guestShow'])->name('messages.guest.show')->whereNumber('conversation')->where('token', '[A-Za-z0-9]{48}');
+Route::post('/messages/g/{conversation}/{token}', [MessagesController::class, 'guestReply'])->name('messages.guest.reply')->whereNumber('conversation')->where('token', '[A-Za-z0-9]{48}')->middleware('throttle:20,10,messages.guest.reply');
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::post('/orders/{order}/parts/{part}/messages', [MessageController::class, 'storeAsSeller'])->name('orders.messages.store')->middleware('throttle:20,1,seller.orders.messages.store');

@@ -10,7 +10,7 @@
         @if($conversation->kind === 'product' && $conversation->product)
             <div class="flex items-center gap-3 rounded-lg bg-white p-3 shadow">
                 <img src="{{ $conversation->product->mainImage?->url ?? '/images/product-placeholder.svg' }}" alt="" class="h-14 w-14 rounded-lg object-cover">
-                <div class="text-sm"><p class="font-medium text-gray-900">{{ $conversation->product->name }}</p><p class="text-gray-500">{{ __('Asked by :name', ['name' => \App\Services\PointsService::maskName($conversation->customer?->name)]) }}</p></div>
+                <div class="text-sm"><p class="font-medium text-gray-900">{{ $conversation->product->name }}</p><p class="text-gray-500">{{ __('Asked by :name', ['name' => \App\Services\PointsService::maskName($conversation->customerName())]) }}</p></div>
             </div>
         @elseif(! $conversation->exists)
             <p class="text-sm text-gray-600">{{ __('Questions for the iruali team about your shop, payouts, listings or anything else.') }}</p>

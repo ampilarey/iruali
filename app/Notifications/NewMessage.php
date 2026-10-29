@@ -9,6 +9,7 @@ use App\Services\Sms\SmsText;
 use App\Support\SmsTypes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
@@ -25,6 +26,10 @@ class NewMessage extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
+        // A visitor without an account: the email and/or mobile they gave
+        if ($notifiable instanceof AnonymousNotifiable) {
+            return array_keys($notifiable->routes);
+        }
         if ($notifiable instanceof User && $this->roleOf($notifiable) === 'customer') {
             return $notifiable->notificationChannels('order_updates');
         }
@@ -37,7 +42,7 @@ class NewMessage extends Notification implements ShouldQueue
         $conversation = $this->message->conversation;
         $role = $this->roleOf($notifiable);
         $sender = $this->message->senderName($role);
-        $mail = (new MailMessage)->salutation(__('The iruali team'))->greeting(__('Hello :name,', ['name' => $notifiable->name ?? '']));
+        $mail = (new MailMessage)->salutation(__('The iruali team'))->greeting(__('Hello :name,', ['name' => $notifiable instanceof User ? $notifiable->name : ($conversation->guest_name ?? '')]));
 
         if ($conversation->kind === Conversation::ORDER && $conversation->order) {
             $number = $conversation->order->order_number;

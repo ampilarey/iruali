@@ -5,7 +5,10 @@
 {{-- One conversation for the customer: an item question, iruali support or an item request (order threads are on the order page). --}}
 @section('content')
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
-    <a href="{{ route('messages.index') }}" class="text-sm text-primary hover:underline">← {{ __('My messages') }}</a>
+    @auth<a href="{{ route('messages.index') }}" class="text-sm text-primary hover:underline">← {{ __('My messages') }}</a>@endauth
+    @if($guestLink ?? false)
+        <p class="rounded-lg border border-primary-100 bg-primary-50 px-4 py-3 text-sm text-gray-700" data-guest-link>{{ __('This is your private link to the conversation: keep it to read our answers. We also send it to you with every reply.') }}</p>
+    @endif
     <h1 class="text-2xl font-bold text-dark">{{ $conversation->exists ? $conversation->title() : __('Message iruali') }}</h1>
 
     @if($conversation->kind === \App\Models\Conversation::PRODUCT && $conversation->product)
@@ -23,6 +26,6 @@
         @if(session($flash))<div class="rounded-lg border px-4 py-3 text-sm {{ $style }}">{{ session($flash) }}</div>@endif
     @endforeach
 
-    @include('messaging._chat', ['conversation' => $conversation, 'role' => 'customer', 'action' => $postUrl])
+    @include('messaging._chat', ['conversation' => $conversation, 'role' => 'customer', 'action' => $postUrl, 'guestForm' => $guestForm ?? false])
 </div>
 @endsection

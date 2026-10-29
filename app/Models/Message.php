@@ -52,8 +52,8 @@ class Message extends Model
             'admin' => __('iruali support'),
             'seller' => $viewerRole === 'customer' ? 'iruali' : ($conversation?->shopName() ?? ($this->sender->name ?? __('Shop'))),
             default => $viewerRole === 'seller' && $conversation?->hidesContactDetails()
-                ? \App\Services\PointsService::maskName($this->sender->name ?? __('Customer'))
-                : ($this->sender->name ?? __('Customer')),
+                ? \App\Services\PointsService::maskName($this->sender->name ?? $conversation->guest_name ?? __('Customer'))
+                : ($this->sender->name ?? $conversation->guest_name ?? __('Customer')),
         };
     }
 

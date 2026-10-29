@@ -3420,5 +3420,11 @@
     ":sender wrote:": ":sender ލިޔުނީ:",
     "You get at most one of these emails every 10 minutes per conversation; the full conversation is on the website.": "ކޮންމެ ވާހަކައަކަށް 10 މިނެޓުން އެއްފަހަރަށްވުރެ ގިނައިން މި އީމެއިލް ނުލިބޭނެ؛ ފުރިހަމަ ވާހަކަ ވެބްސައިޓުގައި ހުންނާނެ.",
     "iruali: new message from :sender. Reply at :url": "iruali: :sender ގެ އާ މެސެޖެއް. ޖަވާބު ދެއްވާ: :url",
-    "Message us": "އަހަރެމެންނަށް މެސެޖުކުރައްވާ"
+    "Message us": "އަހަރެމެންނަށް މެސެޖުކުރައްވާ",
+    "or mobile number": "ނުވަތަ މޮބައިލް ނަންބަރު",
+    "No account needed. We answer by email or SMS, with a link to this conversation.": "އެކައުންޓެއް ބޭނުމެއް ނުވޭ. މި ވާހަކައިގެ ލިންކާއެކު އީމެއިލް ނުވަތަ އެސްއެމްއެސް އިން ޖަވާބު ދޭނަން.",
+    "This is your private link to the conversation: keep it to read our answers. We also send it to you with every reply.": "މިއީ ތިބާގެ ވާހަކައިގެ ޚާއްޞަ ލިންކް: އަހަރެމެންގެ ޖަވާބުތައް ކިޔުމަށް މި ލިންކް ރައްކާކުރައްވާ. ކޮންމެ ޖަވާބަކާއެކުވެސް މި ލިންކް ފޮނުވާނަން.",
+    "Give an email address or a mobile number, so we can answer you.": "ޖަވާބު ދެވޭނެ ގޮތަށް، އީމެއިލް އެޑްރެހެއް ނުވަތަ މޮބައިލް ނަންބަރެއް ދެއްވާ.",
+    "Enter a mobile number, for example 7771234.": "މޮބައިލް ނަންބަރެއް ލިޔުއްވާ، މިސާލަކަށް 7771234.",
+    "Message sent. Keep this page's link to read our answer; we also send it to you with every reply.": "މެސެޖު ފޮނުވިއްޖެ. އަހަރެމެންގެ ޖަވާބު ކިޔުމަށް މި ޞަފްޙާގެ ލިންކް ރައްކާކުރައްވާ؛ ކޮންމެ ޖަވާބަކާއެކުވެސް އެ ފޮނުވާނަން."
 }

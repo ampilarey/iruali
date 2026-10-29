@@ -4,5 +4,6 @@ import './variant-picker';
 import './island-picker';
 import './shopping-island';
 import './checkout-address';
+import './stack-tables';
 import './pwa';
 import './push';

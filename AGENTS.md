@@ -20,6 +20,7 @@ This is a **Laravel 12 (PHP 8.2+) multi-vendor e-commerce app** ("Iruali") with 
 - Runtime dirs `storage/framework/{cache,sessions,views}` and `storage/app/public` are not tracked and are created during setup. Run `php artisan storage:link` after they exist.
 - **Dev database is SQLite** at `database/database.sqlite` (gitignored). Recreate with `touch database/database.sqlite` then `php artisan migrate --seed`. Seeders create an admin user `admin@example.com` / `password` plus sample categories/products/islands.
 
+- **Mobile first, always.** Most people (the owner included) use iruali on a phone. Build every page for a ~390px-wide screen first, then widen with `sm:`/`md:`/`lg:`. Data tables need nothing extra: below 768px any `main table` with a `<thead>` becomes one card per row (`resources/css/app.css`, labels from `resources/js/stack-tables.js`); put `data-no-stack` only on a table that must stay a grid (product comparison). No page may scroll sideways on a phone. Before shipping a page change, open it in Playwright at 390×844 and check `document.documentElement.scrollWidth` is 390 and the screenshot reads well.
 - **Rate limits:** write `throttle:N,M,name` with a name of its own. A bare `throttle:N,M` shares one counter per visitor across every throttled route (search suggestions once used up the sign-in attempts); `RateLimitTest` fails on a bare one.
 
 ### Tests

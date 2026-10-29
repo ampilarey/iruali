@@ -44,7 +44,7 @@
             </div>
         @else
             <div class="bg-white border border-gray-200 rounded-xl overflow-x-auto">
-                <table class="w-full text-sm table-fixed" style="min-width: {{ 10 + $products->count() * 12 }}rem">
+                <table data-no-stack class="w-full text-sm table-fixed" style="min-width: {{ 10 + $products->count() * 12 }}rem">
                     <thead>
                         <tr class="align-top">
                             <th scope="col" class="w-40 p-4 text-start text-gray-500 font-medium sticky start-0 bg-white">{{ trans_choice(':count product|:count products', $products->count(), ['count' => $products->count()]) }}</th>

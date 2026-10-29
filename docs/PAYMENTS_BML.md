@@ -34,7 +34,7 @@ and type `bmlkey` on its own line (set `BML_ENVIRONMENT` with `setenv BML_ENVIRO
    | `BML_CURRENCY` | Sandbox only: `USD` (default, BML's UAT only takes USD) or `MVR`. Live payments are always MVR |
    | `BML_AUTH_MODE` | `auto` (default: `Bearer` for a JWT key, plain key otherwise), `raw` (UAT), `bearer_jwt`, `bearer_basic` (needs `BML_APP_ID`) |
    | `BML_APP_ID` | App ID from the portal, for `bearer_basic` |
-   | `BML_WEBHOOK_SECRET` | Webhook secret from the portal; enables `X-BML-Signature` HMAC checking |
+   | `BML_WEBHOOK_SECRET` | Optional. Webhook secret from the portal, if it shows one; enables `X-BML-Signature` HMAC checking. Without it webhooks are checked with the API key (`X-Signature`) |
    | `BML_EXTERNAL_TERMS_URL` | Terms URL sent to BML (defaults to `/terms`) |
 
    In the BML portal, set the **webhook URL** to `https://<your-site>/api/payments/bml/webhook`. The webhook

@@ -85,7 +85,7 @@ class PaymentService
             'purpose' => BookingFeeService::nextPart($order), // a booking-fee order: the fee, then the balance
             'local_id' => $localId,
             'amount' => BmlConnect::toLaari($order->cardAmount()), // the total (or its part due now) less whatever the wallet paid
-            'currency' => 'MVR',
+            'currency' => $this->bml()->currency(), // MVR; USD on BML's UAT (BmlConnect::currency())
         ]);
 
         $remote = $this->bml()->createTransaction([

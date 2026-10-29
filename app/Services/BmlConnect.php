@@ -9,7 +9,8 @@ use RuntimeException;
 /**
  * Thin client for BML Connect v2 (Bank of Maldives payment gateway), redirect method.
  *
- * Amounts are integers in laari (MVR 1.00 = 100). The payment result is never taken from
+ * Amounts are integers in laari (MVR 1.00 = 100), or cents when BML's UAT is used in USD
+ * (currency()). The payment result is never taken from
  * the redirect or webhook alone: callers re-fetch the transaction with getTransaction().
  */
 class BmlConnect
@@ -32,6 +33,22 @@ class BmlConnect
     public function isSandbox(): bool
     {
         return config('services.bml.environment') !== 'production';
+    }
+
+    /**
+     * The currency transactions are sent in. Live payments are always MVR. BML's UAT (sandbox) only
+     * takes USD, so the sandbox sends the same figure in USD unless BML_CURRENCY says otherwise:
+     * nothing is really charged there.
+     */
+    public function currency(): string
+    {
+        if (! $this->isSandbox()) {
+            return 'MVR';
+        }
+
+        $currency = strtoupper(trim((string) config('services.bml.currency')));
+
+        return in_array($currency, ['MVR', 'USD'], true) ? $currency : 'USD';
     }
 
     /**

@@ -19,6 +19,8 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
+        @if(session('success'))<div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">{{ session('success') }}</div>@endif
+        @if(session('error'))<div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">{{ session('error') }}</div>@endif
         <div class="bg-white shadow rounded-lg">
             <div class="px-4 py-5 sm:p-6">
                 <div class="overflow-x-auto">
@@ -79,7 +81,7 @@
                                         <button type="submit" class="text-green-600 hover:text-green-900 mr-2">Approve</button>
                                     </form>
                                     @endif
-                                    <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                                    <a href="{{ route('products.show', $product) }}" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-900">View</a>
                                 </td>
                             </tr>
                             @empty

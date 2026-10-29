@@ -363,7 +363,7 @@
                 </div>
                 <div class="mt-3 rounded-lg border px-4 py-3 text-sm {{ $bml->enabled() ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-800' }}">
                     @if($bml->enabled())
-                        <p class="font-semibold">BML card payments are on{{ $bml->isSandbox() ? ' (sandbox: test cards only, no real money)' : '' }}.</p>
+                        <p class="font-semibold">BML card payments are on{{ $bml->isSandbox() ? ' (sandbox: test cards only, no real money, sent to BML in '.$bml->currency().')' : '' }}.</p>
                         <p class="mt-1">Card payment is the only payment method. Customers pay on Bank of Maldives' secure page. Refunds are made in the BML merchant portal.</p>
                     @else
                         <p class="font-semibold">BML card payments are off, so checkout is closed.</p>

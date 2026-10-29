@@ -68,6 +68,9 @@ return [
         'base_uri' => env('BML_BASE_URI') ?: (env('BML_ENVIRONMENT', 'sandbox') === 'production'
             ? 'https://api.merchants.bankofmaldives.com.mv/public'
             : 'https://api.uat.merchants.bankofmaldives.com.mv/public'),
+        // The currency card payments are sent to BML in. BML's UAT (sandbox) only takes USD, so the
+        // sandbox defaults to USD (the same figure, test money); production is always MVR.
+        'currency' => env('BML_CURRENCY'),
         'merchant_id' => env('BML_MERCHANT_ID'),
         'app_id' => env('BML_APP_ID'),
 

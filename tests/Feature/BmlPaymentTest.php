@@ -122,6 +122,36 @@ class BmlPaymentTest extends TestCase
         });
     }
 
+    public function test_bml_uat_is_paid_in_usd_and_live_payments_always_in_mvr(): void
+    {
+        $bml = app(\App\Services\BmlConnect::class);
+
+        // BML's UAT only takes USD: the sandbox sends the same figure in USD unless told otherwise
+        config(['services.bml.currency' => null]);
+        $this->assertSame('USD', $bml->currency());
+        config(['services.bml.currency' => 'mvr']);
+        $this->assertSame('MVR', $bml->currency());
+
+        // Live payments are MVR whatever BML_CURRENCY says
+        config(['services.bml.environment' => 'production', 'services.bml.currency' => 'USD']);
+        $this->assertSame('MVR', $bml->currency());
+
+        // A UAT payment is created, stored and confirmed in USD
+        config(['services.bml.environment' => 'sandbox', 'services.bml.currency' => 'USD']);
+        Http::fake([
+            self::API.'/v2/transactions' => Http::response(['id' => 'txn_usd', 'url' => 'https://pay.bml.test/txn_usd', 'state' => 'INITIATED'], 201),
+            self::API.'/v2/transactions/*' => fn () => Http::response(['id' => 'txn_usd', 'state' => 'CONFIRMED', 'amount' => 27500, 'currency' => 'USD', 'localId' => PaymentTransaction::sole()->local_id]),
+        ]);
+
+        $this->checkout()->assertRedirect('https://pay.bml.test/txn_usd');
+        $order = Order::sole();
+        Http::assertSent(fn (Request $request) => $request->method() === 'POST' && $request['currency'] === 'USD' && $request['amount'] === 27500);
+        $this->assertSame('USD', PaymentTransaction::sole()->currency);
+
+        $this->get(route('payments.bml.return', $order).'?transactionId=txn_usd');
+        $this->assertSame('paid', $order->fresh()->payment_status);
+    }
+
     public function test_confirmed_payment_marks_the_order_paid_once(): void
     {
         $this->fakeBml('CONFIRMED');

@@ -31,6 +31,7 @@ and type `bmlkey` on its own line (set `BML_ENVIRONMENT` with `setenv BML_ENVIRO
 
    | Variable | Use |
    | --- | --- |
+   | `BML_CURRENCY` | Sandbox only: `USD` (default, BML's UAT only takes USD) or `MVR`. Live payments are always MVR |
    | `BML_AUTH_MODE` | `auto` (default: `Bearer` for a JWT key, plain key otherwise), `raw` (UAT), `bearer_jwt`, `bearer_basic` (needs `BML_APP_ID`) |
    | `BML_APP_ID` | App ID from the portal, for `bearer_basic` |
    | `BML_WEBHOOK_SECRET` | Webhook secret from the portal; enables `X-BML-Signature` HMAC checking |
@@ -49,6 +50,18 @@ and type `bmlkey` on its own line (set `BML_ENVIRONMENT` with `setenv BML_ENVIRO
 
    It cancels card orders that are still unpaid after 24 hours so their stock goes back on sale
    (`php artisan orders:cancel-unpaid-card`).
+
+### Testing on BML's UAT (test.iruali.mv)
+
+BML's UAT only accepts **USD**. With `BML_ENVIRONMENT=sandbox`, iruali sends each card payment to BML as the same
+figure in USD (an MVR 275.00 order is sent as USD 275.00; it is test money, nothing is charged). The payment record
+stores USD and the return check expects USD back, so test orders still turn "paid". Admin → Settings → Payments says
+which currency the sandbox uses. With `BML_ENVIRONMENT=production` the currency is always MVR, whatever
+`BML_CURRENCY` says, so nothing has to be undone at go-live.
+
+Steps on test.iruali.mv (`/home/iruali/test`): set the UAT key with `bmlkey`, `setenv BML_ENVIRONMENT sandbox`,
+`php artisan config:cache`, set the UAT app's webhook to `https://test.iruali.mv/api/payments/bml/webhook`, check that
+"Card payment (BML)" is ticked in Admin → Settings → Payment methods (it is by default), then pay a test order with BML's UAT test card.
 
 When BML approves you for live payments, swap in the production API key, set `BML_ENVIRONMENT=production`, and
 place one small real order to check the whole path.

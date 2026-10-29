@@ -6,6 +6,16 @@ back to their order page. iruali never sees card details.
 
 ## Setup
 
+Putting the key on the server: never paste it into a command or chat. In cPanel → Terminal, in the app folder
+(`/home/iruali/test` for test.iruali.mv, `/home/iruali/iruali` for iruali.mv), define the `setenv` helper from
+`SERVERS.md`, then:
+
+```bash
+bmlkey() { read -s -p "BML API key: " k; echo; setenv BML_API_KEY "$k"; unset k; php artisan config:cache; php artisan iruali:ready; }
+```
+
+and type `bmlkey` on its own line (set `BML_ENVIRONMENT` with `setenv BML_ENVIRONMENT sandbox` or `production`).
+
 1. Get a BML Connect merchant account from Bank of Maldives and sign in to the merchant portal.
 2. In the portal, create an app and copy its **API key**. Start in the **UAT (sandbox)** environment.
 3. On the server, add to `.env`:
@@ -29,8 +39,8 @@ back to their order page. iruali never sees card details.
    In the BML portal, set the **webhook URL** to `https://<your-site>/api/payments/bml/webhook`. The webhook
    host must match the site the Connect app is registered for, or BML rejects new transactions.
 4. Admin → Settings → **Payments** shows whether card payments are on, and whether it is the sandbox.
-   Card payment through BML is the **only** payment method (no cash on delivery or bank transfer). Until
-   `BML_API_KEY` is set, checkout shows a notice and orders can't be placed.
+   Until `BML_API_KEY` is set, card payment is not offered; bank transfer and cash on delivery can be switched on
+   meanwhile in Admin → Settings → Payment methods (see the last section).
 5. Make sure the Laravel scheduler runs (cPanel → Cron Jobs):
 
    ```

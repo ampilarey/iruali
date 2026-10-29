@@ -9,8 +9,16 @@ Things agreed on 2026-10-19 but not started (updated 2026-10-24; booking-fee pre
 3. **SMS (most urgent):** put the Dhiraagu SMS details in the live `.env`, then send a test from
    Admin → SMS. Sign-in and checkout start with the mobile number: without SMS, new customers
    cannot sign up.
-4. **Card payments:** put the BML keys in the live `.env` (`BML_API_KEY`, `BML_ENVIRONMENT=production`
-   once BML approves go-live), then place one small real order and refund it.
+4. **Card payments (deadline 29 Dec 2026):** BML sent test-environment access on 2026-10-29. Create an app
+   in the test Merchant Portal, put its key on test.iruali.mv (`bmlkey`, see `PAYMENTS_BML.md`), set the
+   webhook to `https://test.iruali.mv/api/payments/bml/webhook`, test with BML's test cards (paid, declined,
+   cancelled), check BML's Website Requirements checklist (`BML_COMPLIANCE.md`, status there), then send BML
+   the link. After approval: the live key on iruali.mv (`BML_ENVIRONMENT=production`), one small real order,
+   refund it.
+4a. **Office network:** the office Fortinet firewall blocks iruali.mv/cPanel (NET::ERR_CERT_AUTHORITY_INVALID)
+   since iruali's Let's Encrypt certificates moved to the new "Generation Y" issuers (mid-2026). Ask office IT
+   to update the FortiGate's trusted CAs or exempt iruali.mv / *.iruali.mv from SSL inspection; meanwhile use
+   mobile data. (Or ask the host to switch AutoSSL to Sectigo.)
 5. **Server settings:** `APP_DEBUG=false`, and an alerts address (`ALERTS_EMAIL`, or a contact email in
    Admin → Settings) for the daily error digest.
 6. **Company details** in Admin → Settings (registered name, registration number, address, email,

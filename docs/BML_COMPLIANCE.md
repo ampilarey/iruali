@@ -14,14 +14,14 @@ lists anything BML will still ask for.
 | 1 | All card brand marks, full colour, equal prominence | Amex, Visa, Mastercard and Maestro marks (`/images/card-brands.png`) at checkout (payment method and payment box), on every product's buy box, in the footer of every page, and on [Payment Security](https://iruali.mv/payment-security). 3-D Secure is described on the same page. |
 | 2 | Complete description of goods or services | Every product page (`/products/{product}`): overview, key features, specs table (brand, model, SKU, weight, dimensions, department), seller, price, stock. |
 | 3 | Corporate information: trading name, full address of permanent establishment, postal address, email, phone with country code, customer service contact | A business details box at the **top of every policy page** (as on Bake & Grill's Terms page): registered and trading name, registration no., address, postal address, phone, email, customer service channels and hours. Also [About & Contact](https://iruali.mv/about) and the footer of every page. |
-| 4 | Transaction currency | "Transaction currency: MVR (Maldivian Rufiyaa)" at checkout next to the payment options; "Prices in MVR" in the footer and buy box; stated in Terms §3 and §5 and on Payment Security. |
-| 5 | Merchant outlet country shown when payment options are presented | "Merchant outlet country: Maldives" in the payment box at checkout, beside the card marks; also in the footer, Terms §5 and Payment Security. |
-| 6 | Return / refund / exchange / cancellation policy; limited-refund items made clear before purchase | [Returns, Refunds & Cancellations](https://iruali.mv/refund-policy): a **Key points** box first, then cancellation, returns, exchanges, **items that cannot be returned**, refund process (original card via BML, 5–7 business days), how to request, and **payment disputes** (7 days, reply in 3 business days, then card issuer). Terms §4 has the same summary, and it is shown again at checkout above Place Order. |
-| 7 | Import/export or other legal restrictions and customs duties | Terms §8 "Legal restrictions, import and export" and Delivery Policy §5: delivery within the Maldives only, so no import/export duties; prohibited/restricted items under Maldivian law are not allowed. |
+| 4 | Transaction currency | "Transaction currency: MVR (Maldivian Rufiyaa)" at checkout next to the payment options; "Prices in MVR" in the footer and buy box; stated in Terms §2 and on Payment Security. |
+| 5 | Merchant outlet country shown when payment options are presented | "Merchant outlet country: Maldives" in the payment box at checkout, beside the card marks; also in the footer, Terms §2 and Payment Security. |
+| 6 | Return / refund / exchange / cancellation policy; limited-refund items made clear before purchase | [Returns, Refunds & Cancellations](https://iruali.mv/refund-policy): a **Key points** box first, then cancellation, returns, exchanges, **items that cannot be returned**, refund process (original card via BML, 5–7 business days), how to request, and **payment disputes** (7 days, reply in 3 business days, then card issuer). Terms §6 has the same summary (pre-orders and booking fees in Terms §5 and Refunds §2), and it is shown again at checkout above Place Order. |
+| 7 | Import/export or other legal restrictions and customs duties | Terms §7 "Import / export and legal restrictions" and Delivery Policy §5: delivery within the Maldives only, so no import/export duties for the customer; prohibited/restricted items are listed on the public [Prohibited & Restricted Items](https://iruali.mv/prohibited-items) page (linked in the footer and Terms §7), including that items brought in from abroad for pre-orders have duty included in the price. |
 | 8 | Delivery policy including special conditions | [Delivery Policy](https://iruali.mv/delivery-policy): fees (from Settings), free-delivery threshold, times for Greater Malé and other islands, how delivery works, receiving, special conditions. |
 | 9 | Privacy policy: data collected, purpose, use, protection against unauthorised access to cardholder data | [Privacy Policy](https://iruali.mv/privacy-policy) §1–§4: data collected, why, who it is shared with, and security measures (card data never received or stored, HTTPS, hashed passwords, 2-step sign-in, restricted access). |
 | 10 | Security capabilities and policy for transmitting card details | [Payment Security](https://iruali.mv/payment-security): BML hosted payment page, TLS, PCI DSS at the bank, 3-D Secure, no card data on iruali, server-side confirmation of every payment. Short statement also at checkout. |
-| 11 | Recommend the cardholder keeps transaction records and the policies | Terms §7 "Transaction records", Refunds §8, Payment Security §4, the note at the end of every policy page, the checkout payment box, the order page, the order confirmation email, and a **printable receipt** for every order (`/orders/{order}/receipt`, with the BML transaction reference, currency and outlet country). |
+| 11 | Recommend the cardholder keeps transaction records and the policies | Terms §9 "Transaction records", Refunds §9, Payment Security §4, the note at the end of every policy page, the checkout payment box, the order page, the order confirmation email, and a **printable receipt** for every order (`/orders/{order}/receipt`, with the BML transaction reference, currency and outlet country). |
 | 12 | Purchase terms shown during the order process, on the checkout screen with the total or before final checkout | The checkout order summary shows the total, a "Before you order" summary of the key terms, and links to all policies, on the same screen as the Place Order button. |
 | 13 | Mechanism to affirmatively accept the terms | Required checkbox at checkout: "I have read and accept the Terms & Conditions, Returns, Refunds & Cancellations, Delivery Policy and Privacy Policy" (each a link). The order cannot be placed without it. `paymentPortalExperience.externalWebsiteTermsAccepted = true` and the terms URL are also sent to BML with every transaction. |
 | 14 | The webhook is the primary method for capturing transaction responses | Every transaction is created with `webhook = https://iruali.mv/api/payments/bml/webhook`; the same URL should be set in the BML merchant portal. Webhooks are signature-checked, then the transaction is fetched from BML's API before the order is marked paid. The customer's return is only a fallback. |
@@ -29,9 +29,10 @@ lists anything BML will still ask for.
 ## How the pages are organised (same as Bake & Grill and Akuru)
 
 - **Terms & Conditions** follows Bake & Grill's order, each section marked in the source with the BML requirement it covers:
-  1 About our services (req 2) · 2 Payment and currency (reqs 4, 5) · 3 Delivery policy (req 8) · 4 Refund and cancellation (req 6) ·
-  5 Import/export and legal restrictions (req 7) · 6 Security and card data (reqs 9, 10) · 7 Transaction records (req 11) ·
-  8 Account · 9 Products and prices · 10 Reviews · 11 Privacy · 12 Governing law · 13 Changes.
+  1 About our services (req 2) · 2 Payment and currency (reqs 4, 5) · 3 Wallet, gift cards and points · 4 Delivery policy (req 8) ·
+  5 Pre-orders · 6 Refund and cancellation (req 6) · 7 Import/export and legal restrictions (req 7) · 8 Security and card data
+  (reqs 9, 10) · 9 Transaction records (req 11) · 10 Account · 11 Products and prices · 12 Reviews · 13 Privacy · 14 Governing law ·
+  15 Changes. (Numbering as of 2026-10-24.)
 - **Refund policy** follows Bake & Grill's refund page (key points, cancellation, refunds, refund process, how to request, payment disputes) plus Akuru's "retain your receipt".
 - **Privacy policy** follows both: introduction, information collected, how it is used, SMS and email communications (consent and opt-out), card payment security, data security, data sharing, cookies, retention, rights, contact.
 - **Editing:** like Bake & Grill's Content Hub → Legal, the owner can replace any policy's text in **Admin → Legal pages** and set the "Last updated" date. The date is hidden until it is set (Bake & Grill found a default date goes stale).
@@ -58,6 +59,19 @@ Both sites take BML card payments with this approach, and iruali now follows it:
 | `paymentPortalExperience` (terms accepted + terms URL) | yes | yes | yes |
 | `localId` letters and digits only | yes | yes | yes |
 | Webhook as primary, API re-check | yes | yes | yes |
+
+## Status of iruali.mv (checked 2026-10-29)
+
+BML's test-environment access arrived on 2026-10-29 (merchant "IRUALI SUPPLIES"; integration to be completed by
+**29 December 2026**; redirect method, which iruali uses). On the live site:
+
+- Done: card marks, MVR and outlet country, all policy pages, the acceptance checkbox, the webhook-first payment flow.
+- **Missing: company details.** The box on every policy page and About & Contact show only "iruali": fill in Admin →
+  Settings → Business details (registered name as BML has it, "IRUALI SUPPLIES"; registration number; address; postal
+  address) and Contact (email, phone with +960). Requirement 3.
+- **Missing: products.** The shop lists no products yet; BML reviews product pages for requirement 2. Add real products
+  (or at least a few) before sending the link.
+- BML keys: none yet. Test key on test.iruali.mv first (see PAYMENTS_BML.md), live key after BML approves.
 
 ## Before sending to BML
 

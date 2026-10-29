@@ -78,7 +78,7 @@ return [
         //   raw          → {API_KEY}                  (BML UAT)
         //   bearer_jwt   → Bearer {API_KEY}
         //   bearer_basic → Bearer base64(API_KEY:APP_ID)
-        //   auto         → Bearer for a JWT key (eyJ…), raw otherwise
+        //   auto         → raw on the sandbox (UAT); live, Bearer for a JWT key (eyJ…), raw otherwise
         'auth_mode' => env('BML_AUTH_MODE', 'auto'),
 
         // Webhook signature. BML signs either with HMAC-SHA256 of the body using the portal's

@@ -32,7 +32,7 @@ and type `bmlkey` on its own line (set `BML_ENVIRONMENT` with `setenv BML_ENVIRO
    | Variable | Use |
    | --- | --- |
    | `BML_CURRENCY` | Sandbox only: `USD` (default, BML's UAT only takes USD) or `MVR`. Live payments are always MVR |
-   | `BML_AUTH_MODE` | `auto` (default: `Bearer` for a JWT key, plain key otherwise), `raw` (UAT), `bearer_jwt`, `bearer_basic` (needs `BML_APP_ID`) |
+   | `BML_AUTH_MODE` | `auto` (default: the plain key on the sandbox/UAT, as Bake & Grill; live, `Bearer` for a JWT key), `raw`, `bearer_jwt`, `bearer_basic` (needs `BML_APP_ID`) |
    | `BML_APP_ID` | App ID from the portal, for `bearer_basic` |
    | `BML_WEBHOOK_SECRET` | Optional. Webhook secret from the portal, if it shows one; enables `X-BML-Signature` HMAC checking. Without it webhooks are checked with the API key (`X-Signature`) |
    | `BML_EXTERNAL_TERMS_URL` | Terms URL sent to BML (defaults to `/terms`) |
@@ -51,7 +51,11 @@ and type `bmlkey` on its own line (set `BML_ENVIRONMENT` with `setenv BML_ENVIRO
    It cancels card orders that are still unpaid after 24 hours so their stock goes back on sale
    (`php artisan orders:cancel-unpaid-card`).
 
-### Testing on BML's UAT (test.iruali.mv)
+### Testing on BML's UAT
+
+A 401 "Unauthorized" (`PP-C-004`) when a payment starts means BML refused the key: UAT wants the plain key
+(`BML_AUTH_MODE=raw`, what `auto` now sends on the sandbox), and it must be the app's **API key**, not its public key.
+
 
 BML's UAT only accepts **USD**. With `BML_ENVIRONMENT=sandbox`, iruali sends each card payment to BML as the same
 figure in USD (an MVR 275.00 order is sent as USD 275.00; it is test money, nothing is charged). The payment record

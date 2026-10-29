@@ -1,6 +1,7 @@
 {{--
     One conversation with its reply form (item questions, iruali support, item requests; order threads use _thread).
     Needs: $conversation (Conversation, may be new), $role ('customer'|'seller'|'admin'), $action (POST url).
+    Optional: $guestForm (a visitor's first message: name and email or mobile, MessagesController::postAsGuest()).
     The team ($role admin) also sees what was written where contact details were hidden, and reports.
 --}}
 @php
@@ -28,7 +29,7 @@
                         @endif
                         @if($m->reported_at)
                             <p class="mt-1 text-[11px] font-semibold text-danger" data-chat-reported>{{ __('Reported') }}@if($role === 'admin'): {{ $m->report_reason }} ({{ $m->reportedBy?->name }})@endif</p>
-                        @elseif(! $mine($m) && $role !== 'admin')
+                        @elseif(! $mine($m) && $role !== 'admin' && auth()->check())
                             <details class="mt-1 text-[11px]">
                                 <summary class="cursor-pointer opacity-70 hover:underline">{{ __('Report') }}</summary>
                                 <form method="POST" action="{{ route('messages.report', $m) }}" class="mt-1 flex gap-1">
@@ -47,6 +48,9 @@
     @if($canReply)
         <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="space-y-2">
             @csrf
+            @if($guestForm ?? false)
+                @include('messaging._guest_fields')
+            @endif
             <label for="chat-body" class="sr-only">{{ __('Your message') }}</label>
             <textarea id="chat-body" name="body" rows="3" maxlength="2000" required placeholder="{{ __('Write a message…') }}" class="w-full rounded-lg border-gray-300 text-sm">{{ old('body') }}</textarea>
             @error('body')<p class="text-sm text-danger">{{ $message }}</p>@enderror

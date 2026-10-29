@@ -36,7 +36,7 @@
                                 <td class="px-4 py-3 text-gray-600"><a href="{{ route('admin.messages.show', $c) }}" class="text-primary-700 hover:underline">{{ $c->last_message_at?->format('d M Y, H:i') ?? '—' }}</a></td>
                                 <td class="px-4 py-3">{{ $kinds[$c->kind] ?? $c->kind }}</td>
                                 <td class="px-4 py-3 max-w-xs truncate">{{ $c->title() }}</td>
-                                <td class="px-4 py-3">{{ $c->customer?->name ?? '—' }}</td>
+                                <td class="px-4 py-3">{{ $c->customer_id || $c->guest_name ? $c->customerName() : '—' }}@if($c->isGuest()) <span class="rounded bg-gray-100 px-1 text-[10px] text-gray-600">no account</span>@endif</td>
                                 <td class="px-4 py-3">{{ $c->seller_id ? $c->shopName() : '—' }}</td>
                                 <td class="px-4 py-3">@if($c->admin_unread_count)<span class="rounded-full bg-primary-600 px-2 py-0.5 text-xs text-white">{{ $c->admin_unread_count }}</span>@else—@endif</td>
                                 <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $c->isOpen() ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700' }}">{{ $c->status }}</span></td>

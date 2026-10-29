@@ -11,6 +11,9 @@
             @if($conversation->order)<p>Order: <a href="{{ route('admin.orders.show', $conversation->order) }}" class="text-primary-700 hover:underline">{{ $conversation->order->order_number }}</a></p>@endif
             @if($conversation->product)<p>Item: {{ $conversation->product->getTranslation('name', 'en', false) }} (#{{ $conversation->product->id }})</p>@endif
             @if($conversation->itemRequest)<p>Item request: <a href="{{ route('admin.item-requests.show', $conversation->itemRequest) }}" class="text-primary-700 hover:underline">#{{ $conversation->itemRequest->id }} {{ $conversation->itemRequest->title }}</a></p>@endif
+            @if($conversation->isGuest())
+                <p data-admin-guest>Visitor (no account): <strong>{{ $conversation->guest_name }}</strong>@if($conversation->guest_email) · {{ $conversation->guest_email }}@endif @if($conversation->guest_phone) · {{ $conversation->guest_phone }}@endif — replies reach them by {{ collect([$conversation->guest_email ? 'email' : null, $conversation->guest_phone ? 'SMS' : null])->filter()->implode(' and ') }}, with their private link.</p>
+            @endif
             @foreach(['customer' => 'Customer', 'seller' => 'Shop'] as $relation => $label)
                 @if($person = $conversation->{$relation})
                     <div class="flex flex-wrap items-center gap-2">

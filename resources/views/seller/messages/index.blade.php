@@ -27,7 +27,7 @@
                     <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">{{ $kinds[$conversation->kind] ?? $conversation->kind }}</span>
                     <div class="min-w-0 flex-1">
                         <p class="truncate text-gray-900">{{ $conversation->title() }}</p>
-                        <p class="text-xs text-gray-500">@if($conversation->customer){{ $conversation->kind === 'product' ? \App\Services\PointsService::maskName($conversation->customer->name) : $conversation->customer->name }} · @endif{{ $conversation->last_message_at?->translatedFormat('j M Y, H:i') }}</p>
+                        <p class="text-xs text-gray-500">@if($conversation->customer_id || $conversation->guest_name){{ $conversation->kind === 'product' ? \App\Services\PointsService::maskName($conversation->customerName()) : $conversation->customerName() }} · @endif{{ $conversation->last_message_at?->translatedFormat('j M Y, H:i') }}</p>
                     </div>
                     @if($conversation->seller_unread_count)<span class="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">{{ $conversation->seller_unread_count }}</span>@endif
                 </a>

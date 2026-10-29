@@ -26,6 +26,7 @@
                 </optgroup>
             @endforeach
         </select>
+        <p class="mt-1 hidden text-sm font-medium text-primary-700" data-island-chosen data-label="{{ __('Chosen') }}" aria-live="polite"></p>
         @error('home_island_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
 

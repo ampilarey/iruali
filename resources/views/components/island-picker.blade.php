@@ -30,6 +30,7 @@
                 </optgroup>
             @endforeach
         </select>
+        <p class="mt-1 hidden text-sm font-medium text-primary-700" data-island-chosen data-label="{{ __('Chosen') }}" aria-live="polite"></p>
         @error($idName)<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
     </div>
     <div data-island-other class="grid gap-3 sm:grid-cols-2 {{ $other || $islandsByAtoll->isEmpty() ? '' : 'hidden' }}">

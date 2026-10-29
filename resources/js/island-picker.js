@@ -13,12 +13,19 @@
         var select = picker.querySelector('[data-island-select]');
         var other = picker.querySelector('[data-island-other]');
         var islandText = picker.querySelector('[data-island-text]');
+        var chosen = picker.querySelector('[data-island-chosen]');
         if (!select) return;
 
         function sync() {
             var opt = select.options[select.selectedIndex];
             var isOther = !select.value;
             if (other) other.classList.toggle('hidden', !isOther);
+            // Say which island is picked: a highlighted row in the list is easy to miss
+            if (chosen) {
+                var group = opt && opt.parentNode && opt.parentNode.tagName === 'OPTGROUP' ? opt.parentNode.label : '';
+                chosen.textContent = isOther ? '' : '\u2713 ' + (chosen.dataset.label || 'Chosen') + ': ' + opt.textContent.trim() + (group ? ' (' + group + ')' : '');
+                chosen.classList.toggle('hidden', isOther);
+            }
             if (islandText) {
                 if (isOther) islandText.setAttribute('required', 'required');
                 else islandText.removeAttribute('required');

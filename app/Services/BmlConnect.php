@@ -163,7 +163,9 @@ class BmlConnect
             'raw' => $key,
             'bearer_jwt' => 'Bearer '.$key,
             'bearer_basic' => 'Bearer '.base64_encode($key.':'.config('services.bml.app_id')),
-            default => str_starts_with($key, 'eyJ') ? 'Bearer '.$key : $key,
+            // auto: BML's UAT takes the key as it is (as on Bake & Grill: "Bearer" there is refused with 401);
+            // live, a JWT key (eyJ…) goes with "Bearer"
+            default => ! $this->isSandbox() && str_starts_with($key, 'eyJ') ? 'Bearer '.$key : $key,
         };
     }
 

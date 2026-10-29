@@ -282,6 +282,20 @@ class BmlPaymentTest extends TestCase
         Http::assertSent(fn (Request $r) => $r->method() === 'POST' && $r->header('Authorization')[0] === 'Bearer '.base64_encode('test-key:app1'));
     }
 
+    public function test_auto_sends_the_plain_key_to_the_uat_and_bearer_for_a_live_jwt_key(): void
+    {
+        $header = fn () => (fn () => $this->authorizationHeader())->call(app(\App\Services\BmlConnect::class));
+        config(['services.bml.auth_mode' => 'auto', 'services.bml.api_key' => 'eyJhbGciOiJIUzI1NiJ9.x.y']);
+
+        // BML's UAT refuses "Bearer" with 401 PP-C-004 (as Bake & Grill found): the key as it is
+        $this->assertSame('eyJhbGciOiJIUzI1NiJ9.x.y', $header());
+
+        config(['services.bml.environment' => 'production']);
+        $this->assertSame('Bearer eyJhbGciOiJIUzI1NiJ9.x.y', $header());
+        config(['services.bml.api_key' => 'plain-live-key']);
+        $this->assertSame('plain-live-key', $header());
+    }
+
     public function test_bml_being_down_keeps_the_order_and_offers_pay_now(): void
     {
         Http::fake([self::API.'/*' => Http::response(['message' => 'down'], 503)]);

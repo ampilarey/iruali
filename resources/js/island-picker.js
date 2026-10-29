@@ -16,10 +16,13 @@
         var chosen = picker.querySelector('[data-island-chosen]');
         if (!select) return;
 
+        // The typed island/atoll boxes open when someone picks "not in the list", not on arrival with nothing picked yet
+        var touched = !!(islandText && islandText.value);
+
         function sync() {
             var opt = select.options[select.selectedIndex];
             var isOther = !select.value;
-            if (other) other.classList.toggle('hidden', !isOther);
+            if (other) other.classList.toggle('hidden', !(isOther && touched));
             // Say which island is picked: a highlighted row in the list is easy to miss
             if (chosen) {
                 var group = opt && opt.parentNode && opt.parentNode.tagName === 'OPTGROUP' ? opt.parentNode.label : '';
@@ -27,7 +30,7 @@
                 chosen.classList.toggle('hidden', isOther);
             }
             if (islandText) {
-                if (isOther) islandText.setAttribute('required', 'required');
+                if (isOther && touched) islandText.setAttribute('required', 'required');
                 else islandText.removeAttribute('required');
             }
             picker.dispatchEvent(new CustomEvent('island:change', {
@@ -64,7 +67,7 @@
             if (select.value !== current) sync();
         }
 
-        select.addEventListener('change', sync);
+        select.addEventListener('change', function () { touched = true; sync(); });
         if (search) search.addEventListener('input', filter);
         sync();
     }

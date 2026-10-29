@@ -235,6 +235,8 @@ class PaymentService
     public function confirm(Order $order): void
     {
         if ($order->hasBookingFee() && ! in_array($order->payment_status, ['deposit_paid', 'paid'], true)) {
+            // A card order waiting for its booking fee is announced now; feePaid() tells the customer and shops
+            app(OrderNotifier::class)->placedOnce($order, customer: false, shops: false);
             app(BookingFeeService::class)->feePaid($order);
 
             return;
@@ -256,7 +258,13 @@ class PaymentService
 
         app(OrderService::class)->awardRewards($order->fresh());
         app(GiftCardService::class)->issueForOrder($order); // a paid gift-card order sends the card
-        app(OrderNotifier::class)->paymentUpdated($order);
+        // A card order is announced only now that it is paid: its "we have your order" message is the
+        // confirmation (one SMS, not two). An order announced earlier gets "payment received".
+        if (app(OrderNotifier::class)->placedOnce($order)) {
+            \App\Support\Webhooks::order('order.paid', $order);
+        } else {
+            app(OrderNotifier::class)->paymentUpdated($order);
+        }
         if ($order->hasBookingFee()) {
             app(BookingFeeService::class)->tellShops($order, 'balance'); // the shop holds the item: send it now
         } elseif ($order->confirm_first) {

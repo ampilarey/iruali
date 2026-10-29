@@ -92,6 +92,12 @@ class PhoneLoginController extends AuthController
             $pending = ['user_id' => $user?->id, 'phone' => $phone, 'key' => $phone, 'shown' => '•••'.substr($phone, -4), 'remember' => $remember, 'checkout' => $request->boolean('checkout'), 'unverified_holder' => $user !== null && ! $user->isPhoneVerified()];
         }
 
+        // At checkout a mobile number is enough, as on Bake & Grill: an SMS code, never a password, for a new
+        // number or one already confirmed (an account that never confirmed its number keeps its usual steps)
+        if ($pending['checkout'] && isset($pending['phone']) && (! $user || $user->isPhoneVerified())) {
+            return $this->sendCode($request, $pending, 'sms', 'login');
+        }
+
         if ($user && $user->hasPassword()) {
             $request->session()->put(self::SESSION, $pending + ['step' => 'password', 'email_code' => filled($user->email), 'sms_code' => $user->isPhoneVerified() && filled($user->phone)]);
 

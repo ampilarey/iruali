@@ -32,7 +32,8 @@ class StoreOrderRequest extends FormRequest
             'shipping_country' => [$needsAddress, 'nullable', 'string', 'max:100'],
             'shipping_phone' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/'],
             // A customer who signed up with just a mobile number at checkout gives their name here
-            'customer_name' => [\Illuminate\Validation\Rule::requiredIf(fn () => trim((string) auth()->user()?->name) === ''), 'nullable', 'string', 'max:120'],
+            // A name for the courier: only for a delivery to a new address, when the account has none yet
+            'customer_name' => [\Illuminate\Validation\Rule::requiredIf(fn () => trim((string) auth()->user()?->name) === '' && ! $this->everythingPickedUp() && ! $this->filled('address_id')), 'nullable', 'string', 'max:120'],
             'billing_address' => 'nullable|string|max:500',
             'billing_city' => 'nullable|string|max:100',
             'billing_state' => 'nullable|string|max:100',

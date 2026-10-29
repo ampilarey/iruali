@@ -203,7 +203,10 @@ class OrderService
                 app(PaymentService::class)->confirm($order);
             }
 
-            app(OrderNotifier::class)->orderPlaced($order);
+            // A card order is announced once it is paid (PaymentService::confirm()); others now
+            if (! self::waitsForCardPayment($order->fresh())) {
+                app(OrderNotifier::class)->placedOnce($order);
+            }
 
             return [
                 'success' => true,
@@ -657,5 +660,17 @@ class OrderService
             'created_at' => $order->created_at,
             'updated_at' => $order->updated_at,
         ];
+    }
+
+    /**
+     * A card order still to be paid: nobody is told about it until BML confirms the payment, like Bake & Grill
+     * (no "order placed" SMS for a payment page the customer never finished). An order the shop must confirm
+     * first is announced at once: the shop has to say yes before the customer can pay.
+     */
+    public static function waitsForCardPayment(Order $order): bool
+    {
+        return $order->payment_method === 'bml'
+            && ! $order->confirm_first
+            && ! in_array($order->payment_status, ['paid', 'deposit_paid'], true);
     }
 }

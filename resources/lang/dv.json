@@ -3428,5 +3428,20 @@
     "An email or a mobile number is enough. We answer there, with a link to this conversation. No account needed.": "އީމެއިލެއް ނުވަތަ މޮބައިލް ނަންބަރެއް ދިނުން ފުދޭ. އެ ކޮންވަރޭޝަނަށް ލިންކާއެކު އެތަނަށް ޖަވާބު ދޭނަން. އެކައުންޓެއް ނުބޭނުންވޭ.",
     "Chosen": "ހޮވާފައި",
     "Name for the delivery": "ޑެލިވަރީއަށް ނަން",
-    "Type your mobile number and the code we text you. No password, no account to set up.": "ތިބާގެ މޮބައިލް ނަންބަރާއި އަޅުގަނޑުމެން އެސްއެމްއެސް ކުރާ ކޯޑު ޖައްސަވާ. ޕާސްވޯޑެއް ނުވަތަ އެކައުންޓެއް ހަދަން ނުޖެހޭ."
+    "Type your mobile number and the code we text you. No password, no account to set up.": "ތިބާގެ މޮބައިލް ނަންބަރާއި އަޅުގަނޑުމެން އެސްއެމްއެސް ކުރާ ކޯޑު ޖައްސަވާ. ޕާސްވޯޑެއް ނުވަތަ އެކައުންޓެއް ހަދަން ނުޖެހޭ.",
+    "Pickup instructions": "ހިފަން އަންނައިރު ބަލަންވީ ކަންތައް",
+    "e.g. Ring the bell at the side door.": "މިސާލަކަށް: ފަރާތު ދޮރުގައިވާ ބެލް ޖައްސަވާ.",
+    "Customers see your opening hours (below) and these instructions at checkout, on their order and with their pickup code.": "ކަސްޓަމަރުންނަށް ހުޅުވާ ގަޑިތަކާއި (ތިރީގައި) މި އިރުޝާދުތައް ޗެކްއައުޓްގައާއި، އެމީހުންގެ އޯޑަރުގައާއި، ޕިކަޕް ކޯޑާއެކު ފެންނާނެ.",
+    "When you work on orders and customers can collect. Arrival estimates count from your next open day. Add a second time for a break (e.g. prayer or lunch); a closing time earlier than the opening runs past midnight.": "އޯޑަރުތަކުގައި މަސައްކަތްކުރާ އަދި ކަސްޓަމަރުންނަށް ހިފަން އެންނެވޭ ގަޑިތައް. ފޮނުވާ މުއްދަތު ގުނާނީ ދެން ހުޅުވާ ދުވަހުން. ބްރޭކަކަށް (ނަމާދު ނުވަތަ ކެއުން) ދެވަނަ ގަޑިއެއް އިތުރުކުރައްވާ؛ ހުޅުވާ ގަޑިއަށް ވުރެ ކުރީ ބަންދުކުރާ ގަޑިއަކީ ރޭގަނޑު 12 ފަހުން ނިމޭ ގަޑިއެއް.",
+    "24 hours": "24 ގަޑިއިރު",
+    "Remove this time": "މި ގަޑި ފޮހެލާ",
+    "Add another time (a break)": "އިތުރު ގަޑިއެއް (ބްރޭކެއް)",
+    "Copy the first open day to all open days": "ފުރަތަމަ ހުޅުވާ ދުވަހުގެ ގަޑިތައް އެހެން ހުޅުވާ ދުވަސްތަކަށް ކޮޕީކުރޭ",
+    "Open 24 hours today": "މިއަދު 24 ގަޑިއިރު ހުޅުވާފައި",
+    "Open today :hours": "މިއަދު ހުޅުވާ ގަޑި :hours",
+    "Open now": "މިހާރު ހުޅުވާފައި",
+    "At most :count times a day.": "ދުވަހަކު އެންމެ ގިނަވެގެން :count ގަޑި.",
+    "Give both times for :day, and different opening and closing times.": ":day އަށް ދެ ގަޑިވެސް ޖައްސަވާ، ހުޅުވާ ގަޑިއާއި ބަންދުކުރާ ގަޑި ތަފާތުކޮށް.",
+    "Give the times for :day, or mark it closed.": ":day ގެ ގަޑިތައް ޖައްސަވާ، ނުވަތަ ބަންދުކަމަށް ބަދަލުކުރައްވާ.",
+    "The times for :day overlap.": ":day ގެ ގަޑިތައް އެއްގަޑިއަކަށް ދަނީ."
 }

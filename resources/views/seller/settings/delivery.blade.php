@@ -64,9 +64,9 @@
                         </select>
                     </div>
                     <div class="sm:col-span-2">
-                        <label for="pickup_hours" class="block text-sm font-medium text-gray-700">{{ __('Opening hours and instructions') }}</label>
-                        <textarea id="pickup_hours" name="pickup_hours" rows="3" maxlength="500" class="{{ $field }}" placeholder="{{ __('e.g. Saturday to Thursday 9:00–21:00. Ring the bell at the side door.') }}">{{ old('pickup_hours', $setting->pickup_hours) }}</textarea>
-                        <p class="mt-1 text-xs text-gray-500">{{ __('Shown to customers at checkout and on their order, and sent with their pickup code.') }}</p>
+                        <label for="pickup_hours" class="block text-sm font-medium text-gray-700">{{ __('Pickup instructions') }} <span class="font-normal text-gray-500">({{ __('optional') }})</span></label>
+                        <textarea id="pickup_hours" name="pickup_hours" rows="2" maxlength="500" class="{{ $field }}" placeholder="{{ __('e.g. Ring the bell at the side door.') }}">{{ old('pickup_hours', $setting->pickup_hours) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('Customers see your opening hours (below) and these instructions at checkout, on their order and with their pickup code.') }}</p>
                     </div>
                 </div>
             </section>
@@ -109,24 +109,123 @@
                 </section>
             @endif
 
-            <section class="rounded-lg bg-white p-6 shadow space-y-3" data-opening-hours>
+            {{-- Opening hours: per day closed, 24 hours, or up to three times (around a break); a close
+                 before the open runs past midnight. Saved by DeliverySettingsController::openingHours(). --}}
+            @php
+                $oldHours = old('hours');
+                $dayState = function (int $day) use ($setting, $oldHours) {
+                    if (is_array($oldHours)) {
+                        $row = (array) ($oldHours[$day] ?? []);
+                        $ranges = array_values(array_filter((array) ($row['ranges'] ?? []), fn ($r) => filled($r[0] ?? null) || filled($r[1] ?? null)));
+
+                        return ['open' => ! empty($row['open']), 'allday' => ! empty($row['allday']), 'ranges' => $ranges];
+                    }
+                    $ranges = $setting->rangesOn($day);
+                    $allDay = $setting->isOpenAllDay($day);
+
+                    return ['open' => $ranges !== [], 'allday' => $allDay, 'ranges' => $allDay ? [] : array_map(fn ($r) => [$r[0], $r[1] === '24:00' ? '00:00' : $r[1]], $ranges)];
+                };
+                $time = 'block w-full min-w-0 rounded-lg border border-gray-300 px-2 py-2 text-sm focus:border-primary-500 focus:ring-primary-500';
+            @endphp
+            <section class="rounded-lg bg-white p-4 shadow space-y-4 sm:p-6" data-opening-hours>
                 <div>
                     <h2 class="text-base font-semibold text-gray-900">{{ __('Opening hours') }}</h2>
-                    <p class="text-sm text-gray-500">{{ __('The days and times you work on orders. Arrival estimates count from your next open day, and customers see when you are open. Leave a day empty when you are closed, or all days empty to not use opening hours.') }}</p>
+                    <p class="text-sm text-gray-500">{{ __('When you work on orders and customers can collect. Arrival estimates count from your next open day. Add a second time for a break (e.g. prayer or lunch); a closing time earlier than the opening runs past midnight.') }}</p>
                 </div>
-                <div class="space-y-2">
+                @error('hours')<p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
+                <div class="space-y-3">
                     @foreach(\App\Models\SellerDeliverySetting::DAYS as $day => $dayName)
-                        @php $hours = $setting->hoursOn($day); @endphp
-                        <div class="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                            <span class="text-sm font-medium text-gray-700">{{ __($dayName) }}</span>
-                            <label class="text-xs text-gray-500"><span class="sr-only">{{ __($dayName) }} </span>{{ __('Opens') }}
-                                <input type="time" name="hours[{{ $day }}][0]" value="{{ old('hours.'.$day.'.0', $hours[0] ?? '') }}" class="{{ $field }}"></label>
-                            <label class="text-xs text-gray-500"><span class="sr-only">{{ __($dayName) }} </span>{{ __('Closes') }}
-                                <input type="time" name="hours[{{ $day }}][1]" value="{{ old('hours.'.$day.'.1', $hours[1] ?? '') }}" class="{{ $field }}"></label>
+                        @php $state = $dayState($day); $ranges = $state['ranges'] ?: [['', '']]; @endphp
+                        <div class="rounded-lg border border-gray-200 p-3" data-hours-day="{{ $day }}">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-sm font-semibold text-gray-900">{{ __($dayName) }}</span>
+                                <div class="flex items-center gap-4 text-sm">
+                                    <label class="flex items-center gap-2"><input type="hidden" name="hours[{{ $day }}][open]" value="0"><input type="checkbox" name="hours[{{ $day }}][open]" value="1" class="rounded border-gray-300 text-primary-600" data-hours-open @checked($state['open'])> {{ __('Open') }}</label>
+                                    <label class="flex items-center gap-2 {{ $state['open'] ? '' : 'hidden' }}" data-hours-allday-label><input type="hidden" name="hours[{{ $day }}][allday]" value="0"><input type="checkbox" name="hours[{{ $day }}][allday]" value="1" class="rounded border-gray-300 text-primary-600" data-hours-allday @checked($state['allday'])> {{ __('24 hours') }}</label>
+                                </div>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 {{ $state['open'] ? 'hidden' : '' }}" data-hours-closed>{{ __('Closed') }}</p>
+                            <div class="mt-3 space-y-2 {{ $state['open'] && ! $state['allday'] ? '' : 'hidden' }}" data-hours-ranges>
+                                @foreach($ranges as $i => $range)
+                                    <div class="flex items-center gap-2" data-hours-range>
+                                        <label class="min-w-0 flex-1"><span class="sr-only">{{ __($dayName) }} {{ __('Opens') }}</span><input type="time" name="hours[{{ $day }}][ranges][{{ $i }}][0]" value="{{ $range[0] ?? '' }}" class="{{ $time }}"></label>
+                                        <span class="text-gray-400" aria-hidden="true">–</span>
+                                        <label class="min-w-0 flex-1"><span class="sr-only">{{ __($dayName) }} {{ __('Closes') }}</span><input type="time" name="hours[{{ $day }}][ranges][{{ $i }}][1]" value="{{ $range[1] ?? '' }}" class="{{ $time }}"></label>
+                                        <button type="button" class="shrink-0 rounded-lg px-2 py-2 text-gray-400 hover:bg-gray-100 hover:text-red-600" data-hours-remove aria-label="{{ __('Remove this time') }}">&times;</button>
+                                    </div>
+                                @endforeach
+                                <button type="button" class="text-sm font-medium text-primary-700 hover:underline" data-hours-add>+ {{ __('Add another time (a break)') }}</button>
+                            </div>
                         </div>
                     @endforeach
                 </div>
+                <button type="button" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:w-auto" data-hours-copy>{{ __('Copy the first open day to all open days') }}</button>
             </section>
+            <script>
+                (function () {
+                    var box = document.querySelector('[data-opening-hours]');
+                    if (!box) return;
+                    var max = {{ \App\Models\SellerDeliverySetting::MAX_RANGES }};
+                    function sync(row) {
+                        var open = row.querySelector('[data-hours-open]').checked;
+                        var allday = row.querySelector('[data-hours-allday]').checked;
+                        row.querySelector('[data-hours-allday-label]').classList.toggle('hidden', !open);
+                        row.querySelector('[data-hours-closed]').classList.toggle('hidden', open);
+                        row.querySelector('[data-hours-ranges]').classList.toggle('hidden', !open || allday);
+                        row.querySelector('[data-hours-add]').classList.toggle('hidden', row.querySelectorAll('[data-hours-range]').length >= max);
+                    }
+                    function renumber(row) {
+                        row.querySelectorAll('[data-hours-range]').forEach(function (r, i) {
+                            r.querySelectorAll('input').forEach(function (input, j) {
+                                input.name = 'hours[' + row.dataset.hoursDay + '][ranges][' + i + '][' + j + ']';
+                            });
+                        });
+                    }
+                    box.querySelectorAll('[data-hours-day]').forEach(function (row) {
+                        row.addEventListener('change', function () { sync(row); });
+                        row.querySelector('[data-hours-add]').addEventListener('click', function () {
+                            var ranges = row.querySelectorAll('[data-hours-range]');
+                            if (ranges.length >= max) return;
+                            var copy = ranges[ranges.length - 1].cloneNode(true);
+                            copy.querySelectorAll('input').forEach(function (input) { input.value = ''; });
+                            ranges[ranges.length - 1].after(copy);
+                            renumber(row); sync(row);
+                            copy.querySelector('input').focus();
+                        });
+                        row.addEventListener('click', function (e) {
+                            var remove = e.target.closest('[data-hours-remove]');
+                            if (!remove) return;
+                            var ranges = row.querySelectorAll('[data-hours-range]');
+                            var range = remove.closest('[data-hours-range]');
+                            if (ranges.length > 1) range.remove(); else range.querySelectorAll('input').forEach(function (input) { input.value = ''; });
+                            renumber(row); sync(row);
+                        });
+                        sync(row);
+                    });
+                    box.querySelector('[data-hours-copy]').addEventListener('click', function () {
+                        var rows = Array.prototype.slice.call(box.querySelectorAll('[data-hours-day]'));
+                        var first = rows.find(function (r) { return r.querySelector('[data-hours-open]').checked; });
+                        if (!first) return;
+                        var times = Array.prototype.map.call(first.querySelectorAll('[data-hours-range]'), function (r) {
+                            return Array.prototype.map.call(r.querySelectorAll('input'), function (i) { return i.value; });
+                        });
+                        var allday = first.querySelector('[data-hours-allday]').checked;
+                        rows.forEach(function (row) {
+                            if (row === first || !row.querySelector('[data-hours-open]').checked) return;
+                            row.querySelector('[data-hours-allday]').checked = allday;
+                            var ranges = row.querySelectorAll('[data-hours-range]');
+                            for (var i = 1; i < ranges.length; i++) ranges[i].remove();
+                            var tmpl = row.querySelector('[data-hours-range]');
+                            times.forEach(function (t, i) {
+                                var r = i === 0 ? tmpl : tmpl.cloneNode(true);
+                                if (i > 0) row.querySelectorAll('[data-hours-range]')[i - 1].after(r);
+                                r.querySelectorAll('input').forEach(function (input, j) { input.value = t[j] || ''; });
+                            });
+                            renumber(row); sync(row);
+                        });
+                    });
+                })();
+            </script>
 
             <section class="rounded-lg bg-white p-6 shadow space-y-3">
                 <div>

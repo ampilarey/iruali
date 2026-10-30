@@ -174,6 +174,10 @@ class BmlPaymentTest extends TestCase
         Notification::assertNotSentTo($this->customer, PaymentUpdated::class);
 
         $this->actingAs($this->customer)->get(route('orders.show', $order))->assertSee('Paid by card')->assertDontSee('Pay MVR');
+        // The customer sees "Paid", not the order's internal "pending" (waiting for the shop to start)
+        $this->assertSame('Paid', $order->fresh()->customerStatusLabel());
+        $order->forceFill(['payment_status' => 'unpaid'])->save();
+        $this->assertSame('Waiting for payment', $order->fresh()->customerStatusLabel());
     }
 
     public function test_a_redirect_claiming_success_is_not_trusted(): void

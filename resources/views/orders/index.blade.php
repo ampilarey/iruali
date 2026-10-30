@@ -20,8 +20,8 @@
                         <p class="text-sm text-gray-600">{{ $order->created_at->translatedFormat('j M Y') }}</p>
                     </div>
                     <div class="text-right">
-                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">
-                            {{ __(\App\Support\OrderStatus::label($order->status)) }}
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->customerStatusBadge() }}">
+                            {{ $order->customerStatusLabel() }}
                         </span>
                         <p class="text-lg font-bold text-primary-600 mt-1 force-ltr" dir="ltr">{{ \App\Support\Money::format($order->total_amount) }}</p>
                     </div>

@@ -12,8 +12,8 @@
                 <p class="text-gray-600">{{ __('Placed on :date', ['date' => $order->created_at->translatedFormat('j F Y, H:i')]) }}</p>
             </div>
             <div class="text-end">
-                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->status_badge }}">
-                    {{ __(\App\Support\OrderStatus::label($order->status)) }}
+                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->customerStatusBadge() }}">
+                    {{ $order->customerStatusLabel() }}
                 </span>
             </div>
         </div>

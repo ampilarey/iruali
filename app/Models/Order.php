@@ -139,6 +139,31 @@ class Order extends Model
     }
 
     /**
+     * The status as the customer sees it. "Pending" means nothing to them, so a pending order says
+     * whether it still waits for their card payment, or is paid (or placed, paid another way) and
+     * waiting for the shop to start on it.
+     */
+    public function customerStatusLabel(): string
+    {
+        if ($this->status !== 'pending') {
+            return __(\App\Support\OrderStatus::label($this->status));
+        }
+        if ($this->payment_method === 'bml' && $this->awaitingPayment()) {
+            return __('Waiting for payment');
+        }
+
+        return in_array($this->payment_status, ['paid', 'deposit_paid'], true) ? __('Paid') : __('Order placed');
+    }
+
+    /** The badge colour for customerStatusLabel(): green once a pending order is paid. */
+    public function customerStatusBadge(): string
+    {
+        return $this->status === 'pending' && in_array($this->payment_status, ['paid', 'deposit_paid'], true)
+            ? 'bg-green-100 text-green-800'
+            : $this->status_badge;
+    }
+
+    /**
      * The status as an enum case (null for a legacy value the enum does not know).
      */
     public function statusEnum(): ?OrderStatus

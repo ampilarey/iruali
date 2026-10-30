@@ -12,7 +12,7 @@
         </div>
         <div class="mb-4">
             <span class="font-semibold">{{ __('Status:') }}</span>
-            <span class="rounded-full px-2 py-0.5 text-sm font-semibold {{ $order->status_badge }}">{{ __(\App\Support\OrderStatus::label($order->status)) }}</span>
+            <span class="rounded-full px-2 py-0.5 text-sm font-semibold {{ $order->customerStatusBadge() }}">{{ $order->customerStatusLabel() }}</span>
         </div>
         <div class="mb-4">
             <span class="font-semibold">{{ __('Total:') }}</span>
@@ -41,7 +41,7 @@
                     @include('orders._pickup', ['part' => $part, 'showCode' => false])
                 </div>
             @empty
-                <p class="text-sm text-gray-600">{{ __(\App\Support\OrderStatus::label($order->status)) }}</p>
+                <p class="text-sm text-gray-600">{{ $order->customerStatusLabel() }}</p>
             @endforelse
         </div>
 

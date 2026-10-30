@@ -19,6 +19,8 @@
         </div>
     </div>
 
+    @include('orders._pay_banner')
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Order Details -->
         <div class="lg:col-span-2">
@@ -184,26 +186,7 @@
                 @include('orders._preorder_confirm', ['order' => $order])
                 @php $payments = app(\App\Services\PaymentService::class); @endphp
                 @if($payments->canPayOnline($order))
-                    @php $lastAttempt = $order->paymentTransactions()->latest('id')->first(); @endphp
-                    <div class="mt-6 rounded-xl border border-primary-200 bg-primary-50 p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ __('Pay by card') }}</h3>
-                        @if($lastAttempt?->hasFailed())
-                            <p class="text-sm text-danger">{{ __('Your last payment attempt did not go through. You can try again.') }}</p>
-                        @elseif($lastAttempt && ! $lastAttempt->isConfirmed())
-                            <p class="text-sm text-gray-600">{{ __('If you already paid, it can take a minute for the bank to confirm. Otherwise, pay below.') }}</p>
-                        @else
-                            <p class="text-sm text-gray-600">{{ __('Your order is waiting for payment.') }}</p>
-                        @endif
-                        <form method="POST" action="{{ route('payments.bml.pay', $order) }}">
-                            @csrf
-                            <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ match (\App\Services\BookingFeeService::nextPart($order)) {
-                                'deposit' => __('Pay the booking fee of :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]),
-                                'balance' => __('Pay the balance of :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]),
-                                default => __('Pay :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]),
-                            } }}</button>
-                        </form>
-                        <p class="text-xs text-gray-500 flex items-center gap-1.5"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('You pay on Bank of Maldives\' secure page. iruali never sees your card details.') }}</p>
-                    </div>
+                    {{-- Paying is at the top of the page (orders/_pay_banner) --}}
                 @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
                     <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
                 @elseif($order->payment_method === 'wallet' && $order->payment_status === 'paid')

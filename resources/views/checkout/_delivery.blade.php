@@ -14,7 +14,11 @@
         <p class="text-sm text-gray-600 mb-4">{{ __('Free delivery on orders over :amount.', ['amount' => \App\Support\Money::format($dc['freeOver'])]) }}</p>
     @endif
 
-    <div class="space-y-3 {{ $dc['delivered'] ? '' : 'hidden' }}" data-delivery-zones>
+    <p class="text-sm font-medium text-gray-900 {{ $dc['delivered'] ? '' : 'hidden' }}" data-area-note>{{ __('Delivery to :area: :fee', ['area' => $dc['areas'][$area] ?? $area, 'fee' => $feeText($dc['deliveryFees'])]) }}</p>
+    {{-- The area follows the address (or the boat), so its choices stay folded: the line above says it --}}
+    <details class="mt-1 {{ $dc['delivered'] ? '' : 'hidden' }}" data-delivery-zones @if($errors->has('delivery_zone')) open @endif>
+        <summary class="cursor-pointer text-sm font-medium text-primary-700 hover:underline">{{ __('Change delivery area') }}</summary>
+        <div class="mt-3 space-y-3">
         @foreach($deliveryZones as $zone => $label)
             <label class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
                 <span class="flex items-center gap-3">
@@ -25,8 +29,8 @@
             </label>
         @endforeach
     </div>
+    </details>
 
-    <p class="mt-3 text-sm text-gray-700 {{ $dc['delivered'] ? '' : 'hidden' }}" data-area-note>{{ __('Delivery to :area: :fee', ['area' => $dc['areas'][$area] ?? $area, 'fee' => $feeText($dc['deliveryFees'])]) }}</p>
     <p class="mt-1 text-sm text-gray-700 {{ $dc['delivered'] && $dc['surcharge'] > 0 ? '' : 'hidden' }}" data-surcharge-note>{{ __('Bulky items add :amount to delivery. Free delivery does not cover this charge.', ['amount' => \App\Support\Money::format($dc['surcharge'])]) }}</p>
     <p class="text-sm text-gray-700 {{ $dc['delivered'] ? 'hidden' : '' }}" data-all-pickup-note>{{ __('You are collecting everything from the shops, so there is no delivery fee and no address is needed.') }}</p>
 

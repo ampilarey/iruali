@@ -66,7 +66,10 @@ test.describe('checkout', () => {
         await expect(bml).toBeVisible();
         await bml.check();
         await page.locator('input[name="agree_terms"]').check();
-        await page.getByRole('button', { name: /place order/i }).click();
+        // The pay button says what a tap does ("Pay MVR … by card")
+        const pay = page.locator('[data-pay-button]');
+        await expect(pay).toHaveText(/pay .+ by card/i);
+        await pay.click();
 
         // With BML faked the "payment page" comes straight back to the order, unpaid, with Pay now
         await expect(page).toHaveURL(/\/orders\/(\d+)$/);

@@ -462,7 +462,8 @@
         </div>
     </footer>
 
-    <!-- Bottom tab bar (mobile) -->
+    <!-- Bottom tab bar (mobile); not on checkout, where the pay bar sits at the bottom instead -->
+    @unless(request()->routeIs('checkout'))
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(15,42,58,0.08)]" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="{{ __('Main') }}">
         <div class="grid grid-cols-5 h-16 text-[11px] font-medium">
             @php $tab = 'flex flex-col items-center justify-center gap-1'; @endphp
@@ -477,6 +478,7 @@
             </a>
         </div>
     </nav>
+    @endunless
 
     <!-- "Message us": a conversation with iruali from any storefront page (not during checkout or on the message pages) -->
     @unless(request()->routeIs('checkout*', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show'))

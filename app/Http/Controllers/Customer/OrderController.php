@@ -211,4 +211,36 @@ class OrderController extends Controller
 
         return redirect()->route('cart');
     }
+
+    /**
+     * "Change my order": a card order not paid yet goes back to the cart, as on Bake & Grill, where the cart stays
+     * until the payment succeeds. The order is cancelled (its stock released) and its items, with their size or
+     * colour, are put back in the cart to change and check out again.
+     */
+    public function backToCart(Order $order, \App\Services\CartService $cart)
+    {
+        $this->authorize('cancel', $order);
+        abort_unless($order->user_id === Auth::id() && $order->payment_method === 'bml' && $order->payment_status === 'unpaid' && $order->status === 'pending', 403);
+
+        $items = $order->items()->with('product')->get();
+        if (! $this->orderService->updateOrderStatus($order, 'cancelled')) {
+            NotificationService::error(__('This order can no longer be changed.'));
+
+            return redirect()->route('orders.show', $order);
+        }
+
+        foreach ($items as $item) {
+            try {
+                if ($item->product && $item->product->is_active) {
+                    $cart->addToCart($item->product->id, (int) $item->quantity, $item->product_variant_id ? (int) $item->product_variant_id : null);
+                }
+            } catch (\Throwable $e) {
+                // A product that can't go back (sold out, shop on holiday) is left out; the cart says what is there
+                report($e);
+            }
+        }
+        NotificationService::success(__('Your items are back in your cart. Change what you like and check out again.'));
+
+        return redirect()->route('cart');
+    }
 }

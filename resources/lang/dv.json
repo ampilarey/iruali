@@ -3498,5 +3498,18 @@
     "Customers can name a boat leaving the shop's island for theirs: the shop takes the parcel to the jetty or harbour before it leaves and the customer pays the boat's freight on collection. It costs the Greater Malé delivery fee (or the shop's own local fee), and is offered when every shop in the cart is on the same island, or all in Greater Malé.": "ކަސްޓަމަރުންނަށް ފިހާރަ ހުރި ރަށުން އެމީހުންގެ ރަށަށް ދާ ބޯޓެއް ބުނެވިދާނެ: ބޯޓު ފުރުމުގެ ކުރިން ފިހާރައިން ޖެޓީ ނުވަތަ ބަނދަރަށް ގެންދާނެ، އަދި ބޯޓުގެ ފުރައިޓް ކަސްޓަމަރު ދައްކާނީ ނަގާއިރު. ބޮޑުމާލޭގެ ޑެލިވަރީ ފީ (ނުވަތަ ފިހާރައިގެ އަމިއްލަ ލޯކަލް ފީ) ނަގާނެ، އަދި ލިބޭނީ ކާޓުގައިވާ ހުރިހާ ފިހާރައެއް އެއް ރަށެއްގައި، ނުވަތަ ހުރިހާ ފިހާރައެއް ބޮޑުމާލޭގައި ހުންނައިރު.",
     ":island harbour": ":island ބަނދަރު",
     "Another place on :island": ":island ގައި އެހެން ތަނެއް",
-    "Sending with a boat works when every shop is on the same island (or all in Greater Malé). Please give an address instead.": "ބޯޓެއްގައި ފޮނުވޭނީ ހުރިހާ ފިހާރައެއް އެއް ރަށެއްގައި (ނުވަތަ ހުރިހާ ފިހާރައެއް ބޮޑުމާލޭގައި) ހުންނައިރު. އެޑްރެހެއް ޖައްސަވާ."
+    "Sending with a boat works when every shop is on the same island (or all in Greater Malé). Please give an address instead.": "ބޯޓެއްގައި ފޮނުވޭނީ ހުރިހާ ފިހާރައެއް އެއް ރަށެއްގައި (ނުވަތަ ހުރިހާ ފިހާރައެއް ބޮޑުމާލޭގައި) ހުންނައިރު. އެޑްރެހެއް ޖައްސަވާ.",
+    "Place order · :amount": "އޯޑަރު ކުރޭ · :amount",
+    "Place order": "އޯޑަރު ކުރޭ",
+    "Change delivery area": "ޑެލިވަރީ ސަރަޙައްދު ބަދަލުކުރޭ",
+    "Your payment didn't go through": "ތިބާގެ ފައިސާ ދެއްކުން ނުނިމުނު",
+    "Your order is waiting for payment": "ތިބާގެ އޯޑަރު ފައިސާ ދެއްކުމަށް މަޑުކުރަނީ",
+    "Nothing was charged. Try again, or use another card.": "އެއްވެސް ފައިސާއެއް ނުކެނޑޭ. އަލުން މަސައްކަތްކުރައްވާ، ނުވަތަ އެހެން ކާޑެއް ބޭނުންކުރައްވާ.",
+    "If you just paid, it can take a minute for the bank to confirm. Otherwise, pay below.": "މިހާރު ފައިސާ ދެއްކެވި ނަމަ، ބޭންކުން ކަށަވަރުކުރަން މިނެޓެއްހާ ދިގުވެދާނެ. ނޫނީ ތިރީގައި ދައްކަވާ.",
+    "The shop starts on it once it is paid.": "ފައިސާ ދެއްކުމުން ފިހާރައިން މަސައްކަތް ފަށާނެ.",
+    "Pay again :amount": "އަލުން ދައްކާ :amount",
+    "Cancel this order and put its items back in your cart?": "މި އޯޑަރު ކެންސަލްކޮށް، ބައިތައް ކާޓަށް އަނބުރާ ލާން ބޭނުންތޯ؟",
+    "Change my order": "އަހަރެންގެ އޯޑަރު ބަދަލުކުރޭ",
+    "This order can no longer be changed.": "މި އޯޑަރު މިހާރު ބަދަލެއް ނުކުރެވޭނެ.",
+    "Your items are back in your cart. Change what you like and check out again.": "ތިބާގެ ބައިތައް ކާޓަށް އަނބުރާ ލެވިއްޖެ. ބޭނުން ބަދަލުތައް ގެނެސް، އަލުން ޗެކްއައުޓް ކުރައްވާ."
 }

@@ -169,6 +169,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::get('/orders/{order}/receipt.pdf', [OrderController::class, 'receiptPdf'])->name('orders.receipt.pdf')->middleware('throttle:10,1,orders.receipt.pdf');
         Route::post('/orders/{order}/receipt/email', [OrderController::class, 'emailReceipt'])->name('orders.receipt.email')->middleware('throttle:3,10,orders.receipt.email');
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buyAgain');
+        Route::post('/orders/{order}/back-to-cart', [OrderController::class, 'backToCart'])->name('orders.backToCart');
         Route::post('/orders/{order}/pay', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'pay'])->name('payments.bml.pay')->middleware('throttle:10,1,payments.bml.pay');
         Route::post('/orders/{order}/parts/{part}/return', [\App\Http\Controllers\Customer\ReturnController::class, 'store'])->name('orders.returns.store')->middleware('throttle:10,1,orders.returns.store');
         Route::get('/returns/{return}/photo', [\App\Http\Controllers\Customer\ReturnController::class, 'photo'])->name('returns.photo');

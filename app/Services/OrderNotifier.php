@@ -63,6 +63,10 @@ class OrderNotifier
         if (in_array($order->status, ['delivered', 'cancelled'], true)) {
             \App\Support\Webhooks::order('order.'.$order->status, $order);
         }
+        // A card order never paid was never announced (placedOnce()): no "cancelled" message about it either
+        if ($order->status === 'cancelled' && $order->placed_notified_at === null && $order->payment_method === 'bml') {
+            return;
+        }
         $this->sendToCustomer($order, new OrderStatusChanged($order));
     }
 

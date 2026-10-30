@@ -27,7 +27,7 @@
 @endphp
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-48 lg:pb-8">
     @if($orderingPause)
         <p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-ordering-paused>{{ $orderingPause['message'] }}</p>
     @endif
@@ -299,16 +299,6 @@
                         <p>{{ __('Pending orders can be cancelled from My Orders. Damaged, faulty or wrong items can be returned within :days days of delivery. Food, opened personal care items, underwear, swimwear and custom items cannot be returned unless they arrive damaged or wrong. Card refunds go back to the same card.', ['days' => \App\Support\Company::returnWindowDays()]) }}</p>
                         <p>{{ __('We deliver within the Maldives only; delivery times depend on boat and flight schedules to your island.') }}</p>
                     </div>
-                    <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
-                        <input type="checkbox" name="agree_terms" value="1" required @checked(old('agree_terms')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
-                        <span>{!! __('I have read and accept the :terms, :refunds, :delivery and :privacy.', [
-                            'terms' => '<a href="'.route('policies.terms').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Terms & Conditions')).'</a>',
-                            'refunds' => '<a href="'.route('policies.refunds').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Returns, Refunds & Cancellations')).'</a>',
-                            'delivery' => '<a href="'.route('policies.delivery').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Delivery Policy')).'</a>',
-                            'privacy' => '<a href="'.route('policies.privacy').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Privacy Policy')).'</a>',
-                        ]) !!}</span>
-                    </label>
-                    @error('agree_terms')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                     @if($bookingFee)
                         <label class="mt-3 flex items-start gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3 text-sm text-gray-800" data-agree-booking-fee>
                             <input type="checkbox" name="agree_booking_fee" value="1" required @checked(old('agree_booking_fee')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
@@ -317,14 +307,52 @@
                         @error('agree_booking_fee')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
                     @endif
 
-                    <button type="submit" @disabled($paymentMethods === []) class="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition mt-4 disabled:cursor-not-allowed disabled:opacity-50">
-                        {{ __('Place Order') }}
-                    </button>
+                    {{-- The terms and the button: on a phone a bar fixed at the bottom of the screen (as on Bake & Grill),
+                         saying what the tap does ("Pay MVR 275 by card"); on a computer at the end of the summary --}}
+                    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white px-4 pt-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)] lg:static lg:z-auto lg:mt-0 lg:border-0 lg:p-0 lg:shadow-none" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));" data-pay-bar>
+                        <label class="flex items-start gap-3 text-xs text-gray-700 lg:mt-4 lg:text-sm">
+                            <input type="checkbox" name="agree_terms" value="1" required @checked(old('agree_terms')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
+                            <span>{!! __('I have read and accept the :terms, :refunds, :delivery and :privacy.', [
+                                'terms' => '<a href="'.route('policies.terms').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Terms & Conditions')).'</a>',
+                                'refunds' => '<a href="'.route('policies.refunds').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Returns, Refunds & Cancellations')).'</a>',
+                                'delivery' => '<a href="'.route('policies.delivery').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Delivery Policy')).'</a>',
+                                'privacy' => '<a href="'.route('policies.privacy').'" target="_blank" rel="noopener" class="text-primary font-medium underline">'.e(__('Privacy Policy')).'</a>',
+                            ]) !!}</span>
+                        </label>
+                        @error('agree_terms')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+                        <button type="submit" @disabled($paymentMethods === []) class="mt-2 w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-hover transition lg:mt-4 disabled:cursor-not-allowed disabled:opacity-50" data-pay-button data-label-card="{{ __('Pay :amount by card') }}" data-label-other="{{ __('Place order · :amount') }}" data-label-free="{{ __('Place order') }}">
+                            {{ __('Place Order') }}
+                        </button>
+                    </div>
                 </div>
             </aside>
         </div>
     </form>
 </div>
+
+<script>
+    // The pay button says what a tap does: "Pay MVR 275.00 by card" (what goes to the card: after the wallet,
+    // or the booking fee), "Place order · MVR 275.00" for other ways to pay, "Place order" when nothing is due now
+    (function () {
+        var form = document.getElementById('checkout-form');
+        var button = form && form.querySelector('[data-pay-button]');
+        if (!button) return;
+        var text = function (sel) { var el = form.querySelector(sel); return el && !el.closest('.hidden') ? el.textContent.trim() : ''; };
+        function label() {
+            var method = form.querySelector('input[name=payment_method]:checked');
+            if (form.querySelector('[data-confirm-first-now]')) { button.textContent = button.dataset.labelFree; return; }
+            var amount = text('#card-amount') || text('[data-booking-fee-now] dd') || text('#order-total');
+            var key = method && method.value === 'bml' ? 'labelCard' : 'labelOther';
+            button.textContent = amount ? button.dataset[key].replace(':amount', amount) : button.dataset.labelFree;
+        }
+        form.addEventListener('change', function () { setTimeout(label, 0); });
+        ['#order-total', '#card-amount', '#card-row'].forEach(function (sel) {
+            var el = form.querySelector(sel);
+            if (el && window.MutationObserver) new MutationObserver(label).observe(el, { childList: true, characterData: true, subtree: true, attributes: true });
+        });
+        label();
+    })();
+</script>
 
 <script>
     (function () {

@@ -190,7 +190,7 @@ class BmlPaymentTest extends TestCase
 
         $this->assertSame('unpaid', $order->fresh()->payment_status);
         $this->actingAs($this->customer)->get(route('orders.show', $order))
-            ->assertSee('did not go through')
+            ->assertSee("didn't go through")
             ->assertSee(route('payments.bml.pay', $order));
     }
 
@@ -298,6 +298,32 @@ class BmlPaymentTest extends TestCase
         $this->assertSame('Bearer eyJhbGciOiJIUzI1NiJ9.x.y', $header());
         config(['services.bml.api_key' => 'plain-live-key']);
         $this->assertSame('plain-live-key', $header());
+    }
+
+    public function test_a_failed_payment_says_so_at_the_top_and_the_order_can_go_back_to_the_cart(): void
+    {
+        $this->fakeBml('CANCELLED');
+        $this->checkout();
+        $order = Order::sole();
+        $this->get(route('payments.bml.return', $order).'?transactionId=txn_123');
+
+        // A red banner at the top with "Pay again", as on Bake & Grill
+        $this->actingAs($this->customer)->get(route('orders.show', $order))->assertOk()
+            ->assertSee('data-pay-banner="failed"', false)->assertSee("Your payment didn't go through")
+            ->assertSee('Pay again')->assertSee('data-back-to-cart', false);
+
+        // "Change my order": cancelled, stock back, items in the cart, and no "cancelled" text for an order never announced
+        Notification::fake();
+        $this->post(route('orders.backToCart', $order))->assertRedirect(route('cart'));
+        $this->assertSame('cancelled', $order->fresh()->status);
+        $this->assertSame(10, $this->product->fresh()->stock_quantity);
+        $cart = Cart::where('user_id', $this->customer->id)->where('status', 'active')->latest('id')->firstOrFail();
+        $this->assertSame(1, (int) $cart->items()->where('product_id', $this->product->id)->sum('quantity'));
+        Notification::assertNothingSent();
+
+        // A paid order can't be sent back
+        $paid = Order::factory()->create(['user_id' => $this->customer->id, 'payment_method' => 'bml', 'payment_status' => 'paid', 'status' => 'pending']);
+        $this->post(route('orders.backToCart', $paid))->assertForbidden();
     }
 
     public function test_bml_being_down_keeps_the_order_and_offers_pay_now(): void

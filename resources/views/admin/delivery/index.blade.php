@@ -88,7 +88,7 @@
         </x-admin.fold>
 
         <x-admin.fold :title="__('Send with a boat')" data-boat-delivery>
-            <p class="mt-1 text-sm text-gray-500">{{ __('Customers on other islands can name a boat leaving Greater Malé for their island: the shop takes the parcel to the jetty before it leaves and the customer pays the boat\'s freight on collection. It costs the Greater Malé delivery fee, and is offered only when every shop in the cart is in Greater Malé.') }}</p>
+            <p class="mt-1 text-sm text-gray-500">{{ __('Customers can name a boat leaving the shop\'s island for theirs: the shop takes the parcel to the jetty or harbour before it leaves and the customer pays the boat\'s freight on collection. It costs the Greater Malé delivery fee (or the shop\'s own local fee), and is offered when every shop in the cart is on the same island, or all in Greater Malé.') }}</p>
             <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
                 <input type="hidden" name="boat_delivery_enabled" value="0">
                 <input type="checkbox" name="boat_delivery_enabled" value="1" @checked(old('boat_delivery_enabled', $boatDelivery)) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">

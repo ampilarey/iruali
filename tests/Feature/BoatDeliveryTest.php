@@ -73,6 +73,7 @@ class BoatDeliveryTest extends TestCase
         $this->assertSame('Malé', $order->shipping_city);
         $this->assertStringContainsString('Express 3', $order->shipping_address);
         $this->assertSame(['name' => 'Express 3', 'phone' => '7991234', 'jetty' => 'male_5', 'jetty_other' => null,
+            'jetty_label' => 'Malé Jetty No. 5', 'from' => 'Malé',
             'departs_at' => '2026-11-02 15:00', 'island' => 'Hithadhoo, Seenu', 'notes' => 'Give it to Ahmed'], $order->boat);
 
         // The customer, the shop and admins see the boat
@@ -106,7 +107,29 @@ class BoatDeliveryTest extends TestCase
 
     }
 
-    public function test_only_when_every_shop_is_in_greater_male_and_it_is_switched_on(): void
+    public function test_a_shop_on_another_island_sends_with_a_boat_from_its_harbour(): void
+    {
+        $addu = $this->island('Hithadhoo', 'Seenu');
+        $adduShop = $this->shop('Addu Goods');
+        $adduShop->forceFill(['home_island_id' => $addu->id])->save();
+        $this->cartFor($this->customer, [[$this->product($adduShop, 200), 1]]);
+
+        $this->actingAs($this->customer)->get(route('checkout'))->assertOk()
+            ->assertSee('Send with a boat (from Hithadhoo)')->assertSee('Hithadhoo harbour')->assertDontSee('Malé Jetty No. 5');
+        // The Malé jetties are not where an Addu shop meets a boat
+        $this->placeOrder($this->customer, $this->boat())->assertSessionHasErrors('boat_jetty');
+
+        $this->placeOrder($this->customer, $this->boat(['boat_jetty' => 'harbour', 'boat_island' => 'Fuvahmulah']))->assertSessionHasNoErrors()->assertRedirect();
+        $order = Order::latest('id')->firstOrFail();
+        $this->assertSame('Hithadhoo', $order->shipping_city);
+        $this->assertSame('greater_male', $order->delivery_zone);
+        $this->assertEquals(25, $order->shipping_amount); // a hand-over on the shop's island: the local rate, not 75
+        $this->assertSame('Hithadhoo harbour', $order->boat['jetty_label']);
+        $this->assertSame('Hithadhoo', $order->boat['from']);
+        $this->assertStringContainsString('Hithadhoo harbour', BoatDelivery::summary($order->boat));
+    }
+
+    public function test_only_when_every_shop_is_on_one_island_and_it_is_switched_on(): void
     {
         $addu = $this->island('Hithadhoo', 'Seenu');
         $islandShop = $this->shop('Addu Goods');

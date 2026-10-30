@@ -1,7 +1,7 @@
 {{-- Checkout: "Send with a boat" (App\Support\BoatDelivery). The boat, the jetty it leaves from, when, the island
      it goes to, and who to call; filled in from the customer's last boat order. Shown when the boat card is chosen
      (resources/js/checkout-address.js); StoreOrderRequest turns it into a Greater Malé delivery to the jetty.
-     Needs $field, $user, $byBoat, $boatLast, $islandsByAtoll. --}}
+     Needs $field, $user, $byBoat, $boatLast, $boatFrom (the island it leaves from), $islandsByAtoll. --}}
 @php
     $boatValue = fn (string $key, ?string $fallback = null) => old('boat_'.$key, $boatLast[$key] ?? $fallback);
     // A boat leaving soon: the form suggests no time, but refuses one less than two hours away
@@ -9,7 +9,7 @@
     $departs = old('boat_departs_at');
 @endphp
 <div class="space-y-4 {{ $byBoat ? '' : 'hidden' }}" data-boat-panel>
-    <p class="rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-900">{{ __('Tell us which boat to give it to. The shop hands your order to the boat at the jetty before it leaves, and we text you when it is on board. The boat\'s freight charge is paid to the boat when you collect.') }}</p>
+    <p class="rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-900">{{ __('Tell us which boat to give it to. The shop hands your order to the boat before it leaves :island, and we text you when it is on board. The boat\'s freight charge is paid to the boat when you collect.', ['island' => $boatFrom?->localized_name]) }}</p>
     @if($user && trim((string) $user->name) === '')
         <div>
             <label for="boat_customer_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Name to collect it') }}</label>
@@ -32,12 +32,12 @@
         <label for="boat_jetty" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Leaves from') }}</label>
         <select id="boat_jetty" name="boat_jetty" required class="{{ $field }}" data-boat-jetty @disabled(! $byBoat)>
             <option value="">{{ __('Choose the jetty') }}</option>
-            @foreach(\App\Support\BoatDelivery::jetties() as $key => $label)
+            @foreach(\App\Support\BoatDelivery::jetties($boatFrom) as $key => $label)
                 <option value="{{ $key }}" @selected($boatValue('jetty') === $key)>{{ $label }}</option>
             @endforeach
         </select>
         @error('boat_jetty')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
-        <input type="text" name="boat_jetty_other" maxlength="100" class="mt-2 {{ $field }} {{ $boatValue('jetty') === 'other' ? '' : 'hidden' }}" value="{{ $boatValue('jetty_other') }}" placeholder="{{ __('Which jetty?') }}" aria-label="{{ __('Which jetty?') }}" data-boat-jetty-other @disabled(! $byBoat)>
+        <input type="text" name="boat_jetty_other" maxlength="100" class="mt-2 {{ $field }} {{ $boatValue('jetty') === 'other' ? '' : 'hidden' }}" value="{{ $boatValue('jetty_other') }}" placeholder="{{ __('Where exactly?') }}" aria-label="{{ __('Where exactly?') }}" data-boat-jetty-other @disabled(! $byBoat)>
         @error('boat_jetty_other')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
     </div>
     <div>

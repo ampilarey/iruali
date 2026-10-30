@@ -12,10 +12,11 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 /**
- * "Send with a boat": the customer names a boat leaving Greater Malé for their island, and the shop takes
- * the parcel to that jetty before it leaves. For iruali it is a Greater Malé delivery (the Greater Malé fee,
- * the shops' Greater Malé reach); the customer pays the boat's freight when they collect. Offered when
- * Admin → Delivery has it on and every shop in the cart is in Greater Malé (it can get to the jetties).
+ * "Send with a boat": the customer names a boat leaving the shop's island for theirs, and the shop takes the
+ * parcel to the jetty or harbour before it leaves. For iruali it is a local hand-over on the shop's island
+ * (the Greater Malé fee, or the shop's own local fee); the customer pays the boat's freight when they collect.
+ * Offered when Admin → Delivery has it on and every shop in the cart is on one island, or all in Greater Malé
+ * (Malé, Hulhumalé, Villimalé: the Malé jetties).
  */
 final class BoatDelivery
 {
@@ -27,9 +28,19 @@ final class BoatDelivery
 
     public const MAX_DAYS = 21;
 
-    /** @return array<string, string> jetty key => label */
-    public static function jetties(): array
+    /**
+     * Where the boat can be met: the Malé jetties for Greater Malé shops, else the shop's island's harbour.
+     *
+     * @return array<string, string> jetty key => label
+     */
+    public static function jetties(?Island $from = null): array
     {
+        if ($from !== null && ! self::isGreaterMale($from)) {
+            return [
+                'harbour' => __(':island harbour', ['island' => $from->localized_name]),
+                'other' => __('Another place on :island', ['island' => $from->localized_name]),
+            ];
+        }
         $jetties = [];
         foreach (range(1, 10) as $n) {
             $jetties['male_'.$n] = __('Malé Jetty No. :n', ['n' => $n]);
@@ -42,19 +53,22 @@ final class BoatDelivery
         ];
     }
 
-    /** The island the jetty is on, by its English name. */
-    public static function jettyIslandName(string $jetty): string
+    public static function isGreaterMale(Island $island): bool
     {
-        return match ($jetty) {
+        return app(DeliveryService::class)->zoneForIsland($island) === DeliveryService::AREA_GREATER_MALE;
+    }
+
+    /** The island the jetty is on: in Greater Malé by the jetty, elsewhere the shops' island. */
+    public static function jettyIsland(string $jetty, ?Island $from = null): ?Island
+    {
+        if ($from !== null && ! self::isGreaterMale($from)) {
+            return $from;
+        }
+        $name = match ($jetty) {
             'villimale' => 'Villimalé',
             'hulhumale' => 'Hulhumalé',
             default => 'Malé',
         };
-    }
-
-    public static function jettyIsland(string $jetty): ?Island
-    {
-        $name = self::jettyIslandName($jetty);
 
         return Island::where('is_active', true)->get()
             ->first(fn (Island $island) => mb_strtolower((string) $island->getTranslation('name', 'en', false)) === mb_strtolower($name));
@@ -66,23 +80,32 @@ final class BoatDelivery
     }
 
     /**
-     * Offered for these cart shops (DeliveryService::cartShops()): switched on, and every shop is in Greater Malé.
+     * The island the boat leaves from for these cart shops (DeliveryService::cartShops()), or null when it is not
+     * offered: switched off, a shop without a home island, or shops on different islands (all in Greater Malé
+     * counts as one place). Greater Malé gives Malé.
      *
      * @param  Collection<int, array<string, mixed>>  $shops
      */
-    public static function offeredFor(Collection $shops): bool
+    public static function fromIsland(Collection $shops): ?Island
     {
         if (! self::enabled() || $shops->isEmpty()) {
-            return false;
+            return null;
         }
-        $delivery = app(DeliveryService::class);
+        $homes = $shops->map(fn (array $shop) => ($shop['seller'] ?? null) instanceof User ? $shop['seller']->homeIsland : null);
+        if ($homes->contains(null)) {
+            return null;
+        }
+        if ($homes->every(fn (Island $island) => self::isGreaterMale($island))) {
+            return self::jettyIsland('male_1') ?? $homes->first();
+        }
 
-        return $shops->every(function (array $shop) use ($delivery) {
-            $seller = $shop['seller'] ?? null;
-            $home = $seller instanceof User ? $seller->homeIsland : null;
+        return $homes->pluck('id')->unique()->count() === 1 ? $homes->first() : null;
+    }
 
-            return $home !== null && $delivery->zoneForIsland($home) === DeliveryService::AREA_GREATER_MALE;
-        });
+    /** @param  Collection<int, array<string, mixed>>  $shops */
+    public static function offeredFor(Collection $shops): bool
+    {
+        return self::fromIsland($shops) !== null;
     }
 
     /**
@@ -127,10 +150,20 @@ final class BoatDelivery
         return is_array($boat) && ! empty($boat['name']) ? $boat : null;
     }
 
+    /** Where the boat is met, as stored on the order (older orders: from the Malé jetty list). */
+    public static function jettyLabel(array $boat): string
+    {
+        if (($boat['jetty'] ?? '') === 'other' && filled($boat['jetty_other'] ?? null)) {
+            return (string) $boat['jetty_other'];
+        }
+
+        return (string) ($boat['jetty_label'] ?? (self::jetties()[$boat['jetty'] ?? ''] ?? ''));
+    }
+
     /** "Express 3 · Malé Jetty No. 5 · leaves Sat 2 Nov 15:00" */
     public static function summary(array $boat): string
     {
-        $jetty = ($boat['jetty'] ?? '') === 'other' ? (string) ($boat['jetty_other'] ?? '') : (self::jetties()[$boat['jetty'] ?? ''] ?? '');
+        $jetty = self::jettyLabel($boat);
         $departs = ! empty($boat['departs_at']) ? CarbonImmutable::parse($boat['departs_at'])->translatedFormat('D j M H:i') : null;
 
         return collect([$boat['name'] ?? null, $jetty ?: null, $departs ? __('leaves :when', ['when' => $departs]) : null])->filter()->join(' · ');

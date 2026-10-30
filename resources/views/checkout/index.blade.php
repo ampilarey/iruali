@@ -7,7 +7,10 @@
     $user = auth()->user();
     $addresses = $addresses ?? collect();
     $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
-    $selectedZone = old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
+    $boatOffer ??= false;
+    $boatLast ??= null;
+    $byBoat = $boatOffer && (string) $selectedAddressId === \App\Support\BoatDelivery::CHOICE;
+    $selectedZone = $byBoat ? \App\Services\DeliveryService::AREA_GREATER_MALE : old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
     // Deliver or pickup per shop, area fees, bulky-item charges, Malé time slots (checkout/_fulfilment, _delivery)
     $deliveryCheckout = app(\App\Services\DeliveryService::class)->checkout($cart, (float) $goodsTotal, $selectedAddress, $user, $addresses);
     // Small-order fee (Admin → Settings → Ordering), charged with delivery; and a pause in force
@@ -55,8 +58,8 @@
                 @include('checkout._fulfilment')
                 <section class="bg-white rounded-2xl border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Delivery address') }}</h2>
-                    @if($addresses->isNotEmpty())
-                        <div class="space-y-3 mb-5" role="radiogroup" aria-label="{{ __('Saved addresses') }}">
+                    @if($addresses->isNotEmpty() || $boatOffer)
+                        <div class="space-y-3 mb-5" role="radiogroup" aria-label="{{ __('Where it goes') }}">
                             @foreach($addresses as $address)
                                 <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
                                     <input type="radio" name="address_id" value="{{ $address->id }}" data-zone="{{ $address->deliveryZone() }}" @checked((string) $selectedAddressId === (string) $address->id) class="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500">
@@ -70,13 +73,23 @@
                             @endforeach
                             <label class="flex items-center gap-3 rounded-xl border border-dashed border-gray-300 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50">
                                 <input type="radio" name="address_id" value="" @checked((string) $selectedAddressId === '') class="h-4 w-4 text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm font-medium text-gray-900">{{ __('Deliver to a new address') }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ $addresses->isNotEmpty() ? __('Deliver to a new address') : __('Deliver to an address') }}</span>
                             </label>
+                            @if($boatOffer)
+                                {{-- Send with a boat (App\Support\BoatDelivery): the shop takes it to the jetty --}}
+                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50" data-boat-choice>
+                                    <input type="radio" name="address_id" value="{{ \App\Support\BoatDelivery::CHOICE }}" data-zone="{{ \App\Services\DeliveryService::AREA_GREATER_MALE }}" @checked($byBoat) class="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                    <span class="min-w-0 text-sm">
+                                        <span class="flex items-center gap-1.5 font-medium text-gray-900"><x-icon name="truck" class="h-4 w-4 text-primary" />{{ __('Send with a boat (from Malé)') }}</span>
+                                        <span class="block text-gray-600">{{ __('The shop takes it to the jetty before your boat leaves. You pay the boat\'s freight when you collect.') }}</span>
+                                    </span>
+                                </label>
+                            @endif
                             @error('address_id')<p class="text-sm text-danger">{{ $message }}</p>@enderror
                         </div>
-                        <p class="mb-4 text-xs text-gray-500"><a href="{{ route('account.addresses') }}" class="text-primary hover:underline">{{ __('Manage saved addresses') }}</a></p>
+                        @if($addresses->isNotEmpty())<p class="mb-4 text-xs text-gray-500"><a href="{{ route('account.addresses') }}" class="text-primary hover:underline">{{ __('Manage saved addresses') }}</a></p>@endif
                     @endif
-                    <div class="space-y-4 {{ $addresses->isNotEmpty() && (string) $selectedAddressId !== '' ? 'hidden' : '' }}" data-new-address>
+                    <div class="space-y-4 {{ ($addresses->isNotEmpty() || $byBoat) && (string) $selectedAddressId !== '' ? 'hidden' : '' }}" data-new-address>
                         @if($user && trim((string) $user->name) === '')
                             {{-- Signed in with just a mobile number: the courier needs a name (none for a pickup, as on Bake & Grill) --}}
                             <div data-checkout-name>
@@ -117,6 +130,9 @@
                             </div>
                         @endauth
                     </div>
+                    @if($boatOffer)
+                        @include('checkout._boat')
+                    @endif
                 </section>
 
                 @include('checkout._delivery')

@@ -70,10 +70,13 @@ class CheckoutController extends Controller
 
         // Saved addresses as cards (the default one pre-selected), plus the island list for a new address
         $addresses = $user->addresses()->defaultFirst()->with('islandRecord')->get();
-        $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)->id ?? $addresses->first()->id ?? '');
+        $selectedAddressId = old('deliver_by_boat') ? \App\Support\BoatDelivery::CHOICE : old('address_id', $addresses->firstWhere('is_default', true)->id ?? $addresses->first()->id ?? '');
         $islandsByAtoll = app(DeliveryService::class)->islandsByAtoll();
+        // "Send with a boat" when every shop is in Greater Malé; the last boat used fills the form in again
+        $boatOffer = \App\Support\BoatDelivery::offeredFor(app(DeliveryService::class)->cartShops($cart));
+        $boatLast = $boatOffer ? \App\Support\BoatDelivery::lastFor($user) : null;
 
-        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll', 'preorderLines', 'bookingFee', 'confirmFirst'));
+        return view('checkout.index', compact('cart', 'points_balance', 'points_redeemed', 'points_redeemed_discount', 'voucherDiscount', 'voucherCode', 'goodsTotal', 'deliveryZones', 'deliveryQuotes', 'freeDeliveryOver', 'addresses', 'selectedAddressId', 'islandsByAtoll', 'preorderLines', 'bookingFee', 'confirmFirst', 'boatOffer', 'boatLast'));
     }
 
     /**

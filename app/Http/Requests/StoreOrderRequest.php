@@ -72,6 +72,43 @@ class StoreOrderRequest extends FormRequest
             'gift_receiver_phone' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->boolean('is_gift')), 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/'],
             'gift_message' => 'nullable|string|max:200',
             'gift_hide_prices' => 'nullable|boolean',
+            // Send with a boat (address_id=boat, App\Support\BoatDelivery)
+            'deliver_by_boat' => 'nullable|boolean',
+            'boat_name' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'string', 'max:80'],
+            'boat_phone' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/'],
+            'boat_jetty' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', \Illuminate\Validation\Rule::in(array_keys(\App\Support\BoatDelivery::jetties()))],
+            'boat_jetty_other' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat() && $this->input('boat_jetty') === 'other'), 'nullable', 'string', 'max:100'],
+            'boat_departs_at' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'date'],
+            'boat_island' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'string', 'max:100'],
+            'boat_notes' => 'nullable|string|max:200',
+        ];
+    }
+
+    /** The customer chose "Send with a boat". */
+    public function byBoat(): bool
+    {
+        return $this->boolean('deliver_by_boat') && ! $this->everythingPickedUp();
+    }
+
+    /**
+     * What is stored on the order for a boat delivery, or null.
+     *
+     * @return array<string, string|null>|null
+     */
+    public function boatDetails(): ?array
+    {
+        if (! $this->byBoat()) {
+            return null;
+        }
+
+        return [
+            'name' => trim((string) $this->input('boat_name')),
+            'phone' => preg_replace('/\s+/', '', (string) $this->input('boat_phone')),
+            'jetty' => (string) $this->input('boat_jetty'),
+            'jetty_other' => $this->input('boat_jetty') === 'other' ? trim((string) $this->input('boat_jetty_other')) : null,
+            'departs_at' => \Carbon\CarbonImmutable::parse((string) $this->input('boat_departs_at'))->format('Y-m-d H:i'),
+            'island' => trim((string) $this->input('boat_island')),
+            'notes' => filled($this->input('boat_notes')) ? trim((string) $this->input('boat_notes')) : null,
         ];
     }
 
@@ -117,6 +154,33 @@ class StoreOrderRequest extends FormRequest
     }
 
     /**
+     * "Send with a boat": for delivery it is a Greater Malé delivery to the jetty's island (its fee, the
+     * shops' Greater Malé reach), with the boat on the address line and no Malé time slot.
+     */
+    protected function applyBoatChoice(): void
+    {
+        if ($this->input('address_id') !== \App\Support\BoatDelivery::CHOICE) {
+            $this->merge(['deliver_by_boat' => false]);
+
+            return;
+        }
+        $jetty = (string) $this->input('boat_jetty');
+        $island = \App\Support\BoatDelivery::jettyIsland($jetty);
+        $label = $jetty === 'other' ? trim((string) $this->input('boat_jetty_other')) : (\App\Support\BoatDelivery::jetties()[$jetty] ?? '');
+        $this->merge([
+            'deliver_by_boat' => true,
+            'address_id' => null,
+            'island_id' => $island?->id,
+            'shipping_address' => __('Boat: :boat', ['boat' => trim(implode(', ', array_filter([trim((string) $this->input('boat_name')), $label])))]),
+            'shipping_city' => \App\Support\BoatDelivery::jettyIslandName($jetty),
+            'shipping_state' => $island?->atoll ?: 'Kaafu',
+            'shipping_country' => 'Maldives',
+            'delivery_zone' => \App\Services\DeliveryService::AREA_GREATER_MALE,
+            'delivery_slot' => '',
+        ]);
+    }
+
+    /**
      * Get custom messages for validator errors.
      */
     public function messages(): array
@@ -138,6 +202,13 @@ class StoreOrderRequest extends FormRequest
             'gift_receiver_phone.required' => __('Please enter a phone number for the person receiving the gift.'),
             'gift_receiver_phone.regex' => __('Please enter a valid phone number for the gift receiver (digits only, e.g. 7771234).'),
             'gift_message.max' => __('The gift message can be up to 200 characters.'),
+            'boat_name.required' => __('Please give the boat\'s name.'),
+            'boat_phone.required' => __('Please give the boat\'s or captain\'s phone number.'),
+            'boat_phone.regex' => __('Please enter a valid phone number for the boat (digits only, e.g. 7771234).'),
+            'boat_jetty.required' => __('Please choose the jetty the boat leaves from.'),
+            'boat_jetty_other.required' => __('Please say which jetty the boat leaves from.'),
+            'boat_departs_at.required' => __('Please give the day and time the boat leaves.'),
+            'boat_island.required' => __('Please give the island the boat goes to.'),
         ];
     }
 
@@ -169,6 +240,7 @@ class StoreOrderRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $this->applyBoatChoice();
         $this->applyAddressChoice();
 
         // Trim whitespace from string inputs
@@ -301,6 +373,15 @@ class StoreOrderRequest extends FormRequest
     protected function validateDeliveryChoices($validator): void
     {
         $shops = $this->deliveryShops();
+        if ($this->byBoat() && ! $validator->errors()->has('boat_departs_at')) {
+            $choices = (array) $this->input('fulfilment', []);
+            $delivered = $shops->filter(fn (array $shop, int $sellerId) => ($choices[$sellerId] ?? null) !== \App\Models\SellerOrder::METHOD_PICKUP);
+            if (! \App\Support\BoatDelivery::offeredFor($delivered)) {
+                $validator->errors()->add('address_id', __('Sending with a boat is only possible when every shop is in Greater Malé. Please give an address instead.'));
+            } elseif ($problem = \App\Support\BoatDelivery::departureProblem(\Carbon\CarbonImmutable::parse((string) $this->input('boat_departs_at')), $delivered)) {
+                $validator->errors()->add('boat_departs_at', $problem);
+            }
+        }
         foreach ((array) $this->input('fulfilment', []) as $sellerId => $method) {
             $shop = $shops[(int) $sellerId] ?? null;
             if ($method === \App\Models\SellerOrder::METHOD_PICKUP && $shop && ! $shop['setting']->offersPickup()) {

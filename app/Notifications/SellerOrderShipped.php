@@ -50,6 +50,11 @@ class SellerOrderShipped extends Notification implements ShouldQueue
             $mail->line('• '.$item->displayName().' × '.$item->quantity);
         }
 
+        if ($this->part->order->isByBoat()) {
+            $mail->line(__('It is on the boat: :boat. Boat phone: :phone. Collect it from the boat on your island and pay the boat\'s freight charge there.', [
+                'boat' => \App\Support\BoatDelivery::summary($this->part->order->boat), 'phone' => $this->part->order->boat['phone'] ?? '',
+            ]));
+        }
         if ($this->part->courier || $this->part->tracking_number) {
             $mail->line(__('Courier: :courier', ['courier' => trim($this->part->courier.' '.$this->part->tracking_number)]));
         }
@@ -75,7 +80,10 @@ class SellerOrderShipped extends Notification implements ShouldQueue
         return SmsTypes::render('part_shipped', [
             'shop' => $this->part->shopName(),
             'number' => $this->part->order->order_number,
-            'details' => $this->part->trackingSummary(),
+            // Sent with a boat: which boat, from where, when, and its phone, so the customer can meet it
+            'details' => $this->part->order->isByBoat()
+                ? __('On the boat :boat, phone :phone.', ['boat' => \App\Support\BoatDelivery::summary($this->part->order->boat), 'phone' => $this->part->order->boat['phone'] ?? ''])
+                : $this->part->trackingSummary(),
         ]);
     }
 

@@ -27,6 +27,7 @@ class DeliveryController extends Controller
             'rows' => $this->rows($delivery),
             'freeDeliveryOver' => Setting::get('free_delivery_over'),
             'shopOwnFees' => \App\Models\SellerDeliverySetting::ownFeesAllowed(),
+            'boatDelivery' => \App\Support\BoatDelivery::enabled(),
             'shopFeeMax' => Setting::get('shop_delivery_fee_max'),
             'shopsWithOwnFees' => \App\Models\SellerDeliverySetting::where('own_fees', true)->count(),
             'slotsEnabled' => filter_var(Setting::get('delivery_slots_enabled', 0), FILTER_VALIDATE_BOOLEAN),
@@ -50,6 +51,7 @@ class DeliveryController extends Controller
             'rates.*.max' => 'nullable|integer|min:0|max:60',
             'free_delivery_over' => 'required|numeric|min:0|max:1000000',
             'shop_own_fees_enabled' => 'nullable|boolean',
+            'boat_delivery_enabled' => 'nullable|boolean',
             'shop_delivery_fee_max' => 'sometimes|required|numeric|min:0|max:100000',
             'delivery_slots_enabled' => 'nullable|boolean',
             'delivery_slots' => 'nullable|string|max:1000',
@@ -99,6 +101,10 @@ class DeliveryController extends Controller
                 'delivery_slot_cutoff_hours' => (int) $data['delivery_slot_cutoff_hours'],
                 'delivery_slot_capacity' => (int) $data['delivery_slot_capacity'],
             ];
+
+            if (array_key_exists('boat_delivery_enabled', $data)) {
+                $settings['boat_delivery_enabled'] = (int) $data['boat_delivery_enabled'];
+            }
 
             // Shops' own fees: only what the form sent (the page always sends both)
             if (array_key_exists('shop_own_fees_enabled', $data)) {

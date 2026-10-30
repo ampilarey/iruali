@@ -254,6 +254,8 @@ class OrderService
             'credit_due_on' => $shippingData['credit_due_on'] ?? null,
             'delivery_fee_shops' => $shippingData['delivery_fee_shops'] ?? 0,
             'delivery_zone' => $shippingData['delivery_zone'],
+            // Send with a boat: none when every shop's items are collected
+            'boat' => $shippingData['delivery_zone'] !== null ? ($shippingData['boat'] ?? null) : null,
             'payment_method' => $shippingData['payment_method'] ?? 'bml',
             'voucher_code' => $voucher ? $voucher->code : null,
             'voucher_discount' => $discounts['voucher']['amount'],

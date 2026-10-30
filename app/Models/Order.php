@@ -38,6 +38,7 @@ class Order extends Model
         'shipping_country',
         'shipping_phone',
         'delivery_zone',
+        'boat',
         'billing_address',
         'payment_method',
         'payment_status',
@@ -52,6 +53,7 @@ class Order extends Model
     protected $casts = [
         'paid_at' => 'datetime',
         'placed_notified_at' => 'datetime',
+        'boat' => 'array',
         'payment_link_sent_at' => 'datetime',
         'payment_slip_uploaded_at' => 'datetime',
         'refunded_at' => 'datetime',
@@ -136,6 +138,12 @@ class Order extends Model
     public function getStatusBadgeAttribute(): string
     {
         return OrderStatus::badgeFor($this->status);
+    }
+
+    /** Sent with a boat from a jetty in Greater Malé (App\Support\BoatDelivery). */
+    public function isByBoat(): bool
+    {
+        return ! empty($this->boat['name']);
     }
 
     /**

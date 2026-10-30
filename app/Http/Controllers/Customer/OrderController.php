@@ -73,6 +73,7 @@ class OrderController extends Controller
             'payment_method' => $request->payment_method,
             'use_wallet' => $request->boolean('use_wallet'),
             'agree_booking_fee' => $request->boolean('agree_booking_fee'), // pre-orders with a booking fee (BookingFeeService)
+            'boat' => $request->boatDetails(), // "Send with a boat" (App\Support\BoatDelivery)
         ];
         // Deliver or pick up per shop, the Malé time slot and the gift details
         $shippingData += $request->deliveryChoices();

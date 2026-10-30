@@ -79,37 +79,104 @@ class SellerDeliverySetting extends Model
     /** ISO weekday => English day name, for the hours form */
     public const DAYS = [6 => 'Saturday', 7 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday'];
 
+    /** At most this many times a day (e.g. 09:00–12:00 and 14:00–22:00 around a break) */
+    public const MAX_RANGES = 3;
+
     public function hasOpeningHours(): bool
     {
-        return ! empty($this->opening_hours);
+        return collect(array_keys(self::DAYS))->contains(fn (int $day) => $this->rangesOn($day) !== []);
     }
 
     /**
-     * [open, close] for an ISO weekday, or null when closed that day.
+     * A day's opening times, in order: [[open, close], ...]; empty when closed. "24:00" closes at midnight
+     * (an all-day [00:00, 24:00]); a close before the open runs past midnight (18:00–02:00). Hours saved in
+     * the first, one-range form ([open, close]) read the same.
+     *
+     * @return list<array{0: string, 1: string}>
+     */
+    public function rangesOn(int $weekday): array
+    {
+        $day = ((array) $this->opening_hours)[(string) $weekday] ?? null;
+        if (! is_array($day) || $day === []) {
+            return [];
+        }
+        $ranges = is_array(reset($day)) ? $day : [$day];
+
+        return collect($ranges)
+            ->filter(fn ($r) => is_array($r) && count($r) === 2 && filled($r[0]) && filled($r[1]))
+            ->map(fn ($r) => [(string) $r[0], (string) $r[1] === '00:00' ? '24:00' : (string) $r[1]])
+            ->sortBy(fn (array $r) => $r[0])->values()->all();
+    }
+
+    /**
+     * The first opening and last closing time of a day, or null when closed.
      *
      * @return array{0: string, 1: string}|null
      */
     public function hoursOn(int $weekday): ?array
     {
-        $hours = ((array) $this->opening_hours)[(string) $weekday] ?? null;
+        $ranges = $this->rangesOn($weekday);
 
-        return is_array($hours) && count($hours) === 2 ? [(string) $hours[0], (string) $hours[1]] : null;
+        return $ranges === [] ? null : [$ranges[0][0], end($ranges)[1]];
+    }
+
+    /** Open all day (00:00–24:00). */
+    public function isOpenAllDay(int $weekday): bool
+    {
+        return $this->rangesOn($weekday) === [['00:00', '24:00']];
+    }
+
+    /** A day's hours for people: "09:00–12:00, 14:00–22:00", "24 hours", or null when closed. */
+    public function dayText(int $weekday): ?string
+    {
+        if ($this->isOpenAllDay($weekday)) {
+            return __('24 hours');
+        }
+        $ranges = $this->rangesOn($weekday);
+
+        return $ranges === [] ? null : collect($ranges)->map(fn ($r) => $r[0].'–'.($r[1] === '24:00' ? '00:00' : $r[1]))->join(', ');
+    }
+
+    /** Whether the shop is open at this moment (also late-night hours carried over from the day before). */
+    public function isOpenAt(CarbonInterface $at): bool
+    {
+        $time = $at->format('H:i');
+        foreach ($this->rangesOn($at->dayOfWeekIso) as [$open, $close]) {
+            if ($close > $open ? ($time >= $open && $time < $close) : $time >= $open) {
+                return true;
+            }
+        }
+        foreach ($this->rangesOn($at->subDay()->dayOfWeekIso) as [$open, $close]) {
+            if ($close < $open && $time < $close) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Whether some opening is still to come today, or the shop is open now. */
+    protected function opensLaterToday(CarbonInterface $at): bool
+    {
+        $time = $at->format('H:i');
+
+        return $this->isOpenAt($at) || collect($this->rangesOn($at->dayOfWeekIso))->contains(fn ($r) => $r[0] > $time);
     }
 
     /**
-     * When the shop next works on orders: now while it is open (or before today's opening), else
+     * When the shop next works on orders: now while it is open (or before an opening later today), else
      * the start of the next day it opens. Without opening hours: now.
      */
     public function nextWorkingDay(?CarbonInterface $at = null): CarbonImmutable
     {
         $at = CarbonImmutable::instance($at ?? now());
-        if (! $this->hasOpeningHours()) {
+        if (! $this->hasOpeningHours() || $this->opensLaterToday($at)) {
             return $at;
         }
-        for ($i = 0; $i < 8; $i++) {
+        for ($i = 1; $i < 8; $i++) {
             $day = $at->addDays($i);
-            if (($hours = $this->hoursOn($day->dayOfWeekIso)) && ($i > 0 || $day->format('H:i') < $hours[1])) {
-                return $i === 0 ? $at : $day->startOfDay();
+            if ($this->rangesOn($day->dayOfWeekIso) !== []) {
+                return $day->startOfDay();
             }
         }
 
@@ -117,7 +184,7 @@ class SellerDeliverySetting extends Model
     }
 
     /**
-     * "Open today 09:00–21:00", "Closed now, opens Sunday 09:00", or null without opening hours.
+     * "Open today 09:00–12:00, 14:00–22:00", "Closed now, opens Sunday 09:00", or null without opening hours.
      */
     public function hoursText(?CarbonInterface $at = null): ?string
     {
@@ -125,14 +192,21 @@ class SellerDeliverySetting extends Model
             return null;
         }
         $at = CarbonImmutable::instance($at ?? now());
-        $today = $this->hoursOn($at->dayOfWeekIso);
-        if ($today && $at->format('H:i') < $today[1]) {
-            return __('Open today :from–:until', ['from' => $today[0], 'until' => $today[1]]);
+        if ($this->opensLaterToday($at) && ($today = $this->dayText($at->dayOfWeekIso)) !== null) {
+            return $this->isOpenAllDay($at->dayOfWeekIso) ? __('Open 24 hours today') : __('Open today :hours', ['hours' => $today]);
         }
-        $next = $this->nextWorkingDay($at);
-        $hours = $this->hoursOn($next->dayOfWeekIso);
+        if ($this->isOpenAt($at)) {
+            return __('Open now'); // late-night hours from yesterday
+        }
+        // Closed for the rest of today: the next opening (today's later slot is handled above)
+        for ($i = 1; $i < 8; $i++) {
+            $day = $at->addDays($i);
+            if ($ranges = $this->rangesOn($day->dayOfWeekIso)) {
+                return __('Closed now, opens :day :time', ['day' => $day->translatedFormat('l'), 'time' => $ranges[0][0]]);
+            }
+        }
 
-        return $hours ? __('Closed now, opens :day :time', ['day' => $next->translatedFormat('l'), 'time' => $hours[0]]) : null;
+        return null;
     }
 
     public function minimumOrder(): float

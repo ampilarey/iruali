@@ -125,6 +125,59 @@ class OrderRulesTest extends TestCase
         $this->assertNotNull(OrderRules::pauseProblem(['payment_method' => 'cod', 'fulfilment_parts' => []]));
     }
 
+    public function test_opening_hours_with_breaks_all_day_and_past_midnight(): void
+    {
+        $shop = $this->shop('Malé Mart');
+        $base = ['ships_within_days' => 1, 'pickup_enabled' => 0];
+        $this->actingAs($shop)->put(route('seller.settings.delivery.update'), $base + ['hours' => [
+            '5' => ['open' => 1, 'ranges' => [['14:00', '22:00'], ['08:00', '11:30']]], // Friday, around prayer; any order
+            '6' => ['open' => 1, 'allday' => 1],                                      // Saturday, 24 hours
+            '7' => ['open' => 1, 'ranges' => [['18:00', '02:00']]],                   // Sunday, into Monday morning
+        ]])->assertSessionHas('success');
+        $setting = SellerDeliverySetting::for($shop->id);
+        $this->assertSame([['08:00', '11:30'], ['14:00', '22:00']], $setting->rangesOn(5));
+        $this->assertSame('08:00–11:30, 14:00–22:00', $setting->dayText(5));
+        $this->assertTrue($setting->isOpenAllDay(6));
+        $this->assertSame(__('24 hours'), $setting->dayText(6));
+
+        $at = fn (string $when) => Carbon::parse($when, 'Indian/Maldives');
+        $this->assertFalse($setting->isOpenAt($at('2026-10-30 12:30'))); // Friday break
+        $this->assertSame(__('Open today :hours', ['hours' => '08:00–11:30, 14:00–22:00']), $setting->hoursText($at('2026-10-30 12:30')));
+        $this->assertTrue($setting->nextWorkingDay($at('2026-10-30 12:30'))->isSameDay($at('2026-10-30 12:30')));
+        $this->assertSame(__('Closed now, opens :day :time', ['day' => 'Saturday', 'time' => '00:00']), $setting->hoursText($at('2026-10-30 23:00')));
+        $this->assertSame(__('Open 24 hours today'), $setting->hoursText($at('2026-10-31 03:00')));
+        $this->assertTrue($setting->isOpenAt($at('2026-11-01 23:30')));  // Sunday night
+        $this->assertTrue($setting->isOpenAt($at('2026-11-02 01:30')));  // Monday 01:30, Sunday's late hours
+        $this->assertFalse($setting->isOpenAt($at('2026-11-02 03:00')));
+        $this->assertSame(__('Open now'), $setting->hoursText($at('2026-11-02 01:30')));
+
+        // Overlapping times, and more than three, are refused
+        $this->put(route('seller.settings.delivery.update'), $base + ['hours' => ['1' => ['open' => 1, 'ranges' => [['09:00', '13:00'], ['12:00', '18:00']]]]])->assertSessionHasErrors('hours');
+        $this->put(route('seller.settings.delivery.update'), $base + ['hours' => ['1' => ['open' => 1, 'ranges' => [['08:00', '09:00'], ['10:00', '11:00'], ['12:00', '13:00'], ['14:00', '15:00']]]]])->assertSessionHasErrors();
+        // An open day with no times says so
+        $this->put(route('seller.settings.delivery.update'), $base + ['hours' => ['1' => ['open' => 1, 'ranges' => [['', '']]]]])->assertSessionHasErrors('hours');
+
+        // Hours saved the first way ([open, close]) read the same
+        $old = new SellerDeliverySetting(['opening_hours' => ['1' => ['09:00', '17:00']]]);
+        $this->assertSame([['09:00', '17:00']], $old->rangesOn(1));
+    }
+
+    public function test_pickup_needs_opening_hours_or_instructions_not_both(): void
+    {
+        $shop = $this->shop('Lagoon Store');
+        $island = \App\Models\Island::create(['name' => ['en' => 'Malé', 'dv' => 'މާލެ'], 'atoll' => 'Kaafu', 'is_active' => true]);
+        $pickup = ['ships_within_days' => 1, 'pickup_enabled' => 1, 'pickup_address' => 'Lagoon Store, Majeedhee Magu', 'pickup_island_id' => $island->id];
+
+        // Neither: refused, with the message the owner saw
+        $this->actingAs($shop)->put(route('seller.settings.delivery.update'), $pickup)
+            ->assertSessionHasErrors(['pickup_hours' => __('Please give your opening hours, so customers know when to come.')]);
+        // Opening hours only (what the owner filled in): saved
+        $this->put(route('seller.settings.delivery.update'), $pickup + ['hours' => ['6' => ['open' => 1, 'ranges' => [['09:00', '21:00']]]]])->assertSessionHas('success');
+        $this->assertTrue(SellerDeliverySetting::for($shop->id)->offersPickup());
+        // Instructions only: saved too
+        $this->put(route('seller.settings.delivery.update'), $pickup + ['pickup_hours' => 'Call when you arrive.'])->assertSessionHas('success');
+    }
+
     public function test_opening_hours_move_the_arrival_estimate_and_show_on_the_product(): void
     {
         // Open Sunday to Thursday 09:00-17:00; the test runs on a Friday afternoon
@@ -136,7 +189,7 @@ class OrderRulesTest extends TestCase
         $this->assertSame(__('Closed now, opens :day :time', ['day' => 'Sunday', 'time' => '09:00']), $setting->hoursText());
 
         Carbon::setTestNow(Carbon::parse('2026-10-25 10:00', 'Indian/Maldives'));
-        $this->assertSame(__('Open today :from–:until', ['from' => '09:00', 'until' => '17:00']), $setting->hoursText());
+        $this->assertSame(__('Open today :hours', ['hours' => '09:00–17:00']), $setting->hoursText());
         $this->assertTrue($setting->nextWorkingDay()->isSameDay(now()));
 
         Carbon::setTestNow();
@@ -145,10 +198,10 @@ class OrderRulesTest extends TestCase
         $shop = $this->shop('Reef Goods');
         $base = ['ships_within_days' => 1, 'pickup_enabled' => 0];
         $this->actingAs($shop)->get(route('seller.settings.delivery'))->assertOk()->assertSee('data-opening-hours', false);
-        $this->put(route('seller.settings.delivery.update'), $base + ['hours' => ['6' => ['09:00', '']]])->assertSessionHasErrors('hours');
-        $this->put(route('seller.settings.delivery.update'), $base + ['min_order_amount' => 150, 'hours' => ['6' => ['09:00', '18:00'], '7' => ['', '']]])->assertSessionHas('success');
+        $this->put(route('seller.settings.delivery.update'), $base + ['hours' => ['6' => ['open' => 1, 'ranges' => [['09:00', '']]]]])->assertSessionHasErrors('hours');
+        $this->put(route('seller.settings.delivery.update'), $base + ['min_order_amount' => 150, 'hours' => ['6' => ['open' => 1, 'ranges' => [['09:00', '18:00']]], '7' => ['open' => 0, 'ranges' => [['09:00', '18:00']]]]])->assertSessionHas('success');
         $saved = SellerDeliverySetting::for($shop->id);
-        $this->assertSame(['6' => ['09:00', '18:00']], $saved->opening_hours);
+        $this->assertSame(['6' => [['09:00', '18:00']]], $saved->opening_hours);
         $this->assertEqualsWithDelta(150, $saved->minimumOrder(), 0.001);
     }
 }

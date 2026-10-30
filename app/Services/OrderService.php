@@ -106,7 +106,10 @@ class OrderService
             // items' extra charges, which free delivery does not waive; also the Malé time slot
             // (checked again under a lock) and the gift details
             $delivery = app(DeliveryService::class);
-            $shippingData['delivery_zone'] = $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null, $shippingData['shipping_state'] ?? null);
+            // A boat order (checked by StoreOrderRequest) is a hand-over on the shop's island at the local rate
+            $shippingData['delivery_zone'] = ! empty($shippingData['boat'])
+                ? DeliveryService::AREA_GREATER_MALE
+                : $delivery->zoneFor($shippingData['delivery_zone'] ?? null, $shippingData['shipping_city'] ?? null, $shippingData['shipping_state'] ?? null);
             $shippingData = $delivery->prepareOrder($cart, $shippingData, (float) $discounts['final_total']);
 
             // Ordering rules: paused ordering, minimum orders, and the small-order fee (with delivery, for iruali)

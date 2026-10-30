@@ -8,6 +8,7 @@
     $addresses = $addresses ?? collect();
     $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
     $boatOffer ??= false;
+    $boatFrom ??= null;
     $boatLast ??= null;
     $byBoat = $boatOffer && (string) $selectedAddressId === \App\Support\BoatDelivery::CHOICE;
     $selectedZone = $byBoat ? \App\Services\DeliveryService::AREA_GREATER_MALE : old('delivery_zone', $selectedAddress ? $selectedAddress->deliveryZone() : app(\App\Services\DeliveryService::class)->zoneFor(null, $user?->city));
@@ -80,8 +81,8 @@
                                 <label class="flex items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-50" data-boat-choice>
                                     <input type="radio" name="address_id" value="{{ \App\Support\BoatDelivery::CHOICE }}" data-zone="{{ \App\Services\DeliveryService::AREA_GREATER_MALE }}" @checked($byBoat) class="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500">
                                     <span class="min-w-0 text-sm">
-                                        <span class="flex items-center gap-1.5 font-medium text-gray-900"><x-icon name="truck" class="h-4 w-4 text-primary" />{{ __('Send with a boat (from Malé)') }}</span>
-                                        <span class="block text-gray-600">{{ __('The shop takes it to the jetty before your boat leaves. You pay the boat\'s freight when you collect.') }}</span>
+                                        <span class="flex items-center gap-1.5 font-medium text-gray-900"><x-icon name="truck" class="h-4 w-4 text-primary" />{{ __('Send with a boat (from :island)', ['island' => $boatFrom?->localized_name]) }}</span>
+                                        <span class="block text-gray-600">{{ __('The shop takes it to the jetty or harbour before your boat leaves. You pay the boat\'s freight when you collect.') }}</span>
                                     </span>
                                 </label>
                             @endif

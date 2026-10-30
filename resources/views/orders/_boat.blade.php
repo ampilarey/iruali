@@ -3,7 +3,7 @@
 @if($order->isByBoat())
     @php
         $boat = $order->boat;
-        $jetty = ($boat['jetty'] ?? '') === 'other' ? ($boat['jetty_other'] ?? '') : (\App\Support\BoatDelivery::jetties()[$boat['jetty'] ?? ''] ?? '');
+        $jetty = \App\Support\BoatDelivery::jettyLabel($boat);
         $departs = ! empty($boat['departs_at']) ? \Illuminate\Support\Carbon::parse($boat['departs_at']) : null;
     @endphp
     <div class="mt-3 rounded-lg border border-primary-200 bg-primary-50 p-3 text-sm text-gray-800" data-order-boat>

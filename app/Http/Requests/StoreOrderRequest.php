@@ -76,7 +76,7 @@ class StoreOrderRequest extends FormRequest
             'deliver_by_boat' => 'nullable|boolean',
             'boat_name' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'string', 'max:80'],
             'boat_phone' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/'],
-            'boat_jetty' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', \Illuminate\Validation\Rule::in(array_keys(\App\Support\BoatDelivery::jetties()))],
+            'boat_jetty' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', \Illuminate\Validation\Rule::in(array_keys(\App\Support\BoatDelivery::jetties($this->byBoat() ? $this->boatFrom() : null)))],
             'boat_jetty_other' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat() && $this->input('boat_jetty') === 'other'), 'nullable', 'string', 'max:100'],
             'boat_departs_at' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'date'],
             'boat_island' => [\Illuminate\Validation\Rule::requiredIf(fn () => $this->byBoat()), 'nullable', 'string', 'max:100'],
@@ -101,11 +101,15 @@ class StoreOrderRequest extends FormRequest
             return null;
         }
 
+        $from = $this->boatFrom();
+
         return [
             'name' => trim((string) $this->input('boat_name')),
             'phone' => preg_replace('/\s+/', '', (string) $this->input('boat_phone')),
             'jetty' => (string) $this->input('boat_jetty'),
             'jetty_other' => $this->input('boat_jetty') === 'other' ? trim((string) $this->input('boat_jetty_other')) : null,
+            'jetty_label' => \App\Support\BoatDelivery::jetties($from)[(string) $this->input('boat_jetty')] ?? null,
+            'from' => $from ? ($from->getTranslation('name', 'en', false) ?: (string) $from->localized_name) : null,
             'departs_at' => \Carbon\CarbonImmutable::parse((string) $this->input('boat_departs_at'))->format('Y-m-d H:i'),
             'island' => trim((string) $this->input('boat_island')),
             'notes' => filled($this->input('boat_notes')) ? trim((string) $this->input('boat_notes')) : null,
@@ -164,20 +168,30 @@ class StoreOrderRequest extends FormRequest
 
             return;
         }
+        $from = $this->boatFrom();
         $jetty = (string) $this->input('boat_jetty');
-        $island = \App\Support\BoatDelivery::jettyIsland($jetty);
-        $label = $jetty === 'other' ? trim((string) $this->input('boat_jetty_other')) : (\App\Support\BoatDelivery::jetties()[$jetty] ?? '');
+        $island = \App\Support\BoatDelivery::jettyIsland($jetty, $from);
+        $label = $jetty === 'other' ? trim((string) $this->input('boat_jetty_other')) : (\App\Support\BoatDelivery::jetties($from)[$jetty] ?? '');
         $this->merge([
             'deliver_by_boat' => true,
             'address_id' => null,
             'island_id' => $island?->id,
             'shipping_address' => __('Boat: :boat', ['boat' => trim(implode(', ', array_filter([trim((string) $this->input('boat_name')), $label])))]),
-            'shipping_city' => \App\Support\BoatDelivery::jettyIslandName($jetty),
-            'shipping_state' => $island?->atoll ?: 'Kaafu',
+            'shipping_city' => $island ? ($island->getTranslation('name', 'en', false) ?: (string) $island->localized_name) : '',
+            'shipping_state' => (string) ($island->atoll ?? ''),
             'shipping_country' => 'Maldives',
+            // A hand-over on the shop's island: the local (Greater Malé) rate, or the shop's own local fee
             'delivery_zone' => \App\Services\DeliveryService::AREA_GREATER_MALE,
             'delivery_slot' => '',
         ]);
+    }
+
+    /** The island the boat leaves from for this cart's delivering shops (BoatDelivery::fromIsland()). */
+    public function boatFrom(): ?\App\Models\Island
+    {
+        $choices = (array) $this->input('fulfilment', []);
+
+        return \App\Support\BoatDelivery::fromIsland($this->deliveryShops()->filter(fn (array $shop, int $sellerId) => ($choices[$sellerId] ?? null) !== \App\Models\SellerOrder::METHOD_PICKUP));
     }
 
     /**
@@ -241,7 +255,9 @@ class StoreOrderRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->applyBoatChoice();
-        $this->applyAddressChoice();
+        if (! $this->boolean('deliver_by_boat')) {
+            $this->applyAddressChoice();
+        }
 
         // Trim whitespace from string inputs
         $this->merge([
@@ -377,7 +393,7 @@ class StoreOrderRequest extends FormRequest
             $choices = (array) $this->input('fulfilment', []);
             $delivered = $shops->filter(fn (array $shop, int $sellerId) => ($choices[$sellerId] ?? null) !== \App\Models\SellerOrder::METHOD_PICKUP);
             if (! \App\Support\BoatDelivery::offeredFor($delivered)) {
-                $validator->errors()->add('address_id', __('Sending with a boat is only possible when every shop is in Greater Malé. Please give an address instead.'));
+                $validator->errors()->add('address_id', __('Sending with a boat works when every shop is on the same island (or all in Greater Malé). Please give an address instead.'));
             } elseif ($problem = \App\Support\BoatDelivery::departureProblem(\Carbon\CarbonImmutable::parse((string) $this->input('boat_departs_at')), $delivered)) {
                 $validator->errors()->add('boat_departs_at', $problem);
             }

@@ -21,7 +21,7 @@
             'estimates' => $shop['estimates'],
             'reach' => $shop['reach'],
         ])->values(),
-        'addressIslands' => (object) ($deliveryCheckout['addressIslands'] + (($boatOffer ?? false) && ($maleIsland = \App\Support\BoatDelivery::jettyIsland('male_1')) ? [\App\Support\BoatDelivery::CHOICE => ['id' => $maleIsland->id, 'name' => $maleIsland->localized_name]] : [])),
+        'addressIslands' => (object) ($deliveryCheckout['addressIslands'] + (($boatFrom ?? null) ? [\App\Support\BoatDelivery::CHOICE => ['id' => $boatFrom->id, 'name' => $boatFrom->localized_name]] : [])),
     ];
 @endphp
 <script type="application/json" id="delivery-config">@json($deliveryConfig)</script>

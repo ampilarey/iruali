@@ -3490,5 +3490,13 @@
     "Please give the island the boat goes to.": "ބޯޓު ދާ ރަށް ޖައްސަވާ.",
     "Sending with a boat is only possible when every shop is in Greater Malé. Please give an address instead.": "ބޯޓެއްގައި ފޮނުވޭނީ ހުރިހާ ފިހާރައެއް ބޮޑުމާލޭގައި ހުންނައިރު. އެޑްރެހެއް ޖައްސަވާ.",
     "It is on the boat: :boat. Boat phone: :phone. Collect it from the boat on your island and pay the boat's freight charge there.": "ބޯޓަށް އަރުވާފައި: :boat. ބޯޓުގެ ފޯނު: :phone. ތިބާގެ ރަށުގައި ބޯޓުން ނަގައި، ފުރައިޓް ޗާޖު އެތަނުގައި ދައްކަވާ.",
-    "On the boat :boat, phone :phone.": "ބޯޓު :boat ގައި، ފޯނު :phone."
+    "On the boat :boat, phone :phone.": "ބޯޓު :boat ގައި، ފޯނު :phone.",
+    "Tell us which boat to give it to. The shop hands your order to the boat before it leaves :island, and we text you when it is on board. The boat's freight charge is paid to the boat when you collect.": "ހަވާލުކުރާނެ ބޯޓު ބުނެދެއްވާ. ބޯޓު :island އިން ފުރުމުގެ ކުރިން ފިހާރައިން އޯޑަރު ބޯޓާ ހަވާލުކުރާނެ، އަދި ބޯޓަށް އެރުވުމުން އަޅުގަނޑުމެން އެސްއެމްއެސް ކުރާނަން. ބޯޓުގެ ފުރައިޓް ޗާޖު ދައްކަވާނީ ނަގާއިރު ބޯޓަށް.",
+    "Where exactly?": "ކޮންތަނެއްގައި؟",
+    "Send with a boat (from :island)": "ބޯޓެއްގައި ފޮނުވާ (:island އިން)",
+    "The shop takes it to the jetty or harbour before your boat leaves. You pay the boat's freight when you collect.": "ތިބާގެ ބޯޓު ފުރުމުގެ ކުރިން ފިހާރައިން ޖެޓީ ނުވަތަ ބަނދަރަށް ގެންދާނެ. ބޯޓުގެ ފުރައިޓް ދައްކަވާނީ ނަގާއިރު.",
+    "Customers can name a boat leaving the shop's island for theirs: the shop takes the parcel to the jetty or harbour before it leaves and the customer pays the boat's freight on collection. It costs the Greater Malé delivery fee (or the shop's own local fee), and is offered when every shop in the cart is on the same island, or all in Greater Malé.": "ކަސްޓަމަރުންނަށް ފިހާރަ ހުރި ރަށުން އެމީހުންގެ ރަށަށް ދާ ބޯޓެއް ބުނެވިދާނެ: ބޯޓު ފުރުމުގެ ކުރިން ފިހާރައިން ޖެޓީ ނުވަތަ ބަނދަރަށް ގެންދާނެ، އަދި ބޯޓުގެ ފުރައިޓް ކަސްޓަމަރު ދައްކާނީ ނަގާއިރު. ބޮޑުމާލޭގެ ޑެލިވަރީ ފީ (ނުވަތަ ފިހާރައިގެ އަމިއްލަ ލޯކަލް ފީ) ނަގާނެ، އަދި ލިބޭނީ ކާޓުގައިވާ ހުރިހާ ފިހާރައެއް އެއް ރަށެއްގައި، ނުވަތަ ހުރިހާ ފިހާރައެއް ބޮޑުމާލޭގައި ހުންނައިރު.",
+    ":island harbour": ":island ބަނދަރު",
+    "Another place on :island": ":island ގައި އެހެން ތަނެއް",
+    "Sending with a boat works when every shop is on the same island (or all in Greater Malé). Please give an address instead.": "ބޯޓެއްގައި ފޮނުވޭނީ ހުރިހާ ފިހާރައެއް އެއް ރަށެއްގައި (ނުވަތަ ހުރިހާ ފިހާރައެއް ބޮޑުމާލޭގައި) ހުންނައިރު. އެޑްރެހެއް ޖައްސަވާ."
 }

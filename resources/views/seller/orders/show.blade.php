@@ -131,6 +131,7 @@
                 <p class="text-sm text-gray-700">{{ $order->shipping_address }}</p>
                 <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
                 <p class="text-sm text-gray-700">{{ $order->shipping_country }}</p>
+                @include('orders._boat')
                 @if($order->shipping_phone)
                     <p class="mt-2 text-sm text-gray-700">Phone: <a href="tel:{{ $order->shipping_phone }}" dir="ltr" class="font-medium hover:underline">{{ $order->shipping_phone }}</a></p>
                 @endif

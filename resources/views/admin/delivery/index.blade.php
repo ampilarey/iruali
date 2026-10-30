@@ -87,6 +87,15 @@
             </div>
         </x-admin.fold>
 
+        <x-admin.fold :title="__('Send with a boat')" data-boat-delivery>
+            <p class="mt-1 text-sm text-gray-500">{{ __('Customers on other islands can name a boat leaving Greater Malé for their island: the shop takes the parcel to the jetty before it leaves and the customer pays the boat\'s freight on collection. It costs the Greater Malé delivery fee, and is offered only when every shop in the cart is in Greater Malé.') }}</p>
+            <label class="mt-4 flex items-start gap-3 text-sm text-gray-700">
+                <input type="hidden" name="boat_delivery_enabled" value="0">
+                <input type="checkbox" name="boat_delivery_enabled" value="1" @checked(old('boat_delivery_enabled', $boatDelivery)) class="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                <span class="font-medium text-gray-900">{{ __('Offer "Send with a boat" at checkout') }}</span>
+            </label>
+        </x-admin.fold>
+
         <x-admin.fold :title="__('Shops\' own delivery fees')" data-shop-fees>
             <p class="mt-1 text-sm text-gray-500">{{ __('A shop can deliver its orders itself and set its own fees: to its home island, to Greater Malé and to other islands. It is paid its fee and bulky-item charges with its earnings, with no commission on them, and they are on its invoice. The fees above apply to every other shop; iruali charges them once per order and keeps them.') }}</p>
             <p class="mt-2 text-sm text-gray-700">{{ trans_choice(':count shop has set its own fees.|:count shops have set their own fees.', $shopsWithOwnFees, ['count' => $shopsWithOwnFees]) }}</p>

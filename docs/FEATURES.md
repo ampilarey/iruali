@@ -230,6 +230,16 @@ listings, labels and checkout; pickup from the shop is open to everyone whatever
 shop page shows "Based in <island>, <atoll> · Delivers to: …". The fields are not mass-assignable
 (saved with `ShopCoverage::save()`).
 
+**Send with a boat** (`App\Support\BoatDelivery`). At checkout, next to the saved addresses, "Send with a
+boat (from Malé)" (`address_id=boat`) asks for the boat's name and phone, the jetty (Malé Jetty No. 1–10,
+Villimalé or Hulhumalé ferry terminal, or another), when it leaves, the island it goes to and a note; the
+last boat used fills it in again. `StoreOrderRequest::applyBoatChoice()` makes it a Greater Malé delivery
+to the jetty's island (the Greater Malé fee and reach, no Malé time slot) and stores the details in
+`orders.boat`. The boat must leave at least 2 hours from now, within 21 days, and 2 hours after each shop
+next opens. Offered when Admin → Delivery has it on (default) and every shop in the cart has a Greater Malé
+home island. The order pages (customer, shop, admin) show the boat; the shop's "sent" message names the
+boat and its phone. The customer pays the boat's freight on collection.
+
 **Pausing or hiding new shop applications.** **Admin → Sellers → New shop applications**
 (`admin.seller-applications`, admins only; `App\Support\SellerApplications`) has three choices.
 **Open** is the default. **Paused** keeps "Sell on iruali" on the site, but `/seller/apply` shows the

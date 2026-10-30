@@ -105,6 +105,7 @@
                             {{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}<br>
                             {{ $order->shipping_country }}
                         </p>
+                        @include('orders._boat')
                     </div>
                     @if($order->shipping_phone)
                         <div>

@@ -7,6 +7,7 @@
         if (!form) return;
         var cards = form.querySelectorAll('input[name="address_id"]');
         var panel = form.querySelector('[data-new-address]');
+        var boatPanel = form.querySelector('[data-boat-panel]');
         var zones = form.querySelectorAll('input[name="delivery_zone"]');
 
         function pickZone(zone) {
@@ -20,10 +21,16 @@
             if (!panel || !cards.length) return;
             var chosen = Array.prototype.find.call(cards, function (c) { return c.checked; });
             var useNew = !chosen || chosen.value === '';
+            // "Send with a boat": its own fields instead of an address (the shop takes it to the jetty)
+            var byBoat = !!(chosen && chosen.value === 'boat');
             panel.classList.toggle('hidden', !useNew);
             panel.querySelectorAll('input, select, textarea').forEach(function (el) {
                 el.disabled = !useNew;
             });
+            if (boatPanel) {
+                boatPanel.classList.toggle('hidden', !byBoat);
+                boatPanel.querySelectorAll('input, select, textarea').forEach(function (el) { el.disabled = !byBoat; });
+            }
             if (!useNew && chosen) pickZone(chosen.dataset.zone);
             if (useNew) {
                 var select = panel.querySelector('[data-island-select]');
@@ -33,6 +40,13 @@
         }
 
         cards.forEach(function (c) { c.addEventListener('change', syncPanel); });
+        var jetty = form.querySelector('[data-boat-jetty]');
+        var jettyOther = form.querySelector('[data-boat-jetty-other]');
+        if (jetty && jettyOther) {
+            var syncJetty = function () { jettyOther.classList.toggle('hidden', jetty.value !== 'other'); jettyOther.required = jetty.value === 'other'; };
+            jetty.addEventListener('change', syncJetty);
+            syncJetty();
+        }
         form.addEventListener('island:change', function (e) { pickZone(e.detail && e.detail.zone); });
         syncPanel();
     }

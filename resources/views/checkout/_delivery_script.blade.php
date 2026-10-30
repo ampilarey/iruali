@@ -10,7 +10,8 @@
         'areaFees' => $deliveryCheckout['areaFees'],
         'areaLabels' => $deliveryCheckout['areas'],
         'atollAreas' => (object) $deliveryCheckout['atollAreas'],
-        'addressAreas' => (object) $deliveryCheckout['addressAreas'],
+        // "Send with a boat" counts as Greater Malé (the jetty), App\Support\BoatDelivery
+        'addressAreas' => (object) ($deliveryCheckout['addressAreas'] + (($boatOffer ?? false) ? [\App\Support\BoatDelivery::CHOICE => \App\Services\DeliveryService::AREA_GREATER_MALE] : [])),
         'shops' => $deliveryCheckout['shops']->map(fn ($shop) => [
             'key' => $shop['key'],
             'pickup' => $shop['pickup'] !== null,
@@ -20,7 +21,7 @@
             'estimates' => $shop['estimates'],
             'reach' => $shop['reach'],
         ])->values(),
-        'addressIslands' => (object) $deliveryCheckout['addressIslands'],
+        'addressIslands' => (object) ($deliveryCheckout['addressIslands'] + (($boatOffer ?? false) && ($maleIsland = \App\Support\BoatDelivery::jettyIsland('male_1')) ? [\App\Support\BoatDelivery::CHOICE => ['id' => $maleIsland->id, 'name' => $maleIsland->localized_name]] : [])),
     ];
 @endphp
 <script type="application/json" id="delivery-config">@json($deliveryConfig)</script>
@@ -153,7 +154,9 @@
                 });
 
                 var toggle = function (selector, show) { var el = form.querySelector(selector); if (el) el.classList.toggle('hidden', !show); return el; };
-                toggle('[data-delivery-zones]', anyDelivered);
+                var card = form.querySelector('input[name="address_id"]:checked');
+                var byBoat = !!(card && card.value === 'boat');
+                toggle('[data-delivery-zones]', anyDelivered && !byBoat);
                 var note = toggle('[data-area-note]', anyDelivered);
                 if (note) note.textContent = cfg.areaNote.replace(':area', cfg.areaLabels[current] || current).replace(':fee', fmt(anyDelivered ? feesFor(delivered, current, dest) : 0));
                 var surchargeNote = toggle('[data-surcharge-note]', anyDelivered && surcharge > 0);
@@ -162,7 +165,7 @@
                 toggleAddress(!anyDelivered);
 
                 if (slots) {
-                    var showSlots = anyDelivered && current === 'greater_male';
+                    var showSlots = anyDelivered && current === 'greater_male' && !byBoat; // a boat leaves when it leaves
                     slots.classList.toggle('hidden', !showSlots);
                     slots.querySelectorAll('input[name="delivery_slot"]').forEach(function (el) { el.disabled = !showSlots || el.dataset.unavailable === '1'; });
                 }

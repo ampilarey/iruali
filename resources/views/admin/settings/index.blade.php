@@ -459,7 +459,7 @@
                 </dl>
             </x-admin.fold>
 
-            <div class="flex justify-end">
+            <div class="flex justify-end sticky z-20 -mx-4 border-t border-gray-200 bg-white/95 px-4 py-3 sm:-mx-6 sm:px-6 backdrop-blur max-lg:bottom-[calc(3.5rem+env(safe-area-inset-bottom))] lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none" data-save-bar>
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Save settings</button>
             </div>
         </form>

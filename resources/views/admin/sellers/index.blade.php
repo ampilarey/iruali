@@ -5,8 +5,9 @@
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-wrap items-center justify-between gap-2 py-3 lg:py-4">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900 lg:text-2xl">Manage Sellers</h1>
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wider text-primary-600">Marketplace</p>
+                    <h1 class="text-xl font-bold text-gray-900 lg:text-2xl">Sellers</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     @php $applications = \App\Support\SellerApplications::status(); @endphp
@@ -19,12 +20,12 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         @if(session('success'))
             <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
         @endif
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
+        <div class="md:rounded-lg md:bg-white md:shadow">
+            <div class="md:p-6">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -80,23 +81,25 @@
                                     @if($perf && $perf['rating'] !== null){{ number_format($perf['rating'], 1) }} ★ <span class="text-xs text-gray-500">({{ $perf['reviews'] }})</span>@else<span class="text-gray-400">—</span>@endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('admin.sellers.performance', $seller) }}" class="text-primary-700 hover:text-primary-900 me-3">{{ __('Performance') }}</a>
+                                    <div class="flex flex-wrap items-center justify-end gap-2 md:justify-start" data-seller-actions>
+                                    <a href="{{ route('admin.sellers.performance', $seller) }}" class="rounded-lg border border-gray-300 px-3 py-1.5 text-primary-700 hover:bg-gray-50">{{ __('Performance') }}</a>
                                     @if(! $seller->seller_approved)
                                     <form method="POST" action="{{ route('admin.sellers.approve', $seller->id) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-green-600 hover:text-green-900 mr-3">Approve</button>
+                                        <button type="submit" class="rounded-lg bg-green-600 px-3 py-1.5 text-white hover:bg-green-700">Approve</button>
                                     </form>
                                     @endif
                                     <form method="POST" action="{{ route('admin.sellers.reject', $seller->id) }}" class="inline" onsubmit="return confirm('Remove seller access for this user?')">
                                         @csrf
-                                        <button type="submit" class="text-red-600 hover:text-red-900">{{ $seller->seller_approved ? 'Revoke' : 'Reject' }}</button>
+                                        <button type="submit" class="rounded-lg border border-red-200 px-3 py-1.5 text-red-700 hover:bg-red-50">{{ $seller->seller_approved ? 'Revoke' : 'Reject' }}</button>
                                     </form>
                                     @if($seller->seller_approved && $seller->status !== 'suspended')
-                                    <form method="POST" action="{{ route('admin.sellers.suspend', $seller->id) }}" class="inline ml-3" onsubmit="return confirm('Suspend this seller? Every product in their shop will be deactivated.')">
+                                    <form method="POST" action="{{ route('admin.sellers.suspend', $seller->id) }}" class="inline" onsubmit="return confirm('Suspend this seller? Every product in their shop will be deactivated.')">
                                         @csrf
-                                        <button type="submit" class="text-orange-600 hover:text-orange-900" title="Deactivates every product in this shop">Suspend</button>
+                                        <button type="submit" class="rounded-lg border border-orange-200 px-3 py-1.5 text-orange-700 hover:bg-orange-50" title="Deactivates every product in this shop">Suspend</button>
                                     </form>
                                     @endif
+                                    </div>
                                 </td>
                             </tr>
                             @empty

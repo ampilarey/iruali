@@ -481,7 +481,7 @@
     @endunless
 
     <!-- "Message us": a conversation with iruali from any storefront page (not during checkout or on the message pages) -->
-    @unless(request()->routeIs('checkout*', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show'))
+    @unless(request()->routeIs('checkout*', 'cart', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show'))
         <a href="{{ route('messages.support') }}" class="fixed z-40 start-4 bottom-20 lg:bottom-6 flex items-center gap-2 rounded-full bg-primary px-3 py-3 lg:px-4 text-white shadow-2xl hover:bg-primary-hover" aria-label="{{ __('Message us') }}" data-floating-message>
             <x-icon name="chat" class="w-5 h-5" /><span class="hidden lg:inline text-sm font-semibold">{{ __('Message us') }}</span>
         </a>

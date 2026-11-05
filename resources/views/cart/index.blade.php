@@ -12,7 +12,7 @@
 
 @section('content')
 <div class="bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 lg:py-8">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 pb-28 lg:py-8">
         <h1 class="font-display text-2xl lg:text-3xl font-bold text-dark mb-4">{{ __('Cart') }}@if($units)<span class="text-gray-500 font-sans font-normal text-base ms-2">({{ trans_choice(':count item|:count items', $units, ['count' => $units]) }})</span>@endif</h1>
         @include('quotes._cart_notices')
 
@@ -159,6 +159,12 @@
                         <a href="{{ route('checkout') }}" class="flex items-center justify-center gap-2 w-full h-12 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold">{{ __('Proceed to checkout') }}</a>
                         <p class="text-xs text-gray-500 text-center">{{ __('You sign in at checkout with your mobile number or email. Your cart comes with you.') }}</p>
                     @endauth
+                    @unless($minimumProblem)
+                        {{-- Phones: the total and the way to checkout stay in view, above the tab bar (as on checkout) --}}
+                        <div class="lg:hidden fixed inset-x-0 z-40 border-t border-gray-200 bg-white px-4 py-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)]" style="bottom: calc(4rem + env(safe-area-inset-bottom));" data-cart-bar>
+                            <a href="{{ route('checkout') }}" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-white hover:bg-primary-hover">{{ __('Checkout · :amount', ['amount' => \App\Support\Money::format($total)]) }}</a>
+                        </div>
+                    @endunless
                     <ul class="text-xs text-gray-600 space-y-1.5">
                         <li class="flex items-center gap-2"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('Reviewed local sellers') }}</li>
                         <li class="flex items-center gap-2"><x-icon name="bank" class="w-4 h-4 text-primary" />{{ __('Secure card payment via Bank of Maldives') }}</li>

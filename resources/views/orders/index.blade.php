@@ -53,12 +53,16 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center">
+                    @if(app(\App\Services\PaymentService::class)->canPayOnline($order))
+                        {{-- Waiting for its card payment: the order page has "Pay now" at the top --}}
+                        <a href="{{ route('orders.show', $order) }}" class="mb-3 flex h-11 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white hover:bg-primary-hover" data-order-pay>{{ __('Pay :amount now', ['amount' => \App\Support\Money::format($order->cardAmount())]) }}</a>
+                    @endif
+                    <div class="flex flex-wrap justify-between items-center gap-x-4 gap-y-2">
                         <a href="{{ route('orders.show', $order) }}" 
                            class="text-primary-600 hover:text-primary-700 font-medium">
                             {{ __('View Order Details →') }}
                         </a>
-                        <div class="flex items-center gap-4">
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                             <a href="{{ route('orders.receipt', $order) }}" target="_blank" rel="noopener" class="text-gray-600 hover:text-primary-700 font-medium">{{ __('Receipt') }}</a>
                             <form method="POST" action="{{ route('orders.buyAgain', $order) }}">
                                 @csrf

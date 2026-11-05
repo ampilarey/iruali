@@ -54,6 +54,7 @@ class AccountTest extends TestCase
         // A mobile number confirmed by SMS code is enough: no email reminder (signed in with a code at checkout)
         $user->forceFill(['phone' => '7771234', 'phone_verified_at' => now()])->save();
         $this->actingAs($user->fresh())->get('/')->assertOk()->assertDontSee('Please verify your email address.');
+        $this->get(route('account'))->assertOk()->assertDontSee('Your email is not verified yet.');
         $user->forceFill(['phone_verified_at' => null, 'email' => null])->save();
         $this->actingAs($user->fresh())->get('/')->assertOk()->assertDontSee('Please verify your email address.'); // no email to verify
     }

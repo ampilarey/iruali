@@ -105,6 +105,9 @@ return [
         'api_secret' => env('SMS_API_SECRET'),
         'from_number' => env('SMS_FROM_NUMBER'),
         'endpoint' => env('SMS_ENDPOINT'),
+        // Sign-in codes by text, for the whole site per hour (PhoneLoginController::sendCode()): someone cycling
+        // through numbers can't run up the SMS bill
+        'login_hourly_cap' => (int) env('SMS_LOGIN_HOURLY_CAP', 300),
     ],
 
     /*

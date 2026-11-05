@@ -109,8 +109,12 @@ class WalletService
             return 0.0;
         }
 
+        // Stamped first and only once: a second call (two cancels at once) changes no row and credits nothing
+        if (Order::whereKey($order->id)->whereNull('wallet_refunded_at')->update(['wallet_refunded_at' => now()]) === 0) {
+            return 0.0;
+        }
+        $order->forceFill(['wallet_refunded_at' => now()])->syncOriginal();
         $this->credit($order->user, $amount, 'refund', ['order_id' => $order->id, 'reference' => $order->order_number, 'note' => __('Order :number cancelled', ['number' => $order->order_number])]);
-        $order->forceFill(['wallet_refunded_at' => now()])->save();
 
         return $amount;
     }

@@ -33,7 +33,8 @@ return [
             'admin.orders.bml-sync', 'admin.orders.messages.store', 'admin.orders.invoice', 'admin.orders.payment-link',
             'admin.orders.balance-due', // more time for a pre-order's balance (BookingFeeService)
             'admin.orders.parts.tracking', 'admin.orders.parts.collected', 'admin.orders.parts.packing-slip',
-            'admin.returns', 'admin.returns.*',
+            // Returns: deciding them; approving, sending and recording the refund is finance's (two people)
+            'admin.returns', 'admin.returns.show', 'admin.returns.approve', 'admin.returns.reject',
             'admin.reviews', 'admin.reviews.*',
             'admin.questions', 'admin.questions.*',
             'admin.newsletter', 'admin.newsletter.*',
@@ -56,7 +57,7 @@ return [
             'admin.sellers.commission',
             'admin.orders', 'admin.orders.show', 'admin.orders.refunded', 'admin.orders.bml-sync',
             'admin.orders.confirm-payment', 'admin.orders.payment-slip', 'admin.orders.payment-link', 'admin.orders.balance-due', // bank transfers and cash on delivery
-            'admin.returns', 'admin.returns.show', 'admin.returns.refunded', 'admin.returns.refund-approve', 'admin.orders.refund-approve',
+            'admin.returns', 'admin.returns.show', 'admin.returns.refunded', 'admin.returns.refund-approve', 'admin.returns.refund-wallet', 'admin.orders.refund-approve',
             'admin.analytics',
             'admin.errors', 'admin.errors.show',
             'admin.audit',

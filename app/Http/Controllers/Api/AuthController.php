@@ -28,6 +28,13 @@ class AuthController extends BaseController
             return $this->sendValidationError($validator->errors());
         }
 
+        // iruali's team signs in on the website only (staff lockout, two-step sign-in): no app token, and the
+        // same answer as a wrong password, so this door tells nothing about a staff account's password
+        $account = User::whereRaw('LOWER(email) = ?', [mb_strtolower((string) $request->input('email'))])->first();
+        if ($account?->isStaff()) {
+            return $this->sendUnauthorized('Invalid credentials');
+        }
+
         if (! Auth::attempt($request->only('email', 'password'))) {
             return $this->sendUnauthorized('Invalid credentials');
         }

@@ -283,7 +283,9 @@ class SocialLoginTest extends TestCase
         $this->assertDatabaseHas('social_accounts', ['user_id' => $existing->id, 'provider' => 'google']);
         $existing->refresh();
         $this->assertNotNull($existing->email_verified_at);
-        $this->assertTrue($existing->hasPassword(), 'the password stays');
+        // The email was never confirmed, so whoever chose that password may not have been its owner: it is
+        // thrown away (User::claimByEmailProof()); the owner can set a new one
+        $this->assertFalse($existing->hasPassword(), 'a password set before the email was proven is dropped');
         $this->assertSame('Aisha', $existing->name);
     }
 

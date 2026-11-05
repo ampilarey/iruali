@@ -20,6 +20,7 @@ container and the test database.
 - **[PAYMENTS_BML.md](PAYMENTS_BML.md)** — BML Connect setup, the payment flow, webhook,
   reconciliation; BML card is the only payment method.
 - **[BML_COMPLIANCE.md](BML_COMPLIANCE.md)** — where each of BML's website requirements is met.
+- **[SHOP_ABROAD_PLAN.md](SHOP_ABROAD_PLAN.md)** — planned: shop overseas stores, see the price in MVR (store tiles, instant estimate, requests in the cart).
 
 ## Deploying and running it
 

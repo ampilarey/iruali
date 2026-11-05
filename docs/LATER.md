@@ -213,6 +213,8 @@ shop ratings and sponsored shops (idea 11).
 
 ### "Shop the world, pay in MVR" (discussed 2026-10-26)
 
+**Full plan written 2026-11-05: [SHOP_ABROAD_PLAN.md](SHOP_ABROAD_PLAN.md)** (phases 1–6, owner decisions, risks).
+
 Customers tap a store (Amazon, Shein, AliExpress…), pick an item and see an MVR price with shipping,
 handling and duty included. Showing Amazon inside iruali isn't possible on a website (stores block being
 embedded and their carts can't be read), so the plan, lowest risk first:

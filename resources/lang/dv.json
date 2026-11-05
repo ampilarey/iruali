@@ -3513,5 +3513,9 @@
     "This order can no longer be changed.": "މި އޯޑަރު މިހާރު ބަދަލެއް ނުކުރެވޭނެ.",
     "Your items are back in your cart. Change what you like and check out again.": "ތިބާގެ ބައިތައް ކާޓަށް އަނބުރާ ލެވިއްޖެ. ބޭނުން ބަދަލުތައް ގެނެސް، އަލުން ޗެކްއައުޓް ކުރައްވާ.",
     "Add your name": "ނަން އިތުރުކުރޭ",
-    "Checkout · :amount": "ޗެކްއައުޓް · :amount"
+    "Checkout · :amount": "ޗެކްއައުޓް · :amount",
+    "Dashboard": "ޑޭޝްބޯޑު",
+    "Store": "ފިހާރަ",
+    "More options": "އިތުރު އޮޕްޝަންތައް",
+    "multi-buy offer, weight, extra delivery charge, video, bulk quotes": "ގިނައިން ގަނެފިނަމަ އޮފާ، ބަރުދަން، އިތުރު ޑެލިވަރީ ޗާޖު، ވީޑިއޯ، ބަލްކް ކޯޓް"
 }

@@ -348,7 +348,8 @@
         @yield('content')
     </main>
 
-    <!-- Why iruali -->
+    {{-- Why iruali (for shoppers; not in the Seller Centre) --}}
+    @unless(request()->routeIs('seller.*'))
     <section class="bg-white border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 text-sm">
             <div class="flex items-center gap-3">
@@ -369,10 +370,11 @@
             </div>
         </div>
     </section>
+    @endunless
 
     <!-- Footer -->
     <footer class="bg-footer text-white">
-        <div class="border-b border-white/10">
+        <div class="border-b border-white/10 {{ request()->routeIs('seller.*') ? 'hidden' : '' }}">
             <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 flex flex-col lg:flex-row lg:items-center gap-4">
                 <div class="flex-1">
                     <p class="font-display text-lg font-bold">{{ __('Get deals in your inbox') }}</p>
@@ -463,7 +465,23 @@
     </footer>
 
     <!-- Bottom tab bar (mobile); not on checkout, where the pay bar sits at the bottom instead -->
-    @unless(request()->routeIs('checkout'))
+    @if(request()->routeIs('seller.*') && auth()->check())
+    {{-- Seller Centre on a phone: the shop's own tabs instead of the shopper's --}}
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(15,42,58,0.08)]" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="{{ __('Seller Centre') }}" data-seller-tabs>
+        <div class="grid grid-cols-5 h-16 text-[11px] font-medium">
+            @php $tab = 'flex flex-col items-center justify-center gap-1'; $sellerUnread = (int) ($messageBadges['seller'] ?? 0); @endphp
+            <a href="{{ route('seller.dashboard') }}" class="{{ $tab }} {{ request()->routeIs('seller.dashboard') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="home" class="w-6 h-6" />{{ __('Dashboard') }}</a>
+            <a href="{{ route('seller.orders') }}" class="{{ $tab }} {{ request()->routeIs('seller.orders*') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="box" class="w-6 h-6" />{{ __('Orders') }}</a>
+            <a href="{{ route('seller.products.index') }}" class="{{ $tab }} {{ request()->routeIs('seller.products*', 'seller.stock*') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="squares" class="w-6 h-6" />{{ __('Products') }}</a>
+            <a href="{{ route('seller.messages') }}" class="{{ $tab }} {{ request()->routeIs('seller.messages*') ? 'text-primary' : 'text-gray-600' }}">
+                <span class="relative"><x-icon name="chat" class="w-6 h-6" />
+                    @if($sellerUnread > 0)<span class="absolute -top-1.5 -end-2.5 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-[11px] font-bold flex items-center justify-center">{{ $sellerUnread }}</span>@endif
+                </span>{{ __('Messages') }}
+            </a>
+            <a href="{{ route('home') }}" class="{{ $tab }} text-gray-600"><x-icon name="store" class="w-6 h-6" />{{ __('Store') }}</a>
+        </div>
+    </nav>
+    @elseif(! request()->routeIs('checkout'))
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(15,42,58,0.08)]" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="{{ __('Main') }}">
         <div class="grid grid-cols-5 h-16 text-[11px] font-medium">
             @php $tab = 'flex flex-col items-center justify-center gap-1'; @endphp
@@ -478,10 +496,10 @@
             </a>
         </div>
     </nav>
-    @endunless
+    @endif
 
     <!-- "Message us": a conversation with iruali from any storefront page (not during checkout or on the message pages) -->
-    @unless(request()->routeIs('checkout*', 'cart', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show'))
+    @unless(request()->routeIs('checkout*', 'cart', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show', 'seller.*'))
         <a href="{{ route('messages.support') }}" class="fixed z-40 start-4 bottom-20 lg:bottom-6 flex items-center gap-2 rounded-full bg-primary px-3 py-3 lg:px-4 text-white shadow-2xl hover:bg-primary-hover" aria-label="{{ __('Message us') }}" data-floating-message>
             <x-icon name="chat" class="w-5 h-5" /><span class="hidden lg:inline text-sm font-semibold">{{ __('Message us') }}</span>
         </a>

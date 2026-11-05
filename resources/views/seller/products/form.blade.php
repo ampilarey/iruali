@@ -24,7 +24,7 @@
 
         <form method="POST" enctype="multipart/form-data"
               action="{{ $editing ? route('seller.products.update', $product) : route('seller.products.store') }}"
-              class="space-y-6 rounded-lg bg-white p-6 shadow">
+              class="space-y-6 rounded-lg bg-white p-6 shadow max-lg:pb-28">
             @csrf
             <p class="text-sm text-gray-600" data-prohibited-note>{{ __('Some items may not be sold on iruali, and some need a permit.') }} <a href="{{ route('policies.prohibited') }}" target="_blank" rel="noopener" class="font-medium text-primary-600 hover:underline">{{ __('Check the Prohibited & Restricted Items list') }} ↗</a></p>
             @if(! $editing && ! empty($imported))
@@ -55,6 +55,19 @@
                 </div>
             </div>
 
+            {{-- The photo first: it is what shoppers see --}}
+            <div>
+                <label for="main_image" class="block text-sm font-medium text-gray-700">Main image</label>
+                @if($product->mainImage)
+                    <img src="{{ $product->mainImage->url }}" alt="" class="mt-2 h-24 w-24 rounded-lg object-cover">
+                    @if(! empty($pendingChange) && ($pendingChange->payload['main_image'] ?? null) && in_array($pendingChange->payload['main_image'], $pendingChange->stagedFiles(), true))
+                        <p class="mt-1 text-xs text-amber-700">{{ __('New image, waiting for review.') }}</p>
+                    @endif
+                @endif
+                <input id="main_image" name="main_image" type="file" accept="image/jpeg,image/png,image/gif" class="mt-2 block w-full text-sm text-gray-700">
+                <p class="mt-1 text-xs text-gray-500">JPEG, PNG or GIF, up to 2 MB.</p>
+            </div>
+
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
                     <label for="sku" class="block text-sm font-medium text-gray-700">SKU <span class="font-normal text-gray-500">(your product code)</span></label>
@@ -83,7 +96,6 @@
                     <input id="flash_sale_ends_at" name="flash_sale_ends_at" type="datetime-local" class="{{ $field }}" value="{{ old('flash_sale_ends_at', $product->flash_sale_ends_at?->format('Y-m-d\TH:i')) }}">
                     <p class="mt-1 text-xs text-gray-500">Only used when a compare-at price is set.</p>
                 </div>
-                @include('seller.products._multibuy', ['product' => $product])
                 <div>
                     <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
                     <input id="brand" name="brand" list="brand-options" autocomplete="off" maxlength="120" class="{{ $field }}" value="{{ old('brand', $product->brand) }}" aria-describedby="brand-hint">
@@ -104,10 +116,6 @@
                     <label for="reorder_point" class="block text-sm font-medium text-gray-700">Low-stock alert at</label>
                     <input id="reorder_point" name="reorder_point" type="number" min="0" class="{{ $field }}" value="{{ old('reorder_point', $product->reorder_point) }}">
                 </div>
-                <div>
-                    <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
-                    <input id="weight" name="weight" type="number" step="0.01" min="0" class="{{ $field }}" value="{{ old('weight', $product->weight) }}">
-                </div>
             </div>
 
             {{-- "Coming soon" and pre-orders: only for a shop an admin allowed each of them (User::allowsComingSoon(), allowsPreorders()) --}}
@@ -119,27 +127,31 @@
                 @include('seller.products._preorder', ['product' => $product])
             @endif
 
-            @include('seller.products._delivery', ['product' => $product])
 
-            <div>
-                <label for="main_image" class="block text-sm font-medium text-gray-700">Main image</label>
-                @if($product->mainImage)
-                    <img src="{{ $product->mainImage->url }}" alt="" class="mt-2 h-24 w-24 rounded-lg object-cover">
-                    @if(! empty($pendingChange) && ($pendingChange->payload['main_image'] ?? null) && in_array($pendingChange->payload['main_image'], $pendingChange->stagedFiles(), true))
-                        <p class="mt-1 text-xs text-amber-700">{{ __('New image, waiting for review.') }}</p>
-                    @endif
-                @endif
-                <input id="main_image" name="main_image" type="file" accept="image/jpeg,image/png,image/gif" class="mt-2 block w-full text-sm text-gray-700">
-                <p class="mt-1 text-xs text-gray-500">JPEG, PNG or GIF, up to 2 MB.</p>
-            </div>
 
-            @include('seller.products._video', ['product' => $product])
 
-            @include('seller.products._quotes', ['product' => $product])
+            {{-- Optional extras, folded so the form stays short on a phone (open again when something in them needs fixing) --}}
+            <details class="rounded-lg border border-gray-200 p-4" data-more-options @if($errors->hasAny(['weight', 'delivery_surcharge', 'video_url', 'quote_min_quantity']) || collect($errors->keys())->contains(fn ($k) => str_starts_with($k, 'multibuy'))) open @endif>
+                <summary class="cursor-pointer text-sm font-semibold text-gray-900">{{ __('More options') }} <span class="font-normal text-gray-500">({{ __('multi-buy offer, weight, extra delivery charge, video, bulk quotes') }})</span></summary>
+                <div class="mt-4 space-y-6">
+                    @include('seller.products._multibuy', ['product' => $product])
+
+                    <div>
+                        <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                        <input id="weight" name="weight" type="number" step="0.01" min="0" class="{{ $field }}" value="{{ old('weight', $product->weight) }}">
+                    </div>
+
+                    @include('seller.products._delivery', ['product' => $product])
+
+                    @include('seller.products._video', ['product' => $product])
+
+                    @include('seller.products._quotes', ['product' => $product])
+                </div>
+            </details>
 
             @include('seller.products._variants', ['product' => $product, 'variants' => $variants])
 
-            <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
+            <div class="fixed inset-x-0 z-40 flex items-center justify-end gap-3 border-t border-gray-200 bg-white px-4 py-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)] lg:static lg:z-auto lg:border-gray-100 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-4 lg:shadow-none max-lg:bottom-[calc(4rem+env(safe-area-inset-bottom))]" data-product-save-bar>
                 <a href="{{ route('seller.products.index') }}" class="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Cancel</a>
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
                     {{ $editing ? 'Save changes' : 'Submit for approval' }}

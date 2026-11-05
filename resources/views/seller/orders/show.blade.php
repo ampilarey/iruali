@@ -47,19 +47,10 @@
                     @endforeach
                 </div>
             @endif
-            <div class="border-t border-gray-100 px-5 py-4">
-                @include('messaging._thread', [
-                    'part' => $part,
-                    'conversation' => $conversation,
-                    'role' => 'seller',
-                    'action' => route('seller.orders.messages.store', [$order, $part]),
-                    'canReply' => $messagingOpen && (! $conversation || $conversation->isOpen()) && \App\Support\CurrentShop::can('seller.orders.messages.store'),
-                    'closedNote' => \App\Support\CurrentShop::can('seller.orders.messages.store') ? 'This conversation is closed.' : null,
-                ])
-            </div>
+
         </div>
 
-        <div class="space-y-6">
+        <div class="space-y-6 lg:row-span-2">
             <div class="rounded-lg bg-white p-5 shadow">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Your part of this order</h2>
                 <span class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium {{ $part->status_badge }}">{{ \App\Support\OrderStatus::label($part->status) }}</span>
@@ -108,6 +99,17 @@
                     </details>
                 @endif
             </div>
+            <div class="rounded-lg bg-white p-5 shadow">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Ship to</h2>
+                <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span> <span class="block text-xs text-gray-500">{{ $order->guest_email }}</span>@endif</p>
+                <p class="text-sm text-gray-700">{{ $order->shipping_address }}</p>
+                <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
+                <p class="text-sm text-gray-700">{{ $order->shipping_country }}</p>
+                @include('orders._boat')
+                @if($order->shipping_phone)
+                    <p class="mt-2 text-sm text-gray-700">Phone: <a href="tel:{{ $order->shipping_phone }}" dir="ltr" class="font-medium hover:underline">{{ $order->shipping_phone }}</a></p>
+                @endif
+            </div>
             @include('seller.orders._delivery', ['order' => $order, 'part' => $part])
             @if(\App\Support\CurrentShop::can('seller.earnings'))
             <div class="rounded-lg bg-white p-5 shadow text-sm">
@@ -125,16 +127,18 @@
             @if(\App\Support\CurrentShop::can('seller.orders.invoice'))
             @include('tax.partials.seller-order-document', ['order' => $order, 'part' => $part])
             @endif
-            <div class="rounded-lg bg-white p-5 shadow">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500">Ship to</h2>
-                <p class="mt-2 text-sm text-gray-900">{{ $order->customerName() ?? 'Customer' }}@if($order->isGuest()) <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold">Guest</span> <span class="block text-xs text-gray-500">{{ $order->guest_email }}</span>@endif</p>
-                <p class="text-sm text-gray-700">{{ $order->shipping_address }}</p>
-                <p class="text-sm text-gray-700">{{ collect([$order->shipping_city, $order->shipping_state, $order->shipping_zip])->filter()->join(', ') }}</p>
-                <p class="text-sm text-gray-700">{{ $order->shipping_country }}</p>
-                @include('orders._boat')
-                @if($order->shipping_phone)
-                    <p class="mt-2 text-sm text-gray-700">Phone: <a href="tel:{{ $order->shipping_phone }}" dir="ltr" class="font-medium hover:underline">{{ $order->shipping_phone }}</a></p>
-                @endif
+        </div>
+        {{-- Messages with the customer: last on a phone (after what to do and where it goes), under the items on a computer --}}
+        <div class="lg:col-span-2 overflow-hidden rounded-lg bg-white shadow">
+            <div class="px-5 py-4">
+                @include('messaging._thread', [
+                    'part' => $part,
+                    'conversation' => $conversation,
+                    'role' => 'seller',
+                    'action' => route('seller.orders.messages.store', [$order, $part]),
+                    'canReply' => $messagingOpen && (! $conversation || $conversation->isOpen()) && \App\Support\CurrentShop::can('seller.orders.messages.store'),
+                    'closedNote' => \App\Support\CurrentShop::can('seller.orders.messages.store') ? 'This conversation is closed.' : null,
+                ])
             </div>
         </div>
     </div>

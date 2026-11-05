@@ -3511,5 +3511,7 @@
     "Cancel this order and put its items back in your cart?": "މި އޯޑަރު ކެންސަލްކޮށް، ބައިތައް ކާޓަށް އަނބުރާ ލާން ބޭނުންތޯ؟",
     "Change my order": "އަހަރެންގެ އޯޑަރު ބަދަލުކުރޭ",
     "This order can no longer be changed.": "މި އޯޑަރު މިހާރު ބަދަލެއް ނުކުރެވޭނެ.",
-    "Your items are back in your cart. Change what you like and check out again.": "ތިބާގެ ބައިތައް ކާޓަށް އަނބުރާ ލެވިއްޖެ. ބޭނުން ބަދަލުތައް ގެނެސް، އަލުން ޗެކްއައުޓް ކުރައްވާ."
+    "Your items are back in your cart. Change what you like and check out again.": "ތިބާގެ ބައިތައް ކާޓަށް އަނބުރާ ލެވިއްޖެ. ބޭނުން ބަދަލުތައް ގެނެސް، އަލުން ޗެކްއައުޓް ކުރައްވާ.",
+    "Add your name": "ނަން އިތުރުކުރޭ",
+    "Checkout · :amount": "ޗެކްއައުޓް · :amount"
 }

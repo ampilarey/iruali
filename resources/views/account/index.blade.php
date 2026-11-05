@@ -5,43 +5,45 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-dark mb-8">{{ __('My Account') }}</h1>
+        <h1 class="text-2xl lg:text-3xl font-bold text-dark mb-4 lg:mb-8">{{ __('My Account') }}</h1>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
             <aside class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center gap-4 mb-6">
-                        <span class="w-14 h-14 shrink-0 rounded-full bg-primary-50 text-primary font-display text-xl font-bold flex items-center justify-center" aria-hidden="true">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 lg:p-6">
+                    <div class="flex items-center gap-4 mb-4 lg:mb-6">
+                        <span class="w-14 h-14 shrink-0 rounded-full bg-primary-50 text-primary font-display text-xl font-bold flex items-center justify-center" aria-hidden="true">{{ mb_strtoupper(mb_substr($user->name ?: '#', 0, 1)) }}</span>
                         <div class="min-w-0">
-                            <h2 class="text-lg font-semibold text-dark truncate">{{ $user->name }}</h2>
-                            <p class="text-sm text-gray-500 truncate" dir="ltr">{{ $user->email }}</p>
+                            <h2 class="text-lg font-semibold text-dark truncate">{{ $user->name ?: $user->phone }}</h2>
+                            <p class="text-sm text-gray-500 truncate" dir="ltr">{{ $user->email ?: ($user->name ? $user->phone : '') }}</p>
                         </div>
                     </div>
-                    <nav class="space-y-1" aria-label="{{ __('Account') }}">
-                        <a href="{{ route('account') }}" class="block px-4 py-2 text-primary bg-primary/10 rounded-lg font-medium" aria-current="page">{{ __('Profile') }}</a>
-                        <a href="{{ route('orders') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My Orders') }}</a>
-                        <a href="{{ route('messages.index') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>
-                        <a href="{{ route('account.addresses') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My addresses') }}</a>
-                        <a href="{{ route('wishlist') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wishlist') }}</a>
-                        <a href="{{ route('quotes.index') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Quote requests') }}</a>
-                        <a href="{{ route('item-requests.index') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Item requests') }}</a>
-                        <a href="{{ route('account.brands') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Brands you follow') }}</a>
-                        <a href="{{ route('account.notifications') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Notifications') }}</a>
-                        <a href="{{ route('account.rewards') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Rewards') }}</a>
-                        <a href="{{ route('account.wallet') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wallet') }}</a>
-                        @if(app(\App\Services\CreditService::class)->account($user))<a href="{{ route('account.credit') }}" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Pay later') }}</a>@endif
-                        <a href="#security" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Security') }}</a>
+                    {{-- Phones: one row of tabs to swipe; computers: the list --}}
+                    <nav class="-mx-1 flex gap-1 overflow-x-auto pb-1 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:pb-0" aria-label="{{ __('Account') }}">
+                        <a href="{{ route('account') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-primary bg-primary/10 rounded-lg font-medium" aria-current="page">{{ __('Profile') }}</a>
+                        <a href="{{ route('orders') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My Orders') }}</a>
+                        <a href="{{ route('messages.index') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>
+                        <a href="{{ route('account.addresses') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('My addresses') }}</a>
+                        <a href="{{ route('wishlist') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wishlist') }}</a>
+                        <a href="{{ route('quotes.index') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Quote requests') }}</a>
+                        <a href="{{ route('item-requests.index') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Item requests') }}</a>
+                        <a href="{{ route('account.brands') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Brands you follow') }}</a>
+                        <a href="{{ route('account.notifications') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Notifications') }}</a>
+                        <a href="{{ route('account.rewards') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Rewards') }}</a>
+                        <a href="{{ route('account.wallet') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Wallet') }}</a>
+                        @if(app(\App\Services\CreditService::class)->account($user))<a href="{{ route('account.credit') }}" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Pay later') }}</a>@endif
+                        <a href="#security" class="shrink-0 whitespace-nowrap rounded-full lg:rounded-lg block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg">{{ __('Security') }}</a>
                     </nav>
                 </div>
             </aside>
 
             <div class="lg:col-span-2 space-y-6">
-                @unless($user->isEmailVerified())
+                {{-- Only an email that was given and not confirmed; a mobile number confirmed by SMS code is enough --}}
+                @if(filled($user->email) && ! $user->isEmailVerified() && ! $user->isPhoneVerified())
                     <div class="rounded-lg border border-sun bg-sun-soft px-4 py-3 text-sm text-sun-ink flex flex-wrap items-center justify-between gap-2">
                         <span>{{ __('Your email is not verified yet.') }}</span>
                         <a href="{{ route('verification.notice') }}" class="font-semibold underline">{{ __('Verify now') }}</a>
                     </div>
-                @endunless
+                @endif
 
                 <section class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between gap-3 mb-5">
@@ -49,8 +51,8 @@
                         <a href="{{ route('account.edit') }}" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
                     </div>
                     <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
-                        <div><dt class="text-gray-500">{{ __('Name') }}</dt><dd class="text-gray-900">{{ $user->name }}</dd></div>
-                        <div><dt class="text-gray-500">{{ __('Email') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->email }}</dd></div>
+                        <div><dt class="text-gray-500">{{ __('Name') }}</dt><dd class="text-gray-900">@if(filled($user->name)){{ $user->name }}@else{{ __('Not added') }} <a href="{{ route('account.edit') }}" class="font-medium text-primary hover:underline">{{ __('Add your name') }}</a>@endif</dd></div>
+                        <div><dt class="text-gray-500">{{ __('Email') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->email ?: __('Not added') }}</dd></div>
                         <div><dt class="text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900" dir="ltr">{{ $user->phone ?: __('Not added') }}@if($user->phone && $user->isPhoneVerified()) <span class="text-xs text-green-700">({{ __('verified') }})</span>@endif</dd></div>
                         <div><dt class="text-gray-500">{{ __('Language') }}</dt><dd class="text-gray-900">{{ ($user->preferred_language ?? 'en') === 'dv' ? 'ދިވެހި' : 'English' }}</dd></div>
                         <div class="sm:col-span-2"><dt class="text-gray-500">{{ __('Delivery address') }}</dt>

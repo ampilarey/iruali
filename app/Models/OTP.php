@@ -19,8 +19,12 @@ class OTP extends Model
         'type',
         'purpose',
         'is_used',
+        'attempts',
         'expires_at',
     ];
+
+    /** Wrong tries a code takes before it is spent (one code, wherever the guesses come from). */
+    public const MAX_ATTEMPTS = 5;
 
     protected $casts = [
         'is_used' => 'boolean',
@@ -98,24 +102,37 @@ class OTP extends Model
     }
 
     /**
-     * Verify OTP code
+     * Check a code against the live one for this number or email and purpose. A right code is spent at once;
+     * each wrong one counts against that code, which is spent after MAX_ATTEMPTS wrong tries, so guessing gets
+     * at most a handful of tries per code across every sign-in page and account.
      */
     public static function verify(string $identifier, string $code, string $purpose = 'verification'): ?self
     {
-        $otp = self::where(function ($query) use ($identifier) {
-            $query->where('phone', $identifier)
-                ->orWhere('email', $identifier);
-        })
-            ->where('code', $code)
-            ->where('purpose', $purpose)
-            ->where('is_used', false)
-            ->where('expires_at', '>', Carbon::now())
-            ->first();
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($identifier, $code, $purpose) {
+            $otp = self::where(function ($query) use ($identifier) {
+                $query->where('phone', $identifier)
+                    ->orWhere('email', $identifier);
+            })
+                ->where('purpose', $purpose)
+                ->where('is_used', false)
+                ->where('expires_at', '>', Carbon::now())
+                ->latest('id')
+                ->lockForUpdate()
+                ->first();
 
-        if ($otp) {
-            $otp->markAsUsed();
-        }
+            if (! $otp) {
+                return null;
+            }
+            if (hash_equals((string) $otp->code, $code)) {
+                $otp->markAsUsed();
 
-        return $otp;
+                return $otp;
+            }
+
+            $attempts = (int) $otp->attempts + 1;
+            $otp->forceFill(['attempts' => $attempts, 'is_used' => $attempts >= self::MAX_ATTEMPTS])->save();
+
+            return null;
+        });
     }
 }

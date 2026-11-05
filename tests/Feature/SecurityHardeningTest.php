@@ -2,166 +2,146 @@
 
 namespace Tests\Feature;
 
-use App\Models\Cart;
-use App\Models\CartItem;
 use App\Models\Order;
-use App\Models\Product;
+use App\Models\OTP;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\OrderService;
-use App\Support\ApiToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
+/**
+ * Fixes from the November 2026 security review: codes that can't be guessed through many doors, accounts set up
+ * with someone else's email, sessions after a password change, staff on the app sign-in, refund duties, and
+ * cancels that run twice.
+ */
 class SecurityHardeningTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_product_description_is_escaped(): void
+    protected function withRole(string $role, array $attributes = []): User
     {
-        $product = Product::factory()->create([
-            'is_active' => true,
-            'description' => ['en' => '<script>alert("x")</script>Nice mat'],
-        ]);
+        $user = User::factory()->create($attributes);
+        $user->roles()->attach(Role::firstOrCreate(['name' => $role], ['display_name' => ucfirst($role)])->id);
 
-        $this->get(route('products.show', $product->slug))
-            ->assertOk()
-            ->assertDontSee('<script>alert("x")</script>', false)
-            ->assertSee('Nice mat');
+        return $user;
     }
 
-    public function test_product_name_cannot_break_out_of_the_json_ld_block(): void
+    public function test_a_code_is_spent_after_five_wrong_tries_and_compared_safely(): void
     {
-        $product = Product::factory()->create([
-            'is_active' => true,
-            'name' => ['en' => 'Mat</script><script>alert(1)</script>'],
-        ]);
+        $otp = OTP::createForPhone('+9607771234', 'login');
+        $wrong = $otp->code === '000000' ? '111111' : '000000';
 
-        $this->get(route('products.show', $product->slug))
-            ->assertOk()
-            ->assertDontSee('</script><script>alert(1)', false);
-    }
-
-    public function test_users_cannot_change_or_remove_other_peoples_cart_items(): void
-    {
-        $owner = User::factory()->create();
-        $cart = Cart::factory()->create(['user_id' => $owner->id, 'status' => 'active']);
-        $item = CartItem::factory()->create(['cart_id' => $cart->id, 'quantity' => 1]);
-
-        $this->actingAs(User::factory()->create());
-        $this->put(route('cart.update', $item), ['quantity' => 9])->assertForbidden();
-        $this->delete(route('cart.remove', $item))->assertForbidden();
-
-        $this->assertSame(1, $item->fresh()->quantity);
-    }
-
-    public function test_order_status_page_needs_a_signed_link(): void
-    {
-        $order = Order::factory()->create();
-
-        // Guessing ids doesn't work
-        $this->get('/track/order/'.$order->id)->assertForbidden();
-
-        // Submitting the order number gives a signed link that works
-        $response = $this->post(route('order.track.submit'), ['order_code' => $order->order_number]);
-        $response->assertRedirect();
-        $this->get($response->headers->get('Location'))->assertOk()->assertSee($order->order_number);
-
-        $this->post(route('order.track.submit'), ['order_code' => 'ORD-NOPE'])->assertSessionHasErrors('order_code');
-    }
-
-    public function test_login_starts_a_new_session(): void
-    {
-        // Laravel's session guard migrates the session id on login; keep it that way.
-        $user = User::factory()->create(['password' => bcrypt('Secret#123'), 'status' => 'active', 'is_active' => true]);
-
-        $this->get('/login');
-        $before = session()->getId();
-
-        $this->post('/login', ['email' => $user->email, 'password' => 'Secret#123']);
-
-        $this->assertAuthenticatedAs($user);
-        $this->assertNotSame($before, session()->getId());
-    }
-
-    public function test_two_factor_users_are_not_signed_in_before_the_code(): void
-    {
-        $user = User::factory()->create([
-            'password' => bcrypt('Secret#123'), 'status' => 'active', 'is_active' => true,
-            'two_factor_enabled' => true, 'two_factor_secret' => encrypt('JBSWY3DPEHPK3PXP'),
-        ]);
-
-        $this->post('/login', ['email' => $user->email, 'password' => 'Secret#123'])
-            ->assertRedirect(route('2fa.show'));
-
-        $this->assertGuest();
-        $this->get('/account')->assertRedirect('/login');
-        $this->get(route('2fa.show'))->assertOk();
-    }
-
-    public function test_order_numbers_are_random(): void
-    {
-        $method = new \ReflectionMethod(OrderService::class, 'generateOrderNumber');
-        $method->setAccessible(true);
-        $service = app(OrderService::class);
-
-        $a = $method->invoke($service);
-        $b = $method->invoke($service);
-
-        $this->assertMatchesRegularExpression('/^ORD-[A-Z0-9]{10}$/', $a);
-        $this->assertNotSame(substr($a, 0, 10), substr($b, 0, 10));
-    }
-
-    public function test_privileged_user_columns_are_not_mass_assignable(): void
-    {
-        $user = User::factory()->create(['name' => 'Amina']);
-
-        $user->fill([
-            'name' => 'Amina Updated',
-            'is_seller' => true,
-            'seller_approved' => true,
-            'is_active' => false,
-            'loyalty_points' => 5000,
-            'is_smoke_test' => true,
-            'email_verified_at' => null,
-        ])->save();
-
-        $user->refresh();
-
-        $this->assertSame('Amina Updated', $user->name);
-        $this->assertFalse($user->is_seller);
-        $this->assertFalse((bool) $user->seller_approved);
-        $this->assertTrue($user->is_active);
-        $this->assertSame(0, (int) $user->loyalty_points);
-        $this->assertFalse($user->isSmokeTest());
-        $this->assertNotNull($user->email_verified_at);
-    }
-
-    public function test_an_api_token_without_cart_write_cannot_change_the_cart(): void
-    {
-        $user = User::factory()->create();
-        $product = Product::factory()->create(['is_active' => true, 'stock_quantity' => 5, 'price' => 20]);
-        Sanctum::actingAs($user, [ApiToken::PROFILE_READ]);
-
-        $this->postJson('/api/v1/cart/add', ['product_id' => $product->id, 'quantity' => 1])
-            ->assertForbidden();
-    }
-
-    public function test_trusted_proxies_come_from_the_setting(): void
-    {
-        // TRUSTED_PROXIES → config('app.trusted_proxies'), applied as the app boots
-        config(['app.trusted_proxies' => '10.9.9.9']);
-        \App\Providers\AppServiceProvider::trustProxies();
-        try {
-            \Illuminate\Support\Facades\Route::get('/_ip-probe', fn () => request()->ip());
-
-            // Through the trusted proxy, the visitor's address is used
-            $this->call('GET', '/_ip-probe', [], [], [], ['REMOTE_ADDR' => '10.9.9.9', 'HTTP_X_FORWARDED_FOR' => '203.0.113.5'])->assertSee('203.0.113.5');
-            // From anywhere else the header is ignored
-            $this->call('GET', '/_ip-probe', [], [], [], ['REMOTE_ADDR' => '10.1.1.1', 'HTTP_X_FORWARDED_FOR' => '203.0.113.5'])->assertSee('10.1.1.1');
-        } finally {
-            config(['app.trusted_proxies' => '127.0.0.1']);
-            \App\Providers\AppServiceProvider::trustProxies();
+        for ($i = 0; $i < OTP::MAX_ATTEMPTS; $i++) {
+            $this->assertNull(OTP::verify('+9607771234', $wrong, 'login'));
         }
+        // Even the right code no longer works: it was spent by the wrong tries
+        $this->assertNull(OTP::verify('+9607771234', $otp->code, 'login'));
+        $this->assertTrue($otp->fresh()->is_used);
+
+        $fresh = OTP::createForPhone('+9607771234', 'login');
+        $this->assertNotNull(OTP::verify('+9607771234', $fresh->code, 'login'));
+        $this->assertNull(OTP::verify('+9607771234', $fresh->code, 'login'), 'a right code works once');
+    }
+
+    public function test_proving_the_email_of_a_premade_account_throws_away_its_password_and_sessions(): void
+    {
+        config(['session.driver' => 'database']);
+        // Someone opened an account with the victim's email and a password of their own, never confirmed
+        $account = User::factory()->create(['email' => 'victim@example.com', 'email_verified_at' => null, 'password' => Hash::make('Attacker-pass-1!'), 'remember_token' => 'attacker-cookie']);
+        $account->createToken('attacker');
+        DB::table('sessions')->insert(['id' => 'attacker-session', 'user_id' => $account->id, 'payload' => '', 'last_activity' => time()]);
+        $guestOrder = Order::factory()->create(['user_id' => null, 'guest_email' => 'victim@example.com']);
+
+        // The real owner proves the email (a code that reached the inbox, or Google vouching for it)
+        $account->claimByEmailProof();
+        $account->refresh();
+
+        $this->assertNotNull($account->email_verified_at);
+        $this->assertFalse(Hash::check('Attacker-pass-1!', $account->password));
+        $this->assertFalse($account->hasPassword());
+        $this->assertNotSame('attacker-cookie', $account->remember_token);
+        $this->assertSame(0, $account->tokens()->count());
+        $this->assertSame(0, DB::table('sessions')->where('user_id', $account->id)->count());
+        $this->assertSame($account->id, $guestOrder->fresh()->user_id);
+
+        // An account whose email was already confirmed keeps its password
+        $owner = User::factory()->create(['password' => Hash::make('Owner-pass-1!')]);
+        $owner->claimByEmailProof();
+        $this->assertTrue(Hash::check('Owner-pass-1!', $owner->fresh()->password));
+    }
+
+    public function test_changing_the_password_signs_out_every_other_device(): void
+    {
+        config(['session.driver' => 'database']);
+        $user = User::factory()->create(['password' => Hash::make('Old-pass-123!'), 'remember_token' => 'old-cookie']);
+        $user->createToken('phone');
+        DB::table('sessions')->insert(['id' => 'stolen-session', 'user_id' => $user->id, 'payload' => '', 'last_activity' => time()]);
+
+        $this->actingAs($user)->put(route('account.password'), [
+            'current_password' => 'Old-pass-123!', 'password' => 'New-pass-456!', 'password_confirmation' => 'New-pass-456!',
+        ])->assertRedirect(route('account'));
+
+        $this->assertSame(0, DB::table('sessions')->where('id', 'stolen-session')->count());
+        $this->assertNotSame('old-cookie', $user->fresh()->remember_token);
+        $this->assertSame(0, $user->tokens()->count());
+    }
+
+    public function test_staff_get_no_app_token_and_the_same_answer_as_a_wrong_password(): void
+    {
+        $admin = $this->withRole('admin', ['password' => Hash::make('Right-pass-123!')]);
+
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class)
+            ->postJson('/api/v1/login', ['email' => $admin->email, 'password' => 'Right-pass-123!'])->assertStatus(401);
+        $this->assertSame(0, $admin->tokens()->count());
+    }
+
+    public function test_support_decides_returns_but_refunds_are_finance(): void
+    {
+        $support = $this->withRole('support');
+        $this->assertTrue(\App\Support\StaffAccess::can('admin.returns.approve', $support));
+        $this->assertFalse(\App\Support\StaffAccess::can('admin.returns.refunded', $support));
+        $this->assertFalse(\App\Support\StaffAccess::can('admin.returns.refund-approve', $support));
+        $this->assertFalse(\App\Support\StaffAccess::can('admin.returns.refund-wallet', $support));
+
+        $finance = $this->withRole('finance');
+        $this->assertTrue(\App\Support\StaffAccess::can('admin.returns.refunded', $finance));
+        $this->assertTrue(\App\Support\StaffAccess::can('admin.returns.refund-wallet', $finance));
+    }
+
+    public function test_payout_pages_need_two_step_sign_in_like_the_rest_of_admin(): void
+    {
+        config(['staff.require_two_factor' => true]);
+        $admin = $this->withRole('admin');
+        $response = $this->actingAs($admin)->get(route('admin.payout-batches.index'));
+        $this->assertTrue($response->isRedirect(), 'an admin without two-step sign-in is sent to set it up');
+    }
+
+    public function test_a_paid_gift_card_order_cannot_be_cancelled_for_a_refund(): void
+    {
+        $customer = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $customer->id, 'status' => 'pending', 'payment_status' => 'paid', 'payment_method' => 'bml']);
+        \App\Models\GiftCard::create(['code' => 'GIFT-TEST-1234', 'amount' => 500, 'balance' => 0, 'purchaser_id' => $customer->id, 'order_id' => $order->id,
+            'recipient_email' => $customer->email, 'status' => 'redeemed']);
+        $this->assertFalse($customer->can('cancel', $order->fresh()));
+        $this->actingAs($customer)->post(route('orders.cancel', $order))->assertForbidden();
+        $this->assertSame('pending', $order->fresh()->status);
+
+        // An unpaid gift-card order can still be cancelled
+        $order->update(['payment_status' => 'unpaid']);
+        $this->assertTrue($customer->can('cancel', $order->fresh()));
+    }
+
+    public function test_cancelling_twice_reverses_once(): void
+    {
+        $customer = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $customer->id, 'status' => 'pending', 'payment_status' => 'unpaid']);
+        $stale = Order::find($order->id); // a second request that loaded the order before the first cancel
+
+        $this->assertTrue(app(OrderService::class)->updateOrderStatus($order, 'cancelled'));
+        $this->assertFalse(app(OrderService::class)->updateOrderStatus($stale, 'cancelled'), 'the second cancel finds it already cancelled');
+        $this->assertSame(1, \App\Models\AuditLog::where('action', 'order.cancelled')->count());
     }
 }

@@ -811,4 +811,44 @@ class User extends Authenticatable implements HasLocalePreference
     {
         return in_array($this->delivery_coverage, self::COVERAGES, true) ? $this->delivery_coverage : self::COVERAGE_ALL;
     }
+
+    /**
+     * End every other sign-in: other browsers' sessions (except $keepSessionId), remember-me cookies and app
+     * tokens. After a password change or reset, and when an account is claimed by proving its email.
+     */
+    public function endOtherSessions(?string $keepSessionId = null): void
+    {
+        if (config('session.driver') === 'database') {
+            \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))->where('user_id', $this->id)
+                ->when($keepSessionId, fn ($q) => $q->where('id', '!=', $keepSessionId))->delete();
+        }
+        $this->forceFill(['remember_token' => \Illuminate\Support\Str::random(60)])->save();
+        $this->tokens()->delete();
+    }
+
+    /** Orders placed as a guest with this account's email show under My Orders: only once the email is proven. */
+    public function attachGuestOrders(): void
+    {
+        if ($this->isEmailVerified() && filled($this->email)) {
+            Order::whereNull('user_id')->where('guest_email', mb_strtolower((string) $this->email))->update(['user_id' => $this->id]);
+        }
+    }
+
+    /**
+     * Someone just proved they own this account's email (a code that reached the inbox, or Google/Facebook vouching
+     * for it) while signing in. If the email was never confirmed, whoever opened the account may not have been
+     * its owner: the password they chose and their sessions are thrown away, so a pre-made account can't be used
+     * to watch the real owner. Then the email counts as confirmed and its guest orders come along.
+     */
+    public function claimByEmailProof(): void
+    {
+        if (! $this->isEmailVerified()) {
+            if ($this->hasPassword()) {
+                $this->forceFill(['password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(40)), 'has_password' => false]);
+            }
+            $this->forceFill(['email_verified_at' => now()])->save();
+            $this->endOtherSessions();
+        }
+        $this->attachGuestOrders();
+    }
 }

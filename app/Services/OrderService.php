@@ -502,7 +502,15 @@ class OrderService
         }
 
         $before = $order->status;
-        DB::transaction(function () use ($order, $status, $keepBookingFee) {
+        $done = DB::transaction(function () use ($order, $status, $keepBookingFee) {
+            // Locked and read again: two cancels at once (or a cancel while BML confirms the payment) must not
+            // both pass the check and refund, restock or credit the wallet twice
+            $locked = Order::whereKey($order->id)->lockForUpdate()->first();
+            if (! $locked || ! $this->canTransition($locked, $status)) {
+                return false;
+            }
+            $order->setRawAttributes($locked->getAttributes(), true);
+
             if ($status === 'cancelled') {
                 if ($keepBookingFee) {
                     app(BookingFeeService::class)->keepOnCancel($order);
@@ -520,7 +528,12 @@ class OrderService
 
             // Bring every shop's part along with the order
             app(FulfilmentService::class)->cascadeFromOrder($order, $status);
+
+            return true;
         });
+        if (! $done) {
+            return false;
+        }
 
         \App\Support\Audit::record($status === 'cancelled' ? 'order.cancelled' : 'order.status', $order, ['from' => $before, 'to' => $status, 'order_number' => $order->order_number]);
         app(OrderNotifier::class)->statusChanged($order->fresh());

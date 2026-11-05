@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
 /**
@@ -50,8 +49,8 @@ class PasswordResetController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, string $password) use (&$resetUserId) {
                 // has_password: an account made with Google, Facebook or Apple has one of its own now
-                $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60), 'has_password' => true])->save();
-                $user->tokens()->delete(); // sign out any app sessions too
+                $user->forceFill(['password' => Hash::make($password), 'has_password' => true])->save();
+                $user->endOtherSessions(); // every browser, remember-me cookie and app token signed out
                 event(new PasswordReset($user));
                 $resetUserId = $user->id;
             }

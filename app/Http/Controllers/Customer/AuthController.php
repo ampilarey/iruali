@@ -64,8 +64,8 @@ class AuthController extends Controller
 
         $user->roles()->attach(Role::firstOrCreate(['name' => 'customer'], ['display_name' => 'Customer'])->id);
 
-        // Orders placed as a guest with this email now show under My Orders
-        \App\Models\Order::whereNull('user_id')->where('guest_email', mb_strtolower($user->email))->update(['user_id' => $user->id]);
+        // Orders placed as a guest with this email come along once the email is confirmed (verifyEmailOTP),
+        // so signing up with someone else's address doesn't show their orders
 
         $this->sendEmailCode($user);
         if ($user->phone && $this->sms->isLive()) {
@@ -212,6 +212,7 @@ class AuthController extends Controller
         }
 
         $user->forceFill(['email_verified_at' => now()])->save();
+        $user->attachGuestOrders(); // their guest orders, now that the email is theirs
         NotificationService::emailVerified();
 
         return redirect()->intended(route('account'));
@@ -251,6 +252,11 @@ class AuthController extends Controller
 
         if (! $user->phone || ! OTP::verify($user->phone, $request->phone_code, 'verification')) {
             return back()->withErrors(['phone_code' => __('auth.invalid_otp')]);
+        }
+        // A number is confirmed on one account only: the account that signs in with it
+        $holder = User::findByVerifiedPhone($user->phone);
+        if ($holder && $holder->id !== $user->id) {
+            return back()->withErrors(['phone_code' => __('This mobile number is already confirmed on another account. Sign in with it instead, or use another number.')]);
         }
 
         $user->forceFill(['phone_verified_at' => now()])->save();

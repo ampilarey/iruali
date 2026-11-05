@@ -24,7 +24,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::post('/terms', [SellerTermsController::class, 'agree'])->name('terms.agree')->middleware('throttle:10,1,seller.terms.agree');
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+// Payouts and shops' bank details: admins only, with two-step sign-in like the rest of the admin area
+Route::middleware(['auth', 'staff', 'staff.2fa'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('/sellers/{seller}/bank/verify', [PayoutController::class, 'toggleBankVerified'])->name('sellers.bank.verify');
     Route::get('/sellers/{seller}/performance', [SellerPerformanceController::class, 'show'])->name('sellers.performance');
 

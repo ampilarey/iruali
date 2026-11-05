@@ -162,9 +162,7 @@ class SocialLoginService
             $this->allowed($existing, $label); // staff are never linked
 
             $this->link($existing, $profile);
-            if (! $existing->isEmailVerified()) {
-                $existing->forceFill(['email_verified_at' => now()])->save(); // the provider vouched for it
-            }
+            $existing->claimByEmailProof(); // the provider vouched for the email (User::claimByEmailProof())
 
             return [$existing, false];
         }

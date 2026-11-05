@@ -125,8 +125,8 @@ class CodeLoginController extends AuthController
 
         RateLimiter::clear($tries);
         $request->session()->forget(self::SESSION);
-        if ($pending['channel'] === 'mail' && ! $user->isEmailVerified()) {
-            $user->forceFill(['email_verified_at' => now()])->save(); // the code reached that inbox
+        if ($pending['channel'] === 'mail') {
+            $user->claimByEmailProof(); // the code reached that inbox (User::claimByEmailProof())
         }
 
         if ($user->isTwoFactorEnabled()) {

@@ -112,9 +112,10 @@ class OrderPolicy
             return true;
         }
 
-        // Customers can cancel their own orders until the shop starts processing them
+        // Customers can cancel their own orders until the shop starts processing them; a paid gift card is
+        // already sent (its code may be spent), so it is not cancelled for a refund
         if ($user->id === $order->user_id) {
-            return $order->status === 'pending';
+            return $order->status === 'pending' && ! ($order->isGiftCardOrder() && $order->payment_status === 'paid');
         }
 
         return false;

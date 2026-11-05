@@ -222,8 +222,8 @@ class PhoneLoginController extends AuthController
             }
             $user = $this->createAccount($pending['phone']);
         }
-        if ($pending['channel'] === 'mail' && ! $user->isEmailVerified()) {
-            $user->forceFill(['email_verified_at' => now()])->save(); // the code reached that inbox
+        if ($pending['channel'] === 'mail') {
+            $user->claimByEmailProof(); // the code reached that inbox (User::claimByEmailProof())
         }
 
         return $this->signIn($request, $user, (bool) $pending['remember'], true, ($pending['purpose'] ?? 'login') === 'reset', (bool) ($pending['checkout'] ?? false));
@@ -371,6 +371,14 @@ class PhoneLoginController extends AuthController
         $key = 'phone-login:'.sha1($target);
         if (RateLimiter::tooManyAttempts($key.':m', 1) || RateLimiter::tooManyAttempts($key.':h', 5)) {
             return back()->withInput()->withErrors(['login' => __('Please wait a minute before asking for another code.')]);
+        }
+        if ($channel === 'sms' && RateLimiter::tooManyAttempts('phone-login:sms:site', max(1, (int) config('services.sms.login_hourly_cap', 300)))) {
+            report(new \RuntimeException('Sign-in texts reached the hourly cap (services.sms.login_hourly_cap)'));
+
+            return back()->withInput()->withErrors(['login' => __('We are sending a lot of codes right now. Please try again in a few minutes.')]);
+        }
+        if ($channel === 'sms') {
+            RateLimiter::hit('phone-login:sms:site', 3600);
         }
         RateLimiter::hit($key.':m', 60);
         RateLimiter::hit($key.':h', 3600);

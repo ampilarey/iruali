@@ -78,8 +78,8 @@ class ProfileController extends Controller
 
         $user = $request->user();
         $user->forceFill(['password' => Hash::make($request->password), 'has_password' => true])->save();
-        $user->tokens()->delete();
-        Auth::logoutOtherDevices($request->password);
+        // Every other browser, remember-me cookie and app token stops working (this one stays signed in)
+        $user->endOtherSessions($request->session()->getId());
         $request->session()->forget('code_signed_in_at');
 
         NotificationService::success(__('Your password has been changed.'));

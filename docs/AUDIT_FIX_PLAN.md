@@ -586,27 +586,33 @@ Check every change at 390×844 in English and Dhivehi.
 
 ## Batch 6: clean-up and docs
 
-- [ ] **6.1** `.env.example`: add commented entries for every key read in `config/` that is missing:
+- [x] **6.1** `.env.example`: add commented entries for every key read in `config/` that is missing:
   the SMS driver and Dhiraagu keys, VAPID, Telegram, test-deploy webhook, backup, Facebook
   page / Instagram, the BML extras, `SANCTUM_STATEFUL_DOMAINS`.
-- [ ] **6.2** Remove dead config: the unused `services.sms` provider keys (move `login_hourly_cap`
+  Done (the app's own settings; framework defaults such as Redis and Memcached are left to Laravel's docs).
+- [x] **6.2** Remove dead config: the unused `services.sms` provider keys (move `login_hourly_cap`
   to `config/sms.php`), `whatsapp`, `slack`, the Sentry line.
-- [ ] **6.3** Delete the stale `CartService::getCartTotals` / `calculateVoucherDiscount` /
+  Done for `services.sms`, `whatsapp` and `slack` (`login_hourly_cap` is now `sms.login_hourly_cap`). The Sentry lines stay: `ErrorTracker` hands alerting to Sentry when the package is installed and `SENTRY_LARAVEL_DSN` is set.
+- [x] **6.3** Delete the stale `CartService::getCartTotals` / `calculateVoucherDiscount` /
   `applyVoucher`. Point `tests/Unit/CartServiceTest` at `DiscountService`.
-- [ ] **6.4** Docs:
+  Done; the unused `getAppliedVoucher` and `removeVoucher` went too.
+- [x] **6.4** Docs:
   - AGENTS.md: PHP `^8.4`, the current test count, the vite `base` note.
   - README: the production deploy flow.
   - `TECH_STACK.md`: the PHP version.
   - Mark `ARCHITECTURE_AND_AUDIT_GUIDE.md` and `BAKEANDGRILL_IMPORT_PLAN.md` as historical at the top.
-- [ ] **6.5** Tests for untested deleting or token routes:
+  Done (README now describes `~/deploy-live.sh` and newest `main`).
+- [x] **6.5** Tests for untested deleting or token routes:
   - `DELETE admin/finance/expenses/{expense}`;
   - `DELETE admin/newsletter/{subscriber}`;
   - admin webhooks destroy and toggle;
   - `POST messages/g/{conversation}/{token}`;
   - `GET track/order/{order}`;
   - `sms:prune`.
-- [ ] **6.6** composer.json: project name and description; remove the pest plugin from
+  Done: `UntestedRoutesTest` (the tracking page was covered for a good link; it now also checks missing, expired and altered signatures).
+- [x] **6.6** composer.json: project name and description; remove the pest plugin from
   `allow-plugins`.
+  Done.
 
 ---
 

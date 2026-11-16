@@ -28,28 +28,6 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'slack' => [
-        'notifications' => [
-            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | WhatsApp Cloud API Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure WhatsApp Business API for sending messages, OTP, and notifications
-    |
-    */
-    'whatsapp' => [
-        'token' => env('WHATSAPP_TOKEN'),
-        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
-        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
-        'webhook_verify_token' => env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
-    ],
-
     /*
     |--------------------------------------------------------------------------
     | BML Payment Gateway Configuration
@@ -89,25 +67,6 @@ return [
 
         // Sent as paymentPortalExperience.externalWebsiteTermsUrl (BML v2 asks for it).
         'terms_url' => env('BML_EXTERNAL_TERMS_URL'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | SMS Gateway Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure SMS gateway for sending OTP and notifications
-    |
-    */
-    'sms' => [
-        'provider' => env('SMS_PROVIDER', 'twilio'), // twilio, nexmo, etc.
-        'api_key' => env('SMS_API_KEY'),
-        'api_secret' => env('SMS_API_SECRET'),
-        'from_number' => env('SMS_FROM_NUMBER'),
-        'endpoint' => env('SMS_ENDPOINT'),
-        // Sign-in codes by text, for the whole site per hour (PhoneLoginController::sendCode()): someone cycling
-        // through numbers can't run up the SMS bill
-        'login_hourly_cap' => (int) env('SMS_LOGIN_HOURLY_CAP', 300),
     ],
 
     /*

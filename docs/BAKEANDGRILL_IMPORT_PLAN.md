@@ -1,5 +1,8 @@
 # Bringing Bake & Grill features into iruali
 
+> **Historical (kept for reference).** The October 2026 plan; the features it chose have shipped. See
+> `docs/FEATURES.md` for what exists now.
+
 From a code audit of both repos (October 2026). Bake & Grill (github.com/ampilarey/bakeandgrill) is a
 single restaurant: Laravel API in `backend/`, React apps in `apps/` (order, POS, admin, KDS, driver).
 iruali is a multi-shop marketplace in Laravel/Blade. Features are rebuilt the iruali way: Blade

@@ -4,7 +4,7 @@ Laravel 12 marketplace where island shops sell to the whole country: one checkou
 payment through BML Connect, one order split into a part per shop, commission and payouts for
 the shops, delivery by zone (Greater Malé / islands). English and Dhivehi (right-to-left)
 throughout. Runs on cPanel shared hosting; `test.iruali.mv` deploys itself from `main`,
-`iruali.mv` runs tagged releases deployed by hand.
+`iruali.mv` is deployed by hand from the newest `main`.
 
 ## What it does
 
@@ -98,16 +98,16 @@ npm run build      # vite build, then fix-manifest.sh copies .vite/manifest.json
 
 - **Test site:** every push to `main` that passes CI is pulled by `test.iruali.mv` within a
   minute (webhook, cron fallback) and smoke-tested. `docs/TEST_AUTO_DEPLOY.md`.
-- **Release:** `bash scripts/release.sh` on `main` makes an annotated `vYYYY.MM.DD` tag (after
-  checking CI is green when `GITHUB_TOKEN` is set) and pushes it; GitHub runs the suite on the
-  tag and publishes a Release with generated notes (`.github/workflows/release.yml`).
-- **Production:** on the server, `bash scripts/deploy-production.sh v2026.10.01` (or
-  `--latest-tag`): maintenance mode, detached checkout of the tag, composer, migrations, caches,
-  health check and `php artisan iruali:smoke`; any failure rolls back automatically.
-  `bash scripts/rollback-production.sh [tag]` rolls back on demand. Every attempt is in
-  `storage/app/deploys.log`. First-deploy walk-through and everything that must run on the
-  server: `docs/PRODUCTION_DEPLOY.md`.
-- After deploying: `php artisan iruali:ready` (`READY`), `/api/health` shows the tag.
+- **Production:** on the server, `bash ~/deploy-live.sh`. It refuses while GitHub's checks on the
+  newest `main` are red or running, then: maintenance page, checkout, `composer install`, a database
+  backup (the deploy stops if it fails), migrations, caches, health check and
+  `php artisan iruali:smoke`; any failure rolls the code back automatically (migrations are not
+  reversed). `bash ~/deploy-tools/rollback-production.sh` rolls back on demand. Every attempt is in
+  `storage/app/deploys.log`. Details: `docs/SERVERS.md`; first-deploy walk-through:
+  `docs/PRODUCTION_DEPLOY.md`.
+- **No release tags for now.** `scripts/release.sh` and `deploy-production.sh <tag>` still work if
+  tags come back.
+- After deploying: `php artisan iruali:ready` (`READY`), `/api/health` shows the commit.
 
 ## Environment variables that matter
 

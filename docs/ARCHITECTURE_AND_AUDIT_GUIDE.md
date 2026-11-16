@@ -1,5 +1,8 @@
 # Iruali — Architecture & Audit Implementation Guide
 
+> **Historical (kept for reference).** Written early in the project; much of it is done or superseded. For the
+> current state see `docs/PROJECT_OVERVIEW.md`, `docs/SERVERS.md` and `docs/AUDIT_FIX_PLAN.md`.
+
 > **Status:** Reference document. Do not implement without reviewing each section.
 > **Codebase:** Laravel 12 / PHP 8.2+ / Blade + Tailwind / Sanctum API
 > **Context:** Maldives marketplace platform (`APP_TIMEZONE=Asia/Male`)

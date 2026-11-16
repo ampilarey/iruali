@@ -206,106 +206,6 @@ class CartService
     }
 
     /**
-     * Get cart totals with applied discounts
-     */
-    public function getCartTotals(Cart $cart): array
-    {
-        $subtotal = $cart->total;
-        $voucher = $this->getAppliedVoucher();
-        $voucherDiscount = 0;
-
-        if ($voucher) {
-            $voucherDiscount = $this->calculateVoucherDiscount($cart, $voucher);
-        }
-
-        $pointsRedeemed = Session::get('points_redeemed', 0);
-        $pointsDiscount = $pointsRedeemed;
-
-        $total = $subtotal - $voucherDiscount - $pointsDiscount;
-        $total = max(0, $total); // Ensure total is not negative
-
-        return [
-            'subtotal' => $subtotal,
-            'voucher_discount' => $voucherDiscount,
-            'points_discount' => $pointsDiscount,
-            'total' => $total,
-            'voucher' => $voucher,
-            'points_redeemed' => $pointsRedeemed,
-        ];
-    }
-
-    /**
-     * Get applied voucher from session
-     */
-    public function getAppliedVoucher()
-    {
-        $voucherCode = Session::get('voucher_code');
-        if (! $voucherCode) {
-            return null;
-        }
-
-        return \App\Models\Voucher::where('code', $voucherCode)
-            ->where('is_active', true)
-            ->first();
-    }
-
-    /**
-     * Calculate voucher discount
-     */
-    public function calculateVoucherDiscount(Cart $cart, $voucher): float
-    {
-        if ($voucher->type === 'percent') {
-            return round($cart->total * ($voucher->amount / 100), 2);
-        }
-
-        return min($voucher->amount, $cart->total);
-    }
-
-    /**
-     * Validate and apply voucher
-     */
-    public function applyVoucher(string $voucherCode, Cart $cart): array
-    {
-        $voucher = \App\Models\Voucher::where('code', $voucherCode)
-            ->where('is_active', true)
-            ->first();
-
-        if (! $voucher || ! $voucher->usableBy(Auth::id())) {
-            return ['success' => false, 'message' => __('Invalid or inactive voucher.')];
-        }
-
-        if ($voucher->valid_from && now()->lt($voucher->valid_from)) {
-            return ['success' => false, 'message' => __('Voucher not yet valid.')];
-        }
-
-        if ($voucher->valid_until && now()->gt($voucher->valid_until)) {
-            return ['success' => false, 'message' => __('Voucher expired.')];
-        }
-
-        if ($voucher->max_uses && $voucher->used_count >= $voucher->max_uses) {
-            return ['success' => false, 'message' => __('Voucher usage limit reached.')];
-        }
-
-        if ($voucher->min_order && $cart->total < $voucher->min_order) {
-            return ['success' => false, 'message' => __('Order does not meet minimum amount for this voucher.')];
-        }
-
-        Session::put('voucher_code', $voucher->code);
-
-        return ['success' => true, 'message' => __('Voucher applied!')];
-    }
-
-    /**
-     * Remove applied voucher
-     */
-    public function removeVoucher(): bool
-    {
-        Session::forget('voucher_code');
-
-        return true;
-    }
-
-    /**
      * Check if cart is empty
      */
     public function isCartEmpty(Cart $cart): bool
@@ -318,7 +218,8 @@ class CartService
      */
     public function getCartSummary(Cart $cart): array
     {
-        $totals = $this->getCartTotals($cart);
+        $subtotal = (float) $cart->total;
+        $pointsDiscount = (float) Session::get('points_redeemed', 0);
         // The same sums checkout uses: the shops' own discounts first (multi-buy offers, shop codes),
         // then the iruali voucher on what is left (see ShopDiscountService and DiscountService)
         $discounts = app(DiscountService::class)->calculateTotalDiscount($cart);
@@ -326,10 +227,10 @@ class CartService
 
         return [
             'item_count' => $cart->item_count,
-            'subtotal' => $totals['subtotal'],
+            'subtotal' => $subtotal,
             'voucher_discount' => $discounts['voucher']['amount'],
-            'points_discount' => $totals['points_discount'],
-            'total' => round(max(0, (float) $totals['subtotal'] - $shop['amount'] - $discounts['voucher']['amount'] - (float) $totals['points_discount']), 2),
+            'points_discount' => $pointsDiscount,
+            'total' => round(max(0, $subtotal - $shop['amount'] - $discounts['voucher']['amount'] - $pointsDiscount), 2),
             'voucher' => $discounts['voucher']['voucher'],
             'voucher_error' => $discounts['voucher']['error'] ?? null,
             'shop_discount' => $shop['amount'],

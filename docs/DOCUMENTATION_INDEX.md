@@ -21,6 +21,7 @@ container and the test database.
   reconciliation; BML card is the only payment method.
 - **[BML_COMPLIANCE.md](BML_COMPLIANCE.md)** — where each of BML's website requirements is met.
 - **[SHOP_ABROAD_PLAN.md](SHOP_ABROAD_PLAN.md)** — planned: shop overseas stores, see the price in MVR (store tiles, instant estimate, requests in the cart).
+- **[AUDIT_FIX_PLAN.md](AUDIT_FIX_PLAN.md)** — the 2026-11-16 audit: every finding with where, fix and tests, in six batches. Work order for the fixes.
 
 ## Deploying and running it
 

@@ -482,6 +482,9 @@ sold-out item when no terms were shown.
 - `deploy-test-immediate.yml`: require `github.event.workflow_run.event == 'push'` and
   `head_repository.full_name == github.repository`.
 - `permissions: contents: read` on `tests.yml`.
+- The browser job is pinned to `ubuntu-24.04` (Playwright 1.56.1 cannot install Chromium on 26.04).
+  Upgrade `@playwright/test` to a version that supports 26.04, then return the job to
+  `ubuntu-latest`.
 - `Http::preventStrayRequests()` in `tests/TestCase::setUp`. Fix any test this exposes.
 - Tests for `POST api/deploy/test-pull` with `TestDeployTrigger` mocked: short secret → 404, wrong
   secret → 401, non-test host → 404, correct → 202. Make `isTestHost()` check the request host too.

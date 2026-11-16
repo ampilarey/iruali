@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\Cart;
 use App\Models\User;
 use App\Services\CartService;
+use App\Services\DiscountService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -43,24 +44,23 @@ class CartServiceTest extends TestCase
         $this->assertEquals('active', $cart->status);
     }
 
-    public function test_cart_totals_calculation()
+    public function test_cart_totals_come_from_the_discount_service()
     {
         $user = User::factory()->create();
         Auth::login($user);
 
         $cart = $this->cartService->getOrCreateCart();
 
-        // Add some items to cart (this would be done through addToCart method)
-        // For now, we'll test the totals calculation with an empty cart
+        // The cart page and checkout take their discounts from DiscountService (shop deals first,
+        // then the iruali voucher); an empty cart has none
+        $discounts = app(DiscountService::class)->calculateTotalDiscount($cart);
+        $this->assertEquals(0, $discounts['voucher']['amount']);
+        $this->assertEquals(0, $discounts['shop']['amount']);
 
-        $totals = $this->cartService->getCartTotals($cart);
-
-        $this->assertArrayHasKey('subtotal', $totals);
-        $this->assertArrayHasKey('voucher_discount', $totals);
-        $this->assertArrayHasKey('points_discount', $totals);
-        $this->assertArrayHasKey('total', $totals);
-        $this->assertEquals(0, $totals['subtotal']);
-        $this->assertEquals(0, $totals['total']);
+        $summary = $this->cartService->getCartSummary($cart);
+        $this->assertEquals(0, $summary['subtotal']);
+        $this->assertEquals(0, $summary['total']);
+        $this->assertSame($discounts['voucher']['amount'], $summary['voucher_discount']);
     }
 
     public function test_is_cart_empty()

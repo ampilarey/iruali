@@ -29,7 +29,8 @@ That is the whole routine. `~/deploy-live.sh` (made once, content in `PRODUCTION
 
 - refuses while GitHub's checks for the newest `main` commit are failing or still running
   (wait ~5 minutes after a merge);
-- maintenance page → checkout → `composer install --no-dev` → `migrate --force` → caches →
+- maintenance page (the deploy stops if it can't be shown) → checkout → `composer install --no-dev`
+  → `config:clear` → database backup (the deploy stops if it fails) → `migrate --force` → caches →
   copies built assets and a front-controller `index.php` into `public_html` → `up`;
 - `/api/health` must answer healthy (and, with `HEALTH_DETAIL_TOKEN` in `.env`, report the new
   commit), then `php artisan iruali:smoke` must pass;

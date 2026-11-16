@@ -8,7 +8,7 @@ This page lists what the Iruali marketplace is actually built with. The source o
 ## 🏗️ Architecture Overview
 
 ### Backend Architecture
-- **Framework**: Laravel 12 (PHP 8.4 in production and CI; `composer.json` requires `^8.2`)
+- **Framework**: Laravel 12 (PHP 8.4 in production and CI; `composer.json` requires `^8.4`)
 - **Pattern**: Model-View-Controller with a service layer (`app/Services`)
 - **Database**: MySQL / MariaDB in production and for the test suite; SQLite for local development (`.env.example`)
 - **Authentication**: Session auth for the website, Laravel Sanctum tokens for the JSON API, optional TOTP 2FA
@@ -25,7 +25,7 @@ This page lists what the Iruali marketplace is actually built with. The source o
 ### Core Framework
 ```json
 {
-  "php": "^8.2",
+  "php": "^8.4",
   "laravel/framework": "^12.0"
 }
 ```
@@ -80,7 +80,7 @@ There is no PDF, spreadsheet, reCAPTCHA or social-login package.
 
 - **TailwindCSS 4**: brand palette, fonts and animations are defined in `tailwind.config.js`; `resources/css/app.css` holds the component classes
 - **SweetAlert2**: the flash/notification dialogs driven by `resources/js/notifications.js`
-- **Vite 6**: `npm run dev` for HMR, `npm run build` for production assets (`vite.config.js` sets `base: '/iruali/public/'` only when `NODE_ENV=production`, matching the cPanel layout)
+- **Vite 6**: `npm run dev` for HMR, `npm run build` for production assets (`vite.config.js` uses `base: '/'`, the domain root)
 - No JavaScript framework (no Alpine, Vue or React) and no axios: the pages are server-rendered Blade with plain `fetch` where needed
 
 ## 🗄️ Database
@@ -160,4 +160,4 @@ backups, token pruning and guest-cart cleanup (`routes/console.php`).
 ---
 
 **Laravel Version**: 12.x  
-**PHP Version**: 8.4 (8.2+ required)
+**PHP Version**: 8.4 (required)

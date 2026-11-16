@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "ampilarey/iruali",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "iruali: a multi-vendor marketplace for shops across the Maldives (Laravel 12).",
+    "keywords": ["laravel", "marketplace", "e-commerce", "maldives"],
     "license": "MIT",
     "require": {
         "php": "^8.4",
@@ -80,7 +80,6 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true,
             "php-http/discovery": true
         }
     },

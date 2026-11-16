@@ -20,6 +20,10 @@ return [
 
     'driver' => env('SMS_DRIVER', 'log'),
 
+    // Sign-in codes by text, for the whole site per hour (PhoneLoginController::sendCode()): someone cycling
+    // through numbers can't run up the SMS bill
+    'login_hourly_cap' => (int) env('SMS_LOGIN_HOURLY_CAP', 300),
+
     // Shown as the sender when the gateway allows an alphanumeric sender id
     'sender_id' => env('SMS_SENDER_ID', 'iruali'),
 

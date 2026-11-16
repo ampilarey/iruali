@@ -375,8 +375,8 @@ class PhoneLoginController extends AuthController
         if (RateLimiter::tooManyAttempts($key.':m', 1) || RateLimiter::tooManyAttempts($key.':h', 5)) {
             return back()->withInput()->withErrors(['login' => __('Please wait a minute before asking for another code.')]);
         }
-        if ($channel === 'sms' && RateLimiter::tooManyAttempts('phone-login:sms:site', max(1, (int) config('services.sms.login_hourly_cap', 300)))) {
-            report(new \RuntimeException('Sign-in texts reached the hourly cap (services.sms.login_hourly_cap)'));
+        if ($channel === 'sms' && RateLimiter::tooManyAttempts('phone-login:sms:site', max(1, (int) config('sms.login_hourly_cap', 300)))) {
+            report(new \RuntimeException('Sign-in texts reached the hourly cap (sms.login_hourly_cap)'));
 
             return back()->withInput()->withErrors(['login' => __('We are sending a lot of codes right now. Please try again in a few minutes.')]);
         }

@@ -165,16 +165,17 @@ class SellerPerformanceService
     public function ratingsByMonth(User $seller): array
     {
         $from = now()->startOfMonth()->subMonths(11);
-        $rows = $this->reviews($seller)
+        // Grouped by month here, not in SQL, so it works on any database (DATE_FORMAT is MySQL only)
+        $byMonth = $this->reviews($seller)
             ->where('product_reviews.created_at', '>=', $from)
-            ->selectRaw("DATE_FORMAT(product_reviews.created_at, '%Y-%m') as ym, AVG(product_reviews.rating) as avg_rating, COUNT(*) as n")
-            ->groupBy('ym')->get()->keyBy('ym');
+            ->toBase()->get(['product_reviews.created_at', 'product_reviews.rating'])
+            ->groupBy(fn ($r) => \Illuminate\Support\Carbon::parse($r->created_at)->format('Y-m'));
 
-        $months = collect(range(0, 11))->map(function ($i) use ($from, $rows) {
+        $months = collect(range(0, 11))->map(function ($i) use ($from, $byMonth) {
             $month = $from->copy()->addMonths($i);
-            $row = $rows[$month->format('Y-m')] ?? null;
+            $ratings = $byMonth->get($month->format('Y-m'), collect())->pluck('rating');
 
-            return ['month' => $month->format('Y-m'), 'label' => $month->format('M'), 'avg' => $row ? round((float) $row->avg_rating, 2) : null, 'count' => (int) ($row->n ?? 0)];
+            return ['month' => $month->format('Y-m'), 'label' => $month->format('M'), 'avg' => $ratings->isNotEmpty() ? round((float) $ratings->avg(), 2) : null, 'count' => $ratings->count()];
         })->all();
 
         $overall = $this->reviews($seller)->selectRaw('AVG(product_reviews.rating) as avg_rating, COUNT(*) as n')->first();

@@ -3,7 +3,7 @@
     <div class="flex items-end justify-between gap-4 mb-3">
         <h2 class="font-display text-xl lg:text-2xl font-bold text-dark">{{ $title }}</h2>
         @if($link)
-            <a href="{{ $link }}" class="shrink-0 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">{{ $linkLabel ?? __('See all') }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" /></a>
+            <a href="{{ $link }}" class="shrink-0 inline-flex items-center gap-1 min-h-11 -my-2 text-sm font-semibold text-primary hover:underline">{{ $linkLabel ?? __('See all') }}<x-icon name="chevron-right" class="w-4 h-4 rtl:rotate-180" /></a>
         @endif
     </div>
     <div class="-mx-4 px-4 lg:mx-0 lg:px-0 flex gap-3 lg:gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">

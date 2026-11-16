@@ -407,6 +407,9 @@ class ShoppingIslandTest extends TestCase
         // Never over the sign-in form, checkout or payment: the person came to do something else
         $this->get('/login')->assertDontSee('data-auto-open', false);
         $this->get('/register')->assertDontSee('data-auto-open', false);
+        // Nor over a product page reached from a link; the bar still offers the choice
+        $this->get(route('products.show', $this->maleProduct))->assertOk()->assertDontSee('data-auto-open', false)->assertSee('data-shopping-island', false);
+        $this->get(route('deals'))->assertSee('data-auto-open', false);
     }
 
     public function test_department_counts_follow_the_island(): void

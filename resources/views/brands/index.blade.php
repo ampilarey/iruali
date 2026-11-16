@@ -51,9 +51,9 @@
                     <nav aria-label="{{ __('Brands A to Z') }}" class="flex flex-wrap gap-1 text-sm" dir="ltr">
                         @foreach(array_merge(range('A', 'Z'), ['#']) as $letter)
                             @if($letters->has($letter))
-                                <a href="#letter-{{ $letter === '#' ? 'other' : $letter }}" class="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-primary hover:bg-primary-50">{{ $letter }}</a>
+                                <a href="#letter-{{ $letter === '#' ? 'other' : $letter }}" class="w-11 h-11 rounded-lg flex items-center justify-center font-semibold text-primary hover:bg-primary-50">{{ $letter }}</a>
                             @else
-                                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300" aria-hidden="true">{{ $letter }}</span>
+                                <span class="w-11 h-11 rounded-lg flex items-center justify-center text-gray-300" aria-hidden="true">{{ $letter }}</span>
                             @endif
                         @endforeach
                     </nav>

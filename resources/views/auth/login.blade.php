@@ -6,13 +6,13 @@
 <div class="min-h-[60vh] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h1 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 {{ __('Sign in with email') }}
-            </h2>
+            </h1>
             <p class="mt-2 text-center text-sm text-gray-600">{{ __('For staff, and customers who signed up with an email.') }}</p>
         </div>
         {{-- Customers sign in with their mobile number (as on Bake & Grill): password if set, otherwise a code --}}
-        <a href="{{ route('login') }}" class="mt-8 flex w-full items-center justify-center gap-2 rounded-md border border-primary-300 bg-white px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50" data-login-phone-link>
+        <a href="{{ route('login') }}" class="mt-8 flex w-full min-h-11 items-center justify-center gap-2 rounded-md border border-primary-300 bg-white px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50" data-login-phone-link>
             <x-icon name="phone" class="h-4 w-4" />{{ __('Continue with your mobile number') }}
         </a>
         <form class="space-y-6" action="{{ route('login') }}" method="POST">
@@ -56,7 +56,7 @@
 
             <div>
                 <button type="submit" 
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        class="group relative w-full min-h-11 flex items-center justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                     <span class="absolute start-0 inset-y-0 flex items-center ps-3">
                         <svg class="h-5 w-5 text-white/70 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />

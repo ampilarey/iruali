@@ -23,7 +23,7 @@
                     <input id="password" name="password" type="password" autocomplete="current-password" required autofocus class="{{ $field }} @error('password') border-red-500 @enderror">
                     @error('password')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
-                <button type="submit" class="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Sign in') }}</button>
+                <button type="submit" class="w-full min-h-11 rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Sign in') }}</button>
             </form>
             <p class="text-center"><a href="{{ route('password.request') }}" class="text-sm font-medium text-primary-600 hover:text-primary-500">{{ __('Forgot password?') }}</a></p>
         @elseif(($pending['step'] ?? null) === 'password')
@@ -35,7 +35,7 @@
                     <input id="password" name="password" type="password" autocomplete="current-password" required autofocus class="{{ $field }} @error('password') border-red-500 @enderror">
                     @error('password')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
-                <button type="submit" class="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Sign in') }}</button>
+                <button type="submit" class="w-full min-h-11 rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Sign in') }}</button>
             </form>
             <div class="flex flex-col items-center gap-2">
                 @if($pending['email_code'] ?? false)
@@ -75,7 +75,7 @@
                            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-center text-2xl tracking-[.4em] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('code') border-red-500 @enderror">
                     @error('code')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
-                <button type="submit" class="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Continue') }}</button>
+                <button type="submit" class="w-full min-h-11 rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Continue') }}</button>
                 <p class="text-xs text-gray-500">{{ __('The code works for 10 minutes.') }}</p>
             </form>
             <form method="POST" action="{{ route('login.phone.resend') }}" class="text-center">
@@ -95,7 +95,7 @@
                     <input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                     {{ __('Remember me') }}
                 </label>
-                <button type="submit" class="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Continue') }}</button>
+                <button type="submit" class="w-full min-h-11 rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ __('Continue') }}</button>
             </form>
         @endif
 

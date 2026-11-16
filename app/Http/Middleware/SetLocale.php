@@ -19,9 +19,15 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        // /dv/... is only for storefront pages (see LocalePrefix and LocaleUrl); anything else under it is not a page
+        // /dv/... is only for storefront pages (see LocalePrefix and LocaleUrl): a page that has no Dhivehi
+        // address (account, checkout, sign-in...) is opened at its plain address, in the visitor's language
         if (LocalePrefix::active($request) && ! LocaleUrl::isLocalized($request->route())) {
-            abort(404);
+            abort_unless($request->isMethod('GET') || $request->isMethod('HEAD'), 404);
+            if (LocalizationService::dhivehiEnabled() && $request->hasSession()) {
+                $request->session()->put('locale', LocalePrefix::PREFIX); // they were reading in Dhivehi
+            }
+
+            return redirect()->to(self::withoutPrefix($request), 302);
         }
 
         // Dhivehi switched off: a /dv page sends the visitor to the same page in English (a temporary
@@ -43,6 +49,36 @@ class SetLocale
         Carbon::setLocale($locale);
 
         return $next($request);
+    }
+
+    /**
+     * The same address without /dv (the request's base URL ends in "/dv", see LocalePrefix).
+     */
+    public static function withoutPrefix(Request $request): string
+    {
+        $base = substr($request->getBaseUrl(), 0, -strlen('/'.LocalePrefix::PREFIX));
+        $query = $request->getQueryString();
+
+        return $request->getSchemeAndHttpHost().$base.$request->getPathInfo().($query !== null ? '?'.$query : '');
+    }
+
+    /**
+     * Error pages: an address the router did not match never ran this middleware, so the language
+     * comes from the /dv prefix, or the visitor's choice when the session is open.
+     */
+    public static function forErrorPage(Request $request): void
+    {
+        $locale = null;
+        if (LocalePrefix::active($request)) {
+            $locale = LocalizationService::dhivehiEnabled() ? LocalePrefix::PREFIX : null;
+        } elseif ($request->hasSession() && $request->session()->isStarted() && $request->session()->has('locale')) {
+            $locale = (string) $request->session()->get('locale');
+        }
+
+        if ($locale !== null && in_array($locale, LocalizationService::getAvailableLocales(), true)) {
+            App::setLocale($locale);
+            Carbon::setLocale($locale);
+        }
     }
 
     /**

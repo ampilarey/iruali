@@ -3524,5 +3524,12 @@
     "This order is not paid yet. You can start on it once it is.": "މި އޯޑަރުގެ ފައިސާ އަދި ނުދައްކާ. ފައިސާ ދެއްކުމުން މަސައްކަތް ފަށާ.",
     "The price for \":name\" is no longer valid. Ask us again and we will send a new one.": "\":name\" ގެ އަގު މިހާރު ބާތިލް. އަލުން އަހާލައްވާ، އައު އަގެއް ފޮނުވާނަން.",
     "\":name\" was priced for :count. Please accept the request again.": "\":name\" ގެ އަގު ދީފައިވަނީ :count އަށް. ރިކުއެސްޓް އަލުން ގަބޫލުކުރައްވާ.",
-    "The prices in your cart changed since you opened checkout. Please check the new total and place the order again.": "ޗެކްއައުޓް ހުޅުވިފަހުން ކާޓުގެ އަގުތައް ބަދަލުވެއްޖެ. އައު ޖުމްލަ ބައްލަވާފައި އަލުން އޯޑަރު ކުރައްވާ."
+    "The prices in your cart changed since you opened checkout. Please check the new total and place the order again.": "ޗެކްއައުޓް ހުޅުވިފަހުން ކާޓުގެ އަގުތައް ބަދަލުވެއްޖެ. އައު ޖުމްލަ ބައްލަވާފައި އަލުން އޯޑަރު ކުރައްވާ.",
+    "This page is in English for now. A Dhivehi version is on its way.": "މި ޞަފްޙާ މިހާރު އޮތީ އިނގިރޭސި ބަހުން. ދިވެހި ބަހުން ވެސް އަވަހަށް ލިބޭނެ.",
+    "No access to this page": "މި ޞަފްޙާއަށް ވަނުމުގެ ހުއްދައެއް ނެތް",
+    "Your account cannot open this page. Sign in with another account, or go back to the shop.": "ތިޔަ އެކައުންޓުން މި ޞަފްޙާ ހުޅުވޭކަށް ނެތް. އެހެން އެކައުންޓަކުން ސައިން އިން ކުރައްވާ، ނުވަތަ ފިހާރައަށް އެނބުރި ވަޑައިގަންނަވާ.",
+    "Bulk action": "އެއްފަހަރާ ކުރާ ކަންތައް",
+    "Order status": "އޯޑަރުގެ ހާލަތު",
+    "CSV file": "CSV ފައިލް",
+    "Your referral link": "ތިޔަ ރިފަރަލް ލިންކް"
 }

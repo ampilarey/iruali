@@ -53,6 +53,11 @@ class PwaAndPushTest extends TestCase
         }
 
         $this->get('/')->assertOk()->assertSee('<link rel="manifest" href="/site.webmanifest">', false);
+        // The Dhivehi storefront installs with Dhivehi names, right to left
+        $this->get('/dv')->assertOk()->assertSee('<link rel="manifest" href="/site.dv.webmanifest">', false);
+        $dv = json_decode(file_get_contents(public_path('site.dv.webmanifest')), true);
+        $this->assertSame(['dv', 'rtl', '/dv/'], [$dv['lang'], $dv['dir'], $dv['start_url']]);
+        $this->assertSame(array_column(json_decode(file_get_contents(public_path('site.webmanifest')), true)['icons'], 'src'), array_column($dv['icons'], 'src'));
     }
 
     public function test_service_worker_handles_fetch_push_and_never_caches_private_pages(): void

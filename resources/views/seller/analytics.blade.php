@@ -31,7 +31,7 @@
             </div>
             <div class="mt-2 flex gap-2">
                 @foreach($months as $month => $total)
-                    <span class="flex-1 text-center text-[10px] text-gray-500">{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M') }}</span>
+                    <span class="flex-1 text-center text-xs text-gray-500">{{ \Illuminate\Support\Carbon::parse($month . '-01')->format('M') }}</span>
                 @endforeach
             </div>
         </div>

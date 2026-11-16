@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\PreorderService;
 use App\Support\CurrentShop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,11 @@ class StockController extends Controller
 
     /**
      * Save the stock numbers typed into the table (products without variants, and variants).
+     *
+     * The page sends each number as it was when the page opened (original[...]) beside the one typed:
+     * only rows the shop changed are saved, and as the difference, so a sale (or a cancelled order's
+     * units coming back) while the page was open is not written over. More units for a product with
+     * pre-orders waiting go to those orders first (PreorderService::receiveStock()).
      */
     public function update(Request $request)
     {
@@ -47,6 +53,10 @@ class StockController extends Controller
             'products.*' => 'required|integer|min:0|max:999999',
             'variants' => 'nullable|array|max:2000',
             'variants.*' => 'required|integer|min:0|max:999999',
+            'original.products' => 'nullable|array|max:500',
+            'original.products.*' => 'nullable|integer|min:0|max:999999',
+            'original.variants' => 'nullable|array|max:2000',
+            'original.variants.*' => 'nullable|integer|min:0|max:999999',
         ]);
 
         $sellerId = CurrentShop::id();
@@ -63,23 +73,47 @@ class StockController extends Controller
             403
         );
 
+        $preorders = app(PreorderService::class);
         $changed = 0;
-        DB::transaction(function () use ($data, $products, $variants, &$changed) {
+        $arrivals = []; // product id => [variant id, or 0 => units]: handed to waiting pre-orders first
+        DB::transaction(function () use ($data, $products, $variants, $preorders, &$changed, &$arrivals) {
             foreach ($data['products'] ?? [] as $id => $stock) {
                 $product = $products[(int) $id];
-                if (! $product->has_variants && (int) $product->stock_quantity !== (int) $stock) {
-                    $product->update(['stock_quantity' => (int) $stock]);
-                    $changed++;
+                if ($product->has_variants) {
+                    continue;
                 }
+                $locked = Product::whereKey($product->id)->lockForUpdate()->first();
+                $delta = (int) $stock - (int) ($data['original']['products'][$id] ?? $locked->stock_quantity);
+                if ($delta === 0) {
+                    continue;
+                }
+                if ($delta > 0 && $preorders->waitingUnits($locked->id) > 0) {
+                    $arrivals[$locked->id][0] = $delta;
+                } else {
+                    $locked->update(['stock_quantity' => max(0, (int) $locked->stock_quantity + $delta)]);
+                }
+                $changed++;
             }
             foreach ($data['variants'] ?? [] as $id => $stock) {
                 $variant = $variants[(int) $id];
-                if ((int) $variant->stock_quantity !== (int) $stock) {
-                    $variant->update(['stock_quantity' => (int) $stock]);
-                    $changed++;
+                $locked = ProductVariant::whereKey($variant->id)->lockForUpdate()->first();
+                $delta = (int) $stock - (int) ($data['original']['variants'][$id] ?? $locked->stock_quantity);
+                if ($delta === 0) {
+                    continue;
                 }
+                if ($delta > 0 && $preorders->waitingUnits((int) $locked->product_id) > 0) {
+                    $arrivals[(int) $locked->product_id][(int) $locked->id] = $delta;
+                } else {
+                    $locked->update(['stock_quantity' => max(0, (int) $locked->stock_quantity + $delta)]);
+                }
+                $changed++;
             }
         });
+        foreach ($arrivals as $productId => $units) {
+            if ($product = Product::find($productId)) {
+                $preorders->receiveStock($product, $units, 'stock_page');
+            }
+        }
 
         return redirect()->route('seller.stock', $request->only('low', 'q'))
             ->with('success', trans_choice(':count stock level updated.|:count stock levels updated.', $changed, ['count' => $changed]));

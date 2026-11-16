@@ -35,6 +35,8 @@ class CartController extends Controller
         $cart->items->each(fn ($item) => $item->variant?->setRelation('product', $item->product));
 
         $cartSummary = $this->cartService->getCartSummary($cart);
+        // The total the customer sees here counts as seen (a higher one at "Place order" is shown first: OrderService)
+        session([\App\Services\OrderService::SESSION_GOODS_SHOWN => (float) $cartSummary['total']]);
 
         $saved = Auth::check()
             ? SavedItem::where('user_id', Auth::id())->with(['product.mainImage', 'variant'])->latest()->get()->whereNotNull('product')

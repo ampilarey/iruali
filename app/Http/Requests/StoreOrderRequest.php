@@ -312,7 +312,7 @@ class StoreOrderRequest extends FormRequest
             // the same check as guest checkout
             if ($cart) {
                 foreach ($cart->items as $item) {
-                    if (! $item->product || ! $item->product->is_active) {
+                    if (! $item->product || (! $item->product->is_active && ! app(\App\Services\ItemRequestService::class)->acceptedBy($item->product, $this->user()))) {
                         $validator->errors()->add('cart', __('A product in your cart is no longer available.'));
                     } elseif ($item->product->seller?->isOnHoliday()) {
                         $validator->errors()->add('cart', \App\Support\ShopHoliday::cartMessage($item->product));

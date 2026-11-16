@@ -1,6 +1,6 @@
 # Audit fix plan (audit of 2026-11-16)
 
-Status: **Batches 1–2 done (2026-11-16); Batches 3–6 to do.** A read-only audit of `main` at `93832c1` found the items below.
+Status: **Batches 1–3 done (2026-11-17); Batches 4–6 to do.** A read-only audit of `main` at `93832c1` found the items below.
 This file is the work order: do the batches in order, one pull request per batch.
 
 Tick an item (`[x]`) in this file in the same PR that fixes it.
@@ -286,7 +286,7 @@ Do 2.1 first; 2.2–2.4 build on it.
 
 ## Batch 3: orders, stock and checkout
 
-### 3.1 [ ] H: accepted item requests cannot be ordered on the website
+### 3.1 [x] H: accepted item requests cannot be ordered on the website
 
 - **Where:** `StoreOrderRequest` (the cart loop: `! $item->product->is_active`). Item-request
   products are created inactive (`ItemRequestService::quote`).
@@ -298,7 +298,7 @@ Do 2.1 first; 2.2–2.4 build on it.
   - Keep the form-request message.
 - **Test:** full HTTP flow: request → quote → accept → `POST /checkout` succeeds.
 
-### 3.2 [ ] H: a shop can advance an unpaid order
+### 3.2 [x] H: a shop can advance an unpaid order
 
 - **Where:** `FulfilmentService::nextStatuses` / `advance`; `OrderService::advanceTo`.
 - **Fix:**
@@ -312,7 +312,7 @@ Do 2.1 first; 2.2–2.4 build on it.
   - it is absent from the seller list;
   - the auto-cancel still cancels it and restores stock.
 
-### 3.3 [ ] H: seller stock page overwrites live stock
+### 3.3 [x] H: seller stock page overwrites live stock
 
 - **Where:** `Seller/StockController::update`; `resources/views/seller/stock.blade.php`.
 - **Fix:**
@@ -323,7 +323,7 @@ Do 2.1 first; 2.2–2.4 build on it.
 - **Test:** page loaded at 5, a sale takes 2, the shop saves an unrelated row → stock stays 3. The
   shop changes 5 → 8 → stock becomes 6.
 
-### 3.4 [ ] M: double tap creates two orders
+### 3.4 [x] M: double tap creates two orders
 
 - **Where:** `OrderService::createOrderFromCart` (the cart is loaded before the transaction).
 - **Fix:**
@@ -332,12 +332,13 @@ Do 2.1 first; 2.2–2.4 build on it.
   - Disable the Place order button on submit in `checkout` JS.
 - **Test:** two calls with the same pre-loaded cart create one order.
 
-### 3.5 [ ] M: API checkout skips the "still on sale" check
+### 3.5 [x] M: API checkout skips the "still on sale" check
 
 Covered by 3.1's move. Add an API test for a deactivated product. Refuse the silent pre-order of a
 sold-out item when no terms were shown.
+**Done:** the app must send `accept_preorders: true` to buy pre-order lines (POST /api/v1/orders).
 
-### 3.6 [ ] M: pre-orders paid after stock arrived are never allocated
+### 3.6 [x] M: pre-orders paid after stock arrived are never allocated
 
 - **Where:**
   - `PreorderService::receiveStock` (skips unpaid orders);
@@ -346,13 +347,13 @@ sold-out item when no terms were shown.
 - **Fix:** after a payment is confirmed, allocate any free stock to that order's waiting pre-order
   lines. Use the same method with an empty arrival.
 
-### 3.7 [ ] M: "Remove seller access" leaves products on sale
+### 3.7 [x] M: "Remove seller access" leaves products on sale
 
 - **Where:** `Admin/AdminController::rejectSeller`; the guard in `OrderService` (around line 51).
 - **Fix:** deactivate the shop's products, as suspend does. Change the order guard to refuse products
   whose owner may not sell (`maySell()`).
 
-### 3.8 [ ] L: item request price and quantity not re-checked at order time
+### 3.8 [x] L: item request price and quantity not re-checked at order time
 
 - **Where:** `ItemRequestService::placeOrder`; `CartController::update`.
 - **Fix:**
@@ -360,25 +361,29 @@ sold-out item when no terms were shown.
     quantity.
   - Block quantity changes on item-request lines.
 
-### 3.9 [ ] L: "shop confirms first" pre-orders never expire
+### 3.9 [x] L: "shop confirms first" pre-orders never expire
 
 - **Where:** `PreorderConfirmService` (around line 247).
 - **Fix:** auto-cancel after N days without confirmation (setting, default 7). Notify the customer.
+- **Done:** `preorder_confirm_days` (default 7) is read from settings but has no field in Admin → Settings
+  yet; the daily `preorders:balance-reminders` run cancels them and the customer gets the usual
+  cancellation message.
 
-### 3.10 [ ] L: voucher and points forgotten before the order can still fail
+### 3.10 [x] L: voucher and points forgotten before the order can still fail
 
 - **Where:** `OrderService` (session `forget` inside the transaction, around lines 291–296).
 - **Fix:** move the forget to after commit.
 
-### 3.11 [ ] L: price changed between checkout page and submit
+### 3.11 [x] L: price changed between checkout page and submit
 
 - **Fix:** post the displayed total (hidden field). If the recomputed total differs, return to
   checkout with "prices changed, please review". Model: `BookingFeeService::forOrder`.
 
-### 3.12 [ ] L: two concurrent return requests
+### 3.12 [x] L: two concurrent return requests
 
 - **Where:** `ReturnService::request`.
 - **Fix:** lock the `SellerOrder` row and re-check `canRequest()` in the transaction.
+  (`ReturnService::request()` now enforces `canRequest()` itself: window, one open request per part.)
 
 ---
 

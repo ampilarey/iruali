@@ -73,6 +73,10 @@ class FulfilmentService
         if ($part->order->status === 'cancelled') {
             return [];
         }
+        // Nothing moves on before the money is in (or the order is paid on delivery): Order::mayBeFulfilled()
+        if (! $part->order->mayBeFulfilled()) {
+            return [];
+        }
 
         // A pre-order paid once the shop confirms stays as it is until it is paid: moved on, it could no
         // longer be paid (Order::awaitingPayment(); PreorderConfirmService)

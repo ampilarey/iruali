@@ -192,6 +192,7 @@ class GuestCheckoutTest extends TestCase
         $seller = $product->seller;
         $seller->forceFill(['is_seller' => true, 'seller_approved' => true])->save();
         $seller->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+        app(\App\Services\PaymentService::class)->confirm($order->fresh()); // shops see a card order once it is paid
         $this->actingAs($seller)->get('/seller/orders')->assertOk()->assertSee('Mariyam')->assertSee('Guest');
         $this->actingAs($seller)->get('/seller/orders/'.$order->id)->assertOk()->assertSee('visitor@example.com');
         $this->actingAs($seller)->get('/seller/dashboard')->assertOk();

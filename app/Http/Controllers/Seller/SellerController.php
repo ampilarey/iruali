@@ -28,12 +28,12 @@ class SellerController extends Controller
             'active_products' => $user->products()->where('is_active', true)->count(),
             'pending_products' => $user->products()->where('is_active', false)->whereNull('item_request_id')->count(),
             'low_stock' => $user->products()->whereColumn('stock_quantity', '<=', 'reorder_point')->count(),
-            'total_orders' => $this->sellerOrders()->count(),
-            'pending_orders' => SellerOrder::where('seller_id', $user->id)->whereIn('status', ['pending', 'processing'])->count(),
+            'total_orders' => $this->sellerOrders()->shownToShops()->count(),
+            'pending_orders' => SellerOrder::where('seller_id', $user->id)->shownToShop()->whereIn('status', ['pending', 'processing'])->count(),
             'total_revenue' => $this->revenue(),
         ];
 
-        $recent_orders = $this->sellerOrders()->with('user')->latest()->take(5)->get();
+        $recent_orders = $this->sellerOrders()->shownToShops()->with('user')->latest()->take(5)->get();
         $recent_products = $user->products()->with('category')->latest()->take(5)->get();
         $onboarding = $user->isOnboarded() ? [] : app(\App\Services\OnboardingService::class)->items($user);
 
@@ -44,6 +44,7 @@ class SellerController extends Controller
     {
         $parts = SellerOrder::query()
             ->where('seller_id', CurrentShop::id())
+            ->shownToShop() // not a card order still waiting for its payment
             ->with(['order.user', 'order.items' => fn ($q) => $this->onlyOwnItems($q), 'order.items.product'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest()
@@ -87,6 +88,9 @@ class SellerController extends Controller
             'tracking_note' => 'nullable|string|max:255',
         ] + \App\Http\Controllers\TrackingController::rules());
 
+        if (! $order->mayBeFulfilled()) {
+            return back()->with('error', __('This order is not paid yet. You can start on it once it is.'));
+        }
         if (! $fulfilment->advance($part, $data['status'], $data['tracking_note'] ?? null, $data)) {
             return back()->with('error', "Your part of this order is {$part->status}; it can't be moved to {$request->status}.");
         }
@@ -246,6 +250,8 @@ class SellerController extends Controller
 
     /**
      * Orders that contain at least one of the current seller's products.
+     *
+     * @return Builder<Order>
      */
     protected function sellerOrders(): Builder
     {

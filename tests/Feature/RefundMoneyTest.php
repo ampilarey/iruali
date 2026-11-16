@@ -167,13 +167,15 @@ class RefundMoneyTest extends TestCase
         $first = $this->returnAll($order, $this->shopA, 'changed_mind', 1);
         $this->assertEquals(70, $first->items_value);
         $returns->approve($first, 70, false, null, $this->admin);
+        $returns->markRefunded($first->fresh(), 'BML-1'); // one open return per part at a time
         $second = $this->returnAll($order->fresh(), $this->shopA, 'changed_mind', 2);
         $this->assertEquals(140, $second->items_value);
         $returns->approve($second, 140, false, null, $this->admin);
+        $returns->markRefunded($second->fresh(), 'BML-2');
         $third = $this->returnAll($order->fresh(), $this->shopB);
         $returns->approve($third, (float) $third->items_value, false, null, $this->admin);
 
-        $refunded = (float) ReturnRequest::where('status', 'approved')->sum('refund_amount');
+        $refunded = (float) ReturnRequest::whereIn('status', ['approved', 'refunded'])->sum('refund_amount');
         $this->assertEquals(420, $refunded);
         $this->assertLessThanOrEqual((float) $order->total_amount, $refunded);
     }

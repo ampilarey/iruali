@@ -52,6 +52,7 @@
                                         @if($product->has_variants)
                                             <span class="text-sm {{ $low ? 'font-semibold text-red-700' : 'text-gray-700' }}" title="{{ __('With variants, stock is the total of the variants below.') }}">{{ $product->stock_quantity }}</span>
                                         @else
+                                            <input type="hidden" name="original[products][{{ $product->id }}]" value="{{ old('original.products.'.$product->id, $product->stock_quantity) }}">
                                             <input type="number" name="products[{{ $product->id }}]" value="{{ old('products.'.$product->id, $product->stock_quantity) }}" min="0" max="999999" dir="ltr"
                                                    class="w-24 rounded-md border px-2 py-1 text-end text-sm focus:border-primary-500 focus:ring-primary-500 {{ $low ? 'border-red-300 font-semibold text-red-700' : 'border-gray-300' }}">
                                         @endif
@@ -69,6 +70,7 @@
                                             <td class="px-4 py-2 text-end text-sm text-gray-900">{{ \App\Support\Money::format($variant->effectivePrice()) }}</td>
                                             <td class="px-4 py-2 text-end text-sm text-gray-500">{{ $variant->low_stock_threshold ?? $product->reorder_point }}</td>
                                             <td class="px-4 py-2 text-end">
+                                                <input type="hidden" name="original[variants][{{ $variant->id }}]" value="{{ old('original.variants.'.$variant->id, $variant->stock_quantity) }}">
                                                 <input type="number" name="variants[{{ $variant->id }}]" value="{{ old('variants.'.$variant->id, $variant->stock_quantity) }}" min="0" max="999999" dir="ltr"
                                                        class="w-24 rounded-md border px-2 py-1 text-end text-sm focus:border-primary-500 focus:ring-primary-500 {{ $vLow ? 'border-red-300 font-semibold text-red-700' : 'border-gray-300' }}">
                                             </td>

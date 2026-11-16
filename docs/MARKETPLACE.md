@@ -105,6 +105,18 @@ Beneficiary Account Number,Beneficiary Name,Amount,Remarks
 
 If BML changes the template, change `BankFileFormat` and the byte-for-byte test in `PayoutBatchesTest`.
 
+## Orders the shops see
+
+A card order appears in Seller Centre (orders list, dashboard counts) only once it is paid; until then
+nobody is told about it and it is cancelled if it is never paid. A shop can move its part forward
+(processing, shipped...) only when the order is paid, its booking fee is paid, or it is cash on delivery
+or pay later (`Order::mayBeFulfilled()`). Admins can still change any order's status.
+
+**Seller Centre → Stock** saves only the rows the shop changed, as the difference from what the page
+showed, so a sale while the page was open is never written over; more units for a product with paid
+pre-orders waiting go to those orders first. **Remove seller access** takes the shop's products off
+sale, like a suspension.
+
 ## Returns and refunds
 
 1. **Customer:** on a delivered order (My Orders → the order), each shop's part has **Request a return**

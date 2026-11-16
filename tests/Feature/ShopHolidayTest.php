@@ -263,7 +263,8 @@ class ShopHolidayTest extends TestCase
         $this->actingAs($this->customer)->get(route('orders.show', $order))->assertOk();
         $this->post(route('payments.bml.pay', $order))->assertRedirect('https://pay.bml.test/txn_test');
 
-        // The shop still sends it
+        // Once paid, the shop still sends it
+        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $this->actingAs($this->shop)->get(route('seller.orders.show', $order))->assertOk();
         $this->post(route('seller.orders.status', $order), ['status' => 'processing'])->assertSessionHas('success');
         $this->post(route('seller.orders.status', $order), ['status' => 'shipped'])->assertSessionHas('success');

@@ -90,6 +90,13 @@ class ReturnService
         $value = $lines->sum('value');
 
         $request = DB::transaction(function () use ($part, $user, $lines, $reason, $details, $photo, $value) {
+            // The part locked and checked again: two requests sent at the same moment can't both be opened
+            // (one open request per part), so the same items can't be asked for twice
+            SellerOrder::whereKey($part->id)->lockForUpdate()->first(['id']);
+            if (! $this->canRequest($part->fresh(), $user)) {
+                return null;
+            }
+
             $request = ReturnRequest::create([
                 'order_id' => $part->order_id,
                 'seller_order_id' => $part->id,
@@ -106,6 +113,9 @@ class ReturnService
 
             return $request;
         });
+        if (! $request) {
+            return null;
+        }
 
         $this->notifyRequested($request);
 

@@ -48,6 +48,15 @@ class OrderService
             if (! $product) {
                 return ['success' => false, 'message' => 'A product in your cart no longer exists.'];
             }
+            // Still on sale (for the website and the app alike). A customer's own item request is never
+            // listed: its accepted price can still be ordered by them
+            if (! $product->is_active && ! app(ItemRequestService::class)->acceptedBy($product, $user)) {
+                return ['success' => false, 'message' => __('A product in your cart is no longer available.')];
+            }
+            // iruali's team accounts never sell (an admin account may also be iruali's own shop)
+            if ($product->seller && ! $product->seller->maySell()) {
+                return ['success' => false, 'message' => __('A product in your cart is no longer available.')];
+            }
             // A shop that was rejected or suspended can't sell (products owned by staff have no seller flag)
             if ($product->seller_id && $product->seller?->is_seller && ! $product->seller->isSeller()) {
                 return ['success' => false, 'message' => __('":name" is no longer available: the shop has closed.', ['name' => $product->name['en'] ?? $product->name])];
@@ -76,9 +85,16 @@ class OrderService
         try {
             DB::beginTransaction();
 
+            // The cart locked and read again first (locking reads only, before the stock locks below): a double
+            // tap's second request waits here for the first, then finds the cart already ordered
+            $lockedCart = Cart::whereKey($cart->id)->lockForUpdate()->first();
+            if (! $lockedCart || $lockedCart->status !== 'active' || \App\Models\CartItem::where('cart_id', $cart->id)->lockForUpdate()->count() === 0) {
+                throw new \RuntimeException(__('Your cart is empty. Please add items before placing an order.'));
+            }
+
             // Pre-orders: the cart's stock rows are locked first, before any plain read (snapshot isolation),
             // and lines with no stock that the shop takes pre-orders for are held against its limit
-            $preorders = app(PreorderService::class)->reserveForCheckout($cart, $user);
+            $preorders = app(PreorderService::class)->reserveForCheckout($cart, $user, $shippingData['accept_preorders'] ?? null);
             // Bulk quotes in the cart are locked next (checked in placeOrder below). The pre-order locks
             // come first: product and variant rows are the ones other checkouts change all the time
             app(QuoteService::class)->lockQuotes($cart);
@@ -99,6 +115,12 @@ class OrderService
                 $discounts['points']['amount'] = $redeem;
                 $discounts['total_discount'] = $discounts['shop']['amount'] + $discounts['voucher']['amount'] + $redeem;
                 $discounts['final_total'] = max(0, $cart->total - $discounts['total_discount']);
+            }
+            // The checkout page showed a goods total (CheckoutController): more than that now (a shop raised a
+            // price, a voucher stopped working) is not charged without the customer seeing it first
+            $shownGoods = Session::get(self::SESSION_GOODS_SHOWN);
+            if ($shownGoods !== null && round((float) $discounts['final_total'], 2) > round((float) $shownGoods, 2) + 0.004) {
+                throw new \RuntimeException(__('The prices in your cart changed since you opened checkout. Please check the new total and place the order again.'));
             }
             $loyaltyPointsEarned = $user ? $this->discountService->calculateLoyaltyPointsEarned($discounts['final_total'], $user) : 0;
 
@@ -203,9 +225,14 @@ class OrderService
 
             // Clear cart
             $this->clearCart($cart);
-            Session::forget([BookingFeeService::SESSION_SHOWN, PreorderConfirmService::SESSION_SHOWN]);
 
             DB::commit();
+
+            // Only now that the order is saved: what the checkout page applied and showed is used up
+            Session::forget(['voucher_code', self::SESSION_GOODS_SHOWN, BookingFeeService::SESSION_SHOWN, PreorderConfirmService::SESSION_SHOWN]);
+            if ($discounts['points']['points_redeemed'] > 0) {
+                Session::forget('points_redeemed');
+            }
 
             // The wallet covered everything due now (the order, or its booking fee): no card step
             if ($walletPaid > 0 && $order->fresh()->cardAmount() <= 0) {
@@ -294,13 +321,9 @@ class OrderService
                 throw new \RuntimeException(__('Voucher usage limit reached.'));
             }
             $locked->increment('used_count');
-            Session::forget('voucher_code');
         }
-
-        // Clear points from session
-        if ($discounts['points']['points_redeemed'] > 0) {
-            Session::forget('points_redeemed');
-        }
+        // The voucher and points chosen stay in the session until the order is committed (createOrderFromCart):
+        // if a later step fails ("just sold out"), the customer tries again with them still applied
     }
 
     /**
@@ -452,6 +475,9 @@ class OrderService
     /**
      * Allowed next statuses for each order status.
      */
+    /** Session: the goods total (after discounts) the checkout page showed; more than that is not charged silently. */
+    public const SESSION_GOODS_SHOWN = 'checkout_goods_shown';
+
     public const TRANSITIONS = [
         'pending' => ['processing', 'cancelled'],
         'processing' => ['shipped', 'cancelled'],

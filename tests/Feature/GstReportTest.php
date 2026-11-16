@@ -61,6 +61,7 @@ class GstReportTest extends TestCase
         // One item comes back and is refunded on 20 October
         $this->deliver($craftsOrder);
         $this->travelTo(Carbon::parse('2026-10-20 12:00'));
+        \App\Models\Setting::set(['return_window_days' => 30]); // still within the return window on the 20th
         $part = $craftsOrder->sellerOrders()->sole();
         $returns = app(ReturnService::class);
         $return = $returns->request($part->fresh(), $this->customer, [$craftsOrder->items()->sole()->id => 1], 'change_of_mind', null, null);

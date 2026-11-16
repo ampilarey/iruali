@@ -98,6 +98,9 @@ class OrderController extends BaseController
             // Card payment through BML is the only method; the customer pays from the order page.
             'payment_method' => ['required', \Illuminate\Validation\Rule::in(array_keys(app(\App\Services\PaymentService::class)->methods()))],
             'notes' => 'nullable|string|max:1000',
+            // The customer saw and agreed to the pre-order lines (their dates): without it, a line that sold
+            // out since it was added is not bought as a pre-order
+            'accept_preorders' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -114,6 +117,7 @@ class OrderController extends BaseController
             'shipping_country' => $request->shipping_country,
             'shipping_phone' => $request->shipping_phone ? preg_replace('/\s+/', '', $request->shipping_phone) : null,
             'payment_method' => $request->payment_method,
+            'accept_preorders' => $request->boolean('accept_preorders'),
         ];
 
         $result = $this->orderService->createOrderFromCart($user, $shippingData);

@@ -47,6 +47,7 @@ class CheckoutController extends Controller
         $voucherDiscount = (float) $discounts['voucher']['amount'];
         $voucherCode = $discounts['voucher']['voucher']?->code;
         $goodsTotal = (float) $discounts['final_total'];
+        session([\App\Services\OrderService::SESSION_GOODS_SHOWN => $goodsTotal]); // a higher total at "Place order" is shown first
         // Below a minimum order, or ordering paused altogether: back to the cart, which says why
         if ($problem = \App\Support\OrderRules::minimumProblem($cart, $goodsTotal) ?? \App\Support\OrderRules::pausedEntirely()) {
             return redirect()->route('cart')->with('error', $problem);

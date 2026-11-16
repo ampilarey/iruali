@@ -3520,5 +3520,9 @@
     "multi-buy offer, weight, extra delivery charge, video, bulk quotes": "ގިނައިން ގަނެފިނަމަ އޮފާ، ބަރުދަން، އިތުރު ޑެލިވަރީ ޗާޖު، ވީޑިއޯ، ބަލްކް ކޯޓް",
     "This mobile number is already confirmed on another account. Sign in with it instead, or use another number.": "މި މޮބައިލް ނަންބަރު އެހެން އެކައުންޓެއްގައި ކަށަވަރުކުރެވިފައި. އެ ނަންބަރުން ސައިން އިން ކުރައްވާ، ނުވަތަ އެހެން ނަންބަރެއް ބޭނުންކުރައްވާ.",
     "We are sending a lot of codes right now. Please try again in a few minutes.": "މިހާރު ވަރަށް ގިނަ ކޯޑު ފޮނުވަމުންދަނީ. މިނެޓުކޮޅަކުން އަލުން މަސައްކަތްކުރައްވާ.",
-    "All clear": "ހުރިހާ ކަމެއް ނިމިފައި"
+    "All clear": "ހުރިހާ ކަމެއް ނިމިފައި",
+    "This order is not paid yet. You can start on it once it is.": "މި އޯޑަރުގެ ފައިސާ އަދި ނުދައްކާ. ފައިސާ ދެއްކުމުން މަސައްކަތް ފަށާ.",
+    "The price for \":name\" is no longer valid. Ask us again and we will send a new one.": "\":name\" ގެ އަގު މިހާރު ބާތިލް. އަލުން އަހާލައްވާ، އައު އަގެއް ފޮނުވާނަން.",
+    "\":name\" was priced for :count. Please accept the request again.": "\":name\" ގެ އަގު ދީފައިވަނީ :count އަށް. ރިކުއެސްޓް އަލުން ގަބޫލުކުރައްވާ.",
+    "The prices in your cart changed since you opened checkout. Please check the new total and place the order again.": "ޗެކްއައުޓް ހުޅުވިފަހުން ކާޓުގެ އަގުތައް ބަދަލުވެއްޖެ. އައު ޖުމްލަ ބައްލަވާފައި އަލުން އޯޑަރު ކުރައްވާ."
 }

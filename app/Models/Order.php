@@ -227,14 +227,6 @@ class Order extends Model
     }
 
     /**
-     * Force delete an order (permanently remove)
-     */
-    public function forceDeleteOrder(): bool
-    {
-        return $this->forceDelete();
-    }
-
-    /**
      * Message threads about this order (one per shop).
      *
      * @return HasMany<Conversation, $this>

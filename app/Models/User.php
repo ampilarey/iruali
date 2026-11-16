@@ -500,14 +500,6 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * Force delete a user (permanently remove)
-     */
-    public function forceDeleteUser(): bool
-    {
-        return $this->forceDelete();
-    }
-
-    /**
      * Emails go out in the user's chosen language (en or dv), English while Dhivehi is switched off.
      */
     public function preferredLocale(): ?string

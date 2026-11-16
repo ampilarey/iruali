@@ -20,8 +20,12 @@ class SignInCode extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public OTP $otp)
+    /** The code itself: only its hash is stored (OTP), so it travels with the notification. */
+    public string $code;
+
+    public function __construct(public OTP $otp, ?string $code = null)
     {
+        $this->code = (string) ($code ?? $otp->plainCode);
         $this->afterCommit();
     }
 
@@ -32,7 +36,7 @@ class SignInCode extends Notification implements ShouldQueue
 
     public function toSms(object $notifiable): SmsText
     {
-        return SmsTypes::render('login_code', ['code' => $this->otp->code]);
+        return SmsTypes::render('login_code', ['code' => $this->code]);
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -40,7 +44,7 @@ class SignInCode extends Notification implements ShouldQueue
         return (new MailMessage)->salutation(__('The iruali team'))
             ->subject(__('Your iruali sign-in code'))
             ->line(__('Your sign-in code is:'))
-            ->line('# '.$this->otp->code)
+            ->line('# '.$this->code)
             ->line(__('It expires in 10 minutes. Never share it with anyone: iruali will never ask you for it.'))
             ->line(__('If you did not try to sign in, you can ignore this email; your account is safe.'));
     }

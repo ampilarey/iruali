@@ -71,9 +71,11 @@ class PhoneVerificationTest extends TestCase
         $user = User::where('email', 'aisha@example.com')->firstOrFail();
 
         $otp = OTP::where('phone', '7771234')->where('purpose', 'verification')->where('is_used', false)->firstOrFail();
+        $code = OTP::lastCodeFor('7771234', 'verification');
+        $this->assertNotSame($code, $otp->code, 'only a hash of the code is stored');
         $sent = $this->smsRequests()->sole();
         $this->assertSame('+9607771234', $sent['to']);
-        $this->assertStringContainsString($otp->code, $sent['message']);
+        $this->assertStringContainsString($code, $sent['message']);
         $this->assertDatabaseHas('sms_messages', ['to' => '+9607771234', 'status' => 'sent']);
 
         $this->get(route('verification.notice'))->assertOk()->assertSee('Verify your email and phone')->assertSee('name="phone_code"', false);
@@ -81,7 +83,7 @@ class PhoneVerificationTest extends TestCase
         $this->post(route('auth.verify.phone.otp'), ['phone_code' => '000000'])->assertSessionHasErrors('phone_code');
         $this->assertNull($user->fresh()->phone_verified_at);
 
-        $this->post(route('auth.verify.phone.otp'), ['phone_code' => $otp->code])->assertSessionMissing('errors');
+        $this->post(route('auth.verify.phone.otp'), ['phone_code' => $code])->assertSessionMissing('errors');
         $this->assertNotNull($user->fresh()->phone_verified_at);
         $this->assertTrue($otp->fresh()->is_used);
 
@@ -117,7 +119,8 @@ class PhoneVerificationTest extends TestCase
         // Only the latest code works
         $latest = OTP::where('phone', $user->phone)->where('is_used', false)->latest('id')->firstOrFail();
         $this->assertSame(1, OTP::where('phone', $user->phone)->where('is_used', false)->count());
-        $this->post(route('auth.verify.phone.otp'), ['phone_code' => $latest->code]);
+        $this->assertNotNull($latest);
+        $this->post(route('auth.verify.phone.otp'), ['phone_code' => OTP::lastCodeFor($user->phone, 'verification')]);
         $this->assertNotNull($user->fresh()->phone_verified_at);
     }
 

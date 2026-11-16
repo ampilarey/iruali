@@ -5,7 +5,7 @@
 #   say <msg>                      timestamped line
 #   deploy_log <kind> <k=v>...     append one line to storage/app/deploys.log
 #   last_deploy_previous           the "previous=" commit of the last successful deploy (for rollback)
-#   build_app                      composer install --no-dev, migrate, caches, storage:link, docroot sync, stamp, queue:restart
+#   build_app                      composer install --no-dev, database backup, migrate, caches, storage:link, docroot sync, stamp, queue:restart
 #   rebuild_app_without_migrate    same but no migrate (rollback: migrations are never reversed)
 #   checkout_commit <ref>          detached checkout of a tag or commit
 #   verify_site                    /api/health + php artisan iruali:smoke (and --place-order when SMOKE_USER_EMAIL is set)
@@ -126,10 +126,22 @@ _stamp_and_restart() {
   php artisan queue:restart >/dev/null 2>&1 || say "WARN: queue:restart failed"
 }
 
+# A database backup right before migrating (the nightly one can be a day old, and a migration that
+# fails half way, or a backfill that goes wrong, is not undone by a rollback). No backup, no migration.
+_backup_before_migrate() {
+  say "database backup before migrating"
+  php artisan backup:run --only-db --disable-notifications >/dev/null 2>&1 \
+    || { say "ERROR: the database backup failed, so the migrations were not run (php artisan backup:run --only-db shows why)"; return 1; }
+}
+
 # Full build of the checked-out code. Returns non-zero on the first failing step.
+# The config cache is cleared before migrating: the previous release's cached config would hide
+# new keys from this release's migrations.
 build_app() {
   ( cd "$ROOT" \
     && _composer_install \
+    && php artisan config:clear \
+    && _backup_before_migrate \
     && php artisan migrate --force \
     && _caches \
     && _storage_link \

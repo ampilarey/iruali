@@ -78,14 +78,11 @@ class TestDeployWebhookController extends Controller
         $allowed = config('deploy.test_allowed_hosts', ['test.iruali.mv']);
         $allowed = array_map(static fn (string $h): string => strtolower($h), $allowed);
 
+        // Both: the request is for the test site, and this install is the test site (APP_URL). Production
+        // (APP_URL iruali.mv) never honours it, whatever Host a request claims.
         $requestHost = strtolower($request->getHost());
-        if (in_array($requestHost, $allowed, true)) {
-            return true;
-        }
+        $appHost = strtolower((string) (parse_url((string) config('app.url', ''), PHP_URL_HOST) ?: ''));
 
-        $appUrl = (string) config('app.url', '');
-        $appHost = strtolower((string) (parse_url($appUrl, PHP_URL_HOST) ?: ''));
-
-        return $appHost !== '' && in_array($appHost, $allowed, true);
+        return in_array($requestHost, $allowed, true) && $appHost !== '' && in_array($appHost, $allowed, true);
     }
 }

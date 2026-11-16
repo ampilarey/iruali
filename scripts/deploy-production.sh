@@ -99,24 +99,36 @@ deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} previous_nam
 
 rollback() {
   say "DEPLOY FAILED: $1"
+  local back_up=1
   if [[ "$(git rev-parse HEAD)" != "$PREV" || "$PREV" == "$NEXT" ]]; then
     say "rolling back to $PREV_NAME (${PREV:0:8})"
     if checkout_commit "$PREV" && rebuild_app_without_migrate; then
-      say "rolled back to ${PREV:0:8}. Database migrations from $TAG were NOT reversed; check them by hand if the release added any."
+      say "rolled back to ${PREV:0:8}. Database migrations from $TAG were NOT reversed; check them by hand if the release added any (a database backup was taken just before migrating: php artisan backup:list)."
       deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=rolled-back reason=\"$1\""
     else
-      say "ROLLBACK FAILED. Fix by hand: cd $ROOT && git checkout --detach $PREV && composer install --no-dev --optimize-autoloader && php artisan config:cache route:cache view:cache"
+      # The code on disk is half built: customers see the maintenance page, not errors, until it is fixed
+      back_up=0
+      say "ROLLBACK FAILED. The site stays in maintenance mode. Fix by hand: cd $ROOT && git checkout --detach $PREV && composer install --no-dev --optimize-autoloader && php artisan config:cache route:cache view:cache && php artisan up"
       deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=rollback-failed reason=\"$1\""
     fi
   else
     deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=failed reason=\"$1\""
   fi
-  php artisan up >/dev/null 2>&1 || true
+  if [[ $back_up -eq 1 ]]; then
+    php artisan up >/dev/null 2>&1 || true
+  fi
   exit 1
 }
 
 say "deploying $PREV_NAME (${PREV:0:8}) -> $TAG (${NEXT:0:8})"
-php artisan down --retry=30 >/dev/null 2>&1 || say "WARN: could not enter maintenance mode"
+# --render: the "back soon" page is written out now and served without loading the app, so visitors and
+# BML's webhook get a clean 503 (with Retry-After) while vendor/ and the caches are being replaced.
+# No maintenance mode, no deploy: changing the code under live traffic gives customers errors.
+if ! php artisan down --render="errors::503" --retry=30 >/dev/null 2>&1; then
+  say "ERROR: could not enter maintenance mode (php artisan down); nothing was changed"
+  deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=failed reason=\"maintenance mode\""
+  exit 1
+fi
 
 checkout_commit "$NEXT" || rollback "git checkout $TAG"
 build_app || rollback "build (composer install / migrate / caches / docroot sync)"

@@ -122,7 +122,21 @@ class CustomerAdminTest extends TestCase
         $this->assertNull($customer->fresh()->erased_at);
 
         $open->update(['status' => 'delivered']);
+        // What else they left: a message, texts to their number, a bank slip, a signed-in device
+        \Illuminate\Support\Facades\Storage::fake('local');
+        \Illuminate\Support\Facades\Storage::disk('local')->put('payment-slips/slip.jpg', 'x');
+        $order->forceFill(['payment_slip_path' => 'payment-slips/slip.jpg'])->save();
+        $conversation = \App\Models\Conversation::forceCreate(['order_id' => $order->id, 'customer_id' => $customer->id, 'kind' => 'order', 'status' => 'open']);
+        DB::table('messages')->insert(['conversation_id' => $conversation->id, 'sender_id' => $customer->id, 'sender_role' => 'customer', 'body' => 'My door code is 4455', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('sms_messages')->insert(['to' => '+9607771234', 'message' => 'Order shipped to Ahmed', 'type' => 'order_shipped', 'status' => 'sent', 'created_at' => now()]);
+        DB::table('sessions')->insert(['id' => 'phone', 'user_id' => $customer->id, 'payload' => 'x', 'last_activity' => time()]);
+
         $this->post(route('admin.customers.erase', $customer), ['reason' => 'Asked by email', 'confirm' => 1])->assertSessionHas('success');
+        $this->assertSame('Message removed', DB::table('messages')->value('body'), 'the conversation stays, the words go');
+        $this->assertSame(0, DB::table('sms_messages')->where('to', '+9607771234')->count());
+        $this->assertSame(0, DB::table('sessions')->where('user_id', $customer->id)->count());
+        \Illuminate\Support\Facades\Storage::disk('local')->assertMissing('payment-slips/slip.jpg');
+        $this->assertNull($order->fresh()->payment_slip_path);
 
         $customer->refresh();
         $this->assertNotNull($customer->erased_at);

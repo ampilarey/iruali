@@ -94,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
             $user = auth()->user();
 
             $view->with([
-                'navDepartments' => Category::active()->root()->get()->sortBy(fn ($c) => $c->localized_name)->values(),
+                'navDepartments' => Category::navDepartments()->sortBy(fn ($c) => $c->localized_name)->values(),
                 'cartCount' => app(CartService::class)->count(),
                 'wishlistCount' => $user ? \App\Models\Wishlist::where('user_id', $user->id)->count() : 0,
             ]);

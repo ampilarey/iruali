@@ -98,9 +98,12 @@ class PreorderConcurrencyTest extends TestCase
             }
         } finally {
             $orderIds = Order::withTrashed()->whereIn('user_id', array_map(fn ($b) => $b->id, $buyers))->pluck('id');
+            // Children first: the database refuses to delete an order, product or user that still has money records
             DB::table('seller_orders')->whereIn('order_id', $orderIds)->delete();
+            DB::table('payment_transactions')->whereIn('order_id', $orderIds)->delete();
             OrderItem::whereIn('order_id', $orderIds)->delete();
             Order::withTrashed()->whereIn('id', $orderIds)->forceDelete();
+            DB::table('points_transactions')->whereIn('user_id', array_map(fn ($b) => $b->id, $buyers))->delete();
             CartItem::whereIn('cart_id', array_map(fn ($c) => $c->id, $carts))->delete();
             Cart::whereIn('id', array_map(fn ($c) => $c->id, $carts))->delete();
             Product::withTrashed()->whereIn('id', [$product->id, $stocked->id])->forceDelete();

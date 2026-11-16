@@ -123,7 +123,7 @@ class NotificationSystemTest extends TestCase
     {
         $this->actingAs($this->user);
         $otp = \App\Models\OTP::createForEmail($this->user->email, 'verification');
-        $code = $otp->code;
+        $code = $otp->plainCode;
         $response = $this->post('/auth/verify/email/otp', [
             'email' => $this->user->email,
             'code' => $code,
@@ -141,7 +141,7 @@ class NotificationSystemTest extends TestCase
     {
         $this->actingAs($this->user);
         $otp = \App\Models\OTP::createForPhone($this->user->phone, 'verification');
-        $code = $otp->code;
+        $code = $otp->plainCode;
         $response = $this->post('/auth/verify/phone/otp', [
             'phone' => $this->user->phone,
             'code' => $code,

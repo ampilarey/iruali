@@ -37,23 +37,37 @@ class SmsCampaignService
         return null;
     }
 
+    /** Statuses that count as delivered to the gateway (or held for the morning). */
+    public const OK = ['sent', 'logged', 'held'];
+
+    /**
+     * Send the campaign to everyone in its segment who hasn't had it yet. Safe to run again: a run
+     * that stopped half way (the host ended it, a deploy) carries on where it stopped
+     * (sms_campaign_recipients), and the next minute's run picks up a campaign left "sending".
+     */
     public function send(SmsCampaign $campaign): void
     {
         $campaign->forceFill(['status' => 'sending'])->save();
         $people = SmsSegments::recipients($campaign->segment, $campaign->segment_value);
         $done = DB::table('sms_campaign_recipients')->where('sms_campaign_id', $campaign->id)->pluck('user_id')->flip();
         $sms = app(SmsManager::class);
-        [$sent, $failed] = [(int) $campaign->sent_count, (int) $campaign->failed_count];
 
+        $count = 0;
         foreach ($people as $user) {
             if (isset($done[$user->id])) {
                 continue;
             }
             $result = $sms->send($user->phone, new SmsText('campaign', $this->text($campaign, $user)));
             DB::table('sms_campaign_recipients')->insertOrIgnore(['sms_campaign_id' => $campaign->id, 'user_id' => $user->id, 'status' => $result->status, 'created_at' => now()]);
-            in_array($result->status, ['sent', 'logged', 'held'], true) ? $sent++ : $failed++;
+            if (++$count % 50 === 0) {
+                $campaign->touch(); // still going: the stuck-campaign check looks at this
+            }
         }
 
+        // Counted from what was recorded, so a run that carried on from an earlier one counts everyone
+        $statuses = DB::table('sms_campaign_recipients')->where('sms_campaign_id', $campaign->id)->pluck('status');
+        $sent = $statuses->filter(fn ($status) => in_array($status, self::OK, true))->count();
+        $failed = $statuses->count() - $sent;
         $campaign->forceFill([
             'status' => 'sent', 'sent_at' => now(), 'recipients_count' => $sent + $failed, 'sent_count' => $sent, 'failed_count' => $failed,
         ])->save();

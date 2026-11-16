@@ -74,6 +74,42 @@ class ReadyCheckTest extends TestCase
         $this->assertStringContainsString('backup:run', $checks['Database backup']['fix']);
     }
 
+    public function test_backups_kept_only_on_this_server_are_flagged(): void
+    {
+        $this->configureEverything();
+        Storage::fake('local');
+        Storage::disk('local')->put('iruali/iruali-backup-2026-01-01-00-00-00.zip', 'zip');
+        config(['backup.backup.destination.disks' => ['local'], 'filesystems.disks.local.driver' => 'local']);
+
+        $check = collect((new ReadyChecks(offline: true))->run())->keyBy('name')['Database backup'];
+        $this->assertSame('warn', $check['status']);
+        $this->assertStringContainsString('only on this server', $check['detail']);
+        $this->assertStringContainsString('BACKUP_DISKS', $check['fix']);
+
+        // On the live site that is a failure
+        $this->app['env'] = 'production';
+        $this->assertSame('fail', collect((new ReadyChecks(offline: true))->run())->keyBy('name')['Database backup']['status']);
+    }
+
+    public function test_unrotated_logs_and_texts_to_the_log_fail_on_the_live_site(): void
+    {
+        $this->configureEverything();
+        config(['logging.default' => 'stack', 'logging.channels.stack.channels' => ['single'], 'sms.driver' => 'log']);
+
+        $checks = collect((new ReadyChecks(offline: true))->run())->keyBy('name');
+        $this->assertSame('warn', $checks['Logs']['status']);
+        $this->assertStringContainsString('LOG_STACK=daily', $checks['Logs']['fix']);
+        $this->assertSame('warn', $checks['SMS']['status']);
+
+        $this->app['env'] = 'production';
+        $checks = collect((new ReadyChecks(offline: true))->run())->keyBy('name');
+        $this->assertSame('fail', $checks['Logs']['status']);
+        $this->assertSame('fail', $checks['SMS']['status']);
+
+        config(['logging.channels.stack.channels' => ['daily'], 'logging.channels.daily.level' => 'warning']);
+        $this->assertSame('pass', collect((new ReadyChecks(offline: true))->run())->keyBy('name')['Logs']['status']);
+    }
+
     public function test_send_test_mail_option_sends_one(): void
     {
         $this->configureEverything();

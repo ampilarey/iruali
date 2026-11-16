@@ -16,8 +16,12 @@ class VerifyEmailCode extends Notification implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public OTP $otp)
+    /** The code itself: only its hash is stored (OTP), so it travels with the notification. */
+    public string $code;
+
+    public function __construct(public OTP $otp, ?string $code = null)
     {
+        $this->code = (string) ($code ?? $otp->plainCode);
         // Sent only once the surrounding database transaction has committed
         $this->afterCommit();
     }
@@ -33,7 +37,7 @@ class VerifyEmailCode extends Notification implements ShouldQueue
             ->subject(__('Your iruali verification code'))
             ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
             ->line(__('Your verification code is:'))
-            ->line('# '.$this->otp->code)
+            ->line('# '.$this->code)
             ->line(__('It expires in 10 minutes. If you did not create an iruali account, you can ignore this email.'))
             ->action(__('Verify my email'), route('verification.notice'));
     }

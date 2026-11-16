@@ -45,7 +45,7 @@ class AccountTest extends TestCase
         $this->assertFalse($user->is_seller);
         $this->assertSame(0, $user->loyalty_points);
         $this->assertTrue($user->hasRole('customer'));
-        Notification::assertSentTo($user, VerifyEmailCode::class, fn ($n) => strlen($n->otp->code) === 6);
+        Notification::assertSentTo($user, VerifyEmailCode::class, fn ($n) => strlen($n->code) === 6);
 
         // Signed in but unverified: pages work and carry the reminder
         $this->get('/')->assertOk()->assertSee('Please verify your email address.');
@@ -80,14 +80,14 @@ class AccountTest extends TestCase
     {
         $me = User::factory()->create(['email_verified_at' => null]);
         $other = User::factory()->create(['email_verified_at' => null]);
-        $otherCode = OTP::createForEmail($other->email, 'verification')->code;
+        $otherCode = OTP::createForEmail($other->email, 'verification')->plainCode;
 
         // My code verifies me, and sends me on to where I was going
         $this->actingAs($me);
         session(['url.intended' => '/checkout']);
         $this->post(route('auth.send.email.otp'))->assertSessionHas('status');
         Notification::assertSentTo($me, VerifyEmailCode::class);
-        $code = OTP::where('email', $me->email)->where('is_used', false)->latest('id')->value('code');
+        $code = OTP::lastCodeFor($me->email, 'verification');
         $this->post(route('auth.verify.email.otp'), ['code' => $code])->assertRedirect('/checkout');
         $this->assertNotNull($me->fresh()->email_verified_at);
 

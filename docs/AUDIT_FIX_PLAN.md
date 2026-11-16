@@ -389,7 +389,9 @@ sold-out item when no terms were shown.
 
 ## Batch 4: operations and data safety
 
-### 4.1 [ ] H: SMS campaign stuck in "sending"
+### 4.1 [x] H: SMS campaign stuck in "sending"
+
+Done: stuck "sending" campaigns resume (recipients table skips the ones already sent), one alert per campaign stuck over an hour, counts taken from the recipients table, and the command runs in the background (4.11), so no queued chunks were needed.
 
 - **Where:** `SendSmsCampaigns` (selects `scheduled` only); `SmsCampaignService::send`.
 - **Fix:**
@@ -397,7 +399,9 @@ sold-out item when no terms were shown.
   - Alert when a campaign has been `sending` for over an hour.
   - Better: send in queued chunks so the scheduler is not blocked (see 4.11).
 
-### 4.2 [ ] H: backups (confirm on the server)
+### 4.2 [x] H: backups (confirm on the server)
+
+Done: weekly `files-*.zip` of `storage/app`, `iruali:ready` fails in production without an off-server disk, drill checks the newest files backup and a sample of product images, documented. **Owner decision C still open.**
 
 - **Where:** `routes/console.php` (`backup:run --only-db`), `config/backup.php`, `ReadyChecks`.
 - **Fix:**
@@ -407,7 +411,9 @@ sold-out item when no terms were shown.
   - The restore drill also checks that a sample of files exists.
 - **Owner action:** set the off-server disk on production (owner decision C).
 
-### 4.3 [ ] H: staging anonymiser misses personal data
+### 4.3 [x] H: staging anonymiser misses personal data
+
+Done: all of the listed tables plus guest conversations, disputes, item requests, gift cards, reviews, email lists, IPs; `AnonymiseTest` fails on any personal-looking column not covered or explained. `notifications` has no data columns here, so nothing to replace.
 
 - **Where:** `AnonymiseCommand`; `docs/PRODUCTION_DEPLOY.md` claims more than it does.
 - **Fix:** cover:
@@ -429,7 +435,9 @@ sold-out item when no terms were shown.
   `account_number`, `message`, `body`) across the schema. Fail when one is neither handled nor on an
   explicit allow-list.
 
-### 4.4 [ ] M: deploy script
+### 4.4 [x] M: deploy script
+
+Done: `bash -n` and shellcheck clean.
 
 - **Where:** `scripts/deploy-lib.sh`, `scripts/deploy-production.sh`.
 - **Fixes:**
@@ -440,7 +448,9 @@ sold-out item when no terms were shown.
 - **Constraint:** `verify_site` must keep working. CI does not run these scripts, so run
   `bash -n` and shellcheck, and describe the manual test in the PR.
 
-### 4.5 [ ] M: tables and logs that only grow
+### 4.5 [x] M: tables and logs that only grow
+
+Done: codes stored as an HMAC with the app key; the migration empties `otps`.
 
 - Daily prune of expired `cache` and `cache_locks` rows (database cache store).
 - Daily prune of `otps` older than a day. Store OTP codes hashed (`hash('sha256', code . app key)`),
@@ -448,7 +458,9 @@ sold-out item when no terms were shown.
 - `config/logging.php` defaults `LOG_STACK` to `daily`. Add a ready check on log level and size.
   Document it in SERVERS.md.
 
-### 4.6 [ ] M: sign-in codes readable in logs and the SMS table
+### 4.6 [x] M: sign-in codes readable in logs and the SMS table
+
+Done: code texts stored masked and never resent; the log driver masks digits in production.
 
 - **Where:** `Sms/LogSms`; `SmsManager::record`.
 - **Fix:**
@@ -456,7 +468,9 @@ sold-out item when no terms were shown.
     `log` driver in non-production.
   - The ready check **fails** on `SMS_DRIVER=log` in production.
 
-### 4.7 [ ] M: account deletion leaves data behind
+### 4.7 [x] M: account deletion leaves data behind
+
+Done (decision D as default: rows kept, text blanked). API tokens and sessions are deleted too.
 
 - **Where:** `CustomerAccountService::erase`.
 - **Fix:** also remove:
@@ -468,7 +482,9 @@ sold-out item when no terms were shown.
   - payment and deposit slip files;
   - the user's `sessions` rows and Sanctum tokens.
 
-### 4.8 [ ] M: financial rows cascade-delete from users and orders
+### 4.8 [x] M: financial rows cascade-delete from users and orders
+
+Done: tested up, down, up on SQLite and on MariaDB through the suite.
 
 - **Where:** the foreign keys in the orders, products, wallet, points ledger, seller orders/payouts
   and payment transactions migrations.
@@ -478,7 +494,9 @@ sold-out item when no terms were shown.
   - Remove `User::forceDeleteUser()` and the order force-delete helper if nothing calls them.
 - Run the whole suite; tests that hard-delete users will need changing.
 
-### 4.9 [ ] M: dependencies
+### 4.9 [x] M: dependencies
+
+Done: framework 12.72, `composer audit` and `npm audit` clean.
 
 - `composer update "symfony/*" laravel/framework` (9 advisories); `npm audit fix` (vite,
   source-map-js; dev only).
@@ -486,7 +504,9 @@ sold-out item when no terms were shown.
   local). Check `LocalePrefix` (`URL::forceRootUrl`) still works.
 - CI: add `composer audit --no-dev` to `tests.yml`.
 
-### 4.10 [ ] M: CI
+### 4.10 [x] M: CI
+
+Done, except the Playwright upgrade and returning the browser job to `ubuntu-latest`: **deferred** (the pin works; an upgrade is its own change to test). `isTestHost()` now needs both the request host and APP_URL to be the test site.
 
 - "Built assets are committed and current" must actually build. In a job with Node, run
   `npm ci && npm run build`, then `git diff --exit-code -- public/build`.
@@ -500,7 +520,9 @@ sold-out item when no terms were shown.
 - Tests for `POST api/deploy/test-pull` with `TestDeployTrigger` mocked: short secret → 404, wrong
   secret → 401, non-test host → 404, correct → 202. Make `isTestHost()` check the request host too.
 
-### 4.11 [ ] L: scheduler and speed
+### 4.11 [x] L: scheduler and speed
+
+Done: both commands run in the background; header departments cached 10 minutes (dropped on category save or delete). The home page measured 13 queries before and 12 after; the product rows are **deferred**, since 12 queries does not justify a cache that has to follow islands, stock and prices.
 
 - Long events (`sms:send-campaigns`, the queue worker) get `runInBackground()`, or move campaigns to
   queued jobs.

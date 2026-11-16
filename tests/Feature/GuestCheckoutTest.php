@@ -214,7 +214,7 @@ class GuestCheckoutTest extends TestCase
         $user = User::where('email', 'Visitor@example.com')->sole();
         // Not yet: anyone could sign up with this address. Only once the email code proves it is theirs
         $this->assertNull($order->fresh()->user_id);
-        $code = \App\Models\OTP::where('email', $user->email)->where('purpose', 'verification')->latest('id')->value('code');
+        $code = \App\Models\OTP::lastCodeFor($user->email, 'verification');
         $this->actingAs($user)->post(route('auth.verify.email.otp'), ['code' => $code])->assertRedirect();
         $this->assertSame($user->id, $order->fresh()->user_id);
         $this->assertNull($other->fresh()->user_id);

@@ -40,7 +40,7 @@ class CodeLoginTest extends TestCase
 
     protected function lastCode(): string
     {
-        return OTP::where('purpose', 'login')->latest('id')->value('code');
+        return (string) OTP::lastCodeFor(null, 'login'); // only its hash is stored
     }
 
     public function test_a_customer_signs_in_with_a_code_by_sms_and_sets_a_new_password(): void
@@ -52,7 +52,9 @@ class CodeLoginTest extends TestCase
             ->assertSessionHas('status', 'If that number belongs to an iruali account, we have texted it a code.');
         $sms = SmsMessage::where('type', 'login_code')->sole();
         $this->assertSame('+9607771234', $sms->to);
-        $this->assertStringContainsString($this->lastCode(), $sms->message);
+        // Texted whole, kept in the SMS log with the code hidden
+        $this->assertStringNotContainsString($this->lastCode(), $sms->message);
+        $this->assertStringContainsString('••••••', $sms->message);
 
         $this->get(route('login.code'))->assertOk()->assertSee('•••1234')->assertSee('data-login-code-verify', false);
         $this->post(route('login.code.verify'), ['code' => '000000'])->assertSessionHasErrors('code');

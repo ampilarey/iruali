@@ -87,6 +87,7 @@ class BackupRestoreDrill extends Command
                     $problems[] = "table {$table} is empty in the backup but has {$c['live']} live rows";
                 }
             }
+            $report['steps'][] = $this->checkFilesBackup();
             $report['ok'] = $problems === [];
             $report['error'] = $problems ? implode('; ', $problems) : null;
         } catch (Throwable $e) {
@@ -144,12 +145,66 @@ class BackupRestoreDrill extends Command
             throw new \RuntimeException("Backup disk '{$diskName}' is not reachable: ".$destination->connectionError()->getMessage());
         }
 
-        $backup = $destination->newestBackup();
+        // The newest database backup: the weekly files backups (files-…) have no SQL dump
+        $backup = $destination->backups()->first(fn (Backup $b) => ! $this->isFilesBackup($b));
         if (! $backup) {
             throw new \RuntimeException("No backup found on disk '{$diskName}'. Run php artisan backup:run --only-db first.");
         }
 
         return [$backup, $diskName];
+    }
+
+    protected function isFilesBackup(Backup $backup): bool
+    {
+        return str_starts_with(basename($backup->path()), 'files-');
+    }
+
+    /**
+     * The weekly files backup: there is one from the last 8 days, and a few uploads the database
+     * points at (product photos) are in it. Reported as a step; the drill itself is about the database.
+     */
+    protected function checkFilesBackup(): string
+    {
+        try {
+            $disks = (array) config('backup.backup.destination.disks', ['local']);
+            $destination = BackupDestination::create((string) ($disks[0] ?? 'local'), (string) config('backup.backup.name'));
+            $files = $destination->backups()->first(fn (Backup $b) => $this->isFilesBackup($b));
+            if (! $files) {
+                return 'Files backup: none yet (it runs weekly, Sunday 03:00)';
+            }
+            $age = $files->date()->diffForHumans();
+            if ($files->date()->lt(now()->subDays(8))) {
+                return "Files backup: the newest is from {$age}, more than a week old: check the scheduler";
+            }
+
+            $tempDir = storage_path('app/restore-drill-files-'.Str::random(8));
+            File::ensureDirectoryExists($tempDir);
+            try {
+                $zip = new ZipArchive;
+                if ($zip->open($this->download($files, $tempDir)) !== true) {
+                    return "Files backup {$files->path()} ({$age}) is not a readable zip";
+                }
+                $names = [];
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $names[] = (string) $zip->getNameIndex($i);
+                }
+                $zip->close();
+            } finally {
+                File::deleteDirectory($tempDir);
+            }
+            // Uploaded photos are kept as /storage/products/… (Storage::url of the public disk): in the zip
+            // as …/storage/app/public/products/…; photos linked from other sites are not ours to back up
+            $sample = DB::table('product_images')->where('url', 'like', '%/storage/%')->where('created_at', '<', $files->date())
+                ->latest('id')->limit(5)->pluck('url')
+                ->map(fn ($url) => 'public/'.ltrim(Str::after((string) $url, '/storage/'), '/'));
+            $missing = $sample->reject(fn ($path) => collect($names)->contains(fn ($name) => str_ends_with($name, '/'.$path) || $name === $path));
+
+            return $missing->isEmpty()
+                ? "Files backup {$files->path()} ({$age}): ".count($names).' files; '.$sample->count().' sample product photos found in it'
+                : "Files backup {$files->path()} ({$age}): missing ".$missing->count().' of '.$sample->count().' sample product photos ('.$missing->implode(', ').')';
+        } catch (Throwable $e) {
+            return 'Files backup: could not check ('.$e->getMessage().')';
+        }
     }
 
     protected function download(Backup $backup, string $tempDir): string

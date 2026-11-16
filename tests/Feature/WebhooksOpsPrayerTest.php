@@ -96,7 +96,7 @@ class WebhooksOpsPrayerTest extends TestCase
 
         // The worker's schedule entry (routes/console.php registers it only for a real queue) uses a
         // short lock; one killed mid-run left that lock behind
-        $this->assertStringContainsString("->everyMinute()->withoutOverlapping(5)->name('queue-worker')", (string) file_get_contents(base_path('routes/console.php')));
+        $this->assertStringContainsString("->everyMinute()->withoutOverlapping(5)->runInBackground()->name('queue-worker')", (string) file_get_contents(base_path('routes/console.php')));
         $event = app(\Illuminate\Console\Scheduling\Schedule::class)->command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5)->name('queue-worker');
         $event->mutex->create($event);
         $this->assertTrue($event->mutex->exists($event));

@@ -124,8 +124,16 @@ class CustomerAccountService
             return $problem;
         }
         $email = $user->email;
+        $phone = \App\Services\Sms\PhoneNumber::normalize($user->phone);
+        // Files of theirs to delete once the rows are changed: [disk, path]
+        $files = collect([['public', $user->avatar]])
+            ->merge(Order::where('user_id', $user->id)->get(['payment_slip_path', 'deposit_slip_path'])->flatMap(fn ($o) => [[\App\Services\ManualPaymentService::SLIP_DISK, $o->payment_slip_path], [\App\Services\ManualPaymentService::SLIP_DISK, $o->deposit_slip_path]]))
+            ->merge(DB::table('messages')->where('sender_id', $user->id)->whereNotNull('attachment_path')->pluck('attachment_path')->map(fn ($p) => [\App\Services\MessagingService::DISK, $p]))
+            ->merge(DB::table('return_requests')->where('user_id', $user->id)->whereNotNull('photo_path')->pluck('photo_path')->map(fn ($p) => [ReturnService::DISK, $p]))
+            ->merge(DB::table('item_requests')->where('user_id', $user->id)->whereNotNull('photo_path')->pluck('photo_path')->map(fn ($p) => ['public', $p]))
+            ->filter(fn ($file) => filled($file[1]));
 
-        DB::transaction(function () use ($user, $by, $reason, $email) {
+        DB::transaction(function () use ($user, $by, $reason, $email, $phone) {
             foreach (['addresses', 'social_accounts', 'push_subscriptions', 'business_profiles', 'customer_notes', 'carts'] as $table) {
                 DB::table($table)->where('user_id', $user->id)->delete();
             }
@@ -137,11 +145,23 @@ class CustomerAccountService
             DB::table('complaints')->where('user_id', $user->id)->orWhere('email', $email)
                 ->update(['name' => 'Erased customer', 'email' => 'erased-'.$user->id.'@iruali.invalid', 'phone' => null]);
             DB::table('personal_access_tokens')->where('tokenable_type', User::class)->where('tokenable_id', $user->id)->delete();
+            DB::table('sessions')->where('user_id', $user->id)->delete(); // signed out everywhere
+
+            // What they wrote stays in its conversation (conversations are never deleted), without the words
+            DB::table('messages')->where('sender_id', $user->id)->update(['body' => 'Message removed', 'original_body' => null, 'attachment_path' => null]);
+            // The texts sent to their number (kept for the SMS costs), without the number or the wording
+            if ($phone) {
+                DB::table('sms_messages')->where('to', $phone)->update(['to' => 'erased', 'message' => 'Removed', 'provider_response' => null]);
+            }
+            DB::table('quote_requests')->where('customer_id', $user->id)->update(['business_name' => 'Erased customer', 'business_tin' => null, 'business_address' => 'Erased', 'notes' => null]);
+            DB::table('return_requests')->where('user_id', $user->id)->update(['details' => null, 'photo_path' => null]);
+            DB::table('item_requests')->where('user_id', $user->id)->update(['details' => null, 'photo_path' => null]);
 
             Order::where('user_id', $user->id)->update([
                 'shipping_address' => json_encode('Erased'), 'shipping_phone' => null, 'shipping_zip' => null,
                 'guest_email' => null, 'guest_name' => null, 'gift_receiver_name' => null, 'gift_receiver_phone' => null, 'gift_message' => null,
                 'buyer_business_name' => null, 'buyer_tin' => null, 'buyer_business_address' => null,
+                'payment_slip_path' => null, 'deposit_slip_path' => null,
             ]);
 
             $user->forceFill([
@@ -156,6 +176,15 @@ class CustomerAccountService
             // The audit row keeps who and why, not the data that was removed
             Audit::record('customer.erased', $user, ['by' => $by ? 'staff' : 'customer', 'reason' => $reason]);
         });
+
+        // Their photo, bank slips, message attachments and return and request photos
+        foreach ($files as [$disk, $path]) {
+            try {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($path);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return null;
     }

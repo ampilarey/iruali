@@ -12,10 +12,10 @@
     $analyticsId = $analyticsOn ? trim((string) \App\Models\Setting::get('analytics_id')) : '';
 @endphp
 @if($analyticsOn && $analyticsProvider === 'plausible' && $analyticsDomain !== '')
-    <script defer data-domain="{{ $analyticsDomain }}" src="https://plausible.io/js/script.js"></script>
+    <script @nonce defer data-domain="{{ $analyticsDomain }}" src="https://plausible.io/js/script.js"></script>
 @elseif($analyticsOn && $analyticsProvider === 'ga4' && $analyticsId !== '')
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $analyticsId }}"></script>
-    <script>
+    <script @nonce async src="https://www.googletagmanager.com/gtag/js?id={{ $analyticsId }}"></script>
+    <script @nonce>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());

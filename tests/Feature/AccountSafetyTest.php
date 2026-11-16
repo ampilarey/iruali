@@ -69,6 +69,46 @@ class AccountSafetyTest extends TestCase
         $this->assertAuthenticatedAs($staff);
     }
 
+    public function test_wrong_passwords_lock_only_the_address_they_came_from(): void
+    {
+        Mail::fake();
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+        $staff = $this->staff('support', ['email' => 'aisha@iruali.mv', 'password' => bcrypt('Right#Pass1')]);
+
+        for ($i = 0; $i < StaffLockout::ATTEMPTS; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+                ->post(route('login'), ['email' => 'aisha@iruali.mv', 'password' => 'wrong'])->assertSessionHasErrors('email');
+        }
+        $this->assertNotNull(StaffLockout::lockedUntil($staff, '10.0.0.1'));
+        $this->assertNull(StaffLockout::lockedUntil($staff, '10.0.0.2'));
+        $this->assertNotNull(StaffLockout::lockedUntil($staff)); // shown as locked in Admin → Users
+
+        // The real person, somewhere else, still signs in with the right password
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.2'])
+            ->post(route('login'), ['email' => 'aisha@iruali.mv', 'password' => 'Right#Pass1']);
+        $this->assertAuthenticatedAs($staff);
+        $this->post(route('logout'));
+
+        // The locked address stays locked, even with the right password
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->post(route('login'), ['email' => 'aisha@iruali.mv', 'password' => 'Right#Pass1'])->assertSessionHasErrors('email');
+        $this->assertGuest();
+
+        StaffLockout::unlock($staff);
+        $this->assertNull(StaffLockout::lockedUntil($staff));
+    }
+
+    public function test_wrong_two_step_codes_lock_the_whole_account(): void
+    {
+        Mail::fake();
+        $staff = $this->staff('support');
+
+        for ($i = 0; $i < StaffLockout::ATTEMPTS; $i++) {
+            StaffLockout::failed($staff, '10.0.0.1', twoStep: true);
+        }
+        $this->assertNotNull(StaffLockout::lockedUntil($staff, '10.0.0.2'));
+    }
+
     public function test_customers_are_not_locked_this_way(): void
     {
         Mail::fake();

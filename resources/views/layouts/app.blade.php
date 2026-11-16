@@ -522,7 +522,7 @@
     @endif
 
     <!-- Flash messages, shown as toasts by resources/js/notifications.js -->
-    <script>
+    <script @nonce>
         window.notificationLabels = {{ \Illuminate\Support\Js::from([
             'success' => __('Success'),
             'error' => __('Error'),
@@ -559,7 +559,7 @@
         </div>
     @endif
 
-    <script>
+    <script @nonce>
         // Shared dialog behaviour for the drawers and the image zoom: focus moves to the close
         // button ([data-dialog-close]) on open, Tab cycles inside, Escape closes, and focus goes
         // back to whatever opened it. open(dialog, hide) — hide() is what actually hides it.

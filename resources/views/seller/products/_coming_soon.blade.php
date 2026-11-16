@@ -22,7 +22,7 @@
 </fieldset>
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var box = document.querySelector('[data-coming-soon-fieldset]');
         if (!box) return;

@@ -23,7 +23,7 @@ class SocialPostsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.facebook.page_id' => '123', 'services.facebook.page_token' => 'tok', 'services.facebook.instagram_account_id' => '456', 'services.telegram.bot_token' => 'bot']);
+        config(['services.facebook_page.page_id' => '123', 'services.facebook_page.page_token' => 'tok', 'services.facebook_page.instagram_account_id' => '456', 'services.telegram.bot_token' => 'bot']);
         Setting::set(['telegram_channel_id' => '@iruali_deals']);
     }
 

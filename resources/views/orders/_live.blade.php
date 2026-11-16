@@ -5,7 +5,7 @@
         {{ __('This order was just updated.') }}
         <button type="button" class="ms-2 font-semibold underline" onclick="location.reload()">{{ __('Refresh') }}</button>
     </div>
-    <script>
+    <script @nonce>
         (function () {
             var bar = document.getElementById('order-live');
             var state = bar.dataset.state;

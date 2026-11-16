@@ -74,7 +74,7 @@ class AuthController extends BaseController
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols()],
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', new \App\Rules\PhoneNotTaken],
         ]);
 
         if ($validator->fails()) {
@@ -129,15 +129,11 @@ class AuthController extends BaseController
             return $this->sendValidationError($validator->errors());
         }
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        Password::sendResetLink($request->only('email'));
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return $this->sendResponse([], 'Password reset link sent to your email');
-        }
-
-        return $this->sendError('Unable to send reset link');
+        // The same answer whether or not an account uses this email, as on the website: the answer
+        // must not tell a stranger who has an account
+        return $this->sendResponse([], 'If an account uses this email, we have sent it a link to reset the password.');
     }
 
     /**
@@ -148,7 +144,7 @@ class AuthController extends BaseController
         $validator = Validator::make($request->all(), [
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
         if ($validator->fails()) {
@@ -162,6 +158,8 @@ class AuthController extends BaseController
                     'password' => Hash::make($password),
                     'has_password' => true, // an account made with Google, Facebook or Apple has one of its own now
                 ])->save();
+                $user->endOtherSessions(); // every browser, remember-me cookie and app token signed out
+                event(new \Illuminate\Auth\Events\PasswordReset($user));
             }
         );
 

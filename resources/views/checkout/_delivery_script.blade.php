@@ -25,7 +25,7 @@
     ];
 @endphp
 <script type="application/json" id="delivery-config">@json($deliveryConfig)</script>
-<script>
+<script @nonce>
     (function () {
         function init() {
             var form = document.getElementById('checkout-form');

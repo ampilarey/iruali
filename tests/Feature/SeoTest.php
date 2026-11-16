@@ -106,40 +106,32 @@ class SeoTest extends TestCase
     }
 
     #[Test]
-    public function it_generates_user_seo_data_for_seller()
+    public function it_generates_shop_seo_data_from_the_shop_name()
     {
         $user = User::factory()->create([
             'name' => 'John Seller',
+            'business_name' => 'Island Crafts',
             'is_seller' => true,
             'seller_approved' => true,
         ]);
 
         $seo = SeoService::forUser($user);
 
-        $this->assertEquals('Shop by John Seller - iruali', $seo['title']);
-        $this->assertStringContainsString('John Seller', $seo['description']);
-        $this->assertStringContainsString('seller', $seo['keywords']);
+        $this->assertEquals('Island Crafts - iruali', $seo['title']);
+        $this->assertStringContainsString('Island Crafts', $seo['description']);
+        $this->assertStringNotContainsString('John Seller', json_encode($seo));
+        $this->assertStringContainsString('shop', $seo['keywords']);
         $this->assertEquals('profile', $seo['og_type']);
-        $this->assertArrayHasKey('schema', $seo);
         $this->assertEquals('Organization', $seo['schema']['@type']);
+        $this->assertEquals('Island Crafts', $seo['schema']['name']);
     }
 
     #[Test]
-    public function it_generates_user_seo_data_for_customer()
+    public function a_404_for_someone_who_is_not_a_shop_does_not_show_their_name()
     {
-        $user = User::factory()->create([
-            'name' => 'John Customer',
-            'is_seller' => false,
-        ]);
+        $customer = User::factory()->create(['name' => 'Private Person Name', 'is_seller' => false]);
 
-        $seo = SeoService::forUser($user);
-
-        $this->assertEquals("John Customer's Profile - iruali", $seo['title']);
-        $this->assertStringContainsString('John Customer', $seo['description']);
-        $this->assertStringNotContainsString('seller', $seo['keywords']);
-        $this->assertEquals('profile', $seo['og_type']);
-        $this->assertArrayHasKey('schema', $seo);
-        $this->assertEquals('Person', $seo['schema']['@type']);
+        $this->get('/shops/'.$customer->id)->assertNotFound()->assertDontSee('Private Person Name');
     }
 
     #[Test]

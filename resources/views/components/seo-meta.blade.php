@@ -16,7 +16,8 @@
     // Private, transactional and duplicate-content pages are not for search engines
     $noindex = trim($__env->yieldContent('robots')) === 'noindex, nofollow'
         || request()->routeIs('login', 'register', 'password.*', 'verification.*', '2fa.*', 'account*', 'profile.*', 'cart*', 'checkout*',
-            'orders*', 'wishlist*', 'compare*', 'saved.*', 'search', 'order.track.*', 'returns.*', 'payments.*', 'admin.*', 'seller.*', 'locale.*');
+            'orders*', 'wishlist*', 'compare*', 'saved.*', 'search', 'order.track.*', 'returns.*', 'payments.*', 'admin.*', 'seller.*', 'locale.*',
+            'login.*', 'messages.*', 'quotes.*', 'item-requests.*', 'guest.*', 'complaints.*', 'pay.*', 'shop-invitations.*', 'gift-cards*');
 @endphp
 
 {{-- Basic Meta Tags --}}

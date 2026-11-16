@@ -161,7 +161,7 @@
                 </div>
                 <button type="button" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:w-auto" data-hours-copy>{{ __('Copy the first open day to all open days') }}</button>
             </section>
-            <script>
+            <script @nonce>
                 (function () {
                     var box = document.querySelector('[data-opening-hours]');
                     if (!box) return;

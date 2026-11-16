@@ -121,7 +121,7 @@
     </div>
 </div>
 
-<script>
+<script @nonce>
     document.querySelectorAll('[data-copy]').forEach(function (button) {
         button.addEventListener('click', function () {
             var input = document.querySelector(button.dataset.copy);

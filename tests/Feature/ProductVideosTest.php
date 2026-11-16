@@ -189,6 +189,24 @@ class ProductVideosTest extends TestCase
         $this->get(route('products.show', $plain))->assertOk()->assertDontSee('data-product-video', false)->assertDontSee('data-video-play', false);
     }
 
+    public function test_every_script_written_in_blade_carries_the_nonce_and_injected_ones_do_not(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'description' => ['en' => 'Nice <script>alert(1)</script> mat']]);
+        foreach (['/', route('products.show', $product), route('cart')] as $url) {
+            $response = $this->get($url)->assertOk();
+            preg_match("/'nonce-([^']+)'/", (string) $response->headers->get('Content-Security-Policy'), $nonce);
+            preg_match_all('/<script\b([^>]*)>/i', $response->getContent(), $tags);
+            foreach ($tags[1] as $attrs) {
+                if (preg_match('/\btype=["\'](application\/(ld\+)?json)["\']/', $attrs)) {
+                    continue; // data, not run
+                }
+                $this->assertStringContainsString('nonce="'.$nonce[1].'"', $attrs, $url.': a script without the nonce');
+            }
+        }
+        // User content is escaped, and the page is not rewritten to stamp a nonce onto it
+        $this->get(route('products.show', $product))->assertDontSee('<script>alert(1)</script>', false);
+    }
+
     public function test_the_csp_allows_exactly_the_video_providers_to_be_framed(): void
     {
         $policy = SecurityHeaders::contentSecurityPolicy('test-nonce');

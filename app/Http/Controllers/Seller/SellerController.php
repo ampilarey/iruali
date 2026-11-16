@@ -198,7 +198,7 @@ class SellerController extends Controller
             'name' => 'required|string|max:255',
             'business_name' => 'required|string|max:255',
             'business_description' => 'nullable|string|max:2000',
-            'phone' => 'nullable|string|max:20|unique:users,phone,'.$user->id,
+            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone,'.$user->id, new \App\Rules\PhoneNotTaken($user->id)],
             'address' => 'nullable|string|max:500',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
@@ -220,6 +220,10 @@ class SellerController extends Controller
             $rules += \App\Services\ShopCoverage::rules(false);
         }
         $validated = $request->validate($rules, \App\Services\ShopCoverage::messages());
+        if (array_key_exists('phone', $validated) && $user->signsInWithPhoneOnly()
+            && \App\Services\Sms\PhoneNumber::normalize($validated['phone']) !== \App\Services\Sms\PhoneNumber::normalize($user->phone)) {
+            return back()->withInput()->withErrors(['phone' => __('You sign in with this mobile number. Add an email to your account first, or ask us to change the number.')]);
+        }
 
         $coverage = array_intersect_key($validated, array_flip(['home_island_id', 'delivery_coverage', 'delivers_to_home_atoll', 'delivery_island_ids']));
         unset($validated['shop_logo'], $validated['shop_banner'], $validated['home_island_id'], $validated['delivery_coverage'], $validated['delivers_to_home_atoll'], $validated['delivery_island_ids']);

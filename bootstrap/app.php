@@ -40,6 +40,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_AWS_ELB,
         );
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        // What the service worker may keep offline (needs the session, so in the web group)
+        $middleware->web(append: [\App\Http\Middleware\OfflineCopies::class]);
         // /dv/... storefront URLs: runs before routing (see the middleware)
         $middleware->append(\App\Http\Middleware\LocalePrefix::class);
         $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider

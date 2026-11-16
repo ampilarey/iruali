@@ -38,7 +38,7 @@ class ProfileController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/', Rule::unique('users', 'phone')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/', Rule::unique('users', 'phone')->ignore($user->id), new \App\Rules\PhoneNotTaken($user->id)],
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',

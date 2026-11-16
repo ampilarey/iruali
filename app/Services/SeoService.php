@@ -202,15 +202,15 @@ class SeoService
      */
     public static function forUser(User $user): array
     {
-        $title = $user->is_seller ? "Shop by {$user->name}" : "{$user->name}'s Profile";
-        $description = $user->is_seller
-            ? "Discover amazing products from {$user->name} on iruali. Shop the latest collection now!"
-            : "View {$user->name}'s profile on iruali.";
+        // Only shops have a public page: a shop is known by its shop name, never the owner's own name
+        $name = $user->business_name ?: $user->name;
+        $title = $name;
+        $description = "Discover products from {$name} on iruali. Shop the latest collection now!";
 
         return [
             'title' => $title.' - iruali',
             'description' => $description,
-            'keywords' => "{$user->name}, iruali, Maldives, e-commerce".($user->is_seller ? ', seller, shop' : ''),
+            'keywords' => "{$name}, iruali, Maldives, e-commerce, shop",
             'og_title' => $title,
             'og_description' => $description,
             'og_type' => 'profile',
@@ -403,20 +403,10 @@ class SeoService
      */
     private static function generateUserSchema(User $user): array
     {
-        if ($user->is_seller) {
-            return [
-                '@context' => 'https://schema.org',
-                '@type' => 'Organization',
-                'name' => $user->name,
-                'url' => request()->url(),
-                'image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.png'),
-            ];
-        }
-
         return [
             '@context' => 'https://schema.org',
-            '@type' => 'Person',
-            'name' => $user->name,
+            '@type' => 'Organization',
+            'name' => $user->business_name ?: $user->name,
             'url' => request()->url(),
             'image' => $user->avatar ? asset($user->avatar) : asset('images/og-image.png'),
         ];

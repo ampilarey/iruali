@@ -19,7 +19,7 @@ class SeoAndErrorPagesTest extends TestCase
     public function test_robots_and_sitemap_are_served_from_the_app(): void
     {
         $this->get('/robots.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
-            ->assertSee('Disallow: /admin')->assertSee('Disallow: /checkout')->assertSee('Sitemap: '.url('/sitemap.xml'));
+            ->assertSee('Disallow: /admin')->assertSee('Disallow: /checkout')->assertSee('Disallow: /messages')->assertSee('Disallow: /pay/')->assertSee('Sitemap: '.url('/sitemap.xml'));
 
         $product = Product::factory()->create(['is_active' => true]);
         $category = Category::create(['name' => ['en' => 'Boats', 'dv' => 'ދޯނި'], 'slug' => 'boats', 'status' => 'active']);
@@ -48,10 +48,10 @@ class SeoAndErrorPagesTest extends TestCase
     public function test_private_pages_are_noindex(): void
     {
         $user = User::factory()->create();
-        foreach ([route('login'), route('register'), route('password.request')] as $url) {
+        foreach ([route('login'), route('login.email'), route('login.phone'), route('register'), route('password.request'), route('complaints.create')] as $url) {
             $this->get($url)->assertSee('content="noindex, nofollow"', false);
         }
-        foreach ([route('cart'), route('account'), route('orders'), route('wishlist')] as $url) {
+        foreach ([route('cart'), route('account'), route('orders'), route('wishlist'), route('messages.index'), route('messages.support'), route('quotes.index'), route('item-requests.index'), route('item-requests.create')] as $url) {
             $this->actingAs($user)->get($url)->assertOk()->assertSee('content="noindex, nofollow"', false);
         }
         $this->get('/search?q=boat')->assertSee('content="noindex, nofollow"', false);

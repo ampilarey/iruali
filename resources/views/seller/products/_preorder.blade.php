@@ -110,7 +110,7 @@
 </fieldset>
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var box = document.querySelector('[data-preorder-fieldset]');
         if (!box) return;

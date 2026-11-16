@@ -162,11 +162,12 @@ return [
 
     // Social posting (Admin → Social posts): the iruali Facebook page and its linked Instagram
     // business account, with a long-lived page access token from Meta's Graph API
-    'facebook' => [
+    // (Its own key: under 'facebook' it replaced the sign-in settings above, so Facebook sign-in never had its keys.)
+    'facebook_page' => [
         'page_id' => env('FACEBOOK_PAGE_ID'),
         'page_token' => env('FACEBOOK_PAGE_TOKEN'),
         'instagram_account_id' => env('INSTAGRAM_ACCOUNT_ID'),
-        'graph_version' => env('FACEBOOK_GRAPH_VERSION', 'v21.0'),
+        'graph_version' => env('FACEBOOK_PAGE_GRAPH_VERSION', env('FACEBOOK_GRAPH_VERSION', 'v21.0')),
     ],
 
 ];

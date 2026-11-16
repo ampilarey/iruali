@@ -70,7 +70,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var select = document.querySelector('[data-bank-select]'), other = document.querySelector('[data-bank-other]');
         if (!select || !other) return;

@@ -29,7 +29,7 @@
     </section>
     @once
         @push('scripts')
-            <script>
+            <script @nonce>
                 // Replace the placeholder with the player only when asked (no third-party request before)
                 document.querySelectorAll('[data-video-play]').forEach(function (button) {
                     button.addEventListener('click', function () {

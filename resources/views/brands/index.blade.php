@@ -88,7 +88,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var wrap = document.querySelector('[data-brand-filter-wrap]');
         if (!wrap) return;

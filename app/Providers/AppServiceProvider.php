@@ -43,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // <script @nonce>: the per-request Content-Security-Policy nonce (SecurityHeaders). Every inline
+        // script written in Blade carries it; a script injected through user content would not.
+        \Illuminate\Support\Facades\Blade::directive('nonce', fn () => '<?php echo \'nonce="\'.e(\Illuminate\Support\Facades\Vite::cspNonce() ?? \'\').\'"\'; ?>');
+
         if ($this->app->isProduction()) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
@@ -75,7 +79,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Share SEO data with all views
         View::composer('layouts.app', function ($view) {
-            $seo = $this->getSeoData();
+            // An error page (404, 403...) never describes the record in the address: a 404 for
+            // /shops/{id} of a customer, or an unlisted product, must not put its name in the title
+            $seo = isset($view->getData()['exception']) ? SeoService::getDefault() : $this->getSeoData();
             $view->with('seo', $seo);
         });
 
@@ -144,7 +150,7 @@ class AppServiceProvider extends ServiceProvider
         // Seller shop page
         if ($routeName === 'sellers.show' && isset($routeParameters['seller'])) {
             $seller = $routeParameters['seller'];
-            if ($seller instanceof User) {
+            if ($seller instanceof User && $seller->isSeller()) {
                 return SeoService::forUser($seller);
             }
         }

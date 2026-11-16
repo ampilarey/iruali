@@ -534,7 +534,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var main = document.querySelector('[data-gallery-main]');
         document.querySelectorAll('[data-gallery-thumb]').forEach(function (thumb) {

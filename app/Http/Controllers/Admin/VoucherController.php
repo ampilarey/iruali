@@ -82,7 +82,7 @@ class VoucherController extends Controller
 
         for ($i = 0; $i < (int) $data['count']; $i++) {
             do {
-                $code = strtoupper($data['name']).'-'.strtoupper(\Illuminate\Support\Str::random(6));
+                $code = strtoupper($data['name']).'-'.strtoupper(\Illuminate\Support\Str::random(10)); // too many to guess (cart/apply-voucher is also rate limited)
             } while (Voucher::where('code', $code)->exists());
             Voucher::create([
                 'code' => $code, 'type' => $data['type'], 'amount' => $data['amount'], 'min_order' => $data['min_order'] ?? null,

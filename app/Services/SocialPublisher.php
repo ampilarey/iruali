@@ -21,7 +21,7 @@ class SocialPublisher
      */
     public static function configuredChannels(): array
     {
-        $fb = config('services.facebook');
+        $fb = config('services.facebook_page');
 
         return array_filter([
             'facebook' => filled($fb['page_id'] ?? null) && filled($fb['page_token'] ?? null) ? SocialPost::CHANNELS['facebook'] : null,
@@ -55,7 +55,7 @@ class SocialPublisher
      */
     protected function facebook(SocialPost $post): array
     {
-        $fb = config('services.facebook');
+        $fb = config('services.facebook_page');
 
         return $this->graph($post->image_url
             ? ['/'.$fb['page_id'].'/photos', ['url' => $post->image_url, 'caption' => $this->text($post)]]
@@ -70,7 +70,7 @@ class SocialPublisher
         if (! $post->image_url) {
             return ['ok' => false, 'error' => 'Instagram needs a picture'];
         }
-        $account = config('services.facebook.instagram_account_id');
+        $account = config('services.facebook_page.instagram_account_id');
         $container = $this->graph(['/'.$account.'/media', ['image_url' => $post->image_url, 'caption' => $this->text($post)]]);
         if (! $container['ok']) {
             return $container;
@@ -87,8 +87,8 @@ class SocialPublisher
     {
         [$path, $params] = $call;
         try {
-            $response = Http::timeout(20)->asForm()->post('https://graph.facebook.com/'.config('services.facebook.graph_version', 'v21.0').$path,
-                array_filter($params) + ['access_token' => config('services.facebook.page_token')]);
+            $response = Http::timeout(20)->asForm()->post('https://graph.facebook.com/'.config('services.facebook_page.graph_version', 'v21.0').$path,
+                array_filter($params) + ['access_token' => config('services.facebook_page.page_token')]);
             if ($response->successful() && $response->json('id')) {
                 return ['ok' => true, 'error' => null, 'id' => (string) $response->json('id')];
             }

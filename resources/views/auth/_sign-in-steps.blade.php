@@ -16,7 +16,6 @@
             {{-- Staff: password only (then the authenticator code), through the staff sign-in --}}
             <form method="POST" action="{{ route('login') }}" class="space-y-4 rounded-lg bg-white p-6 shadow-sm border border-gray-100" data-staff-password>
                 @csrf
-                <input type="hidden" name="email" value="{{ $pending['email'] }}">
                 @if($pending['remember'] ?? false)<input type="hidden" name="remember" value="1">@endif
                 <p class="text-sm text-gray-700">{{ __('Signing in as :phone', ['phone' => $pending['shown']]) }} · <a href="{{ $changeUrl }}" class="font-medium text-primary-600">{{ __('Change') }}</a></p>
                 <div>

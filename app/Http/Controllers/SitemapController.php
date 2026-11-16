@@ -23,7 +23,8 @@ class SitemapController extends Controller
             'Disallow: /orders', 'Disallow: /wishlist', 'Disallow: /compare', 'Disallow: /saved', 'Disallow: /search',
             'Disallow: /login', 'Disallow: /register', 'Disallow: /forgot-password', 'Disallow: /reset-password',
             'Disallow: /verification', 'Disallow: /2fa', 'Disallow: /profile', 'Disallow: /track', 'Disallow: /api',
-            'Disallow: /payments', 'Disallow: /returns',
+            'Disallow: /payments', 'Disallow: /returns', 'Disallow: /messages', 'Disallow: /quotes', 'Disallow: /pay/',
+            'Disallow: /request-an-item', 'Disallow: /complaints', 'Disallow: /feedback', 'Disallow: /shop-invitations',
             '',
             'Sitemap: '.url('/sitemap.xml'),
         ];

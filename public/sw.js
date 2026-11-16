@@ -3,10 +3,12 @@
  *
  * - Navigations (HTML): network first, the cached copy when offline, else the /offline page.
  * - /build/, /storage/ and /images/: stale-while-revalidate (serve from cache, refresh in the background).
- * - Private pages (admin, seller, account, checkout, orders, cart, API, sign-in...) are never cached.
+ * - Private pages (admin, seller, account, checkout, orders, cart, messages, quotes, API, sign-in...) are
+ *   never cached, nor any page made for a signed-in person (the server marks it X-Iruali-Private), nor a
+ *   redirect. The page right after signing out carries X-Iruali-Clear-Pages: every stored page is dropped.
  * - Push notifications: shows them and opens the order on tap.
  */
-const VERSION = 'v1';
+const VERSION = 'v2'; // v1 could hold signed-in pages: a new version drops every old cache
 const SHELL_CACHE = 'iruali-shell-' + VERSION;
 const PAGE_CACHE = 'iruali-pages-' + VERSION;
 const ASSET_CACHE = 'iruali-assets-' + VERSION;
@@ -24,7 +26,7 @@ const PRECACHE = [
 ];
 
 // Nothing under these paths is ever stored (also with the /dv language prefix)
-const PRIVATE = /^\/(dv\/)?(admin|seller|account|checkout|orders|cart|api|login|register|logout|forgot-password|reset-password|2fa|verification|auth|profile|wishlist|compare|saved|payments|returns|track|feeds|locale|offline|storage\/returns)(\/|$|\?)/;
+const PRIVATE = /^\/(dv\/)?(admin|seller|account|checkout|orders|cart|api|login|register|logout|forgot-password|reset-password|2fa|verification|auth|profile|wishlist|compare|saved|payments|returns|track|feeds|locale|offline|storage\/returns|messages|quotes|request-an-item|pay|feedback|complaints|gift-cards|shop-invitations)(\/|$|\?)/;
 const ASSET = /^\/(build|storage|images)\//;
 const MAX_PAGES = 40;
 
@@ -66,7 +68,10 @@ self.addEventListener('fetch', function (event) {
 
 function networkFirstPage(request) {
     return fetch(request).then(function (response) {
-        if (response && response.ok && response.type === 'basic') {
+        if (response && response.headers.get('X-Iruali-Clear-Pages')) {
+            caches.delete(PAGE_CACHE);
+        }
+        if (response && response.ok && response.type === 'basic' && !response.redirected && !response.headers.get('X-Iruali-Private')) {
             var copy = response.clone();
             caches.open(PAGE_CACHE).then(function (cache) {
                 cache.put(request, copy).then(function () { return trim(cache, MAX_PAGES); });
@@ -124,8 +129,9 @@ self.addEventListener('notificationclick', function (event) {
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (windows) {
+            var target = new URL(url, self.location.origin).href; // the payload's url may be a path
             for (var i = 0; i < windows.length; i++) {
-                if (windows[i].url === url && 'focus' in windows[i]) return windows[i].focus();
+                if (windows[i].url === target && 'focus' in windows[i]) return windows[i].focus();
             }
             if (self.clients.openWindow) return self.clients.openWindow(url);
         })

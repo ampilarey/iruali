@@ -67,7 +67,7 @@ class PhoneLoginController extends AuthController
                 return back()->withInput()->withErrors(['login' => __('No account uses that email. New to iruali? Continue with your mobile number.')]);
             }
             if ($user->isStaff()) {
-                return $this->staffStep($request, $user, $remember);
+                return $this->staffStep($request, $user, $remember, $email);
             }
             $pending = ['user_id' => $user->id, 'key' => $email, 'shown' => $this->maskEmail($email), 'remember' => $remember, 'checkout' => $request->boolean('checkout')];
         } else {
@@ -81,7 +81,7 @@ class PhoneLoginController extends AuthController
             // second, empty one. "Not you?" (new=1) starts a new account for a different person.
             $holder = $user ?? $this->unverifiedHolder($phone);
             if ($holder?->isStaff()) {
-                return $this->staffStep($request, $holder, $remember); // always, "Not you?" included
+                return $this->staffStep($request, $holder, $remember, '•••'.substr($phone, -4)); // always, "Not you?" included
             }
             if (! $user && $request->boolean('new')) {
                 $holder = null;
@@ -234,10 +234,13 @@ class PhoneLoginController extends AuthController
      * (AuthController::login: lockout after wrong tries, then the authenticator code). Never a code
      * by text or email.
      */
-    protected function staffStep(Request $request, User $staff, bool $remember): RedirectResponse
+    protected function staffStep(Request $request, User $staff, bool $remember, string $shown): RedirectResponse
     {
+        // The page shows only what was typed (the email, or the last digits of the number): a staff
+        // member's email is never shown to someone who typed their phone number. The staff sign-in
+        // takes the email from the session (AuthController::login()).
         $email = mb_strtolower((string) $staff->email);
-        $request->session()->put(self::SESSION, ['step' => 'password', 'staff' => true, 'email' => $email, 'key' => $email, 'shown' => $email, 'remember' => $remember, 'checkout' => $request->boolean('checkout')]);
+        $request->session()->put(self::SESSION, ['step' => 'password', 'staff' => true, 'email' => $email, 'key' => $email, 'shown' => $shown, 'remember' => $remember, 'checkout' => $request->boolean('checkout')]);
 
         return $this->home(['checkout' => $request->boolean('checkout')]);
     }

@@ -330,7 +330,7 @@
     </form>
 </div>
 
-<script>
+<script @nonce>
     // The pay button says what a tap does: "Pay MVR 275.00 by card" (what goes to the card: after the wallet,
     // or the booking fee), "Place order · MVR 275.00" for other ways to pay, "Place order" when nothing is due now
     (function () {
@@ -354,7 +354,7 @@
     })();
 </script>
 
-<script>
+<script @nonce>
     (function () {
         var goods = @json((float) $goodsTotal + $smallOrderFee);
         var bookingFee = @json($bookingFee ? (float) $bookingFee['fee'] : null); // a booking fee: the wallet pays towards it, the rest is the balance

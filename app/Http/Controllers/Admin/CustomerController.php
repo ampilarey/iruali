@@ -67,7 +67,7 @@ class CustomerController extends Controller
     public function phone(Request $request, User $user)
     {
         $data = $request->validate([
-            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/', Rule::unique('users', 'phone')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{7,15}$/', Rule::unique('users', 'phone')->ignore($user->id), new \App\Rules\PhoneNotTaken($user->id)],
         ]);
         $phone = filled($data['phone'] ?? null) ? preg_replace('/\s+/', '', $data['phone']) : null;
         Audit::record('customer.phone_changed', $user, ['from' => $user->phone, 'to' => $phone]);

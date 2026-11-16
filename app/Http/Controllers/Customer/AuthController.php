@@ -82,13 +82,18 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // The staff step of the sign-in page (PhoneLoginController::staffStep()) keeps the email in the session
+        $pending = $request->session()->get(PhoneLoginController::SESSION);
+        if (! $request->filled('email') && ($pending['staff'] ?? false) && filled($pending['email'] ?? null)) {
+            $request->merge(['email' => $pending['email']]);
+        }
         $request->validate(['email' => 'required|string|email', 'password' => 'required|string']);
 
         $remember = $request->boolean('remember');
 
         // Staff accounts lock for a while after repeated wrong tries (StaffLockout)
         $account = User::where('email', $request->input('email'))->first();
-        if ($account && ($until = StaffLockout::lockedUntil($account))) {
+        if ($account && ($until = StaffLockout::lockedUntil($account, $request->ip()))) {
             return back()->withInput($request->only('email', 'remember'))->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
         }
 
@@ -117,7 +122,7 @@ class AuthController extends Controller
             return redirect()->route('2fa.show');
         }
 
-        StaffLockout::succeeded($user);
+        StaffLockout::succeeded($user, $request->ip());
         $request->session()->regenerate();
         $user->updateLoginTracking($request->ip());
         NotificationService::loginSuccess();
@@ -147,7 +152,7 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
-        if ($until = StaffLockout::lockedUntil($user)) {
+        if ($until = StaffLockout::lockedUntil($user, $request->ip())) {
             session()->forget(['2fa_user_id', '2fa_remember']);
 
             return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
@@ -158,11 +163,11 @@ class AuthController extends Controller
             || (ctype_digit($code) && strlen($code) === 6 && $this->google2fa->verifyKey(decrypt($user->two_factor_secret), $code));
 
         if (! $valid) {
-            StaffLockout::failed($user, $request->ip());
+            StaffLockout::failed($user, $request->ip(), twoStep: true);
 
             return back()->withErrors(['code' => __('auth.invalid_2fa_code')]);
         }
-        StaffLockout::succeeded($user);
+        StaffLockout::succeeded($user, $request->ip());
 
         $remember = (bool) session('2fa_remember', false);
         session()->forget(['2fa_user_id', '2fa_remember']);
@@ -270,6 +275,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        $request->session()->flash('iruali.signed_out', true); // the next page tells the service worker to drop its offline copies
 
         NotificationService::logoutSuccess();
 

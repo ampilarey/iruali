@@ -43,7 +43,7 @@
 </fieldset>
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var box = document.querySelector('[data-multibuy]');
         if (!box) return;

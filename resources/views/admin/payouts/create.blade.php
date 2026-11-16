@@ -76,7 +76,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var form = document.querySelector('[data-payout]'), total = form && form.querySelector('[data-payout-total]');
         if (!total) return;

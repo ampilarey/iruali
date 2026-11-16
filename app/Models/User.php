@@ -20,6 +20,38 @@ class User extends Authenticatable implements HasLocalePreference
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
+     * A changed mobile number is not confirmed until a code proves it again: sign-in by text
+     * trusts the confirmed holder of a number (findByVerifiedPhone()). The same number typed
+     * another way ("+960 777 1234" for "7771234") keeps its confirmation, and a save that sets
+     * phone_verified_at itself (a code was just checked) is left as it is.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $user) {
+            if (! $user->exists || ! $user->isDirty('phone') || $user->isDirty('phone_verified_at')) {
+                return;
+            }
+            $before = $user->getOriginal('phone');
+            $after = $user->phone;
+            $same = ($a = \App\Services\Sms\PhoneNumber::normalize($before)) !== null
+                ? $a === \App\Services\Sms\PhoneNumber::normalize($after)
+                : (string) $before === (string) $after;
+            if (! $same) {
+                $user->phone_verified_at = null;
+            }
+        });
+    }
+
+    /**
+     * Signs in with its mobile number only (no email): that number can't be changed or removed
+     * by the customer, or they could no longer sign in.
+     */
+    public function signsInWithPhoneOnly(): bool
+    {
+        return blank($this->email) && $this->isPhoneVerified();
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

@@ -93,13 +93,16 @@ class ApplicationController extends Controller
         $validated = $request->validate([
             'business_name' => 'required|string|max:255',
             'business_description' => 'required|string|min:20|max:2000',
-            'phone' => 'required|string|max:20|unique:users,phone,'.$user->id,
+            'phone' => ['required', 'string', 'max:20', 'unique:users,phone,'.$user->id, new \App\Rules\PhoneNotTaken($user->id)],
             'address' => 'required|string|max:500',
             'agree_seller_terms' => 'accepted',
         ] + \App\Services\ShopCoverage::rules(true), \App\Services\ShopCoverage::messages() + [
             'agree_seller_terms.accepted' => 'You must agree to the seller terms.',
             'business_description.min' => 'Please tell us a little more about what you sell (at least 20 characters).',
         ]);
+        if ($user->signsInWithPhoneOnly() && \App\Services\Sms\PhoneNumber::normalize($validated['phone']) !== \App\Services\Sms\PhoneNumber::normalize($user->phone)) {
+            return back()->withInput()->withErrors(['phone' => __('You sign in with this mobile number. Add an email to your account first, or ask us to change the number.')]);
+        }
         // Optional: business documents for the "Verified business" badge (all of them, or none)
         $verification = app(\App\Services\SellerVerificationService::class)->validateApplication($request);
 

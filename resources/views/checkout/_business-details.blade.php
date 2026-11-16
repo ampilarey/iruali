@@ -36,7 +36,7 @@
     </div>
 </section>
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var toggle = document.querySelector('[data-business-toggle]'), fields = document.querySelector('[data-business-fields]');
         if (!toggle || !fields) return;

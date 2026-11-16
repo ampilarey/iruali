@@ -68,7 +68,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var form = document.querySelector('[data-batch]'); if (!form) return;
         var total = form.querySelector('[data-batch-total]'), boxes = form.querySelectorAll('input[name="sellers[]"]');

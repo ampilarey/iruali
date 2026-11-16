@@ -74,7 +74,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::put('/cart/update/{item}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])->name('cart.remove');
         Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-        Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
+        Route::post('cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher')->middleware('throttle:20,1,cart.applyVoucher'); // printed card codes can't be guessed by script
         Route::post('cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.removeVoucher');
         Route::post('cart/shop-code', [\App\Http\Controllers\Customer\ShopCodeController::class, 'apply'])->name('cart.shopCode.apply')->middleware('throttle:20,1,cart.shopCode.apply');
         Route::post('cart/shop-code/remove', [\App\Http\Controllers\Customer\ShopCodeController::class, 'remove'])->name('cart.shopCode.remove');

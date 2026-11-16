@@ -64,12 +64,30 @@ class PwaAndPushTest extends TestCase
         }
         preg_match('/const PRIVATE = (\/.+\/);/', $sw, $m);
         $this->assertNotEmpty($m, 'The private-path pattern is missing');
-        foreach (['/admin/dashboard', '/seller/orders', '/account', '/checkout', '/api/v1/cart', '/dv/account/edit', '/orders/5', '/cart'] as $path) {
+        foreach (['/admin/dashboard', '/seller/orders', '/account', '/checkout', '/api/v1/cart', '/dv/account/edit', '/orders/5', '/cart', '/messages', '/messages/g/1/token', '/quotes', '/request-an-item', '/pay/5', '/feedback/5', '/complaints/new', '/gift-cards', '/dv/messages/support'] as $path) {
             $this->assertSame(1, preg_match($m[1], $path), $path.' should be private');
         }
         foreach (['/', '/products/x', '/dv/products/x', '/deals', '/build/assets/app.js', '/images/icons/icon-192.png'] as $path) {
             $this->assertSame(0, preg_match($m[1], $path), $path.' should be cacheable');
         }
+    }
+
+    public function test_pages_for_a_signed_in_person_are_marked_private_and_signing_out_clears_the_offline_copies(): void
+    {
+        $sw = file_get_contents(public_path('sw.js'));
+        $this->assertStringContainsString('X-Iruali-Private', $sw);
+        $this->assertStringContainsString('X-Iruali-Clear-Pages', $sw);
+        $this->assertStringContainsString('response.redirected', $sw);
+
+        // A guest's page may be kept offline; the same page for a signed-in person may not
+        $this->get('/')->assertOk()->assertHeaderMissing('X-Iruali-Private');
+        $user = \App\Models\User::factory()->create();
+        $this->actingAs($user)->get('/')->assertOk()->assertHeader('X-Iruali-Private', '1');
+
+        // The page right after signing out tells the service worker to drop what it kept
+        $this->post(route('logout'))->assertRedirect(route('home'));
+        $this->get('/')->assertOk()->assertHeader('X-Iruali-Clear-Pages', '1')->assertHeaderMissing('X-Iruali-Private');
+        $this->get('/')->assertHeaderMissing('X-Iruali-Clear-Pages');
     }
 
     public function test_offline_page_is_translated_and_noindex(): void

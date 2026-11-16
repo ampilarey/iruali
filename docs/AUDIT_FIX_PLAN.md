@@ -1,6 +1,6 @@
 # Audit fix plan (audit of 2026-11-16)
 
-Status: **planned, nothing fixed yet.** A read-only audit of `main` at `93832c1` found the items below.
+Status: **Batch 1 done (2026-11-16); Batches 2–6 to do.** A read-only audit of `main` at `93832c1` found the items below.
 This file is the work order: do the batches in order, one pull request per batch.
 
 Tick an item (`[x]`) in this file in the same PR that fixes it.
@@ -36,7 +36,7 @@ Severity: **H** high, **M** medium, **L** low.
 
 ## Batch 1: sign-in and privacy
 
-### 1.1 [ ] H: phone number changes keep "verified"
+### 1.1 [x] H: phone number changes keep "verified"
 
 - **Where:**
   - `Api/UserController::update` (`PUT /api/v1/user`);
@@ -62,7 +62,7 @@ Severity: **H** high, **M** medium, **L** low.
   - a number verified on another account is refused;
   - phone OTP sign-in still verifies.
 
-### 1.2 [ ] H: service worker keeps private pages after sign-out
+### 1.2 [x] H: service worker keeps private pages after sign-out
 
 - **Where:** `public/sw.js` (the `PRIVATE` regex, the page cache `iruali-pages-v1`).
 - **Bug:**
@@ -82,12 +82,14 @@ Severity: **H** high, **M** medium, **L** low.
 - Also in this file (**L**):
   - `notificationclick` compares an absolute URL to a relative one; use
     `new URL(url, self.location.origin).href`.
-  - `pushsubscriptionchange` should resubscribe.
+  - `pushsubscriptionchange` should resubscribe. **Not done (deferred):** re-subscribing from the
+    service worker needs an endpoint that accepts the new subscription without a session or CSRF
+    token. Until that exists, the account page re-subscribes on the next visit, as before.
 - **Tests:**
   - a PHPUnit test that signed-in HTML responses carry the no-store marker and guest ones do not;
   - a Playwright check that after logout the caches hold no `/messages` entry.
 
-### 1.3 [ ] H: Facebook sign-in keys are overwritten
+### 1.3 [x] H: Facebook sign-in keys are overwritten
 
 - **Where:** `config/services.php` has two `'facebook' =>` blocks (sign-in near line 141, page
   posting near line 165). PHP keeps the last, so `services.facebook.client_id` is always null.
@@ -100,7 +102,7 @@ Severity: **H** high, **M** medium, **L** low.
   and `services.facebook_page.page_id` resolve. Add a generic test that no top-level key is duplicated
   in `config/services.php` (tokenise the file).
 
-### 1.4 [ ] M: staff email shown to anyone who types a staff phone number
+### 1.4 [x] M: staff email shown to anyone who types a staff phone number
 
 - **Where:** `PhoneLoginController::staffStep` (puts the full email in the session as `shown`) and
   `resources/views/auth/_sign-in-steps.blade.php` (prints it and puts it in a hidden input).
@@ -110,7 +112,7 @@ Severity: **H** high, **M** medium, **L** low.
   - Have `AuthController::login` read it from the session when the hidden field is absent.
 - **Test:** the response for a staff phone does not contain the staff email.
 
-### 1.5 [ ] M: anyone can keep staff locked out
+### 1.5 [x] M: anyone can keep staff locked out
 
 - **Where:** `App\Support\StaffLockout` (keyed on the account only).
 - **Fix:**
@@ -120,7 +122,7 @@ Severity: **H** high, **M** medium, **L** low.
   - wrong passwords from IP A do not block a correct sign-in from IP B;
   - the same IP is still locked after 5.
 
-### 1.6 [ ] M: API password reset is weaker than the web one
+### 1.6 [x] M: API password reset is weaker than the web one
 
 - **Where:** `Api/AuthController` (`forgot-password`, `reset-password`).
 - **Fix:**
@@ -130,21 +132,21 @@ Severity: **H** high, **M** medium, **L** low.
 - **Tests:** new `ApiPasswordTest` covering forgot (same answer for known and unknown email), reset
   (weak password refused, tokens revoked), change-password and logout.
 
-### 1.7 [ ] M: voucher box has no guess limit
+### 1.7 [x] M: voucher box has no guess limit
 
 - **Where:** `routes/web.php`, `cart/apply-voucher`; code format in `Admin/VoucherController`
   (batch codes: prefix + 6 characters).
 - **Fix:** add `throttle:20,1,cart.applyVoucher`. New batch codes get 10 random characters.
 - **Test:** `RateLimitTest` covers the name; the 21st attempt gets 429.
 
-### 1.8 [ ] M: shop link leaks any user's name in the page title
+### 1.8 [x] M: shop link leaks any user's name in the page title
 
 - **Where:** `/shops/{seller}` → `ShopController::seller` / `SeoService` (profile title built before
   `abort_unless($seller->isSeller(), 404)`).
 - **Fix:** abort before any SEO data is set. Error pages use the default title.
 - **Test:** `GET /shops/{id of a non-seller}` is 404 and the body does not contain that user's name.
 
-### 1.9 [ ] L: CSP nonce is stamped onto every inline script
+### 1.9 [x] L: CSP nonce is stamped onto every inline script
 
 - **Where:** `app/Http/Middleware/SecurityHeaders.php` (`stampScriptNonce`).
 - **Fix:**
@@ -153,7 +155,7 @@ Severity: **H** high, **M** medium, **L** low.
   - Leave `script-src-attr` for a later pass.
 - Do this last in the batch. Check every layout in a browser for CSP errors.
 
-### 1.10 [ ] L: private routes are indexable
+### 1.10 [x] L: private routes are indexable
 
 - **Where:** `resources/views/components/seo-meta.blade.php` (noindex list) and `public/robots.txt`.
 - **Fix:**

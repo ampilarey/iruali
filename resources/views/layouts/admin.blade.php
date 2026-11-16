@@ -122,7 +122,7 @@
         <div id="session-notification" data-notification="{{ json_encode(session('notification')) }}" hidden></div>
     @endif
 
-    <script>
+    <script @nonce>
         (function () {
             var drawer = document.querySelector('[data-admin-drawer]');
             if (!drawer) return;
@@ -146,7 +146,7 @@
             document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !drawer.classList.contains('hidden')) set(false); });
         })();
     </script>
-    <script>
+    <script @nonce>
         // Folded sections (x-admin.fold): remember which were left open on this page, and open one when a
         // field inside it is invalid or a link points into it.
         (function () {

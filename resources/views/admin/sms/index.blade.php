@@ -249,7 +249,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script @nonce>
     // Characters and SMS parts as the wording is typed (Dhivehi uses 70 characters a part)
     document.querySelectorAll('[data-sms-length]').forEach(function (box) {
         var out = box.parentElement.querySelector('[data-sms-count]');

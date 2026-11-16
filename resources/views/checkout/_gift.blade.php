@@ -41,7 +41,7 @@
         </label>
     </div>
 </section>
-<script>
+<script @nonce>
     (function () {
         var box = document.getElementById('is_gift');
         var fields = document.querySelector('[data-gift-fields]');

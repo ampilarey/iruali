@@ -32,6 +32,17 @@ class RateLimitTest extends TestCase
         $this->post('/login', ['email' => 'nobody@example.com', 'password' => 'wrong-password'])->assertStatus(429);
     }
 
+    public function test_voucher_codes_can_not_be_guessed_by_script(): void
+    {
+        for ($i = 0; $i < 20; $i++) {
+            $this->post('/cart/apply-voucher', ['voucher_code' => 'GUESS-'.$i])->assertStatus(302);
+        }
+
+        $this->post('/cart/apply-voucher', ['voucher_code' => 'GUESS-X'])->assertStatus(429);
+        // Its own counter: signing in still works
+        $this->post('/login', ['email' => 'nobody@example.com', 'password' => 'wrong-password'])->assertStatus(302);
+    }
+
     public function test_every_numeric_throttle_names_its_own_counter(): void
     {
         foreach (app('router')->getRoutes() as $route) {

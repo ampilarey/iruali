@@ -73,7 +73,7 @@
         </div>
     </div>
 </div>
-<script>
+<script @nonce>
     (function () {
         var custom = document.getElementById('custom_amount');
         var radios = document.querySelectorAll('input[name="amount"]');

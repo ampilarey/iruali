@@ -105,7 +105,8 @@ class PhoneLoginTest extends TestCase
             $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
 
             $this->post(route('login.phone.start'), ['login' => $number])->assertRedirect(route('login'));
-            $this->get(route('login'))->assertSee('data-staff-password', false)->assertSee('staff'.$number.'@iruali.test');
+            // Only the last digits of the number typed: never the staff member's email
+            $this->get(route('login'))->assertSee('data-staff-password', false)->assertSee('•••'.substr($number, -4))->assertDontSee('staff'.$number.'@iruali.test');
             // "Not you?" can't get round it either
             $this->post(route('login.phone.start'), ['login' => $number, 'new' => '1']);
             $this->get(route('login'))->assertSee('data-staff-password', false);
@@ -234,5 +235,19 @@ class PhoneLoginTest extends TestCase
         $this->from(route('login'))->post(route('login'), ['email' => 'ops@iruali.test', 'password' => 'Staff-pass-123!'])->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($staff);
         $this->assertNull(session(PhoneLoginController::SESSION));
+    }
+
+    public function test_staff_who_typed_their_number_sign_in_with_only_the_password(): void
+    {
+        $staff = User::factory()->create(['email' => 'ops@iruali.test', 'password' => Hash::make('Staff-pass-123!'), 'phone' => '7779000']);
+        $staff->forceFill(['phone_verified_at' => now()])->save();
+        $staff->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+
+        $this->post(route('login.phone.start'), ['login' => '777 9000'])->assertRedirect(route('login'));
+        $this->get(route('login'))->assertDontSee('ops@iruali.test');
+
+        // The page posts only the password: the email comes from the session
+        $this->from(route('login'))->post(route('login'), ['password' => 'Staff-pass-123!'])->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($staff);
     }
 }

@@ -110,7 +110,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var bar = document.querySelector('[data-bulk-bar]');
         if (!bar) return;

@@ -31,7 +31,7 @@ class UserController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', new \App\Rules\PhoneNotTaken($user->id)],
             'address' => 'nullable|string|max:500',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
@@ -43,6 +43,10 @@ class UserController extends BaseController
 
         if ($validator->fails()) {
             return $this->sendValidationError($validator->errors());
+        }
+        if ($request->exists('phone') && $user->signsInWithPhoneOnly()
+            && \App\Services\Sms\PhoneNumber::normalize($request->input('phone')) !== \App\Services\Sms\PhoneNumber::normalize($user->phone)) {
+            return $this->sendValidationError(['phone' => [__('You sign in with this mobile number. Add an email to your account first, or ask us to change the number.')]]);
         }
 
         $user->update($request->only([

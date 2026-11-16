@@ -301,7 +301,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script @nonce>
     (function () {
         var panel = document.querySelector('[data-filters]');
         function setFilters(open) {

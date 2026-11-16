@@ -15,6 +15,7 @@ use App\Support\Money;
 use App\Support\PayLink;
 use App\Support\TeamAlerts;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Session;
 use RuntimeException;
@@ -241,6 +242,8 @@ class BookingFeeService
             return false;
         }
         $order->forceFill(['payment_status' => 'deposit_paid', 'deposit_paid_at' => $paidAt])->syncOriginal();
+        // Pre-order units already on the shelf go to this order now that its booking fee is in (once committed)
+        DB::afterCommit(fn () => app(PreorderService::class)->allocateShelfStock($order));
         if ($order->payment_slip_path) {
             $order->forceFill(['deposit_slip_path' => $order->payment_slip_path, 'payment_slip_path' => null, 'payment_slip_uploaded_at' => null])->save();
         }

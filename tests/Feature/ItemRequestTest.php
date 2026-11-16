@@ -153,6 +153,48 @@ class ItemRequestTest extends TestCase
         $this->get(route('item-requests.show', $request))->assertSee('data-item-request-order', false)->assertDontSee('data-item-request-cancel', false);
     }
 
+    public function test_an_accepted_price_is_bought_through_the_checkout_page_and_its_quantity_is_fixed(): void
+    {
+        $this->enableBml();
+        $customer = User::factory()->create();
+        $request = $this->ask($customer);
+        $this->price($request);
+        $this->actingAs($customer)->post(route('item-requests.accept', $request))->assertRedirect(route('cart'));
+        $line = CartItem::where('product_id', $request->fresh()->product_id)->sole();
+
+        // The quantity is the request's
+        $this->put(route('cart.update', $line), ['quantity' => 1]);
+        $this->assertSame(2, $line->fresh()->quantity);
+
+        // The real checkout: the product is never listed (inactive) and is still bought by this customer
+        $this->get(route('checkout'))->assertOk();
+        $this->post(route('orders.store'), array_merge($this->checkoutFields(), ['agree_booking_fee' => '1']))->assertSessionHasNoErrors()->assertRedirect();
+        $order = \App\Models\Order::sole();
+        $this->assertSame([ItemRequest::ORDERED, $order->id], [$request->fresh()->status, $request->fresh()->order_id]);
+    }
+
+    public function test_someone_elses_or_an_expired_accepted_price_cannot_be_ordered(): void
+    {
+        $customer = User::factory()->create();
+        $request = $this->ask($customer);
+        $this->price($request, ['valid_days' => 1]);
+        $this->actingAs($customer)->post(route('item-requests.accept', $request));
+        $cart = CartItem::where('product_id', $request->fresh()->product_id)->sole()->cart;
+
+        // Past its last day: not ordered at the old price
+        $this->travel(3)->days();
+        $result = app(OrderService::class)->createOrderFromCart($customer, $this->shippingData() + ['agree_booking_fee' => true], $cart);
+        $this->assertFalse($result['success']);
+        $this->assertSame(ItemRequest::ACCEPTED, $request->fresh()->status);
+        $this->assertSame(0, \App\Models\Order::count());
+
+        // Another customer with the product in their cart: it is not on sale to them
+        $stranger = User::factory()->create();
+        $theirs = \App\Models\Cart::factory()->create(['user_id' => $stranger->id, 'status' => 'active']);
+        CartItem::factory()->create(['cart_id' => $theirs->id, 'product_id' => $request->fresh()->product_id, 'quantity' => 2, 'price' => 1]);
+        $this->assertFalse(app(OrderService::class)->createOrderFromCart($stranger, $this->shippingData(), $theirs)['success']);
+    }
+
     public function test_declining_cancelling_and_expiry(): void
     {
         $customer = User::factory()->create();

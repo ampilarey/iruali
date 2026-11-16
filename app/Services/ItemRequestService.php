@@ -182,14 +182,36 @@ class ItemRequestService
     }
 
     /**
+     * Is this (never listed) product the price this customer accepted on an item request, still valid?
+     * Such a product is inactive on purpose and may still be ordered by them (OrderService, StoreOrderRequest).
+     */
+    public function acceptedBy(\App\Models\Product $product, ?User $customer): bool
+    {
+        if (! $customer || $product->item_request_id === null) {
+            return false;
+        }
+        $request = ItemRequest::find($product->item_request_id);
+
+        return $request && (int) $request->user_id === (int) $customer->id && $request->status === ItemRequest::ACCEPTED && ! $request->isExpired();
+    }
+
+    /**
      * Placing the order (OrderService, in its transaction): a request whose product is in the order is
-     * marked ordered.
+     * marked ordered. The request must still be accepted, not expired, and for the quantity it was priced
+     * for; it is locked so it is ordered once.
      */
     public function placeOrder(Order $order, Cart $cart): void
     {
-        $ids = $cart->items->map(fn (CartItem $item) => $item->product?->item_request_id)->filter()->unique()->values()->all();
-        if ($ids !== []) {
-            ItemRequest::whereIn('id', $ids)->update(['status' => ItemRequest::ORDERED, 'order_id' => $order->id, 'ordered_at' => now(), 'updated_at' => now()]);
+        $lines = $cart->items->filter(fn (CartItem $item) => $item->product?->item_request_id !== null);
+        foreach ($lines as $line) {
+            $request = ItemRequest::whereKey($line->product->item_request_id)->lockForUpdate()->first();
+            if (! $request || $request->status !== ItemRequest::ACCEPTED || $request->isExpired() || (int) $request->user_id !== (int) $order->user_id) {
+                throw new RuntimeException(__('The price for ":name" is no longer valid. Ask us again and we will send a new one.', ['name' => $request->title ?? $line->product->name]));
+            }
+            if ((int) $line->quantity !== (int) $request->quantity) {
+                throw new RuntimeException(__('":name" was priced for :count. Please accept the request again.', ['name' => $request->title, 'count' => $request->quantity]));
+            }
+            $request->forceFill(['status' => ItemRequest::ORDERED, 'order_id' => $order->id, 'ordered_at' => now()])->save();
         }
     }
 

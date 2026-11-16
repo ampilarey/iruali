@@ -174,8 +174,8 @@ class CartService
      */
     public function updateCartItem(CartItem $item, int $quantity): bool
     {
-        // A quoted line's quantity is the quote's: it can only be removed
-        if ($item->quote_request_id !== null) {
+        // A quoted line's quantity is the quote's, and an item request's the request's: they can only be removed
+        if ($item->quote_request_id !== null || $item->product?->item_request_id !== null) {
             return false;
         }
 

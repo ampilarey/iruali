@@ -62,7 +62,8 @@ class MarketplacePayoutsTest extends TestCase
     /**
      * Place a real order through checkout: MVR 200 from shop A and MVR 100 from shop B.
      */
-    protected function placeOrder(): Order
+    /** Paid by card (BML's confirmation): a shop starts on an order only once it is paid. */
+    protected function placeOrder(bool $paid = true): Order
     {
         $a = Product::factory()->create(['seller_id' => $this->shopA->id, 'price' => 100, 'stock_quantity' => 10]);
         $b = Product::factory()->create(['seller_id' => $this->shopB->id, 'price' => 100, 'stock_quantity' => 10]);
@@ -75,8 +76,11 @@ class MarketplacePayoutsTest extends TestCase
             'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml',
         ]);
         $this->assertTrue($result['success'], $result['message'] ?? '');
+        if ($paid) {
+            app(\App\Services\PaymentService::class)->confirm($result['order']->fresh());
+        }
 
-        return $result['order'];
+        return $result['order']->fresh();
     }
 
     protected function part(Order $order, User $shop): SellerOrder
@@ -160,7 +164,7 @@ class MarketplacePayoutsTest extends TestCase
 
     public function test_earnings_become_payable_when_delivered_and_paid_then_are_paid_once(): void
     {
-        $order = $this->placeOrder();
+        $order = $this->placeOrder(paid: false); // admins can move an unpaid order; the earnings wait for the payment
         $admin = $this->admin();
         $payouts = app(PayoutService::class);
 

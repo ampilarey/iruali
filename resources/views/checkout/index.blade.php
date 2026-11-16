@@ -346,6 +346,14 @@
             button.textContent = amount ? button.dataset[key].replace(':amount', amount) : button.dataset.labelFree;
         }
         form.addEventListener('change', function () { setTimeout(label, 0); });
+        // One tap places one order: the button waits once the form is on its way (back to the page enables it again)
+        form.addEventListener('submit', function (event) {
+            if (event.defaultPrevented) return;
+            if (button.dataset.sending) { event.preventDefault(); return; }
+            button.dataset.sending = '1';
+            setTimeout(function () { button.disabled = true; }, 0);
+        });
+        window.addEventListener('pageshow', function () { delete button.dataset.sending; button.disabled = false; });
         ['#order-total', '#card-amount', '#card-row'].forEach(function (sel) {
             var el = form.querySelector(sel);
             if (el && window.MutationObserver) new MutationObserver(label).observe(el, { childList: true, characterData: true, subtree: true, attributes: true });

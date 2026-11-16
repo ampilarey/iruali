@@ -23,8 +23,9 @@ class BookingBalanceReminders extends Command
     {
         $result = $bookingFees->sendReminders();
         $confirmed = $confirms->sendReminders();
+        $unanswered = $confirms->expireUnanswered(); // the shop never confirmed in time: cancelled, the customer told
 
-        $this->info("Sent {$result['reminded']} balance reminder(s); {$result['overdue']} balance(s) newly overdue; {$confirmed} confirmed pre-order payment reminder(s).");
+        $this->info("Sent {$result['reminded']} balance reminder(s); {$result['overdue']} balance(s) newly overdue; {$confirmed} confirmed pre-order payment reminder(s); {$unanswered} unanswered pre-order(s) cancelled.");
 
         return self::SUCCESS;
     }

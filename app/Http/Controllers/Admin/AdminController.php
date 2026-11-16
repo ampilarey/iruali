@@ -114,7 +114,9 @@ class AdminController extends Controller
             'seller_approved' => false,
             'seller_approved_at' => null,
         ])->save();
-        \App\Support\Audit::record('seller.rejected', $seller, ['business_name' => $seller->business_name]);
+        // No seller access, so nothing of theirs stays on sale (as for a suspension)
+        $deactivated = Product::where('seller_id', $seller->id)->where('is_active', true)->update(['is_active' => false]);
+        \App\Support\Audit::record('seller.rejected', $seller, ['business_name' => $seller->business_name, 'products_deactivated' => $deactivated]);
 
         return redirect()->back()->with('success', 'Seller application rejected.');
     }

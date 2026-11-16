@@ -283,6 +283,8 @@ class PaymentService
             return;
         }
         $order->forceFill(['payment_status' => 'paid', 'paid_at' => $paidAt])->syncOriginal();
+        // Pre-order units already on the shelf go to this order now that it is paid (once committed)
+        DB::afterCommit(fn () => app(PreorderService::class)->allocateShelfStock($order));
         FunnelService::orderPaid($order);
         app(GstService::class)->orderPaid($order); // each shop's invoice number, once the payment is committed
 

@@ -181,6 +181,37 @@ class PreorderConfirmService
         return true;
     }
 
+    /** Days a shop has to confirm before the order is cancelled for it (Setting preorder_confirm_days). */
+    public const CONFIRM_DAYS = 7;
+
+    /**
+     * Pre-orders the shop never answered within the days it has (preorder_confirm_days, 7 by default)
+     * are cancelled like a decline, so they stop holding the product's pre-order places and the
+     * customer knows. Run daily (preorders:balance-reminders). Returns how many were cancelled.
+     */
+    public function expireUnanswered(): int
+    {
+        $days = max(1, (int) \App\Models\Setting::get('preorder_confirm_days', self::CONFIRM_DAYS));
+        $cancelled = 0;
+        Order::query()->where('confirm_first', true)->whereNull('availability_confirmed_at')->whereNull('availability_declined_at')
+            ->where('status', 'pending')->where('payment_status', '!=', 'paid')
+            ->where('created_at', '<', now()->subDays($days))
+            ->eachById(function (Order $order) use (&$cancelled) {
+                if (Order::whereKey($order->id)->whereNull('availability_confirmed_at')->whereNull('availability_declined_at')
+                    ->update(['availability_declined_at' => now()]) === 0) {
+                    return;
+                }
+                if (app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled')) {
+                    Audit::record('preorder.unanswered', $order, ['order_number' => $order->order_number]);
+                    $cancelled++;
+                } else {
+                    $order->forceFill(['availability_declined_at' => null])->save();
+                }
+            });
+
+        return $cancelled;
+    }
+
     // ---- Paying ---------------------------------------------------------------------------------
 
     /**

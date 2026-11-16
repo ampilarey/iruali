@@ -434,9 +434,13 @@ class PreorderService
      *
      * @return array<int, array{product_id: int, variant_id: ?int, seller_id: int, date: CarbonInterface, days: ?int, late_days: int}> keyed by cart item id
      *
+     * $accepted: the app (API) says whether the customer agreed to buy pre-orders (false: they were not
+     * shown any, so a line that sold out since is not bought as a pre-order); null on the website, where
+     * the checkout page records what it showed.
+     *
      * @throws RuntimeException a message for the customer
      */
-    public function reserveForCheckout(Cart $cart, ?User $user): array
+    public function reserveForCheckout(Cart $cart, ?User $user, ?bool $accepted = null): array
     {
         $items = $cart->items->filter(fn (CartItem $item) => $item->product_id !== null);
         if ($items->isEmpty()) {
@@ -482,6 +486,10 @@ class PreorderService
         // The checkout page said which lines were pre-orders: one that sold out since, or whose date
         // (or days after the order) moved later, is not bought as a pre-order without the customer seeing it first
         $shown = Session::get(self::SESSION_SHOWN);
+        if ($accepted === false && $lines !== []) {
+            $line = reset($lines);
+            throw new RuntimeException(__('":name" is now a pre-order that ships around :date. Please check your cart and place the order again.', ['name' => $products[$line['product_id']]->name, 'date' => $line['date']->translatedFormat('j M')]));
+        }
         if (is_array($shown)) {
             foreach ($lines as $id => $line) {
                 $seen = $shown[$id] ?? null;
@@ -623,6 +631,20 @@ class PreorderService
     }
 
     // ---- Stock arrived (Seller Centre → Pre-orders) ---------------------------------------------
+
+    /**
+     * An order's pre-orders were just paid (or their booking fee): units already on the shelf go to
+     * them now. Stock that arrived while the order was unpaid went on sale, and nothing would hand it
+     * to this order until the shop recorded another delivery. Run after the payment is committed.
+     */
+    public function allocateShelfStock(Order $order): void
+    {
+        $productIds = OrderItem::where('order_id', $order->id)->where('is_preorder', true)->whereNull('preorder_allocated_at')
+            ->distinct()->pluck('product_id');
+        foreach (Product::whereIn('id', $productIds)->get() as $product) {
+            $this->receiveStock($product, [], 'payment_confirmed');
+        }
+    }
 
     /**
      * Stock has arrived for a product: the units received (per variant id, or under 0 for a

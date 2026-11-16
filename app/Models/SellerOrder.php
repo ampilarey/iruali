@@ -194,6 +194,17 @@ class SellerOrder extends Model
      * The shop's items as the customer paid for them: subtotal less what the shop funded
      * (multi-buy offers, its discount code). Commission and earnings are worked out on this.
      */
+    /**
+     * Parts a shop sees (Order::scopeShownToShops()).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<SellerOrder>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<SellerOrder>
+     */
+    public function scopeShownToShop($query)
+    {
+        return $query->whereHas('order', fn ($q) => $q->shownToShops());
+    }
+
     public function netSubtotal(): float
     {
         return round((float) $this->subtotal - (float) $this->shop_discount, 2);

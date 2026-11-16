@@ -302,6 +302,29 @@ class Order extends Model
         return substr(sha1($this->status.'|'.$this->payment_status.'|'.$this->refund_status.'|'.$parts.'|'.$messages), 0, 16);
     }
 
+    /**
+     * May the shops prepare and send it? Paid (or its booking fee paid), or paid on delivery: cash on
+     * delivery or pay later. A card or bank-transfer order still waiting for its money may not: moved on,
+     * it could no longer be paid or cancelled, and the unpaid-order clean-up would skip it.
+     */
+    public function mayBeFulfilled(): bool
+    {
+        return in_array($this->payment_status, ['paid', 'deposit_paid'], true)
+            || in_array($this->payment_method, [\App\Services\ManualPaymentService::COD, \App\Services\CreditService::METHOD], true);
+    }
+
+    /**
+     * Orders a shop sees: not a card order still waiting for its payment (it is announced to nobody
+     * until paid, OrderService::waitsForCardPayment(), and is cancelled if it never is).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<Order>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<Order>
+     */
+    public function scopeShownToShops($query)
+    {
+        return $query->where(fn ($q) => $q->where('payment_method', '!=', 'bml')->orWhere('confirm_first', true)->orWhereIn('payment_status', ['paid', 'deposit_paid']));
+    }
+
     /** Statuses after which nothing changes for the customer any more (the page stops checking). */
     public function isSettled(): bool
     {

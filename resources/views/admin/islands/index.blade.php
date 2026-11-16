@@ -85,7 +85,7 @@
                                     @csrf
                                     <input type="hidden" name="active" value="{{ $island->is_active ? 0 : 1 }}">
                                     <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $island->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">{{ $island->is_active ? __('On') : __('Off') }}</span>
-                                    <button class="text-xs font-medium text-primary-600 hover:underline">{{ $island->is_active ? __('Switch off') : __('Switch on') }}</button>
+                                    <button class="inline-flex items-center min-h-11 px-2 text-xs font-medium text-primary-600 hover:underline">{{ $island->is_active ? __('Switch off') : __('Switch on') }}</button>
                                     <a href="{{ route('admin.islands.edit', $island) }}" class="text-xs font-medium text-gray-600 hover:underline">Edit</a>
                                 </form>
                             </td>

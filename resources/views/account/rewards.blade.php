@@ -55,7 +55,7 @@
                         <div class="sm:col-span-2">
                             <dt class="text-gray-500">{{ __('Your link') }}</dt>
                             <dd class="mt-1 flex flex-wrap gap-2">
-                                <input id="referral-link" type="text" readonly value="{{ $shareUrl }}" dir="ltr" class="flex-1 min-w-0 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+                                <input id="referral-link" type="text" readonly aria-label="{{ __('Your referral link') }}" value="{{ $shareUrl }}" dir="ltr" class="flex-1 min-w-0 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
                                 <button type="button" data-copy="#referral-link" data-copied="{{ __('Copied!') }}" class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Copy link') }}</button>
                                 <a href="https://wa.me/?text={{ urlencode($shareText.' '.$shareUrl) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-[#128C7E] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0f7a6d]">{{ __('Share on WhatsApp') }}</a>
                             </dd>

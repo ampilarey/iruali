@@ -53,4 +53,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Count every reported exception in error_events and alert on payment errors (app/Support/ErrorTracker.php)
         $exceptions->report(fn (\Throwable $e) => \App\Support\ErrorTracker::record($e));
+        // Error pages (404, 403, 500...) in the visitor's language, also where no route matched; null = render as usual
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            \App\Http\Middleware\SetLocale::forErrorPage($request);
+
+            return null;
+        });
     })->create();

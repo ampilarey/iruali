@@ -36,7 +36,7 @@
             </ul>
             <form method="POST" action="{{ route('seller.products.import.preview') }}" enctype="multipart/form-data" class="mt-4 flex flex-wrap items-center gap-3">
                 @csrf
-                <input type="file" name="file" accept=".csv,text/csv" required class="block text-sm text-gray-700">
+                <input type="file" name="file" accept=".csv,text/csv" required aria-label="{{ __('CSV file') }}" class="block text-sm text-gray-700">
                 <button class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">{{ __('Preview import') }}</button>
             </form>
         </div>

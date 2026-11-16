@@ -536,10 +536,11 @@ Done: both commands run in the background; header departments cached 10 minutes 
 
 Check every change at 390×844 in English and Dhivehi.
 
-- [ ] **5.1 M:** the "Message us" bubble covers the price in the sticky add-to-cart bar on product
+- [x] **5.1 M:** the "Message us" bubble covers the price in the sticky add-to-cart bar on product
   pages (`layouts/app.blade.php` bubble; `products/show.blade.php` bar). Hide the bubble on
   `products.show` below `lg`, or raise it above the bar.
-- [ ] **5.2 M:** tap targets under 44px. Add `min-h-11` and padding on text-only buttons:
+  Done: hidden on product pages below `lg`.
+- [x] **5.2 M:** tap targets under 44px. Add `min-h-11` and padding on text-only buttons:
   - "Buy again" / "Cancel Order" (`orders/index`);
   - "Remove" / "Clear cart" and the quantity select (`cart/index`);
   - product card "Compare", heart and "Add to cart";
@@ -547,29 +548,39 @@ Check every change at 390×844 in English and Dhivehi.
   - "Continue" on `/login` and `/checkout`;
   - the `/brands` letter links;
   - admin: the users role select and Save, islands "Switch off", home-page arrows.
-- [ ] **5.3 M:** Dhivehi `/dv/about`, `/dv/terms` and the policy pages are mostly English. Until
+  Done: every control listed is 44px tall (or wide), plus the home rows' "See all" and the 404/403 buttons. A Playwright pass at 390×844 finds no button, select or link button under 40px on the home, product (English and Dhivehi), brands, sign-in, policy and 404 pages.
+- [x] **5.3 M:** Dhivehi `/dv/about`, `/dv/terms` and the policy pages are mostly English. Until
   translated (owner decision E), wrap untranslated blocks in `dir="ltr" lang="en"` with a one-line
   Dhivehi note.
-- [ ] **5.4 M:** error pages ignore the language. Apply the locale in the 404/403/500 views (detect
+  Done: on `/dv` the policy text sits in `dir="ltr" lang="en"` under a Dhivehi note (the wording itself waits for owner decision E).
+- [x] **5.4 M:** error pages ignore the language. Apply the locale in the 404/403/500 views (detect
   the `/dv` prefix or the session). Redirect `/dv/{route that is not localised}` to the unprefixed URL.
-- [ ] **5.5 L:** add `errors/403.blade.php` modelled on the 404 page.
-- [ ] **5.6 L:** the first-visit island modal covers product pages reached from a link. Auto-open
+  Done: error pages take the language from `/dv` or the session, also where no route matched. GET `/dv/{page without a Dhivehi address}` redirects to the plain address (and keeps the visitor in Dhivehi); other methods stay 404.
+- [x] **5.5 L:** add `errors/403.blade.php` modelled on the 404 page.
+  Done.
+- [x] **5.6 L:** the first-visit island modal covers product pages reached from a link. Auto-open
   only on home and listing pages (`shopping-island.js`). The banner still offers the choice.
-- [ ] **5.7 L:** `SellerPerformanceService` uses MySQL `DATE_FORMAT`, so the page returns 500 on dev
+  Done: auto-opens on home, shop, product list, departments, search, brand and deals pages only.
+- [x] **5.7 L:** `SellerPerformanceService` uses MySQL `DATE_FORMAT`, so the page returns 500 on dev
   SQLite. Group by month in PHP.
-- [ ] **5.8 L:** text under 12px: `text-[11px]` → `text-xs` on product cards and badges; chart
+  Done.
+- [x] **5.8 L:** text under 12px: `text-[11px]` → `text-xs` on product cards and badges; chart
   axis labels.
-- [ ] **5.9 L:** Seller Centre with a Dhivehi session emits `lang="dv" dir="ltr"`. Output `lang="en"`
+  Done on product cards, badges and the chart labels. The header count bubbles and the bottom tab labels stay 11px (they are short and sized to their circle and grid).
+- [x] **5.9 L:** Seller Centre with a Dhivehi session emits `lang="dv" dir="ltr"`. Output `lang="en"`
   when RTL is forced off.
-- [ ] **5.10 L:** unlabelled controls. Add `aria-label`s:
+  Done.
+- [x] **5.10 L:** unlabelled controls. Add `aria-label`s:
   - seller products filters and bulk action;
   - stock inputs;
   - the orders status filter;
   - the import file field;
   - admin gift-cards search;
   - the rewards referral link.
-- [ ] **5.11 L:** the zoom dialog `<img src="">` on product pages (use `data-src` until opened).
+  Done.
+- [x] **5.11 L:** the zoom dialog `<img src="">` on product pages (use `data-src` until opened).
   `/login/email` and `/register` need an `<h1>`. The web manifest is English only.
+  Done: `site.dv.webmanifest` (Dhivehi names, `dir: rtl`, start `/dv/`) is linked on Dhivehi pages.
 
 ---
 

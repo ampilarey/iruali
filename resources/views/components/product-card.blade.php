@@ -16,7 +16,7 @@
     <a href="{{ $url }}" class="relative shrink-0 w-28 h-28 sm:w-44 sm:h-44 rounded-lg overflow-hidden bg-primary-50">
         <img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy" class="w-full h-full object-cover">
         @if($wasPrice)
-            <span dir="ltr" class="absolute top-2 start-2 bg-coral text-white text-[11px] font-bold px-1.5 py-0.5 rounded">&minus;{{ $product->discount_percentage }}%</span>
+            <span dir="ltr" class="absolute top-2 start-2 bg-coral text-white text-xs font-bold px-1.5 py-0.5 rounded">&minus;{{ $product->discount_percentage }}%</span>
         @endif
         @include('sellers._holiday_label', ['seller' => $seller, 'class' => 'absolute bottom-2 start-2'])
     </a>
@@ -43,7 +43,7 @@
                 <x-add-to-cart :product="$product" class="flex-1" />
                 <x-wishlist-button :product="$product" />
             </div>
-            <x-compare-toggle :product="$product" class="mt-2" />
+            <x-compare-toggle :product="$product" />
         </div>
     </div>
 </article>
@@ -53,10 +53,10 @@
         <img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300">
         <span class="absolute top-2 start-2 flex flex-col items-start gap-1">
             @if($wasPrice)
-                <span dir="ltr" class="bg-coral text-white text-[11px] font-bold px-1.5 py-0.5 rounded">&minus;{{ $product->discount_percentage }}%</span>
+                <span dir="ltr" class="bg-coral text-white text-xs font-bold px-1.5 py-0.5 rounded">&minus;{{ $product->discount_percentage }}%</span>
             @endif
             @if($product->is_featured && ! $compact)
-                <span class="bg-sun text-sun-on text-[11px] font-bold px-1.5 py-0.5 rounded">{{ __('Top pick') }}</span>
+                <span class="bg-sun text-sun-on text-xs font-bold px-1.5 py-0.5 rounded">{{ __('Top pick') }}</span>
             @endif
             @include('sellers._holiday_label', ['seller' => $seller])
             @include('products._island_label', ['product' => $product])
@@ -66,7 +66,7 @@
         <x-wishlist-button :product="$product" floating />
     @endunless
     <div class="p-3 flex flex-col flex-1">
-        @if($brandLabel)<p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 truncate">{{ $brandLabel }}</p>@endif
+        @if($brandLabel)<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 truncate">{{ $brandLabel }}</p>@endif
         <h3 class="text-sm font-semibold text-dark leading-snug line-clamp-2 min-h-[2.5rem]"><a href="{{ $url }}" class="hover:text-primary hover:underline">{{ $product->name }}</a></h3>
         @if($ratingCount > 0)
             <x-rating :value="$rating" :count="$ratingCount" class="mt-1" />
@@ -80,7 +80,7 @@
             <x-stock :quantity="$stock" :product="$product" class="mt-0.5" />
             @unless($compact)
                 <x-add-to-cart :product="$product" class="w-full mt-2.5" small />
-                <x-compare-toggle :product="$product" class="mt-2" />
+                <x-compare-toggle :product="$product" />
             @endunless
         </div>
     </div>

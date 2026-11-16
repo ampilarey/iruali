@@ -9,7 +9,7 @@
             @foreach($departments as $dept)
                 <a href="{{ route('categories.show', $dept) }}" class="group bg-white border border-gray-200 rounded-xl p-2.5 lg:p-4 flex flex-col items-center text-center gap-2 hover:border-primary hover:shadow-sm">
                     <span class="w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-primary-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition"><x-icon :name="$dept->slug" class="w-5 h-5 lg:w-7 lg:h-7" /></span>
-                    <span class="text-[11px] sm:text-xs lg:text-sm font-semibold leading-tight text-dark">{{ $dept->localized_name }}</span>
+                    <span class="text-xs lg:text-sm font-semibold leading-tight text-dark">{{ $dept->localized_name }}</span>
                 </a>
             @endforeach
         </div>

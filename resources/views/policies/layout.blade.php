@@ -60,6 +60,12 @@
             <div class="policy mt-6 text-gray-700 leading-relaxed space-y-4 [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-dark [&_h2]:pt-4 [&_ul]:list-disc [&_ul]:ps-6 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:font-medium [&_a:hover]:underline [&_strong]:text-dark">
                 @if($override !== '')
                     <div class="whitespace-pre-line">{{ $override }}</div>
+                @elseif(app()->getLocale() === 'dv')
+                    {{-- The policy wording is English until a Dhivehi version is written (owner decision E) --}}
+                    <p class="rounded-lg bg-sky-50 border border-sky-100 px-3 py-2 text-sm text-gray-700">{{ __('This page is in English for now. A Dhivehi version is on its way.') }}</p>
+                    <div dir="ltr" lang="en" class="text-start space-y-4">
+                        @yield('policy')
+                    </div>
                 @else
                     @yield('policy')
                 @endif

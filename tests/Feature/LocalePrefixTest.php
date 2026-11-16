@@ -31,7 +31,9 @@ class LocalePrefixTest extends TestCase
         $this->get('/dv/products/copper-kettle')->assertOk()->assertSee('dir="rtl"', false)->assertSee('ކޮޕަރ ކެތަލް');
         $this->get('/products/copper-kettle')->assertOk()->assertSee('dir="ltr"', false)->assertSee('Copper kettle');
         $this->get('/dv/deals')->assertOk()->assertSee('dir="rtl"', false);
-        $this->get('/dv/does-not-exist')->assertNotFound();
+        // Not found, in Dhivehi
+        $this->get('/dv/does-not-exist')->assertNotFound()->assertSee('dir="rtl"', false)->assertSee('lang="dv"', false)->assertSee(__('Page not found', [], 'dv'));
+        $this->withSession(['locale' => 'dv'])->get('/products/no-such-product')->assertNotFound()->assertSee('dir="rtl"', false);
         $this->get('/dvd')->assertNotFound();
     }
 
@@ -42,14 +44,14 @@ class LocalePrefixTest extends TestCase
         $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
 
         $this->actingAs($user)->get('/account')->assertOk();
-        $this->actingAs($user)->get('/dv/account')->assertNotFound();
-        $this->actingAs($user)->get('/dv/checkout')->assertNotFound();
-        $this->actingAs($user)->get('/dv/orders')->assertNotFound();
-        $this->actingAs($admin)->get('/dv/admin/dashboard')->assertNotFound();
-        $this->get('/dv/login')->assertNotFound();
+        // A page with no Dhivehi address opens at its plain one
+        $this->actingAs($user)->get('/dv/account')->assertRedirect(url('/account'));
+        $this->actingAs($user)->get('/dv/checkout')->assertRedirect(url('/checkout'));
+        $this->actingAs($user)->get('/dv/orders?page=2')->assertRedirect(url('/orders?page=2'));
+        $this->actingAs($admin)->get('/dv/admin/dashboard')->assertRedirect(url('/admin/dashboard'));
+        $this->get('/dv/login')->assertRedirect(url('/login'))->assertSessionHas('locale', 'dv');
+        $this->post('/dv/login')->assertNotFound();
         $this->get('/dv/api/v1/products')->assertNotFound();
-        $this->get('/dv/sitemap.xml')->assertNotFound();
-        $this->get('/dv/robots.txt')->assertNotFound();
 
         // A Dhivehi session still renders private pages in Dhivehi at their plain URL
         $this->actingAs($user)->withSession(['locale' => 'dv'])->get('/account')->assertOk()->assertSee('dir="rtl"', false);

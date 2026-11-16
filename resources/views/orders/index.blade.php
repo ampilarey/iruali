@@ -66,12 +66,12 @@
                             <a href="{{ route('orders.receipt', $order) }}" target="_blank" rel="noopener" class="text-gray-600 hover:text-primary-700 font-medium">{{ __('Receipt') }}</a>
                             <form method="POST" action="{{ route('orders.buyAgain', $order) }}">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-medium"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>
+                                <button type="submit" class="inline-flex items-center gap-1.5 min-h-11 px-1 text-primary-600 hover:text-primary-700 font-medium"><x-icon name="repeat" class="w-4 h-4" />{{ __('Buy again') }}</button>
                             </form>
                             @if($order->status === 'pending')
                                 <form method="POST" action="{{ route('orders.cancel', $order) }}" onsubmit="return confirm('{{ __('Cancel this order?') }}')">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-700 font-medium">{{ __('Cancel Order') }}</button>
+                                    <button type="submit" class="inline-flex items-center min-h-11 px-1 text-red-600 hover:text-red-700 font-medium">{{ __('Cancel Order') }}</button>
                                 </form>
                             @endif
                         </div>

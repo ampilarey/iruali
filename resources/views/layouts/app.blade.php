@@ -16,7 +16,8 @@
     // No language link while Dhivehi is switched off (Admin → Settings)
     $showLanguage = in_array($otherLocale, \App\Services\LocalizationService::getAvailableLocales(), true);
 @endphp
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
+{{-- Admin and Seller Centre stay left-to-right in English even in a Dhivehi session, so say "en" there --}}
+<html lang="{{ app()->getLocale() === 'dv' && ! $rtl ? 'en' : str_replace('_', '-', app()->getLocale()) }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -26,7 +27,7 @@
     <link rel="icon" href="/images/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="manifest" href="{{ $rtl ? '/site.dv.webmanifest' : '/site.webmanifest' }}">
     <meta name="theme-color" content="#0B7A70">
 
     <x-seo-meta :seo="$seo ?? null" />
@@ -498,9 +499,10 @@
     </nav>
     @endif
 
-    <!-- "Message us": a conversation with iruali from any storefront page (not during checkout or on the message pages) -->
+    <!-- "Message us": a conversation with iruali from any storefront page (not during checkout or on the message pages;
+         on a phone not on product pages, where it would cover the price in the add-to-cart bar) -->
     @unless(request()->routeIs('checkout*', 'cart', 'messages.*', 'item-requests.*', 'pay.*', 'orders.show', 'seller.*'))
-        <a href="{{ route('messages.support') }}" class="fixed z-40 start-4 bottom-20 lg:bottom-6 flex items-center gap-2 rounded-full bg-primary px-3 py-3 lg:px-4 text-white shadow-2xl hover:bg-primary-hover" aria-label="{{ __('Message us') }}" data-floating-message>
+        <a href="{{ route('messages.support') }}" class="fixed z-40 start-4 bottom-20 lg:bottom-6 {{ request()->routeIs('products.show') ? 'hidden lg:flex' : 'flex' }} items-center gap-2 rounded-full bg-primary px-3 py-3 lg:px-4 text-white shadow-2xl hover:bg-primary-hover" aria-label="{{ __('Message us') }}" data-floating-message>
             <x-icon name="chat" class="w-5 h-5" /><span class="hidden lg:inline text-sm font-semibold">{{ __('Message us') }}</span>
         </a>
     @endunless

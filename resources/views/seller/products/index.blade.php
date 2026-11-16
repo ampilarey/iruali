@@ -17,9 +17,9 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <form method="GET" class="mb-4 flex flex-wrap gap-2">
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Search name or SKU"
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Search name or SKU" aria-label="{{ __('Search name or SKU') }}"
                    class="w-full sm:w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500">
-            <select name="status" class="rounded-lg border border-gray-300 px-3 py-2 text-sm">
+            <select name="status" class="rounded-lg border border-gray-300 px-3 py-2 text-sm" aria-label="{{ __('Status') }}">
                 <option value="">All statuses</option>
                 <option value="active" @selected(request('status') === 'active')>Live</option>
                 <option value="pending" @selected(request('status') === 'pending')>Awaiting approval</option>
@@ -31,13 +31,13 @@
         <form id="bulk-form" method="POST" action="{{ route('seller.products.bulk') }}" class="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" data-bulk-bar>
             @csrf
             <span class="text-gray-600"><span data-bulk-count>0</span> {{ __('selected') }}:</span>
-            <select name="action" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm" data-bulk-action>
+            <select name="action" aria-label="{{ __('Bulk action') }}" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm" data-bulk-action>
                 <option value="price_percent">{{ __('Change price by %') }}</option>
                 <option value="stock_set">{{ __('Set stock to') }}</option>
                 <option value="activate">{{ __('Activate') }}</option>
                 <option value="deactivate">{{ __('Deactivate') }}</option>
             </select>
-            <input type="number" name="value" step="0.01" placeholder="{{ __('e.g. -10 or 5') }}" class="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-sm" dir="ltr" data-bulk-value>
+            <input type="number" name="value" step="0.01" aria-label="{{ __('Amount') }}" placeholder="{{ __('e.g. -10 or 5') }}" class="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-sm" dir="ltr" data-bulk-value>
             <button class="rounded-lg bg-gray-800 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-900">{{ __('Preview changes') }}</button>
             @error('ids')<span class="text-xs text-red-600">{{ $message }}</span>@enderror
             @error('value')<span class="text-xs text-red-600">{{ $message }}</span>@enderror

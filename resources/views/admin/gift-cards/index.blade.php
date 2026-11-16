@@ -20,7 +20,7 @@
         @endforeach
         <form method="GET" class="ms-auto flex gap-2">
             <input type="hidden" name="status" value="{{ $status }}">
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Code or email" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Code or email" aria-label="Search gift cards by code or email" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
             <button class="rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-medium text-white">Search</button>
         </form>
     </div>

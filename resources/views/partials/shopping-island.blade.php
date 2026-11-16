@@ -7,7 +7,10 @@
     $shopIsland = $shopping->island();
     $shopView = $shopping->view();
     $isBot = (bool) preg_match('/bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|lighthouse/i', (string) request()->userAgent());
-    $autoPrompt = ! $isBot && $shopping->shouldPrompt();
+    // Opens by itself only where the shopper is browsing; a product, shop or other page reached from a link
+    // keeps its content in view (the bar above still offers the choice)
+    $browsing = request()->routeIs('home', 'shop', 'products.index', 'categories.index', 'categories.show', 'search', 'brands.show', 'deals');
+    $autoPrompt = ! $isBot && $browsing && $shopping->shouldPrompt();
 @endphp
 <div class="border-t border-gray-100 bg-primary-50/60 text-sm" data-shopping-island>
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">

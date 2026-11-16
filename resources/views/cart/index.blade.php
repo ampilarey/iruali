@@ -63,7 +63,7 @@
                                             @csrf
                                             @method('PUT')
                                             <label for="qty-{{ $item->id }}" class="text-gray-600">{{ __('Qty') }}</label>
-                                            <select id="qty-{{ $item->id }}" name="quantity" onchange="this.form.submit()" class="rounded-lg border border-gray-300 bg-white ps-3 pe-8 py-1.5 text-sm focus:border-primary focus:ring-primary">
+                                            <select id="qty-{{ $item->id }}" name="quantity" onchange="this.form.submit()" class="rounded-lg border border-gray-300 bg-white ps-3 pe-8 py-1.5 min-h-11 text-sm focus:border-primary focus:ring-primary">
                                                 @for($q = 1; $q <= max($item->quantity, min(20, $item->availableStock())); $q++)
                                                     <option value="{{ $q }}" @selected($q === (int) $item->quantity)>{{ $q }}</option>
                                                 @endfor
@@ -79,7 +79,7 @@
                                         <form action="{{ route('cart.remove', $item) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-gray-600 hover:text-danger hover:underline">{{ __('Remove') }}</button>
+                                            <button type="submit" class="inline-flex items-center min-h-11 px-1 text-gray-600 hover:text-danger hover:underline">{{ __('Remove') }}</button>
                                         </form>
                                     </div>
                                 </div>
@@ -96,7 +96,7 @@
                         <a href="{{ route('shop') }}" class="font-semibold text-primary hover:underline">{{ __('Continue shopping') }}</a>
                         <form action="{{ route('cart.clear') }}" method="POST">
                             @csrf
-                            <button type="submit" class="text-gray-600 hover:text-danger hover:underline">{{ __('Clear cart') }}</button>
+                            <button type="submit" class="inline-flex items-center min-h-11 px-1 text-gray-600 hover:text-danger hover:underline">{{ __('Clear cart') }}</button>
                         </form>
                     </div>
                 </section>
@@ -214,7 +214,7 @@
                                     @if($savedStock > 0 && $s->product->is_active)
                                         <form action="{{ route('saved.moveToCart', $s) }}" method="POST">@csrf<button type="submit" class="font-semibold text-primary hover:underline">{{ __('Move to cart') }}</button></form>
                                     @endif
-                                    <form action="{{ route('saved.remove', $s) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="text-gray-600 hover:text-danger hover:underline">{{ __('Remove') }}</button></form>
+                                    <form action="{{ route('saved.remove', $s) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="inline-flex items-center min-h-11 px-1 text-gray-600 hover:text-danger hover:underline">{{ __('Remove') }}</button></form>
                                 </div>
                             </div>
                         </div>

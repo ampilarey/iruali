@@ -45,7 +45,7 @@
         </div>
         <div class="mt-2 flex gap-1">
             @foreach($weekly as $week)
-                <span class="flex-1 text-center text-[10px] text-gray-500">{{ $loop->index % 2 === 0 ? $week['label'] : '' }}</span>
+                <span class="flex-1 text-center text-xs text-gray-500">{{ $loop->index % 2 === 0 ? $week['label'] : '' }}</span>
             @endforeach
         </div>
     </div>
@@ -75,7 +75,7 @@
         </svg>
         <div class="mt-1 flex">
             @foreach($points as $p)
-                <span class="flex-1 text-center text-[10px] text-gray-500">{{ $p['label'] }}</span>
+                <span class="flex-1 text-center text-xs text-gray-500">{{ $p['label'] }}</span>
             @endforeach
         </div>
     </div>

@@ -86,11 +86,11 @@
                                 @error("variants.$i.price")<span class="block text-xs text-red-600">{{ $message }}</span>@enderror
                             </td>
                             <td class="px-2 py-2 align-top">
-                                <input type="number" name="variants[{{ $i }}][stock_quantity]" value="{{ $row['stock_quantity'] ?? 0 }}" min="0" required class="{{ $small }} w-20" dir="ltr">
+                                <input type="number" name="variants[{{ $i }}][stock_quantity]" aria-label="{{ __('Stock') }}" value="{{ $row['stock_quantity'] ?? 0 }}" min="0" required class="{{ $small }} w-20" dir="ltr">
                                 @error("variants.$i.stock_quantity")<span class="block text-xs text-red-600">{{ $message }}</span>@enderror
                             </td>
                             <td class="px-2 py-2 align-top">
-                                <input type="number" name="variants[{{ $i }}][low_stock_threshold]" value="{{ $row['low_stock_threshold'] ?? '' }}" min="0" placeholder="{{ old('reorder_point', $product->reorder_point ?? 5) }}" class="{{ $small }} w-20" dir="ltr">
+                                <input type="number" name="variants[{{ $i }}][low_stock_threshold]" aria-label="{{ __('Low-stock alert at') }}" value="{{ $row['low_stock_threshold'] ?? '' }}" min="0" placeholder="{{ old('reorder_point', $product->reorder_point ?? 5) }}" class="{{ $small }} w-20" dir="ltr">
                             </td>
                             <td class="px-2 py-2 align-top">
                                 @if(! empty($row['image_url']))<img src="{{ $row['image_url'] }}" alt="" class="mb-1 h-10 w-10 rounded object-cover">@endif
@@ -124,8 +124,8 @@
             </td>
             <td class="px-2 py-2 align-top"><input type="text" name="variants[__I__][sku]" value="" required class="{{ $small }} min-w-[8rem]" dir="ltr"></td>
             <td class="px-2 py-2 align-top"><input type="number" name="variants[__I__][price]" value="" step="0.01" min="0.01" placeholder="{{ __('Product price') }}" class="{{ $small }} min-w-[7rem]" dir="ltr"></td>
-            <td class="px-2 py-2 align-top"><input type="number" name="variants[__I__][stock_quantity]" value="0" min="0" required class="{{ $small }} w-20" dir="ltr"></td>
-            <td class="px-2 py-2 align-top"><input type="number" name="variants[__I__][low_stock_threshold]" value="" min="0" class="{{ $small }} w-20" dir="ltr"></td>
+            <td class="px-2 py-2 align-top"><input type="number" name="variants[__I__][stock_quantity]" aria-label="{{ __('Stock') }}" value="0" min="0" required class="{{ $small }} w-20" dir="ltr"></td>
+            <td class="px-2 py-2 align-top"><input type="number" name="variants[__I__][low_stock_threshold]" aria-label="{{ __('Low-stock alert at') }}" value="" min="0" class="{{ $small }} w-20" dir="ltr"></td>
             <td class="px-2 py-2 align-top"><input type="file" name="variants[__I__][image]" accept="image/jpeg,image/png,image/gif" class="block w-36 text-xs text-gray-700"></td>
             <td class="px-2 py-2 align-top">
                 <input type="hidden" name="variants[__I__][is_active]" value="0">

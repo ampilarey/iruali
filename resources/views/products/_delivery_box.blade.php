@@ -43,7 +43,7 @@
             <form method="POST" action="{{ route('delivery.island') }}" class="pt-1 flex items-center gap-2">
                 @csrf
                 <label for="delivery-island" class="text-xs text-gray-500 shrink-0">{{ __('Deliver to') }}</label>
-                <select id="delivery-island" name="island_id" onchange="this.form.submit()" class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white ps-2 pe-8 py-1 text-sm focus:border-primary focus:ring-primary">
+                <select id="delivery-island" name="island_id" onchange="this.form.submit()" class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white ps-2 pe-8 py-1 min-h-11 text-sm focus:border-primary focus:ring-primary">
                     @if(! $destination['island_id'])
                         <option value="" disabled selected>{{ $destination['label'] }}</option>
                     @endif

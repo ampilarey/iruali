@@ -160,7 +160,7 @@
                                     </fieldset>
                                 @endforeach
                                 <label for="variant-select" class="block text-sm font-medium text-gray-700" data-variant-select-label>{{ __('Choose an option') }}</label>
-                                <select id="variant-select" name="product_variant_id" required data-variant-select class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
+                                <select id="variant-select" name="product_variant_id" required data-variant-select class="block w-full min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
                                     <option value="">{{ __('Choose an option') }}</option>
                                     @foreach($variants as $variant)
                                         <option value="{{ $variant->id }}" @disabled($variant->stock_quantity <= 0 && ! $preorder)>{{ $variant->displayNameWithKeys() }} – {{ \App\Support\Money::format($variant->effectivePrice()) }}@if($variant->stock_quantity <= 0) ({{ $preorder ? __('Pre-order: ships around :date', ['date' => $preorder['date']->translatedFormat('j M')]) : __('Out of stock') }})@endif</option>
@@ -188,7 +188,7 @@
                         <p class="text-sm font-semibold flex items-center gap-2"><x-icon name="bell" class="w-4 h-4 text-primary" />{{ $comingSoon ? __('Email me when it goes on sale') : __('Email me when it\'s back in stock') }}</p>
                         @if($variants->isNotEmpty() && ! $comingSoon)
                             <label for="alert-variant" class="sr-only">{{ __('Variant') }}</label>
-                            <select id="alert-variant" name="product_variant_id" data-alert-variant class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
+                            <select id="alert-variant" name="product_variant_id" data-alert-variant class="mt-2 block w-full min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-primary">
                                 <option value="">{{ __('Any option') }}</option>
                                 @foreach($variants as $variant)
                                     <option value="{{ $variant->id }}">{{ $variant->displayNameWithKeys() }}@if($variant->stock_quantity <= 0) ({{ __('Out of stock') }})@endif</option>
@@ -222,13 +222,13 @@
                     <x-compare-toggle :product="$product" />
                     <div class="flex items-center gap-1" aria-label="{{ __('Share') }}">
                         <span class="text-gray-500 text-xs me-1">{{ __('Share') }}</span>
-                        <a href="{{ route('share.go', [$product, 'whatsapp']) }}" target="_blank" rel="noopener nofollow" class="w-8 h-8 rounded-full bg-[#128C7E] text-white flex items-center justify-center" aria-label="WhatsApp">
+                        <a href="{{ route('share.go', [$product, 'whatsapp']) }}" target="_blank" rel="noopener nofollow" class="w-11 h-11 rounded-full bg-[#128C7E] text-white flex items-center justify-center" aria-label="WhatsApp">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.4c.1.3.6 1 1.3 1.6.9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"/></svg>
                         </a>
-                        <a href="{{ route('share.go', [$product, 'viber']) }}" rel="nofollow" class="w-8 h-8 rounded-full bg-[#7360F2] text-white flex items-center justify-center text-[10px] font-bold" aria-label="Viber">V</a>
-                        <a href="{{ route('share.go', [$product, 'facebook']) }}" target="_blank" rel="noopener nofollow" class="w-8 h-8 rounded-full bg-[#1877F2] text-white flex items-center justify-center text-xs font-bold" aria-label="Facebook">f</a>
-                        <a href="{{ route('share.go', [$product, 'telegram']) }}" target="_blank" rel="noopener nofollow" class="w-8 h-8 rounded-full bg-[#229ED9] text-white flex items-center justify-center text-[10px] font-bold" aria-label="Telegram">T</a>
-                        <button type="button" data-copy-link="{{ $shareUrl }}" data-copy-count="{{ route('share.copied', $product) }}" data-copied="{{ __('Link copied') }}" class="w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:text-primary flex items-center justify-center" aria-label="{{ __('Copy link') }}"><x-icon name="share" class="w-4 h-4" /></button>
+                        <a href="{{ route('share.go', [$product, 'viber']) }}" rel="nofollow" class="w-11 h-11 rounded-full bg-[#7360F2] text-white flex items-center justify-center text-xs font-bold" aria-label="Viber">V</a>
+                        <a href="{{ route('share.go', [$product, 'facebook']) }}" target="_blank" rel="noopener nofollow" class="w-11 h-11 rounded-full bg-[#1877F2] text-white flex items-center justify-center text-xs font-bold" aria-label="Facebook">f</a>
+                        <a href="{{ route('share.go', [$product, 'telegram']) }}" target="_blank" rel="noopener nofollow" class="w-11 h-11 rounded-full bg-[#229ED9] text-white flex items-center justify-center text-xs font-bold" aria-label="Telegram">T</a>
+                        <button type="button" data-copy-link="{{ $shareUrl }}" data-copy-count="{{ route('share.copied', $product) }}" data-copied="{{ __('Link copied') }}" class="w-11 h-11 rounded-full border border-gray-300 text-gray-600 hover:text-primary flex items-center justify-center" aria-label="{{ __('Copy link') }}"><x-icon name="share" class="w-4 h-4" /></button>
                     </div>
                 </div>
                 @if($whatsapp)
@@ -518,7 +518,7 @@
 <!-- Zoomed image -->
 <div data-zoom class="hidden fixed inset-0 z-[80] bg-reef/95 flex items-center justify-center p-4 overflow-hidden" role="dialog" aria-modal="true" aria-label="{{ __('Zoom image') }}">
     <button type="button" data-dialog-close class="absolute top-4 end-4 text-white" aria-label="{{ __('Close') }}"><x-icon name="x" class="w-8 h-8" /></button>
-    <img src="" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain transition-transform duration-200 cursor-zoom-in">
+    <img alt="{{ $product->name }}" class="max-w-full max-h-full object-contain transition-transform duration-200 cursor-zoom-in">
 </div>
 
 <!-- Sticky buy bar (mobile) -->

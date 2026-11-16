@@ -82,13 +82,13 @@
                                         <form method="POST" action="{{ route('admin.users.role', $user) }}" class="flex items-center gap-2">
                                             @csrf
                                             @php $staffRole = \App\Support\StaffAccess::staffRoles($user)[0] ?? 'none'; @endphp
-                                            <select name="role" class="rounded-lg border-gray-300 text-sm" aria-label="Staff role for {{ $user->name }}">
+                                            <select name="role" class="min-h-11 rounded-lg border-gray-300 text-sm" aria-label="Staff role for {{ $user->name }}">
                                                 <option value="none" @selected($staffRole === 'none')>Not staff</option>
                                                 <option value="support" @selected($staffRole === 'support')>Support</option>
                                                 <option value="finance" @selected($staffRole === 'finance')>Finance</option>
                                                 <option value="catalogue" @selected($staffRole === 'catalogue')>Catalogue</option>
                                             </select>
-                                            <button type="submit" class="text-indigo-600 hover:text-indigo-900">Save</button>
+                                            <button type="submit" class="inline-flex items-center min-h-11 px-2 text-indigo-600 hover:text-indigo-900">Save</button>
                                         </form>
                                     @elseif($user->hasRole('admin'))
                                         <span class="text-gray-400">Admin</span>

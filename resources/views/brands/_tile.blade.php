@@ -3,5 +3,5 @@
     @include('brands._logo', ['brand' => $brand, 'class' => 'w-12 h-12 lg:w-14 lg:h-14 text-lg'])
     <span class="w-full text-xs lg:text-sm font-semibold text-dark truncate group-hover:text-primary">{{ $brand->localizedName() }}</span>
     {{-- In Dhivehi, a brand with a Dhivehi name shows its own (English) name small underneath --}}
-    @if($brand->localizedName() !== $brand->name)<span class="-mt-1.5 w-full text-[11px] text-gray-500 truncate" lang="en"><bdi>{{ $brand->name }}</bdi></span>@endif
+    @if($brand->localizedName() !== $brand->name)<span class="-mt-1.5 w-full text-xs text-gray-500 truncate" lang="en"><bdi>{{ $brand->name }}</bdi></span>@endif
 </a>

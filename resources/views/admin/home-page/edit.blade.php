@@ -30,7 +30,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="me-auto font-medium">{{ $label }}@if($custom && ! empty($block['title_en'])): {{ $block['title_en'] }}@endif @unless($visible)<span class="text-xs text-gray-500">(hidden)</span>@endunless</span>
                     @foreach(['up' => '↑', 'down' => '↓', 'toggle' => $visible ? 'Hide' : 'Show'] + ($custom ? ['remove' => 'Remove'] : []) as $action => $text)
-                        <form method="POST" action="{{ route('admin.home-page.move', $block['id']) }}">@csrf<input type="hidden" name="action" value="{{ $action }}"><button class="rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50" aria-label="{{ ucfirst($action) }} {{ $label }}">{{ $text }}</button></form>
+                        <form method="POST" action="{{ route('admin.home-page.move', $block['id']) }}">@csrf<input type="hidden" name="action" value="{{ $action }}"><button class="min-h-11 min-w-11 rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50" aria-label="{{ ucfirst($action) }} {{ $label }}">{{ $text }}</button></form>
                     @endforeach
                 </div>
                 @if($custom)

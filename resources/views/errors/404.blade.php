@@ -10,8 +10,8 @@
     <h1 class="mt-2 font-display text-3xl font-bold text-dark">{{ __('Page not found') }}</h1>
     <p class="mt-3 text-gray-600 max-w-md mx-auto">{{ __('The page you are looking for does not exist or has moved.') }}</p>
     <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <a href="{{ route('home') }}" class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Go to the home page') }}</a>
-        <a href="{{ route('shop') }}" class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Browse products') }}</a>
+        <a href="{{ route('home') }}" class="inline-flex items-center min-h-11 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Go to the home page') }}</a>
+        <a href="{{ route('shop') }}" class="inline-flex items-center min-h-11 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Browse products') }}</a>
     </div>
 </div>
 @endsection

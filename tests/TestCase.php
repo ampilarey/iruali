@@ -15,6 +15,8 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         Http::preventStrayRequests();
+        // A test run as the live site leaves Symfony's trusted-host list (static) behind; start clean
+        \Illuminate\Http\Request::setTrustedHosts([]);
     }
 
     /**

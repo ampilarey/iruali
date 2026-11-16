@@ -74,7 +74,7 @@ class RewardsTest extends TestCase
         $this->assertSame(30, $user->fresh()->loyalty_points);
     }
 
-    public function test_referral_reward_is_given_once_on_the_first_paid_order_and_never_at_sign_up(): void
+    public function test_referral_reward_is_given_once_on_the_first_delivered_order_and_never_at_sign_up(): void
     {
         $referrer = User::factory()->create(['loyalty_points' => 0, 'referral_code' => 'REF12345']);
 
@@ -89,12 +89,17 @@ class RewardsTest extends TestCase
         $this->assertSame(0, $referrer->fresh()->loyalty_points, 'no reward until paid');
 
         app(PaymentService::class)->confirm($first);
+        $this->assertSame(0, $referrer->fresh()->loyalty_points, 'paid is not enough: it could still be cancelled');
+        $this->assertNull($referee->fresh()->referral_rewarded_at);
+
+        app(\App\Services\OrderService::class)->advanceTo($first->fresh(), 'delivered');
         $this->assertSame(100, $referrer->fresh()->loyalty_points);
         $this->assertSame(50 + $first->loyalty_points_earned, $referee->fresh()->loyalty_points);
         $this->assertNotNull($referee->fresh()->referral_rewarded_at);
 
         $second = $this->placeOrder($referee, 100);
         app(PaymentService::class)->confirm($second);
+        app(\App\Services\OrderService::class)->advanceTo($second->fresh(), 'delivered');
         $this->assertSame(100, $referrer->fresh()->loyalty_points, 'rewarded once');
     }
 }

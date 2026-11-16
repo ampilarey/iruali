@@ -472,6 +472,25 @@ class BookingFeeService
     }
 
     /**
+     * What a cancellation refunds: refundSplit(), less what returns and dispute refunds on the order
+     * have already given back (or flagged as due), taken off the card share first, then the wallet's.
+     * Without this a dispute refund followed by a cancellation would refund the same money twice.
+     *
+     * @return array{kept: float, card: float, wallet: float}
+     */
+    public static function cancelRefund(Order $order, float $kept): array
+    {
+        $split = self::refundSplit($order, $kept);
+        $already = (float) \App\Models\ReturnRequest::where('order_id', $order->id)->whereIn('status', ['approved', 'refunded'])->sum('refund_amount')
+            + (float) \App\Models\Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+        $fromCard = min($split['card'], $already);
+        $split['card'] = round($split['card'] - $fromCard, 2);
+        $split['wallet'] = round(max(0, $split['wallet'] - ($already - $fromCard)), 2);
+
+        return $split;
+    }
+
+    /**
      * What cancelling now would return, for the cancel page: the fee kept when the customer cancels
      * (keepable()), the rest refunded.
      *
@@ -479,6 +498,6 @@ class BookingFeeService
      */
     public function customerCancelPreview(Order $order): array
     {
-        return self::refundSplit($order, $this->keepable($order) ? (float) $order->deposit_amount : 0.0);
+        return self::cancelRefund($order, $this->keepable($order) ? (float) $order->deposit_amount : 0.0);
     }
 }

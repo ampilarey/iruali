@@ -269,7 +269,8 @@ class ReturnsTest extends TestCase
         $part = $this->partA($order);
         \App\Models\Dispute::forceCreate([
             'order_id' => $order->id, 'seller_order_id' => $part->id, 'customer_id' => $this->customer->id, 'type' => 'not_as_described',
-            'status' => 'resolved_partial', 'amount_claimed' => 300, 'amount_resolved' => (float) $order->total_amount - 40, 'opened_at' => now(), 'resolved_at' => now(),
+            // The dispute took all but 40 of what this shop's items were paid
+            'status' => 'resolved_partial', 'amount_claimed' => 300, 'amount_resolved' => $part->paidSubtotal() - 40, 'opened_at' => now(), 'resolved_at' => now(),
         ]);
 
         $this->requestReturn($order);

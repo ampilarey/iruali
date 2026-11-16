@@ -20,6 +20,7 @@ class OrderItem extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'paid_total' => 'decimal:2',
         'quantity' => 'integer',
         // A pre-order line (App\Services\PreorderService)
         'is_preorder' => 'boolean',
@@ -85,6 +86,16 @@ class OrderItem extends Model
     public function netTotal(): float
     {
         return round((float) $this->price * (int) $this->quantity - $this->shopDiscount(), 2);
+    }
+
+    /**
+     * What the customer actually paid for the line: its net total less its share of the iruali
+     * voucher and the points redeemed (App\Support\PaidShares, kept when the order was placed).
+     * Returns and disputes refund this, never more.
+     */
+    public function paidTotal(): float
+    {
+        return $this->paid_total !== null ? round((float) $this->paid_total, 2) : $this->netTotal();
     }
 
     // ---- Pre-orders -----------------------------------------------------------------------

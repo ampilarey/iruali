@@ -121,14 +121,12 @@ class ReferralProgrammeTest extends TestCase
         $this->assertDatabaseHas('points_transactions', ['user_id' => $user->id, 'type' => 'redeemed', 'points' => -200, 'order_id' => $order->id]);
         $this->assertLedgerMatches($user, 'after redeem');
 
-        // Paid: earned points + referral rewards on both sides
+        // Paid: earned points; the referral rewards wait until the order is delivered
         app(PaymentService::class)->confirm($order);
         $this->assertDatabaseHas('points_transactions', ['user_id' => $user->id, 'type' => 'earned', 'points' => $order->loyalty_points_earned, 'order_id' => $order->id]);
-        $this->assertDatabaseHas('points_transactions', ['user_id' => $user->id, 'type' => 'referral', 'points' => 50]);
-        $this->assertDatabaseHas('points_transactions', ['user_id' => $referrer->id, 'type' => 'referral', 'points' => 100, 'order_id' => $order->id]);
-        $this->assertSame(100, $referrer->fresh()->loyalty_points);
+        $this->assertDatabaseMissing('points_transactions', ['type' => 'referral']);
+        $this->assertSame(0, $referrer->fresh()->loyalty_points);
         $this->assertLedgerMatches($user, 'after payment');
-        $this->assertLedgerMatches($referrer, 'after payment');
 
         // Confirming twice adds nothing
         app(PaymentService::class)->confirm($order->fresh());
@@ -139,7 +137,10 @@ class ReferralProgrammeTest extends TestCase
         app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled');
         $this->assertDatabaseHas('points_transactions', ['user_id' => $user->id, 'type' => 'refund', 'points' => 200, 'order_id' => $order->id]);
         $this->assertDatabaseHas('points_transactions', ['user_id' => $user->id, 'type' => 'refund', 'points' => -$order->loyalty_points_earned]);
-        $this->assertSame(300 + 50, $user->fresh()->loyalty_points);
+        // A cancelled order never gives the referral reward (it used to keep it: points farmed with new accounts)
+        $this->assertSame(300, $user->fresh()->loyalty_points);
+        $this->assertDatabaseMissing('points_transactions', ['type' => 'referral']);
+        $this->assertNull($user->fresh()->referral_rewarded_at);
         $this->assertLedgerMatches($user, 'after cancel');
     }
 
@@ -224,6 +225,7 @@ class ReferralProgrammeTest extends TestCase
         $paid = User::factory()->create(['name' => 'Hassan Ali', 'referred_by' => $user->id]);
         $order = $this->placeOrder($paid, 500);
         app(PaymentService::class)->confirm($order);
+        app(OrderService::class)->advanceTo($order->fresh(), 'delivered'); // the reward comes with delivery
 
         $this->actingAs($user)->get(route('account.rewards'))->assertOk()
             ->assertSee('SHARE123')

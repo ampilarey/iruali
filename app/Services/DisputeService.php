@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DisputeStatus;
 use App\Models\Dispute;
 use App\Models\ReturnRequest;
 use App\Models\SellerAdjustment;
@@ -90,14 +91,15 @@ class DisputeService
 
     /**
      * The most a customer can claim on this part: its items as paid for (after the shop's own
-     * discounts), plus delivery (the shop's own charge when it delivered the part itself, else the
-     * order's delivery fee when it is the only shop), less what has already been refunded on it
-     * through returns or earlier disputes.
+     * discounts and their share of the iruali voucher and points: SellerOrder::paidSubtotal()), plus
+     * delivery (the shop's own charge when it delivered the part itself, else the order's delivery
+     * fee when it is the only shop), less what has already been refunded on it through returns or
+     * earlier disputes. Never more than is left of what the whole order was paid.
      */
     public function maxClaim(SellerOrder $part): float
     {
         $order = $part->order;
-        $cap = $part->netSubtotal();
+        $cap = $part->paidSubtotal();
         if ($part->delivery_fee_to_shop) {
             $cap += $part->shopDeliveryCharge();
         } elseif ($order->sellerOrders()->count() === 1) {
@@ -106,7 +108,22 @@ class DisputeService
         $cap -= (float) $part->returnRequests()->whereIn('status', ['approved', 'refunded'])->sum('refund_amount');
         $cap -= (float) Dispute::where('seller_order_id', $part->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
 
-        return max(0, round($cap, 2));
+        return max(0, round(min($cap, $this->orderLeft($order)), 2));
+    }
+
+    /**
+     * What is left to refund on the whole order: what was paid, less every approved return and
+     * dispute refund. Nothing on an unpaid or cancelled order (a cancellation refunds the payment).
+     */
+    public function orderLeft(?\App\Models\Order $order): float
+    {
+        if (! $order || $order->payment_status !== 'paid' || $order->status === 'cancelled') {
+            return 0.0;
+        }
+        $taken = (float) ReturnRequest::where('order_id', $order->id)->whereIn('status', ['approved', 'refunded'])->sum('refund_amount')
+            + (float) Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+
+        return max(0, round((float) $order->total_amount - $taken, 2));
     }
 
     public function open(SellerOrder $part, User $customer, string $type, float $amountClaimed, string $details): ?Dispute
@@ -191,14 +208,35 @@ class DisputeService
             return false;
         }
 
-        DB::transaction(function () use ($dispute, $admin, $outcome, $refund, $note) {
-            $dispute->update([
+        $done = DB::transaction(function () use ($dispute, $admin, $outcome, $refund, $note) {
+            // The order locked, then the room left worked out again: a return or another dispute decided
+            // since this one was opened has already taken some of it
+            \App\Models\Order::whereKey($dispute->order_id)->lockForUpdate()->first(['id']);
+            if ($refund > 0) {
+                $cap = $dispute->sellerOrder ? $this->maxClaim($dispute->sellerOrder->fresh()) : 0.0;
+                if ($outcome === 'full') {
+                    $refund = round(min($refund, $cap), 2);
+                } elseif ($refund > $cap + 0.001) {
+                    return false;
+                }
+                if ($refund <= 0) {
+                    return false; // nothing left to refund: reject it instead
+                }
+            }
+
+            // Only from an open status, in one statement: a second decision at the same moment changes no
+            // row and stops here (no second refund or shop deduction)
+            $changes = [
                 'status' => ['full' => 'resolved_refund', 'partial' => 'resolved_partial', 'reject' => 'resolved_rejected'][$outcome],
                 'amount_resolved' => $refund,
                 'resolution_note' => $note,
                 'resolved_at' => now(),
                 'admin_id' => $admin->id,
-            ]);
+            ];
+            if (Dispute::whereKey($dispute->id)->whereIn('status', DisputeStatus::openValues())->update($changes) === 0) {
+                return false;
+            }
+            $dispute->forceFill($changes)->syncOriginal();
 
             if ($refund > 0) {
                 $order = $dispute->order;
@@ -206,17 +244,16 @@ class DisputeService
 
                 $part = $dispute->sellerOrder;
                 if ($part?->seller_id) {
-                    // The shop gives back its share of the refunded items (iruali forgoes its commission on them)
-                    $base = min($refund, $part->netSubtotal());
-                    $shopShare = round($base * (1 - (float) $part->commission_rate / 100), 2);
-                    // and its own delivery charge refunded beyond the items
-                    $shopShare = round($shopShare + $part->deliveryRefundShare($refund, $part->netSubtotal()), 2);
+                    // The shop gives back its earning on the refunded items and its own delivery charge
+                    // refunded beyond them (App\Support\RefundSplit); iruali forgoes its commission
+                    $shopShare = \App\Support\RefundSplit::of($part, $refund, $part->paidSubtotal(), $part->netSubtotal())['shop_gives_back'];
                     if ($shopShare > 0) {
                         SellerAdjustment::create([
                             'seller_id' => $part->seller_id,
                             'amount' => -$shopShare,
                             'reason' => 'Dispute #'.$dispute->id.' on order '.$order->order_number,
                             'return_request_id' => $dispute->return_request_id,
+                            'dispute_id' => $dispute->id,
                         ]);
                     }
                 }
@@ -225,7 +262,12 @@ class DisputeService
             if ($dispute->conversation) {
                 $this->messaging->send($dispute->conversation, $admin, 'admin', $this->resolutionMessage($dispute->fresh()), null, false);
             }
+
+            return true;
         });
+        if (! $done) {
+            return false;
+        }
 
         $this->notifyResolved($dispute->fresh());
 

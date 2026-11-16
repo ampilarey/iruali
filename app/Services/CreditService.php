@@ -25,6 +25,17 @@ class CreditService
     }
 
     /**
+     * Lock the customer's credit account row until the transaction ends (checkout): the credit left is
+     * then read and used by one order at a time.
+     */
+    public function lockAccount(?User $user): void
+    {
+        if ($user) {
+            CreditAccount::where('user_id', $user->id)->lockForUpdate()->first(['id']);
+        }
+    }
+
+    /**
      * Unpaid pay-later orders of this customer.
      *
      * @return Builder<Order>

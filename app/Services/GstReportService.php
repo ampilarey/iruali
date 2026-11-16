@@ -192,14 +192,14 @@ class GstReportService
         $returns = ReturnRequest::whereIn('status', ['approved', 'refunded'])->whereBetween('resolved_at', [$from, $to])
             ->with(['order' => fn ($q) => $q->withTrashed(), 'sellerOrder'])->orderBy('resolved_at')->get();
         foreach ($returns as $return) {
-            $events->push($this->refund('return', $return->resolved_at, $return->order, $return->sellerOrder, (float) $return->refund_amount, (float) $return->items_value));
+            $events->push($this->refund('return', $return->resolved_at, $return->order, $return->sellerOrder, (float) $return->refund_amount, (float) $return->items_value, $return->itemsNetValue()));
         }
 
-        // Disputes decided with a refund (capped at the part's items, like DisputeService)
+        // Disputes decided with a refund (the part's items as paid, like DisputeService)
         $disputes = Dispute::where('amount_resolved', '>', 0)->whereBetween('resolved_at', [$from, $to])
             ->with(['order' => fn ($q) => $q->withTrashed(), 'sellerOrder'])->orderBy('resolved_at')->get();
         foreach ($disputes as $dispute) {
-            $events->push($this->refund('dispute', $dispute->resolved_at, $dispute->order, $dispute->sellerOrder, (float) $dispute->amount_resolved, (float) $dispute->sellerOrder?->subtotal));
+            $events->push($this->refund('dispute', $dispute->resolved_at, $dispute->order, $dispute->sellerOrder, (float) $dispute->amount_resolved, (float) $dispute->sellerOrder?->paidSubtotal(), (float) $dispute->sellerOrder?->netSubtotal()));
         }
 
         // Booking fees refunded when their orders were cancelled: the fee's own invoice is reversed
@@ -246,23 +246,24 @@ class GstReportService
     }
 
     /**
-     * One return or dispute refund: the part of it up to the items' value is the shop's goods (iruali
-     * gives up its commission on that), then the shop's own delivery charge when it delivered the
-     * part itself (also the shop's sale), and the rest up to iruali's delivery fee is iruali's.
+     * One return or dispute refund, split as App\Support\RefundSplit does: the part of it up to what
+     * the items were paid is the shop's sale of them undone (at their value after the shop's own
+     * discounts; iruali gives up its commission on that), then the shop's own delivery charge when it
+     * delivered the part itself (also the shop's sale), and the rest up to iruali's delivery fee is iruali's.
      *
      * @return array<string, mixed>|null
      */
-    protected function refund(string $kind, ?CarbonInterface $date, ?Order $order, ?SellerOrder $part, float $refund, float $goodsCap): ?array
+    protected function refund(string $kind, ?CarbonInterface $date, ?Order $order, ?SellerOrder $part, float $refund, float $paidGoods, float $netGoods): ?array
     {
         if (! $order || ! $part || $refund <= 0) {
             return null;
         }
 
-        $base = round(min($refund, $goodsCap), 2);
-        $shopDelivery = $part->deliveryRefundShare($refund, $goodsCap);
-        $goods = round(min($base, (float) ($part->gst_taxable ?? $part->subtotal) - $part->shopDeliveryCharge()) + $shopDelivery, 2);
-        $delivery = round(min(max(0, $refund - $goodsCap - $shopDelivery), $this->gst->deliveryFee($order)), 2);
-        $commission = round($base * (float) $part->commission_rate / 100, 2);
+        $split = \App\Support\RefundSplit::of($part, $refund, $paidGoods, $netGoods);
+        $shopDelivery = $split['shop_delivery'];
+        $goods = round(min($split['shop_goods'], (float) ($part->gst_taxable ?? $part->subtotal) - $part->shopDeliveryCharge()) + $shopDelivery, 2);
+        $delivery = round(min(max(0, $refund - $split['goods_paid'] - $shopDelivery), $this->gst->deliveryFee($order)), 2);
+        $commission = $split['commission'];
         $platformRate = $order->gst_platform_registered ? $order->gst_rate : null;
 
         return [

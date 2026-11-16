@@ -151,6 +151,11 @@ class SmsManager
      */
     public function resend(SmsMessage $message): SmsResult
     {
+        // A code is stored masked (and was valid 10 minutes): the customer asks for a new one instead
+        if (in_array($message->type, self::CODE_TYPES, true)) {
+            return SmsResult::failed('A sign-in or verification code is not sent again: ask the customer to request a new one', 'invalid');
+        }
+
         return $this->send($message->to, new SmsText((string) $message->type, $message->message, true));
     }
 
@@ -202,13 +207,23 @@ class SmsManager
         }
     }
 
+    /** Messages that carry a one-time code: the code is never stored or logged (maskCodes()). */
+    public const CODE_TYPES = ['login_code', 'phone_code'];
+
+    /** The message with any 4-8 digit run hidden, for a code message; others as they are. */
+    public static function maskCodes(string $message, ?string $type): string
+    {
+        return in_array($type, self::CODE_TYPES, true) ? (string) preg_replace('/\b\d{4,8}\b/', '••••••', $message) : $message;
+    }
+
     protected function record(string $to, string $message, SmsResult $result, ?string $type = null, ?Carbon $sendAfter = null): SmsResult
     {
         try {
             SmsMessage::create([
                 'type' => $type !== null ? mb_substr($type, 0, 40) : null,
                 'to' => mb_substr($to, 0, 30),
-                'message' => $message,
+                // Codes are urgent (never held for later), so the stored copy never has to be sent again
+                'message' => self::maskCodes($message, $type),
                 'status' => $result->status,
                 'provider_response' => $result->providerResponse,
                 'cost' => $result->cost,

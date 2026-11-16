@@ -84,6 +84,7 @@ class ReadyChecks
             'Uploads' => 'checkUploads',
             'Error alerts' => 'checkAlerts',
             'SMS' => 'checkSms',
+            'Logs' => 'checkLogs',
         ];
     }
 
@@ -321,6 +322,15 @@ class ReadyChecks
             return $this->fail("Newest backup on '{$disk}' is from ".$age->diffForHumans(), $fix);
         }
 
+        // Copies only on this server go with it if the hosting account is lost
+        $offServer = array_values(array_filter($disks, fn ($name) => config("filesystems.disks.{$name}.driver") !== 'local'));
+        if ($offServer === []) {
+            $detail = "Backups are kept only on this server ('".implode("', '", $disks)."'): an account or disk loss takes them too";
+            $offFix = 'Set BACKUP_DISKS=local,s3 (or another off-server disk) in .env, with that disk\'s keys, then php artisan config:cache.';
+
+            return app()->isProduction() ? $this->fail($detail, $offFix) : $this->warn($detail, $offFix);
+        }
+
         return $this->pass("Newest backup on '{$disk}' ".$age->diffForHumans().', '.count($disks).' disk(s): '.implode(', ', $disks));
     }
 
@@ -375,7 +385,11 @@ class ReadyChecks
         $driver = (string) config('sms.driver', 'log');
 
         if ($driver === 'log') {
-            return $this->warn('SMS driver is log (codes are written to the log, not sent)', 'Set the SMS driver and credentials in config/sms.php / .env.');
+            // On the live site nobody gets their sign-in code, and the codes sit in the log file
+            $detail = 'SMS driver is log (codes are written to the log, not sent)';
+            $fix = 'Set the SMS driver and credentials in config/sms.php / .env.';
+
+            return app()->isProduction() ? $this->fail($detail, $fix) : $this->warn($detail, $fix);
         }
         if ($driver === 'dhiraagu' && (blank(config('sms.dhiraagu.username')) || blank(config('sms.dhiraagu.password')))) {
             return $this->fail('SMS driver dhiraagu, but the username or password is missing', 'Set SMS_DHIRAAGU_USERNAME and SMS_DHIRAAGU_PASSWORD in .env, then php artisan config:cache.');
@@ -388,5 +402,34 @@ class ReadyChecks
         }
 
         return $this->pass("SMS driver {$driver}");
+    }
+
+    /**
+     * Logs rotate (a single laravel.log grows until the hosting quota is full, and then uploads,
+     * sessions, backups and deploys fail together) and are not at debug level on the live site.
+     */
+    protected function checkLogs(): array
+    {
+        $channel = (string) config('logging.default');
+        $channels = $channel === 'stack' ? (array) config('logging.channels.stack.channels', []) : [$channel];
+        $single = array_values(array_filter($channels, fn ($name) => config("logging.channels.{$name}.driver") === 'single'));
+        $debug = array_values(array_filter($channels, fn ($name) => config("logging.channels.{$name}.level", 'debug') === 'debug'));
+        $size = collect(glob(storage_path('logs/*.log')) ?: [])->sum(fn ($file) => (int) @filesize($file));
+        $mb = round($size / 1048576, 1);
+
+        if ($single !== []) {
+            $detail = 'Logs go to one file that is never rotated ('.implode(', ', $single)."), {$mb} MB now";
+            $fix = 'Set LOG_STACK=daily (and LOG_DAILY_DAYS=14) in .env, then php artisan config:cache.';
+
+            return app()->isProduction() ? $this->fail($detail, $fix) : $this->warn($detail, $fix);
+        }
+        if ($debug !== [] && app()->isProduction()) {
+            return $this->warn("Logs are at debug level ({$mb} MB)", 'Set LOG_LEVEL=warning in .env, then php artisan config:cache.');
+        }
+        if ($mb > 200) {
+            return $this->warn("The log files take {$mb} MB", 'Lower LOG_DAILY_DAYS or LOG_LEVEL, or look at what is being logged so much.');
+        }
+
+        return $this->pass('Logs rotate daily ('.implode(', ', $channels)."), {$mb} MB");
     }
 }

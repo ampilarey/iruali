@@ -39,6 +39,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_PROTO
                 | Request::HEADER_X_FORWARDED_AWS_ELB,
         );
+        // Only requests for APP_URL's host (and its subdomains: www., test.) are answered: URLs the app builds
+        // from the request (links in emails, the /dv prefix's root URL) can't point at a host a visitor sent.
+        // Read at request time from config('app.url'); not applied locally or in tests.
+        $middleware->trustHosts();
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         // What the service worker may keep offline (needs the session, so in the web group)
         $middleware->web(append: [\App\Http\Middleware\OfflineCopies::class]);

@@ -14,8 +14,11 @@ return [
                 /*
                  * The list of directories and files that will be included in the backup.
                  */
+                // The uploads: product photos, logos and banners (public) and ID documents, bank slips,
+                // return photos, receipts (private). The code is in Git; the database has its own nightly dump.
+                // Backed up weekly, off the server when BACKUP_DISKS names an off-server disk (routes/console.php).
                 'include' => [
-                    base_path(),
+                    storage_path('app'),
                 ],
 
                 /*
@@ -24,19 +27,9 @@ return [
                  * Directories used by the backup process will automatically be excluded.
                  */
                 'exclude' => [
-                    base_path('vendor'),
-                    base_path('node_modules'),
-                    base_path('storage/logs'),
-                    base_path('storage/framework/cache'),
-                    base_path('storage/framework/sessions'),
-                    base_path('storage/framework/views'),
-                    base_path('storage/app/public'),
-                    base_path('public/build'),
-                    base_path('.git'),
-                    base_path('.env'),
-                    base_path('.env.production'),
-                    base_path('composer.lock'),
-                    base_path('package-lock.json'),
+                    storage_path('app/backup-temp'),
+                    // The backups kept on this server (the local disk): never inside the next one
+                    storage_path('app/private/'.env('APP_NAME', 'iruali-backup')),
                 ],
 
                 /*

@@ -32,18 +32,18 @@ class SecurityHardeningTest extends TestCase
     public function test_a_code_is_spent_after_five_wrong_tries_and_compared_safely(): void
     {
         $otp = OTP::createForPhone('+9607771234', 'login');
-        $wrong = $otp->code === '000000' ? '111111' : '000000';
+        $wrong = $otp->plainCode === '000000' ? '111111' : '000000';
 
         for ($i = 0; $i < OTP::MAX_ATTEMPTS; $i++) {
             $this->assertNull(OTP::verify('+9607771234', $wrong, 'login'));
         }
         // Even the right code no longer works: it was spent by the wrong tries
-        $this->assertNull(OTP::verify('+9607771234', $otp->code, 'login'));
+        $this->assertNull(OTP::verify('+9607771234', $otp->plainCode, 'login'));
         $this->assertTrue($otp->fresh()->is_used);
 
         $fresh = OTP::createForPhone('+9607771234', 'login');
-        $this->assertNotNull(OTP::verify('+9607771234', $fresh->code, 'login'));
-        $this->assertNull(OTP::verify('+9607771234', $fresh->code, 'login'), 'a right code works once');
+        $this->assertNotNull(OTP::verify('+9607771234', $fresh->plainCode, 'login'));
+        $this->assertNull(OTP::verify('+9607771234', $fresh->plainCode, 'login'), 'a right code works once');
     }
 
     public function test_proving_the_email_of_a_premade_account_throws_away_its_password_and_sessions(): void

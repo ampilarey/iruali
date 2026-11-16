@@ -6,9 +6,20 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * A one-time code (sign-in, verification). Only a keyed hash of the code is stored (code), so the
+ * database, its backups and the staging copy never hold a code that works; the code itself is on the
+ * new model as plainCode, for the text or email that sends it, and is gone after that request.
+ */
 class OTP extends Model
 {
     use HasFactory;
+
+    /** The code just made (never saved): what the notification sends. */
+    public ?string $plainCode = null;
+
+    /** @var array<string, string> tests only: the last code made per number or email and purpose */
+    protected static array $issuedInTests = [];
 
     protected $table = 'otps';
 
@@ -63,6 +74,32 @@ class OTP extends Model
         return sprintf('%06d', random_int(0, 999999));
     }
 
+    /** What is stored for a code: an HMAC with the app key, compared with hash_equals. */
+    public static function hashCode(string $code): string
+    {
+        return hash_hmac('sha256', trim($code), (string) config('app.key'));
+    }
+
+    /** A new code for this number or email, saved hashed, with the code itself on plainCode. */
+    protected static function issue(array $attributes): self
+    {
+        $code = self::generateCode();
+        $otp = self::create($attributes + ['code' => self::hashCode($code), 'expires_at' => Carbon::now()->addMinutes(10)]);
+        $otp->plainCode = $code;
+        if (app()->runningUnitTests()) {
+            self::$issuedInTests[($attributes['phone'] ?? $attributes['email'] ?? '').'|'.$attributes['purpose']] = $code;
+            self::$issuedInTests['*|'.$attributes['purpose']] = $code;
+        }
+
+        return $otp;
+    }
+
+    /** Tests only: the last code made for this number or email (any, when null) and purpose (the database has its hash). */
+    public static function lastCodeFor(?string $identifier, string $purpose): ?string
+    {
+        return self::$issuedInTests[($identifier ?? '*').'|'.$purpose] ?? null;
+    }
+
     /**
      * Create a new OTP for phone verification
      */
@@ -73,13 +110,7 @@ class OTP extends Model
             ->where('purpose', $purpose)
             ->update(['is_used' => true]);
 
-        return self::create([
-            'phone' => $phone,
-            'code' => self::generateCode(),
-            'type' => 'sms',
-            'purpose' => $purpose,
-            'expires_at' => Carbon::now()->addMinutes(10),
-        ]);
+        return self::issue(['phone' => $phone, 'type' => 'sms', 'purpose' => $purpose]);
     }
 
     /**
@@ -92,13 +123,7 @@ class OTP extends Model
             ->where('purpose', $purpose)
             ->update(['is_used' => true]);
 
-        return self::create([
-            'email' => $email,
-            'code' => self::generateCode(),
-            'type' => 'email',
-            'purpose' => $purpose,
-            'expires_at' => Carbon::now()->addMinutes(10),
-        ]);
+        return self::issue(['email' => $email, 'type' => 'email', 'purpose' => $purpose]);
     }
 
     /**
@@ -123,7 +148,7 @@ class OTP extends Model
             if (! $otp) {
                 return null;
             }
-            if (hash_equals((string) $otp->code, $code)) {
+            if (hash_equals((string) $otp->code, self::hashCode($code))) {
                 $otp->markAsUsed();
 
                 return $otp;

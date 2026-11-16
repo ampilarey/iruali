@@ -18,7 +18,9 @@ jobs:
   pull-test-now:
     name: Webhook pull (test.iruali.mv)
     # Only after the Tests workflow is green on main (manual runs always go)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # and only for a push to this repository's main: a pull request from a fork whose branch is also
+    # called "main" must not start a job that holds the deploy secret
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository) }}
     runs-on: ubuntu-latest
     environment: test
     env:

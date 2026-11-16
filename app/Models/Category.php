@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
@@ -32,6 +33,26 @@ class Category extends Model
         'meta_title' => 'array',
         'meta_description' => 'array',
     ];
+
+    /** The header menu's departments, cached a few minutes; dropped whenever a category changes. */
+    public const NAV_CACHE_KEY = 'nav-departments';
+
+    protected static function booted(): void
+    {
+        $forget = fn () => Cache::forget(self::NAV_CACHE_KEY);
+        static::saved($forget);
+        static::deleted($forget);
+    }
+
+    /**
+     * Active top-level categories for the header menu.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Category>
+     */
+    public static function navDepartments(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Cache::remember(self::NAV_CACHE_KEY, now()->addMinutes(10), fn () => static::active()->root()->get());
+    }
 
     /** @return HasMany<Product, $this> */
     public function products(): HasMany

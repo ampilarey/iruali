@@ -91,6 +91,35 @@ class SmsCampaignsTest extends TestCase
         $this->assertSame('cancelled', $campaign->fresh()->status);
     }
 
+    public function test_a_campaign_stopped_half_way_carries_on_and_counts_everyone(): void
+    {
+        $first = $this->smsFan('7771111');
+        $this->smsFan('7772222');
+        $this->smsFan('7773333');
+        $campaign = SmsCampaign::create(['name' => 'Eid', 'message' => 'Eid offers', 'segment' => 'all', 'status' => 'draft']);
+        // A run reached the first person, then the host stopped it
+        $campaign->forceFill(['status' => 'sending'])->save();
+        \Illuminate\Support\Facades\DB::table('sms_campaign_recipients')->insert(['sms_campaign_id' => $campaign->id, 'user_id' => $first->id, 'status' => 'logged', 'created_at' => now()]);
+
+        $this->artisan('sms:send-campaigns')->assertSuccessful();
+
+        $campaign->refresh();
+        $this->assertSame('sent', $campaign->status);
+        $this->assertSame(3, $campaign->sent_count, 'the one sent before the stop counts too');
+        $this->assertSame(3, \Illuminate\Support\Facades\DB::table('sms_campaign_recipients')->where('sms_campaign_id', $campaign->id)->count());
+        $this->assertSame(2, SmsMessage::where('type', 'campaign')->count(), 'the first person did not get it twice');
+    }
+
+    public function test_a_campaign_stuck_for_an_hour_is_reported_once(): void
+    {
+        $campaign = SmsCampaign::create(['name' => 'Stuck', 'message' => 'x', 'segment' => 'all', 'status' => 'draft']);
+        $campaign->forceFill(['status' => 'sending'])->save();
+        SmsCampaign::whereKey($campaign->id)->update(['updated_at' => now()->subHours(2)]);
+
+        $this->artisan('sms:send-campaigns')->assertSuccessful();
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has('sms-campaign-stuck:'.$campaign->id));
+    }
+
     public function test_the_stop_link_turns_offers_by_sms_off(): void
     {
         $fan = $this->smsFan('7771111');

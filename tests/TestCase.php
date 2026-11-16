@@ -8,6 +8,18 @@ use Illuminate\Support\Facades\Http;
 abstract class TestCase extends BaseTestCase
 {
     /**
+     * No test reaches the real internet (an SMS gateway, Telegram, Facebook, BML, a shop's page): a
+     * request nothing faked fails the test instead of going out or depending on the network.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Http::preventStrayRequests();
+        // A test run as the live site leaves Symfony's trusted-host list (static) behind; start clean
+        \Illuminate\Http\Request::setTrustedHosts([]);
+    }
+
+    /**
      * Turn on BML card payments (the only payment method) against a fake BML sandbox, so checkout
      * can place orders. Placing an order sends the customer to the fake payment page.
      */

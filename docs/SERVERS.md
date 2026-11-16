@@ -54,6 +54,9 @@ tags come back. Claude Code sessions cannot push tags; the owner would create th
 | `HEALTH_DETAIL_TOKEN` | random; lets the deploy check the commit in `/api/health` |
 | SMS | Dhiraagu, same API and login as Akuru (`PRODUCTION_DEPLOY.md` → SMS); set with `smssetup` |
 | BML | **not set yet**: card payment is off until the BML keys are added. Bank transfer and cash on delivery can be switched on meanwhile in Admin → Settings → Payment methods |
+| Logs | `LOG_STACK=daily`, `LOG_LEVEL=warning` (or `error`), `LOG_DAILY_DAYS=14`. `iruali:ready` fails on the never-rotated `single` log or debug level in production |
+| `BACKUP_DISKS` | `local,s3` (or another off-server disk from `config/filesystems.php`, e.g. an S3-compatible bucket with the `AWS_*` settings). **Only `local` today**: `iruali:ready` fails until an off-server disk is added (owner decision C). Database nightly at 02:00, `storage/app` files weekly (Sunday 03:00); the deploy also takes a database copy before every migration |
+| `SMS_DRIVER` | `dhiraagu`. `log` fails `iruali:ready` on production (texts would never leave the server) |
 
 Admin: `admin@iruali.mv`, two-step sign-in required for all staff unless switched off in Admin → Settings ("Staff must use two-step sign-in"). Locked out of /admin by it: `php artisan staff:two-factor off` on the server (`on` puts it back).
 
@@ -63,7 +66,7 @@ Scheduler (crontab of `iruali`):
 * * * * * /home/iruali/test/scripts/self-update-test.sh >> /home/iruali/self-update-test.log 2>&1
 ```
 
-Health: `php artisan iruali:ready` (expects only BML to fail until the keys exist). For an uptime
+Health: `php artisan iruali:ready` (expects only BML, and backups until an off-server disk is set, to fail). For an uptime
 monitor, `/api/health/ready` answers 200, or 503 when the database, cache or storage fails
 (`/api/health` is unchanged for the deploy check). `ops:watch` (every 10 minutes) alerts when queued
 jobs fail or the queue worker stops.

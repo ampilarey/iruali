@@ -31,7 +31,7 @@ class PhoneLoginTest extends TestCase
 
     protected function lastCode(): string
     {
-        return (string) OTP::where('purpose', 'login')->latest('id')->value('code');
+        return (string) OTP::lastCodeFor(null, 'login'); // only its hash is stored
     }
 
     public function test_a_new_number_signs_up_with_a_code_then_sets_name_and_password(): void

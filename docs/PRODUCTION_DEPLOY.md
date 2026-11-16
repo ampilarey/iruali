@@ -300,9 +300,14 @@ message in the group, then Admin → Team alerts → **Find my group** → save 
 `test.iruali.mv` should run on a recent copy of the production database **with the
 personal data replaced**. `php artisan iruali:anonymise --force` gives every non-staff user
 a made-up Maldivian name, `user<id>@example.test`, phone `7000000+id`, a random password,
-and clears their tokens, 2FA secrets, addresses and bank account; order delivery
-addresses/phones, return request notes, newsletter emails and OTPs are rewritten or
-emptied. Staff accounts (every role in `config/staff.php`) are kept so the team can sign in.
+and clears their tokens, 2FA secrets, sessions, social sign-ins and push subscriptions. It also
+rewrites or empties saved addresses, shop bank accounts, the texts sent (number and wording),
+messages and guest conversations, complaints and staff notes, order addresses, guest and gift
+details, business buyer details, gift cards, return, dispute, feedback and request notes, the email
+lists (newsletter, stock alerts, waiting lists, invitations) and OTPs. The full list is
+`AnonymiseCommand::COVERED`; `AnonymiseTest` fails when a new column that looks personal is
+neither covered nor explained. Staff accounts (every role in `config/staff.php`) are kept so the
+team can sign in. Uploaded files (`storage/app`) are not copied to staging.
 Without `--force` it only prints the counts; on an `APP_ENV=production` install it refuses
 unless `--i-know-this-is-production` is given.
 

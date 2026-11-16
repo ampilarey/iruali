@@ -225,4 +225,23 @@ class SoftDeletesTest extends TestCase
         $this->assertDatabaseHas('orders', ['id' => $order->id]);
         $this->assertNotNull(Order::find($order->id));
     }
+
+    public function test_the_database_refuses_to_hard_delete_a_customer_or_product_with_orders(): void
+    {
+        $customer = User::factory()->create();
+        $product = Product::factory()->create();
+        $order = \App\Models\Order::factory()->create(['user_id' => $customer->id]);
+        $order->items()->create(['product_id' => $product->id, 'quantity' => 1, 'price' => 10]);
+
+        foreach ([fn () => $customer->forceDelete(), fn () => $product->forceDelete(), fn () => $order->forceDelete()] as $delete) {
+            try {
+                $delete();
+                $this->fail('a record with orders was hard-deleted');
+            } catch (\Illuminate\Database\QueryException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+        $this->assertNotNull(\App\Models\Order::find($order->id), 'the order and its items stay');
+        $this->assertSame(1, $order->items()->count());
+    }
 }

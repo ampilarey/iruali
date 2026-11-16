@@ -59,9 +59,18 @@ class GstInvoiceConcurrencyTest extends TestCase
             $this->assertCount(12, $parts->pluck('invoice_number')->filter()->unique());
             $this->assertSame(12, (int) DB::table('invoice_sequences')->where('series', 'shop:'.$shop->id)->value('last_number'));
         } finally {
+            // Committed rows (the workers run outside the test's transaction): children first, since the
+            // database refuses to delete an order, product or user that still has money records
             SellerOrder::whereIn('order_id', $orderIds)->delete();
+            DB::table('payment_transactions')->whereIn('order_id', $orderIds)->delete();
+            DB::table('order_items')->whereIn('order_id', $orderIds)->delete();
             Order::withTrashed()->whereIn('id', $orderIds)->forceDelete();
             DB::table('invoice_sequences')->where('series', 'shop:'.$shop->id)->delete();
+            foreach (['points_transactions', 'wallet_transactions'] as $ledger) {
+                DB::table($ledger)->whereIn('user_id', [$customer->id, $shop->id])->delete();
+            }
+            DB::table('shop_tax_profiles')->where('user_id', $shop->id)->delete();
+            \App\Models\Product::withTrashed()->where('seller_id', $shop->id)->forceDelete();
             User::withTrashed()->whereIn('id', [$customer->id, $shop->id])->forceDelete();
         }
     }

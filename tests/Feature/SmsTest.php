@@ -55,6 +55,24 @@ class SmsTest extends TestCase
         $this->assertNull(PhoneNumber::normalize(null));
     }
 
+    public function test_a_code_is_sent_whole_but_never_stored_and_never_resent(): void
+    {
+        config(['sms.driver' => 'http', 'sms.http.url' => 'https://sms.test/send', 'sms.http.body_template' => '', 'sms.http.success_regex' => '']);
+        app(SmsManager::class)->using(null);
+        Http::fake(['sms.test/*' => Http::response('OK', 200)]);
+
+        app(SmsManager::class)->send('7771234', new \App\Services\Sms\SmsText('login_code', 'iruali: your sign-in code is 615204. It expires in 10 minutes.', true));
+        app(SmsManager::class)->send('7771234', new \App\Services\Sms\SmsText('order_shipped', 'Order 123456 is on its way.'));
+
+        Http::assertSent(fn ($request) => str_contains((string) $request->body(), '615204'));
+        $code = SmsMessage::where('type', 'login_code')->sole();
+        $this->assertStringNotContainsString('615204', $code->message);
+        $this->assertStringContainsString('••••••', $code->message);
+        $this->assertStringContainsString('123456', SmsMessage::where('type', 'order_shipped')->sole()->message, 'other texts are kept as sent');
+
+        $this->assertSame('invalid', app(SmsManager::class)->resend($code)->status);
+    }
+
     public function test_log_driver_records_the_message_without_sending(): void
     {
         config(['sms.driver' => 'log']);

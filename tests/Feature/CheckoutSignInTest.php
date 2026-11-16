@@ -46,7 +46,7 @@ class CheckoutSignInTest extends TestCase
 
     protected function lastCode(): string
     {
-        return (string) OTP::where('purpose', 'login')->latest('id')->value('code');
+        return (string) OTP::lastCodeFor(null, 'login'); // only its hash is stored
     }
 
     protected function customer(): User

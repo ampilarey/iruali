@@ -17,8 +17,12 @@ class VerifyPhoneCode extends Notification implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public OTP $otp)
+    /** The code itself: only its hash is stored (OTP), so it travels with the notification. */
+    public string $code;
+
+    public function __construct(public OTP $otp, ?string $code = null)
     {
+        $this->code = (string) ($code ?? $otp->plainCode);
         $this->afterCommit();
     }
 
@@ -29,6 +33,6 @@ class VerifyPhoneCode extends Notification implements ShouldQueue
 
     public function toSms(object $notifiable): SmsText
     {
-        return SmsTypes::render('phone_code', ['code' => $this->otp->code]);
+        return SmsTypes::render('phone_code', ['code' => $this->code]);
     }
 }

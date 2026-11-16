@@ -13,6 +13,10 @@ Schedule::command('orders:cancel-unpaid-transfer')->hourly()->withoutOverlapping
 // Database backup every night (config/backup.php says where it goes), old ones cleaned up
 Schedule::command('backup:clean')->dailyAt('01:30');
 Schedule::command('backup:run --only-db')->dailyAt('02:00')->withoutOverlapping(120);
+// Every week, the uploaded files (photos, documents, slips: storage/app), named files-… so the restore
+// drill can tell them from the database backups
+Schedule::command('backup:run --only-files --filename=files-'.now()->format('Y-m-d-His').'.zip')->weeklyOn(0, '03:00')
+    ->timezone('Indian/Maldives')->withoutOverlapping(240)->name('backup-files');
 
 // Once a month, prove the backups restore: newest backup into DB_DRILL_DATABASE, counts compared, report mailed
 Schedule::command('backup:restore-drill')->monthlyOn(1, '04:00')->withoutOverlapping(120);
@@ -47,9 +51,16 @@ Schedule::call(function () {
 if (config('queue.default') !== 'sync') {
     // A short lock (5 minutes): a worker killed by the host (restart, memory) must not leave the lock
     // behind for Laravel's default 24 hours, which would stop every email and SMS for a day
-    Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5)->name('queue-worker');
+    Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5)->runInBackground()->name('queue-worker'); // up to 50 s: not in the way of the other tasks
 }
 Schedule::command('queue:prune-failed --hours=168')->daily();
+// Tables that only grow otherwise: the database cache keeps an expired row until that exact key is read
+// again (every rate limit, alert flag and lock leaves one), and spent one-time codes are of no use
+Schedule::call(function () {
+    \Illuminate\Support\Facades\DB::table(config('cache.stores.database.table') ?: 'cache')->where('expiration', '<', time())->delete();
+    \Illuminate\Support\Facades\DB::table(config('cache.stores.database.lock_table') ?: 'cache_locks')->where('expiration', '<', time())->delete();
+    \App\Models\OTP::where('created_at', '<', now()->subDay())->delete();
+})->dailyAt('03:30')->timezone('Indian/Maldives')->name('prune-cache-and-codes')->withoutOverlapping(30);
 
 // Yesterday's errors (new ones and the most frequent), mailed only when there is something to say
 Schedule::command('errors:digest')->dailyAt('07:00')->timezone('Indian/Maldives');
@@ -111,7 +122,8 @@ Schedule::command('credit:reminders')->dailyAt('09:05')->timezone('Indian/Maldiv
 Schedule::command('insights:compute-pairs')->dailyAt('03:45')->timezone('Indian/Maldives')->withoutOverlapping(120);
 
 // SMS campaigns whose time has come (Admin → SMS campaigns)
-Schedule::command('sms:send-campaigns')->everyMinute()->withoutOverlapping(120)->name('sms-send-campaigns');
+// In the background: a long campaign must not hold up the rest of the minute's tasks
+Schedule::command('sms:send-campaigns')->everyMinute()->withoutOverlapping(120)->runInBackground()->name('sms-send-campaigns');
 
 // Approved social posts go out (Admin → Social posts)
 Schedule::command('social:publish')->everyFiveMinutes()->withoutOverlapping(120)->name('social-publish');

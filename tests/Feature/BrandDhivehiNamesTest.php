@@ -176,7 +176,7 @@ class BrandDhivehiNamesTest extends TestCase
         $this->nameInDhivehi($this->brand('Samsung'), 'ސާމްސަންގް');
         $charger = $this->product(['brand' => 'Samsung', 'slug' => 'galaxy-charger', 'name' => ['en' => 'Galaxy charger', 'dv' => 'ގެލެކްސީ ޗާޖަރ']]);
         $headphones = $this->product(['brand' => 'Bose', 'slug' => 'bose-headphones', 'name' => ['en' => 'Headphones', 'dv' => 'ހެޑްފޯން']]);
-        $grid = fn (string $brand) => '<p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 truncate">'.$brand.'</p>';
+        $grid = fn (string $brand) => '<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 truncate">'.$brand.'</p>';
         $list = fn (string $brand) => '<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">'.$brand.'</p>';
 
         // The catalogue's cards in both layouts; a brand without a Dhivehi name keeps its own

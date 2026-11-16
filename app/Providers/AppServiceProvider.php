@@ -45,7 +45,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // <script @nonce>: the per-request Content-Security-Policy nonce (SecurityHeaders). Every inline
         // script written in Blade carries it; a script injected through user content would not.
-        \Illuminate\Support\Facades\Blade::directive('nonce', fn () => '<?php echo \'nonce="\'.e(\Illuminate\Support\Facades\Vite::cspNonce() ?? \'\').\'"\'; ?>');
+        // Registered once the Blade compiler is made, not at boot: `composer install` boots the app
+        // (package:discover) before storage/framework/views exists, and making the compiler then fails.
+        $this->callAfterResolving('blade.compiler', fn (\Illuminate\View\Compilers\BladeCompiler $blade) => $blade->directive(
+            'nonce', fn () => '<?php echo \'nonce="\'.e(\Illuminate\Support\Facades\Vite::cspNonce() ?? \'\').\'"\'; ?>'
+        ));
 
         if ($this->app->isProduction()) {
             \Illuminate\Support\Facades\URL::forceScheme('https');

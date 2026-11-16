@@ -427,7 +427,8 @@ class AdminController extends Controller
         $this->checkAdminRole();
 
         $checked = 0;
-        foreach ($order->paymentTransactions()->whereNotNull('transaction_id')->get() as $transaction) {
+        // Only card payments: the wallet's own row (transaction_id wallet-…) is not BML's to check
+        foreach ($order->paymentTransactions()->where('gateway', 'bml')->whereNotNull('transaction_id')->get() as $transaction) {
             try {
                 $payments->syncBml($transaction);
                 $checked++;

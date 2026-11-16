@@ -154,7 +154,21 @@ class PaymentService
         DB::transaction(function () use ($transaction, $state, $remote) {
             $locked = PaymentTransaction::whereKey($transaction->id)->lockForUpdate()->first();
             $order = Order::whereKey($locked->order_id)->lockForUpdate()->first();
+            $wasMismatch = $locked->state === 'MISMATCH';
             $locked->update(['state' => $state, 'response' => $remote]);
+
+            // BML took the money but it doesn't match this order (amount, currency or reference): the order
+            // stays unpaid (and may be cancelled), so the customer is owed it back. Flagged once, and the team told.
+            if ($state === 'MISMATCH' && ! $wasMismatch) {
+                $paid = round(max(0, (int) ($remote['amount'] ?? 0)) / 100, 2);
+                $currency = strtoupper((string) ($remote['currency'] ?? ''));
+                if ($paid > 0) {
+                    $this->flagRefund($order, $paid, 'BML payment did not match the order ('.$currency.' '.number_format($paid, 2).', transaction '.$locked->transaction_id.')');
+                }
+                \App\Support\TeamAlerts::send('refund_due', 'iruali: BML confirmed a payment that does not match order '.$order->order_number.' ('.$currency.' '.number_format($paid, 2).'). Check it in the BML portal and refund it.', route('admin.orders.show', $order));
+
+                return;
+            }
 
             if ($state !== 'CONFIRMED' || $locked->confirmed_at) {
                 return;
@@ -189,13 +203,24 @@ class PaymentService
      */
     public function flagRefund(Order $order, float $amount, string $reason): void
     {
-        $due = $order->refund_status === 'due' ? (float) $order->refund_amount : 0;
-        $order->forceFill([
-            'refund_status' => 'due',
-            'refund_amount' => round($due + $amount, 2),
-            'refund_reason' => $reason,
-        ])->save();
-        \App\Support\Audit::record('refund.flagged', $order, ['amount' => $amount, 'total_due' => $order->refund_amount, 'reason' => $reason, 'order_number' => $order->order_number]);
+        DB::transaction(function () use ($order, $amount, $reason) {
+            // Read again under a lock: two refunds flagged at the same moment (two disputes on one order)
+            // must both count
+            $locked = Order::whereKey($order->id)->lockForUpdate()->first(['refund_status', 'refund_amount', 'refund_reference', 'refunded_at']);
+            $previous = ['status' => $locked?->refund_status, 'amount' => (float) $locked?->refund_amount, 'reference' => $locked?->refund_reference];
+            $due = $locked?->refund_status === 'due' ? (float) $locked->refund_amount : 0;
+            $order->forceFill([
+                'refund_status' => 'due',
+                'refund_amount' => round($due + $amount, 2),
+                'refund_reason' => $reason,
+                // A new amount needs approving again (RefundApproval): an approval covered the amount it saw
+                'refund_approved_at' => null,
+                'refund_approved_by' => null,
+            ])->save();
+            // A refund already sent is replaced by this new one on the order; the audit log keeps the earlier
+            // amount and reference (one row per refund is a follow-up: docs/AUDIT_FIX_PLAN.md 2.6)
+            \App\Support\Audit::record('refund.flagged', $order, ['amount' => $amount, 'total_due' => $order->refund_amount, 'reason' => $reason, 'order_number' => $order->order_number, 'previous' => $previous]);
+        });
         \App\Support\TeamAlerts::send('refund_due', 'iruali: refund due '.\App\Support\Money::format($amount).' on '.$order->order_number.' ('.$reason.').', route('admin.orders.show', $order));
 
         DB::afterCommit(function () use ($order) {
@@ -218,7 +243,12 @@ class PaymentService
             return false;
         }
 
-        $order->forceFill(['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()])->save();
+        // From "due" in one statement: recorded once, whatever is clicked twice
+        $changes = ['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()];
+        if (Order::whereKey($order->id)->where('refund_status', 'due')->update($changes) === 0) {
+            return false;
+        }
+        $order->forceFill($changes)->syncOriginal();
         \App\Support\Audit::record('refund.recorded', $order, ['amount' => $order->refund_amount, 'reference' => $reference, 'order_number' => $order->order_number]);
 
         app(OrderNotifier::class)->sendToCustomer($order, new RefundRecorded($order));

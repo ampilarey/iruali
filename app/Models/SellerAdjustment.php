@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SellerAdjustment extends Model
 {
     // seller_order_id: a booking fee kept for the shop when the order was cancelled (BookingFeeService)
-    protected $fillable = ['seller_id', 'amount', 'reason', 'return_request_id', 'seller_order_id', 'payout_id'];
+    protected $fillable = ['seller_id', 'amount', 'reason', 'return_request_id', 'dispute_id', 'seller_order_id', 'payout_id'];
 
     protected $casts = ['amount' => 'decimal:2'];
 

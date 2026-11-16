@@ -1,0 +1,333 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Dispute;
+use App\Models\Order;
+use App\Models\PaymentTransaction;
+use App\Models\Product;
+use App\Models\ReturnRequest;
+use App\Models\Role;
+use App\Models\SellerAdjustment;
+use App\Models\SellerOrder;
+use App\Models\Setting;
+use App\Models\User;
+use App\Models\Voucher;
+use App\Models\WalletTransaction;
+use App\Services\DisputeService;
+use App\Services\OrderService;
+use App\Services\PaymentService;
+use App\Services\ReturnService;
+use App\Services\WalletService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+/**
+ * Refund money (docs/AUDIT_FIX_PLAN.md batch 2): returns and disputes refund what the items were
+ * actually paid after the iruali voucher and points, never more than the order was paid, once each,
+ * and a cancellation after a dispute refund does not pay the same money again.
+ */
+class RefundMoneyTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected User $customer;
+
+    protected User $shopA;
+
+    protected User $shopB;
+
+    protected User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Notification::fake();
+        Storage::fake('local');
+        Setting::set(['default_commission_rate' => 10, 'return_window_days' => 7, 'late_shipment_days' => 3]);
+
+        $this->customer = User::factory()->create(['loyalty_points' => 1000]);
+        $this->shopA = $this->seller('Island Crafts');
+        $this->shopB = $this->seller('Reefline Marine');
+        $this->admin = User::factory()->create();
+        $this->admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
+    }
+
+    protected function seller(string $name): User
+    {
+        $user = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => $name]);
+        $user->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+
+        return $user;
+    }
+
+    /**
+     * Place an order through the real checkout.
+     *
+     * @param  array<int, array{0: User, 1: float, 2: int}>  $lines  [shop, price, quantity]
+     */
+    protected function order(array $lines, ?string $voucher = null, int $points = 0): Order
+    {
+        $cart = Cart::factory()->create(['user_id' => $this->customer->id, 'status' => 'active']);
+        foreach ($lines as [$shop, $price, $quantity]) {
+            $product = Product::factory()->create(['seller_id' => $shop->id, 'price' => $price, 'stock_quantity' => 50]);
+            CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => $quantity, 'price' => $price]);
+        }
+        if ($voucher) {
+            Session::put('voucher_code', $voucher);
+        }
+        if ($points) {
+            Session::put('points_redeemed', $points);
+        }
+
+        $result = app(OrderService::class)->createOrderFromCart($this->customer, [
+            'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml', 'delivery_zone' => 'islands',
+        ]);
+        $this->assertTrue($result['success'], $result['message'] ?? '');
+
+        return $result['order']->fresh();
+    }
+
+    protected function voucher(float $percent): string
+    {
+        Voucher::create(['code' => 'SAVE'.(int) $percent, 'type' => 'percent', 'amount' => $percent, 'is_active' => true, 'valid_until' => now()->addMonth()]);
+
+        return 'SAVE'.(int) $percent;
+    }
+
+    protected function paidAndDelivered(Order $order): Order
+    {
+        app(PaymentService::class)->confirm($order->fresh());
+        $this->actingAs($this->admin);
+        foreach (['processing', 'shipped', 'delivered'] as $status) {
+            $this->post(route('admin.orders.status', $order), ['status' => $status]);
+        }
+
+        return $order->fresh();
+    }
+
+    protected function part(Order $order, User $shop): SellerOrder
+    {
+        return $order->sellerOrders()->where('seller_id', $shop->id)->firstOrFail();
+    }
+
+    protected function returnAll(Order $order, User $shop, string $reason = 'changed_mind', ?int $qty = null): ReturnRequest
+    {
+        $part = $this->part($order, $shop);
+        $item = $part->items()->firstOrFail();
+
+        return app(ReturnService::class)->request($part, $this->customer, [$item->id => $qty ?? $item->quantity], $reason, 'Not what I wanted.', null);
+    }
+
+    // ---- 2.1: values after the voucher and points -----------------------------------------------
+
+    public function test_a_voucher_is_shared_over_the_items_and_a_return_refunds_what_was_paid(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 500, 1], [$this->shopB, 500, 1]], $this->voucher(20)));
+        $this->assertEquals(200, $order->voucher_discount);
+        $this->assertEquals([400.0, 400.0], $order->items->map->paidTotal()->all());
+
+        $return = $this->returnAll($order, $this->shopA);
+        $this->assertEquals(400, $return->items_value, 'what was paid for the item, not its 500 price');
+        $this->assertEquals(400, app(ReturnService::class)->suggestedRefund($return));
+
+        // More than was paid for it can't be approved
+        $this->assertFalse(app(ReturnService::class)->approve($return, 500, false, null, $this->admin));
+        $this->assertTrue(app(ReturnService::class)->approve($return->fresh(), 400, false, null, $this->admin));
+
+        // The shop gives back what it earned on the item (500 less 10%): the voucher was iruali's
+        $this->assertEquals(-450, SellerAdjustment::sole()->amount);
+    }
+
+    public function test_redeemed_points_never_come_back_as_cash(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 1000, 1]], null, 200));
+        $this->assertEquals(800, $order->items->first()->paidTotal());
+
+        $return = $this->returnAll($order, $this->shopA, 'faulty');
+        $this->assertEquals(800, $return->items_value);
+        $this->assertLessThanOrEqual((float) $order->total_amount, app(ReturnService::class)->suggestedRefund($return));
+        $this->assertLessThanOrEqual(800 + (float) $order->shipping_amount, app(ReturnService::class)->suggestedRefund($return));
+    }
+
+    public function test_a_voucher_and_points_together_and_partial_returns_add_up_to_what_was_paid(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 3], [$this->shopB, 300, 1]], $this->voucher(20), 60));
+        // 600 of goods, voucher 120 (60 on each line), then 60 points over 480 (30 each): 210 and 210
+        $this->assertEquals([210.0, 210.0], $order->items->map->paidTotal()->all());
+        $this->assertEquals(round((float) $order->items->sum->paidTotal() + (float) $order->shipping_amount, 2), (float) $order->total_amount);
+
+        $returns = app(ReturnService::class);
+        $first = $this->returnAll($order, $this->shopA, 'changed_mind', 1);
+        $this->assertEquals(70, $first->items_value);
+        $returns->approve($first, 70, false, null, $this->admin);
+        $second = $this->returnAll($order->fresh(), $this->shopA, 'changed_mind', 2);
+        $this->assertEquals(140, $second->items_value);
+        $returns->approve($second, 140, false, null, $this->admin);
+        $third = $this->returnAll($order->fresh(), $this->shopB);
+        $returns->approve($third, (float) $third->items_value, false, null, $this->admin);
+
+        $refunded = (float) ReturnRequest::where('status', 'approved')->sum('refund_amount');
+        $this->assertEquals(420, $refunded);
+        $this->assertLessThanOrEqual((float) $order->total_amount, $refunded);
+    }
+
+    // ---- 2.2: disputes and returns on the same items --------------------------------------------
+
+    public function test_a_return_waits_while_a_dispute_is_open_and_a_dispute_pays_only_what_returns_left(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 2], [$this->shopB, 100, 1]]));
+        $part = $this->part($order, $this->shopA);
+        $disputes = app(DisputeService::class);
+
+        $dispute = $disputes->open($part, $this->customer, 'item_not_as_described', 200, 'Both arrived broken.');
+        $this->assertNotNull($dispute);
+        $this->assertFalse(app(ReturnService::class)->canRequest($part->fresh(), $this->customer), 'the dispute decides first');
+
+        // A return decided anyway (an older request) takes 150 of the 200: the dispute pays only 50
+        $return = ReturnRequest::forceCreate(['order_id' => $order->id, 'seller_order_id' => $part->id, 'user_id' => $this->customer->id, 'status' => 'approved', 'reason' => 'faulty', 'items_value' => 200, 'refund_amount' => 150, 'resolved_at' => now()]);
+        $this->assertTrue($disputes->resolve($dispute, $this->admin, 'full', null, null));
+        $this->assertEquals(50, $dispute->fresh()->amount_resolved);
+        $this->assertEquals(50, $order->fresh()->refund_amount);
+
+        // Nothing left: a new dispute on the part refunds nothing
+        $this->assertSame(0.0, $disputes->maxClaim($part->fresh()));
+        $this->assertNotNull($return);
+    }
+
+    public function test_after_a_dispute_refund_a_return_can_only_take_what_is_left(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 2], [$this->shopB, 100, 1]]));
+        $part = $this->part($order, $this->shopA);
+        $disputes = app(DisputeService::class);
+        $dispute = $disputes->open($part, $this->customer, 'item_not_as_described', 150, 'One arrived broken.');
+        $disputes->resolve($dispute, $this->admin, 'full', null, null);
+
+        $return = $this->returnAll($order->fresh(), $this->shopA, 'faulty');
+        $this->assertFalse(app(ReturnService::class)->approve($return, 100, false, null, $this->admin), 'only 50 of the 200 is left');
+        $this->assertTrue(app(ReturnService::class)->approve($return->fresh(), 50, false, null, $this->admin));
+    }
+
+    // ---- 2.3: cancelling after a dispute refund ------------------------------------------------
+
+    public function test_cancelling_after_a_dispute_refund_refunds_the_payment_once_and_gives_the_shop_its_deduction_back(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 2]]);
+        app(PaymentService::class)->confirm($order);
+        $order->forceFill(['paid_at' => now()->subDays(10)])->save();
+        $part = $this->part($order, $this->shopA);
+        $disputes = app(DisputeService::class);
+
+        $dispute = $disputes->open($part, $this->customer, 'non_delivery', 120, 'Nothing arrived.');
+        $this->assertTrue($disputes->resolve($dispute, $this->admin, 'full', null, null));
+        $this->assertEquals(120, $order->fresh()->refund_amount);
+
+        $this->assertTrue(app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled'));
+
+        $order->refresh();
+        $this->assertSame('due', $order->refund_status);
+        $this->assertEquals((float) $order->total_amount, (float) $order->refund_amount, 'the payment back once, not 120 more');
+        $this->assertEquals(0, (float) SellerAdjustment::where('seller_id', $this->shopA->id)->sum('amount'), 'the cancelled part earns nothing and owes nothing');
+
+        // Cancelling can't run twice
+        $this->assertFalse(app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled'));
+        $this->assertSame(2, SellerAdjustment::count());
+    }
+
+    // ---- 2.4 and 2.5: once only ----------------------------------------------------------------
+
+    public function test_refund_to_wallet_credits_once_even_from_a_stale_page(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        app(PaymentService::class)->confirm($order);
+        app(PaymentService::class)->flagRefund($order->fresh(), 60, 'Test');
+        // Two admins (or a double click) with the order loaded before either recorded it
+        [$first, $second] = [$order->fresh(), $order->fresh()];
+        $wallets = app(WalletService::class);
+
+        $this->assertTrue($wallets->refundOrderToWallet($first));
+        $this->assertFalse($wallets->refundOrderToWallet($second), 'the second copy still says "due"');
+        $this->assertEquals(60, (float) WalletTransaction::where('user_id', $this->customer->id)->where('type', 'refund')->sum('amount'));
+        $this->assertSame('refunded', $order->fresh()->refund_status);
+    }
+
+    public function test_return_refund_to_wallet_credits_once(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 1]]));
+        $return = $this->returnAll($order, $this->shopA, 'faulty');
+        app(ReturnService::class)->approve($return, 100, false, null, $this->admin);
+        [$first, $second] = [$return->fresh(), $return->fresh()];
+
+        $this->assertTrue(app(WalletService::class)->refundReturnToWallet($first));
+        $this->assertFalse(app(WalletService::class)->refundReturnToWallet($second), 'the second copy still says "approved"');
+        $this->assertEquals(100, (float) WalletTransaction::where('user_id', $this->customer->id)->where('type', 'refund')->sum('amount'));
+    }
+
+    public function test_a_dispute_is_decided_once(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 2]]));
+        $disputes = app(DisputeService::class);
+        $dispute = $disputes->open($this->part($order, $this->shopA), $this->customer, 'item_not_as_described', 100, 'Broken.');
+        $stale = Dispute::find($dispute->id);
+
+        $this->assertTrue($disputes->resolve($dispute, $this->admin, 'full', null, null));
+        $this->assertFalse($disputes->resolve($stale, $this->admin, 'full', null, null), 'a second decision from a stale page');
+        $this->assertEquals(100, $order->fresh()->refund_amount);
+        $this->assertSame(1, SellerAdjustment::count());
+    }
+
+    // ---- 2.6: a changed refund needs approving again --------------------------------------------
+
+    public function test_a_new_refund_amount_clears_the_earlier_approval(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        app(PaymentService::class)->flagRefund($order, 50, 'First');
+        $order->fresh()->forceFill(['refund_approved_at' => now(), 'refund_approved_by' => $this->admin->id])->save();
+
+        app(PaymentService::class)->flagRefund($order->fresh(), 500, 'Second');
+
+        $order->refresh();
+        $this->assertEquals(550, $order->refund_amount);
+        $this->assertNull($order->refund_approved_at);
+        $this->assertNull($order->refund_approved_by);
+    }
+
+    // ---- 2.9: a BML payment that doesn't match --------------------------------------------------
+
+    public function test_a_bml_payment_that_does_not_match_is_flagged_for_a_refund_once(): void
+    {
+        config(['services.bml.api_key' => 'test-key']);
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        $transaction = PaymentTransaction::create(['order_id' => $order->id, 'gateway' => 'bml', 'transaction_id' => 'bml-1', 'local_id' => 'L1', 'amount' => (int) round((float) $order->total_amount * 100), 'currency' => 'MVR', 'state' => 'INITIATED']);
+        \Illuminate\Support\Facades\Http::fake(['*' => \Illuminate\Support\Facades\Http::response(['id' => 'bml-1', 'state' => 'CONFIRMED', 'amount' => 999, 'currency' => 'MVR', 'localId' => 'L1'])]);
+
+        app(PaymentService::class)->syncBml($transaction);
+        app(PaymentService::class)->syncBml($transaction->fresh());
+
+        $order->refresh();
+        $this->assertSame('MISMATCH', $transaction->fresh()->state);
+        $this->assertNotSame('paid', $order->payment_status);
+        $this->assertSame('due', $order->refund_status);
+        $this->assertEquals(9.99, $order->refund_amount, 'what BML took, flagged once');
+    }
+
+    // ---- 2.10: wallet rows are not card payments -----------------------------------------------
+
+    public function test_wallet_payments_are_not_counted_as_card_money(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        PaymentTransaction::create(['order_id' => $order->id, 'gateway' => 'wallet', 'transaction_id' => 'wallet-1', 'local_id' => 'W1', 'amount' => 5000, 'currency' => 'MVR', 'state' => 'CONFIRMED', 'confirmed_at' => now()]);
+        PaymentTransaction::create(['order_id' => $order->id, 'gateway' => 'bml', 'transaction_id' => 'bml-2', 'local_id' => 'L2', 'amount' => 7000, 'currency' => 'MVR', 'state' => 'CONFIRMED', 'confirmed_at' => now()]);
+        Setting::set(['card_fee_percent' => 10]);
+
+        $report = app(\App\Services\FinanceService::class)->profitAndLoss(now()->format('Y-m'));
+        $this->assertEquals(70, $report['card_total'], 'only the card payment');
+        $this->assertEquals(7, $report['card_fees']);
+    }
+}

@@ -199,6 +199,15 @@ class SellerOrder extends Model
         return round((float) $this->subtotal - (float) $this->shop_discount, 2);
     }
 
+    /**
+     * What the customer actually paid for this shop's items: after the shop's discounts and the
+     * items' share of the iruali voucher and points (OrderItem::paidTotal()).
+     */
+    public function paidSubtotal(): float
+    {
+        return round($this->items()->get()->sum(fn (OrderItem $item) => $item->paidTotal()), 2);
+    }
+
     // ---- Pick up from the shop ------------------------------------------------------------
 
     public const METHOD_DELIVER = 'deliver';

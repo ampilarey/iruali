@@ -227,10 +227,20 @@ class DiscountService
     {
         $rewards = ['referrer_points' => 0, 'user_points' => 0];
 
-        // One reward per referred customer, given when their first order is paid.
+        // One reward per referred customer, for their first order that is paid and delivered: given at
+        // payment, an order cancelled right after (wallet refunded at once) would keep the points, and
+        // new accounts could farm them
         if (! $user->referred_by || $user->referral_rewarded_at) {
             return $rewards;
         }
+        if ($order && ($order->payment_status !== 'paid' || $order->status !== 'delivered')) {
+            return $rewards;
+        }
+        // Stamped first, in one statement: two orders delivered at the same moment give it once
+        if (User::whereKey($user->id)->whereNull('referral_rewarded_at')->update(['referral_rewarded_at' => now()]) === 0) {
+            return $rewards;
+        }
+        $user->forceFill(['referral_rewarded_at' => now()])->syncOriginal();
 
         $referrer = $user->referredBy;
         if ($referrer) {
@@ -243,8 +253,6 @@ class DiscountService
 
             $rewards = ['referrer_points' => $referrerPoints, 'user_points' => $userPoints];
         }
-
-        $user->forceFill(['referral_rewarded_at' => now()])->save();
 
         return $rewards;
     }

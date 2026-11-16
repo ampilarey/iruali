@@ -104,7 +104,7 @@ class WalletService
      */
     public function reverseOrderPayment(Order $order): float
     {
-        $amount = BookingFeeService::refundSplit($order, (float) $order->deposit_kept_amount)['wallet'];
+        $amount = BookingFeeService::cancelRefund($order, (float) $order->deposit_kept_amount)['wallet'];
         if ($amount <= 0 || $order->wallet_refunded_at || ! $order->user) {
             return 0.0;
         }
@@ -131,10 +131,15 @@ class WalletService
         }
 
         return DB::transaction(function () use ($order) {
-            $row = $this->credit($order->user, (float) $order->refund_amount, 'refund', ['order_id' => $order->id, 'note' => __('Refund for order :number', ['number' => $order->order_number])]);
-            $row->update(['reference' => 'WALLET-'.$row->id]);
+            // Recorded first, from "due" in one statement: a second click (or a second admin at the same
+            // moment) changes nothing and credits nothing
+            $reference = 'WALLET-'.\Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(10));
+            if (! app(PaymentService::class)->markRefunded($order, $reference)) {
+                return false;
+            }
+            $this->credit($order->user, (float) $order->refund_amount, 'refund', ['order_id' => $order->id, 'reference' => $reference, 'note' => __('Refund for order :number', ['number' => $order->order_number])]);
 
-            return app(PaymentService::class)->markRefunded($order, 'WALLET-'.$row->id);
+            return true;
         });
     }
 
@@ -149,10 +154,14 @@ class WalletService
         }
 
         return DB::transaction(function () use ($return, $user) {
-            $row = $this->credit($user, (float) $return->refund_amount, 'refund', ['order_id' => $return->order_id, 'note' => __('Return refund for order :number', ['number' => $return->order->order_number ?? '#'.$return->order_id])]);
-            $row->update(['reference' => 'WALLET-'.$row->id]);
+            // Recorded first, from "approved" in one statement: credited once whatever is clicked
+            $reference = 'WALLET-'.\Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(10));
+            if (! app(ReturnService::class)->markRefunded($return, $reference)) {
+                return false;
+            }
+            $this->credit($user, (float) $return->refund_amount, 'refund', ['order_id' => $return->order_id, 'reference' => $reference, 'note' => __('Return refund for order :number', ['number' => $return->order->order_number ?? '#'.$return->order_id])]);
 
-            return app(ReturnService::class)->markRefunded($return, 'WALLET-'.$row->id);
+            return true;
         });
     }
 }

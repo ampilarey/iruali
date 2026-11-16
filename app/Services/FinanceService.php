@@ -28,7 +28,8 @@ class FinanceService
             'delivery' => round($report['iruali']['delivery']['net'] - $report['iruali']['delivery']['net_gst'], 2),
         ];
 
-        $cardTotal = round((float) PaymentTransaction::where('state', 'CONFIRMED')->whereBetween('confirmed_at', [$from, $to])->sum('amount') / 100, 2);
+        // Card payments only (BML's fee is on those): wallet-paid amounts are not card money
+        $cardTotal = round((float) PaymentTransaction::where('gateway', 'bml')->where('state', 'CONFIRMED')->whereBetween('confirmed_at', [$from, $to])->sum('amount') / 100, 2);
         $expenses = Expense::whereBetween('spent_on', [$from->toDateString(), $to->toDateString()])->orderBy('spent_on')->get();
         $byCategory = $expenses->groupBy('category')->map(fn ($rows) => round((float) $rows->sum('amount') - (float) $rows->sum('gst_amount'), 2));
         $cardFees = $byCategory->has('card_fees') ? 0.0 : round($cardTotal * max(0, (float) Setting::get('card_fee_percent', 0)) / 100, 2);

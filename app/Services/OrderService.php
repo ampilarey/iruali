@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\SellerAdjustment;
 use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
@@ -138,6 +139,9 @@ class OrderService
 
             // Pay later: within the business's credit left, nothing overdue; the invoice is due after its terms
             if (($shippingData['payment_method'] ?? null) === CreditService::METHOD) {
+                // The credit account locked until this order is saved: two checkouts at the same moment
+                // must not both fit in the same credit left
+                app(CreditService::class)->lockAccount($user);
                 if ($problem = app(CreditService::class)->problem($user, (float) $discounts['final_total'] + (float) $shippingData['shipping_amount'])) {
                     throw new \RuntimeException($problem);
                 }
@@ -165,6 +169,8 @@ class OrderService
 
             // Shop-funded discounts (multi-buy, shop codes) onto the items, and the codes' uses recorded
             app(ShopDiscountService::class)->applyToOrder($order, $discounts['shop'], $user, $guest['email'] ?? null);
+            // What each line was actually paid, after the iruali voucher and points: what a return refunds
+            \App\Support\PaidShares::apply($order);
 
             // One part per shop, with its own fulfilment status and the shop's earnings
             app(FulfilmentService::class)->createParts($order);
@@ -354,8 +360,9 @@ class OrderService
     }
 
     /**
-     * Give the customer the points this order earns, and the referral reward if this is their first
-     * paid order. Runs when payment is confirmed; safe to call again.
+     * Give the customer the points this order earns, and the referral reward once their first order is
+     * paid and delivered (DiscountService::processReferralRewards()). Runs when payment is confirmed
+     * and when the order is delivered; safe to call again.
      */
     public function awardRewards(Order $order): void
     {
@@ -521,13 +528,17 @@ class OrderService
             $order->update(['status' => $status]);
 
             // The wallet's share went straight back in reverseOrder(); only the card part needs a manual refund
-            $refund = $status === 'cancelled' ? BookingFeeService::refundSplit($order, (float) $order->deposit_kept_amount)['card'] : 0.0;
+            // (less what dispute refunds on the order already gave back: BookingFeeService::cancelRefund())
+            $refund = $status === 'cancelled' ? BookingFeeService::cancelRefund($order, (float) $order->deposit_kept_amount)['card'] : 0.0;
             if ($refund > 0) {
                 app(PaymentService::class)->flagRefund($order, $refund, (float) $order->deposit_kept_amount > 0 ? 'Order cancelled after payment (booking fee kept)' : 'Order cancelled after payment');
             }
 
             // Bring every shop's part along with the order
             app(FulfilmentService::class)->cascadeFromOrder($order, $status);
+            if ($status === 'cancelled') {
+                $this->reverseDisputeDeductions($order);
+            }
 
             return true;
         });
@@ -536,6 +547,9 @@ class OrderService
         }
 
         \App\Support\Audit::record($status === 'cancelled' ? 'order.cancelled' : 'order.status', $order, ['from' => $before, 'to' => $status, 'order_number' => $order->order_number]);
+        if ($status === 'delivered') {
+            $this->awardRewards($order->fresh()); // the referral reward waits for delivery
+        }
         app(OrderNotifier::class)->statusChanged($order->fresh());
 
         return true;
@@ -556,9 +570,35 @@ class OrderService
         }
 
         $order->update(['status' => $target]);
+        if ($target === 'delivered') {
+            $this->awardRewards($order->fresh()); // the referral reward waits for delivery
+        }
         app(OrderNotifier::class)->statusChanged($order->fresh());
 
         return true;
+    }
+
+    /**
+     * A cancelled order's shop parts earn nothing, so the deductions dispute refunds made from the
+     * shops are given back (once each). The customer's refund is covered by the cancellation itself.
+     */
+    protected function reverseDisputeDeductions(Order $order): void
+    {
+        foreach (\App\Models\Dispute::where('order_id', $order->id)->where('amount_resolved', '>', 0)->get() as $dispute) {
+            $reason = 'Dispute #'.$dispute->id.' on order '.$order->order_number;
+            $rows = SellerAdjustment::where(fn ($q) => $q->where('dispute_id', $dispute->id)
+                ->orWhere(fn ($q) => $q->whereNull('dispute_id')->where('reason', $reason)))->get(); // older rows were linked by their reason only
+            $taken = round(-(float) $rows->where('amount', '<', 0)->sum('amount'), 2);
+            $givenBack = round((float) $rows->where('amount', '>', 0)->sum('amount'), 2);
+            if ($taken - $givenBack > 0) {
+                SellerAdjustment::create([
+                    'seller_id' => $rows->first()->seller_id,
+                    'amount' => round($taken - $givenBack, 2),
+                    'reason' => 'Order '.$order->order_number.' cancelled: dispute #'.$dispute->id.' deduction given back',
+                    'dispute_id' => $dispute->id,
+                ]);
+            }
+        }
     }
 
     /**

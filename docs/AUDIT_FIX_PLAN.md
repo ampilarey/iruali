@@ -1,6 +1,6 @@
 # Audit fix plan (audit of 2026-11-16)
 
-Status: **Batch 1 done (2026-11-16); Batches 2–6 to do.** A read-only audit of `main` at `93832c1` found the items below.
+Status: **Batches 1–2 done (2026-11-16); Batches 3–6 to do.** A read-only audit of `main` at `93832c1` found the items below.
 This file is the work order: do the batches in order, one pull request per batch.
 
 Tick an item (`[x]`) in this file in the same PR that fixes it.
@@ -169,7 +169,7 @@ Severity: **H** high, **M** medium, **L** low.
 
 Do 2.1 first; 2.2–2.4 build on it.
 
-### 2.1 [ ] H: returns and disputes are valued without the iruali voucher and points (confirm)
+### 2.1 [x] H: returns and disputes are valued without the iruali voucher and points (confirm)
 
 - **Where:**
   - `ReturnService::unitsValue`, `suggestedRefund`, `approve`;
@@ -191,8 +191,10 @@ Do 2.1 first; 2.2–2.4 build on it.
   - Keep `refund_value` history working for old returns.
 - **Tests:** scenarios with a 20% voucher, with points, with both, multi-shop, and partial quantities.
   Refunds across all items must never exceed the amount paid.
+- **Done** with owner decision A at its default. **Follow-up (not decided):** points redeemed on
+  returned items are not given back as points; only a full cancellation returns them.
 
-### 2.2 [ ] H: dispute refund is not re-capped, and a later return pays again
+### 2.2 [x] H: dispute refund is not re-capped, and a later return pays again
 
 - **Where:** `DisputeService::resolve` (uses `amount_claimed` fixed at open); `ReturnService::canRequest`
   (ignores open disputes).
@@ -206,7 +208,7 @@ Do 2.1 first; 2.2–2.4 build on it.
 - **Test:** dispute opened → return approved and refunded → dispute resolved "full" pays only the
   remainder. Also the opposite order.
 
-### 2.3 [ ] H: cancelling after a dispute/return refund refunds twice (confirm)
+### 2.3 [x] H: cancelling after a dispute/return refund refunds twice (confirm)
 
 - **Where:**
   - `OrderService` cancel path (around `reverseOrder`);
@@ -220,7 +222,7 @@ Do 2.1 first; 2.2–2.4 build on it.
 - **Test:** paid order, dispute resolved full, then admin cancel → total refunded equals amount paid.
   Shop adjustments net to zero.
 
-### 2.4 [ ] H: "refund to wallet" can credit twice
+### 2.4 [x] H: "refund to wallet" can credit twice
 
 - **Where:**
   - `WalletService::refundOrderToWallet`, `refundReturnToWallet`;
@@ -234,7 +236,7 @@ Do 2.1 first; 2.2–2.4 build on it.
   - Apply the same guard when recording a card refund.
 - **Test:** call twice in a row with a stale model; the wallet is credited once.
 
-### 2.5 [ ] M: dispute resolve is not once-only; `flagRefund` loses updates
+### 2.5 [x] M: dispute resolve is not once-only; `flagRefund` loses updates
 
 - **Where:** `DisputeService::resolve`; `PaymentService::flagRefund`.
 - **Fix:**
@@ -242,7 +244,7 @@ Do 2.1 first; 2.2–2.4 build on it.
   - `flagRefund` locks the order row and re-reads before adding.
 - **Test:** double resolve creates one refund and one adjustment.
 
-### 2.6 [ ] M: refund approval is reused when the amount changes
+### 2.6 [x] M: refund approval is reused when the amount changes
 
 - **Where:** `PaymentService::flagRefund`; `App\Support\RefundApproval`.
 - **Fix:**
@@ -251,24 +253,26 @@ Do 2.1 first; 2.2–2.4 build on it.
     `refunds` table (one row per refund: amount, reason, reference, approved by, paid at), with the
     order columns as a running summary. If that is too large for this batch, at least clear the
     approval and write the audit record. Note the table as a follow-up.
+  - **Done:** the approval is cleared and the audit record keeps the earlier status, amount and
+    reference. **Follow-up (not done):** the `refunds` table, one row per refund.
 
-### 2.7 [ ] M: referral points are not taken back on cancel, and can be awarded twice
+### 2.7 [x] M: referral points are not taken back on cancel, and can be awarded twice
 
 - **Where:** `DiscountService::processReferralRewards`; `OrderService::reverseOrder`.
 - **Fix:** award when the order is **delivered** (owner decision B), with a conditional stamp on
   `referral_rewarded_at`. If awarding at payment is kept, record the rewarding order and reverse on cancel.
 
-### 2.8 [ ] M: pay-later credit limit race
+### 2.8 [x] M: pay-later credit limit race
 
 - **Where:** `CreditService` (the check called from `OrderService` around line 141).
 - **Fix:** `lockForUpdate()` the `credit_accounts` row inside the checkout transaction before the check.
 
-### 2.9 [ ] M: BML "mismatch" payments are silent
+### 2.9 [x] M: BML "mismatch" payments are silent
 
 - **Where:** `PaymentService::syncBml` (the MISMATCH branch); `ReconcileBmlPayments`.
 - **Fix:** on MISMATCH, flag a refund for the amount BML reports and send a team alert.
 
-### 2.10 [ ] L: wallet rows treated as BML rows
+### 2.10 [x] L: wallet rows treated as BML rows
 
 - **Where:**
   - `Admin/AdminController::syncBmlPayment` (loops over all transactions);

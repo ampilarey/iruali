@@ -56,6 +56,24 @@ class ReturnRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * The returned units at their value after the shop's own discounts (before the iruali voucher
+     * and points): the shop's sale that the return undoes (App\Support\RefundSplit).
+     */
+    public function itemsNetValue(): float
+    {
+        $lines = $this->items()->with('orderItem')->get();
+        if ($lines->isEmpty() || $lines->contains(fn (ReturnRequestItem $line) => ! $line->orderItem)) {
+            return round((float) $this->items_value, 2); // no lines to value (made by hand): what it was valued at
+        }
+
+        return round($lines->sum(function (ReturnRequestItem $line) {
+            $item = $line->orderItem;
+
+            return $item ? $item->netTotal() * (int) $line->quantity / max(1, (int) $item->quantity) : 0.0;
+        }), 2);
+    }
+
     /** @return HasMany<ReturnRequestItem, $this> */
     public function items(): HasMany
     {

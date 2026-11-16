@@ -38,6 +38,7 @@ class ReturnService
             && $part->status === 'delivered'
             && $this->withinWindow($part)
             && ! $part->returnRequests()->whereIn('status', ['requested', 'approved'])->exists()
+            && ! $part->disputes()->open()->exists() // the dispute decides first: both could refund the same items
             && $this->returnableItems($part)->isNotEmpty();
     }
 
@@ -121,7 +122,8 @@ class ReturnService
     public function unitsValue(OrderItem $item, int $count): float
     {
         $quantity = max(1, (int) $item->quantity);
-        $net = ShopDiscountService::toLaari($item->netTotal());
+        // What was actually paid: after the shop's discounts and the line's share of the iruali voucher and points
+        $net = ShopDiscountService::toLaari($item->paidTotal());
 
         // Returns from before refund values were kept were valued at the item's price
         $earlier = DB::table('return_request_items')
@@ -187,6 +189,11 @@ class ReturnService
         if ($request->status !== 'requested' || $refund < 0 || $refund > $this->refundableLeft($request) + 0.001) {
             return false;
         }
+        // Nor more than is left on this shop's part: its items and delivery as paid, less returns and
+        // dispute refunds already decided on it
+        if ($request->sellerOrder && $refund > app(DisputeService::class)->maxClaim($request->sellerOrder) + 0.001) {
+            return false;
+        }
         // No money back, and nothing taken from the shop, on an order that was never paid (a card
         // order left unpaid, cash not yet confirmed): the items can still come back with a refund of 0
         $paid = $request->order->payment_status === 'paid';
@@ -218,14 +225,12 @@ class ReturnService
                 }
             }
 
-            // Take back what the shop earned on the returned items (their price less commission).
+            // Take back what the shop earned on the returned items: their value after its own discounts
+            // (the voucher and points were iruali's) less commission, for the part of them refunded, and
+            // its own delivery charge refunded beyond the items (App\Support\RefundSplit)
             $part = $request->sellerOrder;
             if ($paid && $part?->seller_id) {
-                // The shop gives back its share of what the customer is actually refunded for the items
-                $base = min((float) $refund, (float) $request->items_value);
-                $shopShare = round($base * (1 - (float) $part->commission_rate / 100), 2);
-                // and its own delivery charge refunded beyond the items (no commission was taken on it)
-                $shopShare = round($shopShare + $part->deliveryRefundShare((float) $refund, (float) $request->items_value), 2);
+                $shopShare = \App\Support\RefundSplit::of($part, (float) $refund, (float) $request->items_value, $request->itemsNetValue())['shop_gives_back'];
                 if ($shopShare > 0) {
                     SellerAdjustment::create([
                         'seller_id' => $part->seller_id,
@@ -266,7 +271,12 @@ class ReturnService
             return false;
         }
 
-        $request->update(['status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()]);
+        // Only from "approved", in one statement: recorded once (the wallet is credited only when this changed a row)
+        $changes = ['status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()];
+        if (ReturnRequest::whereKey($request->id)->where('status', 'approved')->update($changes) === 0) {
+            return false;
+        }
+        $request->forceFill($changes)->syncOriginal();
         $this->notifyCustomer($request->fresh());
 
         return true;

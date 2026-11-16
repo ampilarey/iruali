@@ -112,14 +112,21 @@ If BML changes the template, change `BankFileFormat` and the byte-for-byte test 
    notes and a photo (required for damaged or wrong items). One open request per shop part at a time.
 2. The shop and the admin contact email are emailed. Shops see requests under Seller Centre → **Returns**.
 3. **Admin → Returns** → open a request:
-   - **Approve** with the refund amount. The suggestion is the items' value, plus, when the shop was at
-     fault, its own delivery charge if it delivered the part itself, else the delivery fee when it was the
-     only shop in the order. A refund beyond the items' value is taken back from the shop up to its own
-     delivery charge. The refund can't exceed what is left on the
-     order. Tick **Put the items back in stock** if they can be resold.
+   - **Approve** with the refund amount. The suggestion is what the customer actually paid for the
+     items (after the shop's discounts and the items' share of any iruali voucher and points:
+     `order_items.paid_total`), plus, when the shop was at fault, its own delivery charge if it delivered
+     the part itself, else the delivery fee when it was the only shop in the order. A refund beyond the
+     items' value is taken back from the shop up to its own delivery charge. The refund can't exceed what
+     is left on that shop's part (after other returns and dispute refunds on it) or on the order. A return
+     can't be asked for while a dispute is open on the same part.
+     Tick **Put the items back in stock** if they can be resold.
    - Or **Reject** with a reason (sent to the customer).
-4. Approving takes the shop's share of the returned items (price less the part's commission) from its
-   earnings as an **adjustment**. It is settled in the shop's next payout, whether or not that order was
+4. Approving takes back what the shop earned on the returned items from its earnings as an
+   **adjustment**: their value after the shop's own discounts, less the part's commission, for the share
+   of them refunded (`App\Support\RefundSplit`; the same split is used for disputes and the GST report).
+   An iruali voucher or points on those items stay iruali's cost, so the shop gives back what it earned,
+   not just what the customer paid. Redeemed points are not paid back as money, and are not given back on
+   a return (only when the whole order is cancelled). It is settled in the shop's next payout, whether or not that order was
    already paid out. If deductions are more than what is ready, no payout can be recorded until new sales
    cover them.
 5. Send the money: card orders are refunded in the **BML merchant portal**; other payments by bank
@@ -127,3 +134,13 @@ If BML changes the template, change `BankFileFormat` and the byte-for-byte test 
    the status and reference on their order.
 
 Adjustments show on the payout page, statement CSV and Seller Centre → Earnings.
+
+**Disputes** are capped the same way: what is left of what the shop's items were paid (plus delivery as
+above), less returns and earlier dispute refunds on the part, and never more than is left on the order.
+The cap is worked out again when the dispute is decided. Each refund is recorded once (a double click or
+two admins at once change nothing the second time), including "Refund to wallet". If a dispute refund is
+followed by cancelling the order, the cancellation refunds only the rest of the payment and gives the shop
+back the dispute's deduction (a cancelled part earns nothing). A new amount flagged on an order clears an
+earlier refund approval. A BML payment that does not match its order (amount, currency or reference) is
+flagged as a refund due and the team is alerted. Referral rewards are given when the referred customer's
+first order is paid **and delivered**, once.

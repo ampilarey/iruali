@@ -62,4 +62,15 @@ class PhoneAndLanguageFixesTest extends TestCase
         $this->get(route('login.email'))->assertOk()->assertSee('<h1', false);
         $this->get(route('register'))->assertOk()->assertSee('<h1', false);
     }
+
+    public function test_the_stock_page_names_every_box_for_screen_readers(): void
+    {
+        $shop = User::factory()->create(['is_seller' => true, 'seller_approved' => true, 'business_name' => 'Island Crafts']);
+        $shop->roles()->attach(Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller'])->id);
+        Product::factory()->create(['seller_id' => $shop->id, 'name' => ['en' => 'Reed mat'], 'stock_quantity' => 5]);
+
+        $html = $this->actingAs($shop)->followingRedirects()->get(route('seller.stock'))->assertOk()->getContent();
+        $this->assertStringContainsString('aria-label="Stock of Reed mat"', $html);
+        $this->assertStringContainsString('aria-label="Search name or SKU"', $html);
+    }
 }

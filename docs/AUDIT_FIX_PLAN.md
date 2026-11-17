@@ -1,6 +1,6 @@
 # Audit fix plan (audit of 2026-11-16)
 
-Status: **Batches 1–3 done (2026-11-17); Batches 4–6 to do.** A read-only audit of `main` at `93832c1` found the items below.
+Status: **All six batches done and live (2026-11-17), checked item by item against `main` the same day; what was left for later is in `docs/LATER.md` ("Left over from the audit").** A read-only audit of `main` at `93832c1` found the items below.
 This file is the work order: do the batches in order, one pull request per batch.
 
 Tick an item (`[x]`) in this file in the same PR that fixes it.
@@ -450,7 +450,7 @@ Done: `bash -n` and shellcheck clean.
 
 ### 4.5 [x] M: tables and logs that only grow
 
-Done: codes stored as an HMAC with the app key; the migration empties `otps`.
+Done: codes stored as an HMAC with the app key; the migration empties `otps`. The daily clean-up got its test (`UntestedRoutesTest`) in the verification pass.
 
 - Daily prune of expired `cache` and `cache_locks` rows (database cache store).
 - Daily prune of `otps` older than a day. Store OTP codes hashed (`hash('sha256', code . app key)`),
@@ -566,7 +566,7 @@ Check every change at 390×844 in English and Dhivehi.
   Done.
 - [x] **5.8 L:** text under 12px: `text-[11px]` → `text-xs` on product cards and badges; chart
   axis labels.
-  Done on product cards, badges and the chart labels. The header count bubbles and the bottom tab labels stay 11px (they are short and sized to their circle and grid).
+  Done on the places named: product cards, badges and the chart labels. **Not changed:** the header count bubbles and bottom tab labels, and 10–11px text elsewhere (the order progress steps, message times and labels, a few admin and Seller Centre badges); see `docs/LATER.md`.
 - [x] **5.9 L:** Seller Centre with a Dhivehi session emits `lang="dv" dir="ltr"`. Output `lang="en"`
   when RTL is forced off.
   Done.
@@ -577,7 +577,7 @@ Check every change at 390×844 in English and Dhivehi.
   - the import file field;
   - admin gift-cards search;
   - the rewards referral link.
-  Done.
+  Done. The Seller Centre stock page (`/seller/stock`: its search box and every stock box) was missed at first and added in the verification pass.
 - [x] **5.11 L:** the zoom dialog `<img src="">` on product pages (use `data-src` until opened).
   `/login/email` and `/register` need an `<h1>`. The web manifest is English only.
   Done: `site.dv.webmanifest` (Dhivehi names, `dir: rtl`, start `/dv/`) is linked on Dhivehi pages.

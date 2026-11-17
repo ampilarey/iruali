@@ -111,4 +111,30 @@ class UntestedRoutesTest extends TestCase
         $this->artisan('sms:prune', ['--days' => 1])->assertSuccessful();
         $this->assertModelExists($recent);
     }
+
+    public function test_the_daily_clean_up_removes_expired_cache_rows_and_old_codes_only(): void
+    {
+        $this->artisan('schedule:list')->assertSuccessful(); // loads routes/console.php
+        $event = collect(app(\Illuminate\Console\Scheduling\Schedule::class)->events())->first(fn ($e) => $e->description === 'prune-cache-and-codes');
+        $this->assertNotNull($event, 'The daily clean-up is not scheduled');
+
+        \Illuminate\Support\Facades\DB::table('cache')->insert([
+            ['key' => 'expired-key', 'value' => 'x', 'expiration' => time() - 60],
+            ['key' => 'live-key', 'value' => 'x', 'expiration' => time() + 3600],
+        ]);
+        \Illuminate\Support\Facades\DB::table('cache_locks')->insert([
+            ['key' => 'expired-lock', 'owner' => 'a', 'expiration' => time() - 60],
+            ['key' => 'live-lock', 'owner' => 'a', 'expiration' => time() + 3600],
+        ]);
+        $old = \App\Models\OTP::createForPhone('+9607771234', 'login');
+        $old->forceFill(['created_at' => now()->subDays(2)])->save();
+        $new = \App\Models\OTP::createForPhone('+9607775678', 'login');
+
+        $event->run($this->app);
+
+        $this->assertSame(['live-key'], \Illuminate\Support\Facades\DB::table('cache')->pluck('key')->all());
+        $this->assertSame(['live-lock'], \Illuminate\Support\Facades\DB::table('cache_locks')->pluck('key')->all());
+        $this->assertModelMissing($old);
+        $this->assertModelExists($new);
+    }
 }

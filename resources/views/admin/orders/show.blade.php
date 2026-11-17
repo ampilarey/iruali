@@ -194,6 +194,25 @@
                     @elseif($order->refund_status === 'refunded')
                         <p class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-800">Refunded {{ \App\Support\Money::format($order->refund_amount) }} on {{ $order->refunded_at?->format('d M Y') }} · ref {{ $order->refund_reference }} ({{ $order->refund_reason }})</p>
                     @endif
+                    {{-- Every refund on the order, one row each (the box above is the one due now, or the last sent) --}}
+                    @if($order->refunds->count() > 1)
+                        <div class="mt-3" data-refund-history>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">All refunds on this order</p>
+                            <ul class="mt-1 divide-y divide-gray-100 rounded-md border border-gray-200 text-xs text-gray-700">
+                                @foreach($order->refunds->sortBy('id') as $refund)
+                                    <li class="px-3 py-2">
+                                        <span class="font-semibold text-gray-900">{{ \App\Support\Money::format($refund->amount) }}</span>
+                                        · {{ $refund->reason }}
+                                        @if($refund->status === \App\Models\Refund::REFUNDED)
+                                            <span class="block text-gray-500">Sent {{ $refund->refunded_at?->format('d M Y') }} by {{ $refund->methodLabel() }} · ref {{ $refund->reference }}@if($refund->recorder) · recorded by {{ $refund->recorder->name }}@endif @if($refund->approver) · approved by {{ $refund->approver->name }}@endif</span>
+                                        @else
+                                            <span class="block text-red-700">Due</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     @if($order->payment_status !== 'paid' && $order->payment_method !== 'bml' && ($order->payment_status !== 'deposit_paid' || $order->balanceDue()) && ! $order->awaitingConfirmation() && \App\Support\StaffAccess::can('admin.orders.payment'))
                         <div class="mt-3 flex flex-wrap gap-2">
                             <form method="POST" action="{{ route('admin.orders.payment', $order) }}">

@@ -643,8 +643,10 @@ class OrderService
 
         $user = $order->user;
         if ($user) {
-            if ($order->points_redeemed > 0) {
-                app(PointsService::class)->record($user, (int) $order->points_redeemed, 'refund', $order, __('Redeemed points returned'));
+            // Less the points approved returns already gave back (ReturnService::pointsFor())
+            $pointsBack = (int) $order->points_redeemed - (int) \App\Models\ReturnRequest::where('order_id', $order->id)->sum('points_returned');
+            if ($pointsBack > 0) {
+                app(PointsService::class)->record($user, $pointsBack, 'refund', $order, __('Redeemed points returned'));
             }
             // Earned points are only taken back if they were actually given (the order was paid).
             // The balance can go below zero if they were already spent; nothing can be redeemed until it recovers.

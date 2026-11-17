@@ -73,6 +73,9 @@
             @elseif($return->status === 'approved')
                 <x-admin.fold title="Send the refund" body="space-y-3 text-sm" :open="true">
                     <p>Refund <strong>{{ Money::format($return->refund_amount) }}</strong> to the customer.</p>
+                    @if($return->points_returned > 0)
+                        <p class="text-gray-600" data-points-returned>{{ number_format($return->points_returned) }} points the customer spent on these items went back to their account when the return was approved.</p>
+                    @endif
                     @if($order->payment_method === 'bml')
                         <p class="text-gray-600">This order was paid by card. Refund it in the BML merchant portal (Transactions → find order {{ $order->order_number }} → Refund), then record the refund reference here.</p>
                     @else

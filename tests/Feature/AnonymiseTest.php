@@ -106,7 +106,7 @@ class AnonymiseTest extends TestCase
         // System names, codes and notes written by the team, not by or about a customer
         'roles.name', 'roles.display_name', 'permissions.name', 'permissions.display_name', 'job_batches.name',
         'personal_access_tokens.name', 'error_events.message', 'payout_batches.notes', 'seller_payouts.note',
-        'seller_adjustments.reason', 'orders.refund_reason', 'return_requests.reason', 'item_requests.declined_reason',
+        'seller_adjustments.reason', 'orders.refund_reason', 'refunds.reason', 'return_requests.reason', 'item_requests.declined_reason',
         'item_requests.quote_message', 'quote_requests.decline_reason', 'quote_requests.shop_message',
         'product_change_requests.rejection_reason', 'seller_verifications.rejection_reason', 'wallet_transactions.note',
         'points_transactions.note', 'bank_statement_lines.description', 'expenses.description', 'shop_discount_codes.applies_to',

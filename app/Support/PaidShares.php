@@ -23,9 +23,20 @@ class PaidShares
      */
     public static function compute(Order $order): array
     {
+        return self::shares($order)['paid'];
+    }
+
+    /**
+     * Each line's paid total, and its share (in laari) of the discount the redeemed points gave: the
+     * part of the points that was spent on that line (ReturnService::pointsFor()).
+     *
+     * @return array{paid: array<int, float>, points: array<int, int>}
+     */
+    public static function shares(Order $order): array
+    {
         $items = $order->items()->get(['id', 'price', 'quantity', 'multibuy_discount', 'shop_code_discount', 'quote_request_id']);
         if ($items->isEmpty()) {
-            return [];
+            return ['paid' => [], 'points' => []];
         }
 
         $net = [];
@@ -47,7 +58,7 @@ class PaidShares
             $paid[$id] = max(0, $laari - $points[$id]) / 100;
         }
 
-        return $paid;
+        return ['paid' => $paid, 'points' => array_map(fn ($laari) => (int) $laari, $points)];
     }
 
     /**

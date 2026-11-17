@@ -39,7 +39,7 @@
                                 @if($part)<span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $part->status_badge }}">{{ $steps[$part->status] ?? \App\Enums\SellerOrderStatus::labelFor($part->status) }}</span>@endif
                             </div>
                             @if($part && $part->status !== 'cancelled' && ! $part->isPickup())
-                                <ol class="grid grid-cols-4 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
+                                <ol class="grid grid-cols-4 gap-1 text-xs text-center" aria-label="{{ __('Progress') }}">
                                     @foreach($steps as $key => $label)
                                         @php $done = $rank >= \App\Enums\SellerOrderStatus::rankFor($key); @endphp
                                         <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>

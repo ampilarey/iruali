@@ -168,6 +168,13 @@
                         <input id="import_margin_percent" name="import_margin_percent" type="number" min="0" max="500" step="0.1" class="{{ $field }}" value="{{ old('import_margin_percent', $settings['import_margin_percent'] ?? 0) }}">
                     </div>
                 </div>
+                {{-- "The shop confirms first" pre-orders (App\Services\PreorderConfirmService::expireUnanswered()) --}}
+                <div class="mt-6 border-t border-gray-100 pt-4 sm:max-w-xs">
+                    <label for="preorder_confirm_days" class="block text-sm font-medium text-gray-700">Days a shop has to confirm a pre-order</label>
+                    <input id="preorder_confirm_days" name="preorder_confirm_days" type="number" min="1" max="60" step="1" required class="{{ $field }}" value="{{ old('preorder_confirm_days', $settings['preorder_confirm_days'] ?? 7) }}">
+                    <p class="mt-1 text-xs text-gray-500">For pre-orders where the shop confirms it can get the item before the customer pays. With no answer after this many days, the order is cancelled and the customer is told.</p>
+                    @error('preorder_confirm_days')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
             </x-admin.fold>
 
             <x-admin.fold title="Loyalty & referrals">

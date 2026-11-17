@@ -10,7 +10,7 @@
     @endphp
     <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm space-y-2" data-pickup>
         <p class="font-semibold text-gray-900 flex items-center gap-1.5"><x-icon name="store" class="w-4 h-4 text-primary" />{{ __('Pick up from :shop', ['shop' => $part->shopName()]) }}</p>
-        <ol class="grid grid-cols-3 gap-1 text-[11px] text-center" aria-label="{{ __('Progress') }}">
+        <ol class="grid grid-cols-3 gap-1 text-xs text-center" aria-label="{{ __('Progress') }}">
             @foreach($pickupSteps as $label => $done)
                 <li><span class="block h-1.5 rounded-full {{ $done ? 'bg-primary' : 'bg-gray-200' }}"></span><span class="mt-1 block {{ $done ? 'text-gray-900 font-medium' : 'text-gray-400' }}">{{ $label }}</span></li>
             @endforeach

@@ -51,7 +51,7 @@
                                         <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col items-center text-center gap-2">
                                             @include('brands._logo', ['brand' => $brand, 'class' => 'w-12 h-12 lg:w-14 lg:h-14 text-lg'])
                                             <span class="w-full text-xs lg:text-sm font-semibold text-dark truncate">{{ $brand->localizedName() }}</span>
-                                            <span class="-mt-1.5 text-[11px] text-gray-500">{{ __('Nothing on sale right now') }}</span>
+                                            <span class="-mt-1.5 text-xs text-gray-500">{{ __('Nothing on sale right now') }}</span>
                                         </div>
                                     @endif
                                     <form method="POST" action="{{ route('brands.unfollow', $brand) }}">

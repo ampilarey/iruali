@@ -210,4 +210,12 @@ class LocalePrefixTest extends TestCase
         $this->assertSame(1, $xpath->query('//s:url[s:loc="'.url('/dv').'"]')->length);
         $this->assertSame(0, $xpath->query('//s:url[s:loc="'.url('/dv/sitemap.xml').'"]')->length);
     }
+
+    public function test_a_visitor_who_is_not_signed_in_keeps_dhivehi_after_a_dhivehi_account_link(): void
+    {
+        // /dv/account has no Dhivehi address: on to /account, then the sign-in page, still in Dhivehi
+        $this->get('/dv/account')->assertRedirect(url('/account'))->assertSessionHas('locale', 'dv');
+        $this->get('/account')->assertRedirect(route('login'));
+        $this->get(route('login'))->assertOk()->assertSee('dir="rtl"', false)->assertSee('lang="dv"', false);
+    }
 }

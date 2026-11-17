@@ -365,8 +365,8 @@ sold-out item when no terms were shown.
 
 - **Where:** `PreorderConfirmService` (around line 247).
 - **Fix:** auto-cancel after N days without confirmation (setting, default 7). Notify the customer.
-- **Done:** `preorder_confirm_days` (default 7) is read from settings but has no field in Admin → Settings
-  yet; the daily `preorders:balance-reminders` run cancels them and the customer gets the usual
+- **Done:** `preorder_confirm_days` (default 7) is set in Admin → Settings → Pre-order imports (added
+  afterwards); the daily `preorders:balance-reminders` run cancels them and the customer gets the usual
   cancellation message.
 
 ### 3.10 [x] L: voucher and points forgotten before the order can still fail
@@ -566,7 +566,7 @@ Check every change at 390×844 in English and Dhivehi.
   Done.
 - [x] **5.8 L:** text under 12px: `text-[11px]` → `text-xs` on product cards and badges; chart
   axis labels.
-  Done on the places named: product cards, badges and the chart labels. **Not changed:** the header count bubbles and bottom tab labels, and 10–11px text elsewhere (the order progress steps, message times and labels, a few admin and Seller Centre badges); see `docs/LATER.md`.
+  Done on the places named: product cards, badges and the chart labels. The rest of the 10–11px text (count bubbles, tab labels, order progress steps, message times, badges) was raised to 12px afterwards, checked at 390px in English and Dhivehi.
 - [x] **5.9 L:** Seller Centre with a Dhivehi session emits `lang="dv" dir="ltr"`. Output `lang="en"`
   when RTL is forced off.
   Done.

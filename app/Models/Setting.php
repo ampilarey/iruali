@@ -121,6 +121,8 @@ class Setting extends Model
         'import_exchange_rates' => '',
         'import_shipping_per_kg' => 0,
         'import_margin_percent' => 0,
+        // "The shop confirms first" pre-orders: days the shop has to answer before the order is cancelled
+        'preorder_confirm_days' => 7,
         'payment_cod_enabled' => 0,
         'cod_max_amount' => 0,
         'cod_greater_male_only' => 0,

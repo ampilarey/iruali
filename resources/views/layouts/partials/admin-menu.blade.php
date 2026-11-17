@@ -19,7 +19,7 @@
             </details>
         @else
             <div>
-                <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-white/50">{{ $heading }}</p>
+                <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-white/50">{{ $heading }}</p>
                 <ul class="space-y-0.5">@foreach($items as $item){!! $link($item) !!}@endforeach</ul>
             </div>
         @endif

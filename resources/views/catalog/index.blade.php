@@ -223,7 +223,7 @@
                         @endif
                     </p>
                     <button type="button" data-filters-open class="shrink-0 lg:hidden inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm font-semibold">
-                        <x-icon name="filter" class="w-4 h-4" />{{ __('Filters') }}@if($active->count())<span class="min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] flex items-center justify-center">{{ $active->count() }}</span>@endif
+                        <x-icon name="filter" class="w-4 h-4" />{{ __('Filters') }}@if($active->count())<span class="min-w-5 h-5 px-1 rounded-full bg-primary text-white text-xs flex items-center justify-center">{{ $active->count() }}</span>@endif
                     </button>
                     <label class="flex-1 min-w-0 sm:flex-none flex items-center gap-2 text-sm">
                         <span class="hidden sm:inline text-gray-600">{{ __('Sort by') }}</span>

@@ -49,6 +49,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // /dv/... storefront URLs: runs before routing (see the middleware)
         $middleware->append(\App\Http\Middleware\LocalePrefix::class);
         $middleware->throttleApi(); // RateLimiter 'api' is defined in AppServiceProvider
+        // The language is chosen before the sign-in check: a visitor who is not signed in and opens a
+        // /dv account link is sent on by SetLocale (keeping Dhivehi), not straight to an English sign-in page
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            prepend: \App\Http\Middleware\SetLocale::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Count every reported exception in error_events and alert on payment errors (app/Support/ErrorTracker.php)

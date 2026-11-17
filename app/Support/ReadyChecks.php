@@ -352,7 +352,9 @@ class ReadyChecks
             if (app()->runningInConsole() && app('request')->route() === null) {
                 $original = app('request');
                 try {
-                    $response = app(HttpKernel::class)->handle(Request::create('/storage/'.$name, 'GET'));
+                    // At the site's own address: only APP_URL's host is answered (trustHosts), so a
+                    // request for "localhost" would be refused with 400 on the live site
+                    $response = app(HttpKernel::class)->handle(Request::create(rtrim((string) config('app.url'), '/').'/storage/'.$name, 'GET'));
                 } finally {
                     app()->instance('request', $original);
                 }

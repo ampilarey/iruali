@@ -166,4 +166,24 @@ class ReadyCheckTest extends TestCase
 
         require base_path('routes/console.php'); // registers the queue worker now that the queue is not sync
     }
+
+    public function test_the_uploads_check_passes_where_only_the_sites_own_host_is_answered(): void
+    {
+        // As on the live site: trustHosts() answers APP_URL's host only (it is off in tests)
+        config(['app.url' => 'https://iruali.mv']);
+        $this->app->bind(\Illuminate\Http\Middleware\TrustHosts::class, fn ($app) => new class($app) extends \Illuminate\Http\Middleware\TrustHosts
+        {
+            protected function shouldSpecifyTrustedHosts()
+            {
+                return true;
+            }
+        });
+
+        try {
+            $checks = collect((new ReadyChecks(offline: true))->run())->keyBy('name');
+            $this->assertSame('pass', $checks['Uploads']['status'], $checks['Uploads']['detail']);
+        } finally {
+            \Illuminate\Http\Request::setTrustedHosts([]);
+        }
+    }
 }

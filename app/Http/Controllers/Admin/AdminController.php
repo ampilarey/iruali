@@ -383,6 +383,7 @@ class AdminController extends Controller
             'import_exchange_rates' => ['sometimes', 'nullable', 'string', 'max:1000', 'regex:/^(\s*[A-Za-z]{3}\s*[=:\s]\s*[0-9]+(\.[0-9]+)?\s*(\R|$))*\s*$/'],
             'import_shipping_per_kg' => 'sometimes|nullable|numeric|min:0|max:100000',
             'import_margin_percent' => 'sometimes|nullable|numeric|min:0|max:500',
+            'preorder_confirm_days' => 'sometimes|required|integer|min:1|max:60',
         ], [
             'import_exchange_rates.regex' => 'Write one rate per line, like "USD 15.42".',
         ]);
@@ -395,6 +396,9 @@ class AdminController extends Controller
             if (array_key_exists($key, $validated)) {
                 $validated[$key] = (float) ($validated[$key] ?? 0);
             }
+        }
+        if (array_key_exists('preorder_confirm_days', $validated)) {
+            $validated['preorder_confirm_days'] = (int) $validated['preorder_confirm_days'];
         }
         foreach (['min_order_amount', 'small_order_fee', 'small_order_threshold', 'refund_approval_over'] as $key) {
             if (array_key_exists($key, $validated)) {

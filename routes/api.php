@@ -76,7 +76,7 @@ Route::prefix('v1')->group(function () {
             Route::put('/cart/update/{item}', [CartController::class, 'update']);
             Route::delete('/cart/remove/{item}', [CartController::class, 'remove']);
             Route::post('/cart/clear', [CartController::class, 'clear']);
-            Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher']);
+            Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->middleware('throttle:20,1,api.cart.applyVoucher'); // the same guess limit as the website's voucher box
             Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher']);
         });
 

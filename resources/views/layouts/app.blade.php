@@ -114,7 +114,7 @@
                                     </div>
                                     <a href="{{ route('account') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Account') }}</a>
                                     <a href="{{ route('orders') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('My Orders') }}</a>
-                                    <a href="{{ route('messages.index') }}" class="block px-4 py-2 hover:bg-gray-50" data-menu-messages>{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white" title="{{ __('Unread messages') }}">{{ $messageBadges['customer'] }}</span>@endif</a>
+                                    <a href="{{ route('messages.index') }}" class="block px-4 py-2 hover:bg-gray-50" data-menu-messages>{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-xs font-bold text-white" title="{{ __('Unread messages') }}">{{ $messageBadges['customer'] }}</span>@endif</a>
                                     <a href="{{ route('wishlist') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Wishlist') }}</a>
                                     <a href="{{ route('account.rewards') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Rewards') }}</a>
                                     <a href="{{ route('quotes.index') }}" class="block px-4 py-2 hover:bg-gray-50">{{ __('Quote requests') }}</a>
@@ -149,7 +149,7 @@
                     <a href="{{ route('wishlist') }}" class="relative hidden lg:flex items-center p-1 text-dark hover:text-primary" aria-label="{{ __('Wishlist') }}">
                         <x-icon name="heart" class="w-6 h-6" />
                         @if($wishlistCount > 0)
-                            <span class="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{{ $wishlistCount }}</span>
+                            <span class="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">{{ $wishlistCount }}</span>
                         @endif
                     </a>
 
@@ -157,7 +157,7 @@
                     <a href="{{ auth()->check() ? route('messages.index') : route('messages.support') }}" class="relative flex items-center p-2 lg:p-1 text-dark hover:text-primary" aria-label="{{ __('My messages') }}" title="{{ __('My messages') }}" data-header-messages>
                         <x-icon name="chat" class="w-6 h-6" />
                         @if(($messageBadges['customer'] ?? 0) > 0)
-                            <span class="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{{ $messageBadges['customer'] }}</span>
+                            <span class="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">{{ $messageBadges['customer'] }}</span>
                         @endif
                     </a>
 
@@ -166,7 +166,7 @@
                         <span class="relative">
                             <x-icon name="cart" class="w-6 h-6" />
                             @if($cartCount > 0)
-                                <span class="absolute -top-2 -end-2 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-[11px] font-bold flex items-center justify-center">{{ $cartCount }}</span>
+                                <span class="absolute -top-2 -end-2 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-xs font-bold flex items-center justify-center">{{ $cartCount }}</span>
                             @endif
                         </span>
                         <span class="hidden lg:block text-sm font-semibold">{{ __('Cart') }}</span>
@@ -267,7 +267,7 @@
                 <div class="border-t border-gray-100 mt-2">
                     <p class="px-4 pt-4 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('Your account') }}</p>
                     <a href="{{ route('orders') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My Orders') }}</a>
-                    @auth<a href="{{ route('messages.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>@endauth
+                    @auth<a href="{{ route('messages.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('My messages') }}@if(($messageBadges['customer'] ?? 0) > 0) <span class="ms-1 rounded-full bg-primary px-1.5 text-xs font-bold text-white">{{ $messageBadges['customer'] }}</span>@endif</a>@endauth
                     <a href="{{ route('wishlist') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Wishlist') }}</a>
                     @auth<a href="{{ route('quotes.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Quote requests') }}</a>@endauth
                     @auth<a href="{{ route('item-requests.index') }}" class="block px-4 py-3 text-dark hover:bg-gray-50">{{ __('Item requests') }}</a>@endauth
@@ -469,14 +469,14 @@
     @if(request()->routeIs('seller.*') && auth()->check())
     {{-- Seller Centre on a phone: the shop's own tabs instead of the shopper's --}}
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(15,42,58,0.08)]" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="{{ __('Seller Centre') }}" data-seller-tabs>
-        <div class="grid grid-cols-5 h-16 text-[11px] font-medium">
+        <div class="grid grid-cols-5 h-16 text-xs font-medium">
             @php $tab = 'flex flex-col items-center justify-center gap-1'; $sellerUnread = (int) ($messageBadges['seller'] ?? 0); @endphp
             <a href="{{ route('seller.dashboard') }}" class="{{ $tab }} {{ request()->routeIs('seller.dashboard') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="home" class="w-6 h-6" />{{ __('Dashboard') }}</a>
             <a href="{{ route('seller.orders') }}" class="{{ $tab }} {{ request()->routeIs('seller.orders*') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="box" class="w-6 h-6" />{{ __('Orders') }}</a>
             <a href="{{ route('seller.products.index') }}" class="{{ $tab }} {{ request()->routeIs('seller.products*', 'seller.stock*') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="squares" class="w-6 h-6" />{{ __('Products') }}</a>
             <a href="{{ route('seller.messages') }}" class="{{ $tab }} {{ request()->routeIs('seller.messages*') ? 'text-primary' : 'text-gray-600' }}">
                 <span class="relative"><x-icon name="chat" class="w-6 h-6" />
-                    @if($sellerUnread > 0)<span class="absolute -top-1.5 -end-2.5 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-[11px] font-bold flex items-center justify-center">{{ $sellerUnread }}</span>@endif
+                    @if($sellerUnread > 0)<span class="absolute -top-1.5 -end-2.5 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-xs font-bold flex items-center justify-center">{{ $sellerUnread }}</span>@endif
                 </span>{{ __('Messages') }}
             </a>
             <a href="{{ route('home') }}" class="{{ $tab }} text-gray-600"><x-icon name="store" class="w-6 h-6" />{{ __('Store') }}</a>
@@ -484,7 +484,7 @@
     </nav>
     @elseif(! request()->routeIs('checkout'))
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(15,42,58,0.08)]" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="{{ __('Main') }}">
-        <div class="grid grid-cols-5 h-16 text-[11px] font-medium">
+        <div class="grid grid-cols-5 h-16 text-xs font-medium">
             @php $tab = 'flex flex-col items-center justify-center gap-1'; @endphp
             <a href="{{ route('home') }}" class="{{ $tab }} {{ request()->routeIs('home') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="home" class="w-6 h-6" />{{ __('Home') }}</a>
             <button type="button" data-drawer-open class="{{ $tab }} {{ request()->routeIs('categories.*') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="squares" class="w-6 h-6" />{{ __('Departments') }}</button>
@@ -492,7 +492,7 @@
             <a href="{{ auth()->check() ? route('account') : route('login') }}" class="{{ $tab }} {{ request()->routeIs('account', 'orders*', 'login') ? 'text-primary' : 'text-gray-600' }}"><x-icon name="user" class="w-6 h-6" />{{ __('Account') }}</a>
             <a href="{{ route('cart') }}" class="{{ $tab }} {{ request()->routeIs('cart', 'checkout') ? 'text-primary' : 'text-gray-600' }}">
                 <span class="relative"><x-icon name="cart" class="w-6 h-6" />
-                    @if($cartCount > 0)<span class="absolute -top-1.5 -end-2.5 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-[11px] font-bold flex items-center justify-center">{{ $cartCount }}</span>@endif
+                    @if($cartCount > 0)<span class="absolute -top-1.5 -end-2.5 min-w-5 h-5 px-1 rounded-full bg-sun text-sun-on text-xs font-bold flex items-center justify-center">{{ $cartCount }}</span>@endif
                 </span>{{ __('Cart') }}
             </a>
         </div>
@@ -661,14 +661,14 @@
                     [['departments', 'squares'], ['brands', 'tag']].forEach(function (group) {
                         if (!data[group[0]].length) return;
                         any = true;
-                        box.appendChild(el('p', 'px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500', labels[group[0]]));
+                        box.appendChild(el('p', 'px-4 pt-3 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500', labels[group[0]]));
                         data[group[0]].forEach(function (item) {
                             var a = el('a', 'block px-4 py-2 hover:bg-primary-50 focus:bg-primary-50', item.name); a.href = item.url; box.appendChild(a);
                         });
                     });
                     if (data.products.length) {
                         any = true;
-                        box.appendChild(el('p', 'px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500', labels.products));
+                        box.appendChild(el('p', 'px-4 pt-3 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500', labels.products));
                         data.products.forEach(function (p) {
                             var a = el('a', 'flex items-center gap-3 px-4 py-2 hover:bg-primary-50 focus:bg-primary-50'); a.href = p.url;
                             var img = el('img', 'w-10 h-10 rounded object-cover bg-primary-50 shrink-0'); img.src = p.image; img.alt = '';

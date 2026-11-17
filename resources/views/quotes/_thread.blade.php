@@ -17,7 +17,7 @@
                 @php $m->setRelation('quoteRequest', $quote); @endphp
                 <li class="flex {{ $mine($m) ? 'justify-end' : 'justify-start' }}">
                     <div class="max-w-[85%] rounded-xl px-3 py-2 text-sm {{ $mine($m) ? 'bg-primary text-white' : ($m->sender_role === 'admin' ? 'bg-sun-soft text-sun-ink' : 'bg-gray-100 text-gray-900') }}">
-                        <p class="text-[11px] font-semibold {{ $mine($m) ? 'text-white/80' : 'opacity-70' }}">
+                        <p class="text-xs font-semibold {{ $mine($m) ? 'text-white/80' : 'opacity-70' }}">
                             {{ $m->senderName() }} · <time datetime="{{ $m->created_at->toIso8601String() }}">{{ $m->created_at->translatedFormat('j M, H:i') }}</time>
                         </p>
                         <p class="whitespace-pre-line break-words" dir="auto">{{ $m->body }}</p>

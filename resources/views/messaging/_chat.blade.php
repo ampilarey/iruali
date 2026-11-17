@@ -17,7 +17,7 @@
             @foreach($messages as $m)
                 <li class="flex {{ $mine($m) ? 'justify-end' : 'justify-start' }}" data-chat-message="{{ $m->id }}">
                     <div class="max-w-[85%] rounded-xl px-3 py-2 text-sm {{ $mine($m) ? 'bg-primary text-white' : ($m->sender_role === 'admin' ? 'bg-sun-soft text-sun-ink' : 'bg-gray-100 text-gray-900') }}">
-                        <p class="text-[11px] font-semibold {{ $mine($m) ? 'text-white/80' : 'opacity-70' }}">
+                        <p class="text-xs font-semibold {{ $mine($m) ? 'text-white/80' : 'opacity-70' }}">
                             {{ $m->senderName($role) }} · <time datetime="{{ $m->created_at->toIso8601String() }}">{{ $m->created_at->translatedFormat('j M, H:i') }}</time>
                         </p>
                         <p class="whitespace-pre-line break-words">{{ $m->body }}</p>
@@ -28,9 +28,9 @@
                             <a href="{{ route('messages.attachment', $m) }}" target="_blank" rel="noopener" class="mt-1 block"><img src="{{ route('messages.attachment', $m) }}" alt="{{ __('Attached photo') }}" class="max-h-40 rounded-lg border border-white/30"></a>
                         @endif
                         @if($m->reported_at)
-                            <p class="mt-1 text-[11px] font-semibold text-danger" data-chat-reported>{{ __('Reported') }}@if($role === 'admin'): {{ $m->report_reason }} ({{ $m->reportedBy?->name }})@endif</p>
+                            <p class="mt-1 text-xs font-semibold text-danger" data-chat-reported>{{ __('Reported') }}@if($role === 'admin'): {{ $m->report_reason }} ({{ $m->reportedBy?->name }})@endif</p>
                         @elseif(! $mine($m) && $role !== 'admin' && auth()->check())
-                            <details class="mt-1 text-[11px]">
+                            <details class="mt-1 text-xs">
                                 <summary class="cursor-pointer opacity-70 hover:underline">{{ __('Report') }}</summary>
                                 <form method="POST" action="{{ route('messages.report', $m) }}" class="mt-1 flex gap-1">
                                     @csrf

@@ -39,7 +39,7 @@
                                     <td class="px-4 py-3 align-top whitespace-nowrap">
                                         <a href="{{ route('seller.quotes.show', $quote) }}" class="font-semibold text-primary-700 hover:underline">{{ $quote->label() }}</a>
                                         <span class="block text-xs text-gray-500">{{ $quote->created_at->translatedFormat('j M Y') }}</span>
-                                        @if($quote->seller_unread > 0)<span class="mt-0.5 inline-block rounded-full bg-primary px-1.5 text-[11px] font-bold text-white">{{ trans_choice(':count new message|:count new messages', $quote->seller_unread, ['count' => $quote->seller_unread]) }}</span>@endif
+                                        @if($quote->seller_unread > 0)<span class="mt-0.5 inline-block rounded-full bg-primary px-1.5 text-xs font-bold text-white">{{ trans_choice(':count new message|:count new messages', $quote->seller_unread, ['count' => $quote->seller_unread]) }}</span>@endif
                                     </td>
                                     <td class="px-4 py-3 align-top">{{ $quote->displayName() }}</td>
                                     <td class="px-4 py-3 align-top">{{ $quote->business_name }}</td>

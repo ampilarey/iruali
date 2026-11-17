@@ -92,7 +92,7 @@
                     <a href="{{ route($route) }}" class="relative flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50">
                         <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-700"><x-icon :name="$icon" class="w-5 h-5" /></span>
                         <span class="w-full truncate">{{ $label }}</span>
-                        @if($count)<span class="rounded-full bg-red-600 px-1.5 text-[10px] font-semibold leading-4 text-white">{{ $count }}</span>@endif
+                        @if($count)<span class="rounded-full bg-red-600 px-1.5 text-xs font-semibold leading-4 text-white">{{ $count }}</span>@endif
                     </a>
                 </li>
             @endforeach

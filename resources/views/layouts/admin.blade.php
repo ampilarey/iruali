@@ -41,7 +41,7 @@
     <aside class="hidden lg:fixed lg:inset-y-0 lg:start-0 lg:z-40 lg:flex lg:w-64 lg:flex-col bg-reef text-white" aria-label="Admin menu">
         <a href="{{ route('admin.dashboard') }}" class="flex h-16 shrink-0 items-center gap-2 px-5 border-b border-white/10">
             <img src="/images/brand/iruali-logo-reversed.svg" alt="iruali" class="h-7 w-auto">
-            <span class="rounded bg-white/10 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/80">Admin</span>
+            <span class="rounded bg-white/10 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-white/80">Admin</span>
         </a>
         <div class="flex-1 overflow-y-auto px-3 py-4">{!! $menu('sidebar') !!}</div>
         <div class="border-t border-white/10 p-3 space-y-1 text-sm">
@@ -69,7 +69,7 @@
             @if($navFlat->has('admin.inbox'))
                 <a href="{{ route('admin.inbox') }}" class="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-dark hover:bg-gray-100" aria-label="Inbox{{ $inboxTotal ? ' ('.$inboxTotal.' waiting)' : '' }}">
                     <x-icon name="bell" class="w-6 h-6" />
-                    @if($inboxTotal)<span class="absolute top-1 end-1 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-[11px] font-semibold leading-[1.1rem] text-white">{{ $inboxTotal }}</span>@endif
+                    @if($inboxTotal)<span class="absolute top-1 end-1 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-xs font-semibold leading-[1.1rem] text-white">{{ $inboxTotal }}</span>@endif
                 </a>
             @endif
         </header>
@@ -107,13 +107,13 @@
     <nav class="lg:hidden fixed inset-x-0 bottom-0 z-30 grid border-t border-gray-200 bg-white" style="grid-template-columns: repeat({{ collect(AdminNav::BOTTOM_BAR)->filter(fn ($r) => $navFlat->has($r))->count() + 1 }}, minmax(0, 1fr)); padding-bottom: env(safe-area-inset-bottom);" aria-label="Admin shortcuts">
         @foreach(AdminNav::BOTTOM_BAR as $route)
             @if($item = $navFlat->get($route))
-                <a href="{{ $item['url'] }}" class="relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium {{ $item['active'] ? 'text-primary' : 'text-gray-500' }}" @if($item['active']) aria-current="page" @endif>
+                <a href="{{ $item['url'] }}" class="relative flex flex-col items-center gap-0.5 py-2 text-xs font-medium {{ $item['active'] ? 'text-primary' : 'text-gray-500' }}" @if($item['active']) aria-current="page" @endif>
                     <x-icon :name="$item['icon']" class="w-5 h-5" />{{ $item['label'] }}
-                    @if($route === 'admin.inbox' && $inboxTotal)<span class="absolute top-1 start-1/2 ms-2 min-w-[1rem] rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-4 text-white">{{ $inboxTotal }}</span>@endif
+                    @if($route === 'admin.inbox' && $inboxTotal)<span class="absolute top-1 start-1/2 ms-2 min-w-[1rem] rounded-full bg-red-600 px-1 text-center text-xs font-semibold leading-4 text-white">{{ $inboxTotal }}</span>@endif
                 </a>
             @endif
         @endforeach
-        <button type="button" class="flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium text-gray-500" data-admin-menu-open aria-controls="admin-drawer" aria-expanded="false">
+        <button type="button" class="flex flex-col items-center gap-0.5 py-2 text-xs font-medium text-gray-500" data-admin-menu-open aria-controls="admin-drawer" aria-expanded="false">
             <x-icon name="menu" class="w-5 h-5" />More
         </button>
     </nav>

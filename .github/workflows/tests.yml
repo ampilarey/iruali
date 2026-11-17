@@ -46,7 +46,7 @@ jobs:
 
   browser:
     name: Browser checkout (Playwright)
-    runs-on: ubuntu-24.04 # Playwright 1.56 has no browser build for 26.04 yet
+    runs-on: ubuntu-latest # @playwright/test 1.61+ installs Chromium on Ubuntu 26.04 (package.json pins 1.65.1)
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4

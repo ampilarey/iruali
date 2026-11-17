@@ -23,7 +23,11 @@ GitHub Actions was blocked with:
 
 `Access denied by Imunify360 bot-protection. IPs used for automation should be whitelisted`
 
-Until that is fixed, only cron deploys. Fix one of:
+Until that is fixed, only cron deploys. When the firewall turns away all six attempts, the "Webhook pull
+(test.iruali.mv)" check passes with a warning instead of failing: the test site still updates through
+cron within a minute, and a red check there would also stop `~/deploy-live.sh` on production for something
+the code did not cause. Any other failure (wrong secret, 404, 500, no answer) still fails the check. Fix
+one of:
 
 1. **cPanel → Imunify360 → Firewall → White List**  
    Add GitHub Actions IP ranges from https://api.github.com/meta (`actions` key), **or** ask your host/WHM admin to whitelist them.

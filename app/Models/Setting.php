@@ -169,7 +169,7 @@ class Setting extends Model
             static::updateOrCreate(['key' => $key], ['value' => $value ?? '']);
         }
 
-        Cache::forget(static::CACHE_KEY);
+        Cache::memo()->forget(static::CACHE_KEY);
     }
 
     /**
@@ -177,8 +177,11 @@ class Setting extends Model
      */
     protected static function values(): array
     {
-        if (Cache::has(static::CACHE_KEY)) {
-            return Cache::get(static::CACHE_KEY);
+        // Read from the cache once per request or queued job (Cache::memo()), not once per setting: with
+        // the database cache store every read is a query, and a page asks for dozens of settings
+        $cached = Cache::memo()->get(static::CACHE_KEY);
+        if (is_array($cached)) {
+            return $cached;
         }
 
         // Before the key/value migration has run, fall back to defaults without caching.
@@ -186,6 +189,6 @@ class Setting extends Model
             return [];
         }
 
-        return Cache::rememberForever(static::CACHE_KEY, fn () => static::query()->pluck('value', 'key')->all());
+        return Cache::memo()->rememberForever(static::CACHE_KEY, fn () => static::query()->pluck('value', 'key')->all());
     }
 }

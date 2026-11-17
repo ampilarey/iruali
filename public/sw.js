@@ -139,6 +139,28 @@ self.addEventListener('notificationclick', function (event) {
 });
 
 self.addEventListener('pushsubscriptionchange', function (event) {
-    // The browser rotated the subscription: the account page re-subscribes on the next visit.
-    event.waitUntil(Promise.resolve());
+    // The browser replaced this device's subscription: subscribe again with the same key and tell the
+    // server, so order updates keep arriving without the person opening their account page first.
+    var old = event.oldSubscription;
+    if (!old) {
+        return; // nothing to match it to: the account page re-subscribes on the next visit
+    }
+    var fresh = event.newSubscription
+        ? Promise.resolve(event.newSubscription)
+        : self.registration.pushManager.subscribe(old.options);
+    event.waitUntil(
+        fresh.then(function (subscription) {
+            var json = subscription.toJSON();
+            return fetch('/api/push/renew', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    old_endpoint: old.endpoint,
+                    endpoint: json.endpoint,
+                    keys: json.keys,
+                    content_encoding: (self.PushManager && self.PushManager.supportedContentEncodings || ['aes128gcm'])[0],
+                }),
+            });
+        }).catch(function () { /* the account page re-subscribes on the next visit */ })
+    );
 });

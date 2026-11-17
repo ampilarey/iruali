@@ -300,6 +300,112 @@ class RefundMoneyTest extends TestCase
         $this->assertNull($order->refund_approved_by);
     }
 
+    // ---- 2.1 follow-up: points spent on returned items come back as points ----------------------
+
+    public function test_points_spent_on_returned_items_come_back_as_points(): void
+    {
+        // 2 units at 1000, 200 points redeemed: 100 points sat on each unit
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 1000, 2]], null, 200));
+        $returns = app(ReturnService::class);
+        $before = (int) $this->customer->fresh()->loyalty_points;
+
+        // One unit back, refunded in full: its 100 points return
+        $first = $this->returnAll($order, $this->shopA, 'changed_mind', 1);
+        $this->assertEquals(900, $first->items_value);
+        $this->assertTrue($returns->approve($first, 900, true, null, $this->admin));
+        $this->assertSame(100, (int) $first->fresh()->points_returned);
+        $this->assertSame($before + 100, (int) $this->customer->fresh()->loyalty_points);
+        $this->actingAs($this->admin)->get(route('admin.returns.show', $first))->assertOk()->assertSee('data-points-returned', false);
+
+        // Approving again gives nothing more
+        $this->assertFalse($returns->approve($first->fresh(), 900, true, null, $this->admin));
+        $this->assertSame($before + 100, (int) $this->customer->fresh()->loyalty_points);
+
+        // The other unit, refunded at half its value: half its points
+        $returns->markRefunded($first->fresh(), 'REF-1');
+        $second = $this->returnAll($order->fresh(), $this->shopA, 'changed_mind', 1);
+        $this->assertTrue($returns->approve($second, 450, false, null, $this->admin));
+        $this->assertSame(50, (int) $second->fresh()->points_returned);
+        $this->assertSame($before + 150, (int) $this->customer->fresh()->loyalty_points);
+    }
+
+    public function test_no_points_come_back_when_none_were_spent_and_a_cancellation_returns_only_the_rest(): void
+    {
+        // No points on the order: nothing to give back
+        $plain = $this->paidAndDelivered($this->order([[$this->shopA, 500, 1]]));
+        $return = $this->returnAll($plain, $this->shopA, 'faulty');
+        $this->assertTrue(app(ReturnService::class)->approve($return, 500, true, null, $this->admin));
+        $this->assertSame(0, (int) $return->fresh()->points_returned);
+
+        // Points on the order, one of two units returned, then the order is cancelled: 200 back in all
+        $order = $this->order([[$this->shopB, 1000, 2]], null, 200);
+        $placed = (int) $this->customer->fresh()->loyalty_points; // the 200 already spent
+        app(PaymentService::class)->confirm($order);
+        $before = (int) $this->customer->fresh()->loyalty_points; // plus the points earned on the payment
+        $part = $this->part($order->fresh(), $this->shopB);
+        $part->forceFill(['status' => 'delivered', 'delivered_at' => now()])->save();
+        $back = app(ReturnService::class)->request($part->fresh(), $this->customer, [$part->items()->firstOrFail()->id => 1], 'changed_mind', 'One too many.', null);
+        $this->assertTrue(app(ReturnService::class)->approve($back, 900, true, null, $this->admin));
+        $this->assertSame($before + 100, (int) $this->customer->fresh()->loyalty_points);
+
+        // An order with a part already sent can't be cancelled (returns are the way back), so this can't
+        // follow a return today; should a cancellation ever run after one, it gives back only the rest
+        $this->assertFalse(app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled'));
+        $part->forceFill(['status' => 'pending', 'delivered_at' => null])->save();
+        $this->assertTrue(app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled'));
+        // The earned points go with the cancellation; of the 200 spent, the other 100 come back
+        $this->assertSame($placed + 200, (int) $this->customer->fresh()->loyalty_points, 'the rest of the 200, not 200 again');
+    }
+
+    // ---- 2.6 follow-up: one row per refund ------------------------------------------------------
+
+    public function test_every_refund_on_an_order_keeps_its_own_record(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        $payments = app(PaymentService::class);
+
+        // Two amounts flagged while nothing was sent yet go out together, under one reference
+        $payments->flagRefund($order, 30, 'Paid twice');
+        $payments->flagRefund($order->fresh(), 20, 'Dispute #1');
+        $this->assertEquals(50, $order->fresh()->refund_amount);
+        $this->actingAs($this->admin)->post(route('admin.orders.refunded', $order), ['refund_reference' => 'BML-REF-1'])->assertRedirect();
+
+        // A later refund no longer writes over the first
+        $payments->flagRefund($order->fresh(), 40, 'Dispute #2');
+        $order->refresh();
+        $this->assertSame(['due', '40.00'], [$order->refund_status, $order->refund_amount]);
+
+        $rows = \App\Models\Refund::where('order_id', $order->id)->orderBy('id')->get();
+        $this->assertSame(
+            [['30.00', 'Paid twice', 'refunded', 'BML-REF-1'], ['20.00', 'Dispute #1', 'refunded', 'BML-REF-1'], ['40.00', 'Dispute #2', 'due', null]],
+            $rows->map(fn ($r) => [$r->amount, $r->reason, $r->status, $r->reference])->all(),
+        );
+        $this->assertSame($this->admin->id, (int) $rows[0]->recorded_by);
+        $this->assertNotNull($rows[0]->refunded_at);
+
+        // The order page lists them all
+        $this->get(route('admin.orders.show', $order))->assertOk()
+            ->assertSee('data-refund-history', false)->assertSee('ref BML-REF-1')->assertSee('Dispute #2');
+
+        // Recording the same refund twice changes nothing more
+        $this->post(route('admin.orders.refunded', $order), ['refund_reference' => 'BML-REF-2']);
+        $this->post(route('admin.orders.refunded', $order), ['refund_reference' => 'BML-REF-3']);
+        $this->assertSame(['BML-REF-1', 'BML-REF-1', 'BML-REF-2'], \App\Models\Refund::where('order_id', $order->id)->orderBy('id')->pluck('reference')->all());
+        $this->assertEquals(90, \App\Models\Refund::where('order_id', $order->id)->where('status', 'refunded')->sum('amount'));
+    }
+
+    public function test_a_refund_sent_to_the_wallet_is_recorded_as_wallet_credit(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        app(PaymentService::class)->flagRefund($order, 25, 'Paid twice');
+
+        $this->assertTrue(app(\App\Services\WalletService::class)->refundOrderToWallet($order->fresh()));
+
+        $row = \App\Models\Refund::where('order_id', $order->id)->sole();
+        $this->assertSame(['refunded', 'wallet'], [$row->status, $row->method]);
+        $this->assertStringStartsWith('WALLET-', (string) $row->reference);
+    }
+
     // ---- 2.9: a BML payment that doesn't match --------------------------------------------------
 
     public function test_a_bml_payment_that_does_not_match_is_flagged_for_a_refund_once(): void

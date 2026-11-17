@@ -34,6 +34,37 @@ class PushSubscriptionController extends Controller
         return response()->json(['ok' => true, 'id' => $subscription->id, 'message' => __('Order updates will be sent to this device.')], 201);
     }
 
+    /**
+     * The browser replaced this device's subscription (the service worker's pushsubscriptionchange):
+     * the saved one moves to the new address. There is no session here (a service worker has no page
+     * or form token), so the proof is the old address itself: a long random URL only that browser and
+     * iruali hold. Nothing is created for an address we don't know.
+     */
+    public function renew(Request $request)
+    {
+        $data = $request->validate([
+            'old_endpoint' => 'required|string|max:500',
+            'endpoint' => ['required', 'string', 'max:500', 'url', 'starts_with:https://'],
+            'keys.p256dh' => 'required|string|max:255',
+            'keys.auth' => 'required|string|max:255',
+            'content_encoding' => 'nullable|string|in:aesgcm,aes128gcm',
+        ]);
+
+        $subscription = PushSubscription::where('endpoint', $data['old_endpoint'])->first();
+        if ($subscription && $data['endpoint'] !== $data['old_endpoint']) {
+            PushSubscription::where('endpoint', $data['endpoint'])->whereKeyNot($subscription->id)->delete(); // the address is unique
+            $subscription->update([
+                'endpoint' => $data['endpoint'],
+                'public_key' => $data['keys']['p256dh'],
+                'auth_token' => $data['keys']['auth'],
+                'content_encoding' => $data['content_encoding'] ?? $subscription->content_encoding,
+            ]);
+        }
+
+        // The same answer whether or not the old address was known
+        return response()->json(['ok' => true]);
+    }
+
     public function destroy(Request $request)
     {
         $data = $request->validate(['endpoint' => 'required|string|max:500']);

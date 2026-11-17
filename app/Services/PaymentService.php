@@ -217,8 +217,9 @@ class PaymentService
                 'refund_approved_at' => null,
                 'refund_approved_by' => null,
             ])->save();
-            // A refund already sent is replaced by this new one on the order; the audit log keeps the earlier
-            // amount and reference (one row per refund is a follow-up: docs/AUDIT_FIX_PLAN.md 2.6)
+            // One row per refund (the order's columns are only the summary of what is due now, or was sent
+            // last): a refund already sent stays on record when a new one is flagged
+            \App\Models\Refund::create(['order_id' => $order->id, 'amount' => round($amount, 2), 'reason' => \Illuminate\Support\Str::limit($reason, 250, ''), 'status' => \App\Models\Refund::DUE]);
             \App\Support\Audit::record('refund.flagged', $order, ['amount' => $amount, 'total_due' => $order->refund_amount, 'reason' => $reason, 'order_number' => $order->order_number, 'previous' => $previous]);
         });
         \App\Support\TeamAlerts::send('refund_due', 'iruali: refund due '.\App\Support\Money::format($amount).' on '.$order->order_number.' ('.$reason.').', route('admin.orders.show', $order));
@@ -249,6 +250,16 @@ class PaymentService
             return false;
         }
         $order->forceFill($changes)->syncOriginal();
+        // Every refund due on the order was sent together, under this reference
+        \App\Models\Refund::where('order_id', $order->id)->where('status', \App\Models\Refund::DUE)->update([
+            'status' => \App\Models\Refund::REFUNDED,
+            'reference' => $reference,
+            'method' => str_starts_with($reference, 'WALLET-') ? 'wallet' : ($order->payment_method === 'bml' ? 'card' : 'bank'),
+            'approved_by' => $order->getAttribute('refund_approved_by'),
+            'approved_at' => $order->getAttribute('refund_approved_at'),
+            'recorded_by' => auth()->id(),
+            'refunded_at' => $changes['refunded_at'],
+        ]);
         \App\Support\Audit::record('refund.recorded', $order, ['amount' => $order->refund_amount, 'reference' => $reference, 'order_number' => $order->order_number]);
 
         app(OrderNotifier::class)->sendToCustomer($order, new RefundRecorded($order));

@@ -82,9 +82,9 @@ Severity: **H** high, **M** medium, **L** low.
 - Also in this file (**L**):
   - `notificationclick` compares an absolute URL to a relative one; use
     `new URL(url, self.location.origin).href`.
-  - `pushsubscriptionchange` should resubscribe. **Not done (deferred):** re-subscribing from the
-    service worker needs an endpoint that accepts the new subscription without a session or CSRF
-    token. Until that exists, the account page re-subscribes on the next visit, as before.
+  - `pushsubscriptionchange` should resubscribe. **Done afterwards:** the service worker subscribes
+    again and posts the new subscription to `POST /api/push/renew`, which moves the saved one (the old
+    subscription address is the proof; there is no session in a service worker).
 - **Tests:**
   - a PHPUnit test that signed-in HTML responses carry the no-store marker and guest ones do not;
   - a Playwright check that after logout the caches hold no `/messages` entry.
@@ -191,8 +191,9 @@ Do 2.1 first; 2.2–2.4 build on it.
   - Keep `refund_value` history working for old returns.
 - **Tests:** scenarios with a 20% voucher, with points, with both, multi-shop, and partial quantities.
   Refunds across all items must never exceed the amount paid.
-- **Done** with owner decision A at its default. **Follow-up (not decided):** points redeemed on
-  returned items are not given back as points; only a full cancellation returns them.
+- **Done** with owner decision A at its default. **Done afterwards:** points spent on returned items
+  go back as points when the return is approved, in proportion to the units and to the money refunded
+  for them (`ReturnService::pointsFor()`, `return_requests.points_returned`).
 
 ### 2.2 [x] H: dispute refund is not re-capped, and a later return pays again
 
@@ -254,7 +255,8 @@ Do 2.1 first; 2.2–2.4 build on it.
     order columns as a running summary. If that is too large for this batch, at least clear the
     approval and write the audit record. Note the table as a follow-up.
   - **Done:** the approval is cleared and the audit record keeps the earlier status, amount and
-    reference. **Follow-up (not done):** the `refunds` table, one row per refund.
+    reference. **Done afterwards:** the `refunds` table, one row per refund flagged; the order page lists
+    them when there is more than one.
 
 ### 2.7 [x] M: referral points are not taken back on cancel, and can be awarded twice
 
@@ -522,7 +524,7 @@ Done, except the Playwright upgrade and returning the browser job to `ubuntu-lat
 
 ### 4.11 [x] L: scheduler and speed
 
-Done: both commands run in the background; header departments cached 10 minutes (dropped on category save or delete). The home page measured 13 queries before and 12 after; the product rows are **deferred**, since 12 queries does not justify a cache that has to follow islands, stock and prices.
+Done: both commands run in the background; header departments cached 10 minutes (dropped on category save or delete). The "13 queries before and 12 after" was measured on an empty catalogue and was wrong: with products the home page ran 82 queries, 56 of them reads of the settings from the database cache. Settings are now read once per request (`Cache::memo()`), which brings it to 26. The product rows cache is still not built (it would have to follow islands, stock and prices).
 
 - Long events (`sms:send-campaigns`, the queue worker) get `runInBackground()`, or move campaigns to
   queued jobs.

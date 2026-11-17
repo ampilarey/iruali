@@ -28,6 +28,12 @@ Route::post('/payments/bml/webhook', [\App\Http\Controllers\Customer\BmlPaymentC
     ->name('payments.bml.webhook')
     ->middleware('throttle:120,1,api.api-29');
 
+// A browser's push subscription was replaced (public/sw.js, pushsubscriptionchange): no session there,
+// the old subscription address is the proof (PushSubscriptionController::renew())
+Route::post('/push/renew', [\App\Http\Controllers\Customer\PushSubscriptionController::class, 'renew'])
+    ->name('push.renew')
+    ->middleware('throttle:20,1,api.push.renew');
+
 // Public routes
 Route::prefix('v1')->group(function () {
 

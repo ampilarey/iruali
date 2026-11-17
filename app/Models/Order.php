@@ -124,6 +124,16 @@ class Order extends Model
         return $this->hasMany(PaymentTransaction::class);
     }
 
+    /**
+     * Every refund owed on the order, one row each (the refund_* columns are the running summary).
+     *
+     * @return HasMany<Refund, $this>
+     */
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
     /** @return HasMany<OrderItem, $this> */
     public function items(): HasMany
     {

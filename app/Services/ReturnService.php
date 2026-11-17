@@ -235,6 +235,15 @@ class ReturnService
                 }
             }
 
+            // Points the customer spent on these items go back to them (iruali's to give: nothing to send
+            // by bank or card, so it happens with the decision)
+            $points = $this->pointsFor($request, (float) $refund);
+            if ($points > 0 && $request->order->user) {
+                ReturnRequest::whereKey($request->id)->update(['points_returned' => $points]);
+                $request->forceFill(['points_returned' => $points])->syncOriginal();
+                app(PointsService::class)->record($request->order->user, $points, 'refund', $request->order, __('Redeemed points returned'));
+            }
+
             // Take back what the shop earned on the returned items: their value after its own discounts
             // (the voucher and points were iruali's) less commission, for the part of them refunded, and
             // its own delivery charge refunded beyond the items (App\Support\RefundSplit)
@@ -260,6 +269,40 @@ class ReturnService
         $this->notifyCustomer($request->fresh());
 
         return true;
+    }
+
+    /**
+     * Points to give back with a return: the part of the order's redeemed points that was spent on
+     * the units coming back (PaidShares), in the same proportion as the money refunded for them (a
+     * return refunded at half its value returns half), and never more than the order still holds.
+     * An unpaid order has no money to compare: the points spent on the items come back whole.
+     */
+    public function pointsFor(ReturnRequest $request, float $refund): int
+    {
+        $order = $request->order;
+        $redeemed = (int) $order->points_redeemed;
+        if ($redeemed <= 0) {
+            return 0;
+        }
+        $shares = \App\Support\PaidShares::shares($order)['points'];
+        $total = array_sum($shares);
+        if ($total <= 0) {
+            return 0;
+        }
+
+        $spent = 0.0; // laari of the points discount that sat on the returned units
+        foreach ($request->items()->with('orderItem')->get() as $line) {
+            $item = $line->orderItem;
+            if ($item && isset($shares[$item->id])) {
+                $spent += $shares[$item->id] * min(1, (int) $line->quantity / max(1, (int) $item->quantity));
+            }
+        }
+
+        $value = (float) $request->items_value;
+        $ratio = $order->payment_status === 'paid' && $value > 0 ? min(1, max(0, $refund) / $value) : 1;
+        $left = $redeemed - (int) ReturnRequest::where('order_id', $order->id)->whereKeyNot($request->id)->sum('points_returned');
+
+        return max(0, min($left, (int) floor($redeemed * $spent * $ratio / $total)));
     }
 
     public function reject(ReturnRequest $request, ?string $note, User $admin): bool

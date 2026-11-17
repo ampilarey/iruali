@@ -26,7 +26,7 @@ class ReturnRequest extends Model
 
     protected $fillable = [
         'order_id', 'seller_order_id', 'user_id', 'status', 'reason', 'details', 'photo_path', 'items_value',
-        'refund_amount', 'restocked', 'admin_note', 'refund_reference', 'resolved_by', 'resolved_at', 'refunded_at',
+        'refund_amount', 'points_returned', 'restocked', 'admin_note', 'refund_reference', 'resolved_by', 'resolved_at', 'refunded_at',
     ];
 
     protected $casts = [

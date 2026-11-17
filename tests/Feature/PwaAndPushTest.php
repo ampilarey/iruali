@@ -224,4 +224,29 @@ class PwaAndPushTest extends TestCase
 
         unlink($file);
     }
+
+    public function test_a_replaced_subscription_moves_to_its_new_address_without_a_session(): void
+    {
+        $user = User::factory()->create();
+        $old = 'https://push.example.com/send/'.str_repeat('a', 40);
+        $new = 'https://push.example.com/send/'.str_repeat('b', 40);
+        \App\Models\PushSubscription::create(['user_id' => $user->id, 'endpoint' => $old, 'public_key' => 'old-key', 'auth_token' => 'old-auth', 'content_encoding' => 'aes128gcm']);
+
+        // The service worker has no session or form token: the old address is the proof
+        $this->assertGuest();
+        $this->postJson('/api/push/renew', ['old_endpoint' => $old, 'endpoint' => $new, 'keys' => ['p256dh' => 'new-key', 'auth' => 'new-auth']])->assertOk();
+
+        $subscription = \App\Models\PushSubscription::sole();
+        $this->assertSame([$user->id, $new, 'new-key', 'new-auth'], [$subscription->user_id, $subscription->endpoint, $subscription->public_key, $subscription->auth_token]);
+
+        // An address we never saw creates nothing, and answers the same
+        $this->postJson('/api/push/renew', ['old_endpoint' => 'https://push.example.com/send/unknown', 'endpoint' => 'https://push.example.com/send/else', 'keys' => ['p256dh' => 'k', 'auth' => 'a']])->assertOk()->assertExactJson(['ok' => true]);
+        $this->assertSame(1, \App\Models\PushSubscription::count());
+        $this->postJson('/api/push/renew', ['old_endpoint' => $new, 'endpoint' => 'http://not-secure.example.com/x', 'keys' => ['p256dh' => 'k', 'auth' => 'a']])->assertStatus(422);
+
+        // The service worker asks for it
+        $sw = file_get_contents(public_path('sw.js'));
+        $this->assertStringContainsString("fetch('/api/push/renew'", $sw);
+        $this->assertStringContainsString('pushManager.subscribe(old.options)', $sw);
+    }
 }

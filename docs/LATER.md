@@ -121,17 +121,12 @@ Every plan item is done; these parts were deliberately left for later:
 
 - **Dhivehi legal pages (decision E):** Terms, Privacy and the other policies show in English under a
   Dhivehi note on `/dv`. Needs a translator; then the Dhivehi text goes into the policy views.
-- **Refunds table (2.x):** one row per refund (amount, reason, reference, approved by, paid at), with the
-  order's refund columns as a running summary. Today a second refund on an order keeps the earlier one only
-  in the audit log.
-- **Push re-subscribe (1.x):** the service worker's `pushsubscriptionchange` needs an endpoint that takes
-  the new subscription without a session; until then the account page re-subscribes on the next visit.
 - **Browser tests on `ubuntu-latest` (4.10):** upgrade `@playwright/test` to a version that installs
   Chromium on Ubuntu 26.04, then move the browser job off its `ubuntu-24.04` pin.
-- **Home page product rows cache (4.11):** skipped while the home page needs only 12 queries; revisit if
-  it gets slow (cache per island, language and view, cleared on product save).
-- **Points on returned items (2.1):** points spent on an item that is later returned are not given back as
-  points (only a full cancellation returns them). Needs a decision.
+- **Home page product rows cache (4.11):** not built. The slow part turned out to be the settings (56
+  cache reads a page, each a query with the database cache store); they are now read once per request,
+  which took the home page from 82 queries to 26 with products in the catalogue. Revisit only if the
+  home page gets slow.
 
 ## Optional setup
 

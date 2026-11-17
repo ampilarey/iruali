@@ -48,4 +48,26 @@ class AuditLeftoversTest extends TestCase
         // Its own counter: the rest of the API still answers
         $this->getJson('/api/v1/cart')->assertOk();
     }
+
+    public function test_a_page_reads_the_settings_from_the_cache_once(): void
+    {
+        \App\Models\Product::factory()->count(3)->create(['stock_quantity' => 5]);
+        $this->get('/')->assertOk(); // warm
+
+        $reads = 0;
+        $count = function ($event) use (&$reads) {
+            $reads += $event->key === 'app_settings' ? 1 : 0;
+        };
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Cache\Events\CacheHit::class, $count);
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Cache\Events\CacheMissed::class, $count);
+
+        $this->get('/')->assertOk();
+        // With the database cache store each read is a query; the home page asks for dozens of settings
+        $this->assertLessThanOrEqual(1, $reads, 'settings were read from the cache '.$reads.' times in one page load');
+
+        // A saved setting is seen at once, in the same request too
+        Setting::set(['announcement_text' => 'Fresh news']);
+        $this->assertSame('Fresh news', Setting::get('announcement_text'));
+        $this->get('/')->assertOk()->assertSee('Fresh news');
+    }
 }

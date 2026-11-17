@@ -49,8 +49,10 @@ Things agreed on 2026-10-19 but not started (updated 2026-10-24; booking-fee pre
     Never paste the keys into a chat or a shared file.
 13. **Test-site deploy blocked by the host firewall (when convenient):** on 2026-11-16 Imunify360's bot
     protection answered GitHub Actions with 403, the "Webhook pull (test.iruali.mv)" check went red and
-    `deploy-live.sh` refused to deploy until the next commit. Ask the host (or cPanel → Imunify360) to
-    allow GitHub's addresses or the path `/api/deploy/test-pull`.
+    `deploy-live.sh` refused to deploy until the next commit. That check now passes with a warning when
+    the firewall is the only reason (the test site still updates by cron), so production deploys are no
+    longer held up. For the instant update back, ask the host (or cPanel → Imunify360) to allow GitHub's
+    addresses or the path `/api/deploy/test-pull`.
 
 ### Launch checklist on 2026-10-21 (Admin → dashboard → Launch checklist)
 
@@ -121,8 +123,6 @@ Every plan item is done; these parts were deliberately left for later:
 
 - **Dhivehi legal pages (decision E):** Terms, Privacy and the other policies show in English under a
   Dhivehi note on `/dv`. Needs a translator; then the Dhivehi text goes into the policy views.
-- **Browser tests on `ubuntu-latest` (4.10):** upgrade `@playwright/test` to a version that installs
-  Chromium on Ubuntu 26.04, then move the browser job off its `ubuntu-24.04` pin.
 - **Home page product rows cache (4.11):** not built. The slow part turned out to be the settings (56
   cache reads a page, each a query with the database cache store); they are now read once per request,
   which took the home page from 82 queries to 26 with products in the catalogue. Revisit only if the

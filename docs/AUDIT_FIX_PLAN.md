@@ -508,7 +508,7 @@ Done: framework 12.72, `composer audit` and `npm audit` clean.
 
 ### 4.10 [x] M: CI
 
-Done, except the Playwright upgrade and returning the browser job to `ubuntu-latest`: **deferred** (the pin works; an upgrade is its own change to test). `isTestHost()` now needs both the request host and APP_URL to be the test site.
+Done. The Playwright upgrade (`@playwright/test` 1.65.1) and the browser job's return to `ubuntu-latest` followed afterwards. `isTestHost()` now needs both the request host and APP_URL to be the test site.
 
 - "Built assets are committed and current" must actually build. In a job with Node, run
   `npm ci && npm run build`, then `git diff --exit-code -- public/build`.

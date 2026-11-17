@@ -27,6 +27,7 @@ jobs:
       DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Trigger TEST deploy webhook
+        id: hook
         env:
           DEPLOY_SECRET: ${{ secrets.TEST_DEPLOY_WEBHOOK_SECRET }}
         run: |
@@ -37,6 +38,7 @@ jobs:
 
           # If Imunify360 bot-protection returns 403, whitelist GitHub Actions
           # (or disable webshield for /api/deploy/*) — see docs/TEST_AUTO_DEPLOY.md
+          blocked=0
           for attempt in 1 2 3 4 5 6; do
             code=$(curl -sS -o /tmp/deploy-webhook.json -w "%{http_code}" \
               -X POST "https://test.iruali.mv/api/deploy/test-pull" \
@@ -53,15 +55,29 @@ jobs:
               exit 0
             fi
             if [ "$code" = "403" ] && grep -qi 'Imunify360' /tmp/deploy-webhook.json 2>/dev/null; then
-              echo "::error::Imunify360 blocked GitHub Actions (403). Whitelist automation IPs or allow /api/deploy/test-pull — cron remains fallback."
+              echo "Imunify360 blocked this attempt (403)."
+              blocked=$((blocked + 1))
             fi
             sleep 5
           done
+
+          # The host's firewall (not the app) turned GitHub away on all six attempts. The test site
+          # still pulls main by itself within a minute (cron, scripts/self-update-test.sh), so this is
+          # a warning: a red check here also stops the production deploy (deploy-live.sh waits for
+          # green), for something the code did not cause. Any other failure (wrong secret, 404, 500,
+          # no answer) still fails.
+          if [ "$blocked" = "6" ]; then
+            echo "::warning::Imunify360 blocked GitHub Actions (403) on every attempt. test.iruali.mv updates through its cron instead. To get the fast path back, allow GitHub's addresses or /api/deploy/test-pull at the host (docs/TEST_AUTO_DEPLOY.md)."
+            echo "blocked=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           echo "::error::Webhook deploy failed after retries (hook is primary; cron is fallback only)"
           exit 1
 
       - name: Brief smoke (homepage + health)
+        # Skipped when the firewall turned the webhook away: it would turn these requests away too
+        if: steps.hook.outputs.blocked != '1'
         run: |
           sleep 20
           curl -fsS -o /dev/null -w "health %{http_code}\n" https://test.iruali.mv/api/health

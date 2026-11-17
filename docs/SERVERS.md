@@ -55,7 +55,7 @@ tags come back. Claude Code sessions cannot push tags; the owner would create th
 | `HEALTH_DETAIL_TOKEN` | random; lets the deploy check the commit in `/api/health` |
 | SMS | Dhiraagu, same API and login as Akuru (`PRODUCTION_DEPLOY.md` → SMS); set with `smssetup` |
 | BML | **not set yet**: card payment is off until the BML keys are added. Bank transfer and cash on delivery can be switched on meanwhile in Admin → Settings → Payment methods |
-| Logs | `LOG_STACK=daily`, `LOG_LEVEL=warning` (or `error`), `LOG_DAILY_DAYS=14`. `iruali:ready` fails on the never-rotated `single` log or debug level in production |
+| Logs | `LOG_STACK=daily`, `LOG_LEVEL=warning` (or `error`), `LOG_DAILY_DAYS=14`. `iruali:ready` fails on the never-rotated `single` log in production, and warns on debug level or more than 200 MB of logs |
 | `BACKUP_DISKS` | `local,s3` (or another off-server disk from `config/filesystems.php`, e.g. an S3-compatible bucket with the `AWS_*` settings). **Only `local` today**: `iruali:ready` fails until an off-server disk is added (owner decision C). Database nightly at 02:00, `storage/app` files weekly (Sunday 03:00); the deploy also takes a database copy before every migration |
 | `SMS_DRIVER` | `dhiraagu`. `log` fails `iruali:ready` on production (texts would never leave the server) |
 

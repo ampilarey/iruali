@@ -130,6 +130,16 @@ Every plan item is done; these parts were deliberately left for later:
   Chromium on Ubuntu 26.04, then move the browser job off its `ubuntu-24.04` pin.
 - **Home page product rows cache (4.11):** skipped while the home page needs only 12 queries; revisit if
   it gets slow (cache per island, language and view, cleared on product save).
+- **Points on returned items (2.1):** points spent on an item that is later returned are not given back as
+  points (only a full cancellation returns them). Needs a decision.
+- **Days a shop has to confirm a pre-order (3.9):** `preorder_confirm_days` (default 7) is read from
+  settings but has no box in Admin → Settings yet.
+- **Small text (5.8):** 10–11px text is left on the order progress steps, message times and labels, the
+  header count bubbles, the bottom tab labels and a few admin and Seller Centre badges. Raise to 12px and
+  check each at 390px (the progress steps are tight).
+- **Voucher guesses through the app's API (not in the audit):** the website's voucher box allows 20 tries a
+  minute; `POST /api/v1/cart/apply-voucher` only has the general 60 a minute for a signed-in app user. Give
+  it its own named limit when the app is built.
 - **`/dv` links for guests:** a visitor who isn't signed in and opens a Dhivehi account link lands on the
   sign-in page in English (the sign-in check runs before the language is set).
 

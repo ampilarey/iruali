@@ -39,6 +39,18 @@ Things agreed on 2026-10-19 but not started (updated 2026-10-24; booking-fee pre
 11. **Seller Terms:** after deploying the versioned Seller Terms (2026-10-24), every shop, iruali's own
     included, is asked to agree once when it next opens the Seller Centre. Tell the shops beforehand;
     Admin → Sellers shows who hasn't agreed yet.
+12. **Off-server backups (next; audit decision C):** the only red line left in `php artisan iruali:ready`
+    (2026-11-17). Backups (database nightly, uploaded files weekly, and one before every deploy's
+    migrations) are kept only on this server, so losing the hosting account or disk loses them too.
+    Pick a storage (suggested: Backblaze B2; Cloudflare R2, Wasabi or Amazon S3 also work), create a
+    bucket and an access key on its website, then ask Claude for the server command: it prompts for
+    the keys hidden (`read -s`), sets `BACKUP_DISKS=local,s3` and the `AWS_*` settings in `.env`, runs
+    `php artisan config:cache` and a first `php artisan backup:run --only-db` to check the file arrives.
+    Never paste the keys into a chat or a shared file.
+13. **Test-site deploy blocked by the host firewall (when convenient):** on 2026-11-16 Imunify360's bot
+    protection answered GitHub Actions with 403, the "Webhook pull (test.iruali.mv)" check went red and
+    `deploy-live.sh` refused to deploy until the next commit. Ask the host (or cPanel → Imunify360) to
+    allow GitHub's addresses or the path `/api/deploy/test-pull`.
 
 ### Launch checklist on 2026-10-21 (Admin → dashboard → Launch checklist)
 
@@ -102,6 +114,24 @@ local sellers from every island"), the "Reviewed local sellers" trust badge, "Se
 shop applications to "hidden" in Admin → Sellers to remove them), shop names on products, cart, checkout
 and orders, shop pages (`/shops/...`), home-page shop blocks, and order emails/SMS that say "the shop".
 Tax invoices keep the partner business's name and GST number (required by law).
+
+## Left over from the audit (docs/AUDIT_FIX_PLAN.md, finished 2026-11-17)
+
+Every plan item is done; these parts were deliberately left for later:
+
+- **Dhivehi legal pages (decision E):** Terms, Privacy and the other policies show in English under a
+  Dhivehi note on `/dv`. Needs a translator; then the Dhivehi text goes into the policy views.
+- **Refunds table (2.x):** one row per refund (amount, reason, reference, approved by, paid at), with the
+  order's refund columns as a running summary. Today a second refund on an order keeps the earlier one only
+  in the audit log.
+- **Push re-subscribe (1.x):** the service worker's `pushsubscriptionchange` needs an endpoint that takes
+  the new subscription without a session; until then the account page re-subscribes on the next visit.
+- **Browser tests on `ubuntu-latest` (4.10):** upgrade `@playwright/test` to a version that installs
+  Chromium on Ubuntu 26.04, then move the browser job off its `ubuntu-24.04` pin.
+- **Home page product rows cache (4.11):** skipped while the home page needs only 12 queries; revisit if
+  it gets slow (cache per island, language and view, cleared on product save).
+- **`/dv` links for guests:** a visitor who isn't signed in and opens a Dhivehi account link lands on the
+  sign-in page in English (the sign-in check runs before the language is set).
 
 ## Optional setup
 

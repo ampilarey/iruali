@@ -84,7 +84,7 @@ class DiscountService
         $base ??= (float) $cart->total;
 
         if ($voucher->type === 'percent') {
-            return round($base * ((float) $voucher->amount / 100), 2);
+            return round($base * (min(100, max(0, (float) $voucher->amount)) / 100), 2); // never more than the goods it is on
         }
 
         return round(min((float) $voucher->amount, $base), 2);
@@ -106,7 +106,7 @@ class DiscountService
      */
     public function calculatePointsDiscount(Cart $cart): array
     {
-        $pointsRedeemed = Session::get('points_redeemed', 0);
+        $pointsRedeemed = $this->redeemedPoints($cart);
 
         return [
             'amount' => $pointsRedeemed,
@@ -194,18 +194,35 @@ class DiscountService
         }
 
         Session::put('points_redeemed', $points);
+        $cart->forceFill(['points_redeemed' => $points])->save(); // the app has no session: it reads them from the cart
 
         return ['valid' => true, 'points' => $points];
     }
 
     /**
-     * Remove loyalty points from session
+     * Remove loyalty points (from the session and the cart)
      */
-    public function removeLoyaltyPoints(): bool
+    public function removeLoyaltyPoints(?Cart $cart = null): bool
     {
         Session::forget('points_redeemed');
+        if ($cart?->exists && (int) $cart->points_redeemed !== 0) {
+            $cart->forceFill(['points_redeemed' => 0])->save();
+        }
 
         return true;
+    }
+
+    /**
+     * The points the customer chose to spend on this cart: the website keeps them in the session, the
+     * app on the cart (applyLoyaltyPoints() writes both).
+     */
+    public function redeemedPoints(?Cart $cart): int
+    {
+        if (Session::has('points_redeemed')) {
+            return max(0, (int) Session::get('points_redeemed'));
+        }
+
+        return max(0, (int) ($cart->points_redeemed ?? 0));
     }
 
     /**

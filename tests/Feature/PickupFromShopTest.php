@@ -69,6 +69,27 @@ class PickupFromShopTest extends TestCase
         return $order->sellerOrders()->where('seller_id', $shop->id)->sole();
     }
 
+    public function test_an_order_points_pay_in_full_is_paid_without_a_card_step(): void
+    {
+        // MVR 100 item, 100 points, collected from the shop: nothing left to pay
+        app(\App\Services\PointsService::class)->record($this->customer, 150, 'adjustment');
+        $this->cartFor($this->customer, [[$this->product($this->pickupShop, 100), 1]]);
+        $this->actingAs($this->customer)->withSession(['points_redeemed' => 100])
+            ->post('/orders', $this->orderFields(['fulfilment' => [$this->pickupShop->id => 'pickup']]))
+            ->assertRedirect(); // to the order, not to BML
+
+        $order = Order::sole();
+        $this->assertEquals(0, $order->total_amount);
+        $this->assertSame('paid', $order->payment_status, 'not left unpaid for the clean-up to cancel');
+        $this->assertSame(0, \App\Models\PaymentTransaction::count());
+        $this->assertFalse(app(PaymentService::class)->canPayOnline($order));
+        $this->actingAs($this->pickupShop)->get(route('seller.orders.show', $order))->assertOk();
+
+        $this->travel(25)->hours();
+        $this->artisan('orders:cancel-unpaid-card')->assertSuccessful();
+        $this->assertSame('pending', $order->fresh()->status);
+    }
+
     public function test_shops_set_up_pickup_in_their_settings(): void
     {
         $this->actingAs($this->deliveryShop)->get('/seller/settings/delivery')->assertOk()

@@ -24,7 +24,7 @@ class Dispute extends Model
 
     protected $fillable = [
         'order_id', 'seller_order_id', 'customer_id', 'seller_id', 'return_request_id', 'conversation_id',
-        'type', 'status', 'details', 'amount_claimed', 'amount_resolved', 'resolution_note', 'opened_at', 'resolved_at', 'admin_id',
+        'type', 'status', 'details', 'amount_claimed', 'amount_resolved', 'points_returned', 'resolution_note', 'opened_at', 'resolved_at', 'admin_id',
     ];
 
     protected $casts = [

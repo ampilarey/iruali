@@ -34,13 +34,18 @@ class FinanceService
         $byCategory = $expenses->groupBy('category')->map(fn ($rows) => round((float) $rows->sum('amount') - (float) $rows->sum('gst_amount'), 2));
         $cardFees = $byCategory->has('card_fees') ? 0.0 : round($cardTotal * max(0, (float) Setting::get('card_fee_percent', 0)) / 100, 2);
 
+        // iruali's vouchers and points: the customer paid less, the shop is still owed the full price
+        // (orders paid this month and not cancelled; a cancellation gives them back)
+        $promotions = round((float) \App\Models\Order::whereBetween('paid_at', [$from, $to])->where('payment_status', 'paid')->where('status', '!=', 'cancelled')
+            ->selectRaw('COALESCE(SUM(voucher_discount), 0) + COALESCE(SUM(points_redeemed_discount), 0) as total')->value('total'), 2);
+
         $incomeTotal = round(array_sum($income), 2);
-        $costTotal = round((float) $byCategory->sum() + $cardFees, 2);
+        $costTotal = round((float) $byCategory->sum() + $cardFees + $promotions, 2);
 
         return [
             'month' => $report['month'], 'from' => $from, 'to' => $to,
             'income' => $income, 'income_total' => $incomeTotal,
-            'card_total' => $cardTotal, 'card_fees' => $cardFees,
+            'card_total' => $cardTotal, 'card_fees' => $cardFees, 'promotions' => $promotions,
             'costs' => $byCategory->all(), 'cost_total' => $costTotal,
             'profit' => round($incomeTotal - $costTotal, 2),
             'expenses' => $expenses,

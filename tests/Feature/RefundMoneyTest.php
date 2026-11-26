@@ -377,19 +377,24 @@ class RefundMoneyTest extends TestCase
         $this->assertEquals(900, $first->items_value);
         $this->assertTrue($returns->approve($first, 900, true, null, $this->admin));
         $this->assertSame(100, (int) $first->fresh()->points_returned);
-        $this->assertSame($before + 100, (int) $this->customer->fresh()->loyalty_points);
+        // ...and the points the order earned go back in the same proportion as the money refunded
+        $earned = (int) $order->fresh()->loyalty_points_earned;
+        $this->assertGreaterThan(0, $earned);
+        $earnedBack = fn (float $refunded) => (int) floor($earned * $refunded / (float) $order->total_amount);
+        $this->assertSame($earnedBack(900), (int) $order->fresh()->loyalty_points_taken_back);
+        $this->assertSame($before + 100 - $earnedBack(900), (int) $this->customer->fresh()->loyalty_points);
         $this->actingAs($this->admin)->get(route('admin.returns.show', $first))->assertOk()->assertSee('data-points-returned', false);
 
         // Approving again gives nothing more
         $this->assertFalse($returns->approve($first->fresh(), 900, true, null, $this->admin));
-        $this->assertSame($before + 100, (int) $this->customer->fresh()->loyalty_points);
+        $this->assertSame($before + 100 - $earnedBack(900), (int) $this->customer->fresh()->loyalty_points);
 
         // The other unit, refunded at half its value: half its points
         $returns->markRefunded($first->fresh(), 'REF-1');
         $second = $this->returnAll($order->fresh(), $this->shopA, 'changed_mind', 1);
         $this->assertTrue($returns->approve($second, 450, false, null, $this->admin));
         $this->assertSame(50, (int) $second->fresh()->points_returned);
-        $this->assertSame($before + 150, (int) $this->customer->fresh()->loyalty_points);
+        $this->assertSame($before + 150 - $earnedBack(1350), (int) $this->customer->fresh()->loyalty_points);
     }
 
     public function test_no_points_come_back_when_none_were_spent_and_a_cancellation_returns_only_the_rest(): void
@@ -409,7 +414,8 @@ class RefundMoneyTest extends TestCase
         $part->forceFill(['status' => 'delivered', 'delivered_at' => now()])->save();
         $back = app(ReturnService::class)->request($part->fresh(), $this->customer, [$part->items()->firstOrFail()->id => 1], 'changed_mind', 'One too many.', null);
         $this->assertTrue(app(ReturnService::class)->approve($back, 900, true, null, $this->admin));
-        $this->assertSame($before + 100, (int) $this->customer->fresh()->loyalty_points);
+        $earnedBack = (int) floor((int) $order->fresh()->loyalty_points_earned * 900 / (float) $order->total_amount);
+        $this->assertSame($before + 100 - $earnedBack, (int) $this->customer->fresh()->loyalty_points);
 
         // An order with a part already sent can't be cancelled (returns are the way back), so this can't
         // follow a return today; should a cancellation ever run after one, it gives back only the rest
@@ -500,5 +506,102 @@ class RefundMoneyTest extends TestCase
         $report = app(\App\Services\FinanceService::class)->profitAndLoss(now()->format('Y-m'));
         $this->assertEquals(70, $report['card_total'], 'only the card payment');
         $this->assertEquals(7, $report['card_fees']);
+    }
+
+    // ---- Audit 2, batch 2 ----------------------------------------------------------------------
+
+    public function test_recording_a_refund_closes_only_the_amount_the_admin_saw(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 1], [$this->shopB, 100, 1]]));
+        $payments = app(PaymentService::class);
+        $payments->flagRefund($order, 50, 'Dispute #1');
+        $seen = (float) $order->fresh()->refund_amount; // what the order page shows the admin
+
+        // Another refund is added while the admin sends the first in the bank's portal
+        $payments->flagRefund($order->fresh(), 70, 'Dispute #2');
+        $this->actingAs($this->admin)->post(route('admin.orders.refunded', $order), ['refund_reference' => 'BML-1', 'refund_amount_seen' => $seen])
+            ->assertSessionHas('error', fn ($e) => str_contains($e, 'changed from MVR 50.00 to MVR 120.00'));
+        $this->assertSame('due', $order->fresh()->refund_status);
+        $this->assertSame(2, \App\Models\Refund::where('order_id', $order->id)->where('status', 'due')->count());
+
+        // The wallet the same way: nothing credited for an amount nobody saw
+        $wallet = (float) $this->customer->fresh()->wallet_balance;
+        $this->post(route('admin.orders.refund-wallet', $order), ['refund_amount_seen' => $seen])->assertSessionHas('error');
+        $this->assertEquals($wallet, (float) $this->customer->fresh()->wallet_balance);
+
+        // With the amount due now, it is recorded
+        $this->post(route('admin.orders.refund-wallet', $order), ['refund_amount_seen' => '120.00'])->assertSessionHas('success');
+        $this->assertSame('refunded', $order->fresh()->refund_status);
+        $this->assertEquals($wallet + 120, (float) $this->customer->fresh()->wallet_balance);
+    }
+
+    public function test_a_full_dispute_refund_gives_the_points_back_and_takes_the_earned_ones(): void
+    {
+        // 200 for the item, 100 of it paid with points
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 200, 1]], null, 100));
+        $earned = (int) $order->loyalty_points_earned;
+        $before = (int) $this->customer->fresh()->loyalty_points;
+        $part = $this->part($order, $this->shopA);
+
+        $disputes = app(DisputeService::class);
+        $dispute = $disputes->open($part, $this->customer, 'other', $part->paidSubtotal(), 'Broken on arrival.');
+        $this->assertNotNull($dispute);
+        $this->assertTrue($disputes->resolve($dispute, $this->admin, 'full', null, null));
+
+        $this->assertSame(100, (int) $dispute->fresh()->points_returned, 'as a return would give them back');
+        $this->assertSame((int) floor($earned * $part->paidSubtotal() / (float) $order->total_amount), (int) $order->fresh()->loyalty_points_taken_back);
+        $this->assertSame($before + 100 - (int) $order->fresh()->loyalty_points_taken_back, (int) $this->customer->fresh()->loyalty_points);
+
+        // A request for more information after the decision does not reopen it
+        $this->assertFalse($disputes->requestInfo($dispute, $this->admin, 'seller', 'Anything to add?'));
+        $this->assertSame('resolved_refund', $dispute->fresh()->status);
+    }
+
+    public function test_a_full_refund_takes_back_all_earned_points_the_referral_rewards_and_the_tier_spend(): void
+    {
+        $referrer = User::factory()->create();
+        $this->customer->forceFill(['referred_by' => $referrer->id])->save();
+        Setting::set(['referral_referrer_points' => 100, 'referral_referee_points' => 50]);
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 500, 1]]));
+        $this->assertSame(100, (int) $referrer->fresh()->loyalty_points, 'rewarded on delivery');
+        $spend = \App\Support\LoyaltyTiers::spend($this->customer->fresh());
+        $this->assertEqualsWithDelta((float) $order->total_amount, $spend, 0.01);
+        $before = (int) $this->customer->fresh()->loyalty_points;
+
+        // Everything back, delivery included
+        $return = $this->returnAll($order, $this->shopA, 'faulty');
+        $this->assertTrue(app(ReturnService::class)->approve($return, (float) $order->total_amount, true, null, $this->admin));
+
+        $this->assertSame((int) $order->loyalty_points_earned, (int) $order->fresh()->loyalty_points_taken_back);
+        $this->assertSame($before - (int) $order->loyalty_points_earned - 50, (int) $this->customer->fresh()->loyalty_points);
+        $this->assertSame(0, (int) $referrer->fresh()->loyalty_points);
+        $this->assertEqualsWithDelta(0, \App\Support\LoyaltyTiers::spend($this->customer->fresh()), 0.01);
+
+        // Earned points are given once even when "paid" and "delivered" land together
+        app(OrderService::class)->awardRewards($order->fresh()->forceFill(['loyalty_points_awarded_at' => null]));
+        $this->assertSame(1, \App\Models\PointsTransaction::where('order_id', $order->id)->where('type', 'earned')->count());
+    }
+
+    public function test_a_return_and_a_dispute_decided_together_never_refund_more_than_was_paid(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 1]]));
+        $part = $this->part($order, $this->shopA);
+        $return = $this->returnAll($order, $this->shopA, 'faulty');
+        $disputes = app(DisputeService::class);
+        $dispute = Dispute::create(['order_id' => $order->id, 'seller_order_id' => $part->id, 'customer_id' => $this->customer->id, 'seller_id' => $this->shopA->id,
+            'type' => 'other', 'status' => 'open', 'details' => 'x', 'amount_claimed' => (float) $order->total_amount, 'opened_at' => now()]);
+
+        // The dispute is decided first; the return, checked before it, is checked again under the lock
+        $this->assertTrue($disputes->resolve($dispute, $this->admin, 'full', null, null));
+        $this->assertFalse(app(ReturnService::class)->approve($return->fresh(), 100, true, null, $this->admin));
+        $this->assertSame('requested', $return->fresh()->status);
+
+        // ...and a rejection racing an approval never leaves it "rejected" after the approval
+        $other = $this->paidAndDelivered($this->order([[$this->shopB, 100, 1]]));
+        $second = $this->returnAll($other, $this->shopB, 'faulty');
+        $stale = $second->fresh();
+        $this->assertTrue(app(ReturnService::class)->approve($second, 50, true, null, $this->admin));
+        $this->assertFalse(app(ReturnService::class)->reject($stale, 'No', $this->admin));
+        $this->assertSame('approved', $second->fresh()->status);
     }
 }

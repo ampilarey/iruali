@@ -234,8 +234,9 @@ class OrderService
                 Session::forget('points_redeemed');
             }
 
-            // The wallet covered everything due now (the order, or its booking fee): no card step
-            if ($walletPaid > 0 && $order->fresh()->cardAmount() <= 0) {
+            // The wallet covered everything due now (the order, or its booking fee), or points and a voucher
+            // left nothing to pay (MVR 0, collected from the shop): no card step, it is paid
+            if (($walletPaid > 0 || (float) $order->total_amount <= 0) && $order->fresh()->cardAmount() <= 0) {
                 app(PaymentService::class)->confirm($order);
             }
 
@@ -394,11 +395,12 @@ class OrderService
             return;
         }
 
-        if (! $order->loyalty_points_awarded_at) {
+        // Stamped first, in one statement: "cash received" and "delivered" at the same moment give them once
+        if (! $order->loyalty_points_awarded_at && Order::whereKey($order->id)->whereNull('loyalty_points_awarded_at')->update(['loyalty_points_awarded_at' => now()]) === 1) {
+            $order->forceFill(['loyalty_points_awarded_at' => now()])->syncOriginal();
             if ($order->loyalty_points_earned > 0) {
                 app(PointsService::class)->record($user, (int) $order->loyalty_points_earned, 'earned', $order);
             }
-            $order->forceFill(['loyalty_points_awarded_at' => now()])->save();
         }
 
         $this->discountService->processReferralRewards($user, $order);
@@ -411,6 +413,50 @@ class OrderService
                 report($e);
             }
         }
+    }
+
+    /**
+     * After a return or dispute refund on a paid order: the points it earned are taken back in the
+     * same proportion as the money refunded so far (a full refund takes them all back), and a first
+     * order refunded in full gives back the referral rewards it earned (both sides). Each refund
+     * takes only what earlier ones have not, so this can run after every decision.
+     */
+    public function takeBackEarnedPoints(Order $order): void
+    {
+        $user = $order->user;
+        $total = (float) $order->total_amount;
+        if (! $user || $total <= 0 || $order->payment_status !== 'paid') {
+            return;
+        }
+
+        DB::transaction(function () use ($order, $user, $total) {
+            $locked = Order::whereKey($order->id)->lockForUpdate()->first();
+            $refunded = (float) \App\Models\ReturnRequest::where('order_id', $order->id)->whereIn('status', ['approved', 'refunded'])->sum('refund_amount')
+                + (float) \App\Models\Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+            $ratio = min(1, max(0, $refunded / $total));
+
+            $earned = (int) $locked->loyalty_points_earned;
+            if ($earned > 0 && $locked->loyalty_points_awarded_at) {
+                $due = (int) floor($earned * $ratio + 1e-9);
+                $more = $due - (int) $locked->loyalty_points_taken_back;
+                if ($more > 0) {
+                    app(PointsService::class)->record($user, -$more, 'refund', $locked, __('Earned points taken back'));
+                    $locked->forceFill(['loyalty_points_taken_back' => $due])->save();
+                }
+            }
+
+            // Refunded in full: the referral rewards this order earned are taken back (once: what is
+            // left of each side's reward on the order)
+            if ($ratio >= 1 - 1e-9) {
+                $rewards = \App\Models\PointsTransaction::where('order_id', $order->id)->where('type', 'referral')
+                    ->selectRaw('user_id, SUM(points) as net')->groupBy('user_id')->pluck('net', 'user_id');
+                foreach ($rewards as $userId => $net) {
+                    if ((int) $net > 0 && ($holder = User::find($userId))) {
+                        app(PointsService::class)->record($holder, -(int) $net, 'referral', $locked, __('Referral reward taken back: the order was refunded'));
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -437,6 +483,7 @@ class OrderService
         $cart->items()->delete();
         $cart->status = 'ordered';
         $cart->voucher_code = null;
+        $cart->points_redeemed = 0; // spent on this order (the app keeps its choice on the cart)
         $cart->save();
     }
 
@@ -516,6 +563,12 @@ class OrderService
     {
         // Once a shop has sent its part, the order can't be cancelled as a whole (use a return instead).
         if ($status === 'cancelled' && app(FulfilmentService::class)->anyPartSent($order)) {
+            return false;
+        }
+        // A gift card from the order already turned into store credit: cancelling would refund money
+        // that was already given out (the card rows locked, so a redeem at the same moment waits)
+        if ($status === 'cancelled' && $order->isGiftCardOrder()
+            && in_array('redeemed', \App\Models\GiftCard::where('order_id', $order->id)->lockForUpdate()->pluck('status')->all(), true)) {
             return false;
         }
 
@@ -643,16 +696,22 @@ class OrderService
 
         $user = $order->user;
         if ($user) {
-            // Less the points approved returns already gave back (ReturnService::pointsFor())
-            $pointsBack = (int) $order->points_redeemed - (int) \App\Models\ReturnRequest::where('order_id', $order->id)->sum('points_returned');
+            // Less the points approved returns and dispute refunds already gave back (ReturnService::pointsFor(),
+            // DisputeService::pointsFor())
+            $pointsBack = (int) $order->points_redeemed - (int) \App\Models\ReturnRequest::where('order_id', $order->id)->sum('points_returned')
+                - (int) \App\Models\Dispute::where('order_id', $order->id)->sum('points_returned');
             if ($pointsBack > 0) {
                 app(PointsService::class)->record($user, $pointsBack, 'refund', $order, __('Redeemed points returned'));
             }
             // Earned points are only taken back if they were actually given (the order was paid).
             // The balance can go below zero if they were already spent; nothing can be redeemed until it recovers.
+            // (less what refunds on it already took back: takeBackEarnedPoints())
             if ($order->loyalty_points_earned > 0 && $order->loyalty_points_awarded_at) {
-                app(PointsService::class)->record($user, -(int) $order->loyalty_points_earned, 'refund', $order, __('Earned points taken back'));
-                $order->forceFill(['loyalty_points_awarded_at' => null])->save();
+                $rest = (int) $order->loyalty_points_earned - (int) $order->loyalty_points_taken_back;
+                if ($rest > 0) {
+                    app(PointsService::class)->record($user, -$rest, 'refund', $order, __('Earned points taken back'));
+                }
+                $order->forceFill(['loyalty_points_awarded_at' => null, 'loyalty_points_taken_back' => 0])->save();
             }
         }
 

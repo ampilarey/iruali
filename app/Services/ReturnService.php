@@ -35,6 +35,7 @@ class ReturnService
     public function canRequest(SellerOrder $part, User $user): bool
     {
         return $part->order?->user_id === $user->id
+            && $part->order->payment_status === 'paid' // nothing to give back yet on an unpaid order (pay later, cash not recorded)
             && $part->status === 'delivered'
             && $this->withinWindow($part)
             && ! $part->returnRequests()->whereIn('status', ['requested', 'approved'])->exists()
@@ -213,6 +214,14 @@ class ReturnService
         }
 
         $approved = DB::transaction(function () use ($request, $refund, $restock, $note, $admin, $paid) {
+            // The caps again under the order's lock (DisputeService::resolve() takes the same one): a
+            // dispute decided on the part at the same moment is counted, not refunded a second time
+            \App\Models\Order::whereKey($request->order_id)->lockForUpdate()->first();
+            if ($refund > $this->refundableLeft($request) + 0.001
+                || ($request->sellerOrder && $refund > app(DisputeService::class)->maxClaim($request->sellerOrder) + 0.001)) {
+                return false;
+            }
+
             // Only from "requested", in one statement: a second approval at the same moment changes
             // no row and stops here (no second restock or shop deduction)
             $changes = [
@@ -266,6 +275,9 @@ class ReturnService
         if (! $approved) {
             return false;
         }
+        if ($refund > 0) {
+            app(OrderService::class)->takeBackEarnedPoints($request->order->fresh());
+        }
 
         $this->notifyCustomer($request->fresh());
 
@@ -301,7 +313,8 @@ class ReturnService
 
         $value = (float) $request->items_value;
         $ratio = $order->payment_status === 'paid' && $value > 0 ? min(1, max(0, $refund) / $value) : 1;
-        $left = $redeemed - (int) ReturnRequest::where('order_id', $order->id)->whereKeyNot($request->id)->sum('points_returned');
+        $left = $redeemed - (int) ReturnRequest::where('order_id', $order->id)->whereKeyNot($request->id)->sum('points_returned')
+            - (int) \App\Models\Dispute::where('order_id', $order->id)->sum('points_returned');
 
         return max(0, min($left, (int) floor($redeemed * $spent * $ratio / $total)));
     }
@@ -312,7 +325,13 @@ class ReturnService
             return false;
         }
 
-        $request->update(['status' => 'rejected', 'admin_note' => $note, 'resolved_by' => $admin->id, 'resolved_at' => now()]);
+        // Only from "requested", in one statement: an approval at the same moment wins, and the return
+        // is never left "rejected" with its refund, restock and points already done
+        $changes = ['status' => 'rejected', 'admin_note' => $note, 'resolved_by' => $admin->id, 'resolved_at' => now()];
+        if (ReturnRequest::whereKey($request->id)->where('status', 'requested')->update($changes) === 0) {
+            return false;
+        }
+        $request->forceFill($changes)->syncOriginal();
         $this->notifyCustomer($request->fresh());
 
         return true;

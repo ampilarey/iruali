@@ -214,7 +214,16 @@ class ReturnsTest extends TestCase
     {
         $order = $this->deliveredOrder();
         $order->forceFill(['payment_status' => 'unpaid', 'paid_at' => null])->save(); // e.g. cash on delivery not confirmed yet
+
+        // The customer can ask once the order is paid (nothing to give back before)
+        $this->assertFalse(app(\App\Services\ReturnService::class)->canRequest($this->partA($order->fresh()), $this->customer));
         $this->requestReturn($order, 1, 'faulty', ['photo' => UploadedFile::fake()->image('broken.png')]);
+        $this->assertSame(0, ReturnRequest::count());
+
+        // One asked for while it counted as paid (a payment recorded by mistake, then undone)
+        $order->forceFill(['payment_status' => 'paid', 'paid_at' => now()])->save();
+        $this->requestReturn($order, 1, 'faulty', ['photo' => UploadedFile::fake()->image('broken.png')]);
+        $order->forceFill(['payment_status' => 'unpaid', 'paid_at' => null])->save();
         $return = ReturnRequest::sole();
         $stock = $this->productA->fresh()->stock_quantity;
 

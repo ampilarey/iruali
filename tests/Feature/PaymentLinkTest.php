@@ -83,15 +83,34 @@ class PaymentLinkTest extends TestCase
         $this->get($url)->assertForbidden();
     }
 
-    public function test_paying_by_card_switches_the_order_to_card_and_opens_bml(): void
+    public function test_paying_by_card_opens_bml_and_switches_the_order_to_card_once_paid(): void
     {
-        $this->enableBml();
+        config(['services.bml.api_key' => 'test-key', 'services.bml.environment' => 'sandbox', 'services.bml.base_uri' => 'https://bml.test/public']);
+        $paid = false;
+        \Illuminate\Support\Facades\Http::fake(['bml.test/*' => function ($request) use (&$paid) {
+            if ($request->method() !== 'GET') {
+                return \Illuminate\Support\Facades\Http::response(['id' => 'txn_test', 'url' => 'https://pay.bml.test/txn_test', 'state' => 'INITIATED'], 201);
+            }
+            $transaction = \App\Models\PaymentTransaction::latest('id')->first();
+
+            return \Illuminate\Support\Facades\Http::response(['id' => 'txn_test', 'state' => $paid ? 'CONFIRMED' : 'INITIATED', 'amount' => $transaction->amount, 'currency' => $transaction->currency, 'localId' => $transaction->local_id]);
+        }]);
         $order = $this->order();
         $this->get(PayLink::url($order))->assertOk()->assertSee('data-pay-card', false);
 
         $cardAction = \Illuminate\Support\Facades\URL::temporarySignedRoute('pay.card', now()->addHour(), ['order' => $order->id]);
         $this->post($cardAction)->assertRedirect('https://pay.bml.test/txn_test');
-        $this->assertSame('bml', $order->fresh()->payment_method);
+
+        // The payment page closed half way: still cash on delivery, with the shop as before
+        app(\App\Services\PaymentService::class)->syncBml(\App\Models\PaymentTransaction::sole());
+        $this->assertSame(['cod', 'unpaid'], [$order->fresh()->payment_method, $order->fresh()->payment_status]);
+        $this->assertTrue($order->fresh()->isShownToShops());
+        $this->assertFalse(AuditLog::where('action', 'payment.method_switched')->exists());
+
+        // Paid: a card order now
+        $paid = true;
+        app(\App\Services\PaymentService::class)->syncBml(\App\Models\PaymentTransaction::sole()->fresh());
+        $this->assertSame(['bml', 'paid'], [$order->fresh()->payment_method, $order->fresh()->payment_status]);
         $this->assertTrue(AuditLog::where('action', 'payment.method_switched')->exists());
     }
 

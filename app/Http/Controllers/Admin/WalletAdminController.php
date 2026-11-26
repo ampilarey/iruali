@@ -44,8 +44,9 @@ class WalletAdminController extends Controller
         if ($problem = \App\Support\RefundApproval::problem($order, request()->user())) {
             return back()->with('error', $problem);
         }
-        if (! $wallet->refundOrderToWallet($order)) {
-            return back()->with('error', 'No refund is due on this order, or it has no customer to credit.');
+        $seen = is_numeric(request()->input('refund_amount_seen')) ? (float) request()->input('refund_amount_seen') : null;
+        if (! $wallet->refundOrderToWallet($order, $seen)) {
+            return back()->with('error', AdminController::refundChanged($order->fresh(), $seen) ?? 'No refund is due on this order, or it has no customer to credit.');
         }
 
         return back()->with('success', 'Refunded to the customer\'s wallet. The customer has been emailed.');

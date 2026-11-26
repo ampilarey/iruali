@@ -219,7 +219,7 @@ class CartService
     public function getCartSummary(Cart $cart): array
     {
         $subtotal = (float) $cart->total;
-        $pointsDiscount = (float) Session::get('points_redeemed', 0);
+        $pointsDiscount = (float) app(DiscountService::class)->redeemedPoints($cart);
         // The same sums checkout uses: the shops' own discounts first (multi-buy offers, shop codes),
         // then the iruali voucher on what is left (see ShopDiscountService and DiscountService)
         $discounts = app(DiscountService::class)->calculateTotalDiscount($cart);

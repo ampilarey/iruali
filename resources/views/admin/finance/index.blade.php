@@ -35,6 +35,7 @@
                 <tr><td class="p-3">Commission (net of refunds, without GST)</td><td class="p-3 text-end">{{ $money($pnl['income']['commission']) }}</td></tr>
                 <tr><td class="p-3">Delivery and small-order fees (net, without GST)</td><td class="p-3 text-end">{{ $money($pnl['income']['delivery']) }}</td></tr>
                 <tr class="font-semibold"><td class="p-3">Income</td><td class="p-3 text-end">{{ $money($pnl['income_total']) }}</td></tr>
+                @if($pnl['promotions'] > 0)<tr><td class="p-3">Vouchers and points (iruali's: the shops are paid the full price)</td><td class="p-3 text-end">−{{ $money($pnl['promotions']) }}</td></tr>@endif
                 @if($pnl['card_fees'] > 0)<tr><td class="p-3">Card fees (estimate: {{ $cardFeePercent }}% of {{ $money($pnl['card_total']) }} paid by card)</td><td class="p-3 text-end">−{{ $money($pnl['card_fees']) }}</td></tr>@endif
                 @foreach($pnl['costs'] as $category => $amount)
                     <tr><td class="p-3">{{ \App\Models\Expense::CATEGORIES[$category] ?? $category }} (without GST)</td><td class="p-3 text-end">−{{ $money($amount) }}</td></tr>

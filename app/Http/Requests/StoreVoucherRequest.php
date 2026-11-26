@@ -24,7 +24,7 @@ class StoreVoucherRequest extends FormRequest
         return [
             'code' => 'required|string|max:50|unique:vouchers,code',
             'type' => 'required|in:fixed,percent',
-            'amount' => 'required|numeric|min:0',
+            'amount' => ['required', 'numeric', 'min:0', \Illuminate\Validation\Rule::when($this->input('type') === 'percent', 'max:100')],
             'min_order' => 'nullable|numeric|min:0',
             'max_uses' => 'nullable|integer|min:1',
             'valid_from' => 'nullable|date|before_or_equal:valid_until',
@@ -52,6 +52,7 @@ class StoreVoucherRequest extends FormRequest
             'type.in' => 'Please select a valid voucher type.',
             'amount.required' => 'Voucher amount is required.',
             'amount.min' => 'Voucher amount must be greater than 0.',
+            'amount.max' => 'A percentage voucher can be at most 100%.',
             'min_order.min' => 'Minimum order amount must be greater than or equal to 0.',
             'max_uses.min' => 'Maximum uses must be at least 1.',
             'valid_from.before_or_equal' => 'Valid from date must be before or equal to valid until date.',

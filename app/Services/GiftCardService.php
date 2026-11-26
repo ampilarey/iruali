@@ -97,7 +97,9 @@ class GiftCardService
      */
     public function orderCancelled(Order $order): void
     {
-        GiftCard::where('order_id', $order->id)->where('status', 'pending')->update(['status' => 'cancelled']);
+        // A card not redeemed yet, sent or not: the order's money goes back, so the card stops working
+        // (a redeemed card stops the cancellation: OrderService::canTransition())
+        GiftCard::where('order_id', $order->id)->whereIn('status', ['pending', 'active'])->update(['status' => 'cancelled']);
     }
 
     /**

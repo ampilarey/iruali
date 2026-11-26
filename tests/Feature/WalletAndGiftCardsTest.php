@@ -293,6 +293,29 @@ class WalletAndGiftCardsTest extends TestCase
         $this->actingAs($user)->post(route('account.wallet.redeem'), ['code' => 'IRU-DDDD-EEEE-FFFF'])->assertSessionHasErrors('code');
     }
 
+    public function test_an_admin_cancelling_a_paid_gift_card_order_stops_the_card_or_is_refused_once_it_is_spent(): void
+    {
+        $buyer = User::factory()->create();
+        $this->actingAs($buyer)->post(route('gift-cards.store'), ['amount' => 100, 'recipient_email' => 'x@y.mv']);
+        $card = GiftCard::firstOrFail();
+        app(\App\Services\PaymentService::class)->confirm($card->order->fresh());
+        $this->assertSame('active', $card->fresh()->status);
+
+        // Not redeemed yet: the money goes back and the card stops working
+        $this->assertTrue(app(\App\Services\OrderService::class)->updateOrderStatus($card->order->fresh(), 'cancelled'));
+        $this->assertSame('cancelled', $card->fresh()->status);
+        $this->assertSame('due', $card->order->fresh()->refund_status);
+
+        // Already turned into store credit: the order can't be cancelled for a refund
+        $this->actingAs($buyer)->post(route('gift-cards.store'), ['amount' => 100, 'recipient_email' => 'x@y.mv']);
+        $spent = GiftCard::latest('id')->firstOrFail();
+        app(\App\Services\PaymentService::class)->confirm($spent->order->fresh());
+        $user = User::factory()->create();
+        $this->actingAs($user)->post(route('account.wallet.redeem'), ['code' => $spent->fresh()->code])->assertSessionHasNoErrors();
+        $this->assertFalse(app(\App\Services\OrderService::class)->updateOrderStatus($spent->order->fresh(), 'cancelled'));
+        $this->assertNull($spent->order->fresh()->refund_status);
+    }
+
     public function test_only_admins_reach_admin_wallet_pages_and_users_only_see_their_own_wallet(): void
     {
         $user = User::factory()->create();

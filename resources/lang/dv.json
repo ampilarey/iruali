@@ -3532,5 +3532,15 @@
     "Order status": "އޯޑަރުގެ ހާލަތު",
     "CSV file": "CSV ފައިލް",
     "Your referral link": "ތިޔަ ރިފަރަލް ލިންކް",
-    "Stock of :name": ":name ގެ ސްޓޮކް"
+    "Stock of :name": ":name ގެ ސްޓޮކް",
+    "To change your password, use My Account → Security.": "ޕާސްވޯޑް ބަދަލުކުރައްވަން، މައި އެކައުންޓް → ސެކިއުރިޓީ ބޭނުންކުރައްވާ.",
+    "This email is on another account": "މި އީމެއިލް އޮތީ އެހެން އެކައުންޓެއްގައި",
+    "We confirmed that :email is yours. It is typed on an account that signs in with the mobile number :phone, and was never confirmed there, so we have not signed you in to that account.": ":email އަކީ ތިޔަ ބޭފުޅާގެ އީމެއިލެއްކަން ޔަގީންކުރެވިއްޖެ. މިއީ :phone މޯބައިލް ނަންބަރުން ސައިން އިން ކުރާ އެކައުންޓެއްގައި ލިޔެފައިވާ، އެތަނުގައި ޔަގީން ނުކުރެވޭ އީމެއިލެއް. އެހެންވެ އެ އެކައުންޓަށް ތިޔަ ބޭފުޅާ ސައިން އިން ނުކުރެވުނީ.",
+    "It is my account": "މިއީ އަހަރެންގެ އެކައުންޓް",
+    "Sign in with that mobile number, then confirm the email in My Account.": "އެ މޯބައިލް ނަންބަރުން ސައިން އިން ކުރައްވާފައި، މައި އެކައުންޓުގައި އީމެއިލް ޔަގީންކުރައްވާ.",
+    "Sign in with the mobile number": "މޯބައިލް ނަންބަރުން ސައިން އިން ކުރައްވާ",
+    "It is not my account": "މިއީ އަހަރެންގެ އެކައުންޓެއް ނޫން",
+    "We take your email off it, and you open your own account with it.": "އެ އެކައުންޓުން ތިޔަ އީމެއިލް ނަގާލާނަން، އަދި އެ އީމެއިލުން ތިޔަ ބޭފުޅާގެ އަމިއްލަ އެކައުންޓެއް ހައްދަވާ.",
+    "Take my email off it": "އަހަރެންގެ އީމެއިލް އެ އެކައުންޓުން ނަގާލާ",
+    "Your email is free to use now. Create your account with it.": "ތިޔަ އީމެއިލް މިހާރު ބޭނުންކުރެވޭނެ. އޭގެ ދަށުން ތިޔަ އެކައުންޓު ހައްދަވާ."
 }

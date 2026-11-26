@@ -160,6 +160,13 @@ class SocialLoginService
                 throw SocialLoginException::emailInUse($email);
             }
             $this->allowed($existing, $label); // staff are never linked
+            // Someone else's account with this email typed on it: the provider vouched for the email,
+            // not for that account. The email comes off it and its owner gets an account of their own.
+            if ($existing->emailIsUnproven()) {
+                $existing->releaseUnprovenEmail();
+
+                return [$this->createCustomer($profile, $email, $referralCode), true];
+            }
 
             $this->link($existing, $profile);
             $existing->claimByEmailProof(); // the provider vouched for the email (User::claimByEmailProof())

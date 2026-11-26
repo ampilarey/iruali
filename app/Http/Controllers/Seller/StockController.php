@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Services\PreorderService;
 use App\Support\CurrentShop;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 /**
  * One table of everything the shop sells, with inline stock editing.
@@ -73,47 +71,12 @@ class StockController extends Controller
             403
         );
 
-        $preorders = app(PreorderService::class);
-        $changed = 0;
-        $arrivals = []; // product id => [variant id, or 0 => units]: handed to waiting pre-orders first
-        DB::transaction(function () use ($data, $products, $variants, $preorders, &$changed, &$arrivals) {
-            foreach ($data['products'] ?? [] as $id => $stock) {
-                $product = $products[(int) $id];
-                if ($product->has_variants) {
-                    continue;
-                }
-                $locked = Product::whereKey($product->id)->lockForUpdate()->first();
-                $delta = (int) $stock - (int) ($data['original']['products'][$id] ?? $locked->stock_quantity);
-                if ($delta === 0) {
-                    continue;
-                }
-                if ($delta > 0 && $preorders->waitingUnits($locked->id) > 0) {
-                    $arrivals[$locked->id][0] = $delta;
-                } else {
-                    $locked->update(['stock_quantity' => max(0, (int) $locked->stock_quantity + $delta)]);
-                }
-                $changed++;
-            }
-            foreach ($data['variants'] ?? [] as $id => $stock) {
-                $variant = $variants[(int) $id];
-                $locked = ProductVariant::whereKey($variant->id)->lockForUpdate()->first();
-                $delta = (int) $stock - (int) ($data['original']['variants'][$id] ?? $locked->stock_quantity);
-                if ($delta === 0) {
-                    continue;
-                }
-                if ($delta > 0 && $preorders->waitingUnits((int) $locked->product_id) > 0) {
-                    $arrivals[(int) $locked->product_id][(int) $locked->id] = $delta;
-                } else {
-                    $locked->update(['stock_quantity' => max(0, (int) $locked->stock_quantity + $delta)]);
-                }
-                $changed++;
-            }
-        });
-        foreach ($arrivals as $productId => $units) {
-            if ($product = Product::find($productId)) {
-                $preorders->receiveStock($product, $units, 'stock_page');
-            }
-        }
+        $changed = app(\App\Services\StockEdits::class)->apply(
+            array_filter($data['products'] ?? [], fn ($id) => ! $products[(int) $id]->has_variants, ARRAY_FILTER_USE_KEY),
+            $data['variants'] ?? [],
+            $data['original'] ?? [],
+            'stock_page',
+        );
 
         return redirect()->route('seller.stock', $request->only('low', 'q'))
             ->with('success', trans_choice(':count stock level updated.|:count stock levels updated.', $changed, ['count' => $changed]));

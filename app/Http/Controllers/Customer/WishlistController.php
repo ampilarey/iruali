@@ -13,9 +13,9 @@ class WishlistController extends Controller
 {
     public function index()
     {
-        // A product deleted since it was saved (it is in the bin) is left out
+        // A product deleted since it was saved (it is in the bin), or taken off sale, is left out
         $wishlistItems = Wishlist::where('user_id', Auth::id())
-            ->whereHas('product')
+            ->whereHas('product', fn ($q) => $q->active())
             ->with(['product.mainImage', 'product.variants', 'variant'])
             ->get();
 
@@ -32,7 +32,7 @@ class WishlistController extends Controller
         $productId = $request->product_id;
 
         // "exists" also matches a product in the bin: one deleted since the page was loaded
-        $product = Product::find($productId);
+        $product = Product::query()->active()->find($productId);
         if (! $product) {
             NotificationService::error(__('This product is not available.'));
 

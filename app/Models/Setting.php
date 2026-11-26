@@ -169,7 +169,26 @@ class Setting extends Model
             static::updateOrCreate(['key' => $key], ['value' => $value ?? '']);
         }
 
-        Cache::memo()->forget(static::CACHE_KEY);
+        Cache::forget(static::CACHE_KEY);
+        static::$memo = null;
+    }
+
+    /**
+     * The settings this process read last: [app instance, when, values]. A page asks for dozens of
+     * settings and, with the database cache store, every cache read is a query, so they are read once
+     * and kept here. Only for a few seconds: a long-running command (an SMS campaign going out) must
+     * see an admin switch a setting off in another request.
+     *
+     * @var array{0: int, 1: float, 2: array<string, mixed>}|null
+     */
+    protected static ?array $memo = null;
+
+    protected const MEMO_SECONDS = 5;
+
+    /** Seconds, from the app clock (so tests can move time). */
+    protected static function clock(): float
+    {
+        return (float) now()->format('U.u');
     }
 
     /**
@@ -177,18 +196,21 @@ class Setting extends Model
      */
     protected static function values(): array
     {
-        // Read from the cache once per request or queued job (Cache::memo()), not once per setting: with
-        // the database cache store every read is a query, and a page asks for dozens of settings
-        $cached = Cache::memo()->get(static::CACHE_KEY);
-        if (is_array($cached)) {
-            return $cached;
+        $app = spl_object_id(app());
+        if (static::$memo !== null && static::$memo[0] === $app && static::clock() - static::$memo[1] < static::MEMO_SECONDS) {
+            return static::$memo[2];
         }
 
-        // Before the key/value migration has run, fall back to defaults without caching.
-        if (! Schema::hasColumn('settings', 'key')) {
-            return [];
+        $cached = Cache::get(static::CACHE_KEY);
+        if (! is_array($cached)) {
+            // Before the key/value migration has run, fall back to defaults without caching.
+            if (! Schema::hasColumn('settings', 'key')) {
+                return [];
+            }
+            $cached = Cache::rememberForever(static::CACHE_KEY, fn () => static::query()->pluck('value', 'key')->all());
         }
+        static::$memo = [$app, static::clock(), $cached];
 
-        return Cache::memo()->rememberForever(static::CACHE_KEY, fn () => static::query()->pluck('value', 'key')->all());
+        return $cached;
     }
 }

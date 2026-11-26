@@ -91,6 +91,7 @@ class OrderVariantsTest extends TestCase
         // Everyone sees which variant was bought
         $this->actingAs($this->customer)->get(route('orders.show', $order))->assertOk()->assertSee('HOOD-L');
         $this->get(route('orders.receipt', $order))->assertOk()->assertSee('Hoodie – L');
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($this->shop)->get(route('seller.orders.show', $order))->assertOk()->assertSee('Hoodie – L');
         $admin = User::factory()->create();
         $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);

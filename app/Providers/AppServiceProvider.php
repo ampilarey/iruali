@@ -43,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Markdown mail: names and text people typed (a product, a shop) are escaped, not read as
+        // Markdown, so they cannot add links or formatting to an email
+        \Illuminate\Mail\Markdown::withSecuredEncoding();
+
         // <script @nonce>: the per-request Content-Security-Policy nonce (SecurityHeaders). Every inline
         // script written in Blade carries it; a script injected through user content would not.
         // Registered once the Blade compiler is made, not at boot: `composer install` boots the app

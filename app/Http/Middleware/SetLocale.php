@@ -94,13 +94,14 @@ class SetLocale
         }
 
         // 1. Check URL parameter (e.g., ?locale=en)
-        if ($request->has('locale')) {
-            return $request->get('locale');
+        // (a string only: ?locale[]=x is ignored rather than a 500)
+        if (is_string($fromUrl = $request->get('locale')) && $fromUrl !== '') {
+            return $fromUrl;
         }
 
         // 2. The language the user chose (locale switcher) wins over the browser's
-        if ($request->session()->has('locale')) {
-            return $request->session()->get('locale');
+        if (is_string($chosen = $request->session()->get('locale'))) {
+            return $chosen;
         }
 
         // 3. Fall back to the browser's Accept-Language header

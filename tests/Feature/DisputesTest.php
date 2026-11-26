@@ -129,6 +129,47 @@ class DisputesTest extends TestCase
         $this->assertSame(1, Dispute::count());
     }
 
+    public function test_a_customer_blocked_from_messaging_can_still_open_a_dispute(): void
+    {
+        $order = $this->paidOrder();
+        $order->forceFill(['paid_at' => now()->subDays(9)])->save();
+        $this->customer->forceFill(['messaging_blocked_at' => now()])->save();
+
+        $this->openDispute($order->fresh())->assertRedirect();
+        $this->assertSame(1, Dispute::count());
+        $this->assertSame(0, Message::count());
+
+        // Writing in the order's thread says why it can't, rather than failing
+        $this->actingAs($this->customer->fresh())->post(route('orders.messages.store', [$order, $this->part($order)]), ['body' => 'Hello?'])
+            ->assertRedirect()->assertSessionHasErrors('body', null, 'conversation-'.Dispute::sole()->conversation_id);
+        $this->assertSame(0, Message::count());
+    }
+
+    public function test_a_shop_cannot_open_a_card_order_that_is_not_paid_yet(): void
+    {
+        $product = Product::factory()->create(['seller_id' => $this->shop->id, 'price' => 100, 'stock_quantity' => 10]);
+        $cart = Cart::factory()->create(['user_id' => $this->customer->id, 'status' => 'active']);
+        CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => 1, 'price' => 100]);
+        $order = app(OrderService::class)->createOrderFromCart($this->customer, [
+            'shipping_address' => 'M. Blue House', 'shipping_city' => 'Hithadhoo', 'shipping_state' => 'Addu',
+            'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml', 'delivery_zone' => 'islands',
+        ])['order'];
+        $part = $this->part($order);
+
+        $this->actingAs($this->shop);
+        $this->get(route('seller.orders.show', $order))->assertNotFound();
+        $this->get(route('seller.orders.packing-slip', $order))->assertNotFound();
+        $this->get(route('seller.orders.invoice', $order))->assertNotFound();
+        $this->post(route('seller.orders.messages.store', [$order, $part]), ['body' => 'Your address?'])->assertNotFound();
+        $this->post(route('seller.orders.tracking', [$order, $part]), ['tracking_number' => 'X1'])->assertNotFound();
+        $this->assertSame(0, Message::count());
+
+        // Once it is paid, it is the shop's to see
+        app(PaymentService::class)->confirm($order->fresh());
+        $this->get(route('seller.orders.show', $order))->assertOk();
+        $this->get(route('seller.orders.packing-slip', $order))->assertOk();
+    }
+
     public function test_not_as_described_within_seven_days_and_rejected_returns(): void
     {
         $order = $this->paidOrder();

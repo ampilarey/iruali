@@ -93,6 +93,7 @@ class GiftOrdersTest extends TestCase
     {
         $order = $this->giftOrder();
 
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($this->seller)->get(route('seller.orders.show', $order))->assertOk()
             ->assertSee('This is a gift')
             ->assertSee('For Mariyam Ali')
@@ -115,6 +116,7 @@ class GiftOrdersTest extends TestCase
     {
         $order = $this->giftOrder();
 
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $slip = $this->actingAs($this->seller)->get(route('seller.orders.packing-slip', $order))->assertOk();
         $slip->assertSee('Packing slip')
             ->assertSee($order->order_number)
@@ -138,6 +140,7 @@ class GiftOrdersTest extends TestCase
     public function test_slips_show_prices_unless_a_gift_hides_them(): void
     {
         $shown = $this->giftOrder(['gift_hide_prices' => '0']);
+        $shown->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($this->seller)->get(route('seller.orders.packing-slip', $shown))->assertOk()
             ->assertSee('A gift for you')
             ->assertSee('MVR 349.50')
@@ -146,6 +149,7 @@ class GiftOrdersTest extends TestCase
         $this->cartFor($this->customer, [[$this->product($this->seller, 80, 0, ['name' => ['en' => 'Tote bag']]), 1]]);
         $this->placeOrder($this->customer)->assertRedirect();
         $plain = Order::latest('id')->first();
+        $plain->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($this->seller)->get(route('seller.orders.packing-slip', $plain))->assertOk()
             ->assertSee('Tote bag')
             ->assertSee('Aisha Ahmed')

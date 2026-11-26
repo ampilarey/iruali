@@ -88,6 +88,7 @@ class DeliverySlotsTest extends TestCase
         $this->assertSame('Tue 13 Oct, 15:00–18:00', $order->deliverySlotLabel());
 
         $seller = $order->sellerOrders()->sole()->seller;
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($seller)->get(route('seller.orders.show', $order))->assertOk()->assertSee('Tue 13 Oct, 15:00–18:00');
         $this->actingAs($this->admin())->get(route('admin.orders.show', $order))->assertOk()->assertSee('Tue 13 Oct, 15:00–18:00');
         $this->actingAs($this->customer)->get(route('orders.show', $order))->assertOk()->assertSee('Tue 13 Oct, 15:00–18:00');

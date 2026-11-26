@@ -300,6 +300,69 @@ class RefundMoneyTest extends TestCase
         $this->assertNull($order->refund_approved_by);
     }
 
+    // ---- Audit 2: several refunds on one part share it ------------------------------------------
+
+    public function test_two_disputes_on_one_part_never_charge_the_shop_more_than_it_earned(): void
+    {
+        // Goods 100 (shop earns 90 at 10%), iruali's delivery fee on top
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 1]]));
+        $part = $this->part($order, $this->shopA);
+        $disputes = app(DisputeService::class);
+
+        $first = $disputes->open($part, $this->customer, 'item_not_as_described', 60, 'Half of it broken.');
+        $disputes->resolve($first, $this->admin, 'full', null, null);
+        $second = $disputes->open($part->fresh(), $this->customer, 'item_not_as_described', $disputes->maxClaim($part->fresh()), 'The rest too, and the delivery.');
+        $disputes->resolve($second, $this->admin, 'full', null, null);
+
+        $this->assertEquals((float) $order->total_amount, (float) $order->fresh()->refund_amount, 'the customer gets everything back');
+        $this->assertEquals(-90, (float) SellerAdjustment::where('seller_id', $this->shopA->id)->sum('amount'), 'the shop gives back what it earned, never iruali\'s delivery fee');
+    }
+
+    public function test_a_return_then_a_dispute_on_the_delivery_fee_takes_nothing_more_from_the_shop(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 1]]));
+        $part = $this->part($order, $this->shopA);
+        $return = $this->returnAll($order, $this->shopA, 'changed_mind');
+        $this->assertTrue(app(ReturnService::class)->approve($return, 100, true, null, $this->admin));
+
+        $disputes = app(DisputeService::class);
+        $dispute = $disputes->open($part->fresh(), $this->customer, 'item_not_as_described', $disputes->maxClaim($part->fresh()), 'And the delivery fee.');
+        $disputes->resolve($dispute, $this->admin, 'full', null, null);
+
+        $this->assertEquals(-90, (float) SellerAdjustment::where('seller_id', $this->shopA->id)->sum('amount'));
+    }
+
+    public function test_after_a_dispute_a_change_of_mind_return_suggests_only_the_items_left(): void
+    {
+        $order = $this->paidAndDelivered($this->order([[$this->shopA, 100, 1]]));
+        $part = $this->part($order, $this->shopA);
+        $disputes = app(DisputeService::class);
+        $dispute = $disputes->open($part, $this->customer, 'item_not_as_described', 50, 'Scratched.');
+        $disputes->resolve($dispute, $this->admin, 'full', null, null);
+
+        $return = $this->returnAll($order->fresh(), $this->shopA, 'changed_mind');
+        $this->assertEquals(50, app(ReturnService::class)->suggestedRefund($return), 'not iruali\'s delivery fee through the order cap');
+        $this->assertTrue(app(ReturnService::class)->approve($return, 50, true, null, $this->admin));
+        $this->assertEquals(-90, (float) SellerAdjustment::where('seller_id', $this->shopA->id)->sum('amount'));
+    }
+
+    public function test_the_gst_report_counts_a_dispute_refund_once_when_the_order_is_then_cancelled(): void
+    {
+        $order = $this->order([[$this->shopA, 100, 1]]);
+        app(PaymentService::class)->confirm($order);
+        $order->forceFill(['paid_at' => now()->subDays(10)])->save();
+        $part = $this->part($order, $this->shopA);
+        $disputes = app(DisputeService::class);
+        $dispute = $disputes->open($part, $this->customer, 'non_delivery', $disputes->maxClaim($part), 'Nothing arrived.');
+        $disputes->resolve($dispute, $this->admin, 'full', null, null);
+        $this->assertTrue(app(OrderService::class)->updateOrderStatus($order->fresh(), 'cancelled'));
+
+        $events = app(\App\Services\GstReportService::class)->refunds(now()->subDay(), now()->addDay())->where('order.id', $order->id);
+        $this->assertEqualsWithDelta(100, $events->sum('goods'), 0.01, 'the goods reversed once, not twice');
+        $this->assertEqualsWithDelta((float) $order->shipping_amount, $events->sum('delivery'), 0.01);
+        $this->assertEqualsWithDelta(10, $events->sum('commission'), 0.01);
+    }
+
     // ---- 2.1 follow-up: points spent on returned items come back as points ----------------------
 
     public function test_points_spent_on_returned_items_come_back_as_points(): void

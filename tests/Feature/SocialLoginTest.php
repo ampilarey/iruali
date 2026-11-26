@@ -289,6 +289,21 @@ class SocialLoginTest extends TestCase
         $this->assertSame('Aisha', $existing->name);
     }
 
+    public function test_google_vouching_for_an_email_typed_on_a_phone_account_does_not_hand_that_account_over(): void
+    {
+        $this->configure();
+        // Someone's phone account, with this email typed on it and never confirmed
+        $theirs = User::factory()->unverified()->create(['email' => 'aisha@example.com', 'phone' => '7771234']);
+        $theirs->forceFill(['phone_verified_at' => now()])->save();
+
+        $this->signInWithGoogle()->assertRedirect();
+        $this->assertAuthenticated();
+        $this->assertNotSame($theirs->id, auth()->id(), 'the email owner gets an account of their own');
+        $this->assertSame('aisha@example.com', auth()->user()->email);
+        $this->assertNull($theirs->fresh()->email, 'the unconfirmed email came off the phone account');
+        $this->assertTrue($theirs->fresh()->isPhoneVerified());
+    }
+
     public function test_staff_accounts_must_use_their_password(): void
     {
         $this->configure();

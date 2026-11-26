@@ -74,7 +74,9 @@ class CodeLoginTest extends TestCase
     public function test_by_email_too_and_the_email_counts_as_verified(): void
     {
         Notification::fake();
+        // An account opened with this email (no other way in yet): proving the email signs in and confirms it
         $user = $this->customer(['email' => 'aisha@example.com', 'email_verified_at' => null]);
+        $user->forceFill(['phone_verified_at' => null])->save();
 
         $this->post(route('login.code.send'), ['login' => 'Aisha@Example.com'])->assertSessionHas('status');
         Notification::assertSentOnDemand(SignInCode::class, fn ($n, $channels, $to) => $channels === ['mail'] && $to->routes['mail'] === 'aisha@example.com');
@@ -135,5 +137,44 @@ class CodeLoginTest extends TestCase
         $this->get(route('login.code'))->assertOk()->assertSee('Email address');
         $this->post(route('login.code.send'), ['login' => '7771234'])->assertSessionHasErrors('login');
         $this->assertSame(0, SmsMessage::count());
+    }
+
+    public function test_an_email_typed_onto_someone_elses_account_does_not_hand_that_account_over(): void
+    {
+        Notification::fake();
+        // Opened with one person's mobile number, with another person's email typed onto it (never confirmed)
+        $theirs = $this->customer(['email' => 'victim@example.com', 'email_verified_at' => null, 'phone' => '7771234', 'phone_verified_at' => now()]);
+
+        $this->post(route('login.code.send'), ['login' => 'victim@example.com']);
+        $this->post(route('login.code.verify'), ['code' => $this->lastCode()])->assertRedirect(route('login.email-taken'));
+
+        // The email owner is not signed in to that account: they choose
+        $this->assertGuest();
+        $this->get(route('login.email-taken'))->assertOk()->assertSee('victim@example.com')->assertSee('•••1234');
+
+        // "It is not my account": the email comes off it, free for them to use; the account keeps its own way in
+        $this->post(route('login.email-taken.release'))->assertRedirect(route('register'));
+        $this->assertGuest();
+        $this->assertNull($theirs->fresh()->email);
+        $this->assertTrue($theirs->fresh()->isPhoneVerified());
+        $this->assertSame($theirs->id, User::findByVerifiedPhone('7771234')?->id);
+
+        // The choice can't be replayed later
+        $this->post(route('login.email-taken.release'))->assertRedirect(route('login'));
+    }
+
+    public function test_an_account_with_no_other_way_in_is_still_claimed_by_proving_its_email(): void
+    {
+        Notification::fake();
+        // Registered with someone's email and a password they chose, then two-step turned on
+        $premade = $this->customer(['email' => 'owner@example.com', 'email_verified_at' => null]);
+        $premade->forceFill(['phone' => null, 'phone_verified_at' => null, 'two_factor_enabled' => true, 'two_factor_secret' => encrypt('x')])->save();
+
+        $this->post(route('login.code.send'), ['login' => 'owner@example.com']);
+        $this->post(route('login.code.verify'), ['code' => $this->lastCode()]);
+
+        $this->assertAuthenticatedAs($premade);
+        $this->assertFalse($premade->fresh()->isTwoFactorEnabled(), 'the two-step sign-in the other person set up is gone');
+        $this->assertFalse($premade->fresh()->hasPassword());
     }
 }

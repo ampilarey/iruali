@@ -24,6 +24,11 @@ class AccountSetupController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
+        // Only to finish a new account: a first password and a first email, straight after signing in
+        // with a code. Anyone with the device later needs the current password (My Account → Security)
+        if ($user->hasPassword() || ! CodeLoginController::recentlySignedInWithCode($request)) {
+            return redirect()->route('account.edit')->withErrors(['email' => __('To change your password, use My Account → Security.')]);
+        }
         $later = $request->input('action') === 'later';
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -32,13 +37,17 @@ class AccountSetupController extends Controller
         ], ['email.unique' => __('That email is already on another account. Sign in with it, or leave this empty.')]);
 
         $changes = ['name' => trim($data['name'])];
-        if (filled($data['email'] ?? null) && strcasecmp((string) $user->email, (string) $data['email']) !== 0) {
+        if (filled($data['email'] ?? null) && blank($user->email)) {
             $changes += ['email' => mb_strtolower(trim($data['email'])), 'email_verified_at' => null];
         }
         if (! $later) {
             $changes += ['password' => Hash::make((string) $data['password']), 'has_password' => true];
         }
         $user->forceFill($changes)->save();
+        $request->session()->forget('code_signed_in_at'); // used once
+        if (isset($changes['email'])) {
+            app(AuthController::class)->sendEmailCodeTo($user); // confirm it now (User::claimByEmailProof())
+        }
 
         NotificationService::success($later ? __('Saved. You can set a password any time in My Account.') : __('All set. Next time, sign in with your mobile number and this password.'));
 

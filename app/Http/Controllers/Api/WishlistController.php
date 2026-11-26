@@ -18,9 +18,9 @@ class WishlistController extends BaseController
     public function index()
     {
         $user = Auth::user();
-        // A product deleted since it was saved (it is in the bin) is left out
+        // A product deleted since it was saved (it is in the bin), or taken off sale, is left out
         $wishlistItems = Wishlist::where('user_id', $user->id)
-            ->whereHas('product')
+            ->whereHas('product', fn ($q) => $q->active())
             ->with(['product.mainImage', 'product.category', 'product.seller'])
             ->get();
 

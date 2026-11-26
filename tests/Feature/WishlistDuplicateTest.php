@@ -124,4 +124,25 @@ class WishlistDuplicateTest extends TestCase
         $this->assertTrue($removed);
         $this->assertFalse(Wishlist::isInWishlist($user->id, $product->id));
     }
+
+    public function test_only_products_on_sale_can_be_saved_or_shown(): void
+    {
+        $customer = User::factory()->create();
+        // Another customer's private item request, or a listing waiting for approval: inactive
+        $hidden = Product::factory()->create(['name' => ['en' => 'Private request: gold ring for Aminath'], 'is_active' => false, 'price' => 4321]);
+
+        $this->actingAs($customer)->post('/wishlist/add/'.$hidden->id, ['product_id' => $hidden->id]);
+        $this->get('/wishlist')->assertOk()->assertDontSee('gold ring for Aminath')->assertDontSee('4,321');
+        $this->assertSame(0, Wishlist::count());
+
+        \Laravel\Sanctum\Sanctum::actingAs($customer, ['*']);
+        $this->postJson('/api/v1/wishlist/add', ['product_id' => $hidden->id])->assertStatus(400);
+        $this->assertSame(0, Wishlist::count());
+
+        // Saved while on sale, then taken off sale: no longer shown
+        $live = Product::factory()->create(['name' => ['en' => 'Reed mat'], 'is_active' => true]);
+        $this->postJson('/api/v1/wishlist/add', ['product_id' => $live->id])->assertOk();
+        $live->update(['is_active' => false]);
+        $this->getJson('/api/v1/wishlist')->assertOk()->assertJsonPath('data.total_items', 0);
+    }
 }

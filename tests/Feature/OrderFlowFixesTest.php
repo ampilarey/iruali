@@ -54,7 +54,8 @@ class OrderFlowFixesTest extends TestCase
 
         $this->assertSame([], app(FulfilmentService::class)->nextStatuses($part));
         $this->actingAs($this->shop)->get(route('seller.orders'))->assertOk()->assertDontSee($order->order_number);
-        $this->post(route('seller.orders.status', $order), ['status' => 'processing'])->assertSessionHas('error');
+        $this->get(route('seller.orders.show', $order))->assertNotFound();
+        $this->post(route('seller.orders.status', $order), ['status' => 'processing'])->assertNotFound();
         $this->assertSame(['pending', 'pending'], [$part->fresh()->status, $order->fresh()->status]);
 
         // Never paid: the clean-up still cancels it and the stock comes back

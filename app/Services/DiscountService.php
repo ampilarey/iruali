@@ -222,7 +222,7 @@ class DiscountService
             return max(0, (int) Session::get('points_redeemed'));
         }
 
-        return max(0, (int) ($cart?->points_redeemed ?? 0));
+        return max(0, (int) ($cart->points_redeemed ?? 0));
     }
 
     /**

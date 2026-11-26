@@ -568,7 +568,7 @@ class OrderService
         // A gift card from the order already turned into store credit: cancelling would refund money
         // that was already given out (the card rows locked, so a redeem at the same moment waits)
         if ($status === 'cancelled' && $order->isGiftCardOrder()
-            && \App\Models\GiftCard::where('order_id', $order->id)->lockForUpdate()->get(['id', 'status'])->contains('status', 'redeemed')) {
+            && in_array('redeemed', \App\Models\GiftCard::where('order_id', $order->id)->lockForUpdate()->pluck('status')->all(), true)) {
             return false;
         }
 

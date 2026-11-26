@@ -126,6 +126,10 @@ class AdminAndApiCoverageTest extends TestCase
             ->assertSessionHasErrors(['code', 'type', 'amount', 'max_uses', 'valid_from', 'valid_until']);
 
         $this->post(route('admin.vouchers.store'), [])->assertSessionHasErrors(['code', 'type', 'amount']);
+        // A percentage over 100 would take more than the goods
+        $this->post(route('admin.vouchers.store'), $this->voucherInput(['code' => 'too-much', 'amount' => 150]))->assertSessionHasErrors('amount');
+        $over = new \App\Models\Voucher(['type' => 'percent', 'amount' => 150]);
+        $this->assertEquals(80, app(\App\Services\DiscountService::class)->calculateVoucherAmount(new \App\Models\Cart, $over, 80));
         $this->assertSame(1, Voucher::count());
     }
 
@@ -386,5 +390,17 @@ class AdminAndApiCoverageTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.cart_total', 200);
         $this->assertSame(150, $this->customer->fresh()->loyalty_points);
+
+        // The app has no session: the points chosen reach the order from the cart
+        $this->postJson('/api/v1/checkout/redeem-points', ['points' => 50])->assertOk();
+        $this->flushSession();
+        $this->postJson('/api/v1/orders', [
+            'shipping_address' => 'H. Blue Villa', 'shipping_city' => 'Malé', 'shipping_state' => 'Kaafu', 'shipping_country' => 'Maldives',
+            'shipping_phone' => '7771234', 'payment_method' => 'bml',
+        ])->assertCreated();
+        $order = \App\Models\Order::sole();
+        $this->assertSame(50, (int) $order->points_redeemed);
+        $this->assertEquals(150 + (float) $order->shipping_amount, (float) $order->total_amount);
+        $this->assertSame(100, $this->customer->fresh()->loyalty_points);
     }
 }

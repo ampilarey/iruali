@@ -421,7 +421,10 @@ class BookingFeeService
      */
     public function keepable(Order $order): bool
     {
-        return $order->status !== 'cancelled' && $order->bookingFeePaid() && $order->deposit_refundable_at === null;
+        // Not after a dispute refund on the order: iruali already gave the money back for it, so the
+        // fee is not kept for the shop on top
+        return $order->status !== 'cancelled' && $order->bookingFeePaid() && $order->deposit_refundable_at === null
+            && ! \App\Models\Dispute::where('order_id', $order->id)->where('amount_resolved', '>', 0)->exists();
     }
 
     /**

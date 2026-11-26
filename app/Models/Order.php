@@ -28,7 +28,7 @@ class Order extends Model
         'total_amount',
         'voucher_code',
         'voucher_discount',
-        'loyalty_points_earned', 'loyalty_points_awarded_at',
+        'loyalty_points_earned', 'loyalty_points_awarded_at', 'loyalty_points_taken_back',
         'points_redeemed',
         'points_redeemed_discount',
         'shipping_address',

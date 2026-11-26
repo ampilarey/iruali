@@ -187,8 +187,8 @@ class OrderController extends BaseController
      */
     public function removePoints()
     {
-        $this->discountService->removeLoyaltyPoints();
         $cart = $this->cartService->currentCart();
+        $this->discountService->removeLoyaltyPoints($cart);
 
         return $this->sendResponse([
             'cart_total' => $cart ? $this->discountService->calculateTotalDiscount($cart)['final_total'] : 0,

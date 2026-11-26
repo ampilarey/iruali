@@ -87,6 +87,9 @@ class FinanceController extends Controller
             fputcsv($out, ['Commission (net of refunds, without GST)', $pnl['income']['commission']]);
             fputcsv($out, ['Delivery and small-order fees (net, without GST)', $pnl['income']['delivery']]);
             fputcsv($out, ['Income', $pnl['income_total']]);
+            if ($pnl['promotions'] > 0) {
+                fputcsv($out, ['Vouchers and points (iruali\'s)', -$pnl['promotions']]);
+            }
             if ($pnl['card_fees'] > 0) {
                 fputcsv($out, ['Card fees (estimated)', -$pnl['card_fees']]);
             }

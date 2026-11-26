@@ -124,19 +124,20 @@ class WalletService
     /**
      * Settle a refund that is due on an order by crediting the wallet instead of the card.
      */
-    public function refundOrderToWallet(Order $order): bool
+    public function refundOrderToWallet(Order $order, ?float $amountSeen = null): bool
     {
         if ($order->refund_status !== 'due' || ! $order->user || (float) $order->refund_amount <= 0) {
             return false;
         }
 
-        return DB::transaction(function () use ($order) {
+        return DB::transaction(function () use ($order, $amountSeen) {
             // Recorded first, from "due" in one statement: a second click (or a second admin at the same
             // moment) changes nothing and credits nothing
             $reference = 'WALLET-'.\Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(10));
-            if (! app(PaymentService::class)->markRefunded($order, $reference)) {
+            if (! app(PaymentService::class)->markRefunded($order, $reference, $amountSeen)) {
                 return false;
             }
+            // markRefunded() set the amount it closed: exactly that is credited
             $this->credit($order->user, (float) $order->refund_amount, 'refund', ['order_id' => $order->id, 'reference' => $reference, 'note' => __('Refund for order :number', ['number' => $order->order_number])]);
 
             return true;

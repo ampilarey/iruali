@@ -39,7 +39,7 @@ class CheckoutController extends Controller
         }
 
         $points_balance = $user->loyalty_points;
-        $points_redeemed = session('points_redeemed', 0);
+        $points_redeemed = $this->discountService->redeemedPoints($cart);
         $points_redeemed_discount = $points_redeemed;
 
         // Same calculation the order uses: subtotal minus voucher and points
@@ -125,7 +125,7 @@ class CheckoutController extends Controller
 
     public function removePoints()
     {
-        $this->discountService->removeLoyaltyPoints();
+        $this->discountService->removeLoyaltyPoints($this->cartService->currentCart());
 
         return back()->with('success', __('Loyalty points removed.'));
     }

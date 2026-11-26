@@ -43,10 +43,11 @@ class PayLinkController extends Controller
         if (! PayLink::payable($order) || ! PayLink::cardAvailable()) {
             return back();
         }
-        $this->switchTo($order, 'bml');
-
+        // The order stays cash on delivery (or pay later) until the card payment goes through
+        // (PaymentService::syncBml() switches it then): a payment page closed half way leaves the order
+        // with the shop as it was, not as an unpaid card order that is hidden and cancelled
         try {
-            return redirect()->away($payments->startBmlPayment($order->fresh()));
+            return redirect()->away($payments->startBmlPayment($order));
         } catch (Throwable $e) {
             report($e);
             NotificationService::error(__('We could not reach the payment page. Please try again in a moment.'));

@@ -149,9 +149,13 @@ class ExportController extends Controller
     /** @return array{0: list<string>, 1: iterable<mixed>} */
     protected function rowsRefunds(Carbon $from, Carbon $to): array
     {
-        $orders = DB::table('orders')->whereNotNull('refund_status')->whereBetween('updated_at', [$from, $to])
-            ->selectRaw("'Cancelled order' AS kind, COALESCE(refund_reason, 'Other') AS reason, refund_status AS status, COUNT(*) AS refunds, ROUND(SUM(refund_amount), 2) AS amount")
-            ->groupBy('refund_reason', 'refund_status')->get();
+        // Every refund owed on an order (a cancellation, a dispute, a payment made twice) is its own row in
+        // refunds, dated when it became due: two refunds on one order are both counted
+        $kind = "CASE WHEN reason LIKE 'Dispute%' THEN 'Dispute' WHEN reason LIKE 'Order cancelled%' THEN 'Cancelled order' ELSE 'Payment' END";
+        $why = "CASE WHEN reason LIKE 'Dispute%' THEN 'Dispute decided' ELSE COALESCE(reason, 'Other') END";
+        $orders = DB::table('refunds')->whereBetween('created_at', [$from, $to])
+            ->selectRaw("{$kind} AS kind, {$why} AS reason, status, COUNT(*) AS refunds, ROUND(SUM(amount), 2) AS amount")
+            ->groupByRaw("{$kind}, {$why}, status")->get();
         $returns = DB::table('return_requests')->whereIn('status', ['approved', 'refunded'])->whereBetween('resolved_at', [$from, $to])
             ->selectRaw("'Return' AS kind, reason, status, COUNT(*) AS refunds, ROUND(SUM(refund_amount), 2) AS amount")
             ->groupBy('reason', 'status')->get();

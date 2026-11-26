@@ -437,6 +437,13 @@ class BookingFeePreorderTest extends TestCase
         $this->artisan('preorders:flag-late')->assertExitCode(0);
         $this->assertNotNull($late->fresh()->deposit_refundable_at);
         $this->assertFalse(app(BookingFeeService::class)->keepable($late->fresh()));
+
+        // Nor after a dispute refund on the order: iruali already gave the money back
+        $refunded = $this->bookedOrder(User::factory()->create(), $camera);
+        $this->assertTrue(app(BookingFeeService::class)->keepable($refunded->fresh()));
+        \App\Models\Dispute::create(['order_id' => $refunded->id, 'seller_order_id' => $refunded->sellerOrders()->value('id'), 'customer_id' => $refunded->user_id, 'seller_id' => $this->shop->id,
+            'type' => 'non_delivery', 'status' => 'resolved_refund', 'details' => 'Never came.', 'amount_claimed' => 300, 'amount_resolved' => 300, 'opened_at' => now(), 'resolved_at' => now()]);
+        $this->assertFalse(app(BookingFeeService::class)->keepable($refunded->fresh()));
     }
 
     public function test_an_admin_cancelling_refunds_everything_unless_they_keep_the_fee(): void

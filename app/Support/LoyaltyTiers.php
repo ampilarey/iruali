@@ -34,14 +34,18 @@ class LoyaltyTiers
     }
 
     /**
-     * Paid, not cancelled orders in the last 12 months, less refunds.
+     * Paid, not cancelled orders in the last 12 months, less refunds (returns included).
      */
     public static function spend(User $user): float
     {
         $orders = Order::where('user_id', $user->id)->where('payment_status', 'paid')->where('status', '!=', 'cancelled')
             ->where('created_at', '>=', now()->subYear());
 
-        return max(0, (float) (clone $orders)->sum('total_amount') - (float) (clone $orders)->where('refund_status', 'refunded')->sum('refund_amount'));
+        // Refunds recorded on the orders (disputes, a payment made twice) and approved returns, which are
+        // refunded on the return itself
+        $returns = (float) \App\Models\ReturnRequest::whereIn('order_id', (clone $orders)->select('id'))->whereIn('status', ['approved', 'refunded'])->sum('refund_amount');
+
+        return max(0, (float) (clone $orders)->sum('total_amount') - (float) (clone $orders)->where('refund_status', 'refunded')->sum('refund_amount') - $returns);
     }
 
     public static function tierFor(float $spend): string

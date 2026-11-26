@@ -179,7 +179,12 @@ class DisputeService
             return false;
         }
 
-        $dispute->update(['status' => 'awaiting_'.$from, 'admin_id' => $admin->id]);
+        // Only while it is still open, in one statement: a decision at the same moment is not reopened
+        $changes = ['status' => 'awaiting_'.$from, 'admin_id' => $admin->id];
+        if (Dispute::whereKey($dispute->id)->whereIn('status', DisputeStatus::openValues())->update($changes) === 0) {
+            return false;
+        }
+        $dispute->forceFill($changes)->syncOriginal();
         if ($dispute->conversation) {
             $this->messaging->send($dispute->conversation, $admin, 'admin', $note);
         }
@@ -245,6 +250,15 @@ class DisputeService
                 $order = $dispute->order;
                 $this->payments->flagRefund($order, $refund, 'Dispute #'.$dispute->id.' on order '.$order->order_number);
 
+                // Points the customer spent on the part's items go back with the refund, in the same
+                // proportion (as a return gives them back: ReturnService::pointsFor())
+                $points = $this->pointsFor($dispute, $refund);
+                if ($points > 0 && $order->user) {
+                    Dispute::whereKey($dispute->id)->update(['points_returned' => $points]);
+                    $dispute->forceFill(['points_returned' => $points])->syncOriginal();
+                    app(PointsService::class)->record($order->user, $points, 'refund', $order, __('Redeemed points returned'));
+                }
+
                 $part = $dispute->sellerOrder;
                 if ($part?->seller_id) {
                     // The shop gives back its earning on the refunded items and its own delivery charge
@@ -272,10 +286,49 @@ class DisputeService
         if (! $done) {
             return false;
         }
+        if ($refund > 0) {
+            app(OrderService::class)->takeBackEarnedPoints($dispute->order->fresh());
+        }
 
         $this->notifyResolved($dispute->fresh());
 
         return true;
+    }
+
+    /**
+     * Redeemed points to give back with a dispute refund: the points spent on the part's items
+     * (PaidShares), in proportion to the share of what was paid for them that the refund gives back
+     * (a full refund returns them all), less what returns and other disputes on the part already gave
+     * back, and never more than the order still holds.
+     */
+    public function pointsFor(Dispute $dispute, float $refund): int
+    {
+        $order = $dispute->order;
+        $part = $dispute->sellerOrder;
+        $redeemed = (int) $order?->points_redeemed;
+        if ($redeemed <= 0 || ! $part || $refund <= 0) {
+            return 0;
+        }
+        $shares = \App\Support\PaidShares::shares($order)['points'];
+        $total = array_sum($shares);
+        $partPaid = $part->paidSubtotal();
+        if ($total <= 0 || $partPaid <= 0) {
+            return 0;
+        }
+
+        $partShare = 0;
+        foreach ($part->items()->pluck('order_items.id') as $id) {
+            $partShare += $shares[(int) $id] ?? 0;
+        }
+        $partPoints = (int) floor($redeemed * $partShare / $total);
+        $backOnPart = (int) ReturnRequest::where('seller_order_id', $part->id)->sum('points_returned')
+            + (int) Dispute::where('seller_order_id', $part->id)->whereKeyNot($dispute->id)->sum('points_returned');
+        $backOnOrder = (int) ReturnRequest::where('order_id', $order->id)->sum('points_returned')
+            + (int) Dispute::where('order_id', $order->id)->whereKeyNot($dispute->id)->sum('points_returned');
+
+        $due = (int) floor($partPoints * min(1, $refund / $partPaid));
+
+        return max(0, min($due, $partPoints - $backOnPart, $redeemed - $backOnOrder));
     }
 
     protected function resolutionMessage(Dispute $dispute): string

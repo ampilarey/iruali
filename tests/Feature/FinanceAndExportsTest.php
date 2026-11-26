@@ -54,7 +54,12 @@ class FinanceAndExportsTest extends TestCase
         $this->assertGreaterThanOrEqual(120, $pnl['income']['commission']);
         $this->assertEqualsWithDelta(30, $pnl['income']['delivery'], 0.01);
         $this->assertEqualsWithDelta(20, $pnl['card_fees'], 0.01); // 2% of MVR 1,000
-        $this->assertEqualsWithDelta($commission + 30 - 120, $pnl['profit'], 0.01);
+        // iruali's vouchers and points on the month's paid orders are a cost
+        $promotions = (float) Order::where('payment_status', 'paid')->sum('voucher_discount') + (float) Order::where('payment_status', 'paid')->sum('points_redeemed_discount');
+        $this->assertEqualsWithDelta($promotions, $pnl['promotions'], 0.01);
+        $this->assertEqualsWithDelta($commission + 30 - 120 - $promotions, $pnl['profit'], 0.01);
+        $order->forceFill(['voucher_discount' => (float) $order->voucher_discount + 40])->save();
+        $this->assertEqualsWithDelta($promotions + 40, app(FinanceService::class)->profitAndLoss(now()->format('Y-m'))['promotions'], 0.01);
 
         $this->actingAs($this->staff('finance'))->get(route('admin.finance'))->assertOk()->assertSee('data-pnl', false)->assertSee('Server');
         $this->put(route('admin.finance.settings'), ['card_fee_percent' => 1, 'xero_sales_account' => '200', 'xero_expense_account' => '400', 'xero_tax_sales' => 'x', 'xero_tax_purchases' => 'y'])->assertForbidden();
@@ -98,6 +103,15 @@ class FinanceAndExportsTest extends TestCase
         $this->assertStringContainsString('EID26', $this->get(route('admin.exports.download', 'vouchers'))->streamedContent());
         $this->assertStringContainsString('Hithadhoo, Addu', $this->get(route('admin.exports.download', 'sales_island'))->streamedContent());
         $this->get(route('admin.exports.download', 'nonsense'))->assertNotFound();
+
+        // Refunds: every refund owed on an order is counted, one sent and one still due, by kind
+        $payments = app(\App\Services\PaymentService::class);
+        $payments->flagRefund($order, 50, 'Dispute #7 on order '.$order->order_number);
+        $payments->markRefunded($order->fresh(), 'BML-50');
+        $payments->flagRefund($order->fresh(), 70, 'Order cancelled after payment');
+        $csv = $this->get(route('admin.exports.download', 'refunds'))->streamedContent();
+        $this->assertStringContainsString('Dispute,"Dispute decided",refunded,1,50', $csv);
+        $this->assertStringContainsString('"Cancelled order","Order cancelled after payment",due,1,70', $csv);
 
         $this->actingAs($this->staff('catalogue'))->get(route('admin.exports'))->assertForbidden();
     }

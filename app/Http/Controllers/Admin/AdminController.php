@@ -500,16 +500,30 @@ class AdminController extends Controller
     public function recordRefund(Request $request, Order $order, PaymentService $payments)
     {
         $this->checkAdminRole();
-        $data = $request->validate(['refund_reference' => 'required|string|max:100']);
+        $data = $request->validate(['refund_reference' => 'required|string|max:100', 'refund_amount_seen' => 'nullable|numeric|min:0']);
         if ($problem = \App\Support\RefundApproval::problem($order, $request->user())) {
             return back()->with('error', $problem);
         }
 
-        if (! $payments->markRefunded($order, $data['refund_reference'])) {
-            return back()->with('error', 'No refund is due on this order.');
+        $seen = isset($data['refund_amount_seen']) ? (float) $data['refund_amount_seen'] : null;
+        if (! $payments->markRefunded($order, $data['refund_reference'], $seen)) {
+            return back()->with('error', self::refundChanged($order->fresh(), $seen) ?? 'No refund is due on this order.');
         }
 
         return back()->with('success', 'Refund recorded. The customer has been emailed.');
+    }
+
+    /**
+     * Why recording a refund did nothing when the amount due changed since the page was opened.
+     */
+    public static function refundChanged(Order $order, ?float $seen): ?string
+    {
+        if ($seen === null || $order->refund_status !== 'due' || abs((float) $order->refund_amount - $seen) < 0.005) {
+            return null;
+        }
+
+        return 'Nothing was recorded: the refund due changed from '.\App\Support\Money::format($seen).' to '.\App\Support\Money::format($order->refund_amount)
+            .' since you opened the page (another refund was added). Send the difference, then record it again.';
     }
 
     public function approveRefund(Request $request, Order $order)

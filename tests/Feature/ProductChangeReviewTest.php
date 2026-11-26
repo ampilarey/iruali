@@ -563,4 +563,38 @@ class ProductChangeReviewTest extends TestCase
         $this->assertFalse($l->fresh()->is_active);
         $this->assertSame(3, (int) $product->fresh()->stock_quantity);
     }
+
+    public function test_saving_the_product_form_never_writes_over_a_sale_made_while_it_was_open(): void
+    {
+        // A shop that needs review (stock is live at once) and one that is trusted (everything is)
+        foreach ([false, true] as $trusted) {
+            $this->shop->forceFill(['auto_approve_listings' => $trusted])->save();
+            $product = $this->liveProduct(['sku' => 'TEE-'.(int) $trusted, 'stock_quantity' => 5]);
+            $opened = $this->form($product, ['description_en' => 'Soft cotton, now softer.', 'original' => ['products' => [$product->id => 5]]]);
+
+            $product->decrement('stock_quantity', 2); // two sold while the form was open
+            $this->actingAs($this->shop)->put(route('seller.products.update', $product), $opened)->assertSessionHasNoErrors();
+            $this->assertSame(3, (int) $product->fresh()->stock_quantity, $trusted ? 'trusted shop' : 'shop under review');
+
+            // A change the shop made is applied as the difference: 5 shown, 8 typed, so 3 more
+            $this->put(route('seller.products.update', $product), $this->form($product->fresh(), ['stock_quantity' => 8, 'original' => ['products' => [$product->id => 5]]]))->assertSessionHasNoErrors();
+            $this->assertSame(6, (int) $product->fresh()->stock_quantity);
+        }
+    }
+
+    public function test_variant_stock_from_the_product_form_is_saved_as_the_difference(): void
+    {
+        $this->shop->forceFill(['auto_approve_listings' => true])->save();
+        $product = $this->liveProduct(['has_variants' => true, 'stock_quantity' => 0]);
+        $small = ProductVariant::create(['product_id' => $product->id, 'attributes' => ['Size' => 'S'], 'type' => 'Size', 'name' => ['en' => 'S'], 'sku' => 'TEE-S', 'stock_quantity' => 4, 'is_active' => true]);
+        $form = $this->form($product->fresh(), [
+            'variants' => [$this->variantRow($small->fresh())],
+            'original' => ['variants' => [$small->id => 4]],
+        ]);
+
+        $small->decrement('stock_quantity', 3); // three sold while the form was open
+        $this->actingAs($this->shop)->put(route('seller.products.update', $product), $form)->assertSessionHasNoErrors();
+        $this->assertSame(1, (int) $small->fresh()->stock_quantity);
+        $this->assertSame(1, (int) $product->fresh()->stock_quantity);
+    }
 }

@@ -861,8 +861,11 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * Someone just proved they own this account's email (a code that reached the inbox, or Google/Facebook vouching
      * for it) while signing in. If the email was never confirmed, whoever opened the account may not have been
-     * its owner: the password they chose and their sessions are thrown away, so a pre-made account can't be used
-     * to watch the real owner. Then the email counts as confirmed and its guest orders come along.
+     * its owner: the password they chose, their two-step sign-in and their sessions are thrown away, so a pre-made
+     * account can't be used to watch the real owner. Then the email counts as confirmed and its guest orders come along.
+     *
+     * Only for an account nobody else can get into: one with a confirmed mobile number or a linked Google/Facebook/
+     * Apple sign-in belongs to whoever holds those (emailIsUnproven() and releaseUnprovenEmail() handle it).
      */
     public function claimByEmailProof(): void
     {
@@ -870,9 +873,33 @@ class User extends Authenticatable implements HasLocalePreference
             if ($this->hasPassword()) {
                 $this->forceFill(['password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(40)), 'has_password' => false]);
             }
+            if (! $this->isStaff()) {
+                $this->forceFill(['two_factor_enabled' => false, 'two_factor_secret' => null, 'two_factor_recovery_codes' => null]);
+            }
             $this->forceFill(['email_verified_at' => now()])->save();
             $this->endOtherSessions();
         }
         $this->attachGuestOrders();
+    }
+
+    /**
+     * The account has an email nobody has confirmed, and another way in (a confirmed mobile number or a linked
+     * social sign-in). Whoever proves the email may be someone else entirely: an email typed onto an account is
+     * no proof of who owns the account. They must not be handed it.
+     */
+    public function emailIsUnproven(): bool
+    {
+        return filled($this->email) && ! $this->isEmailVerified()
+            && ($this->isPhoneVerified() || \App\Models\SocialAccount::where('user_id', $this->id)->exists());
+    }
+
+    /**
+     * The real owner of the email just proved it, and the account is someone else's (emailIsUnproven()): the email
+     * comes off that account, so its owner can open their own. The account keeps its other ways in.
+     */
+    public function releaseUnprovenEmail(): void
+    {
+        \App\Support\Audit::record('account.email_released', $this, ['email' => $this->email]);
+        $this->forceFill(['email' => null, 'email_verified_at' => null])->save();
     }
 }

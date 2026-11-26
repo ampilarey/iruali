@@ -31,6 +31,7 @@ class TrackingController extends Controller
     public function updateAsSeller(Request $request, Order $order, SellerOrder $part, FulfilmentService $fulfilment)
     {
         abort_unless($part->order_id === $order->id && $part->seller_id === CurrentShop::id(), 403);
+        abort_unless($order->isShownToShops(), 404);
 
         return $this->update($request, $part, $fulfilment);
     }

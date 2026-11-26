@@ -228,7 +228,8 @@ class FulfilmentService
 
     public function partFor(Order $order, User $seller): ?SellerOrder
     {
-        return $order->sellerOrders()->where('seller_id', $seller->id)->first();
+        // Not a card order still waiting for its payment: the shop does not see it yet
+        return $order->isShownToShops() ? $order->sellerOrders()->where('seller_id', $seller->id)->first() : null;
     }
 
     protected function notifyPartShipped(SellerOrder $part): void

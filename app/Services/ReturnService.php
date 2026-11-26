@@ -164,7 +164,8 @@ class ReturnService
             return 0.0; // nothing was paid, so nothing to send back
         }
         $part = $request->sellerOrder;
-        $refund = (float) $request->items_value;
+        // The items, less what earlier refunds on the part (a dispute) already gave back for them
+        $refund = $part ? min((float) $request->items_value, \App\Support\RefundSplit::goodsLeft($part, 'return', (int) $request->id)) : (float) $request->items_value;
 
         if (in_array($request->reason, ReturnRequest::SHOP_FAULT, true)) {
             if ($part?->delivery_fee_to_shop) {
@@ -249,7 +250,7 @@ class ReturnService
             // its own delivery charge refunded beyond the items (App\Support\RefundSplit)
             $part = $request->sellerOrder;
             if ($paid && $part?->seller_id) {
-                $shopShare = \App\Support\RefundSplit::of($part, (float) $refund, (float) $request->items_value, $request->itemsNetValue())['shop_gives_back'];
+                $shopShare = \App\Support\RefundSplit::of($part, (float) $refund, (float) $request->items_value, $request->itemsNetValue(), \App\Support\RefundSplit::others($part, 'return', (int) $request->id))['shop_gives_back'];
                 if ($shopShare > 0) {
                     SellerAdjustment::create([
                         'seller_id' => $part->seller_id,

@@ -193,4 +193,28 @@ class AccountTest extends TestCase
     {
         $this->get(route('register'))->assertOk()->assertSee(route('policies.terms'))->assertSee(route('policies.privacy'))->assertSee('name="phone"', false);
     }
+
+    public function test_the_setup_page_only_finishes_a_new_account(): void
+    {
+        $owner = User::factory()->create(['email' => 'owner@example.com', 'password' => Hash::make('Original-Pass-1!'), 'has_password' => true, 'email_verified_at' => now()]);
+
+        // Someone with the signed-in device can't replace the password or the email through it
+        $this->actingAs($owner)->post(route('account.setup.store'), ['name' => 'Owner', 'email' => 'intruder@example.com', 'password' => 'Intruder-Pass-9!', 'password_confirmation' => 'Intruder-Pass-9!'])
+            ->assertRedirect(route('account.edit'));
+        $this->assertSame('owner@example.com', $owner->fresh()->email);
+        $this->assertTrue(Hash::check('Original-Pass-1!', $owner->fresh()->password));
+
+        // A new phone account right after its code: a first password and a first email
+        $new = User::factory()->create(['email' => null, 'password' => Hash::make('x'), 'has_password' => false, 'phone' => '7779999', 'phone_verified_at' => now()]);
+        $this->actingAs($new)->withSession(['code_signed_in_at' => now()->timestamp])
+            ->post(route('account.setup.store'), ['name' => 'New Customer', 'email' => 'new@example.com', 'password' => 'Fresh-Pass-1!', 'password_confirmation' => 'Fresh-Pass-1!'])
+            ->assertRedirect();
+        $this->assertSame('new@example.com', $new->fresh()->email);
+        $this->assertTrue($new->fresh()->hasPassword());
+
+        // Later, without a fresh code, the page changes nothing
+        $later = User::factory()->create(['email' => null, 'has_password' => false, 'phone' => '7778888', 'phone_verified_at' => now()]);
+        $this->actingAs($later)->post(route('account.setup.store'), ['name' => 'Later', 'email' => 'someone@example.com', 'action' => 'later'])->assertRedirect(route('account.edit'));
+        $this->assertNull($later->fresh()->email);
+    }
 }

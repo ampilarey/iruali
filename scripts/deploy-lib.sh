@@ -101,7 +101,7 @@ _sync_docroot() {
   if [[ -L "$DOCROOT/storage" ]]; then rm -f "$DOCROOT/storage"; fi
   if [[ -d "$DOCROOT/storage" ]]; then rmdir "$DOCROOT/storage" 2>/dev/null || say "WARNING: $DOCROOT/storage is a non-empty directory and will shadow /storage/* uploads"; fi
   mkdir -p "$ROOT/storage/app/public" && echo "ok $(date -u +%FT%TZ)" > "$ROOT/storage/app/public/healthcheck.txt"
-  for f in favicon.svg site.webmanifest robots.txt .htaccess; do
+  for f in favicon.svg site.webmanifest site.dv.webmanifest sw.js robots.txt .htaccess; do
     [[ -f "$ROOT/public/$f" ]] && cp -a "$ROOT/public/$f" "$DOCROOT/$f"
   done
   # Front controller in the docroot points at the app root

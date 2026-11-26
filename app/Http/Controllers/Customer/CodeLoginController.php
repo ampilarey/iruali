@@ -125,6 +125,10 @@ class CodeLoginController extends AuthController
 
         RateLimiter::clear($tries);
         $request->session()->forget(self::SESSION);
+        if ($pending['channel'] === 'mail' && $user->emailIsUnproven()) {
+            // An account another person may own, with this email typed on it: not signed in (UnprovenEmailController)
+            return UnprovenEmailController::hold($request, $user, (string) $pending['target']);
+        }
         if ($pending['channel'] === 'mail') {
             $user->claimByEmailProof(); // the code reached that inbox (User::claimByEmailProof())
         }

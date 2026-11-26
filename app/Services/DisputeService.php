@@ -157,7 +157,10 @@ class DisputeService
             ]);
 
             // The customer's account of the problem opens the thread so the shop can answer there
-            $this->messaging->send($conversation, $customer, 'customer', __('Dispute opened (:type): :details', ['type' => $dispute->typeLabel(), 'details' => $details]), null, false);
+            // (not from an account blocked from messaging: the dispute still opens, its details are on it)
+            if ($customer->messaging_blocked_at === null) {
+                $this->messaging->send($conversation, $customer, 'customer', __('Dispute opened (:type): :details', ['type' => $dispute->typeLabel(), 'details' => $details]), null, false);
+            }
 
             return $dispute;
         });
@@ -246,7 +249,8 @@ class DisputeService
                 if ($part?->seller_id) {
                     // The shop gives back its earning on the refunded items and its own delivery charge
                     // refunded beyond them (App\Support\RefundSplit); iruali forgoes its commission
-                    $shopShare = \App\Support\RefundSplit::of($part, $refund, $part->paidSubtotal(), $part->netSubtotal())['shop_gives_back'];
+                    // (after what earlier returns and disputes on the part took: never more than it earned)
+                    $shopShare = \App\Support\RefundSplit::of($part, $refund, $part->paidSubtotal(), $part->netSubtotal(), \App\Support\RefundSplit::others($part, 'dispute', (int) $dispute->id))['shop_gives_back'];
                     if ($shopShare > 0) {
                         SellerAdjustment::create([
                             'seller_id' => $part->seller_id,

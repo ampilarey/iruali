@@ -81,6 +81,12 @@ class Wishlist extends Model
      */
     public static function addToWishlist(int $userId, int $productId): array
     {
+        // Only a product on sale: not one waiting for approval, taken off sale, or a customer's private item
+        // request (inactive by design), whose name, words and photo are that customer's
+        if (! Product::query()->active()->whereKey($productId)->exists()) {
+            return ['success' => false, 'message' => __('This product is not available.')];
+        }
+
         // Check if already exists
         if (static::isInWishlist($userId, $productId)) {
             return ['success' => false, 'message' => 'Product is already in your wishlist.'];

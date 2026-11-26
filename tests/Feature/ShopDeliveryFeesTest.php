@@ -139,6 +139,7 @@ class ShopDeliveryFeesTest extends TestCase
         $this->assertFalse($plainPart->delivery_fee_to_shop);
         $this->assertEquals(45, $plainPart->seller_earnings);
 
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($fresh)->get(route('seller.orders.show', $order))->assertOk()
             ->assertSee('Your delivery fee (no commission)')->assertSee('MVR 70.00');
 

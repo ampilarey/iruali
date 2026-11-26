@@ -70,7 +70,7 @@
                         @php $attrs = json_decode((string) ($row['attributes'] ?? '{}'), true) ?: []; @endphp
                         <tr data-variant-row data-attributes="{{ json_encode($attrs) }}" class="{{ ! empty($row['remove']) ? 'opacity-50' : '' }}">
                             <td class="px-2 py-2 align-top">
-                                @if(! empty($row['id']))<input type="hidden" name="variants[{{ $i }}][id]" value="{{ $row['id'] }}">@endif
+                                @if(! empty($row['id']))<input type="hidden" name="variants[{{ $i }}][id]" value="{{ $row['id'] }}"><input type="hidden" name="original[variants][{{ $row['id'] }}]" value="{{ old('original.variants.'.$row['id'], $row['stock_quantity'] ?? 0) }}">@endif
                                 <input type="hidden" name="variants[{{ $i }}][attributes]" value="{{ json_encode($attrs) }}" data-variant-attributes>
                                 <span class="font-medium text-gray-900" data-variant-label>{{ implode(' / ', array_map(fn ($k, $v) => __($k).': '.$v, array_keys($attrs), $attrs)) }}</span>
                                 @if(! empty($row['has_orders']))<span class="block text-xs text-gray-500">{{ __('Has orders: removing deactivates it.') }}</span>@endif

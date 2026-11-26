@@ -26,6 +26,7 @@ class MessageController extends Controller
     public function storeAsSeller(Request $request, Order $order, SellerOrder $part)
     {
         abort_unless($part->order_id === $order->id && $part->seller_id === CurrentShop::id(), 403);
+        abort_unless($order->isShownToShops(), 404);
 
         return $this->store($request, $part, 'seller', route('seller.orders.show', $order).'#conversation');
     }
@@ -59,7 +60,12 @@ class MessageController extends Controller
             return redirect($back)->withErrors(['body' => __('Messages about this order are closed: it is more than 90 days old and nothing is open on it.')], 'conversation-'.$conversation->id);
         }
 
-        $this->messaging->send($conversation, $request->user(), $role, $data['body'], $request->file('attachment'));
+        try {
+            $this->messaging->send($conversation, $request->user(), $role, $data['body'], $request->file('attachment'));
+        } catch (\RuntimeException $e) {
+            // An account blocked from messaging
+            return redirect($back)->withErrors(['body' => $e->getMessage()], 'conversation-'.$conversation->id);
+        }
 
         return redirect($back.'-'.$conversation->id)->with('success', __('Message sent.'));
     }

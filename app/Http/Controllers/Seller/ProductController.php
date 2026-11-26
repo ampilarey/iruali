@@ -112,6 +112,9 @@ class ProductController extends Controller
         $this->authorizeOwner($product);
 
         $form = $editor->formFromRequest($request);
+        // Stock as the difference from what the form showed when it opened: a sale while it was open
+        // is not written over (StockEdits, the same rule as the stock page)
+        $form = app(\App\Services\StockEdits::class)->fromProductForm($product, $form, (array) $request->input('original', []));
 
         // An approved product of a shop that is not trusted: stock now, the rest waits for an admin
         if ($review->needsReview($product)) {

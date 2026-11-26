@@ -70,4 +70,33 @@ class AuditLeftoversTest extends TestCase
         $this->assertSame('Fresh news', Setting::get('announcement_text'));
         $this->get('/')->assertOk()->assertSee('Fresh news');
     }
+
+    public function test_a_long_running_command_sees_a_setting_changed_elsewhere_within_seconds(): void
+    {
+        Setting::set(['sms_enabled' => 1]);
+        $this->assertTrue(\App\Services\Sms\SmsManager::enabled());
+
+        // An admin switches SMS off in another process: the row and the shared cache change, not this process
+        \Illuminate\Support\Facades\DB::table('settings')->where('key', 'sms_enabled')->update(['value' => '0']);
+        \Illuminate\Support\Facades\Cache::forget('app_settings');
+
+        $this->travel(6)->seconds();
+        $this->assertFalse(\App\Services\Sms\SmsManager::enabled(), 'an SMS campaign going out stops at the switch');
+    }
+
+    public function test_a_language_given_as_a_list_is_ignored_not_an_error(): void
+    {
+        $this->get('/?locale[]=dv')->assertOk();
+        $this->get('/?locale=en')->assertOk();
+    }
+
+    public function test_a_name_someone_typed_cannot_put_a_link_into_an_email(): void
+    {
+        $user = User::factory()->create(['name' => '[Claim your prize](https://evil.example)']);
+        $cart = \App\Models\Cart::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+        $html = (string) (new \App\Notifications\CartReminder($cart))->toMail($user)->render();
+        $this->assertStringNotContainsString('href="https://evil.example"', $html);
+        $this->assertStringContainsString('Claim your prize', $html);
+    }
 }

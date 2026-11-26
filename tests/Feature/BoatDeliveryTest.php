@@ -78,6 +78,7 @@ class BoatDeliveryTest extends TestCase
 
         // The customer, the shop and admins see the boat
         $this->actingAs($this->customer)->get(route('orders.show', $order))->assertSee('data-order-boat', false)->assertSee('Malé Jetty No. 5');
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order reaches the shop once paid
         $this->actingAs($this->maleShop)->get(route('seller.orders.show', $order))->assertSee('Express 3')->assertSee('7991234');
 
         // When the shop sends it, the text says which boat

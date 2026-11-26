@@ -327,6 +327,12 @@ class Order extends Model
         return $query->where(fn ($q) => $q->where('payment_method', '!=', 'bml')->orWhere('confirm_first', true)->orWhereIn('payment_status', ['paid', 'deposit_paid']));
     }
 
+    /** The same test as scopeShownToShops() for one order: a shop may open it (its page, slip, invoice, thread). */
+    public function isShownToShops(): bool
+    {
+        return $this->payment_method !== 'bml' || (bool) $this->confirm_first || in_array($this->payment_status, ['paid', 'deposit_paid'], true);
+    }
+
     /** Statuses after which nothing changes for the customer any more (the page stops checking). */
     public function isSettled(): bool
     {

@@ -282,6 +282,12 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
+    /** A code to confirm the email just added to a signed-in account (AccountSetupController). */
+    public function sendEmailCodeTo(User $user): void
+    {
+        $this->sendEmailCode($user);
+    }
+
     protected function sendEmailCode(User $user): void
     {
         $otp = OTP::createForEmail($user->email, 'verification');

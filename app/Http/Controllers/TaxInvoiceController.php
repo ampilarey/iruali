@@ -45,7 +45,7 @@ class TaxInvoiceController extends Controller
     public function seller(Request $request, Order $order)
     {
         $part = $order->sellerOrders()->where('seller_id', CurrentShop::id())->first();
-        abort_if($part === null, 404);
+        abort_if($part === null || ! $order->isShownToShops(), 404);
 
         return $this->invoice($order, $part, route('seller.orders.show', $order));
     }

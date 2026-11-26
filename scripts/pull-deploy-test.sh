@@ -101,7 +101,7 @@ if [[ -d "$DOCROOT" && -d "$ROOT/public/build" ]]; then
   if [[ -L "$DOCROOT/storage" ]]; then rm -f "$DOCROOT/storage"; fi
   if [[ -d "$DOCROOT/storage" ]]; then rmdir "$DOCROOT/storage" 2>/dev/null || echo "WARNING: $DOCROOT/storage is a non-empty directory and will shadow /storage/* uploads"; fi
   mkdir -p "$ROOT/storage/app/public" && echo "ok $(date -u +%FT%TZ)" > "$ROOT/storage/app/public/healthcheck.txt"
-  for f in favicon.svg site.webmanifest robots.txt; do
+  for f in favicon.svg site.webmanifest site.dv.webmanifest sw.js robots.txt; do
     if [[ -f "$ROOT/public/$f" ]]; then
       cp -a "$ROOT/public/$f" "$DOCROOT/$f"
     fi

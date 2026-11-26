@@ -269,8 +269,9 @@ class PickupFromShopTest extends TestCase
         $this->placeOrder($this->customer, ['fulfilment' => [$this->pickupShop->id => 'pickup']])->assertRedirect();
         $order = Order::sole();
 
-        $this->actingAs($this->pickupShop)->get(route('seller.orders.show', $order))->assertOk()->assertSee('Wait until the customer has paid');
-        $this->actingAs($this->pickupShop)->post(route('seller.orders.pickup.ready', $order))->assertSessionHas('error');
+        // A card order the customer has not paid: the shop does not see it at all
+        $this->actingAs($this->pickupShop)->get(route('seller.orders.show', $order))->assertNotFound();
+        $this->actingAs($this->pickupShop)->post(route('seller.orders.pickup.ready', $order))->assertNotFound();
         $this->assertNull($this->part($order, $this->pickupShop)->pickup_code);
         Notification::assertNotSentTo($this->customer, PickupReady::class);
     }

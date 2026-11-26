@@ -192,14 +192,16 @@ class GstReportService
         $returns = ReturnRequest::whereIn('status', ['approved', 'refunded'])->whereBetween('resolved_at', [$from, $to])
             ->with(['order' => fn ($q) => $q->withTrashed(), 'sellerOrder'])->orderBy('resolved_at')->get();
         foreach ($returns as $return) {
-            $events->push($this->refund('return', $return->resolved_at, $return->order, $return->sellerOrder, (float) $return->refund_amount, (float) $return->items_value, $return->itemsNetValue()));
+            $events->push($this->refund('return', $return->resolved_at, $return->order, $return->sellerOrder, (float) $return->refund_amount, (float) $return->items_value, $return->itemsNetValue(),
+                $return->sellerOrder ? \App\Support\RefundSplit::before($return->sellerOrder, 'return', (int) $return->id) : []));
         }
 
         // Disputes decided with a refund (the part's items as paid, like DisputeService)
         $disputes = Dispute::where('amount_resolved', '>', 0)->whereBetween('resolved_at', [$from, $to])
             ->with(['order' => fn ($q) => $q->withTrashed(), 'sellerOrder'])->orderBy('resolved_at')->get();
         foreach ($disputes as $dispute) {
-            $events->push($this->refund('dispute', $dispute->resolved_at, $dispute->order, $dispute->sellerOrder, (float) $dispute->amount_resolved, (float) $dispute->sellerOrder?->paidSubtotal(), (float) $dispute->sellerOrder?->netSubtotal()));
+            $events->push($this->refund('dispute', $dispute->resolved_at, $dispute->order, $dispute->sellerOrder, (float) $dispute->amount_resolved, (float) $dispute->sellerOrder?->paidSubtotal(), (float) $dispute->sellerOrder?->netSubtotal(),
+                $dispute->sellerOrder ? \App\Support\RefundSplit::before($dispute->sellerOrder, 'dispute', (int) $dispute->id) : []));
         }
 
         // Booking fees refunded when their orders were cancelled: the fee's own invoice is reversed
@@ -216,7 +218,8 @@ class GstReportService
         }
 
         // Paid orders cancelled: every part's sale is reversed (a booking fee invoiced on its own is
-        // reversed above, or stays a sale when kept), and the delivery fee once per order
+        // reversed above, or stays a sale when kept), and the delivery fee once per order, less what
+        // returns and disputes on it already reversed (those are their own events, in their month)
         $seen = [];
         $cancelled = SellerOrder::whereBetween('gst_reversed_at', [$from, $to])->with(['order' => fn ($q) => $q->withTrashed()])->orderBy('id')->get();
         foreach ($cancelled as $part) {
@@ -226,17 +229,19 @@ class GstReportService
             }
             $first = ! isset($seen[$order->id]);
             $seen[$order->id] = true;
+            $prior = $this->earlierRefunds($part);
+            $orderPrior = $first ? $this->earlierDelivery($order) : ['delivery' => 0.0, 'delivery_gst' => 0.0];
             $events->push([
                 'kind' => 'cancellation',
                 'date' => $part->gst_reversed_at,
                 'order' => $order,
                 'part' => $part,
-                'goods' => round((float) ($part->gst_taxable ?? $part->subtotal) - (float) $part->deposit_amount, 2),
-                'goods_gst' => round((float) $part->gst_amount - (float) $part->deposit_gst, 2),
-                'delivery' => $first ? $this->gst->deliveryFee($order) : 0.0,
-                'delivery_gst' => $first ? round((float) $order->delivery_gst, 2) : 0.0,
-                'commission' => round((float) $part->commission_amount, 2),
-                'commission_gst' => round((float) $part->commission_gst, 2),
+                'goods' => round(max(0, (float) ($part->gst_taxable ?? $part->subtotal) - (float) $part->deposit_amount - $prior['goods']), 2),
+                'goods_gst' => round(max(0, (float) $part->gst_amount - (float) $part->deposit_gst - $prior['goods_gst']), 2),
+                'delivery' => $first ? round(max(0, $this->gst->deliveryFee($order) - $orderPrior['delivery']), 2) : 0.0,
+                'delivery_gst' => $first ? round(max(0, (float) $order->delivery_gst - $orderPrior['delivery_gst']), 2) : 0.0,
+                'commission' => round(max(0, (float) $part->commission_amount - $prior['commission']), 2),
+                'commission_gst' => round(max(0, (float) $part->commission_gst - $prior['commission_gst']), 2),
             ]);
         }
 
@@ -253,13 +258,13 @@ class GstReportService
      *
      * @return array<string, mixed>|null
      */
-    protected function refund(string $kind, ?CarbonInterface $date, ?Order $order, ?SellerOrder $part, float $refund, float $paidGoods, float $netGoods): ?array
+    protected function refund(string $kind, ?CarbonInterface $date, ?Order $order, ?SellerOrder $part, float $refund, float $paidGoods, float $netGoods, array $earlier = []): ?array
     {
         if (! $order || ! $part || $refund <= 0) {
             return null;
         }
 
-        $split = \App\Support\RefundSplit::of($part, $refund, $paidGoods, $netGoods);
+        $split = \App\Support\RefundSplit::of($part, $refund, $paidGoods, $netGoods, $earlier);
         $shopDelivery = $split['shop_delivery'];
         $goods = round(min($split['shop_goods'], (float) ($part->gst_taxable ?? $part->subtotal) - $part->shopDeliveryCharge()) + $shopDelivery, 2);
         $delivery = round(min(max(0, $refund - $split['goods_paid'] - $shopDelivery), $this->gst->deliveryFee($order)), 2);
@@ -278,6 +283,46 @@ class GstReportService
             'commission' => $commission,
             'commission_gst' => GstService::gstIncluded($commission, $platformRate),
         ];
+    }
+
+    /**
+     * What every return and dispute on the part reversed, as the report counts them.
+     *
+     * @return array{goods: float, goods_gst: float, delivery: float, delivery_gst: float, commission: float, commission_gst: float}
+     */
+    protected function earlierRefunds(SellerOrder $part): array
+    {
+        $sum = ['goods' => 0.0, 'goods_gst' => 0.0, 'delivery' => 0.0, 'delivery_gst' => 0.0, 'commission' => 0.0, 'commission_gst' => 0.0];
+        $order = $part->order;
+        $earlier = [];
+        foreach (\App\Support\RefundSplit::history($part) as $event) {
+            $row = $this->refund($event['kind'], null, $order, $part, $event['refund'], $event['paid'], $event['net'], $earlier);
+            $earlier[] = $event;
+            foreach ($row ? array_keys($sum) : [] as $key) {
+                $sum[$key] += (float) $row[$key];
+            }
+        }
+
+        return $sum;
+    }
+
+    /**
+     * iruali's delivery fee that returns and disputes on any part of the order already gave back.
+     *
+     * @return array{delivery: float, delivery_gst: float}
+     */
+    protected function earlierDelivery(Order $order): array
+    {
+        $delivery = 0.0;
+        $gst = 0.0;
+        foreach ($order->sellerOrders()->get() as $part) {
+            $part->setRelation('order', $order);
+            $prior = $this->earlierRefunds($part);
+            $delivery += $prior['delivery'];
+            $gst += $prior['delivery_gst'];
+        }
+
+        return ['delivery' => $delivery, 'delivery_gst' => $gst];
     }
 
     /**

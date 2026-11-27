@@ -118,6 +118,7 @@
                 <div class="grid grid-cols-1 gap-4 border-t border-gray-100 px-5 py-4 md:grid-cols-2">
                     <form method="POST" action="{{ route('seller.preorders.arrived', $product->id) }}" class="space-y-2 rounded-lg border border-gray-200 p-3" data-stock-arrived>
                         @csrf
+                        <input type="hidden" name="submission" value="{{ \Illuminate\Support\Str::uuid() }}">
                         <h3 class="text-sm font-semibold text-gray-900">{{ __('Stock arrived') }}</h3>
                         @if($product->has_variants)
                             @foreach($variants as $variant)

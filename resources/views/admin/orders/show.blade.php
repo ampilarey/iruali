@@ -86,6 +86,16 @@
                                         @endforeach
                                     </div>
                                 @endif
+                                @if(\App\Services\FulfilmentService::partCancellable($order, $part, $parts) && auth()->user()->hasRole('admin'))
+                                    <form method="POST" action="{{ route('admin.orders.parts.cancel', [$order, $part]) }}" class="mt-2" data-cancel-part
+                                          onsubmit="return confirm('Cancel {{ addslashes($part->shopName()) }}\'s part only? Its items go back on sale and the customer is refunded for them. The rest of the order carries on.')">
+                                        @csrf
+                                        <button class="rounded-lg border border-red-300 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">Cancel this shop's part</button>
+                                        <span class="ms-1 text-xs text-gray-500">When this shop can't supply and another shop has already sent its part.</span>
+                                    </form>
+                                @elseif($part->cancelled_alone_at)
+                                    <p class="mt-2 text-xs text-gray-600">Cancelled on its own on {{ $part->cancelled_alone_at->format('d M Y') }}@if((float) $part->cancelled_refund > 0) · {{ \App\Support\Money::format($part->cancelled_refund) }} refunded with the order's refund @endif</p>
+                                @endif
                                 @if($part->status !== 'cancelled')
                                     <details class="mt-2">
                                         <summary class="cursor-pointer text-xs font-medium text-primary-700">{{ $part->hasTrackingDetails() ? 'Edit delivery details' : 'Add delivery details' }}</summary>

@@ -215,6 +215,20 @@ class ItemRequestService
         }
     }
 
+    /**
+     * An order that was never paid is cancelled (left at the card page, "Change my order"): its item
+     * requests are accepted again, so the customer can put them back in the cart at the same price
+     * while it holds (ItemRequest::canAccept()).
+     */
+    public function releaseFromCancelledOrder(Order $order): void
+    {
+        if ($order->payment_status === 'paid') {
+            return;
+        }
+        ItemRequest::where('order_id', $order->id)->where('status', ItemRequest::ORDERED)
+            ->update(['status' => ItemRequest::ACCEPTED, 'order_id' => null, 'ordered_at' => null, 'updated_at' => now()]);
+    }
+
     /** Who may see a request's private product: the customer, iruali's team and the shop filling it. */
     public function canView(ItemRequest $request, ?User $user): bool
     {

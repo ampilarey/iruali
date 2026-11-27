@@ -80,8 +80,9 @@ class OrderEmailsTest extends TestCase
         Notification::fake();
         [$customer, $shopA, $shopB] = User::factory()->count(3)->create()->all();
         $order = $this->placeOrderFromTwoShops($customer, $shopA, $shopB);
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order is moved on once paid
 
-        app(OrderService::class)->updateOrderStatus($order, 'processing');
+        app(OrderService::class)->updateOrderStatus($order->fresh(), 'processing');
         app(OrderService::class)->updateOrderStatus($order->fresh(), 'shipped');
 
         Notification::assertSentToTimes($customer, OrderStatusChanged::class, 2);
@@ -105,7 +106,8 @@ class OrderEmailsTest extends TestCase
         $order = $this->placeOrderFromTwoShops($customer, $shopA, $shopB);
 
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
-        $this->assertTrue(app(OrderService::class)->updateOrderStatus($order, 'processing'));
+        $order->forceFill(['payment_status' => 'paid'])->save(); // a card order is moved on once paid
+        $this->assertTrue(app(OrderService::class)->updateOrderStatus($order->fresh(), 'processing'));
     }
 
     public function test_emails_use_the_customers_language(): void

@@ -3543,5 +3543,20 @@
     "We take your email off it, and you open your own account with it.": "އެ އެކައުންޓުން ތިޔަ އީމެއިލް ނަގާލާނަން، އަދި އެ އީމެއިލުން ތިޔަ ބޭފުޅާގެ އަމިއްލަ އެކައުންޓެއް ހައްދަވާ.",
     "Take my email off it": "އަހަރެންގެ އީމެއިލް އެ އެކައުންޓުން ނަގާލާ",
     "Your email is free to use now. Create your account with it.": "ތިޔަ އީމެއިލް މިހާރު ބޭނުންކުރެވޭނެ. އޭގެ ދަށުން ތިޔަ އެކައުންޓު ހައްދަވާ.",
-    "Referral reward taken back: the order was refunded": "ރެފަރަލް އިނާމު އަނބުރާ ނެގުނު: އޯޑަރުގެ ފައިސާ އަނބުރާ ދެވުނު"
+    "Referral reward taken back: the order was refunded": "ރެފަރަލް އިނާމު އަނބުރާ ނެގުނު: އޯޑަރުގެ ފައިސާ އަނބުރާ ދެވުނު",
+    "iruali: your return on order :number is approved. We will refund :amount.": "iruali: އޯޑަރު :number ގެ ރިޓަރން ބަލައިގަނެވިއްޖެ. :amount އަނބުރާ ދެވޭނެ.",
+    "iruali: sorry, we could not accept your return on order :number. See the order page for the reason.": "iruali: މަޢާފް ކުރައްވާ، އޯޑަރު :number ގެ ރިޓަރން ބަލައެއް ނުގަނެވުނު. ސަބަބު އޯޑަރުގެ ޕޭޖުގައި ބައްލަވާ.",
+    "iruali: we have sent your refund of :amount for order :number (ref :ref). It usually reaches you within 5-7 business days.": "iruali: އޯޑަރު :number ގެ :amount ރީފަންޑް ފޮނުވައިފިން (ރެފް :ref). އާންމުކޮށް 5-7 މަސައްކަތު ދުވަހުގެ ތެރޭގައި ލިބޭނެ.",
+    "iruali: :shop could not supply its items in order :number, so they are cancelled and :amount will be refunded. The rest of your order is on its way.": "iruali: އޯޑަރު :number ގައިވާ :shop ގެ ތަކެތި ހޯދައެއް ނުދެވުނީމާ އެ ތަކެތި ކެންސަލްކޮށް :amount އަނބުރާ ދެވޭނެ. އޯޑަރުގެ ބާކީ ބައި ފޮނުވޭނެ.",
+    "Part of order :number is cancelled": "އޯޑަރު :number ގެ ބައެއް ކެންސަލްވެއްޖެ",
+    ":shop could not supply its items in your order, so we have cancelled them. The rest of your order carries on.": ":shop އަށް ތިބާގެ އޯޑަރުގައިވާ އެ ފިހާރައިގެ ތަކެތި ހޯދައެއް ނުދެވުނީމާ އެ ތަކެތި ކެންސަލްކޮށްފިން. އޯޑަރުގެ ބާކީ ބައި ކުރިއަށް ދާނެ.",
+    "We will refund :amount for them and tell you when it is sent.": "އެ ތަކެއްޗަށް :amount އަނބުރާ ދޭނަމު، ފޮނުވުމުން އަންގާނަމު.",
+    "The :points points you used on them are back in your account.": "އެ ތަކެއްޗަށް ބޭނުންކުރި :points ޕޮއިންޓް ތިބާގެ އެކައުންޓަށް އަނބުރާ ލިބިއްޖެ.",
+    "Put it back in your cart": "ކާޓަށް އަނބުރާ ލާ",
+    "Your other items are back in your cart, but these could not go back: :items.": "ތިބާގެ އެހެން ތަކެތި ކާޓަށް އަނބުރާ ލެވިއްޖެ، އެކަމަކު މި ތަކެތި އަނބުރާ ނުލެވުނު: :items.",
+    "Your part of order :number is cancelled": "އޯޑަރު :number ގައިވާ ތިޔަ ފިހާރައިގެ ބައި ކެންސަލްވެއްޖެ",
+    "Order :number is cancelled": "އޯޑަރު :number ކެންސަލްވެއްޖެ",
+    "iruali has cancelled your part of order :number. Please do not pack or send its items. The other shops in the order carry on.": "އިރުއަލި އިން އޯޑަރު :number ގައިވާ ތިޔަ ފިހާރައިގެ ބައި ކެންސަލްކޮށްފި. އެ ތަކެތި ޕެކްކޮށް ނުފޮނުއްވާ. އޯޑަރުގެ އެހެން ފިހާރަތައް ކުރިއަށް ދާނެ.",
+    "Order :number has been cancelled. Please do not pack or send it. If it has already left your shop, tell iruali straight away.": "އޯޑަރު :number ކެންސަލްކޮށްފި. ޕެކްކޮށް ނުފޮނުއްވާ. ފިހާރައިން ފޮނުވައިފިނަމަ، އަވަހަށް އިރުއަލި އަށް އަންގަވާ.",
+    "View the order": "އޯޑަރު ބައްލަވާ"
 }

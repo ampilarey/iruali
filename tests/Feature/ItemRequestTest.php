@@ -173,6 +173,32 @@ class ItemRequestTest extends TestCase
         $this->assertSame([ItemRequest::ORDERED, $order->id], [$request->fresh()->status, $request->fresh()->order_id]);
     }
 
+    public function test_an_accepted_price_whose_cart_line_went_can_go_back_in_the_cart(): void
+    {
+        $customer = User::factory()->create();
+        $request = $this->ask($customer);
+        $this->price($request);
+        $this->actingAs($customer)->post(route('item-requests.accept', $request->fresh()))->assertRedirect(route('cart'));
+        $this->get(route('item-requests.show', $request))->assertSee('Go to your cart');
+
+        // Taken out of the cart: the request page offers to put it back, at the same price
+        CartItem::where('product_id', $request->fresh()->product_id)->delete();
+        $this->get(route('item-requests.show', $request))->assertOk()->assertSee('Put it back in your cart');
+        $this->post(route('item-requests.accept', $request))->assertRedirect(route('cart'));
+        $line = CartItem::where('product_id', $request->fresh()->product_id)->sole();
+        $this->assertSame([2, 1200.0], [$line->quantity, (float) $line->price]);
+
+        // Ordered by card and left unpaid: the cancellation gives the request back
+        $result = app(OrderService::class)->createOrderFromCart($customer, $this->shippingData() + ['agree_booking_fee' => true], $line->cart);
+        $this->assertTrue($result['success'], $result['message']);
+        $order = $result['order']->fresh();
+        $this->assertSame(ItemRequest::ORDERED, $request->fresh()->status);
+        $this->actingAs($customer)->post(route('orders.backToCart', $order))->assertRedirect(route('cart'));
+        $this->assertSame(ItemRequest::ACCEPTED, $request->fresh()->status);
+        $this->assertNull($request->fresh()->order_id);
+        $this->assertSame(1, CartItem::where('product_id', $request->fresh()->product_id)->whereHas('cart', fn ($q) => $q->where('status', 'active'))->count(), 'back in the cart at its price');
+    }
+
     public function test_someone_elses_or_an_expired_accepted_price_cannot_be_ordered(): void
     {
         $customer = User::factory()->create();

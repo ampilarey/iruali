@@ -202,11 +202,11 @@ class CheckoutGuardsTest extends TestCase
         $product = Product::factory()->create(['seller_id' => $shop->id, 'price' => 200, 'stock_quantity' => 5]);
         $this->cartWith($product);
         $order = $this->checkout()['order'];
+        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $this->actingAs($admin);
         foreach (['processing', 'shipped', 'delivered'] as $status) {
             $this->post(route('admin.orders.status', $order), ['status' => $status]);
         }
-        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $part = $order->sellerOrders()->firstOrFail();
         $this->actingAs($this->customer)->post(route('orders.returns.store', [$order, $part]), ['quantities' => [$part->items()->first()->id => 1], 'reason' => 'change_of_mind']);
 

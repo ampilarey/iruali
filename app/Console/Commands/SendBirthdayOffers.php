@@ -37,8 +37,8 @@ class SendBirthdayOffers extends Command
             ->whereNull('marketing_opt_out_at')
             ->where('is_active', true)
             ->where(fn ($q) => $q->whereNull('birthday_offer_year')->orWhere('birthday_offer_year', '<', $today->year))
-            ->orderBy('id')
-            ->each(function (User $user) use ($today, $percent, $days, &$sent) {
+            // By id, not by page: each user offered drops out of the filter, which would skip the next page's
+            ->lazyById(200)->each(function (User $user) use ($today, $percent, $days, &$sent) {
                 if (! $user->birth_date || $user->birth_date->format('m-d') !== $today->format('m-d') || $user->isStaff() || $user->isSmokeTest()) {
                     return;
                 }

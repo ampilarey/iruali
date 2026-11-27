@@ -100,10 +100,20 @@ class ItemRequest extends Model
             && $this->valid_until !== null && $this->valid_until->endOfDay()->isPast();
     }
 
-    /** The customer can accept the price now. */
+    /**
+     * The customer can accept the price now: a new price, or one accepted before whose cart line has
+     * gone (removed, saved for later, an unpaid order cancelled) and can be put back while it holds.
+     */
     public function canAccept(): bool
     {
-        return $this->status === self::QUOTED && ! $this->isExpired() && $this->product_id !== null;
+        return in_array($this->status, [self::QUOTED, self::ACCEPTED], true) && ! $this->isExpired() && $this->product_id !== null;
+    }
+
+    /** Its accepted price is in this customer's active cart. */
+    public function inCartOf(?User $customer): bool
+    {
+        return $customer !== null && $this->product_id !== null
+            && CartItem::where('product_id', $this->product_id)->whereHas('cart', fn ($q) => $q->where('user_id', $customer->id)->where('status', 'active'))->exists();
     }
 
     /** The customer can still cancel (nothing ordered yet). */

@@ -113,7 +113,14 @@ class FulfilmentService
         $order = $part->order;
         $before = $order->status;
 
-        DB::transaction(function () use ($part, $status, $trackingNote, $tracking) {
+        $done = DB::transaction(function () use ($part, $status, $trackingNote, $tracking) {
+            // The order locked (as a cancellation locks it: OrderService::updateOrderStatus()) and the
+            // part read again: a cancel at the same moment wins, and the part is not moved on after it
+            Order::whereKey($part->order_id)->lockForUpdate()->first(['id']);
+            $part->refresh();
+            if (! in_array($status, $this->nextStatuses($part), true)) {
+                return false;
+            }
             $part->fill(['status' => $status]);
             if ($status === 'shipped') {
                 $part->shipped_at = now();
@@ -131,7 +138,12 @@ class FulfilmentService
             }
             $this->fillTracking($part, $tracking);
             $part->save();
+
+            return true;
         });
+        if (! $done) {
+            return false;
+        }
 
         $this->syncOrder($order->fresh());
 
@@ -192,6 +204,107 @@ class FulfilmentService
                 $part->{$field} = filled($tracking[$field]) ? $tracking[$field] : null;
             }
         }
+    }
+
+    /**
+     * Cancel one shop's part of a paid order, when that shop can't supply it and another shop has
+     * already sent its part (so the order can't be cancelled as a whole). Its items go back on sale,
+     * the customer is refunded what they paid for them (and the shop's own delivery), less any
+     * dispute refund already made on the part, and gets back the points spent on them; the shop's
+     * dispute deduction is given back (it sold nothing) and its sale is reversed for GST. The order
+     * carries on with its other shops. Returns why it can't be done, or null when it is done.
+     */
+    public function cancelPart(SellerOrder $part, User $admin): ?string
+    {
+        $done = DB::transaction(function () use ($part) {
+            // The order locked, as every other change to it is (a cancel, a shop moving its part on)
+            $order = Order::whereKey($part->order_id)->lockForUpdate()->first();
+            $part->refresh();
+            if (! $order || $order->status === 'cancelled' || ! in_array($part->status, ['pending', 'processing'], true)) {
+                return 'This part can no longer be cancelled: it has been sent, or it is cancelled already.';
+            }
+            if ($order->sellerOrders()->where('status', '!=', 'cancelled')->count() < 2) {
+                return 'This is the only shop left in the order: cancel the whole order instead.';
+            }
+            if ($order->payment_status !== 'paid') {
+                return 'Only a paid order can have one shop cancelled. Cancel the whole order, or wait until it is paid.';
+            }
+
+            // What the customer paid for this part (its items, and the shop's own delivery), less what a
+            // dispute on it already refunded (DisputeService::maxClaim())
+            $refund = app(DisputeService::class)->maxClaim($part);
+            $points = $this->partPoints($order, $part);
+
+            $part->forceFill(['status' => 'cancelled', 'cancelled_alone_at' => now(), 'cancelled_refund' => $refund, 'points_returned' => $points])->save();
+            foreach ($part->items()->with('product')->get() as $item) {
+                if ($item->product && $item->stockedQuantity() > 0) {
+                    app(OrderService::class)->restock($item->product, $item->product_variant_id, $item->stockedQuantity());
+                }
+            }
+            app(PreorderService::class)->afterOrderReversed($order);
+            app(GstService::class)->partCancelled($part);
+            app(OrderService::class)->reverseDisputeDeductions($order, $part->id);
+
+            if ($refund > 0) {
+                app(PaymentService::class)->flagRefund($order, $refund, 'Part cancelled: '.$part->shopName().' on order '.$order->order_number);
+            }
+            if ($points > 0 && $order->user) {
+                app(PointsService::class)->record($order->user, $points, 'refund', $order, __('Redeemed points returned'));
+            }
+
+            return null;
+        });
+        if ($done !== null) {
+            return $done;
+        }
+
+        $order = $part->order->fresh();
+        \App\Support\Audit::record('order.part_cancelled', $order, ['shop' => $part->shopName(), 'refund' => (float) $part->cancelled_refund, 'order_number' => $order->order_number, 'by' => $admin->id]);
+        $this->syncOrder($order);
+        app(OrderService::class)->takeBackEarnedPoints($order->fresh());
+        app(OrderNotifier::class)->cancelledToShops($order, (int) $part->seller_id);
+        app(OrderNotifier::class)->sendToCustomer($order, new \App\Notifications\OrderPartCancelled($order, $part->fresh()));
+
+        return null;
+    }
+
+    /**
+     * Can this part be cancelled on its own (cancelPart())? For the order page's button.
+     *
+     * @param  \Illuminate\Support\Collection<int, SellerOrder>  $parts  the order's parts
+     */
+    public static function partCancellable(Order $order, SellerOrder $part, \Illuminate\Support\Collection $parts): bool
+    {
+        return in_array($part->status, ['pending', 'processing'], true) && $order->status !== 'cancelled'
+            && $order->payment_status === 'paid' && $parts->where('status', '!=', 'cancelled')->count() > 1;
+    }
+
+    /**
+     * The redeemed points spent on a part's items (PaidShares), less what returns and disputes on it
+     * already gave back, and never more than the order still holds.
+     */
+    protected function partPoints(Order $order, SellerOrder $part): int
+    {
+        $redeemed = (int) $order->points_redeemed;
+        if ($redeemed <= 0) {
+            return 0;
+        }
+        $shares = \App\Support\PaidShares::shares($order)['points'];
+        $total = array_sum($shares);
+        if ($total <= 0) {
+            return 0;
+        }
+        $partShare = 0;
+        foreach ($part->items()->pluck('order_items.id') as $id) {
+            $partShare += $shares[(int) $id] ?? 0;
+        }
+        $onPart = (int) \App\Models\ReturnRequest::where('seller_order_id', $part->id)->sum('points_returned')
+            + (int) \App\Models\Dispute::where('seller_order_id', $part->id)->sum('points_returned');
+        $onOrder = (int) \App\Models\ReturnRequest::where('order_id', $order->id)->sum('points_returned')
+            + (int) \App\Models\Dispute::where('order_id', $order->id)->sum('points_returned')
+            + (int) SellerOrder::where('order_id', $order->id)->sum('points_returned');
+
+        return max(0, min((int) floor($redeemed * $partShare / $total) - $onPart, $redeemed - $onOrder));
     }
 
     /**

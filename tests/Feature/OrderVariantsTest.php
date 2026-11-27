@@ -147,11 +147,11 @@ class OrderVariantsTest extends TestCase
 
         $this->cartWith([[$this->large, 2]]);
         $order = app(OrderService::class)->createOrderFromCart($this->customer, $this->shipping())['order'];
+        app(PaymentService::class)->confirm($order->fresh());
         $this->actingAs($admin);
         foreach (['processing', 'shipped', 'delivered'] as $status) {
             $this->post(route('admin.orders.status', $order), ['status' => $status]);
         }
-        app(PaymentService::class)->confirm($order->fresh());
 
         $part = $order->sellerOrders()->firstOrFail();
         $item = $part->items()->firstOrFail();

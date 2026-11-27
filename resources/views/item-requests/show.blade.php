@@ -38,13 +38,14 @@
                 <p class="text-xs text-gray-600">{{ __('The price holds until :date.', ['date' => $itemRequest->valid_until?->translatedFormat('j M Y')]) }}</p>
             @endif
 
-            @if($itemRequest->canAccept())
+            @if($itemRequest->status === 'accepted' && ! $itemRequest->isExpired() && $itemRequest->inCartOf(auth()->user()))
+                <a href="{{ route('cart') }}" class="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Go to your cart') }}</a>
+            @elseif($itemRequest->canAccept())
+                {{-- A new price, or one accepted before whose cart line has gone: put it (back) in the cart --}}
                 <form method="POST" action="{{ route('item-requests.accept', $itemRequest) }}">
                     @csrf
-                    <button class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover" data-item-request-accept>{{ __('Accept and add to cart') }}</button>
+                    <button class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover" data-item-request-accept>{{ $itemRequest->status === 'accepted' ? __('Put it back in your cart') : __('Accept and add to cart') }}</button>
                 </form>
-            @elseif($itemRequest->status === 'accepted' && ! $itemRequest->isExpired())
-                <a href="{{ route('cart') }}" class="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">{{ __('Go to your cart') }}</a>
             @elseif($itemRequest->status === 'ordered' && $itemRequest->order)
                 <a href="{{ route('orders.show', $itemRequest->order) }}" class="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover" data-item-request-order>{{ __('See your order :number', ['number' => $itemRequest->order->order_number]) }}</a>
             @endif

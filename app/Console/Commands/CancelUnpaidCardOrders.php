@@ -29,14 +29,20 @@ class CancelUnpaidCardOrders extends Command
             ->where('status', 'pending')
             ->where('created_at', '<', $cutoff)))
             ->with('paymentTransactions')
-            ->each(function (Order $order) use ($payments, $orders, &$cancelled) {
+            // By id, not by page: each order cancelled drops out of the filter, which would skip the next page's
+            ->lazyById(200)->each(function (Order $order) use ($payments, $orders, &$cancelled) {
                 foreach ($order->paymentTransactions->whereNotNull('transaction_id') as $transaction) {
                     try {
                         $payments->syncBml($transaction);
                     } catch (Throwable $e) {
                         report($e);
-
-                        return; // can't be sure it's unpaid; try again next run
+                        // Can't be sure it's unpaid: try again next run. Not for ever: after three days of
+                        // BML not answering for it (a test-key transaction after the switch to live keys)
+                        // the stock is released; a payment that does arrive later is refunded
+                        // (PaymentService::syncBml(), "Paid after the order was cancelled")
+                        if ($order->created_at->isAfter(now()->subDays(3))) {
+                            return;
+                        }
                     }
                 }
 

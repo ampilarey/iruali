@@ -25,7 +25,13 @@ class RefundRecorded extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        // By SMS too (or instead) for a customer who chose it, or who has only a mobile number
+        return $notifiable instanceof \App\Models\User ? $notifiable->notificationChannels('order_updates') : ['mail'];
+    }
+
+    public function toSms(object $notifiable): \App\Services\Sms\SmsText
+    {
+        return \App\Support\SmsTypes::render('refund_sent', ['number' => $this->order->order_number, 'amount' => Money::format($this->order->refund_amount), 'ref' => (string) $this->order->refund_reference]);
     }
 
     public function toMail(object $notifiable): MailMessage

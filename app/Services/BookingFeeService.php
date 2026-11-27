@@ -488,7 +488,8 @@ class BookingFeeService
     {
         $split = self::refundSplit($order, $kept);
         $already = (float) \App\Models\ReturnRequest::where('order_id', $order->id)->whereIn('status', ['approved', 'refunded'])->sum('refund_amount')
-            + (float) \App\Models\Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+            + (float) \App\Models\Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved')
+            + (float) \App\Models\SellerOrder::where('order_id', $order->id)->sum('cancelled_refund'); // a shop's part cancelled on its own
         $fromCard = min($split['card'], $already);
         $split['card'] = round($split['card'] - $fromCard, 2);
         $split['wallet'] = round(max(0, $split['wallet'] - ($already - $fromCard)), 2);

@@ -455,6 +455,19 @@ class BulkQuoteCheckoutTest extends TestCase
         $this->assertSame('ordered', $quote->fresh()->status);
     }
 
+    public function test_change_my_order_puts_a_quoted_line_back_at_its_quoted_price(): void
+    {
+        $quote = $this->quoted();
+        $this->accept($quote);
+        $order = $this->placeOrder($this->buyer);
+
+        $this->actingAs($this->buyer)->post(route('orders.backToCart', $order))->assertRedirect(route('cart'));
+        $this->assertSame('cancelled', $order->fresh()->status);
+        $line = CartItem::whereHas('cart', fn ($q) => $q->where('user_id', $this->buyer->id)->where('status', 'active'))->sole();
+        $this->assertSame([$quote->id, 30, 80.0], [(int) $line->quote_request_id, (int) $line->quantity, (float) $line->price], 'the quote, not 30 at the list price');
+        $this->assertSame('accepted', $quote->fresh()->status);
+    }
+
     public function test_another_customer_gets_403_everywhere(): void
     {
         $quote = $this->quoted();

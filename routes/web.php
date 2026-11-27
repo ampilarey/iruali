@@ -226,6 +226,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::post('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
         Route::post('/orders/{order}/payment', [AdminController::class, 'updatePayment'])->name('orders.payment');
         Route::post('/orders/{order}/parts/{part}/status', [AdminController::class, 'updatePartStatus'])->name('orders.parts.status');
+        Route::post('/orders/{order}/parts/{part}/cancel', [AdminController::class, 'cancelPart'])->name('orders.parts.cancel'); // admins only (refunds): config/staff.php
         Route::post('/orders/{order}/bml-sync', [AdminController::class, 'syncBmlPayment'])->name('orders.bml-sync');
         Route::post('/orders/{order}/refunded', [AdminController::class, 'recordRefund'])->name('orders.refunded');
         Route::post('/orders/{order}/refund-approve', [AdminController::class, 'approveRefund'])->name('orders.refund-approve');

@@ -57,8 +57,13 @@ class SmsCampaignService
             if (isset($done[$user->id])) {
                 continue;
             }
+            // Claimed before it is sent (the row is unique per person): a second run going at the same time
+            // (the first one still sending when its lock ran out) skips everyone the first has taken
+            if (DB::table('sms_campaign_recipients')->insertOrIgnore(['sms_campaign_id' => $campaign->id, 'user_id' => $user->id, 'status' => 'sending', 'created_at' => now()]) === 0) {
+                continue;
+            }
             $result = $sms->send($user->phone, new SmsText('campaign', $this->text($campaign, $user)));
-            DB::table('sms_campaign_recipients')->insertOrIgnore(['sms_campaign_id' => $campaign->id, 'user_id' => $user->id, 'status' => $result->status, 'created_at' => now()]);
+            DB::table('sms_campaign_recipients')->where('sms_campaign_id', $campaign->id)->where('user_id', $user->id)->update(['status' => $result->status]);
             if (++$count % 50 === 0) {
                 $campaign->touch(); // still going: the stuck-campaign check looks at this
             }

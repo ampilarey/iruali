@@ -164,7 +164,9 @@ class MarketplacePayoutsTest extends TestCase
 
     public function test_earnings_become_payable_when_delivered_and_paid_then_are_paid_once(): void
     {
-        $order = $this->placeOrder(paid: false); // admins can move an unpaid order; the earnings wait for the payment
+        // Cash on delivery: delivered before it is paid; the earnings wait for the payment
+        $order = $this->placeOrder(paid: false);
+        $order->forceFill(['payment_method' => 'cod'])->save();
         $admin = $this->admin();
         $payouts = app(PayoutService::class);
 
@@ -173,7 +175,7 @@ class MarketplacePayoutsTest extends TestCase
         $this->post(route('admin.orders.status', $order), ['status' => 'delivered']);
         $this->assertEquals(['pending' => 170.0, 'available' => 0.0], array_intersect_key($payouts->balances($this->shopA), ['pending' => 1, 'available' => 1]));
 
-        // BML confirms the card payment (what the webhook does on success)
+        // The cash is recorded as received
         app(PaymentService::class)->confirm($order->fresh());
         $this->assertEquals(170, $payouts->balances($this->shopA)['available']);
 

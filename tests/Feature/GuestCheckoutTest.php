@@ -243,7 +243,8 @@ class GuestCheckoutTest extends TestCase
         Notification::assertNotSentTo(new AnonymousNotifiable, OrderPlaced::class);
 
         // Status changes through OrderService notify the guest too, and awarding rewards is a no-op
-        app(OrderService::class)->updateOrderStatus($guest, 'processing');
+        $guest->forceFill(['payment_status' => 'paid'])->save(); // moved on once paid
+        app(OrderService::class)->updateOrderStatus($guest->fresh(), 'processing');
         $this->assertSame('processing', $guest->fresh()->status);
         app(OrderService::class)->awardRewards($guest->fresh());
         $this->assertSame(1, Order::whereNull('user_id')->where('id', $guest->id)->count());

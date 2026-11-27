@@ -68,6 +68,31 @@ class OrderNotifier
             return;
         }
         $this->sendToCustomer($order, new OrderStatusChanged($order));
+        if ($order->status === 'cancelled') {
+            $this->cancelledToShops($order);
+        }
+    }
+
+    /**
+     * Tell the shops that were told about the order (it was announced, and they could see it) that it
+     * is cancelled, so nothing is packed or sent from the "new order" email. With $seller, only that
+     * shop: its part alone was cancelled (FulfilmentService::cancelPart()).
+     */
+    public function cancelledToShops(Order $order, ?int $seller = null): void
+    {
+        if ($order->placed_notified_at === null || ! $order->isShownToShops()) {
+            return;
+        }
+        $parts = $order->sellerOrders()->with('seller')->whereNotNull('seller_id')->when($seller, fn ($q) => $q->where('seller_id', $seller))->get();
+        foreach ($parts as $part) {
+            if ($part->seller && ! $part->seller->isSmokeTest()) {
+                try {
+                    $part->seller->notify(new \App\Notifications\ShopOrderCancelled($order, $seller !== null));
+                } catch (Throwable $e) {
+                    report($e);
+                }
+            }
+        }
     }
 
     public function paymentUpdated(Order $order): void

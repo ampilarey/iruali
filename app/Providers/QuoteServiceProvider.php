@@ -31,10 +31,11 @@ class QuoteServiceProvider extends ServiceProvider
             'severity' => 'warn',
         ]);
 
-        // An order that was never paid and is cancelled gives its quotes back to the customer
+        // An order that was never paid and is cancelled gives its quotes (and item requests) back to the customer
         Order::updated(function (Order $order) {
             if ($order->wasChanged('status') && $order->status === 'cancelled') {
                 app(QuoteService::class)->orderCancelled($order);
+                app(\App\Services\ItemRequestService::class)->releaseFromCancelledOrder($order); // and its item requests
             }
         });
     }

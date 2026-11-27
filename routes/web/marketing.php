@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Signed one-click opt-out from the footer of a marketing email (works without signing in)
-Route::get('/marketing/unsubscribe/{user}', [MarketingController::class, 'unsubscribe'])->name('marketing.unsubscribe')->middleware('signed')->whereNumber('user');
+// Signed opt-out from the footer of a marketing email (works without signing in): the link shows a
+// button, the button does it (mail scanners open links)
+Route::match(['get', 'post'], '/marketing/unsubscribe/{user}', [MarketingController::class, 'unsubscribe'])->name('marketing.unsubscribe')->middleware('signed')->whereNumber('user');
 
 Route::middleware('auth')->group(function () {
     Route::put('/account/marketing', [MarketingController::class, 'update'])->name('account.marketing');

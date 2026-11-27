@@ -71,7 +71,10 @@ class CartReminderService
             ->whereDoesntHave('items', fn ($q) => $q->where('updated_at', '>=', $cutoff))
             ->whereDoesntHave('reminders', fn ($q) => $q->where('stage', $stage))
             ->when($stage === 2, fn ($q) => $q->whereHas('reminders', fn ($r) => $r->where('stage', 1)))
-            ->whereHas('user', fn ($q) => $q->whereNull('marketing_opt_out_at')->whereNotNull('email'))
+            // A customer's confirmed email, an active account, not staff and not the smoke-test customer
+            ->whereHas('user', fn ($q) => $q->whereNull('marketing_opt_out_at')->whereNotNull('email')->whereNotNull('email_verified_at')
+                ->where('is_active', true)->where('is_smoke_test', false)
+                ->whereDoesntHave('roles', fn ($r) => $r->whereIn('name', (array) config('staff.roles', ['admin']))))
             ->with(['user', 'items.product.mainImage', 'items.variant'])
             ->orderBy('id')
             ->get();

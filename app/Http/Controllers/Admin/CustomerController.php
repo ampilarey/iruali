@@ -71,15 +71,33 @@ class CustomerController extends Controller
         ]);
         $phone = filled($data['phone'] ?? null) ? preg_replace('/\s+/', '', $data['phone']) : null;
         Audit::record('customer.phone_changed', $user, ['from' => $user->phone, 'to' => $phone]);
+        // A customer with no other way in (no password, no email: signed up by phone, lost the SIM) could
+        // never verify the new number themselves, and signing in with it would make a new, empty account:
+        // the team has checked who they are, so the number counts as verified
+        $vouched = $phone !== null && ! $user->hasPassword() && blank($user->email);
         $user->forceFill(['phone' => $phone, 'phone_verified_at' => null])->save();
+        if ($vouched) {
+            $user->forceFill(['phone_verified_at' => now()])->save(); // after the number is saved (User::booted() resets it for a new number)
+        }
 
-        return back()->with('success', 'Phone changed. The customer needs to verify the new number before codes go to it.');
+        return back()->with('success', $vouched
+            ? 'Phone changed. It is the only way into this account, so it counts as verified: the customer signs in with a code sent to it.'
+            : 'Phone changed. The customer needs to verify the new number before codes go to it.');
     }
 
     public function merge(Request $request, User $user, CustomerAccountService $accounts)
     {
-        $data = $request->validate(['into' => 'required|email|exists:users,email', 'confirm' => 'accepted'], ['into.exists' => 'No account has that email.']);
-        $keep = User::where('email', $data['into'])->firstOrFail();
+        // The account to keep, by its email, phone or account number (a phone-only account has no email)
+        $data = $request->validate(['into' => 'required|string|max:255', 'confirm' => 'accepted']);
+        $into = trim($data['into']);
+        $phone = \App\Services\Sms\PhoneNumber::normalize($into);
+        $keep = str_contains($into, '@') ? User::where('email', $into)->first()
+            : (ctype_digit(ltrim($into, '#')) && strlen(ltrim($into, '#')) < 7 ? User::find((int) ltrim($into, '#'))
+            : ($phone ? User::whereNotNull('phone_verified_at')->get(['id', 'phone'])->first(fn (User $u) => \App\Services\Sms\PhoneNumber::normalize($u->phone) === $phone) : null));
+        if (! $keep) {
+            return back()->withErrors(['into' => 'No account has that email, phone or account number.'])->withInput();
+        }
+        $keep = User::findOrFail($keep->id);
 
         if ($problem = $accounts->merge($user, $keep, $request->user())) {
             return back()->with('error', $problem);

@@ -50,13 +50,17 @@ class ReturnController extends Controller
     }
 
     /**
-     * The customer's photo: shown to the customer, the shop and admins only.
+     * The customer's photo: shown to the customer, the shop and the team members who handle returns.
      */
     public function photo(Request $request, ReturnRequest $return)
     {
         $user = $request->user();
+        // The customer; staff whose role decides or reads returns (support, finance: config/staff.php); the
+        // shop, its owner or staff allowed its returns page
+        $shop = $return->sellerOrder?->seller_id;
         abort_unless(
-            $return->user_id === $user->id || $user->isAdmin() || $return->sellerOrder?->seller_id === $user->id,
+            $return->user_id === $user->id || \App\Support\StaffAccess::can('admin.returns.show', $user)
+            || ($shop && $shop === \App\Support\CurrentShop::id() && \App\Support\CurrentShop::can('seller.returns')),
             403
         );
         abort_unless($return->photo_path && Storage::disk(ReturnService::DISK)->exists($return->photo_path), 404);

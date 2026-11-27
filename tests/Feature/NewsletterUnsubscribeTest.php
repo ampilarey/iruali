@@ -18,7 +18,9 @@ class NewsletterUnsubscribeTest extends TestCase
         $this->assertStringContainsString('/newsletter/unsubscribe/'.$subscriber->id, $url);
         $this->assertStringContainsString('signature=', $url);
 
-        $this->get($url)->assertOk()->assertSee('You are unsubscribed')->assertSee('fan@example.com');
+        $this->get($url)->assertOk()->assertSee('data-email-link-action', false)->assertSee('fan@example.com');
+        $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'fan@example.com']); // only shown so far
+        $this->post($url)->assertOk()->assertSee('You are unsubscribed')->assertSee('fan@example.com');
         $this->assertSame(0, NewsletterSubscriber::count());
 
         // Clicking the link a second time is not an error

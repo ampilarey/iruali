@@ -80,7 +80,16 @@ class MessagesController extends Controller
         $this->guestOrFail($conversation, $token);
         $this->messaging->markRead($conversation, 'customer');
 
-        return view('messages.show', ['conversation' => $conversation->load(['messages.sender', 'product.mainImage']), 'postUrl' => route('messages.guest.reply', ['conversation' => $conversation->id, 'token' => $token]), 'guestLink' => true]);
+        return view('messages.show', ['conversation' => $conversation->load(['messages.sender', 'product.mainImage']), 'postUrl' => route('messages.guest.reply', ['conversation' => $conversation->id, 'token' => $token]), 'guestLink' => true, 'guestToken' => $token]);
+    }
+
+    /** A photo in a visitor's conversation, through the same private link (they have no account to sign in with). */
+    public function guestAttachment(Conversation $conversation, string $token, \App\Models\Message $message)
+    {
+        $this->guestOrFail($conversation, $token);
+        abort_unless((int) $message->conversation_id === (int) $conversation->id, 404);
+
+        return $this->messaging->attachmentResponse($message);
     }
 
     public function guestReply(Request $request, Conversation $conversation, string $token): RedirectResponse
@@ -111,6 +120,11 @@ class MessagesController extends Controller
             'phone.required_without' => __('Give an email address or a mobile number, so we can answer you.'),
             'phone.regex' => __('Enter a mobile number, for example 7771234.'),
         ]);
+        // Only a number we can text (a Maldivian mobile) counts on its own; with no email, another one
+        // would leave us no way to answer
+        if (blank($data['email'] ?? null) && \App\Services\Sms\PhoneNumber::normalize((string) ($data['phone'] ?? '')) === null) {
+            return back()->withInput()->withErrors(['phone' => __('We can text Maldivian mobile numbers only. Give a Maldivian mobile number or an email address, so we can answer you.')]);
+        }
 
         $conversation = $this->messaging->guestConversation($kind, $data['name'], $data['email'] ?? null, $data['phone'] ?? null, $product);
 

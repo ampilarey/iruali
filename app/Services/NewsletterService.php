@@ -42,8 +42,9 @@ class NewsletterService
     // ---- Who gets it --------------------------------------------------------------------------
 
     /**
-     * Customers who get newsletters: not opted out of marketing, active, not banned, not staff and
-     * not the smoke-test customer.
+     * Customers who get newsletters: a confirmed email (an address typed in, never proven, is not
+     * written to), not opted out of marketing, active, not banned, not staff, not a shop and not the
+     * smoke-test customer.
      *
      * @return Builder<User>
      */
@@ -52,6 +53,8 @@ class NewsletterService
         return User::query()
             ->whereNull('marketing_opt_out_at')
             ->whereNotNull('email')->where('email', '!=', '')
+            ->whereNotNull('email_verified_at')
+            ->where(fn (Builder $q) => $q->whereNull('is_seller')->orWhere('is_seller', false))
             ->where('is_active', true)
             ->where(fn (Builder $q) => $q->whereNull('banned_until')->orWhere('banned_until', '<=', now()))
             ->where('is_smoke_test', false)

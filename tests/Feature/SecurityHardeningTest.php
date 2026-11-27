@@ -108,7 +108,8 @@ class SecurityHardeningTest extends TestCase
 
         $finance = $this->withRole('finance');
         $this->assertTrue(\App\Support\StaffAccess::can('admin.returns.refunded', $finance));
-        $this->assertTrue(\App\Support\StaffAccess::can('admin.returns.refund-wallet', $finance));
+        // Store credit (a refund to the wallet) is admins' only: the route says so (role:admin), and so does the role list
+        $this->assertFalse(\App\Support\StaffAccess::can('admin.returns.refund-wallet', $finance));
     }
 
     public function test_payout_pages_need_two_step_sign_in_like_the_rest_of_admin(): void

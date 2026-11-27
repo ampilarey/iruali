@@ -3558,5 +3558,16 @@
     "Order :number is cancelled": "އޯޑަރު :number ކެންސަލްވެއްޖެ",
     "iruali has cancelled your part of order :number. Please do not pack or send its items. The other shops in the order carry on.": "އިރުއަލި އިން އޯޑަރު :number ގައިވާ ތިޔަ ފިހާރައިގެ ބައި ކެންސަލްކޮށްފި. އެ ތަކެތި ޕެކްކޮށް ނުފޮނުއްވާ. އޯޑަރުގެ އެހެން ފިހާރަތައް ކުރިއަށް ދާނެ.",
     "Order :number has been cancelled. Please do not pack or send it. If it has already left your shop, tell iruali straight away.": "އޯޑަރު :number ކެންސަލްކޮށްފި. ޕެކްކޮށް ނުފޮނުއްވާ. ފިހާރައިން ފޮނުވައިފިނަމަ، އަވަހަށް އިރުއަލި އަށް އަންގަވާ.",
-    "View the order": "އޯޑަރު ބައްލަވާ"
+    "View the order": "އޯޑަރު ބައްލަވާ",
+    "You have asked for a lot of codes. Please try again in an hour, or ask for a code by email.": "ވަރަށް ގިނަ ކޯޑު އެދިވަޑައިގެންފި. އެއް ގަޑިއިރު ފަހުން އަލުން މަސައްކަތްކުރައްވާ، ނުވަތަ އީމެއިލުން ކޯޑަށް އެދިވަޑައިގަންނަވާ.",
+    "This is not a browser push address.": "މިއީ ބްރައުޒަރ ޕުޝް އެޑްރެހެއް ނޫން.",
+    "You can't review your own shop's products.": "ތިޔަ ފިހާރައިގެ ތަކެއްޗަށް ރިވިއު ނުލިޔެވޭނެ.",
+    "Confirm your subscription": "ސަބްސްކްރިޕްޝަން ކަށަވަރުކުރައްވާ",
+    "Yes, send me the newsletter": "އާއެކޭ، ނިއުސްލެޓަރު ފޮނުވާ",
+    "Unsubscribe from our newsletter?": "ނިއުސްލެޓަރުން ވަކިވާން ބޭނުންތަ؟",
+    "Stop offers and reminders by email?": "އީމެއިލުން އޮފަރާއި ހަނދާންކޮށްދިނުން ހުއްޓުވަންތަ؟",
+    "Too many wrong codes. Please wait 15 minutes, then sign in again.": "ވަރަށް ގިނަ ފަހަރު ކޯޑު ރަނގަޅަށް ނުޖެހުނު. 15 މިނިޓު ފަހުން އަލުން ސައިން އިން ކުރައްވާ.",
+    "We can text Maldivian mobile numbers only. Give a Maldivian mobile number or an email address, so we can answer you.": "ދިވެހި މޯބައިލް ނަންބަރުތަކަށް އެކަނި ޓެކްސްޓް ފޮނުވޭނެ. ޖަވާބު ދެވޭނެހެން ދިވެހި މޯބައިލް ނަންބަރެއް ނުވަތަ އީމެއިލް އެޑްރެހެއް ދެއްވާ.",
+    "There are pay-later invoices still to pay. The account can be deleted once they are paid.": "ފަހުން ދައްކާ އިންވޮއިސްތައް އަދި ދައްކަން ބާކީ. އެ ދެއްކުމުން އެކައުންޓް ޑިލީޓް ކުރެވޭނެ.",
+    "A return or dispute is still being decided. The account can be deleted once it is closed.": "ރިޓަރނެއް ނުވަތަ ޑިސްޕިއުޓެއް އަދި ނިންމަމުންދަނީ. އެ ނިމުމުން އެކައުންޓް ޑިލީޓް ކުރެވޭނެ."
 }

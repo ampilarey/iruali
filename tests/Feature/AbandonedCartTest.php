@@ -186,7 +186,9 @@ class AbandonedCartTest extends TestCase
         $url = URL::signedRoute('marketing.unsubscribe', ['user' => $user->id]);
 
         $this->get(route('marketing.unsubscribe', ['user' => $user->id]))->assertForbidden();
-        $this->get($url)->assertOk()->assertSee('You are unsubscribed from marketing emails')->assertSee($user->email);
+        $this->get($url)->assertOk()->assertSee('data-email-link-action', false);
+        $this->assertNull($user->fresh()->marketing_opt_out_at, 'opening the link alone does nothing');
+        $this->post($url)->assertOk()->assertSee('You are unsubscribed from marketing emails')->assertSee($user->email);
         $this->assertNotNull($user->fresh()->marketing_opt_out_at);
 
         $this->actingAs($user)->get(route('account'))->assertOk()->assertSee('Marketing emails')->assertSee('Turn on');

@@ -26,6 +26,6 @@
         @if(session($flash))<div class="rounded-lg border px-4 py-3 text-sm {{ $style }}">{{ session($flash) }}</div>@endif
     @endforeach
 
-    @include('messaging._chat', ['conversation' => $conversation, 'role' => 'customer', 'action' => $postUrl, 'guestForm' => $guestForm ?? false])
+    @include('messaging._chat', ['conversation' => $conversation, 'role' => 'customer', 'action' => $postUrl, 'guestForm' => $guestForm ?? false, 'guestToken' => $guestToken ?? null])
 </div>
 @endsection

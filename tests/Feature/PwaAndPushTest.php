@@ -117,13 +117,13 @@ class PwaAndPushTest extends TestCase
     public function test_subscription_store_and_destroy(): void
     {
         $user = User::factory()->create();
-        $payload = ['endpoint' => 'https://push.example.com/send/abc', 'keys' => ['p256dh' => 'p256', 'auth' => 'authkey'], 'content_encoding' => 'aes128gcm'];
+        $payload = ['endpoint' => 'https://fcm.googleapis.com/fcm/send/abc', 'keys' => ['p256dh' => 'p256', 'auth' => 'authkey'], 'content_encoding' => 'aes128gcm'];
 
         $this->postJson('/account/push', $payload)->assertUnauthorized();
 
         $this->actingAs($user)->postJson('/account/push', ['endpoint' => 'http://insecure.example.com/x', 'keys' => ['p256dh' => 'p', 'auth' => 'a']])
             ->assertUnprocessable()->assertJsonValidationErrors('endpoint');
-        $this->actingAs($user)->postJson('/account/push', ['endpoint' => 'https://push.example.com/send/abc'])
+        $this->actingAs($user)->postJson('/account/push', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/abc'])
             ->assertUnprocessable()->assertJsonValidationErrors(['keys.p256dh', 'keys.auth']);
 
         $this->actingAs($user)->postJson('/account/push', $payload)->assertCreated()->assertJson(['ok' => true]);
@@ -147,8 +147,8 @@ class PwaAndPushTest extends TestCase
         $this->withVapid();
         $customer = User::factory()->create(['name' => 'Aminath']);
         $order = Order::factory()->create(['user_id' => $customer->id, 'status' => 'shipped', 'order_number' => 'ORD-777']);
-        $live = PushSubscription::create(['user_id' => $customer->id, 'endpoint' => 'https://push.example.com/live', 'public_key' => 'k', 'auth_token' => 'a', 'content_encoding' => 'aes128gcm']);
-        $gone = PushSubscription::create(['user_id' => $customer->id, 'endpoint' => 'https://push.example.com/gone', 'public_key' => 'k', 'auth_token' => 'a', 'content_encoding' => 'aes128gcm']);
+        $live = PushSubscription::create(['user_id' => $customer->id, 'endpoint' => 'https://fcm.googleapis.com/fcm/live', 'public_key' => 'k', 'auth_token' => 'a', 'content_encoding' => 'aes128gcm']);
+        $gone = PushSubscription::create(['user_id' => $customer->id, 'endpoint' => 'https://fcm.googleapis.com/fcm/gone', 'public_key' => 'k', 'auth_token' => 'a', 'content_encoding' => 'aes128gcm']);
 
         $sent = [];
         $client = $this->mock(WebPush::class);
@@ -165,11 +165,11 @@ class PwaAndPushTest extends TestCase
         $this->assertContains(WebPushChannel::class, $notification->via($customer));
         $customer->notify($notification);
 
-        $this->assertSame('Order ORD-777 is on its way', $sent['https://push.example.com/live']['title']);
-        $this->assertSame(route('orders.show', $order), $sent['https://push.example.com/live']['url']);
-        $this->assertSame('Tap to see your order.', $sent['https://push.example.com/live']['body']);
-        $this->assertStringEndsWith('/images/icons/icon-192.png', $sent['https://push.example.com/live']['icon']);
-        $this->assertSame('order-'.$order->id, $sent['https://push.example.com/live']['tag']);
+        $this->assertSame('Order ORD-777 is on its way', $sent['https://fcm.googleapis.com/fcm/live']['title']);
+        $this->assertSame(route('orders.show', $order), $sent['https://fcm.googleapis.com/fcm/live']['url']);
+        $this->assertSame('Tap to see your order.', $sent['https://fcm.googleapis.com/fcm/live']['body']);
+        $this->assertStringEndsWith('/images/icons/icon-192.png', $sent['https://fcm.googleapis.com/fcm/live']['icon']);
+        $this->assertSame('order-'.$order->id, $sent['https://fcm.googleapis.com/fcm/live']['tag']);
 
         $this->assertDatabaseHas('push_subscriptions', ['id' => $live->id]);
         $this->assertDatabaseMissing('push_subscriptions', ['id' => $gone->id]);
@@ -228,8 +228,8 @@ class PwaAndPushTest extends TestCase
     public function test_a_replaced_subscription_moves_to_its_new_address_without_a_session(): void
     {
         $user = User::factory()->create();
-        $old = 'https://push.example.com/send/'.str_repeat('a', 40);
-        $new = 'https://push.example.com/send/'.str_repeat('b', 40);
+        $old = 'https://fcm.googleapis.com/fcm/send/'.str_repeat('a', 40);
+        $new = 'https://fcm.googleapis.com/fcm/send/'.str_repeat('b', 40);
         \App\Models\PushSubscription::create(['user_id' => $user->id, 'endpoint' => $old, 'public_key' => 'old-key', 'auth_token' => 'old-auth', 'content_encoding' => 'aes128gcm']);
 
         // The service worker has no session or form token: the old address is the proof
@@ -240,7 +240,7 @@ class PwaAndPushTest extends TestCase
         $this->assertSame([$user->id, $new, 'new-key', 'new-auth'], [$subscription->user_id, $subscription->endpoint, $subscription->public_key, $subscription->auth_token]);
 
         // An address we never saw creates nothing, and answers the same
-        $this->postJson('/api/push/renew', ['old_endpoint' => 'https://push.example.com/send/unknown', 'endpoint' => 'https://push.example.com/send/else', 'keys' => ['p256dh' => 'k', 'auth' => 'a']])->assertOk()->assertExactJson(['ok' => true]);
+        $this->postJson('/api/push/renew', ['old_endpoint' => 'https://fcm.googleapis.com/fcm/send/unknown', 'endpoint' => 'https://fcm.googleapis.com/fcm/send/else', 'keys' => ['p256dh' => 'k', 'auth' => 'a']])->assertOk()->assertExactJson(['ok' => true]);
         $this->assertSame(1, \App\Models\PushSubscription::count());
         $this->postJson('/api/push/renew', ['old_endpoint' => $new, 'endpoint' => 'http://not-secure.example.com/x', 'keys' => ['p256dh' => 'k', 'auth' => 'a']])->assertStatus(422);
 

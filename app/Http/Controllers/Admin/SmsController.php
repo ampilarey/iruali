@@ -148,7 +148,7 @@ class SmsController extends Controller
             fputcsv($out, ['Date', 'Type', 'To', 'Status', 'Message', 'Gateway reply', 'Cost']);
             $query->chunk(500, function ($rows) use ($out) {
                 foreach ($rows as $m) {
-                    fputcsv($out, [$m->created_at?->format('Y-m-d H:i'), $m->type, $m->to, $m->status, $m->message, $m->provider_response, $m->cost]);
+                    fputcsv($out, \App\Support\Csv::row([$m->created_at?->format('Y-m-d H:i'), $m->type, $m->to, $m->status, $m->message, $m->provider_response, $m->cost]));
                 }
             });
             fclose($out);

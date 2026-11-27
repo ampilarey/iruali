@@ -61,7 +61,8 @@ class ApiPasswordTest extends TestCase
 
     public function test_change_password_keeps_this_app_signed_in_and_signs_out_the_others(): void
     {
-        $user = User::factory()->create(['password' => Hash::make('Old!Pass#2026')]);
+        $user = User::factory()->create(['password' => Hash::make('Old!Pass#2026'), 'remember_token' => 'remembered-in-a-browser']);
+        $oldRemember = $user->remember_token;
         $other = $user->createToken('other-phone')->plainTextToken;
         $mine = $user->createToken('this-phone')->plainTextToken;
 
@@ -76,6 +77,8 @@ class ApiPasswordTest extends TestCase
         $this->assertTrue(Hash::check(self::STRONG, $user->fresh()->password));
         $this->assertSame(['this-phone'], $user->tokens()->pluck('name')->all());
         $this->assertNotSame($other, $mine);
+        // Browsers are signed out too, as when it is changed on the website ("remember me" no longer works)
+        $this->assertNotSame($oldRemember, $user->fresh()->remember_token);
     }
 
     public function test_logout_deletes_only_this_token(): void

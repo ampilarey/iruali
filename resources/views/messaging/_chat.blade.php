@@ -25,7 +25,9 @@
                             <p class="mt-1 rounded bg-white/70 px-2 py-1 text-xs text-gray-700" data-chat-original>Written (contact details hidden from the other side): {{ $m->original_body }}</p>
                         @endif
                         @if($m->attachment_path)
-                            <a href="{{ route('messages.attachment', $m) }}" target="_blank" rel="noopener" class="mt-1 block"><img src="{{ route('messages.attachment', $m) }}" alt="{{ __('Attached photo') }}" class="max-h-40 rounded-lg border border-white/30"></a>
+                            {{-- A visitor has no account: their photos come through the conversation's private link --}}
+                            @php $photoUrl = ! empty($guestToken) ? route('messages.guest.attachment', ['conversation' => $conversation->id, 'token' => $guestToken, 'message' => $m->id]) : route('messages.attachment', $m); @endphp
+                            <a href="{{ $photoUrl }}" target="_blank" rel="noopener" class="mt-1 block"><img src="{{ $photoUrl }}" alt="{{ __('Attached photo') }}" class="max-h-40 rounded-lg border border-white/30"></a>
                         @endif
                         @if($m->reported_at)
                             <p class="mt-1 text-xs font-semibold text-danger" data-chat-reported>{{ __('Reported') }}@if($role === 'admin'): {{ $m->report_reason }} ({{ $m->reportedBy?->name }})@endif</p>

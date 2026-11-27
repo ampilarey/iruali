@@ -114,11 +114,23 @@ class ErrorTracker
         return $to !== '' ? $to : null;
     }
 
+    /**
+     * The address without what opens something on its own: signed links' signatures, guest order and
+     * conversation tokens, password reset tokens (staff who read the error list don't get them).
+     */
+    public static function withoutSecrets(string $url): string
+    {
+        // Long random path parts (a guest's order or conversation link, a reset token)
+        $url = (string) preg_replace('#/[A-Za-z0-9]{32,}(?=/|\?|$)#', '/[token]', $url);
+
+        return (string) preg_replace('/([?&](?:signature|token|code|key)=)[^&#]*/i', '$1[hidden]', $url);
+    }
+
     protected static function upsert(Throwable $e): ?ErrorEvent
     {
         $fingerprint = self::fingerprint($e);
         $request = app()->bound('request') ? app('request') : null;
-        $url = $request && ! app()->runningInConsole() ? Str::limit($request->fullUrl(), 990, '') : null;
+        $url = $request && ! app()->runningInConsole() ? Str::limit(self::withoutSecrets($request->fullUrl()), 990, '') : null;
         $userId = $request?->user()?->id;
 
         $updated = ErrorEvent::where('fingerprint', $fingerprint)->update([

@@ -23,6 +23,8 @@ return [
     // Sign-in codes by text, for the whole site per hour (PhoneLoginController::sendCode()): someone cycling
     // through numbers can't run up the SMS bill
     'login_hourly_cap' => (int) env('SMS_LOGIN_HOURLY_CAP', 300),
+    // ...and per visitor (IP address), so one script can't use up the cap for everyone
+    'login_hourly_per_visitor' => (int) env('SMS_LOGIN_HOURLY_PER_VISITOR', 30),
 
     // Shown as the sender when the gateway allows an alphanumeric sender id
     'sender_id' => env('SMS_SENDER_ID', 'iruali'),

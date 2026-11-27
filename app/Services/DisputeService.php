@@ -121,7 +121,8 @@ class DisputeService
             return 0.0;
         }
         $taken = (float) ReturnRequest::where('order_id', $order->id)->whereIn('status', ['approved', 'refunded'])->sum('refund_amount')
-            + (float) Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+            + (float) Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved')
+            + (float) SellerOrder::where('order_id', $order->id)->sum('cancelled_refund'); // a shop's part cancelled on its own
 
         return max(0, round((float) $order->total_amount - $taken, 2));
     }

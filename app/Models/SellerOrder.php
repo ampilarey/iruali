@@ -26,6 +26,8 @@ class SellerOrder extends Model
         'shipped_at' => 'datetime',
         'out_for_delivery_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'cancelled_alone_at' => 'datetime', // this part alone was cancelled (FulfilmentService::cancelPart())
+        'cancelled_refund' => 'decimal:2',
         'expected_delivery_date' => 'date',
         'subtotal' => 'decimal:2',
         'commission_rate' => 'decimal:2',

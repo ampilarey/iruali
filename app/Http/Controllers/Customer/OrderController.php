@@ -229,17 +229,31 @@ class OrderController extends Controller
             return redirect()->route('orders.show', $order);
         }
 
+        $left = [];
         foreach ($items as $item) {
             try {
-                if ($item->product && $item->product->is_active) {
+                if ($item->quote_request_id && ($quote = \App\Models\QuoteRequest::find($item->quote_request_id))) {
+                    // A bulk-quote line goes back at its quoted price (the cancellation gave the quote back)
+                    app(\App\Services\QuoteService::class)->addToCartAgain($quote, Auth::user());
+                } elseif ($item->product?->item_request_id && ($request = \App\Models\ItemRequest::find($item->product->item_request_id))) {
+                    // An item we found on request: its accepted price again (its product is never listed)
+                    app(\App\Services\ItemRequestService::class)->accept($request->fresh(), Auth::user());
+                } elseif ($item->product && $item->product->is_active) {
                     $cart->addToCart($item->product->id, (int) $item->quantity, $item->product_variant_id ? (int) $item->product_variant_id : null);
+                } else {
+                    $left[] = $item->displayName();
                 }
             } catch (\Throwable $e) {
-                // A product that can't go back (sold out, shop on holiday) is left out; the cart says what is there
+                // A product that can't go back (sold out, shop on holiday, a price that expired) is left out
                 report($e);
+                $left[] = $item->displayName();
             }
         }
-        NotificationService::success(__('Your items are back in your cart. Change what you like and check out again.'));
+        if ($left === []) {
+            NotificationService::success(__('Your items are back in your cart. Change what you like and check out again.'));
+        } else {
+            NotificationService::error(__('Your other items are back in your cart, but these could not go back: :items.', ['items' => implode(', ', $left)]));
+        }
 
         return redirect()->route('cart');
     }

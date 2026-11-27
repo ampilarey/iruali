@@ -108,7 +108,12 @@ class PreorderController extends Controller
         $data = $request->validate([
             'received' => 'required|array|max:200',
             'received.*' => 'nullable|integer|min:0|max:'.PreorderService::MAX_LIMIT,
+            'submission' => 'nullable|uuid',
         ]);
+        // The same form sent twice (a double tap, a slow connection retried): the delivery is recorded once
+        if (! empty($data['submission']) && ! \Illuminate\Support\Facades\Cache::add('preorders.arrived.'.$data['submission'], true, now()->addDay())) {
+            return back()->with('success', __('This delivery is already recorded.'));
+        }
 
         // Keys are the product's own variant ids, or 0 for a product without variants
         $allowed = $product->has_variants ? $product->variants()->pluck('id')->map(fn ($id) => (int) $id)->all() : [0];

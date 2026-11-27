@@ -192,6 +192,7 @@ class ReturnService
         $taken = (float) ReturnRequest::where('order_id', $request->order_id)
             ->whereIn('status', ['approved', 'refunded'])->whereKeyNot($request->id)->sum('refund_amount');
         $taken += (float) \App\Models\Dispute::where('order_id', $request->order_id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+        $taken += (float) \App\Models\SellerOrder::where('order_id', $request->order_id)->sum('cancelled_refund'); // a shop's part cancelled on its own
 
         return max(0, round((float) $request->order->total_amount - $taken, 2));
     }
@@ -357,7 +358,7 @@ class ReturnService
 
     protected function notifyRequested(ReturnRequest $request): void
     {
-        \App\Support\TeamAlerts::send('return_requested', 'iruali: return requested on '.$request->order?->order_number.($request->sellerOrder ? ' ('.$request->sellerOrder->shopName().')' : '').', '.\App\Support\Money::format($request->refund_amount).'.', route('admin.returns.show', $request));
+        \App\Support\TeamAlerts::send('return_requested', 'iruali: return requested on '.$request->order?->order_number.($request->sellerOrder ? ' ('.$request->sellerOrder->shopName().')' : '').', '.\App\Support\Money::format($request->items_value).' of items.', route('admin.returns.show', $request)); // the refund is decided later
 
         try {
             if ($seller = $request->sellerOrder?->seller) {

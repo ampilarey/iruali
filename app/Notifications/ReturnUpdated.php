@@ -25,7 +25,21 @@ class ReturnUpdated extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        // By SMS too (or instead) for a customer who chose it, or who has only a mobile number
+        return $notifiable instanceof \App\Models\User ? $notifiable->notificationChannels('order_updates') : ['mail'];
+    }
+
+    public function toSms(object $notifiable): \App\Services\Sms\SmsText
+    {
+        $request = $this->request;
+        $number = $request->order->order_number;
+
+        return match ($request->status) {
+            'approved' => \App\Support\SmsTypes::render('return_approved', ['number' => $number, 'amount' => Money::format($request->refund_amount)]),
+            'rejected' => \App\Support\SmsTypes::render('return_rejected', ['number' => $number]),
+            'refunded' => \App\Support\SmsTypes::render('refund_sent', ['number' => $number, 'amount' => Money::format($request->refund_amount), 'ref' => (string) $request->refund_reference]),
+            default => new \App\Services\Sms\SmsText('return_approved', ''), // nothing to say by SMS
+        };
     }
 
     public function toMail(object $notifiable): MailMessage

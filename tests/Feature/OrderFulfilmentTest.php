@@ -39,7 +39,12 @@ class OrderFulfilmentTest extends TestCase
         $service = app(OrderService::class);
 
         $this->assertFalse($service->updateOrderStatus($order, 'delivered'));
-        $this->assertTrue($service->updateOrderStatus($order, 'processing'));
+        // Not paid yet (a card order): it stays pending, it can only be cancelled
+        $order->forceFill(['payment_method' => 'bml', 'payment_status' => 'unpaid'])->save();
+        $this->assertSame(['cancelled'], $service->nextStatuses($order->fresh()));
+        $this->assertFalse($service->updateOrderStatus($order->fresh(), 'processing'));
+        $order->forceFill(['payment_status' => 'paid', 'paid_at' => now()])->save();
+        $this->assertTrue($service->updateOrderStatus($order->fresh(), 'processing'));
         $this->assertTrue($service->updateOrderStatus($order->fresh(), 'shipped'));
         $this->assertFalse($service->updateOrderStatus($order->fresh(), 'cancelled'));
         $this->assertTrue($service->updateOrderStatus($order->fresh(), 'delivered'));

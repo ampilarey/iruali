@@ -78,12 +78,12 @@ class ReturnsTest extends TestCase
             'shipping_zip' => '19020', 'shipping_country' => 'Maldives', 'shipping_phone' => '7771234', 'payment_method' => 'bml',
         ])['order'];
 
+        // BML confirms card payments (via the webhook); do the same here. A card order is sent once paid.
+        app(PaymentService::class)->confirm($order->fresh());
         $this->actingAs($this->admin);
         foreach (['processing', 'shipped', 'delivered'] as $status) {
             $this->post(route('admin.orders.status', $order), ['status' => $status]);
         }
-        // BML confirms card payments (via the webhook); do the same here
-        app(PaymentService::class)->confirm($order->fresh());
 
         return $order->fresh();
     }

@@ -51,7 +51,7 @@ Schedule::call(function () {
 if (config('queue.default') !== 'sync') {
     // A short lock (5 minutes): a worker killed by the host (restart, memory) must not leave the lock
     // behind for Laravel's default 24 hours, which would stop every email and SMS for a day
-    Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5)->runInBackground()->name('queue-worker'); // up to 50 s: not in the way of the other tasks
+    Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=5 --backoff=60,300,900,1800')->everyMinute()->withoutOverlapping(5)->runInBackground()->name('queue-worker'); // up to 50 s: not in the way of the other tasks. A failed job waits 1, 5, 15 then 30 minutes before trying again (a mail server refusing for a while), and only then lands in failed_jobs
 }
 Schedule::command('queue:prune-failed --hours=168')->daily();
 // Tables that only grow otherwise: the database cache keeps an expired row until that exact key is read

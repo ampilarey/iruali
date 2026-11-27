@@ -227,8 +227,12 @@ class GstReportService
             if (! $order) {
                 continue;
             }
-            $first = ! isset($seen[$order->id]);
-            $seen[$order->id] = true;
+            // iruali's delivery fee is reversed with the whole order only, not with one shop's part
+            // cancelled on its own (the rest of the order was still delivered)
+            $first = ! $part->cancelled_alone_at && ! isset($seen[$order->id]);
+            if (! $part->cancelled_alone_at) {
+                $seen[$order->id] = true;
+            }
             $prior = $this->earlierRefunds($part);
             $orderPrior = $first ? $this->earlierDelivery($order) : ['delivery' => 0.0, 'delivery_gst' => 0.0];
             $events->push([

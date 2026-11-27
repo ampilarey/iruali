@@ -238,7 +238,7 @@ class ManualPaymentService
             ->where('status', 'pending'))
             ->whereNull('payment_slip_uploaded_at')
             ->where('created_at', '<', now()->subHours(self::payWithinHours())))
-            ->each(function (Order $order) use (&$cancelled) {
+            ->lazyById(200)->each(function (Order $order) use (&$cancelled) { // by id: each one cancelled leaves the filter
                 if (app(OrderService::class)->updateOrderStatus($order, 'cancelled')) {
                     $cancelled++;
                 }

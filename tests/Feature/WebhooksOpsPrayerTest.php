@@ -87,6 +87,33 @@ class WebhooksOpsPrayerTest extends TestCase
         $this->artisan('ops:watch')->expectsOutputToContain('All good.');
     }
 
+    public function test_jobs_failing_while_an_alert_is_held_back_go_into_the_next_alert(): void
+    {
+        Mail::fake();
+        config(['mail.alerts_to' => 'owner@iruali.mv']);
+        (new \App\Jobs\QueueHeartbeat)->handle();
+        $fail = fn (string $uuid) => DB::table('failed_jobs')->insert(['uuid' => $uuid, 'connection' => 'database', 'queue' => 'default', 'payload' => json_encode(['displayName' => 'App\\Notifications\\NewSellerOrder']), 'exception' => 'smtp', 'failed_at' => now()]);
+
+        $fail('a');
+        $this->artisan('ops:watch')->expectsOutputToContain('1 queued job(s) failed');
+        $first = (int) DB::table('failed_jobs')->max('id');
+        $this->assertSame($first, (int) Cache::get('ops.failed_jobs_seen'));
+
+        // Two more fail within the hour: held back, not forgotten
+        $this->travel(10)->minutes();
+        (new \App\Jobs\QueueHeartbeat)->handle();
+        $fail('b');
+        $fail('c');
+        $this->artisan('ops:watch')->expectsOutputToContain('2 queued job(s) failed');
+        $this->assertSame($first, (int) Cache::get('ops.failed_jobs_seen'), 'not marked seen while the alert is held back');
+
+        $this->travel(55)->minutes();
+        (new \App\Jobs\QueueHeartbeat)->handle();
+        $this->artisan('ops:watch')->expectsOutputToContain('2 queued job(s) failed: NewSellerOrder ×2');
+        $this->assertSame((int) DB::table('failed_jobs')->max('id'), (int) Cache::get('ops.failed_jobs_seen'));
+        $this->artisan('ops:watch')->expectsOutputToContain('All good.');
+    }
+
     public function test_a_stuck_worker_lock_is_released_and_the_recovery_is_reported(): void
     {
         Mail::fake();
@@ -97,7 +124,7 @@ class WebhooksOpsPrayerTest extends TestCase
         // The worker's schedule entry (routes/console.php registers it only for a real queue) uses a
         // short lock; one killed mid-run left that lock behind
         $this->assertStringContainsString("->everyMinute()->withoutOverlapping(5)->runInBackground()->name('queue-worker')", (string) file_get_contents(base_path('routes/console.php')));
-        $event = app(\Illuminate\Console\Scheduling\Schedule::class)->command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5)->name('queue-worker');
+        $event = app(\Illuminate\Console\Scheduling\Schedule::class)->command('queue:work --stop-when-empty --max-time=50 --tries=5 --backoff=60,300,900,1800')->everyMinute()->withoutOverlapping(5)->name('queue-worker');
         $event->mutex->create($event);
         $this->assertTrue($event->mutex->exists($event));
 

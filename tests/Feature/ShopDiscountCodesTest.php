@@ -465,11 +465,11 @@ class ShopDiscountCodesTest extends TestCase
 
         // Delivered and paid: the payout is the discounted earnings
         $admin = $this->admin();
+        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $this->actingAs($admin);
         foreach (['processing', 'shipped', 'delivered'] as $status) {
             $this->post(route('admin.orders.status', $order), ['status' => $status]);
         }
-        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $payout = app(\App\Services\PayoutService::class)->createPayout($this->shopA, null, 'BML-1', null, $admin);
         $this->assertEquals(91.78, $payout->amount);
 
@@ -533,11 +533,11 @@ class ShopDiscountCodesTest extends TestCase
         $this->useShopCodes([$this->shopA->id => 'ONEOFF']);
         $order = $this->placeOrder($this->customer);
         $admin = $this->admin();
+        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $this->actingAs($admin);
         foreach (['processing', 'shipped', 'delivered'] as $status) {
             $this->post(route('admin.orders.status', $order), ['status' => $status]);
         }
-        app(\App\Services\PaymentService::class)->confirm($order->fresh());
         $part = $order->sellerOrders()->sole();
         $item = $order->items()->sole();
         $this->assertEquals(29, $item->netTotal());

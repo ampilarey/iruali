@@ -86,7 +86,7 @@ class ComingSoonService
     {
         $count = 0;
         Product::query()->where('coming_soon', true)->whereNotNull('available_on')->whereDate('available_on', '<=', today())
-            ->orderBy('id')->each(function (Product $product) use (&$count) {
+            ->lazyById(200)->each(function (Product $product) use (&$count) { // by id: each one launched leaves the filter
                 $product->forceFill(['coming_soon' => false])->save();
                 $count++;
             });

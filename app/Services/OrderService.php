@@ -432,7 +432,8 @@ class OrderService
         DB::transaction(function () use ($order, $user, $total) {
             $locked = Order::whereKey($order->id)->lockForUpdate()->first();
             $refunded = (float) \App\Models\ReturnRequest::where('order_id', $order->id)->whereIn('status', ['approved', 'refunded'])->sum('refund_amount')
-                + (float) \App\Models\Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved');
+                + (float) \App\Models\Dispute::where('order_id', $order->id)->whereNotNull('amount_resolved')->sum('amount_resolved')
+                + (float) \App\Models\SellerOrder::where('order_id', $order->id)->sum('cancelled_refund');
             $ratio = min(1, max(0, $refunded / $total));
 
             $earned = (int) $locked->loyalty_points_earned;
@@ -545,8 +546,11 @@ class OrderService
             $next = array_values(array_diff($next, ['cancelled']));
         }
 
-        // A pre-order paid once the shop confirms stays pending until it is paid: it can only be cancelled
-        if ($order->confirm_first && $order->payment_status !== 'paid') {
+        // A pre-order paid once the shop confirms stays pending until it is paid: it can only be cancelled.
+        // So does any order not paid yet that is paid before it is sent (card, bank transfer): moving it
+        // on would stop the customer paying and the clean-up cancelling it (cash on delivery and
+        // pay-later accounts are paid at or after delivery: Order::mayBeFulfilled())
+        if (($order->confirm_first && $order->payment_status !== 'paid') || ($order->status === 'pending' && ! $order->mayBeFulfilled())) {
             $next = array_values(array_intersect($next, ['cancelled']));
         }
 
@@ -661,9 +665,9 @@ class OrderService
      * A cancelled order's shop parts earn nothing, so the deductions dispute refunds made from the
      * shops are given back (once each). The customer's refund is covered by the cancellation itself.
      */
-    protected function reverseDisputeDeductions(Order $order): void
+    public function reverseDisputeDeductions(Order $order, ?int $partId = null): void
     {
-        foreach (\App\Models\Dispute::where('order_id', $order->id)->where('amount_resolved', '>', 0)->get() as $dispute) {
+        foreach (\App\Models\Dispute::where('order_id', $order->id)->where('amount_resolved', '>', 0)->when($partId, fn ($q) => $q->where('seller_order_id', $partId))->get() as $dispute) {
             $reason = 'Dispute #'.$dispute->id.' on order '.$order->order_number;
             $rows = SellerAdjustment::where(fn ($q) => $q->where('dispute_id', $dispute->id)
                 ->orWhere(fn ($q) => $q->whereNull('dispute_id')->where('reason', $reason)))->get(); // older rows were linked by their reason only
@@ -673,7 +677,7 @@ class OrderService
                 SellerAdjustment::create([
                     'seller_id' => $rows->first()->seller_id,
                     'amount' => round($taken - $givenBack, 2),
-                    'reason' => 'Order '.$order->order_number.' cancelled: dispute #'.$dispute->id.' deduction given back',
+                    'reason' => ($partId ? 'Part of order '.$order->order_number : 'Order '.$order->order_number).' cancelled: dispute #'.$dispute->id.' deduction given back',
                     'dispute_id' => $dispute->id,
                 ]);
             }
@@ -685,7 +689,12 @@ class OrderService
      */
     protected function reverseOrder(Order $order): void
     {
+        // A shop's part cancelled on its own already put its items back (FulfilmentService::cancelPart())
+        $alone = \App\Models\SellerOrder::where('order_id', $order->id)->whereNotNull('cancelled_alone_at')->pluck('seller_id')->map(fn ($id) => (int) $id)->all();
         foreach ($order->items()->with('product')->get() as $item) {
+            if ($item->product && in_array((int) $item->product->seller_id, $alone, true)) {
+                continue;
+            }
             // A pre-order puts back only the units whose stock had arrived for it (the rest never existed)
             if ($item->product && $item->stockedQuantity() > 0) {
                 $this->restock($item->product, $item->product_variant_id, $item->stockedQuantity());
@@ -699,7 +708,8 @@ class OrderService
             // Less the points approved returns and dispute refunds already gave back (ReturnService::pointsFor(),
             // DisputeService::pointsFor())
             $pointsBack = (int) $order->points_redeemed - (int) \App\Models\ReturnRequest::where('order_id', $order->id)->sum('points_returned')
-                - (int) \App\Models\Dispute::where('order_id', $order->id)->sum('points_returned');
+                - (int) \App\Models\Dispute::where('order_id', $order->id)->sum('points_returned')
+                - (int) \App\Models\SellerOrder::where('order_id', $order->id)->sum('points_returned');
             if ($pointsBack > 0) {
                 app(PointsService::class)->record($user, $pointsBack, 'refund', $order, __('Redeemed points returned'));
             }

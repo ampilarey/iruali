@@ -119,7 +119,7 @@ and alerts wait in the `jobs` table until the worker runs; nothing is lost.
   cd /home/iruali/iruali
   crontab -l | grep schedule:run                     # the cron must run every minute
   php artisan schedule:clear-cache                   # release every schedule lock
-  php artisan queue:work --stop-when-empty --tries=3 # send what is waiting now
+  php artisan queue:work --stop-when-empty --tries=5 # send what is waiting now
   php artisan ops:watch                              # should end with "Queue worker running again." or "All good."
   ```
 - `php artisan queue:failed` lists jobs that failed for good; `php artisan queue:retry all` resends them.

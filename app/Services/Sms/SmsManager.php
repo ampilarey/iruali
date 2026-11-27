@@ -134,6 +134,13 @@ class SmsManager
         $count = 0;
         SmsMessage::where('status', 'held')->where('send_after', '<=', now())->orderBy('id')->limit(500)->get()
             ->each(function (SmsMessage $held) use (&$count) {
+                // Claimed first, in one statement, by moving its time on: a second run (this one still
+                // going when its lock ran out) skips it, and one that dies mid-way is tried again later
+                $claimed = SmsMessage::whereKey($held->id)->where('status', 'held')->where('send_after', '<=', now())
+                    ->update(['send_after' => now()->addMinutes(15)]);
+                if ($claimed === 0) {
+                    return;
+                }
                 $count++;
                 $result = match (true) {
                     ! self::enabled() => SmsResult::blocked('All SMS are switched off (Admin → SMS)'),

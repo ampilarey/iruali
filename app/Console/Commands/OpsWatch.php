@@ -31,7 +31,8 @@ class OpsWatch extends Command
         $lastId = (int) Cache::get('ops.failed_jobs_seen', 0);
         $failed = DB::table('failed_jobs')->where('id', '>', $lastId)->orderBy('id')->get(['id', 'payload', 'exception']);
         if ($failed->isNotEmpty()) {
-            Cache::forever('ops.failed_jobs_seen', (int) $failed->max('id'));
+            // Marked as seen only once they are reported (below): failures while an alert is held back
+            // for the hour go into the next alert instead of being skipped
             $names = $failed->map(fn ($job) => class_basename((string) (json_decode((string) $job->payload, true)['displayName'] ?? 'job')))->countBy()
                 ->map(fn ($count, $name) => $name.($count > 1 ? ' ×'.$count : ''))->implode(', ');
             $problems['failed_jobs'] = $failed->count().' queued job(s) failed: '.$names.'. See failed_jobs / php artisan queue:failed.';
@@ -65,6 +66,9 @@ class OpsWatch extends Command
             }
             // Through Telegram straight away: SMS alerts need the queue, which may be what stopped
             TeamAlerts::sendNow('ops_problem', 'iruali: '.$text, route('admin.dashboard'));
+            if ($key === 'failed_jobs') {
+                Cache::forever('ops.failed_jobs_seen', (int) $failed->max('id'));
+            }
         }
         $this->info($problems === [] ? 'All good.' : implode("\n", $problems));
 

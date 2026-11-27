@@ -200,6 +200,25 @@ class SmsTypes
                 'group' => 'disputes', 'label' => 'Dispute decided: not upheld',
                 'text' => 'iruali: your dispute on order :number was reviewed and not upheld. See the order page for the reason.', 'data' => $order,
             ],
+            'order_part_cancelled' => [
+                'group' => 'orders', 'label' => 'One shop\'s part cancelled',
+                'text' => 'iruali: :shop could not supply its items in order :number, so they are cancelled and :amount will be refunded. The rest of your order is on its way.',
+                'data' => $order + ['shop' => 'Reef Goods', 'amount' => 'MVR 450.00'],
+            ],
+            'return_approved' => [
+                'group' => 'orders', 'label' => 'Return approved',
+                'text' => 'iruali: your return on order :number is approved. We will refund :amount.',
+                'data' => $order + ['amount' => 'MVR 450.00'],
+            ],
+            'return_rejected' => [
+                'group' => 'orders', 'label' => 'Return not accepted',
+                'text' => 'iruali: sorry, we could not accept your return on order :number. See the order page for the reason.', 'data' => $order,
+            ],
+            'refund_sent' => [
+                'group' => 'orders', 'label' => 'Refund sent',
+                'text' => 'iruali: we have sent your refund of :amount for order :number (ref :ref). It usually reaches you within 5-7 business days.',
+                'data' => $order + ['amount' => 'MVR 450.00', 'ref' => 'FT2611ABC'],
+            ],
         ];
     }
 

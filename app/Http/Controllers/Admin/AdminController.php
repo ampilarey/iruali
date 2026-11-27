@@ -497,6 +497,22 @@ class AdminController extends Controller
         return back()->with('success', $part->shopName().' part marked as '.str_replace('_', ' ', $request->status).'.');
     }
 
+    /**
+     * Cancel one shop's part: it can't supply, and another shop has already sent its part.
+     */
+    public function cancelPart(Request $request, Order $order, \App\Models\SellerOrder $part, \App\Services\FulfilmentService $fulfilment)
+    {
+        $this->checkAdminRole();
+        abort_unless($part->order_id === $order->id, 404);
+
+        if ($problem = $fulfilment->cancelPart($part, $request->user())) {
+            return back()->with('error', $problem);
+        }
+
+        return back()->with('success', $part->shopName().' part cancelled. Its items are back on sale, the shop and the customer are told'
+            .((float) $part->fresh()->cancelled_refund > 0 ? ', and a refund of '.\App\Support\Money::format($part->fresh()->cancelled_refund).' is due.' : '.'));
+    }
+
     public function recordRefund(Request $request, Order $order, PaymentService $payments)
     {
         $this->checkAdminRole();

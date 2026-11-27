@@ -20,6 +20,12 @@ EXPECTED_SHA="${1:-}"
 
 echo "$(date '+%F %T') pull-deploy-test starting (HOME=$HOME ROOT=$ROOT expected=${EXPECTED_SHA:-none})"
 
+# A lock left by a run that was killed hard (no EXIT trap) would stop every deploy: one older than
+# 30 minutes (a deploy takes a few) is taken as stale and removed
+if [[ -d "$LOCK" ]] && [[ -n "$(find "$LOCK" -maxdepth 0 -mmin +30 2>/dev/null)" ]]; then
+  echo "$(date '+%F %T') removing a stale lock from $(date -r "$LOCK" '+%F %T' 2>/dev/null || echo 'a killed run')"
+  rmdir "$LOCK" 2>/dev/null || rm -rf "$LOCK"
+fi
 mkdir "$LOCK" 2>/dev/null || {
   echo "$(date '+%F %T') deploy already in progress — skipping"
   exit 0
@@ -135,7 +141,8 @@ echo "$(date '+%F %T') deploy complete: ${REMOTE:0:8}"
 # site is not rolled back on failure; the result is in this log and the health endpoint.
 SMOKE_ARGS=()
 grep -qE '^SMOKE_USER_EMAIL=.+' "$ROOT/.env" 2>/dev/null && SMOKE_ARGS+=(--place-order)
-if php artisan iruali:smoke "${SMOKE_ARGS[@]}"; then
+# ("${A[@]+...}": an empty array under set -u stops bash older than 4.4)
+if php artisan iruali:smoke ${SMOKE_ARGS[@]+"${SMOKE_ARGS[@]}"}; then
   echo "$(date '+%F %T') smoke test passed"
 else
   echo "$(date '+%F %T') WARN: smoke test FAILED on ${REMOTE:0:8} — look at the rows above"

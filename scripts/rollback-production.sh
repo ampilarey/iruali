@@ -72,13 +72,27 @@ say "rolling back $CURRENT_NAME (${CURRENT:0:8}) -> $TARGET_NAME (${TARGET:0:8})
 deploy_log rollback "to=$TARGET_NAME commit=${TARGET:0:7} previous=${CURRENT:0:7} status=started"
 
 fail() {
+  trap - INT TERM HUP
   say "ROLLBACK FAILED: $1"
   deploy_log rollback "to=$TARGET_NAME commit=${TARGET:0:7} previous=${CURRENT:0:7} status=failed reason=\"$1\""
   php artisan up >/dev/null 2>&1 || true
   exit 1
 }
 
-php artisan down --retry=30 >/dev/null 2>&1 || say "WARN: could not enter maintenance mode"
+if [[ "$TARGET" == "$CURRENT" ]]; then
+  say "ERROR: the site already runs $TARGET_NAME (${TARGET:0:8}); name the version to go back to: bash scripts/rollback-production.sh <tag or commit>"
+  exit 1
+fi
+
+# --render: the "back soon" page is served without loading the app while its code is swapped (a clean
+# 503 for visitors and BML's webhook, not errors from half-replaced code). No maintenance mode, no
+# rollback, unless the site is already in it.
+if ! php artisan down --render="errors::503" --retry=30 >/dev/null 2>&1 && [[ ! -f "$ROOT/storage/framework/down" ]]; then
+  say "ERROR: could not enter maintenance mode (php artisan down); nothing was changed"
+  deploy_log rollback "to=$TARGET_NAME commit=${TARGET:0:7} previous=${CURRENT:0:7} status=failed reason=\"maintenance mode\""
+  exit 1
+fi
+trap 'fail "interrupted"' INT TERM HUP
 checkout_commit "$TARGET" || fail "git checkout $TARGET_NAME"
 rebuild_app_without_migrate || fail "build (composer install / caches / docroot sync)"
 php artisan up || fail "php artisan up"

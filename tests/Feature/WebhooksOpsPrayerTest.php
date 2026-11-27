@@ -72,7 +72,13 @@ class WebhooksOpsPrayerTest extends TestCase
 
     public function test_the_ready_check_answers_and_ops_watch_alerts_once(): void
     {
-        $this->getJson('/api/health/ready')->assertOk()->assertJson(['status' => 'ready', 'checks' => ['database' => true, 'cache' => true, 'storage' => true]]);
+        // The cron has not run: an uptime monitor hears about it (no emails, clean-ups or backups without it)
+        $this->getJson('/api/health/ready')->assertStatus(503)->assertJson(['status' => 'not_ready', 'checks' => ['scheduler' => false, 'database' => true]]);
+        \Illuminate\Support\Facades\Cache::forever('scheduler.heartbeat', now()->toIso8601String());
+        $this->getJson('/api/health/ready')->assertOk()->assertJson(['status' => 'ready', 'checks' => ['database' => true, 'cache' => true, 'storage' => true, 'scheduler' => true]]);
+        $this->travel(11)->minutes();
+        $this->getJson('/api/health/ready')->assertStatus(503);
+        $this->travelBack();
         $this->getJson('/api/health')->assertOk()->assertJson(['status' => 'healthy']); // unchanged for the deploy check
 
         Mail::fake();

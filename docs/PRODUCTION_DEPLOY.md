@@ -92,8 +92,9 @@ bash scripts/deploy-production.sh --latest-tag                         # or: the
 
 What it does, in order:
 
-1. Refuses anything that is not a tag (`main`, a branch, a bare commit), and refuses if the
-   server checkout has local changes.
+1. Takes `main` (the newest commit on origin/main, refused while its GitHub checks are failing,
+   running or not there yet) or a release tag; refuses any other branch or a bare commit, and
+   refuses if the server checkout has local changes.
 2. Appends a `status=started` line to `storage/app/deploys.log` (tag, new commit, previous
    commit and its tag, UTC time, who ran it).
 3. `php artisan down`, `git fetch --tags`, **detached checkout of the tag**.
@@ -149,10 +150,9 @@ One-off, in cPanel → Terminal, as the cPanel user:
 5. **Deploy the first tag**: `bash scripts/deploy-production.sh --latest-tag`. The first run
    migrates the empty database, caches, links storage and runs the checks; the health check
    needs the domain to already resolve to this checkout.
-6. **Admin account**: never run `db:seed` on production. Set `ADMIN_EMAIL` and
-   `ADMIN_PASSWORD` in `.env`, run `php artisan db:seed --class=UserSeeder`, sign in, turn on
-   two-step sign-in from My Account → Security, remove the two values from `.env`, and
-   `php artisan config:cache`.
+6. **Admin account**: never run `db:seed` on production. Run `php artisan staff:create you@example.com`
+   (it asks for the password, which is never typed into the command line or `.env`), sign in, and turn
+   on two-step sign-in from My Account → Security.
 7. **Scheduler cron** (cPanel → Cron Jobs, every minute):
    `cd /home/iruali/iruali && php artisan schedule:run >> /dev/null 2>&1`
 8. **Check**: `php artisan iruali:ready` must end with `READY`; `php artisan iruali:smoke --place-order`
@@ -205,7 +205,7 @@ rules, not a setting.
   the disk set in `config/backup.php`; run `php artisan backup:run --only-db` once by hand and
   keep copies off the server.
 - **Demo accounts:** on any non-local server the migration `rotate_demo_account_passwords` gives every `*@example.com` shop a random password. `admin@example.com` is left alone so you are not locked out: change its password from My Account, or delete it once a real admin exists.
-- **Uploads:** product photos live in `storage/app/public`. The deploy scripts link `<docroot>/storage` to it; if the docroot is `<app>/public`, `php artisan storage:link` does the same.
+- **Uploads:** product photos live in `storage/app/public` and the app serves them at `/storage/...` (the host's web server does not follow a link out of the docroot). The deploy scripts remove any `<docroot>/storage` link or empty folder, which would hide that route.
 - **Runtime folders** on a fresh clone: `mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public storage/app/private bootstrap/cache`.
 - **Timezone** is `Indian/Maldives` by default (`APP_TIMEZONE`).
 

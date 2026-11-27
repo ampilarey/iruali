@@ -13,10 +13,11 @@ Schedule::command('orders:cancel-unpaid-transfer')->hourly()->withoutOverlapping
 // Database backup every night (config/backup.php says where it goes), old ones cleaned up
 Schedule::command('backup:clean')->dailyAt('01:30');
 Schedule::command('backup:run --only-db')->dailyAt('02:00')->withoutOverlapping(120);
-// Every week, the uploaded files (photos, documents, slips: storage/app), named files-… so the restore
-// drill can tell them from the database backups
-Schedule::command('backup:run --only-files --filename=files-'.now()->format('Y-m-d-His').'.zip')->weeklyOn(0, '03:00')
-    ->timezone('Indian/Maldives')->withoutOverlapping(240)->name('backup-files');
+// Every week, the uploaded files (photos, documents, slips: storage/app), under a backup name and folder
+// of their own, cleaned up on their own (App\Console\Commands\BackupFiles): in the database backups'
+// series they took the weekly, monthly and yearly places meant for a database dump
+Schedule::command('backup:files --clean')->dailyAt('01:40');
+Schedule::command('backup:files')->weeklyOn(0, '03:00')->timezone('Indian/Maldives')->withoutOverlapping(240)->name('backup-files');
 
 // Once a month, prove the backups restore: newest backup into DB_DRILL_DATABASE, counts compared, report mailed
 Schedule::command('backup:restore-drill')->monthlyOn(1, '04:00')->withoutOverlapping(120);

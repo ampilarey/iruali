@@ -154,9 +154,10 @@ class BackupRestoreDrill extends Command
         return [$backup, $diskName];
     }
 
+    /** A files backup: iruali-backup-files-….zip (the prefix is added to the files-… name it is given). */
     protected function isFilesBackup(Backup $backup): bool
     {
-        return str_starts_with(basename($backup->path()), 'files-');
+        return str_contains(basename($backup->path()), 'files-');
     }
 
     /**
@@ -167,8 +168,9 @@ class BackupRestoreDrill extends Command
     {
         try {
             $disks = (array) config('backup.backup.destination.disks', ['local']);
-            $destination = BackupDestination::create((string) ($disks[0] ?? 'local'), (string) config('backup.backup.name'));
-            $files = $destination->backups()->first(fn (Backup $b) => $this->isFilesBackup($b));
+            // Its own folder now (BackupFiles); one made before that may still be with the database backups
+            $files = BackupDestination::create((string) ($disks[0] ?? 'local'), BackupFiles::backupName())->backups()->first(fn (Backup $b) => $this->isFilesBackup($b))
+                ?? BackupDestination::create((string) ($disks[0] ?? 'local'), (string) config('backup.backup.name'))->backups()->first(fn (Backup $b) => $this->isFilesBackup($b));
             if (! $files) {
                 return 'Files backup: none yet (it runs weekly, Sunday 03:00)';
             }

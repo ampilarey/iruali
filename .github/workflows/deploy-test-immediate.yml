@@ -40,13 +40,14 @@ jobs:
           # (or disable webshield for /api/deploy/*) — see docs/TEST_AUTO_DEPLOY.md
           blocked=0
           for attempt in 1 2 3 4 5 6; do
-            code=$(curl -sS -o /tmp/deploy-webhook.json -w "%{http_code}" \
+            # A connection error or timeout counts as one failed attempt (000), not the end of the job
+            code=$(curl -sS --connect-timeout 10 -m 60 -o /tmp/deploy-webhook.json -w "%{http_code}" \
               -X POST "https://test.iruali.mv/api/deploy/test-pull" \
               -H "Authorization: Bearer ${DEPLOY_SECRET}" \
               -H "Content-Type: application/json" \
               -H "Accept: application/json" \
               -H "User-Agent: Iruali-Test-Deploy/1.0 (+GitHubActions)" \
-              -d "{\"sha\":\"${DEPLOY_SHA}\"}")
+              -d "{\"sha\":\"${DEPLOY_SHA}\"}") || code="000"
             echo "Attempt ${attempt}: HTTP ${code}"
             cat /tmp/deploy-webhook.json || true
             echo ""
@@ -76,9 +77,11 @@ jobs:
           exit 1
 
       - name: Brief smoke (homepage + health)
-        # Skipped when the firewall turned the webhook away: it would turn these requests away too
+        # Skipped when the firewall turned the webhook away: it would turn these requests away too.
+        # A warning, not a failure: the deploy runs its own smoke test on the server (its log), and the
+        # production deploy and the cron fallback look only at the Tests checks
         if: steps.hook.outputs.blocked != '1'
         run: |
           sleep 20
-          curl -fsS -o /dev/null -w "health %{http_code}\n" https://test.iruali.mv/api/health
-          curl -fsS -o /dev/null -w "home %{http_code}\n" https://test.iruali.mv/
+          curl -fsS --connect-timeout 10 -m 30 -o /dev/null -w "health %{http_code}\n" https://test.iruali.mv/api/health || echo "::warning::test.iruali.mv/api/health did not answer 200 after the deploy"
+          curl -fsS --connect-timeout 10 -m 30 -o /dev/null -w "home %{http_code}\n" https://test.iruali.mv/ || echo "::warning::test.iruali.mv did not answer 200 after the deploy"

@@ -2,13 +2,14 @@
  * iruali service worker (registered by resources/js/pwa.js on production storefront pages).
  *
  * - Navigations (HTML): network first, the cached copy when offline, else the /offline page.
- * - /build/, /storage/ and /images/: stale-while-revalidate (serve from cache, refresh in the background).
+ * - /build/, /storage/ and /images/: stale-while-revalidate (serve from cache, refresh in the background),
+ *   the oldest dropped past MAX_ASSETS.
  * - Private pages (admin, seller, account, checkout, orders, cart, messages, quotes, API, sign-in...) are
  *   never cached, nor any page made for a signed-in person (the server marks it X-Iruali-Private), nor a
  *   redirect. The page right after signing out carries X-Iruali-Clear-Pages: every stored page is dropped.
  * - Push notifications: shows them and opens the order on tap.
  */
-const VERSION = 'v2'; // v1 could hold signed-in pages: a new version drops every old cache
+const VERSION = 'v3'; // v1 could hold signed-in pages, v2 an /offline page fetched signed in: a new version drops every old cache
 const SHELL_CACHE = 'iruali-shell-' + VERSION;
 const PAGE_CACHE = 'iruali-pages-' + VERSION;
 const ASSET_CACHE = 'iruali-assets-' + VERSION;
@@ -29,11 +30,21 @@ const PRECACHE = [
 const PRIVATE = /^\/(dv\/)?(admin|seller|account|checkout|orders|cart|api|login|register|logout|forgot-password|reset-password|2fa|verification|auth|profile|wishlist|compare|saved|payments|returns|track|feeds|locale|offline|storage\/returns|messages|quotes|request-an-item|pay|feedback|complaints|gift-cards|shop-invitations)(\/|$|\?)/;
 const ASSET = /^\/(build|storage|images)\//;
 const MAX_PAGES = 40;
+const MAX_ASSETS = 300; // photos and built files: the oldest go once there are more
 
 self.addEventListener('install', function (event) {
     event.waitUntil(
         caches.open(SHELL_CACHE)
-            .then(function (cache) { return cache.addAll(PRECACHE); })
+            // Fetched without cookies: the offline page stored here must not carry a signed-in
+            // person's header (it is never cleared by X-Iruali-Clear-Pages)
+            .then(function (cache) {
+                return Promise.all(PRECACHE.map(function (path) {
+                    return fetch(new Request(path, { credentials: 'omit' })).then(function (response) {
+                        if (!response.ok) throw new Error('precache ' + path + ' ' + response.status);
+                        return cache.put(path, response);
+                    });
+                }));
+            })
             .then(function () { return self.skipWaiting(); })
     );
 });
@@ -90,7 +101,7 @@ function staleWhileRevalidate(request) {
         return cache.match(request).then(function (cached) {
             var network = fetch(request).then(function (response) {
                 if (response && response.ok && response.type === 'basic') {
-                    cache.put(request, response.clone());
+                    cache.put(request, response.clone()).then(function () { return trim(cache, MAX_ASSETS); });
                 }
                 return response;
             }).catch(function () { return cached; });

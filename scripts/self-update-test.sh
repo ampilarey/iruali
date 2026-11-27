@@ -32,17 +32,24 @@ CHECKS=$(curl -fsS -m 20 -H 'Accept: application/vnd.github+json' \
     "https://api.github.com/repos/${REPO}/commits/${REMOTE}/check-runs?per_page=100") \
     || { echo "$(date '+%F %T') GitHub API unreachable — will retry next run"; exit 0; }
 
-# If no checks exist yet (no CI workflow), deploy anyway.
-if printf '%s' "$CHECKS" | grep -q '"total_count": *[1-9]'; then
-  if printf '%s' "$CHECKS" | grep -qE '"status": *"(queued|in_progress|pending|waiting)"'; then
-      echo "$(date '+%F %T') ${REMOTE:0:8}: CI still running — holding."
-      exit 0
-  fi
-  if printf '%s' "$CHECKS" | grep -qE '"conclusion": *"(failure|cancelled|timed_out|action_required|startup_failure|stale)"'; then
-      echo "$(date '+%F %T') ${REMOTE:0:8}: CI not green — holding."
-      exit 0
-  fi
-fi
+# The Tests checks decide (PHPUnit, browser, Larastan). Not yet created (seconds after a push): hold,
+# never deploy an untested commit. The webhook deploy job itself is left out: when it fails, this cron
+# is the fallback that must still deploy.
+VERDICT=$(printf '%s' "$CHECKS" | php -r '
+  $runs = json_decode(stream_get_contents(STDIN), true)["check_runs"] ?? null;
+  if (! is_array($runs)) { echo "unreadable"; exit; }
+  $runs = array_filter($runs, fn ($r) => ! str_starts_with((string) ($r["name"] ?? ""), "Webhook pull"));
+  if ($runs === []) { echo "none"; exit; }
+  foreach ($runs as $r) { if (($r["status"] ?? "") !== "completed") { echo "running"; exit; } }
+  foreach ($runs as $r) { if (! in_array($r["conclusion"] ?? "", ["success", "neutral", "skipped"], true)) { echo "red"; exit; } }
+  echo "green";
+')
+case "$VERDICT" in
+  green) ;;
+  none) echo "$(date '+%F %T') ${REMOTE:0:8}: no CI checks yet — holding."; exit 0 ;;
+  running) echo "$(date '+%F %T') ${REMOTE:0:8}: CI still running — holding."; exit 0 ;;
+  *) echo "$(date '+%F %T') ${REMOTE:0:8}: CI not green ($VERDICT) — holding."; exit 0 ;;
+esac
 
 if [[ ! -x "$PULL" ]]; then
   chmod +x "$PULL" 2>/dev/null || true

@@ -80,14 +80,19 @@ class UserController extends BaseController
 
         $user->forceFill([
             'password' => Hash::make($request->new_password),
+            'has_password' => true,
         ])->save();
 
+        // Everywhere else is signed out, as when the password is changed on the website
+        // (User::endOtherSessions()): browser sessions, "remember me" and the other app sign-ins. This
+        // app keeps its own.
         $current = $user->currentAccessToken();
-        if ($current instanceof PersonalAccessToken) {
-            $user->tokens()->whereKeyNot($current->id)->delete();
-        } else {
-            $user->tokens()->delete();
+        $keep = $current instanceof PersonalAccessToken ? $current->id : null;
+        if (config('session.driver') === 'database') {
+            \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))->where('user_id', $user->id)->delete();
         }
+        $user->forceFill(['remember_token' => \Illuminate\Support\Str::random(60)])->save();
+        $user->tokens()->when($keep, fn ($q) => $q->whereKeyNot($keep))->delete();
 
         return $this->sendResponse([], 'Password changed successfully');
     }

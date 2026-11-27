@@ -46,6 +46,9 @@ class NewsletterController extends Controller
     public function confirm(Request $request, int $subscriber)
     {
         $row = NewsletterSubscriber::find($subscriber);
+        if ($request->isMethod('get') && $row && ! $row->isConfirmed()) {
+            return view('newsletter.action', ['title' => __('Confirm your subscription'), 'button' => __('Yes, send me the newsletter'), 'email' => $row->email]);
+        }
         if ($row && ! $row->isConfirmed()) {
             $row->forceFill(['confirmed_at' => now()])->save();
         }
@@ -54,13 +57,17 @@ class NewsletterController extends Controller
     }
 
     /**
-     * Signed one-click opt-out from a newsletter footer. A link that was already used still
-     * shows the confirmation, so clicking it twice is not an error.
+     * Signed opt-out from a newsletter footer: the link shows a button, the button (or a mail app's
+     * one-click unsubscribe, a POST) does it. A link that was already used still shows the
+     * confirmation, so clicking it twice is not an error.
      */
     public function unsubscribe(Request $request, int $subscriber)
     {
         $row = NewsletterSubscriber::find($subscriber);
         $email = $row->email ?? $request->query('email', '');
+        if ($request->isMethod('get') && $row) {
+            return view('newsletter.action', ['title' => __('Unsubscribe from our newsletter?'), 'button' => __('Unsubscribe'), 'email' => $email]);
+        }
         $row?->delete();
 
         return view('newsletter.unsubscribed', ['email' => $email]);

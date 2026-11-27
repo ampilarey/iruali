@@ -122,17 +122,17 @@ class PayoutController extends Controller
             fputcsv($out, ['payout_id', 'shop', 'paid_at', 'reference', 'order', 'order_date', 'items', 'commission_rate', 'commission', 'shop_earnings', 'shop_discount']);
             $shop = $payout->seller?->business_name ?: $payout->seller?->name;
             foreach ($payout->sellerOrders as $part) {
-                fputcsv($out, [
+                fputcsv($out, \App\Support\Csv::row([
                     $payout->id, $shop, $payout->paid_at?->toDateString(), $payout->reference,
                     $part->order?->order_number, $part->order?->created_at?->toDateString(),
                     $part->subtotal, $part->commission_rate, $part->commission_amount, $part->seller_earnings, $part->shop_discount,
-                ]);
+                ])); // spreadsheet formulas in typed text are made harmless (Csv::row())
             }
             foreach ($payout->adjustments as $adjustment) {
-                fputcsv($out, [
+                fputcsv($out, \App\Support\Csv::row([
                     $payout->id, $shop, $payout->paid_at?->toDateString(), $payout->reference,
                     $adjustment->reason, $adjustment->created_at?->toDateString(), '', '', '', $adjustment->amount, '',
-                ]);
+                ])); // spreadsheet formulas in typed text are made harmless (Csv::row())
             }
             fclose($out);
         }, 'payout-'.$payout->id.'.csv', ['Content-Type' => 'text/csv']);

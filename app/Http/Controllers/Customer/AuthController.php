@@ -164,9 +164,24 @@ class AuthController extends Controller
 
         if (! $valid) {
             StaffLockout::failed($user, $request->ip(), twoStep: true);
+            // Any account, staff or not: 5 wrong codes in 15 minutes, from wherever they come, and the
+            // password has to be given again after a wait (StaffLockout also locks a staff account)
+            $key = '2fa-fails:'.$user->id;
+            \Illuminate\Support\Facades\RateLimiter::hit($key, 15 * 60);
+            if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 5)) {
+                session()->forget(['2fa_user_id', '2fa_remember']);
+
+                return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong codes. Please wait 15 minutes, then sign in again.')]);
+            }
 
             return back()->withErrors(['code' => __('auth.invalid_2fa_code')]);
         }
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts('2fa-fails:'.$user->id, 5)) {
+            session()->forget(['2fa_user_id', '2fa_remember']);
+
+            return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong codes. Please wait 15 minutes, then sign in again.')]);
+        }
+        \Illuminate\Support\Facades\RateLimiter::clear('2fa-fails:'.$user->id);
         StaffLockout::succeeded($user, $request->ip());
 
         $remember = (bool) session('2fa_remember', false);

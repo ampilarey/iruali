@@ -61,8 +61,9 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
         Route::view('/about', 'policies.about')->name('policies.about');
         Route::post('/products/{product}/stock-alert', [\App\Http\Controllers\Customer\StockAlertController::class, 'store'])->name('stock-alerts.store')->middleware('throttle:10,1,stock-alerts.store');
         Route::post('/newsletter', [\App\Http\Controllers\Customer\NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1,newsletter.store');
-        Route::get('/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('signed')->whereNumber('subscriber');
-        Route::get('/newsletter/confirm/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'confirm'])->name('newsletter.confirm')->middleware('signed')->whereNumber('subscriber');
+        // Opening the link shows a button; pressing it (or a mail app's one-click unsubscribe) does it
+        Route::match(['get', 'post'], '/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('signed')->whereNumber('subscriber');
+        Route::match(['get', 'post'], '/newsletter/confirm/{subscriber}', [\App\Http\Controllers\Customer\NewsletterController::class, 'confirm'])->name('newsletter.confirm')->middleware('signed')->whereNumber('subscriber');
         Route::get('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'index'])->name('compare');
         Route::post('/compare/{product}', [\App\Http\Controllers\Customer\CompareController::class, 'toggle'])->name('compare.toggle');
         Route::delete('/compare', [\App\Http\Controllers\Customer\CompareController::class, 'clear'])->name('compare.clear');

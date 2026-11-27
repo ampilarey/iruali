@@ -198,8 +198,8 @@
                 <p class="text-xs text-gray-500">Moves this account's orders, addresses, points, wallet, reviews, messages and everything else into the account below, then closes this one. It cannot be undone.</p>
                 <form method="POST" action="{{ route('admin.customers.merge', $customer) }}" class="space-y-2">
                     @csrf
-                    <label for="merge-into" class="block text-xs font-medium text-gray-700">Email of the account to keep</label>
-                    <input id="merge-into" name="into" type="email" required value="{{ old('into') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2">
+                    <label for="merge-into" class="block text-xs font-medium text-gray-700">Email, phone or account number (#123) of the account to keep</label>
+                    <input id="merge-into" name="into" type="text" required value="{{ old('into') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2">
                     @error('into')<p class="text-xs text-red-700">{{ $message }}</p>@enderror
                     <label class="flex items-start gap-2"><input type="checkbox" name="confirm" value="1" required class="mt-1"> <span>Yes, move everything and close {{ $customer->email }}</span></label>
                     <button class="rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-700">Merge</button>

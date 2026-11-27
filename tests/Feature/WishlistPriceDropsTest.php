@@ -248,7 +248,7 @@ class WishlistPriceDropsTest extends TestCase
         $this->save($customer, $kit);
         $withoutPush = User::factory()->create();
         $this->save($withoutPush, $kit);
-        PushSubscription::create(['user_id' => $customer->id, 'endpoint' => 'https://push.example.com/live', 'public_key' => 'k', 'auth_token' => 'a', 'content_encoding' => 'aes128gcm']);
+        PushSubscription::create(['user_id' => $customer->id, 'endpoint' => 'https://fcm.googleapis.com/fcm/live', 'public_key' => 'k', 'auth_token' => 'a', 'content_encoding' => 'aes128gcm']);
 
         $alert = new WishlistPriceDrop([['wishlist' => 1, 'product' => $kit->id, 'variant' => null, 'was' => 200.0, 'now' => 150.0]]);
         $this->assertSame(['mail', WebPushChannel::class], $alert->via($customer));

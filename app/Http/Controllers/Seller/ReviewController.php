@@ -43,7 +43,7 @@ class ReviewController extends Controller
 
         $first = ! $review->hasReply();
         $review->forceFill([
-            'seller_reply' => trim($data['seller_reply']),
+            'seller_reply' => \App\Services\MessagingService::mask(trim($data['seller_reply'])), // public: no numbers or links (Seller Terms)
             'seller_replied_at' => $first ? now() : ($review->seller_replied_at ?? now()),
             'seller_reply_user_id' => Auth::id(), // who wrote it (the owner or one of the shop's staff)
         ])->save();

@@ -163,7 +163,7 @@ class ProductController extends BaseController
                 ] : null,
                 'seller' => $product->seller ? [
                     'id' => $product->seller->id,
-                    'name' => $product->seller->name,
+                    'name' => $product->seller->shopName(),
                 ] : null,
             ];
         });
@@ -214,7 +214,7 @@ class ProductController extends BaseController
                 ] : null,
                 'seller' => $product->seller ? [
                     'id' => $product->seller->id,
-                    'name' => $product->seller->name,
+                    'name' => $product->seller->shopName(),
                 ] : null,
             ];
         });

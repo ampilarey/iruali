@@ -38,7 +38,7 @@ class TrackingController extends Controller
 
     public function updateAsAdmin(Request $request, Order $order, SellerOrder $part, FulfilmentService $fulfilment)
     {
-        abort_unless($request->user()->isAdmin(), 403);
+        abort_unless(\App\Support\StaffAccess::can('admin.orders.parts.tracking', $request->user()), 403); // support too (config/staff.php)
         abort_unless($part->order_id === $order->id, 404);
 
         return $this->update($request, $part, $fulfilment);

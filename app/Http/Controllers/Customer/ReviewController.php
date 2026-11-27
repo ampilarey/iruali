@@ -23,6 +23,10 @@ class ReviewController extends Controller
     public function store(Request $request, Product $product)
     {
         abort_unless($product->is_active, 404);
+        // A shop (its owner or its staff) does not review its own products
+        if (\App\Models\ProductReview::isOwnShop($request->user(), $product)) {
+            return back()->withErrors(['comment' => __('You can\'t review your own shop\'s products.')]);
+        }
 
         $data = $request->validate([
             'rating' => 'required|integer|min:1|max:5',

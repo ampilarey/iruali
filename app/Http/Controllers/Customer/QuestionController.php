@@ -17,7 +17,8 @@ class QuestionController extends Controller
 
         $data = $request->validate(['question' => 'required|string|min:10|max:500']);
 
-        $product->questions()->create($data + ['user_id' => $request->user()->id]);
+        // Public on the product page: no phone numbers, emails or links (customers are served on iruali)
+        $product->questions()->create(['question' => \App\Services\MessagingService::mask($data['question']), 'user_id' => $request->user()->id]);
 
         NotificationService::success(__('Question sent. The shop will answer it here.'));
 
@@ -37,7 +38,9 @@ class QuestionController extends Controller
 
         $data = $request->validate(['answer' => 'required|string|min:2|max:2000']);
 
-        $question->forceFill($data + ['answered_by' => $user->id, 'answered_at' => now(), 'answered_as_shop' => $forShop])->save();
+        // A shop's public answer can't take the customer off iruali with a number or a link (Seller Terms)
+        $answer = $forShop ? \App\Services\MessagingService::mask($data['answer']) : $data['answer'];
+        $question->forceFill(['answer' => $answer, 'answered_by' => $user->id, 'answered_at' => now(), 'answered_as_shop' => $forShop])->save();
 
         return back()->with('success', __('Answer published.'));
     }

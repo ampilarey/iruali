@@ -26,7 +26,8 @@ use Illuminate\Support\Facades\Route;
 // BML Connect payment webhooks (signed by BML, checked in the controller)
 Route::post('/payments/bml/webhook', [\App\Http\Controllers\Customer\BmlPaymentController::class, 'webhook'])
     ->name('payments.bml.webhook')
-    ->middleware('throttle:120,1,api.api-29');
+    ->middleware('throttle:120,1,api.api-29')
+    ->withoutMiddleware('throttle:api'); // its own limit only: BML's few addresses are not one visitor (the api group's 60 a minute)
 
 // A browser's push subscription was replaced (public/sw.js, pushsubscriptionchange): no session there,
 // the old subscription address is the proof (PushSubscriptionController::renew())

@@ -33,7 +33,7 @@ class MessageController extends Controller
 
     public function storeAsAdmin(Request $request, Order $order, SellerOrder $part)
     {
-        abort_unless($request->user()->isAdmin(), 403);
+        abort_unless(\App\Support\StaffAccess::can('admin.orders.messages.store', $request->user()), 403); // support too (config/staff.php)
         abort_unless($part->order_id === $order->id, 404);
 
         return $this->store($request, $part, 'admin', route('admin.orders.show', $order).'#conversation');

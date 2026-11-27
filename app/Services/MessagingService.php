@@ -133,21 +133,33 @@ class MessagingService
     }
 
     /**
-     * Phone numbers, email addresses and links (and @handles) replaced, for item questions.
+     * Phone numbers, email addresses and links (and @handles) replaced: item questions and threads,
+     * the public questions and answers on a product page and shops' replies to reviews.
      */
     public static function mask(string $text): string
     {
         $hidden = __('[contact details hidden]');
         $patterns = [
-            '/[\w.+-]+@[\w-]+(\.[\w-]+)+/u',                                    // email addresses
+            '/[\w.+-]+@[\w-]+(\.[\w-]+)*/u',                                    // email addresses ("ali@gmail" too)
             '#\b(?:https?://|www\.)\S+#iu',                                        // links
-            '/\b[\w-]+\.(?:com|mv|net|org|io|me|co|shop|store|app|link|ly)\b\S*/iu', // bare domains
+            // bare domains
+            '/\b[\w-]+\.(?:com|mv|net|org|io|me|co|shop|store|app|link|ly|xyz|biz|info|online|site|top|club|in|lk|uk|us|ae|cc|tv|page|live|pro|dev|bio|to|gg)\b\S*/iu',
             '/\b(?:wa\.me|t\.me|viber|telegram|whatsapp|instagram|insta|facebook|fb|tiktok|snapchat)\b\S*/iu',
             '/(?<![\w@])@[A-Za-z0-9_.]{3,}/u',                                     // @handles
-            '/(?:\+?\d[\s().-]*){7,}/u',                                          // phone numbers: 7+ digits
+            '/(?:\+?\d[\s().,\/\\_*-]*){7,}/u',                                   // phone numbers: 7+ digits, whatever joins them
+            '/(?:\b(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)\b[\s,.\/_-]*){7,}/iu', // ...or written as words
         ];
 
-        return preg_replace($patterns, $hidden, $text) ?? $text;
+        // Dates (12/11/2026, 12.11.26) are not phone numbers: set aside while the patterns run
+        $dates = [];
+        $text = preg_replace_callback('#\b\d{1,2}[/.-]\d{1,2}[/.-](?:\d{4}|\d{2})\b#u', function ($m) use (&$dates) {
+            $dates[] = $m[0];
+
+            return "\u{1}".(count($dates) - 1)."\u{1}";
+        }, $text) ?? $text;
+        $masked = preg_replace($patterns, $hidden, $text) ?? $text;
+
+        return preg_replace_callback('/\x{1}(\d+)\x{1}/u', fn ($m) => $dates[(int) $m[1]] ?? '', $masked) ?? $masked;
     }
 
     /**
@@ -182,11 +194,13 @@ class MessagingService
                 'attachment_path' => $path,
             ]);
 
-            $bumps = ['last_message_at' => now()];
+            // Added in the database, not read then written: two messages at the same moment count as two
+            $bumps = ['last_message_at' => now(), 'updated_at' => now()];
             foreach (array_diff(Conversation::ROLES, [$role]) as $other) {
-                $bumps[$other.'_unread_count'] = $conversation->unreadFor($other) + 1;
+                $bumps[$other.'_unread_count'] = DB::raw($other.'_unread_count + 1');
             }
-            $conversation->forceFill($bumps)->save();
+            Conversation::whereKey($conversation->id)->toBase()->update($bumps);
+            $conversation->refresh();
 
             return $message;
         });
@@ -268,7 +282,7 @@ class MessagingService
             throw new RuntimeException(__('You can report only messages written to you.'));
         }
         $message->forceFill(['reported_at' => now(), 'reported_by' => $user->id, 'report_reason' => Str::limit(trim($reason), 490)])->save();
-        $conversation->forceFill(['admin_unread_count' => $conversation->admin_unread_count + 1])->save();
+        Conversation::whereKey($conversation->id)->increment('admin_unread_count');
         TeamAlerts::send('message_reported', 'iruali: a message was reported in '.$conversation->title().': '.Str::limit(trim($reason), 100), route('admin.messages.show', $conversation));
     }
 

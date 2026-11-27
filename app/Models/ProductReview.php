@@ -124,4 +124,13 @@ class ProductReview extends Model
             $review->photos()->get()->each->delete();
         });
     }
+
+    /** Is this person the product's shop, or on its staff? (They may not review it.) */
+    public static function isOwnShop(?User $user, Product $product): bool
+    {
+        $shop = (int) $product->seller_id;
+
+        return $user !== null && $shop !== 0
+            && ((int) $user->id === $shop || (int) \App\Support\CurrentShop::membershipOf($user)?->shop_id === $shop);
+    }
 }

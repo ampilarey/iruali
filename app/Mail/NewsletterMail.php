@@ -34,7 +34,8 @@ class NewsletterMail extends Mailable
      */
     public function headers(): Headers
     {
-        return new Headers(text: $this->unsubscribe ? ['List-Unsubscribe' => '<'.$this->unsubscribeUrl().'>'] : []);
+        // One-click unsubscribe in mail apps (RFC 8058): they POST to the link
+        return new Headers(text: $this->unsubscribe ? ['List-Unsubscribe' => '<'.$this->unsubscribeUrl().'>', 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click'] : []);
     }
 
     public function content(): Content

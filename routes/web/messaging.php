@@ -29,6 +29,7 @@ Route::get('/messages/support', [MessagesController::class, 'support'])->name('m
 Route::post('/messages/support', [MessagesController::class, 'storeSupport'])->name('messages.support.store')->middleware('throttle:10,60,messages.support.store');
 Route::post('/products/{product}/ask', [MessagesController::class, 'ask'])->name('messages.product.store')->middleware('throttle:10,60,messages.product.store');
 Route::get('/messages/g/{conversation}/{token}', [MessagesController::class, 'guestShow'])->name('messages.guest.show')->whereNumber('conversation')->where('token', '[A-Za-z0-9]{48}');
+Route::get('/messages/g/{conversation}/{token}/attachment/{message}', [MessagesController::class, 'guestAttachment'])->name('messages.guest.attachment')->whereNumber(['conversation', 'message'])->where('token', '[A-Za-z0-9]{48}');
 Route::post('/messages/g/{conversation}/{token}', [MessagesController::class, 'guestReply'])->name('messages.guest.reply')->whereNumber('conversation')->where('token', '[A-Za-z0-9]{48}')->middleware('throttle:20,10,messages.guest.reply');
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {

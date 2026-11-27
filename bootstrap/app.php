@@ -23,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Signed links from emails, pressed on their page or by a mail app's one-click unsubscribe
+        // (RFC 8058, no session): the signature is the proof, not a form token
+        $middleware->validateCsrfTokens(except: ['newsletter/unsubscribe/*', 'newsletter/confirm/*', 'marketing/unsubscribe/*', 'dv/newsletter/*', 'dv/marketing/unsubscribe/*']);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'staff' => \App\Http\Middleware\StaffAccess::class,      // admin area: role → allowed routes (config/staff.php)

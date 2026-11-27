@@ -381,6 +381,12 @@ class PhoneLoginController extends AuthController
         if (RateLimiter::tooManyAttempts($key.':m', 1) || RateLimiter::tooManyAttempts($key.':h', 5)) {
             return back()->withInput()->withErrors(['login' => __('Please wait a minute before asking for another code.')]);
         }
+        // One visitor (one address) gets a share of the site's sign-in texts, not all of them: a script trying
+        // a new number each time would otherwise use up the hourly cap and stop sign-in by text for everyone
+        $perVisitor = 'phone-login:sms:ip:'.sha1((string) request()->ip());
+        if ($channel === 'sms' && RateLimiter::tooManyAttempts($perVisitor, max(1, (int) config('sms.login_hourly_per_visitor', 30)))) {
+            return back()->withInput()->withErrors(['login' => __('You have asked for a lot of codes. Please try again in an hour, or ask for a code by email.')]);
+        }
         if ($channel === 'sms' && RateLimiter::tooManyAttempts('phone-login:sms:site', max(1, (int) config('sms.login_hourly_cap', 300)))) {
             report(new \RuntimeException('Sign-in texts reached the hourly cap (sms.login_hourly_cap)'));
 
@@ -388,6 +394,7 @@ class PhoneLoginController extends AuthController
         }
         if ($channel === 'sms') {
             RateLimiter::hit('phone-login:sms:site', 3600);
+            RateLimiter::hit($perVisitor, 3600);
         }
         RateLimiter::hit($key.':m', 60);
         RateLimiter::hit($key.':h', 3600);

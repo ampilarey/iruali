@@ -57,7 +57,7 @@ return [
             'admin.sellers.commission',
             'admin.orders', 'admin.orders.show', 'admin.orders.refunded', 'admin.orders.bml-sync',
             'admin.orders.confirm-payment', 'admin.orders.payment-slip', 'admin.orders.payment-link', 'admin.orders.balance-due', // bank transfers and cash on delivery
-            'admin.returns', 'admin.returns.show', 'admin.returns.refunded', 'admin.returns.refund-approve', 'admin.returns.refund-wallet', 'admin.orders.refund-approve',
+            'admin.returns', 'admin.returns.show', 'admin.returns.refunded', 'admin.returns.refund-approve', 'admin.orders.refund-approve', // store credit is admins' only (routes/web/wallet.php)
             'admin.analytics',
             'admin.errors', 'admin.errors.show',
             'admin.audit',

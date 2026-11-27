@@ -102,13 +102,16 @@ class NewsletterSenderTest extends TestCase
 
         // A tampered link does nothing; the real one confirms
         $this->get(str_replace('signature=', 'signature=x', $link))->assertForbidden();
-        $this->get($link)->assertOk()->assertSee('You are subscribed')->assertSee('fan@example.com');
+        // Opening the link only shows a button (mail scanners open links); pressing it confirms
+        $this->get($link)->assertOk()->assertSee('data-email-link-action', false);
+        $this->assertNull($subscriber->fresh()->confirmed_at);
+        $this->post($link)->assertOk()->assertSee('You are subscribed')->assertSee('fan@example.com');
         $this->assertNotNull($subscriber->fresh()->confirmed_at);
         $this->assertSame(1, app(NewsletterService::class)->audience()['total']);
 
         // Clicking it twice is fine; once unsubscribed, the old link says so
         $this->get($link)->assertOk()->assertSee('You are subscribed');
-        $this->get($subscriber->unsubscribeUrl())->assertOk();
+        $this->post($subscriber->unsubscribeUrl())->assertOk();
         $this->get($link)->assertOk()->assertSee('This link no longer works');
     }
 
@@ -144,7 +147,7 @@ class NewsletterSenderTest extends TestCase
         app()->setLocale('en');
         $this->assertSame('iruali ނިއުސްލެޓަރގެ ސަބްސްކްރިޕްޝަން ޔަޤީންކުރައްވާ', $mail->subject);
         $this->assertStringContainsString('/dv/newsletter/confirm/'.$subscriber->id, $mail->actionUrl);
-        $this->get($mail->actionUrl)->assertOk()->assertSee('dir="rtl"', false)->assertSee('ސަބްސްކްރައިބް ކުރެވިއްޖެ');
+        $this->post($mail->actionUrl)->assertOk()->assertSee('dir="rtl"', false)->assertSee('ސަބްސްކްރައިބް ކުރެވިއްޖެ');
     }
 
     // ---- Writing, preview and test -----------------------------------------------------------
@@ -295,13 +298,14 @@ class NewsletterSenderTest extends TestCase
         $this->assertStringContainsString('Hassan', $html);
         $link = URL::signedRoute('marketing.unsubscribe', ['user' => $hassan->id]);
         $this->assertStringContainsString(e($link), $html);
-        $this->get($link)->assertOk();
+        $this->post($link)->assertOk();
         $this->assertNotNull($hassan->fresh()->marketing_opt_out_at);
 
         $fanMail = Mail::sent(NewsletterMail::class, fn (NewsletterMail $mail) => $mail->hasTo('fan@example.com'))->first();
         $this->assertSame('Eid deals are here', $fanMail->envelope()->subject);
         $this->assertStringContainsString('Hello,', $fanMail->render());
-        $this->get($fanMail->unsubscribeUrl())->assertOk()->assertSee('You are unsubscribed');
+        $this->post($fanMail->unsubscribeUrl())->assertOk()->assertSee('You are unsubscribed'); // a mail app's one-click unsubscribe
+        $this->assertSame('List-Unsubscribe=One-Click', $fanMail->headers()->text['List-Unsubscribe-Post']);
         $this->assertModelMissing($fan);
 
         // The page shows the result; the list too

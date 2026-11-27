@@ -109,7 +109,7 @@ class ModerationController extends Controller
             fputcsv($out, ['email', 'language', 'subscribed_at', 'confirmed_at']);
             NewsletterSubscriber::orderBy('id')->chunk(500, function ($rows) use ($out) {
                 foreach ($rows as $row) {
-                    fputcsv($out, [$row->email, $row->locale, $row->created_at?->toDateTimeString(), $row->confirmed_at?->toDateTimeString()]);
+                    fputcsv($out, \App\Support\Csv::row([$row->email, $row->locale, $row->created_at?->toDateTimeString(), $row->confirmed_at?->toDateTimeString()]));
                 }
             });
             fclose($out);

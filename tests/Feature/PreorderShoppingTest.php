@@ -163,12 +163,13 @@ class PreorderShoppingTest extends TestCase
         // The cart's own check counts the pre-order units left (checked again under the product's lock)
         $refused = $this->order(User::factory()->create(), [[$product, 3]]);
         $this->assertFalse($refused['success']);
-        $this->assertStringContainsString('Available: 2, Requested: 3', $refused['message']);
+        $this->assertStringContainsString('only 2 of', $refused['message']);
+        $this->assertStringContainsString('you asked for 3', $refused['message']);
 
         $this->paidOrder(User::factory()->create(), [[$product, 2]]);
         $full = $this->order(User::factory()->create(), [[$product, 1]]);
         $this->assertFalse($full['success']);
-        $this->assertStringContainsString('Available: 0, Requested: 1', $full['message']);
+        $this->assertStringContainsString('only 0 of', $full['message']);
         $this->assertSame(2, Order::count());
 
         // A cancelled pre-order gives its units back to the limit, and never to the shelf
@@ -252,7 +253,8 @@ class PreorderShoppingTest extends TestCase
         // One unit left for the whole product: L × 2 is refused, L × 1 is taken
         $refused = $this->order(User::factory()->create(), [[$product, 2, $large]]);
         $this->assertFalse($refused['success']);
-        $this->assertStringContainsString('Available: 1, Requested: 2', $refused['message']);
+        $this->assertStringContainsString('only 1 of', $refused['message']);
+        $this->assertStringContainsString('you asked for 2', $refused['message']);
         $this->paidOrder(User::factory()->create(), [[$product, 1, $large]]);
         $this->assertSame(0, app(PreorderService::class)->unitsLeft($product->fresh()));
 

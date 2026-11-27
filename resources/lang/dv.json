@@ -3569,5 +3569,17 @@
     "Too many wrong codes. Please wait 15 minutes, then sign in again.": "ވަރަށް ގިނަ ފަހަރު ކޯޑު ރަނގަޅަށް ނުޖެހުނު. 15 މިނިޓު ފަހުން އަލުން ސައިން އިން ކުރައްވާ.",
     "We can text Maldivian mobile numbers only. Give a Maldivian mobile number or an email address, so we can answer you.": "ދިވެހި މޯބައިލް ނަންބަރުތަކަށް އެކަނި ޓެކްސްޓް ފޮނުވޭނެ. ޖަވާބު ދެވޭނެހެން ދިވެހި މޯބައިލް ނަންބަރެއް ނުވަތަ އީމެއިލް އެޑްރެހެއް ދެއްވާ.",
     "There are pay-later invoices still to pay. The account can be deleted once they are paid.": "ފަހުން ދައްކާ އިންވޮއިސްތައް އަދި ދައްކަން ބާކީ. އެ ދެއްކުމުން އެކައުންޓް ޑިލީޓް ކުރެވޭނެ.",
-    "A return or dispute is still being decided. The account can be deleted once it is closed.": "ރިޓަރނެއް ނުވަތަ ޑިސްޕިއުޓެއް އަދި ނިންމަމުންދަނީ. އެ ނިމުމުން އެކައުންޓް ޑިލީޓް ކުރެވޭނެ."
+    "A return or dispute is still being decided. The account can be deleted once it is closed.": "ރިޓަރނެއް ނުވަތަ ޑިސްޕިއުޓެއް އަދި ނިންމަމުންދަނީ. އެ ނިމުމުން އެކައުންޓް ޑިލީޓް ކުރެވޭނެ.",
+    "Please choose an option first.": "ފުރަތަމަ އޮޕްޝަނެއް ހޮވައިދެއްވާ.",
+    "Sorry, only :available of \":name\" are left (you asked for :requested). Please change the quantity.": "މަޢާފް ކުރައްވާ، \":name\" ގެ :available އެކަނި ބާކީ (އެދިވަޑައިގަތީ :requested). އަދަދު ބަދަލުކުރައްވާ.",
+    "A product in your cart no longer exists.": "ކާޓުގައިވާ ތަކެއްޗެއް މިހާރު ނެތް.",
+    "Language changed successfully.": "ބަސް ބަދަލުކުރެވިއްޖެ.",
+    "Cart cleared successfully!": "ކާޓް ހުސްކުރެވިއްޖެ!",
+    "Wishlist cleared successfully.": "ވިޝްލިސްޓް ހުސްކުރެވިއްޖެ.",
+    "My orders": "އަހަރެންގެ އޯޑަރުތައް",
+    "Order #:number": "އޯޑަރު #:number",
+    "Voucher (:code)": "ވައުޗަރު (:code)",
+    "My wishlist": "އަހަރެންގެ ވިޝްލިސްޓް",
+    "+:count more item|+:count more items": "+:count ތަކެތި އިތުރަށް|+:count ތަކެތި އިތުރަށް",
+    ":count item in your wishlist|:count items in your wishlist": "ވިޝްލިސްޓުގައި :count ތަކެތި|ވިޝްލިސްޓުގައި :count ތަކެތި"
 }

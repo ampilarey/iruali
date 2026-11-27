@@ -34,7 +34,7 @@ class OrderService
         $cart ??= $user?->carts()->where('status', 'active')->latest()->first();
 
         if (! $cart || $cart->items->count() === 0) {
-            return ['success' => false, 'message' => 'Your cart is empty.'];
+            return ['success' => false, 'message' => __('Your cart is empty.')];
         }
 
         // Bulk quotes: a quoted line whose quote expired or was closed comes out of the cart, and quoted stock is checked
@@ -46,7 +46,7 @@ class OrderService
         foreach ($cart->items as $cartItem) {
             $product = $cartItem->product;
             if (! $product) {
-                return ['success' => false, 'message' => 'A product in your cart no longer exists.'];
+                return ['success' => false, 'message' => __('A product in your cart no longer exists.')];
             }
             // Still on sale (for the website and the app alike). A customer's own item request is never
             // listed: its accepted price can still be ordered by them
@@ -77,7 +77,10 @@ class OrderService
             if ($available < $cartItem->quantity) {
                 return [
                     'success' => false,
-                    'message' => 'Sorry, not enough stock for "'.($product->name['en'] ?? $product->name).($cartItem->variant ? ' ('.$cartItem->variant->displayName().')' : '').'". Available: '.$available.', Requested: '.$cartItem->quantity,
+                    'message' => __('Sorry, only :available of ":name" are left (you asked for :requested). Please change the quantity.', [
+                        'name' => ($product->localized_name ?? ($product->name['en'] ?? $product->name)).($cartItem->variant ? ' ('.$cartItem->variant->displayName().')' : ''),
+                        'available' => $available, 'requested' => $cartItem->quantity,
+                    ]),
                 ];
             }
         }
@@ -788,7 +791,7 @@ class OrderService
         }
 
         if ($cart->items->count() === 0) {
-            return ['valid' => false, 'message' => 'Your cart is empty.'];
+            return ['valid' => false, 'message' => __('Your cart is empty.')];
         }
 
         return ['valid' => true, 'cart' => $cart];

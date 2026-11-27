@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Orders - iruali')
+@section('title', __('My orders').' - iruali')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 lg:px-6">
@@ -19,7 +19,7 @@
                         <h3 class="text-lg font-semibold text-gray-900">{{ __('Order') }} #{{ $order->order_number }}</h3>
                         <p class="text-sm text-gray-600">{{ $order->created_at->translatedFormat('j M Y') }}</p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-end">
                         <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {{ $order->customerStatusBadge() }}">
                             {{ $order->customerStatusLabel() }}
                         </span>
@@ -47,7 +47,7 @@
                                 </div>
                                 @endforeach
                                 @if($order->items->count() > 3)
-                                <p class="text-sm text-gray-500">+{{ $order->items->count() - 3 }} more items</p>
+                                <p class="text-sm text-gray-500">{{ trans_choice('+:count more item|+:count more items', $order->items->count() - 3, ['count' => $order->items->count() - 3]) }}</p>
                                 @endif
                             </div>
                         </div>

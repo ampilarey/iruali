@@ -166,6 +166,7 @@
                                         <option value="{{ $variant->id }}" @disabled($variant->stock_quantity <= 0 && ! $preorder)>{{ $variant->displayNameWithKeys() }} – {{ \App\Support\Money::format($variant->effectivePrice()) }}@if($variant->stock_quantity <= 0) ({{ $preorder ? __('Pre-order: ships around :date', ['date' => $preorder['date']->translatedFormat('j M')]) : __('Out of stock') }})@endif</option>
                                     @endforeach
                                 </select>
+                                <p class="hidden text-sm font-medium text-danger" data-variant-hint role="alert">{{ __('Please choose an option first.') }}</p>
                                 <p class="text-xs text-danger hidden" data-variant-unavailable>{{ __('This combination is not available.') }}</p>
                             </div>
                         @endif
@@ -269,8 +270,10 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8 space-y-10">
-        @if($boughtTogether->isNotEmpty() && $stock > 0 && ! $onHoliday)
-            @php $bundle = collect([$product])->merge($boughtTogether); @endphp
+        {{-- Items with options (size, colour) need one chosen on their own page, so they are not in the bundle --}}
+        @php $bundleOthers = $boughtTogether->reject(fn ($p) => $p->has_variants)->values(); @endphp
+        @if($bundleOthers->isNotEmpty() && $stock > 0 && ! $onHoliday && ! $product->has_variants)
+            @php $bundle = collect([$product])->merge($bundleOthers); @endphp
             <section class="rounded-xl border border-gray-200 p-4 lg:p-5" aria-labelledby="bought-together">
                 <h2 id="bought-together" class="font-display text-xl font-bold text-dark mb-4">{{ __('Frequently bought together') }}</h2>
                 <form action="{{ route('cart.addMany') }}" method="POST" class="flex flex-col lg:flex-row lg:items-center gap-4" data-bundle>
@@ -289,7 +292,7 @@
                         @endforeach
                     </div>
                     <div class="lg:ms-auto lg:text-end">
-                        <p class="text-sm text-gray-600">{{ __('Total') }}: <span class="font-bold text-lg text-dark" data-bundle-total>{{ \App\Support\Money::format($bundle->sum('final_price')) }}</span></p>
+                        <p class="text-sm text-gray-600">{{ __('Total') }}: <span class="font-bold text-lg text-dark" data-bundle-total data-prefix="{{ \App\Support\Money::prefix() }}">{{ \App\Support\Money::format($bundle->sum('final_price')) }}</span></p>
                         <button type="submit" class="mt-2 inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-sun text-sun-on font-semibold hover:bg-accent-400"><x-icon name="cart" class="w-4 h-4" />{{ __('Add selected to cart') }}</button>
                     </div>
                 </form>
@@ -481,7 +484,7 @@
                     <p class="flex gap-2"><span class="font-bold text-primary shrink-0">{{ __('Q:') }}</span><span class="font-medium text-dark">{{ $question->question }}</span></p>
                     @if($question->answer)
                         <p class="mt-2 flex gap-2 text-sm"><span class="font-bold text-sun-ink shrink-0">{{ __('A:') }}</span><span class="text-gray-700">{{ $question->answer }}
-                            <span class="block text-xs text-gray-500 mt-1">{{ $question->answeredByShop($product->seller_id) ? ($sellerName ?? __('The shop')) : 'iruali' }} &middot; {{ $question->answered_at?->format('j M Y') }}</span></span></p>
+                            <span class="block text-xs text-gray-500 mt-1">{{ $question->answeredByShop($product->seller_id) ? ($sellerName ?? __('The shop')) : 'iruali' }} &middot; {{ $question->answered_at?->translatedFormat('j M Y') }}</span></span></p>
                     @else
                         <p class="mt-2 text-sm text-gray-500 ps-6">{{ __('Waiting for the shop to answer.') }}</p>
                     @endif
@@ -523,7 +526,7 @@
 
 <!-- Sticky buy bar (mobile) -->
 @if(! $comingSoon && ($stock > 0 || $preorder))
-    <div class="lg:hidden fixed inset-x-0 bottom-16 z-40 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_12px_rgba(15,42,58,0.08)]" style="margin-bottom: env(safe-area-inset-bottom);">
+    <div class="lg:hidden fixed inset-x-0 bottom-16 z-40 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_12px_rgba(15,42,58,0.08)]" style="margin-bottom: env(safe-area-inset-bottom);" data-sticky-bar>
         <x-price :product="$product" class="min-w-0 [&_p]:whitespace-nowrap [&_p]:truncate" />
         <button type="submit" form="buy-form" @disabled($onHoliday) class="ms-auto shrink-0 whitespace-nowrap inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
             <x-icon name="cart" class="w-5 h-5" />{{ $preorder && $preorder['whole'] ? __('Pre-order') : __('Add to cart') }}
@@ -598,7 +601,9 @@
 
         var bundle = document.querySelector('[data-bundle]');
         if (bundle) {
-            var totalEl = bundle.querySelector('[data-bundle-total]'), fmt = totalEl.textContent.replace(/[0-9.,]+/, '#');
+            // The currency prefix comes from the server (Money::prefix(): "MVR " or the Dhivehi "ރ. "), never
+            // parsed out of a formatted price (the Dhivehi one has a full stop in it)
+            var totalEl = bundle.querySelector('[data-bundle-total]'), fmt = (totalEl.dataset.prefix || '') + '#';
             bundle.querySelectorAll('input[type=checkbox]').forEach(function (c) {
                 c.addEventListener('change', function () {
                     var t = 0;

@@ -512,7 +512,8 @@ class DemoDataTest extends TestCase
             ->assertSee(route('admin.sample-data.restore'))
             ->assertDontSee('name="confirm"', false);
 
-        $this->withSession(['locale' => 'dv'])->get(route('admin.sample-data'))->assertOk()->assertSee('ނަމޫނާ ޑޭޓާ އަނބުރާ ގެންނަ');
+        // The admin is in English whatever language the person reads the shop in
+        $this->withSession(['locale' => 'dv'])->get(route('admin.sample-data'))->assertOk()->assertSee('Restore sample data')->assertDontSee('ނަމޫނާ ޑޭޓާ އަނބުރާ ގެންނަ');
     }
 
     public function test_the_artisan_commands_remove_and_restore(): void

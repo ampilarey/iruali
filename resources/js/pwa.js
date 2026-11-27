@@ -37,7 +37,9 @@ function showBanner(promptEvent) {
     banner.id = 'install-banner';
     banner.setAttribute('role', 'dialog');
     banner.setAttribute('aria-label', t('title', 'Add iruali to your home screen'));
-    banner.className = 'fixed inset-x-3 bottom-20 lg:bottom-6 lg:inset-x-auto lg:end-6 lg:w-96 z-40 rounded-xl bg-white shadow-xl border border-gray-200 p-4 flex items-center gap-3';
+    // Above a page's sticky buy, cart or pay bar on a phone, never on top of its button
+    const overBar = document.querySelector('[data-sticky-bar]') ? 'bottom-44 z-50' : 'bottom-20 z-40';
+    banner.className = 'fixed inset-x-3 ' + overBar + ' lg:bottom-6 lg:inset-x-auto lg:end-6 lg:w-96 rounded-xl bg-white shadow-xl border border-gray-200 p-4 flex items-center gap-3';
     banner.innerHTML =
         '<img src="/images/icons/icon-192.png" alt="" width="48" height="48" class="w-12 h-12 rounded-xl shrink-0">' +
         '<div class="min-w-0 flex-1">' +

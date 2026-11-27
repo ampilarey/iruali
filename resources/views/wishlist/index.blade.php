@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Wishlist - iruali')
+@section('title', __('My wishlist').' - iruali')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 lg:px-6">
@@ -48,7 +48,7 @@
                         </a>
                     </h3>
                     @include('products._island_label', ['product' => $item->product, 'class' => 'mb-2'])
-                    <p class="text-sm text-gray-600 mb-4">{{ Str::limit($item->product->description, 80) }}</p>
+                    <p class="text-sm text-gray-600 mb-4">{{ Str::limit(strip_tags((string) $item->product->localized_description), 80) }}</p>
                     @if($drop = $item->savedPriceDrop())
                         <p class="-mt-2 mb-3 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-800" data-price-drop>
                             <x-icon name="tag" class="w-3.5 h-3.5" />{{ __(':amount less than when you saved it', ['amount' => \App\Support\Money::format($drop)]) }}
@@ -80,7 +80,7 @@
         <!-- Actions -->
         <div class="mt-8 flex justify-between items-center">
             <div class="text-sm text-gray-600">
-                {{ $wishlistItems->count() }} item(s) in your wishlist
+                {{ trans_choice(':count item in your wishlist|:count items in your wishlist', $wishlistItems->count(), ['count' => $wishlistItems->count()]) }}
             </div>
             <div class="flex gap-4">
                 <form action="{{ route('wishlist.clear') }}" method="POST" class="inline">

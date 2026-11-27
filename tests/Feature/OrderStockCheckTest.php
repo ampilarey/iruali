@@ -43,7 +43,7 @@ class OrderStockCheckTest extends TestCase
 
         $result = $orderService->createOrderFromCart($user, $shippingData);
         $this->assertFalse($result['success']);
-        $this->assertStringContainsString('not enough stock', $result['message']);
+        $this->assertStringContainsString('are left (you asked for', $result['message']);
     }
 
     public function test_order_succeeds_and_decrements_stock()

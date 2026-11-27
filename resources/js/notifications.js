@@ -33,10 +33,15 @@ class NotificationManager {
         });
     }
 
-    // Error notification
+    // Error notification: it stays until closed (why an order was refused must not vanish after 3
+    // seconds on a phone, where nothing pauses the timer)
     error(message, title = t('error', 'Error')) {
         return Swal.fire({
             ...this.defaultConfig,
+            timer: undefined,
+            timerProgressBar: false,
+            showCloseButton: true,
+            closeButtonAriaLabel: t('close', 'Close'),
             icon: 'error',
             title: title,
             text: message,
@@ -46,10 +51,13 @@ class NotificationManager {
         });
     }
 
-    // Warning notification
+    // Warning notification: longer, and it can be closed
     warning(message, title = t('warning', 'Warning')) {
         return Swal.fire({
             ...this.defaultConfig,
+            timer: 8000,
+            showCloseButton: true,
+            closeButtonAriaLabel: t('close', 'Close'),
             icon: 'warning',
             title: title,
             text: message,

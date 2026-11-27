@@ -107,7 +107,7 @@ npm run build      # vite build, then fix-manifest.sh copies .vite/manifest.json
   `docs/PRODUCTION_DEPLOY.md`.
 - **No release tags for now.** `scripts/release.sh` and `deploy-production.sh <tag>` still work if
   tags come back.
-- After deploying: `php artisan iruali:ready` (`READY`), `/api/health` shows the commit.
+- After deploying: `php artisan iruali:ready` (`READY`); `/api/health` shows the commit when asked with the `X-Health-Token` header (`HEALTH_DETAIL_TOKEN`).
 
 ## Environment variables that matter
 

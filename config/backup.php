@@ -267,6 +267,14 @@ return [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 10000,
             ],
         ],
+        // The weekly files backup, under its own name (App\Console\Commands\BackupFiles)
+        [
+            'name' => env('APP_NAME', 'iruali-backup').'-files',
+            'disks' => array_values(array_filter(array_map('trim', explode(',', (string) env('BACKUP_DISKS', 'local'))))),
+            'health_checks' => [
+                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 8,
+            ],
+        ],
     ],
 
     'cleanup' => [

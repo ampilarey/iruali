@@ -129,4 +129,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // Only for database/seeders/UserSeeder.php on a local copy (servers use php artisan staff:create)
+    'seed_admin' => [
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];

@@ -34,6 +34,9 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Code style (Pint)
         run: ./vendor/bin/pint --test
+      # The deploy scripts are not run here (they need the servers): at least they must parse
+      - name: Shell scripts parse
+        run: for f in scripts/*.sh; do bash -n "$f" || exit 1; done
       - name: Prepare app
         run: |
           cp .env.example .env

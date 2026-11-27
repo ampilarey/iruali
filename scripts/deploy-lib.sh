@@ -8,7 +8,7 @@
 #   build_app                      composer install --no-dev, database backup, migrate, caches, storage:link, docroot sync, stamp, queue:restart
 #   rebuild_app_without_migrate    same but no migrate (rollback: migrations are never reversed)
 #   checkout_commit <ref>          detached checkout of a tag or commit
-#   verify_site                    /api/health + php artisan iruali:smoke (and --place-order when SMOKE_USER_EMAIL is set)
+#   verify_site                    /api/health, the home page's stylesheet, php artisan iruali:smoke (and --place-order when SMOKE_USER_EMAIL is set)
 #   describe_head                  tag name when HEAD is exactly a tag, else the short commit
 
 export PATH="${HOME:-/home/iruali}/bin:/usr/local/bin:/opt/cpanel/ea-php84/root/usr/bin:/opt/cpanel/ea-php83/root/usr/bin:/opt/cpanel/ea-php82/root/usr/bin:/opt/cpanel/composer/bin:/usr/bin:/bin:${PATH:-}"
@@ -61,6 +61,9 @@ github_checks() {
     if (! is_array($runs)) { echo "unknown unreadable reply"; exit; }
     if ($runs === []) { echo "none"; exit; }
     $pending = $failed = [];
+    // The test-site deploy job is not a check of the code (the host firewall can fail it)
+    $runs = array_filter($runs, fn ($r) => ! str_starts_with((string) ($r["name"] ?? ""), "Webhook pull"));
+    if ($runs === []) { echo "none"; exit; }
     foreach ($runs as $r) {
         if (($r["status"] ?? "") !== "completed") { $pending[] = $r["name"]; }
         elseif (! in_array($r["conclusion"] ?? "", ["success", "neutral", "skipped"], true)) { $failed[] = $r["name"]."=".$r["conclusion"]; }
@@ -93,19 +96,24 @@ _storage_link() {
 _sync_docroot() {
   [[ -n "${DOCROOT:-}" ]] || return 0
   [[ -d "$DOCROOT" ]] || { say "docroot $DOCROOT does not exist"; return 1; }
-  mkdir -p "$DOCROOT/build" "$DOCROOT/images"
-  cp -a "$ROOT/public/build/." "$DOCROOT/build/"
-  [[ -d "$ROOT/public/images" ]] && cp -a "$ROOT/public/images/." "$DOCROOT/images/"
+  # Every copy is checked (a full disk quota fails here): a site without its CSS and JS must not pass
+  mkdir -p "$DOCROOT/build" "$DOCROOT/images" || { say "ERROR: could not create folders in $DOCROOT"; return 1; }
+  cp -a "$ROOT/public/build/." "$DOCROOT/build/" || { say "ERROR: copying the built assets to $DOCROOT failed"; return 1; }
+  if [[ -d "$ROOT/public/images" ]]; then
+    cp -a "$ROOT/public/images/." "$DOCROOT/images/" || { say "ERROR: copying images to $DOCROOT failed"; return 1; }
+  fi
   # Uploaded files are served by the app at /storage/... (LiteSpeed refuses to follow a docroot
   # symlink into the app folder). Any leftover storage link/dir in the docroot would shadow that route.
   if [[ -L "$DOCROOT/storage" ]]; then rm -f "$DOCROOT/storage"; fi
   if [[ -d "$DOCROOT/storage" ]]; then rmdir "$DOCROOT/storage" 2>/dev/null || say "WARNING: $DOCROOT/storage is a non-empty directory and will shadow /storage/* uploads"; fi
   mkdir -p "$ROOT/storage/app/public" && echo "ok $(date -u +%FT%TZ)" > "$ROOT/storage/app/public/healthcheck.txt"
   for f in favicon.svg site.webmanifest site.dv.webmanifest sw.js robots.txt .htaccess; do
-    [[ -f "$ROOT/public/$f" ]] && cp -a "$ROOT/public/$f" "$DOCROOT/$f"
+    if [[ -f "$ROOT/public/$f" ]]; then
+      cp -a "$ROOT/public/$f" "$DOCROOT/$f" || { say "ERROR: copying $f to $DOCROOT failed"; return 1; }
+    fi
   done
   # Front controller in the docroot points at the app root
-  cat > "$DOCROOT/index.php" <<PHP
+  cat > "$DOCROOT/index.php" <<PHP || { say "ERROR: writing $DOCROOT/index.php failed"; return 1; }
 <?php
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
@@ -189,6 +197,18 @@ verify_site() {
   else
     say "WARN: health does not report the commit (set HEALTH_DETAIL_TOKEN in .env to check it); going on with the smoke test"
   fi
+
+  # The page's own CSS must load: health and the smoke test only read HTML, and a docroot that did not
+  # get the new build/ serves pages with no styles or scripts
+  local page css code
+  page=$(curl -fsS -m 20 "$url/" 2>&1) || { say "home page $url/ failed: ${page:0:200}"; return 1; }
+  css=$(printf '%s' "$page" | grep -oE '/build/assets/[A-Za-z0-9._-]+\.css' | head -1)
+  if [[ -z "$css" ]]; then
+    say "the home page links no built stylesheet (/build/assets/…css)"; return 1
+  fi
+  code=$(curl -sS -o /dev/null -m 20 -w '%{http_code}' "$url$css" 2>&1)
+  [[ "$code" == "200" ]] || { say "the stylesheet $css answers $code, not 200 (is public/build in the docroot?)"; return 1; }
+  say "assets: $css 200"
 
   local smoke=(php artisan iruali:smoke "--base-url=$url")
   if grep -qE '^SMOKE_USER_EMAIL=.+' "$ROOT/.env" 2>/dev/null; then

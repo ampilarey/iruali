@@ -33,11 +33,17 @@ That is the whole routine. `~/deploy-live.sh` (made once, content in `PRODUCTION
   → `config:clear` → database backup (the deploy stops if it fails) → `migrate --force` → caches →
   copies built assets and a front-controller `index.php` into `public_html` → `up`;
 - `/api/health` must answer healthy (and, with `HEALTH_DETAIL_TOKEN` in `.env`, report the new
-  commit), then `php artisan iruali:smoke` must pass;
-- any failure rolls the code back by itself (migrations are not reversed);
+  commit), the home page's stylesheet must load, then `php artisan iruali:smoke` must pass;
+- any failure rolls the code back by itself (back on the maintenance page while it does; migrations
+  are not reversed), and so does the terminal closing or Ctrl-C half way;
 - every run is a line in `~/iruali/storage/app/deploys.log`.
 
-Roll back by hand: `bash ~/deploy-tools/rollback-production.sh`.
+On an unreliable connection run it inside `screen` (or `nohup bash ~/deploy-live.sh &`), so a
+dropped terminal does not stop it. If a deploy did stop half way, running it again carries on from
+the maintenance page.
+
+Roll back by hand: `bash ~/deploy-tools/rollback-production.sh` (to the version before the last
+deploy; after re-deploying the same commit, still the one before it).
 
 **No release tags for now.** Production follows `main`. `deploy-production.sh <tag>` still works if
 tags come back. Claude Code sessions cannot push tags; the owner would create them on GitHub.
@@ -68,7 +74,8 @@ Scheduler (crontab of `iruali`):
 ```
 
 Health: `php artisan iruali:ready` (expects only BML, and backups until an off-server disk is set, to fail). For an uptime
-monitor, `/api/health/ready` answers 200, or 503 when the database, cache or storage fails
+monitor, `/api/health/ready` answers 200, or 503 when the database, cache or storage fails or the cron
+(scheduler) has not run for 10 minutes
 (`/api/health` is unchanged for the deploy check). `ops:watch` (every 10 minutes) alerts when queued
 jobs fail or the queue worker stops.
 

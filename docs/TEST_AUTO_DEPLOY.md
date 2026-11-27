@@ -2,7 +2,7 @@
 
 `test.iruali.mv` pulls `main` automatically. Production (`iruali.mv`) is never auto-deployed.
 
-App root on the server: `/home/iruali/test` (document root: `/home/iruali/test/public`).
+App root on the server: `/home/iruali/test` (document root: `/home/iruali/home/iruali/test.iruali.mv`, see docs/SERVERS.md).
 
 ## Fast path (default)
 
@@ -24,10 +24,10 @@ GitHub Actions was blocked with:
 `Access denied by Imunify360 bot-protection. IPs used for automation should be whitelisted`
 
 Until that is fixed, only cron deploys. When the firewall turns away all six attempts, the "Webhook pull
-(test.iruali.mv)" check passes with a warning instead of failing: the test site still updates through
-cron within a minute, and a red check there would also stop `~/deploy-live.sh` on production for something
-the code did not cause. Any other failure (wrong secret, 404, 500, no answer) still fails the check. Fix
-one of:
+(test.iruali.mv)" check passes with a warning instead of failing. Any other failure (wrong secret, 404,
+500, six attempts with no answer) still fails it. Either way the test site still updates through cron
+within a minute, and neither the cron nor `~/deploy-live.sh` on production waits on this check: they look
+only at the Tests checks (PHPUnit, browser, Larastan). Fix one of:
 
 1. **cPanel → Imunify360 → Firewall → White List**  
    Add GitHub Actions IP ranges from https://api.github.com/meta (`actions` key), **or** ask your host/WHM admin to whitelist them.
@@ -38,21 +38,20 @@ one of:
 
 **1. TEST server secret**
 
-```bash
-cd /home/iruali/test
-SECRET=$(openssl rand -hex 32)
-sed -i '/^TEST_DEPLOY_WEBHOOK_SECRET=/d' .env
-echo "TEST_DEPLOY_WEBHOOK_SECRET=${SECRET}" >> .env
-sed -i '/^TEST_DEPLOY_ALLOWED_HOSTS=/d' .env
-echo "TEST_DEPLOY_ALLOWED_HOSTS=test.iruali.mv" >> .env
-sed -i '/^TEST_DEPLOY_HOME=/d' .env
-echo "TEST_DEPLOY_HOME=/home/iruali" >> .env
-php artisan config:cache
-echo "$SECRET"
+Edit `/home/iruali/test/.env` in cPanel → File Manager (never with `echo … >> .env`, see
+docs/SERVERS.md) and set these three lines, with a new long random value for the secret (for example
+from a password manager):
+
+```
+TEST_DEPLOY_WEBHOOK_SECRET=<a new random value>
+TEST_DEPLOY_ALLOWED_HOSTS=test.iruali.mv
+TEST_DEPLOY_HOME=/home/iruali
 ```
 
+Then run `cd /home/iruali/test && php artisan config:cache`.
+
 **2. GitHub** → Settings → Environments → create **test** → add secret  
-`TEST_DEPLOY_WEBHOOK_SECRET` = same value printed above
+`TEST_DEPLOY_WEBHOOK_SECRET` = the same value as in the .env above
 
 **3. Cron fallback (recommended)**
 
@@ -76,7 +75,7 @@ category, search, cart, login, `/up`, `/api/health`, sitemap, robots). With
 `php artisan iruali:smoke --setup` run once, it also places a real order as that customer,
 opens BML's pay page (sandbox, never paid), cancels the order and checks the stock is back.
 The test site is not rolled back on a failure: the rows are in the deploy log
-(`~/self-update-test.log` for cron runs, `storage/logs/laravel.log` for webhook runs) so the problem is seen before the
+(`~/self-update-test.log`, for cron and webhook runs alike) so the problem is seen before the
 same commit is tagged for production.
 
 ## After a push to `main`
@@ -85,7 +84,7 @@ Only `main` deploys. Work on feature branches (including agent branches such as
 `claude/*`) never reaches TEST until its pull request is merged into `main`.
 
 1. Open Actions → **Deploy TEST (immediate)** — should go green within ~1 minute
-2. Check https://test.iruali.mv/api/health — `commit` should match the new `main` SHA
+2. Check https://test.iruali.mv/api/health with the `X-Health-Token` header (`HEALTH_DETAIL_TOKEN`) — `commit` should match the new `main` SHA
    (written by `scripts/write-deploy-stamp.sh` on every deploy; `unknown` means no
    deploy has run since this was added)
 3. Refresh https://test.iruali.mv/

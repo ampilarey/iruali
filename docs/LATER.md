@@ -128,6 +128,24 @@ Every plan item is done; these parts were deliberately left for later:
   which took the home page from 82 queries to 26 with products in the catalogue. Revisit only if the
   home page gets slow.
 
+## Second full audit (2026-11-25, fixed in PRs #174–#179, finished 2026-11-28)
+
+All findings were fixed in six batches (serious and security; money and refunds; orders and jobs;
+accounts, privacy and API; pages and Dhivehi; operations). Still with the owner:
+
+- **Off-server backups (decision C):** unchanged, see launch to-do 12. The weekly files backup now has
+  its own backup name and folder (`Iruali-files`, `php artisan backup:files`), so it no longer takes
+  the weekly, monthly and yearly places meant for a database dump; set the off-server disk for both.
+- **Dhivehi legal pages (decision E):** unchanged (above).
+- **Server step after deploying #179:** the deploy scripts in `~/deploy-tools/` are refreshed by
+  `~/deploy-live.sh` itself; nothing to do by hand. An uptime monitor on `/api/health/ready` now also
+  reports a stopped cron (503 after 10 minutes without the scheduler).
+
+Left as leads, not changed (low risk, revisit if seen): a newsletter batch of 40 emails near the
+worker's 60-second limit; `php artisan cache:clear` resetting the queue heartbeat (one false "queue
+stopped" alert) and the failed-jobs marker; `SendTeamAlert` retrying an SMS after a Telegram error; the
+smoke test's "stock restored" step if a real customer buys the same cheapest product during it.
+
 ## Optional setup
 
 - **Google / Facebook / Apple sign-in:** keys in `.env`, step by step in `docs/SOCIAL_LOGIN.md`.

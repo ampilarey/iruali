@@ -102,6 +102,14 @@ class SmokeCommandTest extends TestCase
         $cheapest = Product::factory()->create(['seller_id' => $seller->id, 'price' => 12, 'stock_quantity' => 3, 'is_active' => true]);
         Product::factory()->create(['seller_id' => $seller->id, 'price' => 20, 'stock_quantity' => 3, 'is_active' => true]);
 
+        // Card payments off (BML not set up): the round trip is skipped, not failed
+        $this->artisan('iruali:smoke --base-url=http://smoke.test --place-order')
+            ->expectsOutputToContain('Card payments are off: the order round trip is skipped.')
+            ->expectsOutputToContain('SMOKE OK')
+            ->assertExitCode(0);
+        $this->assertNull($site->sent('POST', '/cart/add'));
+        config(['services.bml.api_key' => 'test-key', 'services.bml.environment' => 'sandbox', 'services.bml.base_uri' => 'https://bml.test/public']);
+
         $site->on('POST /login', 302, '', ['Location' => 'http://smoke.test/'])
             ->on('POST /cart/add', 302, '', ['Location' => 'http://smoke.test/'])
             ->on('GET /checkout', 200, self::HTML)

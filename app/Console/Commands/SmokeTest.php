@@ -44,7 +44,14 @@ class SmokeTest extends Command
                 return self::FAILURE;
             }
             $order = $this->orderTarget();
-            if ($order === null) {
+            // The round trip pays by card: with card payments off (BML not set up yet) there is nothing
+            // to check, and failing would roll back every deploy for it
+            $cardOn = \App\Services\ManualPaymentService::cardEnabled() && app(\App\Services\BmlConnect::class)->enabled();
+            if ($order !== null && ! $cardOn) {
+                $order = null;
+                $orderSkipped = 'card payments are off (BML not set up)';
+                $this->warn('Card payments are off: the order round trip is skipped.');
+            } elseif ($order === null) {
                 // A new site, or the sample data just removed: nothing to order is not a broken deploy
                 $orderSkipped = 'no product on sale with stock yet';
                 $this->warn('No product on sale with stock: the order round trip is skipped.');

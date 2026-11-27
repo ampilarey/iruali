@@ -14,12 +14,14 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // On production the admin login comes from .env; the demo login exists only for local work.
-        $email = env('ADMIN_EMAIL', 'admin@example.com');
-        $password = env('ADMIN_PASSWORD');
+        // The demo login for local work. On a server, make the first admin with `php artisan staff:create`
+        // (it asks for the password); ADMIN_EMAIL / ADMIN_PASSWORD are read through config (env is
+        // empty once the config is cached, as every deploy does)
+        $email = (string) (config('app.seed_admin.email') ?: 'admin@example.com');
+        $password = config('app.seed_admin.password');
         if (! $password) {
             if (app()->isProduction()) {
-                throw new \RuntimeException('Set ADMIN_EMAIL and ADMIN_PASSWORD in .env before seeding the admin on production.');
+                throw new \RuntimeException('Make the first admin with: php artisan staff:create you@example.com (it asks for the password).');
             }
             $password = 'password';
         }

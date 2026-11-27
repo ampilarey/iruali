@@ -742,7 +742,7 @@ production follows `main` for now: `bash ~/deploy-live.sh` on the server deploys
 Release tags still work (`scripts/deploy-production.sh <tag>`, `scripts/rollback-production.sh`).
 `/api/health` answers `status`, `timestamp` and `version` to everyone, and adds the running commit
 and tag only with the `X-Health-Token` header (`HEALTH_DETAIL_TOKEN`); `/api/health/ready` answers 503
-when the database, cache or storage is not working; `/up` is Laravel's liveness check.
+when the database, cache or storage is not working, or the scheduler (cron) has not run for 10 minutes; `/up` is Laravel's liveness check.
 
 **Checks.** `php artisan iruali:ready` (scheduler heartbeat, cache, sessions, queue, mail, BML,
 backups, uploads, settings) and `php artisan iruali:smoke [--place-order]` (key pages, health,

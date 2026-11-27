@@ -378,6 +378,7 @@ class PreorderShoppingTest extends TestCase
 
     public function test_the_smoke_test_still_orders_the_cheapest_product_in_stock(): void
     {
+        config(['services.bml.api_key' => 'test-key', 'services.bml.environment' => 'sandbox', 'services.bml.base_uri' => 'https://bml.test/public']); // card payments on
         $html = '<!DOCTYPE html><html><form><input type="hidden" name="_token" value="t" autocomplete="off"></form> agree_terms</html>';
         $site = (new \Tests\Support\FakeSmokeFetcher([], 'http://smoke.test'))
             ->on('GET /', 200, $html)

@@ -109,6 +109,50 @@ SQL;
         $this->assertSame(1, User::count(), 'the live database is untouched');
     }
 
+    public function test_a_files_backup_is_told_apart_from_the_database_ones_wherever_it_is(): void
+    {
+        User::factory()->create();
+        $this->putBackup('iruali-backup-2026-09-30-02-00-00.zip', $this->dump());
+        // A newer files backup, named as it really is on disk (the prefix comes first), in the old folder
+        $tmp = tempnam(sys_get_temp_dir(), 'bk');
+        $zip = new \ZipArchive;
+        $zip->open($tmp, \ZipArchive::OVERWRITE);
+        $zip->addFromString('storage/app/public/products/a.jpg', 'jpg');
+        $zip->close();
+        Storage::disk('drill-backups')->put('iruali/iruali-backup-files-2026-10-04-030000.zip', file_get_contents($tmp));
+        touch(Storage::disk('drill-backups')->path('iruali/iruali-backup-2026-09-30-02-00-00.zip'), now()->subDay()->getTimestamp());
+
+        // The database dump is restored, not the newer files zip; the files backup is found and checked
+        $this->artisan('backup:restore-drill')->expectsOutputToContain('Restore drill PASSED')->expectsOutputToContain('Files backup iruali/iruali-backup-files-')->assertExitCode(0);
+
+        // From now on it has a folder of its own (App\Console\Commands\BackupFiles)
+        Storage::disk('drill-backups')->delete('iruali/iruali-backup-files-2026-10-04-030000.zip');
+        Storage::disk('drill-backups')->put('iruali-files/iruali-backup-files-2026-10-05-030000.zip', file_get_contents($tmp));
+        unlink($tmp);
+        $this->assertSame('iruali-files', \App\Console\Commands\BackupFiles::backupName());
+        $this->artisan('backup:restore-drill')->expectsOutputToContain('Files backup iruali-files/iruali-backup-files-')->assertExitCode(0);
+    }
+
+    public function test_old_files_backups_are_cleaned_up_on_their_own_and_never_take_a_database_backups_place(): void
+    {
+        $disk = Storage::disk('drill-backups');
+        foreach (range(0, 60) as $daysAgo) {
+            $day = now()->subDays($daysAgo);
+            $disk->put('iruali/iruali-backup-'.$day->format('Y-m-d').'-02-00-00.zip', 'db');
+            touch($disk->path('iruali/iruali-backup-'.$day->format('Y-m-d').'-02-00-00.zip'), $day->setTime(2, 0)->getTimestamp());
+            if ($day->isSunday()) {
+                $disk->put('iruali-files/iruali-backup-files-'.$day->format('Y-m-d').'-030000.zip', 'files');
+                touch($disk->path('iruali-files/iruali-backup-files-'.$day->format('Y-m-d').'-030000.zip'), $day->setTime(3, 0)->getTimestamp());
+            }
+        }
+        $databaseBefore = count($disk->files('iruali'));
+
+        $this->artisan('backup:files', ['--clean' => true])->assertExitCode(0);
+        $this->assertSame($databaseBefore, count($disk->files('iruali')), 'the database backups are not touched');
+        $this->assertNotEmpty($disk->files('iruali-files'));
+        $this->assertStringContainsString("Schedule::command('backup:files')->weeklyOn(0, '03:00')", (string) file_get_contents(base_path('routes/console.php')));
+    }
+
     public function test_a_plain_sql_dump_works_too_and_live_tables_are_never_touched(): void
     {
         $this->putBackup('iruali-backup-2026-09-30-02-00-00.zip', $this->dump(), gzip: false);

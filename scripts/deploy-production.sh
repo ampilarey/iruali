@@ -84,6 +84,7 @@ if [[ "$REF" == "refs/remotes/origin/main" ]]; then
   ci=$(github_checks "$NEXT")
   case "$ci" in
     ok) say "GitHub checks passed for ${NEXT:0:8}" ;;
+    none) say "ERROR: GitHub has no checks for ${NEXT:0:8} yet. Wait a minute for CI to start and run this again."; exit 1 ;;
     unknown*) say "WARN: could not ask GitHub about ${NEXT:0:8} (${ci#unknown }); deploying anyway" ;;
     *) say "ERROR: GitHub checks for ${NEXT:0:8} have not all passed: $ci. Wait for them (test.iruali.mv updates when they pass) and run this again."; exit 1 ;;
   esac
@@ -91,17 +92,41 @@ fi
 PREV=$(git rev-parse HEAD)
 PREV_NAME=$(describe_head)
 
-if [[ "$PREV" == "$NEXT" ]]; then
-  say "already on $TAG (${NEXT:0:8}); rebuilding caches and re-running the checks"
+# A deploy that stopped half way (the terminal closed, Ctrl-C) left HEAD on its new commit: what ran
+# before it is the "previous" that deploy logged when it started
+last_line=$(grep -E '^[^ ]+ deploy ' "$DEPLOY_LOG" 2>/dev/null | tail -1)
+if [[ "$last_line" == *"status=started"* && "$last_line" == *"commit=${PREV:0:7} "* ]]; then
+  started_prev=$(echo "$last_line" | sed -n 's/.*previous=\([^ ]*\).*/\1/p')
+  if [[ -n "$started_prev" ]] && full=$(git rev-parse -q --verify "${started_prev}^{commit}"); then
+    say "the last deploy (to ${PREV:0:8}) did not finish; the version before it was ${started_prev}"
+    PREV="$full"
+    PREV_NAME="$started_prev"
+  fi
 fi
 
-deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} previous_name=$PREV_NAME status=started"
+# What a later rollback goes back to: normally the version that ran before this one; when this
+# deploys the commit already running, the version before that (not this same commit again)
+LOG_PREV="${PREV:0:7}"
+LOG_PREV_NAME="$PREV_NAME"
+if [[ "$PREV" == "$NEXT" ]]; then
+  say "already on $TAG (${NEXT:0:8}); rebuilding caches and re-running the checks"
+  if earlier=$(last_deploy_previous) && [[ -n "$earlier" ]]; then
+    LOG_PREV="$earlier"
+    LOG_PREV_NAME="$earlier"
+  fi
+fi
+
+deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${LOG_PREV} previous_name=$LOG_PREV_NAME status=started"
 
 rollback() {
+  trap - INT TERM HUP
   say "DEPLOY FAILED: $1"
   local back_up=1
   if [[ "$(git rev-parse HEAD)" != "$PREV" || "$PREV" == "$NEXT" ]]; then
     say "rolling back to $PREV_NAME (${PREV:0:8})"
+    # Back to the "back soon" page first: the smoke test fails after "up", and the old code must not be
+    # rebuilt under live traffic (the same rule as the deploy)
+    php artisan down --render="errors::503" --retry=30 >/dev/null 2>&1 || true
     if checkout_commit "$PREV" && rebuild_app_without_migrate; then
       say "rolled back to ${PREV:0:8}. Database migrations from $TAG were NOT reversed; check them by hand if the release added any (a database backup was taken just before migrating: php artisan backup:list)."
       deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=rolled-back reason=\"$1\""
@@ -125,15 +150,25 @@ say "deploying $PREV_NAME (${PREV:0:8}) -> $TAG (${NEXT:0:8})"
 # BML's webhook get a clean 503 (with Retry-After) while vendor/ and the caches are being replaced.
 # No maintenance mode, no deploy: changing the code under live traffic gives customers errors.
 if ! php artisan down --render="errors::503" --retry=30 >/dev/null 2>&1; then
-  say "ERROR: could not enter maintenance mode (php artisan down); nothing was changed"
-  deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=failed reason=\"maintenance mode\""
-  exit 1
+  # An earlier deploy that stopped half way left the site down (and vendor/ maybe half installed, so
+  # artisan can't run): carry on and finish the job rather than leave it there
+  if [[ -f "$ROOT/storage/framework/down" ]]; then
+    say "the site is already in maintenance mode (an earlier deploy did not finish); going on"
+  else
+    say "ERROR: could not enter maintenance mode (php artisan down); nothing was changed"
+    deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} status=failed reason=\"maintenance mode\""
+    exit 1
+  fi
 fi
+# The terminal closing (or Ctrl-C) half way: roll back rather than leave a half-built site. Run this in
+# screen or with nohup when the connection is unreliable.
+trap 'rollback "interrupted"' INT TERM HUP
 
 checkout_commit "$NEXT" || rollback "git checkout $TAG"
 build_app || rollback "build (composer install / migrate / caches / docroot sync)"
 php artisan up || rollback "php artisan up"
 verify_site || rollback "health check or smoke test"
+trap - INT TERM HUP
 
-deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${PREV:0:7} previous_name=$PREV_NAME status=ok"
+deploy_log deploy "tag=$TAG commit=${NEXT:0:7} previous=${LOG_PREV} previous_name=$LOG_PREV_NAME status=ok"
 say "deploy complete: $TAG (${NEXT:0:8}). Roll back with: bash scripts/rollback-production.sh"

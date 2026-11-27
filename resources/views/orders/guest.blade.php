@@ -148,7 +148,7 @@
                         <p class="text-xs text-gray-500 flex items-center gap-1.5"><x-icon name="shield" class="w-4 h-4 text-primary" />{{ __('You pay on Bank of Maldives\' secure page. iruali never sees your card details.') }}</p>
                     </div>
                 @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
-                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
+                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->translatedFormat('j M Y, H:i')]) }}</p>
                 @endif
                 @include('orders._manual_payment', ['order' => $order, 'slipAction' => \Illuminate\Support\Facades\URL::signedRoute('guest.orders.payment-slip', ['order' => $order->getKey(), 'token' => (string) $order->guest_token])])
 

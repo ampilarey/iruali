@@ -43,6 +43,12 @@ class SetLocale
         if (! in_array($locale, LocalizationService::getAvailableLocales())) {
             $locale = LocalizationService::getFallbackLocale();
         }
+        // The Seller Centre and the admin are in English (their pages, prices and messages), whatever
+        // language the person reads the shop in; their choice for the shop is kept for when they go back
+        // (The application form and the help guides for shops are written in both languages: they follow it.)
+        if ($request->is('admin', 'admin/*', 'seller', 'seller/*') && ! $request->is('seller/apply', 'seller/apply/*', 'seller/help', 'seller/help/*', 'seller/waitlist')) {
+            $locale = 'en';
+        }
 
         // Set the application locale (Carbon follows it so translatedFormat() gives Dhivehi month/day names)
         App::setLocale($locale);

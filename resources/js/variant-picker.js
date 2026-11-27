@@ -123,6 +123,26 @@ function initPicker(form) {
         });
     });
 
+    // "Add to cart" before an option is chosen (the sticky bar on a phone sits outside the form, so it is
+    // never disabled): the hidden select stops the form, and the browser can't point at a hidden field,
+    // so say so here and bring the options into view
+    const hint = form.querySelector('[data-variant-hint]');
+    if (select) {
+        select.addEventListener('invalid', (e) => {
+            e.preventDefault();
+            if (hint) hint.classList.remove('hidden');
+            const target = groups.find((g) => !chosen[g.dataset.optionGroup]) || groups[0];
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const firstButton = target.querySelector('[data-option-value]:not(:disabled)');
+                if (firstButton) firstButton.focus({ preventScroll: true });
+            }
+        });
+    }
+    groups.forEach((group) => group.addEventListener('click', () => {
+        if (hint && current()) hint.classList.add('hidden');
+    }));
+
     // One option type with a single in-stock (or pre-order) value: pick it for the shopper
     if (groups.length === 1) {
         const inStock = variants.filter(orderable);

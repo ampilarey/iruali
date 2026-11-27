@@ -15,6 +15,10 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-5 pb-28 lg:py-8">
         <h1 class="font-display text-2xl lg:text-3xl font-bold text-dark mb-4">{{ __('Cart') }}@if($units)<span class="text-gray-500 font-sans font-normal text-base ms-2">({{ trans_choice(':count item|:count items', $units, ['count' => $units]) }})</span>@endif</h1>
         @include('quotes._cart_notices')
+        {{-- Why the order was refused (stock, prices, a shop away) stays on the page, not only in a toast --}}
+        @if(is_array(session('notification')) && (session('notification')['type'] ?? '') === 'error')
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert" data-cart-error>{{ session('notification')['message'] ?? '' }}</div>
+        @endif
 
         @if($items->isEmpty())
             <div class="bg-white border border-gray-200 rounded-xl p-10 text-center">
@@ -161,7 +165,7 @@
                     @endauth
                     @unless($minimumProblem)
                         {{-- Phones: the total and the way to checkout stay in view, above the tab bar (as on checkout) --}}
-                        <div class="lg:hidden fixed inset-x-0 z-40 border-t border-gray-200 bg-white px-4 py-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)]" style="bottom: calc(4rem + env(safe-area-inset-bottom));" data-cart-bar>
+                        <div class="lg:hidden fixed inset-x-0 z-40 border-t border-gray-200 bg-white px-4 py-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)]" style="bottom: calc(4rem + env(safe-area-inset-bottom));" data-cart-bar data-sticky-bar>
                             <a href="{{ route('checkout') }}" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-white hover:bg-primary-hover">{{ __('Checkout · :amount', ['amount' => \App\Support\Money::format($total)]) }}</a>
                         </div>
                     @endunless

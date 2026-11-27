@@ -511,7 +511,8 @@
     @php $compareIds = session('compare', []); @endphp
     @if($compareIds && ! request()->routeIs('compare'))
         @php $compareItems = \App\Models\Product::whereIn('id', $compareIds)->with('mainImage')->get(); @endphp
-        <div class="fixed z-40 end-4 bottom-20 lg:bottom-6 {{ request()->routeIs('products.show') ? 'hidden lg:block' : '' }}">
+        {{-- Not over a sticky buy, cart or pay bar on a phone --}}
+        <div class="fixed z-40 end-4 bottom-20 lg:bottom-6 {{ request()->routeIs('products.show', 'cart', 'checkout', 'checkout.*') ? 'hidden lg:block' : '' }}">
             <a href="{{ route('compare') }}" class="flex items-center gap-3 ps-2 pe-4 py-2 rounded-full bg-reef text-white shadow-2xl hover:bg-reef-night">
                 <span class="flex -space-x-2 rtl:space-x-reverse">
                     @foreach($compareItems->take(4) as $c)
@@ -541,6 +542,7 @@
             'loading' => __('Loading…'),
             'completed' => __('Operation completed successfully'),
             'failed' => __('An error occurred'),
+            'close' => __('Close'),
         ]) }};
         // "Add to home screen" banner (resources/js/pwa.js)
         window.pwaLabels = {{ \Illuminate\Support\Js::from([

@@ -41,9 +41,13 @@ class CartItem extends Model
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
+    /**
+     * The line at today's price (unit_price), as the cart's totals and the order count it: the price
+     * stored when it was added may have changed since (a deal ended, the shop changed it).
+     */
     public function getSubtotalAttribute()
     {
-        return $this->quantity * $this->price;
+        return round($this->quantity * $this->unit_price, 2);
     }
 
     /**

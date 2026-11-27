@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Checkout - iruali')
+@section('title', __('Checkout').' - iruali')
 
 @php
     $field = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500';
@@ -309,7 +309,7 @@
 
                     {{-- The terms and the button: on a phone a bar fixed at the bottom of the screen (as on Bake & Grill),
                          saying what the tap does ("Pay MVR 275 by card"); on a computer at the end of the summary --}}
-                    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white px-4 pt-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)] lg:static lg:z-auto lg:mt-0 lg:border-0 lg:p-0 lg:shadow-none" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));" data-pay-bar>
+                    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white px-4 pt-3 shadow-[0_-4px_16px_rgba(15,42,58,0.12)] lg:static lg:z-auto lg:mt-0 lg:border-0 lg:p-0 lg:shadow-none" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));" data-pay-bar data-sticky-bar>
                         <label class="flex items-start gap-3 text-xs text-gray-700 lg:mt-4 lg:text-sm">
                             <input type="checkbox" name="agree_terms" value="1" required @checked(old('agree_terms')) class="mt-0.5 h-4 w-4 rounded text-primary-600 focus:ring-primary-500">
                             <span>{!! __('I have read and accept the :terms, :refunds, :delivery and :privacy.', [

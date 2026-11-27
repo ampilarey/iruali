@@ -104,7 +104,7 @@ class OrderVariantsTest extends TestCase
 
         $result = app(OrderService::class)->createOrderFromCart($this->customer, $this->shipping());
         $this->assertFalse($result['success']);
-        $this->assertStringContainsString('not enough stock', $result['message']);
+        $this->assertStringContainsString('are left (you asked for', $result['message']);
         $this->assertSame(2, $this->medium->fresh()->stock_quantity);
         $this->assertSame(0, Order::count());
 

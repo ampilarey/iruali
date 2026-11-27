@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Order #' . $order->order_number . ' - iruali')
+@section('title', __('Order #:number', ['number' => $order->order_number]).' - iruali')
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
@@ -133,7 +133,7 @@
                     </div>
                     @if($order->voucher_code && $order->voucher_discount > 0)
                     <div class="flex justify-between">
-                        <span class="text-green-700">Voucher ({{ $order->voucher_code }})</span>
+                        <span class="text-green-700">{{ __('Voucher (:code)', ['code' => $order->voucher_code]) }}</span>
                         <span class="text-green-700 force-ltr" dir="ltr">-{{ \App\Support\Money::format($order->voucher_discount) }}</span>
                     </div>
                     @endif
@@ -188,9 +188,9 @@
                 @if($payments->canPayOnline($order))
                     {{-- Paying is at the top of the page (orders/_pay_banner) --}}
                 @elseif($order->payment_method === 'bml' && $order->payment_status === 'paid')
-                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
+                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid by card on :date.', ['date' => $order->paid_at?->translatedFormat('j M Y, H:i')]) }}</p>
                 @elseif($order->payment_method === 'wallet' && $order->payment_status === 'paid')
-                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid from your wallet on :date.', ['date' => $order->paid_at?->format('j M Y, H:i')]) }}</p>
+                    <p class="mt-6 rounded-xl bg-green-50 text-green-800 text-sm font-medium p-4 flex items-center gap-2"><x-icon name="check" class="w-4 h-4" />{{ __('Paid from your wallet on :date.', ['date' => $order->paid_at?->translatedFormat('j M Y, H:i')]) }}</p>
                 @endif
                 @include('orders._manual_payment', ['order' => $order, 'slipAction' => route('orders.payment-slip', $order)])
 

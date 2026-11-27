@@ -26,7 +26,7 @@
                 @foreach($cart->items as $item)
                     <li class="flex items-start justify-between gap-3 py-2">
                         <span class="text-gray-800">{{ $item->product?->localized_name }} <span class="text-gray-500">× {{ $item->quantity }}</span></span>
-                        <span class="shrink-0 font-medium text-gray-900">{{ \App\Support\Money::format((float) $item->price * $item->quantity) }}</span>
+                        <span class="shrink-0 font-medium text-gray-900">{{ \App\Support\Money::format($item->subtotal) }}</span>
                     </li>
                 @endforeach
             </ul>

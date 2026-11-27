@@ -68,7 +68,7 @@ class WishlistController extends Controller
     {
         Wishlist::where('user_id', Auth::id())->delete();
 
-        NotificationService::success('Wishlist cleared successfully.');
+        NotificationService::success(__('Wishlist cleared successfully.'));
 
         return redirect()->route('wishlist');
     }

@@ -41,7 +41,7 @@ class LocaleController extends Controller
             $to = $to !== null ? LocaleUrl::alternateOf($to, $locale) : null;
         }
 
-        return redirect($to ?? url('/'))->with('success', 'Language changed successfully.');
+        return redirect($to ?? url('/'))->with('success', __('Language changed successfully.'));
     }
 
     /**

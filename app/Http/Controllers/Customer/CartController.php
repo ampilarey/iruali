@@ -223,7 +223,7 @@ class CartController extends Controller
     {
         $this->cartService->clearCart();
 
-        NotificationService::success('Cart cleared successfully!');
+        NotificationService::success(__('Cart cleared successfully!'));
 
         return redirect()->route('cart');
     }

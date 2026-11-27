@@ -87,7 +87,7 @@ class PreorderConcurrencyTest extends TestCase
             $this->assertCount($expectedWinners, $winners, json_encode($results));
             foreach (array_filter($results, fn ($r) => ! $r['success']) as $lost) {
                 // The pre-order message (under the lock), or the cart's own check when the winner was already in
-                $this->assertMatchesRegularExpression('/can\'t be pre-ordered any more|pre-order units? of|Available: 0/', $lost['message'], 'lost to a database error instead: '.$lost['message']);
+                $this->assertMatchesRegularExpression('/can\'t be pre-ordered any more|pre-order units? of|only 0 of/', $lost['message'], 'lost to a database error instead: '.$lost['message']);
             }
 
             $this->assertSame($expectedWinners, Order::whereIn('user_id', array_map(fn ($b) => $b->id, $buyers))->count());

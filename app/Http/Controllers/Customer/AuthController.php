@@ -183,11 +183,6 @@ class AuthController extends Controller
 
             return back()->withErrors(['code' => __('auth.invalid_2fa_code')]);
         }
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts('2fa-fails:'.$user->id, 5)) {
-            session()->forget(['2fa_user_id', '2fa_remember']);
-
-            return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong codes. Please wait 15 minutes, then sign in again.')]);
-        }
         \Illuminate\Support\Facades\RateLimiter::clear('2fa-fails:'.$user->id);
         StaffLockout::succeeded($user, $request->ip());
 

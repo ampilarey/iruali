@@ -239,7 +239,8 @@ class OrderService
 
             // The wallet covered everything due now (the order, or its booking fee), or points and a voucher
             // left nothing to pay (MVR 0, collected from the shop): no card step, it is paid
-            if (($walletPaid > 0 || (float) $order->total_amount <= 0) && $order->fresh()->cardAmount() <= 0) {
+            // (not a pre-order the shop must confirm first: that one is "paid" once the shop says yes)
+            if (($walletPaid > 0 || ((float) $order->total_amount <= 0 && ! $order->fresh()->confirm_first)) && $order->fresh()->cardAmount() <= 0) {
                 app(PaymentService::class)->confirm($order);
             }
 

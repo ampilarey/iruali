@@ -144,6 +144,7 @@ class ReturnsTest extends TestCase
         $part = $this->partA($order);
 
         $part->update(['delivered_at' => now()->subDays(8)]);
+        $order->forceFill(['paid_at' => now()->subDays(9)])->save(); // paid before it was delivered
         $this->requestReturn($order);
         $this->assertSame(0, ReturnRequest::count());
 
@@ -239,6 +240,19 @@ class ReturnsTest extends TestCase
 
         $this->post(route('admin.returns.refunded', $return), ['refund_reference' => 'TRF-X'])->assertSessionHas('error');
         $this->assertSame('approved', $return->fresh()->status);
+    }
+
+    public function test_the_return_days_count_from_the_payment_when_it_came_after_delivery(): void
+    {
+        $order = $this->deliveredOrder();
+        $part = $this->partA($order);
+        // Delivered 20 days ago (cash on delivery, a pay-later invoice), paid today
+        $part->forceFill(['delivered_at' => now()->subDays(20)])->save();
+        $order->forceFill(['paid_at' => now()])->save();
+        $this->assertTrue(app(\App\Services\ReturnService::class)->withinWindow($part->fresh()));
+        // Paid on delivery, 20 days ago: the window is over
+        $order->forceFill(['paid_at' => now()->subDays(20)])->save();
+        $this->assertFalse(app(\App\Services\ReturnService::class)->withinWindow($part->fresh()));
     }
 
     public function test_a_return_after_the_shop_was_paid_is_deducted_from_the_next_payout(): void

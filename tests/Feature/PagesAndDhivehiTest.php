@@ -111,4 +111,17 @@ class PagesAndDhivehiTest extends TestCase
         $admin->roles()->attach(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin'])->id);
         $this->actingAs($admin)->withSession(['error' => 'This is an iruali team account.'])->get(route('admin.sellers'))->assertOk()->assertSee('This is an iruali team account.');
     }
+
+    public function test_the_apps_cart_lines_are_at_todays_price_too(): void
+    {
+        $customer = User::factory()->create();
+        $product = Product::factory()->create(['seller_id' => $this->seller()->id, 'price' => 100, 'compare_price' => null, 'stock_quantity' => 10, 'is_active' => true]);
+        $cart = Cart::factory()->create(['user_id' => $customer->id, 'status' => 'active']);
+        CartItem::factory()->create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => 2, 'price' => 100]);
+        $product->forceFill(['price' => 150])->save();
+
+        \Laravel\Sanctum\Sanctum::actingAs($customer, ['*']);
+        $items = collect(json_decode($this->getJson('/api/v1/cart')->assertOk()->getContent(), true))->dot()->filter(fn ($v, $k) => str_ends_with((string) $k, 'items.0.subtotal'));
+        $this->assertEquals(300, $items->first(), 'the line, not only the cart total');
+    }
 }

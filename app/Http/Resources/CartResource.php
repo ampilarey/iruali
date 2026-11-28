@@ -35,7 +35,7 @@ class CartResource extends JsonResource
                         'quantity' => $item->quantity,
                         'price' => $item->price,
                         'product_variant_id' => $item->product_variant_id,
-                        'subtotal' => $item->quantity * $item->price,
+                        'subtotal' => $item->subtotal, // at today's price, as the cart's totals
                         'product' => new ProductResource($item->product),
                     ];
                 });

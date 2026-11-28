@@ -149,6 +149,12 @@ class PreorderConfirmService
 
         $order->refresh();
         Audit::record('preorder.confirmed', $order, ['by' => $by->id, 'amount' => $order->cardAmount(), 'due' => $due->toDateString(), 'order_number' => $order->order_number]);
+        // Nothing to pay (points or a voucher covered it): it is paid now that the shop has said yes
+        if ($order->cardAmount() <= 0) {
+            app(PaymentService::class)->confirm($order);
+
+            return true;
+        }
         $this->sendPayLink($order);
 
         return true;

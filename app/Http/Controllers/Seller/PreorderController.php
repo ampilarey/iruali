@@ -129,7 +129,15 @@ class PreorderController extends Controller
             return back()->withErrors(['received' => __('Enter how many units arrived.')]);
         }
 
-        $result = $preorders->receiveStock($product, $received);
+        try {
+            $result = $preorders->receiveStock($product, $received);
+        } catch (\Throwable $e) {
+            // Nothing was recorded: the same form may be sent again
+            if (! empty($data['submission'])) {
+                \Illuminate\Support\Facades\Cache::forget('preorders.arrived.'.$data['submission']);
+            }
+            throw $e;
+        }
 
         return back()->with('success', __('Stock recorded: :allocated went to waiting pre-orders and :stock are on sale. Customers whose pre-orders are complete have been emailed.', [
             'allocated' => $result['allocated'], 'stock' => $result['to_stock'],

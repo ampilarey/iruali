@@ -141,6 +141,16 @@ accounts, privacy and API; pages and Dhivehi; operations). Still with the owner:
   `~/deploy-live.sh` itself; nothing to do by hand. An uptime monitor on `/api/health/ready` now also
   reports a stopped cron (503 after 10 minutes without the scheduler).
 
+An independent review of the six batches (2026-11-28) found problems in some of the fixes; they were
+fixed in a follow-up PR (a dispute open on a part cancelled on its own, a sign-in dead end for owners
+with an unconfirmed email, the reset link and Google sign-in on such accounts, contact-detail hiding
+that hid prices). Known and left from that review: a dispute on a part paid entirely with points
+returns no points (a return does); earned points are taken back against the total with delivery, so a
+goods-only refund leaves a point or two; iruali's delivery fee is not refunded when one shop's part is
+cancelled (refund it by hand if that shop's was the only delivery); files zips made before 2026-11-28
+stay in the database backups' folder until they age out; a pay-later or cash order with a part
+cancelled has no "cancel this shop's part" (paid orders only).
+
 Left as leads, not changed (low risk, revisit if seen): a newsletter batch of 40 emails near the
 worker's 60-second limit; `php artisan cache:clear` resetting the queue heartbeat (one false "queue
 stopped" alert) and the failed-jobs marker; `SendTeamAlert` retrying an SMS after a Telegram error; the

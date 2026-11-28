@@ -56,6 +56,10 @@ class BackupFiles extends Command
             return self::SUCCESS;
         } catch (Throwable $e) {
             report($e);
+            // Tell the team, as a failed nightly backup does (AppServiceProvider, BackupHasFailed)
+            if (! $this->option('clean')) {
+                \App\Support\TeamAlerts::send('backup_failed', 'iruali: the weekly files backup failed: '.\Illuminate\Support\Str::limit($e->getMessage(), 150));
+            }
             $this->error('Files backup failed: '.$e->getMessage());
 
             return self::FAILURE;

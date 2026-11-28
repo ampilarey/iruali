@@ -9,6 +9,25 @@ use RuntimeException;
  */
 class SocialLoginException extends RuntimeException
 {
+    /** The account that has this email typed on it, never confirmed (unprovenEmail()). */
+    public ?\App\Models\User $unprovenAccount = null;
+
+    public string $unprovenEmail = '';
+
+    /**
+     * The provider vouched for an email that sits, unconfirmed, on an account that is someone's by its
+     * phone or another sign-in. Nobody is signed in: the person chooses ("it is my account" / "it is
+     * not"), as with a code by email (UnprovenEmailController).
+     */
+    public static function unprovenEmail(\App\Models\User $account, string $email): self
+    {
+        $e = new self(__('This email is on another account.'));
+        $e->unprovenAccount = $account;
+        $e->unprovenEmail = $email;
+
+        return $e;
+    }
+
     public static function failed(string $provider): self
     {
         return new self(__('We could not sign you in with :provider. Please try again.', ['provider' => $provider]));

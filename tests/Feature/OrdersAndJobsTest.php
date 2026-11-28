@@ -270,4 +270,51 @@ class OrdersAndJobsTest extends TestCase
         $this->artisan('orders:cancel-unpaid-card')->assertSuccessful();
         $this->assertSame('cancelled', $order->fresh()->status);
     }
+
+    public function test_a_dispute_open_on_a_cancelled_part_is_closed_and_cannot_refund_it_again(): void
+    {
+        $order = $this->order(30);
+        $part = $this->part($order, $this->shopB);
+        $dispute = \App\Models\Dispute::create(['order_id' => $order->id, 'seller_order_id' => $part->id, 'customer_id' => $this->customer->id, 'seller_id' => $this->shopB->id,
+            'type' => 'non_delivery', 'status' => 'open', 'details' => 'Nothing came.', 'amount_claimed' => $part->paidSubtotal(), 'opened_at' => now()]);
+
+        $this->assertNull(app(FulfilmentService::class)->cancelPart($part, $this->admin));
+        $due = (float) $order->fresh()->refund_amount;
+        $points = (int) $this->customer->fresh()->loyalty_points;
+
+        $this->assertSame('resolved_refund', $dispute->fresh()->status, 'closed by the cancellation');
+        $this->assertEquals(0, (float) $dispute->fresh()->amount_resolved);
+        $this->assertEquals(0, app(\App\Services\DisputeService::class)->maxClaim($part->fresh()));
+
+        // Deciding it again (a page left open) does nothing
+        $this->assertFalse(app(\App\Services\DisputeService::class)->resolve($dispute->fresh(), $this->admin, 'full', null, null));
+        $dispute->forceFill(['status' => 'open'])->save();
+        $this->assertFalse(app(\App\Services\DisputeService::class)->resolve($dispute->fresh(), $this->admin, 'full', null, null));
+        $this->assertEquals($due, (float) $order->fresh()->refund_amount);
+        $this->assertSame($points, (int) $this->customer->fresh()->loyalty_points);
+    }
+
+    public function test_pre_order_lines_of_a_cancelled_part_stop_waiting_for_stock(): void
+    {
+        $order = $this->order();
+        $part = $this->part($order, $this->shopB);
+        $item = $part->items()->sole();
+        $item->forceFill(['is_preorder' => true, 'preorder_allocated_at' => null, 'preorder_allocated_quantity' => 0])->save();
+        $this->assertSame(1, app(\App\Services\PreorderService::class)->waitingUnits((int) $item->product_id));
+
+        $stock = (int) $item->product->fresh()->stock_quantity;
+
+        $this->assertNull(app(FulfilmentService::class)->cancelPart($part, $this->admin));
+        $this->assertSame(0, app(\App\Services\PreorderService::class)->waitingUnits((int) $item->product_id));
+        $this->assertSame($stock, (int) $item->product->fresh()->stock_quantity, 'no unit on the shelf was handed to the cancelled line');
+    }
+
+    public function test_a_status_message_queued_before_it_kept_its_status_still_sends(): void
+    {
+        $order = $this->order();
+        $order->forceFill(['status' => 'shipped'])->save();
+        $old = new OrderStatusChanged($order->fresh());
+        $old->status = null; // as unserialized from a job queued by the older code
+        $this->assertStringContainsString('on its way', $old->toMail($this->customer)->subject);
+    }
 }

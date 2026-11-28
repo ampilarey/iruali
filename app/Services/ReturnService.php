@@ -46,6 +46,12 @@ class ReturnService
     public function withinWindow(SellerOrder $part): bool
     {
         $delivered = $part->delivered_at ?? $part->updated_at;
+        // An order paid after it was delivered (cash recorded later, a pay-later invoice): a return can only
+        // be asked for once it is paid (canRequest()), so the days count from the payment
+        $paidAt = $part->order?->paid_at;
+        if ($delivered && $paidAt && $paidAt->gt($delivered)) {
+            $delivered = $paidAt;
+        }
 
         return $delivered && $delivered->copy()->addDays(Company::returnWindowDays())->endOfDay()->isFuture();
     }

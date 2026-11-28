@@ -160,12 +160,12 @@ class SocialLoginService
                 throw SocialLoginException::emailInUse($email);
             }
             $this->allowed($existing, $label); // staff are never linked
-            // Someone else's account with this email typed on it: the provider vouched for the email,
-            // not for that account. The email comes off it and its owner gets an account of their own.
+            // An account with this email typed on it and never confirmed, that is someone's by its phone
+            // or another sign-in: the provider vouched for the email, not for that account. It may be
+            // the same person (who never confirmed the email) or not, so nothing is changed here: they
+            // choose on the next page (SocialLoginController → UnprovenEmailController).
             if ($existing->emailIsUnproven()) {
-                $existing->releaseUnprovenEmail();
-
-                return [$this->createCustomer($profile, $email, $referralCode), true];
+                throw SocialLoginException::unprovenEmail($existing, $email);
             }
 
             $this->link($existing, $profile);

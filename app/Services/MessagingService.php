@@ -140,26 +140,39 @@ class MessagingService
     {
         $hidden = __('[contact details hidden]');
         $patterns = [
-            '/[\w.+-]+@[\w-]+(\.[\w-]+)*/u',                                    // email addresses ("ali@gmail" too)
+            '/(?=[\w.+-]*[A-Za-z])[\w.+-]+@[\w-]+(\.[\w-]+)*/u',                 // email addresses ("ali@gmail" too; not "5@100")
             '#\b(?:https?://|www\.)\S+#iu',                                        // links
-            // bare domains
-            '/\b[\w-]+\.(?:com|mv|net|org|io|me|co|shop|store|app|link|ly|xyz|biz|info|online|site|top|club|in|lk|uk|us|ae|cc|tv|page|live|pro|dev|bio|to|gg)\b\S*/iu',
+            // bare domains (endings that are also everyday words, "Thanks.To", "fits.Top", are left out)
+            '/\b[\w-]+\.(?:com|mv|net|org|io|me|co|shop|store|app|link|ly|xyz|biz|info|lk|uk|ae|cc|tv|dev|bio|gg)\b\S*/iu',
             '/\b(?:wa\.me|t\.me|viber|telegram|whatsapp|instagram|insta|facebook|fb|tiktok|snapchat)\b\S*/iu',
             '/(?<![\w@])@[A-Za-z0-9_.]{3,}/u',                                     // @handles
-            '/(?:\+?\d[\s().,\/\\_*-]*){7,}/u',                                   // phone numbers: 7+ digits, whatever joins them
+            '/(?:\+?\d[\s().,\/\\\\_*-]*){7,}/u',                                   // phone numbers: 7+ digits, whatever joins them
             '/(?:\b(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)\b[\s,.\/_-]*){7,}/iu', // ...or written as words
         ];
 
-        // Dates (12/11/2026, 12.11.26) are not phone numbers: set aside while the patterns run
-        $dates = [];
-        $text = preg_replace_callback('#\b\d{1,2}[/.-]\d{1,2}[/.-](?:\d{4}|\d{2})\b#u', function ($m) use (&$dates) {
-            $dates[] = $m[0];
+        // Set aside while the patterns run, so they are not taken for phone numbers: real dates
+        // (12/11/2026, 12.11.26, 2026-11-27), prices (12,500.00, 950.00) and short lists of small
+        // numbers (sizes 42, 43, 44)
+        $kept = [];
+        $keep = function (string $value) use (&$kept): string {
+            $kept[] = $value;
 
-            return "\u{1}".(count($dates) - 1)."\u{1}";
-        }, $text) ?? $text;
+            return "\u{1}".chr(64 + count($kept))."\u{1}"; // a letter, never a digit the phone pattern could join
+        };
+        $aside = [
+            '#\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})\b#u' => fn ($m) => (int) $m[1] >= 1 && (int) $m[2] >= 1 && min((int) $m[1], (int) $m[2]) <= 12 && max((int) $m[1], (int) $m[2]) <= 31
+                && (strlen($m[3]) === 2 || in_array(substr($m[3], 0, 2), ['19', '20'], true)),
+            '#\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])\b#u' => fn ($m) => true,
+            '#(?<![\d,.])\d{1,3},\d{3}(?:\.\d{1,2})?(?![\d,])#u' => fn ($m) => true,
+            '#(?<![\d,.])\d{1,6}\.\d{2}(?![\d.])#u' => fn ($m) => true,
+            '#(?<![\d,.])\d{1,2}(?:,\s+\d{1,2}(?![\d.]))+#u' => fn ($m) => true,
+        ];
+        foreach ($aside as $pattern => $real) {
+            $text = preg_replace_callback($pattern, fn ($m) => count($kept) < 26 && $real($m) ? $keep($m[0]) : $m[0], $text) ?? $text;
+        }
         $masked = preg_replace($patterns, $hidden, $text) ?? $text;
 
-        return preg_replace_callback('/\x{1}(\d+)\x{1}/u', fn ($m) => $dates[(int) $m[1]] ?? '', $masked) ?? $masked;
+        return preg_replace_callback('/\x{1}([A-Z])\x{1}/u', fn ($m) => $kept[ord($m[1]) - 65] ?? '', $masked) ?? $masked;
     }
 
     /**

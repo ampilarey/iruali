@@ -16,7 +16,7 @@ class MarketingController extends Controller
     public function unsubscribe(Request $request, int $user)
     {
         $row = User::find($user);
-        if ($request->isMethod('get') && $row && ! $row->marketing_opt_out_at) {
+        if (! $request->isMethod('post') && $row && ! $row->marketing_opt_out_at) {
             return view('newsletter.action', ['title' => __('Stop offers and reminders by email?'), 'button' => __('Unsubscribe'), 'email' => $row->email]);
         }
         if ($row && ! $row->marketing_opt_out_at) {

@@ -222,7 +222,8 @@ class ItemRequestService
      */
     public function releaseFromCancelledOrder(Order $order): void
     {
-        if ($order->payment_status === 'paid') {
+        // Nothing was ever paid on it (a booking fee counts as paid: that order was really placed)
+        if (in_array($order->payment_status, ['paid', 'deposit_paid'], true) || $order->availability_declined_at !== null) {
             return;
         }
         ItemRequest::where('order_id', $order->id)->where('status', ItemRequest::ORDERED)

@@ -253,27 +253,38 @@ class PaymentService
         // From "due" in one statement: recorded once, whatever is clicked twice. With the amount the admin
         // saw (and sent), only while that is still what is due: a refund added since (another shop's
         // dispute) is not closed under a reference that never paid it
-        $changes = ['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()];
-        $query = Order::whereKey($order->id)->where('refund_status', 'due');
-        if ($amountSeen !== null) {
-            $query->where('refund_amount', round($amountSeen, 2));
-        }
-        if ($query->update($changes) === 0) {
+        // One transaction under the order's lock (flagRefund() takes the same): a refund flagged at the
+        // same moment is either part of what is closed here or stays due, never marked sent by mistake
+        $changes = [];
+        $done = DB::transaction(function () use ($order, $reference, $amountSeen, &$changes) {
+            Order::whereKey($order->id)->lockForUpdate()->first(['id']);
+            $changes = ['refund_status' => 'refunded', 'refund_reference' => $reference, 'refunded_at' => now()];
+            $query = Order::whereKey($order->id)->where('refund_status', 'due');
+            if ($amountSeen !== null) {
+                $query->where('refund_amount', round($amountSeen, 2));
+            }
+            if ($query->update($changes) === 0) {
+                return false;
+            }
+            // The amount closed, as it was in the row that changed (not as this model was loaded)
+            $changes['refund_amount'] = $amountSeen !== null ? round($amountSeen, 2) : (float) Order::whereKey($order->id)->value('refund_amount');
+            $order->forceFill($changes)->syncOriginal();
+            // Every refund due on the order was sent together, under this reference
+            \App\Models\Refund::where('order_id', $order->id)->where('status', \App\Models\Refund::DUE)->update([
+                'status' => \App\Models\Refund::REFUNDED,
+                'reference' => $reference,
+                'method' => str_starts_with($reference, 'WALLET-') ? 'wallet' : ($order->payment_method === 'bml' ? 'card' : 'bank'),
+                'approved_by' => $order->getAttribute('refund_approved_by'),
+                'approved_at' => $order->getAttribute('refund_approved_at'),
+                'recorded_by' => auth()->id(),
+                'refunded_at' => $changes['refunded_at'],
+            ]);
+
+            return true;
+        });
+        if (! $done) {
             return false;
         }
-        // The amount closed, as it was in the row that changed (not as this model was loaded)
-        $changes['refund_amount'] = $amountSeen !== null ? round($amountSeen, 2) : (float) Order::whereKey($order->id)->value('refund_amount');
-        $order->forceFill($changes)->syncOriginal();
-        // Every refund due on the order was sent together, under this reference
-        \App\Models\Refund::where('order_id', $order->id)->where('status', \App\Models\Refund::DUE)->update([
-            'status' => \App\Models\Refund::REFUNDED,
-            'reference' => $reference,
-            'method' => str_starts_with($reference, 'WALLET-') ? 'wallet' : ($order->payment_method === 'bml' ? 'card' : 'bank'),
-            'approved_by' => $order->getAttribute('refund_approved_by'),
-            'approved_at' => $order->getAttribute('refund_approved_at'),
-            'recorded_by' => auth()->id(),
-            'refunded_at' => $changes['refunded_at'],
-        ]);
         \App\Support\Audit::record('refund.recorded', $order, ['amount' => $order->refund_amount, 'reference' => $reference, 'order_number' => $order->order_number]);
 
         app(OrderNotifier::class)->sendToCustomer($order, new RefundRecorded($order));

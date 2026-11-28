@@ -59,6 +59,9 @@ class CustomerAccountService
         if ($problem = $this->notACustomer($duplicate) ?? $this->notACustomer($keep)) {
             return $problem;
         }
+        if ($keep->merged_into_id !== null || ! $keep->is_active) {
+            return 'The account to keep is closed (merged or inactive). Choose an open account.';
+        }
 
         DB::transaction(function () use ($duplicate, $keep, $by) {
             foreach (self::OWNED as [$table, $column]) {
@@ -137,7 +140,10 @@ class CustomerAccountService
         if ($problem = $this->eraseProblem($user)) {
             return $problem;
         }
-        $email = $user->email;
+        // Rows that only carry the email (a visitor's complaint or thread, a newsletter signup) are theirs
+        // only when the account's email was confirmed: anyone can type someone else's address on a new
+        // account, and deleting it must not wipe that person's things
+        $email = $user->isEmailVerified() ? $user->email : null;
         $phone = \App\Services\Sms\PhoneNumber::normalize($user->phone);
         // Files of theirs to delete once the rows are changed: [disk, path]
         $files = collect([['public', $user->avatar]])
@@ -148,13 +154,17 @@ class CustomerAccountService
             // Their review photos and the photos of the products made for their item requests (with their WebP copies)
             ->merge(DB::table('review_photos')->whereIn('product_review_id', DB::table('product_reviews')->where('user_id', $user->id)->select('id'))->pluck('path')->map(fn ($p) => ['public', $p]))
             ->merge(DB::table('product_images')->whereIn('product_id', $this->requestProducts($user))->pluck('url')->map(fn ($p) => ['public', $p]))
-            ->merge(DB::table('complaints')->where('user_id', $user->id)->whereNotNull('photos')->pluck('photos')
+            ->merge(DB::table('complaints')->where(fn ($q) => $q->where('user_id', $user->id)->when(filled($email), fn ($q) => $q->orWhere('email', $email)))->whereNotNull('photos')->pluck('photos')
                 ->flatMap(fn ($photos) => (array) json_decode((string) $photos, true))->map(fn ($p) => [\App\Models\Complaint::DISK, $p]))
             ->filter(fn ($file) => filled($file[1]) && is_string($file[1]));
         // Phones the texts went to: their own, and the delivery and gift numbers on their orders
         $phones = collect([$phone])
             ->merge(Order::where('user_id', $user->id)->get(['shipping_phone', 'gift_receiver_phone'])->flatMap(fn ($o) => [$o->shipping_phone, $o->gift_receiver_phone]))
-            ->map(fn ($p) => \App\Services\Sms\PhoneNumber::normalize($p))->filter()->unique()->values()->all();
+            ->map(fn ($p) => \App\Services\Sms\PhoneNumber::normalize($p))->filter()->unique()->values();
+        // ...but not a delivery or gift number that is someone else's own account number (a relative's):
+        // the texts to it are mostly theirs
+        $others = User::whereKeyNot($user->id)->whereNotNull('phone')->pluck('phone')->map(fn ($p) => \App\Services\Sms\PhoneNumber::normalize($p))->filter()->flip();
+        $phones = $phones->reject(fn ($p) => $p !== $phone && $others->has($p))->values()->all();
         $requestProducts = $this->requestProducts($user);
 
         DB::transaction(function () use ($user, $by, $reason, $email, $phones, $requestProducts) {
@@ -174,7 +184,7 @@ class CustomerAccountService
             }
             DB::table('complaints')->where('user_id', $user->id)->when(filled($email), fn ($q) => $q->orWhere('email', $email))
                 ->update(['name' => 'Erased customer', 'email' => $erasedEmail, 'phone' => null, 'details' => 'Removed', 'photos' => null]);
-            DB::table('newsletter_deliveries')->where('user_id', $user->id)->when(filled($email), fn ($q) => $q->orWhere('email', $email))->update(['email' => $erasedEmail]);
+            DB::table('newsletter_deliveries')->where('user_id', $user->id)->when(filled($email), fn ($q) => $q->orWhere('email', $email))->update(['email' => DB::raw("CONCAT('erased-', id, '@iruali.invalid')")]); // one per row: (issue, email) is unique
             DB::table('shop_discount_redemptions')->where('user_id', $user->id)->update(['email' => null]);
             // Threads they started as a visitor before having an account
             DB::table('conversations')->where('customer_id', $user->id)->when(filled($email), fn ($q) => $q->orWhere('guest_email', $email))
@@ -192,7 +202,7 @@ class CustomerAccountService
             DB::table('gift_cards')->where('purchaser_id', $user->id)->update(['message' => null]);
             DB::table('gift_cards')->where('purchaser_id', $user->id)->whereNotIn('status', ['pending', 'active'])->update(['recipient_name' => null, 'recipient_email' => $erasedEmail]);
             // The products made for their item requests carry a copy of the request and its photo
-            DB::table('products')->whereIn('id', $requestProducts)->update(['description' => json_encode(['en' => ''])]);
+            DB::table('products')->whereIn('id', $requestProducts)->update(['description' => json_encode(['en' => '']), 'search_text' => '']);
             DB::table('product_images')->whereIn('product_id', $requestProducts)->delete();
             // The old and new numbers staff wrote down when they changed the phone
             DB::table('audit_logs')->where('action', 'customer.phone_changed')->where('subject_type', User::class)->where('subject_id', $user->id)->update(['changes' => null]);
@@ -203,7 +213,8 @@ class CustomerAccountService
             DB::table('messages')->where('sender_id', $user->id)->update(['body' => 'Message removed', 'original_body' => null, 'attachment_path' => null]);
             // The texts sent to their number (kept for the SMS costs), without the number or the wording
             if ($phones !== []) {
-                DB::table('sms_messages')->whereIn('to', $phones)->update(['to' => 'erased', 'message' => 'Removed', 'provider_response' => null]);
+                // (not one still held for the morning: it has to go out first)
+                DB::table('sms_messages')->whereIn('to', $phones)->where('status', '!=', 'held')->update(['to' => 'erased', 'message' => 'Removed', 'provider_response' => null]);
             }
             DB::table('quote_requests')->where('customer_id', $user->id)->update(['business_name' => 'Erased customer', 'business_tin' => null, 'business_address' => 'Erased', 'notes' => null]);
             DB::table('return_requests')->where('user_id', $user->id)->update(['details' => null, 'photo_path' => null]);

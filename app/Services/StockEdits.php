@@ -86,7 +86,7 @@ class StockEdits
      * @param  array<string, mixed>  $original  the form's original[...] fields
      * @return array<string, mixed>
      */
-    public function fromProductForm(Product $product, array $form, array $original): array
+    public function fromProductForm(Product $product, array $form, array $original, bool $apply = true): array
     {
         $products = [];
         if (! $product->has_variants && empty($form['product']['has_variants']) && array_key_exists('stock_quantity', $form['product'])) {
@@ -104,7 +104,11 @@ class StockEdits
             return $form;
         }
 
-        $this->apply($products, $variants, $original, 'product_form');
+        // $apply false: this form's stock change was already saved (the same form sent again); only
+        // today's numbers go back into the form
+        if ($apply) {
+            $this->apply($products, $variants, $original, 'product_form');
+        }
 
         if ($products !== []) {
             $form['product']['stock_quantity'] = (int) Product::whereKey($product->id)->value('stock_quantity');

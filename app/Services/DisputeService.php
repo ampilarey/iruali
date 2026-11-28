@@ -98,6 +98,10 @@ class DisputeService
      */
     public function maxClaim(SellerOrder $part): float
     {
+        // A part cancelled on its own was refunded then (FulfilmentService::cancelPart()): nothing is left on it
+        if ($part->cancelled_alone_at !== null) {
+            return 0.0;
+        }
         $order = $part->order;
         $cap = $part->paidSubtotal();
         if ($part->delivery_fee_to_shop) {
@@ -323,9 +327,11 @@ class DisputeService
         }
         $partPoints = (int) floor($redeemed * $partShare / $total);
         $backOnPart = (int) ReturnRequest::where('seller_order_id', $part->id)->sum('points_returned')
-            + (int) Dispute::where('seller_order_id', $part->id)->whereKeyNot($dispute->id)->sum('points_returned');
+            + (int) Dispute::where('seller_order_id', $part->id)->whereKeyNot($dispute->id)->sum('points_returned')
+            + (int) $part->points_returned; // the part cancelled on its own
         $backOnOrder = (int) ReturnRequest::where('order_id', $order->id)->sum('points_returned')
-            + (int) Dispute::where('order_id', $order->id)->whereKeyNot($dispute->id)->sum('points_returned');
+            + (int) Dispute::where('order_id', $order->id)->whereKeyNot($dispute->id)->sum('points_returned')
+            + (int) SellerOrder::where('order_id', $order->id)->sum('points_returned');
 
         $due = (int) floor($partPoints * min(1, $refund / $partPaid));
 

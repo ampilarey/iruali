@@ -130,7 +130,9 @@ function initPicker(form) {
     if (select) {
         select.addEventListener('invalid', (e) => {
             e.preventDefault();
-            if (hint) hint.classList.remove('hidden');
+            // Everything chosen but that combination does not exist: "not available" already says so
+            const complete = Object.keys(chosen).length === groups.length;
+            if (hint && !complete) hint.classList.remove('hidden');
             const target = groups.find((g) => !chosen[g.dataset.optionGroup]) || groups[0];
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'center' });

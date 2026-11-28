@@ -193,6 +193,29 @@ class PhoneLoginTest extends TestCase
         \Illuminate\Support\Facades\Notification::assertSentOnDemandTimes(\App\Notifications\SignInCode::class, 1);
     }
 
+    public function test_an_owner_with_an_unconfirmed_email_gets_the_code_by_sms_and_no_reset_link_goes_to_that_email(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        // Signed up by mobile, typed an email at setup and never confirmed it, no password
+        $user = $this->customerWithEmail();
+        $user->forceFill(['has_password' => false, 'email_verified_at' => null])->save();
+        $this->assertTrue($user->fresh()->emailIsUnproven());
+
+        // A code by email would be refused (the email proves nothing): it goes to their mobile
+        $this->post(route('login.phone.start'), ['login' => '7774321']);
+        \Illuminate\Support\Facades\Notification::assertSentOnDemand(\App\Notifications\SignInCode::class, fn ($n, $channels) => $channels === ['sms']);
+
+        // Whoever holds the email can't get a reset link for the account (website or app)
+        $this->post(route('password.email'), ['email' => $user->email])->assertSessionHas('status');
+        $this->postJson('/api/v1/forgot-password', ['email' => $user->email])->assertOk();
+        \Illuminate\Support\Facades\Notification::assertNotSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class);
+
+        // The owner, signed in, can still ask for it (a first password from My Account)
+        $this->travel(2)->minutes(); // the reset broker allows one request a minute per account
+        $this->actingAs($user->fresh())->post(route('account.password.link'));
+        \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class);
+    }
+
     public function test_forgot_password_is_a_text_message_even_when_signing_in_by_email(): void
     {
         $user = $this->customerWithEmail();

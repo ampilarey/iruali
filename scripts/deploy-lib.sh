@@ -189,7 +189,7 @@ verify_site() {
   fi
   token="$(health_token)"
   sleep 2
-  health=$(curl -fsS -m 20 ${token:+-H "X-Health-Token: $token"} "$url/api/health" 2>&1) || { say "health check $url/api/health failed: $health"; return 1; }
+  health=$(curl -fsSL -m 20 ${token:+-H "X-Health-Token: $token"} "$url/api/health" 2>&1) || { say "health check $url/api/health failed: $health"; return 1; }
   say "health: $health"
   echo "$health" | grep -q '"status":"healthy"' || { say "health does not say healthy"; return 1; }
   if echo "$health" | grep -q '"commit":'; then
@@ -201,12 +201,12 @@ verify_site() {
   # The page's own CSS must load: health and the smoke test only read HTML, and a docroot that did not
   # get the new build/ serves pages with no styles or scripts
   local page css code
-  page=$(curl -fsS -m 20 "$url/" 2>&1) || { say "home page $url/ failed: ${page:0:200}"; return 1; }
+  page=$(curl -fsSL -m 20 "$url/" 2>&1) || { say "home page $url/ failed: ${page:0:200}"; return 1; }
   css=$(printf '%s' "$page" | grep -oE '/build/assets/[A-Za-z0-9._-]+\.css' | head -1)
   if [[ -z "$css" ]]; then
     say "the home page links no built stylesheet (/build/assets/…css)"; return 1
   fi
-  code=$(curl -sS -o /dev/null -m 20 -w '%{http_code}' "$url$css" 2>&1)
+  code=$(curl -sSL -o /dev/null -m 20 -w '%{http_code}' "$url$css" 2>&1)
   [[ "$code" == "200" ]] || { say "the stylesheet $css answers $code, not 200 (is public/build in the docroot?)"; return 1; }
   say "assets: $css 200"
 

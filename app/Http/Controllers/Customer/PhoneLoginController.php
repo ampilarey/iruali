@@ -104,8 +104,12 @@ class PhoneLoginController extends AuthController
             return $this->home($pending);
         }
 
-        // No password: a code by email when the account has one (saves an SMS), else by SMS
-        return $this->sendCode($request, $pending, $user && filled($user->email) ? 'mail' : 'sms', 'login');
+        // No password: a code by email when the account has one (saves an SMS), else by SMS. An email
+        // that was never confirmed can't sign anyone in (User::emailIsUnproven()): the owner, who typed
+        // their mobile number, gets the code there instead of a dead end
+        $byMail = $user && filled($user->email) && ! (isset($pending['phone']) && $user->emailIsUnproven());
+
+        return $this->sendCode($request, $pending, $byMail ? 'mail' : 'sms', 'login');
     }
 
     /**

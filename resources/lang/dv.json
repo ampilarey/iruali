@@ -3581,5 +3581,6 @@
     "Voucher (:code)": "ވައުޗަރު (:code)",
     "My wishlist": "އަހަރެންގެ ވިޝްލިސްޓް",
     "+:count more item|+:count more items": "+:count ތަކެތި އިތުރަށް|+:count ތަކެތި އިތުރަށް",
-    ":count item in your wishlist|:count items in your wishlist": "ވިޝްލިސްޓުގައި :count ތަކެތި|ވިޝްލިސްޓުގައި :count ތަކެތި"
+    ":count item in your wishlist|:count items in your wishlist": "ވިޝްލިސްޓުގައި :count ތަކެތި|ވިޝްލިސްޓުގައި :count ތަކެތި",
+    "This email is on another account.": "މި އީމެއިލް އޮތީ އެހެން އެކައުންޓެއްގައި."
 }

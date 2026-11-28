@@ -46,7 +46,7 @@ class NewsletterController extends Controller
     public function confirm(Request $request, int $subscriber)
     {
         $row = NewsletterSubscriber::find($subscriber);
-        if ($request->isMethod('get') && $row && ! $row->isConfirmed()) {
+        if (! $request->isMethod('post') && $row && ! $row->isConfirmed()) {
             return view('newsletter.action', ['title' => __('Confirm your subscription'), 'button' => __('Yes, send me the newsletter'), 'email' => $row->email]);
         }
         if ($row && ! $row->isConfirmed()) {
@@ -65,7 +65,7 @@ class NewsletterController extends Controller
     {
         $row = NewsletterSubscriber::find($subscriber);
         $email = $row->email ?? $request->query('email', '');
-        if ($request->isMethod('get') && $row) {
+        if (! $request->isMethod('post') && $row) {
             return view('newsletter.action', ['title' => __('Unsubscribe from our newsletter?'), 'button' => __('Unsubscribe'), 'email' => $email]);
         }
         $row?->delete();

@@ -110,7 +110,7 @@
                 <div data-product-stock class="{{ $hasVariants ? 'hidden' : '' }}">
                     <label for="stock_quantity" class="block text-sm font-medium text-gray-700">Stock *</label>
                     <input id="stock_quantity" name="stock_quantity" type="number" min="0" @disabled($hasVariants) class="{{ $field }}" value="{{ old('stock_quantity', $product->stock_quantity) }}">
-                    @if($product->exists)<input type="hidden" name="original[products][{{ $product->id }}]" value="{{ old('original.products.'.$product->id, $product->stock_quantity) }}">@endif
+                    @if($product->exists)<input type="hidden" name="stock_token" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="original[products][{{ $product->id }}]" value="{{ old('original.products.'.$product->id, $product->stock_quantity) }}">@endif
                     <p class="mt-1 text-xs text-gray-500 {{ $hasVariants ? '' : 'hidden' }}" data-stock-derived>{{ __('With variants, stock is the total of the variants below.') }}</p>
                 </div>
                 <div>

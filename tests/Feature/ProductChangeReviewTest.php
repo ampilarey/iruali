@@ -582,6 +582,19 @@ class ProductChangeReviewTest extends TestCase
         }
     }
 
+    public function test_the_same_product_form_sent_twice_changes_the_stock_once(): void
+    {
+        $this->shop->forceFill(['auto_approve_listings' => true])->save();
+        $product = $this->liveProduct(['sku' => 'TEE-TWICE', 'stock_quantity' => 10]);
+        $form = $this->form($product, ['stock_quantity' => 15, 'original' => ['products' => [$product->id => 10]], 'stock_token' => (string) \Illuminate\Support\Str::uuid()]);
+
+        $this->actingAs($this->shop)->put(route('seller.products.update', $product), $form)->assertSessionHasNoErrors();
+        $this->assertSame(15, (int) $product->fresh()->stock_quantity);
+        // A double tap, or Back then Save: not another +5
+        $this->put(route('seller.products.update', $product), $form)->assertSessionHasNoErrors();
+        $this->assertSame(15, (int) $product->fresh()->stock_quantity);
+    }
+
     public function test_variant_stock_from_the_product_form_is_saved_as_the_difference(): void
     {
         $this->shop->forceFill(['auto_approve_listings' => true])->save();

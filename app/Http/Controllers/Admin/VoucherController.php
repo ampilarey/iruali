@@ -73,7 +73,7 @@ class VoucherController extends Controller
             'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9]+$/'],
             'count' => 'required|integer|min:1|max:1000',
             'type' => 'required|in:fixed,percent',
-            'amount' => 'required|numeric|min:1|max:100000',
+            'amount' => ['required', 'numeric', 'min:1', $request->input('type') === 'percent' ? 'max:100' : 'max:100000'],
             'min_order' => 'nullable|numeric|min:0',
             'valid_until' => 'required|date|after:today',
         ], ['name.regex' => 'Use letters and numbers only, e.g. EID26.']);

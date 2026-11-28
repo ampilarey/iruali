@@ -158,6 +158,13 @@ class AuthController extends Controller
             return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong tries. This account is locked until :time.', ['time' => $until->format('H:i')])]);
         }
 
+        // Locked after too many wrong codes: nothing is tried (a recovery code is not used up for nothing)
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts('2fa-fails:'.$user->id, 5)) {
+            session()->forget(['2fa_user_id', '2fa_remember']);
+
+            return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong codes. Please wait 15 minutes, then sign in again.')]);
+        }
+
         $code = strtoupper(trim($request->code));
         $valid = $user->useRecoveryCode($code)
             || (ctype_digit($code) && strlen($code) === 6 && $this->google2fa->verifyKey(decrypt($user->two_factor_secret), $code));
@@ -175,11 +182,6 @@ class AuthController extends Controller
             }
 
             return back()->withErrors(['code' => __('auth.invalid_2fa_code')]);
-        }
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts('2fa-fails:'.$user->id, 5)) {
-            session()->forget(['2fa_user_id', '2fa_remember']);
-
-            return redirect()->route('login.email')->withErrors(['email' => __('Too many wrong codes. Please wait 15 minutes, then sign in again.')]);
         }
         \Illuminate\Support\Facades\RateLimiter::clear('2fa-fails:'.$user->id);
         StaffLockout::succeeded($user, $request->ip());

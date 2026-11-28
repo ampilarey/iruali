@@ -216,7 +216,7 @@ class FulfilmentService
      */
     public function cancelPart(SellerOrder $part, User $admin): ?string
     {
-        $done = DB::transaction(function () use ($part) {
+        $done = DB::transaction(function () use ($part, $admin) {
             // The order locked, as every other change to it is (a cancel, a shop moving its part on)
             $order = Order::whereKey($part->order_id)->lockForUpdate()->first();
             $part->refresh();
@@ -240,7 +240,19 @@ class FulfilmentService
                 if ($item->product && $item->stockedQuantity() > 0) {
                     app(OrderService::class)->restock($item->product, $item->product_variant_id, $item->stockedQuantity());
                 }
+                // A pre-order line still waiting for stock stops waiting: it no longer counts against the
+                // product's pre-order limit, is not flagged late, and stock that arrives (or the units
+                // just put back) is not handed to it. The order itself is still live, so the pre-order
+                // queries (PreorderService), which look at the order's status, would keep counting it.
+                if ($item->is_preorder && $item->preorder_allocated_at === null) {
+                    $item->forceFill(['preorder_allocated_at' => now()])->save();
+                }
             }
+            // A dispute still open on the part is closed by this refund: decided again, it would refund twice
+            \App\Models\Dispute::where('seller_order_id', $part->id)->whereIn('status', \App\Enums\DisputeStatus::openValues())->update([
+                'status' => $refund > 0 ? 'resolved_refund' : 'resolved_rejected', 'amount_resolved' => 0, 'resolved_at' => now(), 'admin_id' => $admin->id,
+                'resolution_note' => 'Closed: the shop\'s part was cancelled'.($refund > 0 ? ' and '.\App\Support\Money::format($refund).' refunded for it.' : '.'),
+            ]);
             app(PreorderService::class)->afterOrderReversed($order);
             app(GstService::class)->partCancelled($part);
             app(OrderService::class)->reverseDisputeDeductions($order, $part->id);
@@ -262,7 +274,9 @@ class FulfilmentService
         \App\Support\Audit::record('order.part_cancelled', $order, ['shop' => $part->shopName(), 'refund' => (float) $part->cancelled_refund, 'order_number' => $order->order_number, 'by' => $admin->id]);
         $this->syncOrder($order);
         app(OrderService::class)->takeBackEarnedPoints($order->fresh());
-        app(OrderNotifier::class)->cancelledToShops($order, (int) $part->seller_id);
+        if ($part->seller_id) { // a part whose shop account is gone has nobody to tell
+            app(OrderNotifier::class)->cancelledToShops($order, (int) $part->seller_id);
+        }
         app(OrderNotifier::class)->sendToCustomer($order, new \App\Notifications\OrderPartCancelled($order, $part->fresh()));
 
         return null;

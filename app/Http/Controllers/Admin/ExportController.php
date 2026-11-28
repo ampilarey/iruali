@@ -151,8 +151,8 @@ class ExportController extends Controller
     {
         // Every refund owed on an order (a cancellation, a dispute, a payment made twice) is its own row in
         // refunds, dated when it became due: two refunds on one order are both counted
-        $kind = "CASE WHEN reason LIKE 'Dispute%' THEN 'Dispute' WHEN reason LIKE 'Order cancelled%' THEN 'Cancelled order' ELSE 'Payment' END";
-        $why = "CASE WHEN reason LIKE 'Dispute%' THEN 'Dispute decided' ELSE COALESCE(reason, 'Other') END";
+        $kind = "CASE WHEN reason LIKE 'Dispute%' THEN 'Dispute' WHEN reason LIKE 'Order cancelled%' THEN 'Cancelled order' WHEN reason LIKE 'Part cancelled%' THEN 'Cancelled shop part' ELSE 'Payment' END";
+        $why = "CASE WHEN reason LIKE 'Dispute%' THEN 'Dispute decided' WHEN reason LIKE 'Part cancelled%' THEN 'A shop could not supply' WHEN reason LIKE 'BML payment did not match%' THEN 'Payment did not match the order' ELSE COALESCE(reason, 'Other') END";
         $orders = DB::table('refunds')->whereBetween('created_at', [$from, $to])
             ->selectRaw("{$kind} AS kind, {$why} AS reason, status, COUNT(*) AS refunds, ROUND(SUM(amount), 2) AS amount")
             ->groupByRaw("{$kind}, {$why}, status")->get();

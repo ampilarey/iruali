@@ -47,6 +47,10 @@ class SocialLoginController extends Controller
             [$user, $created] = $this->social->resolve($profile, is_string($referral) ? $referral : null);
             $this->social->allowed($user, $driver->label());
         } catch (SocialLoginException $e) {
+            if ($e->unprovenAccount) {
+                return UnprovenEmailController::hold($request, $e->unprovenAccount, $e->unprovenEmail);
+            }
+
             return redirect()->route('login')->withErrors(['social' => $e->getMessage()]);
         }
 

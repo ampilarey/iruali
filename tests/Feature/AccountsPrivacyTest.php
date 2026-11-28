@@ -240,4 +240,52 @@ class AccountsPrivacyTest extends TestCase
             ->post(route('2fa.verify'), ['code' => (new Google2FA)->getCurrentOtp($secret)])->assertRedirect(route('login.email'));
         $this->assertGuest();
     }
+
+    public function test_deleting_an_account_with_an_unconfirmed_email_leaves_other_peoples_things_alone(): void
+    {
+        // A visitor's complaint and a relative's texts, and an account that only typed the same email
+        $complaint = \App\Models\Complaint::create(['reference' => 'C-1', 'name' => 'Victim', 'email' => 'victim@example.com', 'category' => 'other', 'details' => 'My parcel was wet.']);
+        $sister = User::factory()->create(['phone' => '7775555', 'phone_verified_at' => now()]);
+        $impostor = User::factory()->create(['email' => 'victim@example.com', 'email_verified_at' => null]);
+        Order::factory()->create(['user_id' => $impostor->id, 'status' => 'delivered', 'payment_status' => 'paid', 'shipping_phone' => '7775555']);
+        SmsMessage::create(['to' => '+9607775555', 'message' => 'Your own order is ready', 'status' => 'sent', 'created_at' => now()]);
+
+        $this->assertNull(app(CustomerAccountService::class)->erase($impostor, null, 'asked'));
+        $this->assertSame('My parcel was wet.', $complaint->fresh()->details);
+        $this->assertSame('victim@example.com', $complaint->fresh()->email);
+        $this->assertSame(1, SmsMessage::where('to', '+9607775555')->count(), 'the sister\'s texts stay');
+    }
+
+    public function test_hiding_contact_details_leaves_prices_sizes_and_dates_readable(): void
+    {
+        $mask = fn (string $t) => \App\Services\MessagingService::mask($t);
+        foreach (['It costs 12,500.00 MVR', 'MVR 950.00 each', 'Size 42, 43, 44, 45 available', 'Thanks.To confirm', 'It fits.Top quality', 'Ready on 2026-11-27', '5@100'] as $plain) {
+            $this->assertSame($plain, $mask($plain));
+        }
+        foreach (['Call 777,1234 now', '7-77-1234', '77.7.1234', 'mail ali@gmail', 'see shop.xyz', 'call 7,771,234', '+960 777 1234'] as $contact) {
+            $this->assertStringContainsString('hidden', $mask($contact), $contact);
+        }
+    }
+
+    public function test_an_email_link_does_nothing_until_its_button_is_pressed_whatever_opens_it(): void
+    {
+        $subscriber = NewsletterSubscriber::create(['email' => 'fan@example.com', 'locale' => 'en', 'confirmed_at' => now()]);
+        $this->call('HEAD', $subscriber->unsubscribeUrl())->assertOk(); // a mail scanner probing the link
+        $this->assertModelExists($subscriber);
+        $this->post($subscriber->unsubscribeUrl())->assertOk();
+        $this->assertModelMissing($subscriber);
+    }
+
+    public function test_two_step_lock_does_not_use_up_a_recovery_code(): void
+    {
+        $user = User::factory()->create();
+        $user->forceFill(['two_factor_enabled' => true, 'two_factor_secret' => encrypt((new Google2FA)->generateSecretKey()), 'two_factor_recovery_codes' => encrypt(json_encode(['AAAAA-BBBBB']))])->save();
+        foreach (range(1, 5) as $i) {
+            $this->withSession(['2fa_user_id' => $user->id])->withServerVariables(['REMOTE_ADDR' => '10.1.0.'.$i])->post(route('2fa.verify'), ['code' => '000000']);
+        }
+        $before = $user->fresh()->two_factor_recovery_codes;
+        $this->withSession(['2fa_user_id' => $user->id])->withServerVariables(['REMOTE_ADDR' => '10.1.0.9'])->post(route('2fa.verify'), ['code' => 'AAAAA-BBBBB'])->assertRedirect(route('login.email'));
+        $this->assertSame($before, $user->fresh()->two_factor_recovery_codes);
+        $this->assertGuest();
+    }
 }

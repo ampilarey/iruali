@@ -114,7 +114,11 @@ class ProductController extends Controller
         $form = $editor->formFromRequest($request);
         // Stock as the difference from what the form showed when it opened: a sale while it was open
         // is not written over (StockEdits, the same rule as the stock page)
-        $form = app(\App\Services\StockEdits::class)->fromProductForm($product, $form, (array) $request->input('original', []));
+        // The same form sent twice (a double tap, Back then Save again) changes the stock once: the second
+        // time the numbers on the form are old, so today's stock is kept
+        $token = $request->input('stock_token');
+        $first = ! is_string($token) || $token === '' || \Illuminate\Support\Facades\Cache::add('products.stock-form.'.$token, true, now()->addDay());
+        $form = app(\App\Services\StockEdits::class)->fromProductForm($product, $form, (array) $request->input('original', []), $first);
 
         // An approved product of a shop that is not trusted: stock now, the rest waits for an admin
         if ($review->needsReview($product)) {

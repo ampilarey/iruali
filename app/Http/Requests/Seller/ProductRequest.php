@@ -67,6 +67,7 @@ class ProductRequest extends FormRequest
             'stock_quantity' => ['exclude_if:has_variants,true', 'required', 'integer', 'min:0', 'max:999999'],
             'reorder_point' => 'nullable|integer|min:0|max:999999',
             // The stock numbers as the form showed them when it opened (StockEdits)
+            'stock_token' => ['nullable', 'uuid'],
             'original.products.*' => 'nullable|integer|min:0|max:999999',
             'original.variants.*' => 'nullable|integer|min:0|max:999999',
             'brand' => 'nullable|string|max:120',

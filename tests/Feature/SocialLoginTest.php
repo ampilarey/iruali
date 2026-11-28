@@ -296,12 +296,19 @@ class SocialLoginTest extends TestCase
         $theirs = User::factory()->unverified()->create(['email' => 'aisha@example.com', 'phone' => '7771234']);
         $theirs->forceFill(['phone_verified_at' => now()])->save();
 
+        // Nobody is signed in and nothing changes yet: it may be the same person, so they choose
+        $this->signInWithGoogle()->assertRedirect(route('login.email-taken'));
+        $this->assertGuest();
+        $this->assertSame('aisha@example.com', $theirs->fresh()->email);
+        $this->get(route('login.email-taken'))->assertOk()->assertSee('aisha@example.com');
+
+        // "It is not my account": the email comes off it, and Google then makes them their own
+        $this->post(route('login.email-taken.release'))->assertRedirect(route('register'));
+        $this->assertNull($theirs->fresh()->email);
+        $this->assertTrue($theirs->fresh()->isPhoneVerified());
         $this->signInWithGoogle()->assertRedirect();
         $this->assertAuthenticated();
-        $this->assertNotSame($theirs->id, auth()->id(), 'the email owner gets an account of their own');
-        $this->assertSame('aisha@example.com', auth()->user()->email);
-        $this->assertNull($theirs->fresh()->email, 'the unconfirmed email came off the phone account');
-        $this->assertTrue($theirs->fresh()->isPhoneVerified());
+        $this->assertNotSame($theirs->id, auth()->id());
     }
 
     public function test_staff_accounts_must_use_their_password(): void

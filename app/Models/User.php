@@ -887,6 +887,19 @@ class User extends Authenticatable implements HasLocalePreference
      * social sign-in). Whoever proves the email may be someone else entirely: an email typed onto an account is
      * no proof of who owns the account. They must not be handed it.
      */
+    /**
+     * The password reset link. Not to an email nobody proved on an account that is someone's by its
+     * phone or social sign-in (emailIsUnproven()): the link would let whoever holds the email set a
+     * password and walk in. The owner, signed in, can still ask for it (a first password from My Account).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        if ($this->emailIsUnproven() && \Illuminate\Support\Facades\Auth::id() !== $this->id) {
+            return;
+        }
+        $this->notify(new \Illuminate\Auth\Notifications\ResetPassword($token));
+    }
+
     public function emailIsUnproven(): bool
     {
         return filled($this->email) && ! $this->isEmailVerified()

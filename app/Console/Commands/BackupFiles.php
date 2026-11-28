@@ -39,8 +39,9 @@ class BackupFiles extends Command
 
     public function handle(): int
     {
+        $clean = (bool) $this->option('clean');
         try {
-            if ($this->option('clean')) {
+            if ($clean) {
                 $destinations = BackupDestinationFactory::createFromArray(self::config());
                 (new CleanupJob($destinations, app(DefaultStrategy::class), true))->run();
                 $this->info('Old files backups cleaned up.');
@@ -57,7 +58,7 @@ class BackupFiles extends Command
         } catch (Throwable $e) {
             report($e);
             // Tell the team, as a failed nightly backup does (AppServiceProvider, BackupHasFailed)
-            if (! $this->option('clean')) {
+            if (! $clean) {
                 \App\Support\TeamAlerts::send('backup_failed', 'iruali: the weekly files backup failed: '.\Illuminate\Support\Str::limit($e->getMessage(), 150));
             }
             $this->error('Files backup failed: '.$e->getMessage());

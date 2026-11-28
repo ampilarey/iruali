@@ -110,7 +110,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Analyse app/ at level 5
-        run: composer analyse -- --no-progress --error-format=github
+        run: composer analyse -- --no-progress # default output: a table with file and line, plus GitHub annotations
       # Known security advisories in the packages the site runs (dev tools are left out)
       - name: Composer security audit
         run: composer audit --no-dev
